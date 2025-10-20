@@ -1,296 +1,260 @@
-steps:
-- form:
-    discriminator:
-      dbDetails:
-        type: object
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      schema:
-        $ref: discriminator#/properties/dbDetails
-      type: input
-    - if: showAndInitName
-      label:
-        text: labels.op_req_name
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/name
-      type: input
-    - computed: initNamespace
-      disabled: isNamespaceDisabled
-      fetch: getNamespaces
-      hasGroup: isRancherManaged
-      if: showAndInitNamespace
-      label:
-        text: labels.namespace
-      onChange: onNamespaceChange
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/namespace
-      type: select
-    - computed: initDatabaseRef
-      disabled: isDatabaseRefDisabled
-      fetch: getDbs
-      if: showAndInitDatabaseRef
-      label:
-        text: labels.databaseRef
-      onChange: onDbChange
-      refresh: true
-      required: true
-      schema:
-        $ref: schema#/properties/spec/properties/databaseRef/properties/name
-      type: select
-    - if: showConfigureOpsrequestLabel
-      label:
-        text: labels.config_ops_request
-      type: label-element
-    - computed: getRequestTypeFromRoute
-      disabled: isDbDetailsLoading
-      hasDescription: true
-      if: showAndInitOpsRequestType
-      individualItemDisabilityCheck: disableOpsRequest
-      label:
-        text: labels.ops_request_type
-      onChange: onRequestTypeChange
-      options:
-      - description: options.UpdateVersion.description
-        text: options.UpdateVersion.text
-        value: UpdateVersion
-      - description: options.HorizontalScaling.description
-        text: options.HorizontalScaling.text
-        value: HorizontalScaling
-      - description: options.VerticalScaling.description
-        text: options.VerticalScaling.text
-        value: VerticalScaling
-      - description: options.Restart.description
-        text: options.Restart.text
-        value: Restart
-      - description: options.Reconfigure.description
-        text: options.Reconfigure.text
-        value: Reconfigure
-      schema:
-        $ref: schema#/properties/spec/properties/type
-      type: radio
-    - elements:
-      - computed: setValueFromDbDetails|/spec/version
-        fetch: getDbVersions
-        label:
-          text: labels.targetVersion
-        schema:
-          $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
-        type: select
-      if: ifRequestTypeEqualsTo|UpdateVersion
-      type: single-step-form
-    - elements:
-      - computed: setValueFromDbDetails|/spec/replicas
-        label:
-          text: Replicas
-        schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/replicas
-        type: input
-      if: ifRequestTypeEqualsTo|HorizontalScaling
-      label:
-        text: Horizontal Scaling Form
-      type: single-step-form
-    - elements:
-      - discriminator:
-          machine:
-            default: ""
-            type: string
-        elements:
-        - computed: setMachine
-          customClass: mt-20
-          disableUnselect: true
-          fetch: getMachines
-          label:
-            text: Machine Profile
-          onChange: onMachineChange|pgbouncer|/spec/podTemplate/spec/resources
-          schema:
-            $ref: discriminator#/machine
-          type: select
-        - if: isMachineCustom
-          label:
-            text: labels.resources
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/resources
-          type: resource-input-form
-        - label:
-            text: Node Selection Policy
-          options:
-          - text: LabelSelector
-            value: LabelSelector
-          - text: Taint
-            value: Taint
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/nodeSelectionPolicy
-          type: select
-        - elements:
-          - label:
-              text: key
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/key
-            type: input
-          - label:
-              text: value
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/value
-            type: input
-          label:
-            text: Topology
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology
-          show_label: true
-          type: single-step-form
-        label:
-          text: PgBouncer
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer
-        show_label: true
-        type: single-step-form
-      - elements:
-        - computed: setResource|/spec/podTemplate/spec/containers
-          label:
-            text: labels.resources
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
-          type: resource-input-form
-        label:
-          text: Exporter
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter
-        show_label: true
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|VerticalScaling
-      type: single-step-form
-    - elements:
-      - discriminator:
-          reconfigurationType:
-            type: string
-        elements:
-        - label:
-            text: labels.reconfigurationType
-          onChange: onReconfigurationTypeChange
-          options:
-          - text: Select New Config Secret
-            value: selectNewConfigSecret
-          - text: Apply Config
-            value: applyConfig
-          - text: Remove
-            value: remove
-          required: true
-          schema:
-            $ref: discriminator#/properties/reconfigurationType
-          type: radio
-        - elements:
-          - add_new_button:
-              label: labels.createConfig
-              target: _blank
-              url:
-                function: createSecretUrl
-            computed: setValueFromDbDetails|/spec/configuration/pgbouncer/configSecret/name
-            fetch: getConfigSecrets
-            label:
-              text: labels.configSecret
-            refresh: true
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/pgbouncer/properties/configSecret/properties/name
-            type: select
-          if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-          label:
-            text: Configuration config secret
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/pgbouncer/properties/configSecret
-          type: single-step-form
-        - addFormLabel: labels.applyConfig.label
-          element:
-            discriminator:
-              configArray:
-                emitAs: applyConfig
-                type: array
-            elements:
-            - label:
-                text: labels.applyConfig.key
-              required: true
-              schema:
-                $ref: discriminator#/properties/configArray/items/properties/key
-              type: input
-            - label:
-                text: labels.applyConfig.value
-              required: true
-              schema:
-                $ref: discriminator#/properties/configArray/items/properties/value
-              type: editor
-            type: single-step-form
-          if: ifReconfigurationTypeEqualsTo|applyConfig
-          label:
-            text: labels.applyConfig.label
-          onChange: onApplyconfigChange
-          required: true
-          schema:
-            $ref: discriminator#/properties/applyConfig
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.applyConfig.key
-            path: key
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: labels.applyConfig.value
-            path: value
-            type: value
-            typeOfValue: code
-          type: single-step-form-array
-        - if: returnFalse
-          label:
-            text: labels.removeCustomConfig
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/pgbouncer/properties/removeCustomConfig
-          type: switch
-        label:
-          text: labels.configuration
-        schema:
-          $ref: schema#/properties/spec/properties/configuration
-        show_label: true
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|Reconfigure
-      label:
-        text: Reconfigure Form
-      type: single-step-form
-    - label:
-        text: labels.timeout
-      options:
-      - text: 5 minutes
-        value: 5m
-      - text: 10 minutes
-        value: 10m
-      - text: 30 minutes
-        value: 30m
-      - text: 1 hour
-        value: 1h
-      - text: 2 hours
-        value: 2h
-      - text: 5 hours
-        value: 5h
-      - text: 10 hours
-        value: 10h
-      schema:
-        $ref: schema#/properties/spec/properties/timeout
-      type: select
-    - computed: setApplyToIfReady
-      label:
-        text: labels.apply
-      options:
-      - text: IfReady (OpsRequest will be applied if database is ready)
-        value: IfReady
-      - text: Always (OpsRequest will always be applied)
-        value: Always
-      schema:
-        $ref: schema#/properties/spec/properties/apply
-      type: radio
-    type: single-step-form
-  id: basic
-  title: steps.0.label
 type: multi-step-form
+step:
+  - type: single-step-form
+    elements:
+# common
+      - type: input
+        label: op_req_name
+        if:
+          type: function
+          name: showAndInitName
+        validation:
+          type: required
+        schema: schema/properties/metadata/properties/name
+      - type: select
+        label: Namespace
+        if:
+          type: function
+          name: showAndInitNamespace
+        init:
+          type: func
+          value: initNamespace
+        disable: isNamespaceDisabled
+        loader: getNamespaces
+        validation:
+          type: required
+        hasGroup: isRancherManaged
+        schema: schema/properties/metadata/properties/namespace
+      - type: select
+        label: Database Ref
+        if:
+          type: function
+          name: showAndInitDatabaseRef
+        loader: getDbs
+        init:
+          type: func
+          value: initDatabaseRef
+        validation:
+          type: required
+        disable: isDatabaseRefDisabled
+        refresh: true
+        watcher:
+          paths:
+            - schema/properties/metadata/properties/namespace
+          func: getDbs
+        schema: schema/properties/spec/properties/databaseRef/properties/name
+      - type: label-element
+        label: config_ops_request
+        if:
+          type: function
+          name: showConfigureOpsrequestLabel
+      - type: radio
+        label: Type of Ops Request
+        if:
+          type: function
+          name: showAndInitOpsRequestType
+        options:
+          - description: Update your database to any version
+            text: Update Version
+            value: UpdateVersion
+          - description: Scale up or down pod count
+            text: Horizontal Scaling
+            value: HorizontalScaling
+          - description: Manage your CPU resources
+            text: Vertical Scaling
+            value: VerticalScaling
+          - description: Restart your database
+            text: Restart
+            value: Restart
+          - description: Reconfigure your database
+            text: Reconfigure
+            value: Reconfigure
+        init:
+          type: func
+          value: getRequestTypeFromRoute
+        disable: isDbDetailsLoading
+        watcher:
+          func: isDbDetailsLoading
+          paths:
+            - temp/dbDetails
+            - schema/properties/spec/properties/databaseRef/properties/name
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
+# UpdateVersion
+      - type: block-layout
+        showLabels: false
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|UpdateVersion
+        elements:
+          - type: select
+            label: Target Version
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/version
+            loader: getDbVersions
+            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+# Horizontal Scale
+      - type: block-layout
+        label: Horizontal Scaling Form
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|HorizontalScaling
+        elements:
+          - type: input-compare
+            label: Replicas
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/replicas
+            schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
+# vertical Scale
+      - type: block-layout
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VerticalScaling
+        elements:
+          - type: block-layout
+            label: PgBouncer Vertical Scaling
+            showLabels: true
+            elements:
+              - type: machine-compare
+                label: Resources
+                loader: getMachines
+                init:
+                  type: func
+                  value: setMachine
+                # watcher:
+                #   func: onMachineChange|pgbouncer|/spec/podTemplate/spec/resources
+                #   paths:
+                #     - schema/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/resources
+              - type: select
+                label: Node Selection Policy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/nodeSelectionPolicy
+              - type: block-layout
+                label: Topology
+                showLabels: true
+                elements:
+                  - type: input
+                    label: Key
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired
+                    schema: temp/topologyKey
+                  - type: input
+                    label: Value
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired
+                    schema: temp/topologyValue
+          - type: block-layout
+            label: Exporter Vertical Scaling
+            showLabels: true
+            elements:
+              - type: input
+                label: Resources
+                init:
+                  type: func
+                  value: setResource|/spec/podTemplate/spec/containers
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
+# Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        elements:
+          - type: block-layout
+            label: PgBouncer Configuration
+            showLabels: true
+            elements:
+              - type: radio
+                label: Reconfigure Type
+                options:
+                - text: Select New Config Secret
+                  value: selectNewConfigSecret
+                - text: Apply Config
+                  value: applyConfig
+                - text: Remove
+                  value: remove
+                watcher:
+                  func: onReconfigurationTypeChange
+                  paths:
+                    - temp/properties/reconfigurationType
+                validation:
+                  type: required
+                schema: temp/properties/reconfigurationType
+              - type: block-layout
+                label: PgBouncer config secret
+                showLabels: false
+                if:
+                  name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  type: function
+                elements:
+                - type: select
+                  addNewButton:
+                    label: Create Secret
+                    target: _blank
+                    url:
+                      function: createSecretUrl
+                  label: Config Secret
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                    type: function
+                  loader: getConfigSecrets
+                  init:
+                    type: func
+                    value: setValueFromDbDetails|/spec/configuration/pgbouncer/configSecret/name
+                  refresh: true
+                  validation:
+                    type: required
+                  schema: schema/properties/spec/properties/configuration/properties/pgbouncer/properties/configSecret/properties/name
+              - type: array-object-form
+                label: Apply Config
+                if:
+                  name: ifReconfigurationTypeEqualsTo|applyConfig
+                  type: function
+                validation:
+                  type: required
+                watcher:
+                  func: onApplyconfigChange
+                  paths:
+                    - temp/properties/applyConfig
+                schema: temp/properties/applyConfig
+                elements:
+                  - type: input
+                    label: key
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/key
+                  - type: textarea
+                    label: value
+                    validation:
+                      type: required
+                    schema:  temp/properties/configArray/items/properties/value
+              - type: switch
+                schema: schema/properties/spec/properties/configuration/properties/pgbouncer/properties/removeCustomConfig
+                label: Remove CustomConfig
+                if:
+                  name: returnFalse
+                  type: function
+# common
+      - type: time-picker
+        label: Timeout
+        schema: 'schema/properties/spec/properties/timeout'
+      - type: radio
+        label: apply
+        schema: 'schema/properties/spec/properties/apply'
+        init:
+          type: func
+          value: setApplyToIfReady
+        options:
+          - text: IfReady (OpsRequest will be applied if database is ready)
+            value: IfReady
+          - text: Always (OpsRequest will always be applied)
+            value: Always

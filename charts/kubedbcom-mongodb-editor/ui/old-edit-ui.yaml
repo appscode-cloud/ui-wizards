@@ -1,0 +1,2519 @@
+steps:
+- form:
+    elements:
+    - disabled: true
+      label:
+        text: labels.database.name
+      onChange: onNameChange
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - disabled: true
+      fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      onChange: onNamespaceChange
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - disableUnselect: true
+      disabled: true
+      fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|mongodbversions
+      label:
+        text: labels.database.version
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/version
+      type: select
+    - individualItemDisabilityCheck: disableLableChecker
+      isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      onChange: onLabelChange
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations/additionalProperties
+        type: input
+    - hasDescription: true
+      label:
+        text: labels.deletionPolicy
+      options:
+      - description: options.deletionPolicy.delete.description
+        text: options.deletionPolicy.delete.label
+        value: Delete
+      - description: options.deletionPolicy.halt.description
+        text: options.deletionPolicy.halt.label
+        value: Halt
+      - description: options.deletionPolicy.wipeOut.description
+        text: options.deletionPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.deletionPolicy.doNotTerminate.description
+        text: options.deletionPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/deletionPolicy
+      type: radio
+    - disabled: true
+      label:
+        text: labels.secret
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/authSecret/properties/name
+      type: input
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+- form:
+    elements:
+    - alias: reusable_alert
+      chart:
+        name: uibytebuildersdev-component-alert
+        version: v0.25.0
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/form/properties/alert
+      type: reusable-element
+    type: single-step-form
+  id: alert
+  title: labels.alert
+- form:
+    elements:
+    - discriminator:
+        activeDatabaseMode:
+          default: Standalone
+          type: string
+      elements:
+      - if: isNotStandaloneMode
+        label:
+          text: labels.to_update_replicas
+        type: label-element
+      - customClass: mb-20
+        if: isNotStandaloneMode
+        label:
+          text: labels.create_opsrequest
+        type: anchor
+        url:
+          params:
+            cluster:
+              $ref: store#/route/params/cluster
+            dbname:
+              $ref: model#/metadata/release/name
+            domain:
+              $ref: store#/domain
+            group:
+              $ref: model#/metadata/resource/group
+            kind:
+              $ref: model#/metadata/resource/kind
+            namespace:
+              $ref: model#/metadata/release/namespace
+            owner:
+              $ref: store#/route/params/user
+            resource:
+              $ref: model#/metadata/resource/name
+            version:
+              $ref: model#/metadata/resource/version
+          path: ${domain}/console/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=HorizontalScaling
+      - computed: setDatabaseMode
+        disabled: true
+        hasDescription: true
+        label:
+          text: labels.database.mode
+        onChange: deleteDatabaseModePath
+        options:
+        - description: options.database.mode.Standalone.description
+          text: options.database.mode.Standalone.label
+          value: Standalone
+        - description: options.database.mode.Replicaset.description
+          text: options.database.mode.Replicaset.label
+          value: Replicaset
+        - description: options.database.mode.Sharded.description
+          text: options.database.mode.Sharded.label
+          value: Sharded
+        schema:
+          $ref: discriminator#/activeDatabaseMode
+        type: radio
+      - disabled: true
+        elements:
+        - label:
+            text: labels.replicaset.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicaSet/properties/name
+          type: input
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicas
+          type: input
+        if: isEqualToDatabaseMode|Replicaset
+        type: single-step-form
+      - disabled: true
+        elements:
+        - fetch: getStorageClassNames|common
+          label:
+            text: labels.storage.class
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/storageClassName
+          type: select
+        - label:
+            text: labels.storage.size
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+          type: input
+        if: showCommonStorageClassAndSizeField
+        type: single-step-form
+      - disabled: true
+        elements:
+        - elements:
+          - fetch: getStorageClassNames|shard
+            label:
+              text: labels.storage.class
+            onChange: setStorageClass
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/storageClassName
+            type: select
+          - label:
+              text: labels.shardNodes
+            type: label-element
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources
+            type: single-step-form
+          type: single-step-form
+        - label:
+            text: labels.shards
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/shards
+          type: input
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/replicas
+          type: input
+        - label:
+            text: labels.configServer
+          type: label-element
+        - elements:
+          - elements:
+            - elements:
+              - elements:
+                - label:
+                    text: labels.storage.size
+                  schema:
+                    $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests/properties/storage
+                  type: input
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests
+                type: single-step-form
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage
+            type: single-step-form
+          - label:
+              text: labels.replicaset.number
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer
+          type: single-step-form
+        - label:
+            text: labels.mongos
+          type: label-element
+        - elements:
+          - label:
+              text: labels.replicaset.number
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos
+          type: single-step-form
+        if: isEqualToDatabaseMode|Sharded
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: topology
+  title: steps.1.label
+- form:
+    discriminator:
+      configureTLS:
+        default: true
+        type: boolean
+    elements:
+    - label:
+        text: labels.to_update_tls
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/route/params/cluster
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          group:
+            $ref: model#/metadata/resource/group
+          kind:
+            $ref: model#/metadata/resource/kind
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/route/params/user
+          resource:
+            $ref: model#/metadata/resource/name
+          version:
+            $ref: model#/metadata/resource/version
+        path: ${domain}/console/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
+    - computed: isValueExistInModel|/resources/kubedbComMongoDB/spec/tls
+      disabled: true
+      label:
+        text: labels.enable_tls
+      onChange: onTlsConfigureChange
+      schema:
+        $ref: discriminator#/configureTLS
+      type: switch
+    - disabled: true
+      elements:
+      - computed: setClusterAuthMode
+        label:
+          text: labels.cluster_auth_mode
+        options:
+        - text: x509
+          value: x509
+        - text: sendX509
+          value: sendX509
+        - text: keyFile
+          value: keyFile
+        - text: sendKeyFile
+          value: sendKeyFile
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/clusterAuthMode
+        type: radio
+      - computed: setSSLMode
+        label:
+          text: labels.ssl_mode
+        options:
+        - text: requireSSL
+          value: requireSSL
+        - text: preferSSL
+          value: preferSSL
+        - text: allowSSL
+          value: allowSSL
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/sslMode
+        type: radio
+      - elements:
+        - computed: setApiGroup
+          disabled: true
+          label:
+            text: labels.api_group
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+          type: input
+        - label:
+            text: labels.kind
+          options:
+          - text: Issuer
+            value: Issuer
+          - text: ClusterIssuer
+            value: ClusterIssuer
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/kind
+          type: select
+        - allowUserDefinedOption: true
+          fetch: getIssuerRefsName
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/name
+          type: select
+        label:
+          text: labels.issuer_ref
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef
+        type: single-step-form
+      - alias: reusable_certificates
+        chart:
+          name: uibytebuildersdev-component-certificates
+          version: v0.25.0
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates
+        type: reusable-element
+      if: showTlsConfigureSection
+      type: single-step-form
+    type: single-step-form
+  id: tls
+  title: steps.2.label
+- form:
+    elements:
+    - disabled: disableInitializationSection
+      discriminator:
+        prePopulateDatabase:
+          type: string
+      elements:
+      - computed: initPrePopulateDatabase
+        label:
+          text: labels.prePopulateDatabase
+        onChange: onPrePopulateDatabaseChange
+        options:
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.yesOrNo.no.text
+          value: "no"
+        schema:
+          $ref: discriminator#/properties/prePopulateDatabase
+        type: radio
+      - discriminator:
+          dataSource:
+            type: string
+        elements:
+        - computed: initDataSource
+          label:
+            text: labels.dataSource
+          onChange: onDataSourceChange
+          options:
+          - text: options.dataSource.script.text
+            value: script
+          - text: options.dataSource.stashBackup.text
+            value: stashBackup
+          schema:
+            $ref: discriminator#/properties/dataSource
+          type: select
+        - discriminator:
+            sourceVolumeType:
+              type: string
+          elements:
+          - label:
+              text: labels.script.path
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/scriptPath
+            type: input
+          - label:
+              text: labels.script.volume
+            type: label-element
+          - computed: initVolumeType
+            label:
+              text: labels.script.volumeType
+            onChange: onVolumeTypeChange
+            options:
+            - text: options.scriptSourceVolumeType.configMap.text
+              value: configMap
+            - text: options.scriptSourceVolumeType.secret.text
+              value: secret
+            schema:
+              $ref: discriminator#/properties/sourceVolumeType
+            type: select
+          - allowUserDefinedOption: true
+            fetch: resourceNames|core|v1|configmaps
+            if: showConfigMapOrSecretName|configMap
+            label:
+              text: labels.script.volumeName
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/configMap/properties/name
+            type: select
+          - allowUserDefinedOption: true
+            fetch: resourceNames|core|v1|secrets
+            if: showConfigMapOrSecretName|secret
+            label:
+              text: labels.script.volumeName
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
+            type: select
+          if: showScriptOrStashForm|script
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.restoreSession.snapshot
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0
+            type: input
+          - discriminator:
+              repositoryChoise:
+                type: string
+            elements:
+            - label:
+                text: labels.repositories.title
+              type: label-element
+            - computed: setInitialRestoreSessionRepo
+              onChange: onInitRepositoryChoiseChange
+              options:
+              - text: options.createOrSelect.select.text
+                value: select
+              - text: options.createOrSelect.create.text
+                value: create
+              schema:
+                $ref: discriminator#/properties/repositoryChoise
+              type: radio
+            - allowUserDefinedOption: true
+              fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
+              if: showRepositorySelectOrCreate|select
+              label:
+                text: labels.repositories.name
+              schema:
+                $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/repository/properties/name
+              type: select
+            - alias: repository_create_init
+              chart:
+                name: uibytebuildersdev-component-repository-create
+                version: v0.25.0
+              dataContext:
+                namespace:
+                  $ref: schema#/properties/metadata/properties/release/properties/namespace
+              if: showRepositorySelectOrCreate|create
+              moduleResolver: fetchJsons
+              schema:
+                $ref: schema#/properties/resources/properties/stashAppscodeComRepository_init_repo/properties/spec/properties/backend
+              type: reusable-element
+            type: single-step-form
+          - if: returnFalse
+            label:
+              text: labels.backupConfiguration.targetReference.name
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/target/properties/ref/properties/name
+            type: input
+          - discriminator:
+              customizeRestoreJobRuntimeSettings:
+                type: string
+            elements:
+            - computed: initCustomizeRestoreJobRuntimeSettings
+              label:
+                isSubsection: true
+                text: labels.runtimeSettings.choise
+              onChange: onCustomizeRestoreJobRuntimeSettingsChange
+              options:
+              - text: options.yesOrNo.yes.text
+                value: "yes"
+              - text: options.yesOrNo.no.text
+                value: "no"
+              schema:
+                $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+              type: radio
+            - alias: runtime_settings_init
+              chart:
+                name: uibytebuildersdev-component-runtime-settings
+                version: v0.25.0
+              dataContext:
+                namespace:
+                  $ref: schema#/properties/metadata/properties/release/properties/namespace
+              if: showRuntimeForm|yes
+              moduleResolver: fetchJsons
+              schema:
+                $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/runtimeSettings
+              type: reusable-element
+            type: single-step-form
+          if: showScriptOrStashForm|stashBackup
+          type: single-step-form
+        - if: returnFalse
+          label:
+            text: labels.waitForInitialRestore
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/waitForInitialRestore
+          type: switch
+        if: showInitializationForm
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: initialization
+  title: steps.3.label
+- form:
+    discriminator:
+      repoInitialSelectionStatus:
+        type: string
+      scheduleBackup:
+        default: "yes"
+        type: string
+    elements:
+    - computed: initScheduleBackupForEdit
+      if: showScheduleBackup
+      label:
+        text: labels.backup.title
+      onChange: onScheduleBackupChange
+      options:
+      - text: options.yesOrNo.yes.text
+        value: "yes"
+      - text: options.yesOrNo.no.text
+        value: "no"
+      schema:
+        $ref: discriminator#/properties/scheduleBackup
+      type: radio
+    - discriminator:
+        backupType:
+          type: string
+        isBackupDataLoaded:
+          default: false
+          type: boolean
+      elements:
+      - computed: initBackupData
+        if: returnFalse
+        type: input
+      - computed: setBackupType
+        fetch: getTypes
+        hasDescription: true
+        if: isBackupDataLoadedTrue
+        label:
+          text: Select Backup Type
+        onChange: onBackupTypeChange
+        schema:
+          $ref: discriminator#/backupType
+        type: radio
+      - discriminator:
+          backupConfigContext:
+            type: string
+          config:
+            type: string
+          paused:
+            default: false
+            type: boolean
+          schedule:
+            type: string
+        elements:
+        - fetch: getContext
+          label:
+            text: Select Context
+          onChange: onContextChange
+          required: true
+          schema:
+            $ref: discriminator#/backupConfigContext
+          type: select
+        - fetch: getConfigList
+          if: showConfigList
+          label:
+            text: Select BackupConfig
+          onChange: onConfigChange
+          required: true
+          schema:
+            $ref: discriminator#/config
+          type: select
+        - computed: getDefaultSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions
+          if: showSchedule
+          label:
+            text: Schedule
+          onChange: onInputChangeSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions|schedule
+          required: true
+          schema:
+            $ref: discriminator#/schedule
+          type: input
+        - if: showPause
+          label:
+            text: Paused
+          schema:
+            $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
+          type: switch
+        if: isBackupType|BackupConfig
+        type: single-step-form
+      - discriminator:
+          blueprintEnabled:
+            default: false
+            type: boolean
+        elements:
+        - computed: setBlueprintSwitch
+          label:
+            text: Enable Backup Blueprint
+          onChange: onBlueprintChange
+          schema:
+            $ref: discriminator#/blueprintEnabled
+          type: switch
+        if: isBackupType|BackupBlueprint
+        type: single-step-form
+      - discriminator:
+          archiverEnabled:
+            default: false
+            type: boolean
+        elements:
+        - computed: setArchiverSwitch
+          label:
+            text: Enable Archiver
+          onChange: onArchiverChange
+          schema:
+            $ref: discriminator#/archiverEnabled
+          type: switch
+        if: isBackupType|Archiver
+        type: single-step-form
+      if: showBackupForm
+      label:
+        text: Backup Form
+      type: single-step-form
+    type: single-step-form
+  id: backupconfiguration
+  title: steps.4.label
+- form:
+    discriminator:
+      enableMonitoring:
+        default: true
+        type: boolean
+    elements:
+    - label:
+        text: labels.to_update_exporter_resources
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        function: getOpsRequestUrl|VerticalScaling
+    - computed: isValueExistInModel|/resources/kubedbComMongoDB/spec/monitor
+      label:
+        text: labels.enable_monitoring
+      onChange: onEnableMonitoringChange
+      schema:
+        $ref: discriminator#/enableMonitoring
+      type: switch
+    - discriminator:
+        customizeExporter:
+          default: true
+          type: boolean
+      elements:
+      - hasDescription: true
+        label:
+          text: labels.agent
+        onChange: onAgentChange
+        options:
+        - description: options.agent.prometheus_operator.description
+          text: options.agent.prometheus_operator.label
+          value: prometheus.io/operator
+        - description: options.agent.prometheus.description
+          text: options.agent.prometheus.label
+          value: prometheus.io
+        - description: options.agent.prometheus_builtin.description
+          text: options.agent.prometheus_builtin.label
+          value: prometheus.io/builtin
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
+        type: radio
+      - elements:
+        - label:
+            text: labels.scrapping_interval
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+          type: input
+        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMongoDB/spec/monitor/agent
+        label:
+          text: labels.service_monitor_configuration
+        show_label: true
+        type: single-step-form
+      - elements:
+        - elements:
+          - addFormLabel: labels.endpoint
+            element:
+              elements:
+              - label:
+                  text: labels.honor_labels
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/honorLabels
+                type: switch
+              - label:
+                  text: labels.interval
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/interval
+                type: input
+              - label:
+                  text: labels.path
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/path
+                type: input
+              - label:
+                  text: labels.port
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/port
+                type: input
+              type: single-step-form
+            label:
+              text: labels.endpoints
+            schema:
+              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.honor_labels
+              path: honorLabels
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.interval
+              path: interval
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.path
+              path: path
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.port
+              path: port
+              type: value
+              typeOfValue: string
+            type: single-step-form-array
+          - elements:
+            - fetch: getResources|core|v1|namespaces
+              label:
+                text: labels.matchNames
+              schema:
+                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
+              type: multiselect
+            if: returnFalse
+            schema:
+              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector
+            type: single-step-form
+          - elements:
+            - isArray: true
+              keys:
+                label:
+                  text: labels.labels.key
+              label:
+                text: labels.labels.label
+              schema:
+                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.labels.value
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels/additionalProperties
+                type: input
+            if: returnFalse
+            schema:
+              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
+            type: single-step-form
+          schema:
+            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
+          type: single-step-form
+        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMongoDB/spec/monitor/agent
+        label:
+          text: labels.service_monitor
+        schema:
+          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor
+        show_label: true
+        type: single-step-form
+      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMongoDB/spec/monitor/agent
+        individualItemDisabilityCheck: disableLableChecker
+        isArray: true
+        keys:
+          label:
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.labels.value
+          schema:
+            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
+          type: input
+      - label:
+          text: labels.exporter_configuration
+        type: label-element
+      - label:
+          text: labels.customize_exporter
+        onChange: onCustomizeExporterChange
+        schema:
+          $ref: discriminator#/customizeExporter
+        type: switch
+      - elements:
+        - if: returnFalse
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+          type: resource-input-form
+        - label:
+            text: labels.security_context
+          type: label-element
+        - label:
+            text: labels.run_as_user
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+          type: input
+        - customClass: mb-0
+          label:
+            text: labels.run_as_group
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+          type: input
+        - label:
+            text: labels.port
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+          type: input
+        - element:
+            label:
+              isSubsection: true
+              text: labels.args
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+            type: input
+          label:
+            text: labels.args
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+          type: list-input-form
+        - alias: reusable_env
+          chart:
+            name: uibytebuildersdev-component-env
+            version: v0.25.0
+          dataContext:
+            namespace:
+              $ref: schema#/properties/metadata/properties/release/properties/namespace
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+          type: reusable-element
+        if: showCustomizeExporterSection
+        type: single-step-form
+      - computed: setMetadata
+        if: returnFalse
+        schema:
+          $ref: schema#/properties/metadata/properties/release/properties/name
+        type: input
+      if: showMonitoringSection
+      type: single-step-form
+    type: single-step-form
+  id: monitoring
+  title: steps.5.label
+- form:
+    elements:
+    - elements:
+      - alias: pod_template_standalone
+        chart:
+          name: uibytebuildersdev-component-pod-template
+          version: v0.25.0
+        dataContext:
+          namespace:
+            $ref: schema#/properties/metadata/properties/release/properties/namespace
+        functionCallbacks:
+          isEditWizard:
+            $ref: functions#/returnTrue
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate
+        type: reusable-element
+      type: single-step-form
+    type: single-step-form
+  id: pod-template
+  if: isNotShardModeSelected
+  title: steps.6.label
+- form:
+    steps:
+    - form:
+        elements:
+        - elements:
+          - alias: pod_template_shard
+            chart:
+              name: uibytebuildersdev-component-pod-template
+              version: v0.25.0
+            dataContext:
+              namespace:
+                $ref: schema#/properties/metadata/properties/release/properties/namespace
+            functionCallbacks:
+              isEditWizard:
+                $ref: functions#/returnTrue
+            moduleResolver: fetchJsons
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/podTemplate
+            type: reusable-element
+          type: single-step-form
+        type: single-step-form
+      id: pod-template-shard
+      title: labels.shard
+    - form:
+        elements:
+        - elements:
+          - alias: pod_template_configserver
+            chart:
+              name: uibytebuildersdev-component-pod-template
+              version: v0.25.0
+            dataContext:
+              namespace:
+                $ref: schema#/properties/metadata/properties/release/properties/namespace
+            functionCallbacks:
+              isEditWizard:
+                $ref: functions#/returnTrue
+            moduleResolver: fetchJsons
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/podTemplate
+            type: reusable-element
+          type: single-step-form
+        type: single-step-form
+      id: pod-template-config-server
+      title: labels.configServer
+    - form:
+        elements:
+        - elements:
+          - alias: pod_template_mongos
+            chart:
+              name: uibytebuildersdev-component-pod-template
+              version: v0.25.0
+            dataContext:
+              namespace:
+                $ref: schema#/properties/metadata/properties/release/properties/namespace
+            functionCallbacks:
+              isEditWizard:
+                $ref: functions#/returnTrue
+            moduleResolver: fetchJsons
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/podTemplate
+            type: reusable-element
+          type: single-step-form
+        type: single-step-form
+      id: pod-template-mongos
+      title: labels.mongos
+    type: multi-step-form
+  id: pod-template-sharded-topology
+  if: isShardModeSelected
+  title: steps.7.label
+- form:
+    elements:
+    - alias: reusable_service_templates
+      chart:
+        name: uibytebuildersdev-component-service-templates
+        version: v0.25.0
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates
+      type: reusable-element
+    type: single-step-form
+  id: networking
+  title: steps.8.label
+- form:
+    elements:
+    - label:
+        text: labels.to_update_config
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/route/params/cluster
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          group:
+            $ref: model#/metadata/resource/group
+          kind:
+            $ref: model#/metadata/resource/kind
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/route/params/user
+          resource:
+            $ref: model#/metadata/resource/name
+          version:
+            $ref: model#/metadata/resource/version
+        path: ${domain}/console/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=Reconfigure
+    - disabled: true
+      elements:
+      - discriminator:
+          configurationSource:
+            default: use-existing-config
+            type: string
+        elements:
+        - onChange: onConfigurationSourceChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
+          schema:
+            $ref: discriminator#/configurationSource
+          type: radio
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/configSecret/properties/name
+          type: select
+        if: isNotShardModeSelected
+        type: single-step-form
+      - discriminator:
+          configurationSourceConfigServer:
+            default: use-existing-config
+            type: string
+          configurationSourceMongos:
+            default: use-existing-config
+            type: string
+          configurationSourceShard:
+            default: use-existing-config
+            type: string
+        elements:
+        - customClass: mb-10
+          label:
+            text: labels.shardNodes
+          type: label-element
+        - computed: setConfigurationSourceShard
+          label:
+            text: labels.custom_config
+          onChange: onConfigurationSourceShardChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
+          - text: options.configuration_source.same_as_config_server.label
+            value: same-as-configserver-config-secret
+          - text: options.configuration_source.same_as_mongos.label
+            value: same-as-mongos-config-secret
+          schema:
+            $ref: discriminator#/configurationSourceShard
+          type: select
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSourceShard
+          label:
+            text: labels.config_secret
+          onChange: onConfigSecretModelChange|shard|use-existing-config
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/configSecret/properties/name
+          type: select
+        - customClass: mb-10
+          label:
+            text: labels.configServerNodes
+          type: label-element
+        - computed: setConfigurationSourceConfigServer
+          label:
+            text: labels.custom_config
+          onChange: onConfigurationSourceConfigServerChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
+          - text: options.configuration_source.same_as_shard.label
+            value: same-as-shard-config-secret
+          - text: options.configuration_source.same_as_mongos.label
+            value: same-as-mongos-config-secret
+          schema:
+            $ref: discriminator#/configurationSourceConfigServer
+          type: select
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSourceConfigServer
+          label:
+            text: labels.config_secret
+          onChange: onConfigSecretModelChange|configserver|use-existing-config
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/configSecret/properties/name
+          type: select
+        - customClass: mb-10
+          label:
+            text: labels.mongosNodes
+          type: label-element
+        - computed: setConfigurationSourceMongos
+          label:
+            text: labels.custom_config
+          onChange: onConfigurationSourceMongosChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
+          - text: options.configuration_source.same_as_shard.label
+            value: same-as-shard-config-secret
+          - text: options.configuration_source.same_as_config_server.label
+            value: same-as-configserver-config-secret
+          schema:
+            $ref: discriminator#/configurationSourceMongos
+          type: select
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSourceMongos
+          label:
+            text: labels.config_secret
+          onChange: onConfigSecretModelChange|mongos|use-existing-config
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/configSecret/properties/name
+          type: select
+        if: isShardModeSelected
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: custom-config
+  title: steps.9.label
+- form:
+    discriminator:
+      dbDetails:
+        default: false
+        type: boolean
+    elements:
+    - computed: getDbDetails
+      if: returnFalse
+      type: input
+    - discriminator:
+        topologyMachines:
+          default: []
+          type: array
+      elements:
+      - fetch: fetchTopologyMachines
+        if: returnFalse
+        schema:
+          $ref: discriminator#/topologyMachines
+        type: input
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/standalone/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/trigger
+          type: select
+        - label:
+            text: Pod LifeTime Threshold
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/podLifeTimeThreshold
+          type: input
+        - label:
+            text: Resource DiffPercentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/resourceDiffPercentage
+          type: input
+        - discriminator:
+            allowedMachine-standalone-max:
+              type: string
+            allowedMachine-standalone-min:
+              type: string
+          elements:
+          - computed: setAllowedMachine|standalone|min
+            disableUnselect: true
+            fetch: getMachines|standalone|min
+            if: hasAnnotations
+            label:
+              text: Min Allowed Profile
+            onChange: onMachineChange|standalone
+            schema:
+              $ref: discriminator#/properties/allowedMachine-standalone-min
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: Memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Min Allowed
+            show_label: true
+            type: single-step-form
+          - computed: setAllowedMachine|standalone|max
+            disableUnselect: true
+            fetch: getMachines|standalone|max
+            if: hasAnnotations
+            label:
+              text: Max Allowed Profile
+            onChange: onMachineChange|standalone
+            schema:
+              $ref: discriminator#/properties/allowedMachine-standalone-max
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: Memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Max Allowed
+            show_label: true
+            type: single-step-form
+          type: single-step-form
+        - fetch: setControlledResources|compute/standalone
+          label:
+            text: Controlled Resources
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/controlledResources
+          type: multiselect
+        - label:
+            text: Container Controlled Values
+          options:
+          - text: Requests And Limits
+            value: RequestsAndLimits
+          - text: Requests Only
+            value: RequestsOnly
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/containerControlledValues
+          type: select
+        - elements:
+          - label:
+              text: Scaling Factor Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage/properties/scalingFactorPercentage
+            type: input
+          - label:
+              text: Usage Threshold Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage/properties/usageThresholdPercentage
+            type: input
+          label:
+            text: In Memory Storage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage
+          show_label: true
+          type: single-step-form
+        if: mongoTypeEqualsTo|standalone|compute
+        label:
+          text: Standalone
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone
+        show_label: true
+        type: single-step-form
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/replicaSet/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/trigger
+          type: select
+        - label:
+            text: Pod LifeTime Threshold
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/podLifeTimeThreshold
+          type: input
+        - label:
+            text: Resource Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/resourceDiffPercentage
+          type: input
+        - discriminator:
+            allowedMachine-replicaSet-max:
+              type: string
+            allowedMachine-replicaSet-min:
+              type: string
+          elements:
+          - computed: setAllowedMachine|replicaSet|min
+            disableUnselect: true
+            fetch: getMachines|replicaSet|min
+            if: hasAnnotations
+            label:
+              text: Min Allowed Profile
+            onChange: onMachineChange|replicaSet
+            schema:
+              $ref: discriminator#/properties/allowedMachine-replicaSet-min
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Min Allowed
+            show_label: true
+            type: single-step-form
+          - computed: setAllowedMachine|replicaSet|max
+            disableUnselect: true
+            fetch: getMachines|replicaSet|max
+            if: hasAnnotations
+            label:
+              text: Max Allowed Profile
+            onChange: onMachineChange|replicaSet
+            schema:
+              $ref: discriminator#/properties/allowedMachine-replicaSet-max
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Max Allowed
+            show_label: true
+            type: single-step-form
+          type: single-step-form
+        - fetch: setControlledResources|compute/replicaSet
+          label:
+            text: Controlled Resources
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/controlledResources
+          type: multiselect
+        - label:
+            text: Container Controlled Values
+          options:
+          - text: Requests And Limits
+            value: RequestsAndLimits
+          - text: Requests Only
+            value: RequestsOnly
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/containerControlledValues
+          type: select
+        - elements:
+          - label:
+              text: Scaling Factor Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage/properties/scalingFactorPercentage
+            type: input
+          - label:
+              text: Usage Threshold Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage/properties/usageThresholdPercentage
+            type: input
+          label:
+            text: In Memory Storage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage
+          show_label: true
+          type: single-step-form
+        if: mongoTypeEqualsTo|replicaSet|compute
+        label:
+          text: ReplicaSet
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet
+        show_label: true
+        type: single-step-form
+      - elements:
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/shard/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-shard-max:
+                type: string
+              allowedMachine-shard-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|shard|min
+              disableUnselect: true
+              fetch: getMachines|shard|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|shard
+              schema:
+                $ref: discriminator#/properties/allowedMachine-shard-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|shard|max
+              disableUnselect: true
+              fetch: getMachines|shard|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|shard
+              schema:
+                $ref: discriminator#/properties/allowedMachine-shard-max
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Max Allowed
+              show_label: true
+              type: single-step-form
+            type: single-step-form
+          - fetch: setControlledResources|compute/shard
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/controlledResources
+            type: multiselect
+          - label:
+              text: Container Controlled Values
+            options:
+            - text: Requests And Limits
+              value: RequestsAndLimits
+            - text: Requests Only
+              value: RequestsOnly
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/containerControlledValues
+            type: select
+          - elements:
+            - label:
+                text: Scaling Factor Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage/properties/scalingFactorPercentage
+              type: input
+            - label:
+                text: Usage Threshold Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage/properties/usageThresholdPercentage
+              type: input
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage
+            show_label: true
+            type: single-step-form
+          label:
+            text: Shard
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/configServer/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-configServer-max:
+                type: string
+              allowedMachine-configServer-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|configServer|min
+              disableUnselect: true
+              fetch: getMachines|configServer|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|configServer
+              schema:
+                $ref: discriminator#/properties/allowedMachine-configServer-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|configServer|max
+              disableUnselect: true
+              fetch: getMachines|configServer|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|configServer
+              schema:
+                $ref: discriminator#/properties/allowedMachine-configServer-max
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Max Allowed
+              show_label: true
+              type: single-step-form
+            type: single-step-form
+          - fetch: setControlledResources|compute/configServer
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/controlledResources
+            type: multiselect
+          - label:
+              text: Container Controlled Values
+            options:
+            - text: Requests And Limits
+              value: RequestsAndLimits
+            - text: Requests Only
+              value: RequestsOnly
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/containerControlledValues
+            type: select
+          - elements:
+            - label:
+                text: Scaling Factor Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage/properties/scalingFactorPercentage
+              type: input
+            - label:
+                text: Usage Threshold Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage/properties/usageThresholdPercentage
+              type: input
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage
+            show_label: true
+            type: single-step-form
+          label:
+            text: Config Server
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/arbiter/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|compute/arbiter
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/controlledResources
+            type: multiselect
+          - label:
+              text: Container Controlled Values
+            options:
+            - text: Requests And Limits
+              value: RequestsAndLimits
+            - text: Requests Only
+              value: RequestsOnly
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/containerControlledValues
+            type: select
+          - elements:
+            - label:
+                text: Scaling Factor Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage/properties/scalingFactorPercentage
+              type: input
+            - label:
+                text: Usage Threshold Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage/properties/usageThresholdPercentage
+              type: input
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage
+            show_label: true
+            type: single-step-form
+          hideForm: true
+          label:
+            text: Arbiter
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/hidden/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|compute/hidden
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/controlledResources
+            type: multiselect
+          - label:
+              text: Container Controlled Values
+            options:
+            - text: Requests And Limits
+              value: RequestsAndLimits
+            - text: Requests Only
+              value: RequestsOnly
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/containerControlledValues
+            type: select
+          - elements:
+            - label:
+                text: Scaling Factor Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage/properties/scalingFactorPercentage
+              type: input
+            - label:
+                text: Usage Threshold Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage/properties/usageThresholdPercentage
+              type: input
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage
+            show_label: true
+            type: single-step-form
+          hideForm: true
+          label:
+            text: Hidden
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/mongos/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-mongos-max:
+                type: string
+              allowedMachine-mongos-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|mongos|min
+              disableUnselect: true
+              fetch: getMachines|mongos|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|mongos
+              schema:
+                $ref: discriminator#/properties/allowedMachine-mongos-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|mongos|max
+              disableUnselect: true
+              fetch: getMachines|mongos|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|mongos
+              schema:
+                $ref: discriminator#/properties/allowedMachine-mongos-max
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              type: single-step-form
+            type: single-step-form
+          - fetch: setControlledResources|compute/mongos
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/controlledResources
+            type: multiselect
+          - label:
+              text: Container Controlled Values
+            options:
+            - text: Requests And Limits
+              value: RequestsAndLimits
+            - text: Requests Only
+              value: RequestsOnly
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/containerControlledValues
+            type: select
+          - elements:
+            - label:
+                text: Scaling Factor Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage/properties/scalingFactorPercentage
+              type: input
+            - label:
+                text: Usage Threshold Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage/properties/usageThresholdPercentage
+              type: input
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage
+            show_label: true
+            type: single-step-form
+          label:
+            text: Mongos
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos
+          show_label: true
+          type: single-step-form
+        if: mongoTypeEqualsTo|sharded|compute
+        type: single-step-form
+      - elements:
+        - fetch: fetchNodeTopology
+          label:
+            text: Select NodeTopology
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+          type: select
+        - if: isNodeTopologySelected
+          label:
+            text: Scale Up DiffPercentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+          type: input
+        - if: isNodeTopologySelected
+          label:
+            text: Scale Down DiffPercentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+          type: input
+        if: hasNoAnnotations
+        label:
+          text: NodeTopology
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - elements:
+        - label:
+            text: Objects Count Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria/properties/objectsCountDiffPercentage
+          type: input
+        - label:
+            text: Oplog Max Lag Seconds
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria/properties/oplogMaxLagSeconds
+          type: input
+        label:
+          text: Readiness Criteria
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria
+        show_label: true
+        type: single-step-form
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: Ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: compute-autoscaler
+  title: steps.10.label
+- form:
+    discriminator:
+      dbDetails:
+        default: false
+        type: boolean
+    elements:
+    - computed: getDbDetails
+      if: returnFalse
+      type: input
+    - elements:
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/expansionMode
+          type: select
+        - label:
+            text: UsageThreshold (%)
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/usageThreshold
+          type: input
+        - addFormLabel: Scaling Rules
+          element:
+            elements:
+            - label:
+                text: AppliesUpto (In Storage units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold (In %, Or In Storage Units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/scalingRules|scalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: AppliesUpto (In Storage units)
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold (In %, Or In Storage Units)
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: Scaling Threshold
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingThreshold
+          type: input
+        - label:
+            text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/upperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/upperBound
+          type: input
+        if: mongoTypeEqualsTo|standalone|storage
+        label:
+          text: Standalone
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone
+        show_label: true
+        type: single-step-form
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/expansionMode
+          type: select
+        - label:
+            text: usageThreshold (%)
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/usageThreshold
+          type: input
+        - addFormLabel: Scaling Rules
+          element:
+            elements:
+            - label:
+                text: aApplies Upto
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold (In %, Or In Storage Units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/scalingRules|scalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: AppliesUpto (In Storage units)
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold (In %, Or In Storage Units)
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: Scaling Threshold
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingThreshold
+          type: input
+        - label:
+            text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/upperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/upperBound
+          type: input
+        if: mongoTypeEqualsTo|replicaSet|storage
+        label:
+          text: ReplicaSet
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet
+        show_label: true
+        type: single-step-form
+      - elements:
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/trigger
+            type: select
+          - label:
+              text: Expansion Mode
+            options:
+            - Online
+            - Offline
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/expansionMode
+            type: select
+          - label:
+              text: UsageThreshold (%)
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/usageThreshold
+            type: input
+          - addFormLabel: Scaling Rules
+            element:
+              elements:
+              - label:
+                  text: AppliesUpto (In Storage units)
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules/items/properties/appliesUpto
+                type: input
+              - label:
+                  text: Threshold (In %, Or In Storage Units)
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules/items/properties/threshold
+                type: input
+              type: single-step-form
+            label:
+              text: ScalingRules
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/scalingRules|scalingRules
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: AppliesUpto (In Storage units)
+              path: appliesUpto
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: Threshold (In %, Or In Storage Units)
+              path: threshold
+              type: value
+              typeOfValue: string
+            type: single-step-form-array
+          - label:
+              text: UpperBound
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/upperBound
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/upperBound
+            type: input
+          - label:
+              text: Scaling Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingThreshold
+            type: input
+          label:
+            text: Shard
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/trigger
+            type: select
+          - label:
+              text: Expansion Mode
+            options:
+            - Online
+            - Offline
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/expansionMode
+            type: select
+          - label:
+              text: UsageThreshold (%)
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/usageThreshold
+            type: input
+          - addFormLabel: Scaling Rules
+            element:
+              elements:
+              - label:
+                  text: AppliesUpto (In Storage units)
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules/items/properties/appliesUpto
+                type: input
+              - label:
+                  text: Threshold (In %, Or In Storage Units)
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules/items/properties/threshold
+                type: input
+              type: single-step-form
+            label:
+              text: ScalingRules
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/scalingRules|scalingRules
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: AppliesUpto (In Storage units)
+              path: appliesUpto
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: Threshold (In %, Or In Storage Units)
+              path: threshold
+              type: value
+              typeOfValue: string
+            type: single-step-form-array
+          - label:
+              text: UpperBound
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/upperBound
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/upperBound
+            type: input
+          - label:
+              text: Scaling Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingThreshold
+            type: input
+          label:
+            text: ConfigServer
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/trigger
+            type: select
+          - label:
+              text: Expansion Mode
+            options:
+            - Online
+            - Offline
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/expansionMode
+            type: select
+          - label:
+              text: UsageThreshold (%)
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/usageThreshold
+            type: input
+          - addFormLabel: Scaling Rules
+            element:
+              elements:
+              - label:
+                  text: AppliesUpto (In Storage units)
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules/items/properties/appliesUpto
+                type: input
+              - label:
+                  text: Threshold (In %, Or In Storage Units)
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules/items/properties/threshold
+                type: input
+              type: single-step-form
+            label:
+              text: ScalingRules
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/scalingRules|scalingRules
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: AppliesUpto (In Storage units)
+              path: appliesUpto
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: Threshold (In %, Or In Storage Units)
+              path: threshold
+              type: value
+              typeOfValue: string
+            type: single-step-form-array
+          - label:
+              text: UpperBound
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/upperBound
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/upperBound
+            type: input
+          - label:
+              text: Scaling Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingThreshold
+            type: input
+          label:
+            text: Hidden
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden
+          show_label: true
+          type: single-step-form
+        if: mongoTypeEqualsTo|sharded|storage
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - elements:
+        - label:
+            text: Objects Count Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria/properties/objectsCountDiffPercentage
+          type: input
+        - label:
+            text: Oplog Max Lag Seconds
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria/properties/oplogMaxLagSeconds
+          type: input
+        label:
+          text: Readiness Criteria
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria
+        show_label: true
+        type: single-step-form
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: Ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: storage-autoscaler
+  title: steps.11.label
+- form:
+    discriminator:
+      binding:
+        default: false
+        type: boolean
+    elements:
+    - computed: isBindingAlreadyOn
+      label:
+        text: Expose Database
+      onChange: addOrRemoveBinding
+      schema:
+        $ref: discriminator#/properties/binding
+      type: switch
+    type: single-step-form
+  id: binding
+  title: Gateway Binding
+type: multi-step-form
