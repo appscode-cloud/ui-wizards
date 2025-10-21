@@ -64,7 +64,7 @@ function isBackupSelected({ getValue, discriminator, watchDependency }) {
 
 function buildCommand({ getValue, discriminator, commit }) {
   const sessions = getValue(discriminator, '/selectedSessions')
-  let generatedCommand = `trigger ${backupName} -n ${backupNamespace}`
+  let generatedCommand = `kubectl-kubestash trigger ${backupName} -n ${backupNamespace}`
   sessions?.forEach((ele) => {
     generatedCommand += ` --sessions ${ele}`
   })
