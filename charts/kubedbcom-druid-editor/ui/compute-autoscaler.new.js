@@ -4,23 +4,19 @@ let dbDetails = {}
 async function getDbDetails() {
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
-
   const namespace =
-    storeGet('/route/query/namespace') ||
-    getValue(model, '/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/namespace') ||
-    ''
+    storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace') || ''
   const name =
     storeGet('/route/params/name') ||
-    getValue(model, '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name') ||
+    getValue(model, '/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name') ||
     ''
 
   if (namespace && name) {
     try {
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mariadbs/${name}`,
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/druids/${name}`,
       )
       dbDetails = resp.data || {}
-
       setDiscriminatorValue('/dbDetails', true)
     } catch (e) {
       console.log(e)
@@ -38,19 +34,15 @@ async function getDbDetails() {
     force: true,
   })
   commit('wizard/model$update', {
-    path: `/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name`,
+    path: `/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name`,
     value: name,
     force: true,
   })
   commit('wizard/model$update', {
-    path: `/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/labels`,
+    path: `/resources/autoscalingKubedbComRedisAutoscaler/metadata/labels`,
     value: dbDetails.metadata.labels,
     force: true,
   })
-}
-
-function isKubedb() {
-  return !!storeGet('/route/params/actions')
 }
 
 function isConsole() {
@@ -59,7 +51,7 @@ function isConsole() {
   if (isKube) {
     const dbName = storeGet('/route/params/name') || ''
     commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name',
+      path: '/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name',
       value: dbName,
       force: true,
     })
@@ -71,14 +63,14 @@ function isConsole() {
     const date = Math.floor(Date.now() / 1000)
     const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
     commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/name',
+      path: '/metadata/name',
       value: modifiedName,
       force: true,
     })
     const namespace = storeGet('/route/query/namespace') || ''
     if (namespace) {
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/namespace',
+        path: '/metadata/namespace',
         value: namespace,
         force: true,
       })
@@ -113,29 +105,24 @@ function isRancherManaged() {
   return !!found
 }
 
-function onNamespaceChange() {
-  const namespace = getValue(model, '/metadata/release/namespace')
-  const agent = getValue(model, '/resources/kubedbComPostgres/spec/monitor/agent')
-  if (agent === 'prometheus.io') {
-    commit('wizard/model$update', {
-      path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-      value: [namespace],
-      force: true,
-    })
+function onNamespaceChange({ model, getValue, commit }) {
+  const namespace = getValue(model, '/metadata/namespace')
+  if (!namespace) {
+    commit(
+      'wizard/model$delete',
+      '/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name',
+    )
   }
 }
 
-async function getPostgresDbs() {
-  watchDependency('model#/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/namespace')
-  const namespace = getValue(
-    model,
-    '/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/namespace',
-  )
+async function getDbs() {
+  watchDependency('model#/metadata/namespace')
+  const namespace = getValue(model, '/metadata/namespace')
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mariadbs`,
+    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/druids`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
     },
@@ -154,7 +141,7 @@ async function getPostgresDbs() {
 
 function initMetadata() {
   const dbName =
-    getValue(model, '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name') || ''
+    getValue(model, '/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name') || ''
   const type = getValue(discriminator, '/autoscalingType') || ''
   const date = Math.floor(Date.now() / 1000)
   const resource = storeGet('/route/params/resource')
@@ -162,20 +149,20 @@ function initMetadata() {
   const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
   if (modifiedName)
     commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/name',
+      path: '/metadata/name',
       value: modifiedName,
       force: true,
     })
 
-  // delete the other type object from vuex wizard model
+  // delete the other type object from model
   if (type === 'compute')
-    commit('wizard/model$delete', '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/storage')
+    commit('wizard/model$delete', '/resources/autoscalingKubedbComDruidAutoscaler/spec/storage')
   if (type === 'storage')
-    commit('wizard/model$delete', '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/compute')
+    commit('wizard/model$delete', '/resources/autoscalingKubedbComDruidAutoscaler/spec/compute')
 }
 
 async function fetchTopologyMachines() {
-  const instance = hasAnnotations({ model, getValue })
+  const instance = hasAnnotations()
 
   const user = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -194,39 +181,20 @@ async function fetchTopologyMachines() {
   }
 }
 
-function setTrigger(path) {
-  let value = getValue(model, `/resources/${path}`)
-  if (value) return value
-  return 'On'
-}
-
-function hasAnnotations() {
+function hasAnnotations(ype) {
   const annotations = getValue(
     model,
-    '/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/annotations',
+    '/resources/autoscalingKubedbComDruidAutoscaler/metadata/annotations',
   )
   const instance = annotations['kubernetes.io/instance-type']
 
   return !!instance
 }
 
-function setAllowedMachine(minmax) {
-  const annotations = getValue(
-    model,
-    '/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/annotations',
-  )
-  const instance = annotations['kubernetes.io/instance-type']
-  const mx = instance?.includes(',') ? instance.split(',')[1] : ''
-  const mn = instance?.includes(',') ? instance.split(',')[0] : ''
-
-  if (minmax === 'min') return mn
-  else return mx
-}
-
-async function getMachines(minmax) {
+async function getMachines(type, minmax) {
   watchDependency('discriminator#/topologyMachines')
   const depends = minmax === 'min' ? 'max' : 'min'
-  const dependantPath = `/allowedMachine-${depends}`
+  const dependantPath = `/allowedMachine-${type}-${depends}`
 
   watchDependency(`discriminator#${dependantPath}`)
   const dependantMachine = getValue(discriminator, dependantPath)
@@ -249,23 +217,33 @@ async function getMachines(minmax) {
 }
 
 function onMachineChange(type) {
-  const annoPath = '/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/annotations'
+  const annoPath = '/resources/autoscalingKubedbComDruidAutoscaler/metadata/annotations'
   const annotations = getValue(model, annoPath)
   const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
 
-  const minMachine = getValue(discriminator, '/allowedMachine-min')
-  const maxMachine = getValue(discriminator, '/allowedMachine-max')
+  const minMachine = getValue(discriminator, `/allowedMachine-${type}-min`)
+  const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
   const minMaxMachine = `${minMachine},${maxMachine}`
-  annotations['kubernetes.io/instance-type'] = minMaxMachine
+
+  parsedInstance[type] = minMaxMachine
+  const instanceString = JSON.stringify(parsedInstance)
+  annotations['kubernetes.io/instance-type'] = instanceString
 
   const machines = getValue(discriminator, `/topologyMachines`) || []
   const minMachineObj = machines.find((item) => item.topologyValue === minMachine)
   const maxMachineObj = machines.find((item) => item.topologyValue === maxMachine)
   const minMachineAllocatable = minMachineObj?.allocatable
   const maxMachineAllocatable = maxMachineObj?.allocatable
-  const allowedPath = `/resources/autoscalingKubedbComMariaDBAutoscaler/spec/compute/${type}`
+  const allowedPath = `/resources/autoscalingKubedbComDruidAutoscaler/spec/compute/${type}`
 
-  if (minMachine && maxMachine && instance !== minMaxMachine) {
+  if (minMachine && maxMachine && instance !== instanceString) {
     commit('wizard/model$update', {
       path: `${allowedPath}/maxAllowed`,
       value: maxMachineAllocatable,
@@ -278,25 +256,53 @@ function onMachineChange(type) {
     })
     commit('wizard/model$update', {
       path: annoPath,
-      value: { ...annotations },
+      value: annotations,
       force: true,
     })
   }
 }
 
-function hasNoAnnotations() {
-  return !hasAnnotations()
+function setAllowedMachine(type, minmax) {
+  const annotations = getValue(
+    model,
+    '/resources/autoscalingKubedbComDruidAutoscaler/metadata/annotations',
+  )
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
+
+  const machine = parsedInstance[type] || ''
+  const mx = machine?.includes(',') ? machine.split(',')[1] : ''
+  const mn = machine?.includes(',') ? machine.split(',')[0] : ''
+
+  if (minmax === 'min') return mn
+  else return mx
 }
 
 function setControlledResources(type) {
   const list = ['cpu', 'memory']
-  const path = `/resources/autoscalingKubedbComMariaDBAutoscaler/spec/compute/${type}/controlledResources`
+  const path = `/resources/autoscalingKubedbComDruidAutoscaler/spec/compute/${type}/controlledResources`
   commit('wizard/model$update', {
     path: path,
     value: list,
     force: true,
   })
   return list
+}
+
+function setTrigger(path) {
+  let value = getValue(model, `/resources/${path}`)
+  if (value) return value
+  return 'On'
+}
+
+function hasNoAnnotations() {
+  return !hasAnnotations()
 }
 
 async function fetchNodeTopology() {
@@ -319,22 +325,26 @@ async function fetchNodeTopology() {
 
 function isNodeTopologySelected() {
   watchDependency(
-    'model#/resources/autoscalingKubedbComMariaDBAutoscaler/spec/compute/nodeTopology/name',
+    'model#/resources/autoscalingKubedbComDruidAutoscaler/spec/compute/nodeTopology/name',
   )
   const nodeTopologyName =
     getValue(
       model,
-      '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/compute/nodeTopology/name',
+      '/resources/autoscalingKubedbComDruidAutoscaler/spec/compute/nodeTopology/name',
     ) || ''
   return !!nodeTopologyName.length
 }
 
+function isKubedb({ storeGet }) {
+  return !!storeGet('/route/params/actions')
+}
+
 function showOpsRequestOptions() {
   if (isKubedb() === true) return true
-  watchDependency('model#/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name')
+  watchDependency('model#/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name')
   watchDependency('discriminator#/autoscalingType')
   return (
-    !!getValue(model, '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name') &&
+    !!getValue(model, '/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name') &&
     !!getValue(discriminator, '/autoscalingType')
   )
 }

@@ -1,0 +1,505 @@
+  - type: single-step-form
+    id: compute-autoscaler
+    loader: getDbDetails
+    elements:
+      - type: block-layout
+        if:
+         type: function
+         name: isConsole
+        elements:
+          - type: input
+            label: Name
+            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/name
+          - type: select
+            label: Select Namespace
+            loader: getNamespaces
+            if:
+              type: function
+              name: isRancherManaged
+            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/namespace
+            watcher:
+              func: onNamespaceChange
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/namespace
+          - type: select
+            label: Select Db
+            loader: getDbs
+            validation:
+              type: required
+            refresh: true
+            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/databaseRef/properties/name
+            watcher:
+              func: initMetadata
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/databaseRef/properties/name
+
+      - type: radio
+        if:
+          type: function
+          name: isConsole
+        label: Select Type
+        validation:
+          type: required
+        schema: temp/properties/autoscalingType
+        watcher:
+          func: initMetadata
+          paths:
+            - temp/properties/autoscalingType
+        options:
+          - text: Compute
+            value: compute
+            description: Scale your CPU Memory based on resource usage
+          - text: Storage
+            value: storage
+            description: Expand your database size based on volume usage
+
+      - type: block-layout
+        showLabels: false
+        loader: fetchTopologyMachines
+        elements:
+          # brokers mode
+          - type: block-layout
+            label: Brokers
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers
+            elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/brokers/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/podLifeTimeThreshold
+              - type: input
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/resourceDiffPercentage
+              - type: block-layout
+                showLabels: false
+                elements:
+                  - type: select
+                    label: Min Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-brokers-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|brokers|min
+                    loader:
+                      name: getMachines|brokers|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-brokers-max
+                    watcher:
+                      func: onMachineChange|brokers
+                      paths:
+                        - temp/properties/allowedMachine-brokers-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/memory
+                  - type: select
+                    label: Max Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-brokers-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|brokers|max
+                    loader:
+                      name: getMachines|brokers|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-brokers-min
+                    watcher:
+                      func: onMachineChange|brokers
+                      paths:
+                        - temp/properties/allowedMachine-brokers-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/memory
+              - type: select
+                label: Controlled Resources
+                loader: setControlledResources|brokers
+                multiple: true
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/controlledResources
+
+          # coordinators mode
+          - type: block-layout
+            label: Coordinators
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators
+            elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/coordinators/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/podLifeTimeThreshold
+              - type: input
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/resourceDiffPercentage
+              - type: block-layout
+                showLabels: false
+                elements:
+                  - type: select
+                    label: Min Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-coordinators-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|coordinators|min
+                    loader:
+                      name: getMachines|coordinators|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-coordinators-max
+                    watcher:
+                      func: onMachineChange|coordinators
+                      paths:
+                        - temp/properties/allowedMachine-coordinators-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/memory
+                  - type: select
+                    label: Max Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-coordinators-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|coordinators|max
+                    loader:
+                      name: getMachines|coordinators|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-coordinators-min
+                    watcher:
+                      func: onMachineChange|coordinators
+                      paths:
+                        - temp/properties/allowedMachine-coordinators-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/memory
+              - type: select
+                label: Controlled Resources
+                loader: setControlledResources|coordinators
+                multiple: true
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/controlledResources
+
+          # historicals mode
+          - type: block-layout
+            label: Historicals
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals
+            elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/historicals/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/podLifeTimeThreshold
+              - type: input
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/resourceDiffPercentage
+              - type: block-layout
+                showLabels: false
+                elements:
+                  - type: select
+                    label: Min Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-historicals-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|historicals|min
+                    loader:
+                      name: getMachines|historicals|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-historicals-max
+                    watcher:
+                      func: onMachineChange|historicals
+                      paths:
+                        - temp/properties/allowedMachine-historicals-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/memory
+                  - type: select
+                    label: Max Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-historicals-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|historicals|max
+                    loader:
+                      name: getMachines|historicals|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-historicals-min
+                    watcher:
+                      func: onMachineChange|historicals
+                      paths:
+                        - temp/properties/allowedMachine-historicals-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/memory
+              - type: select
+                label: Controlled Resources
+                loader: setControlledResources|historicals
+                multiple: true
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/controlledResources
+
+          # middleManagers mode
+          - type: block-layout
+            label: Middle Managers
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers
+            elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/middleManagers/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/podLifeTimeThreshold
+              - type: input
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/resourceDiffPercentage
+              - type: block-layout
+                showLabels: false
+                elements:
+                  - type: select
+                    label: Min Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-middleManagers-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|middleManagers|min
+                    loader:
+                      name: getMachines|middleManagers|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-middleManagers-max
+                    watcher:
+                      func: onMachineChange|middleManagers
+                      paths:
+                        - temp/properties/allowedMachine-middleManagers-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/memory
+                  - type: select
+                    label: Max Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-middleManagers-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|middleManagers|max
+                    loader:
+                      name: getMachines|middleManagers|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-middleManagers-min
+                    watcher:
+                      func: onMachineChange|middleManagers
+                      paths:
+                        - temp/properties/allowedMachine-middleManagers-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/memory
+              - type: select
+                label: Controlled Resources
+                loader: setControlledResources|middleManagers
+                multiple: true
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/controlledResources
+
+          - type: block-layout
+            label: Node Topology
+            if:
+              type: function
+              name: hasNoAnnotations
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+            elements:
+              - type: select
+                label: Select NodeTopology
+                loader: fetchNodeTopology
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+              - type: input
+                label: ScaleUp Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+              - type: input
+                label: ScaleDown Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+
+          - type: block-layout
+            label: Ops Request Options
+            showLabels: true
+            if:
+              type: function
+              name: showOpsRequestOptions
+            # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions
+            elements:
+              - type: select
+                label: Timeout
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+                options:
+                - text: 5 minutes
+                  value: 5m0s
+                - text: 10 minutes
+                  value: 10m0s
+                - text: 30 minutes
+                  value: 30m0s
+                - text: 1 hour
+                  value: 1h0m
+                - text: 2 hours
+                  value: 2h0m
+                - text: 5 hours
+                  value: 5h0m
+                - text: 10 hours
+                  value: 10h0m
+              - type: radio
+                label: Apply
+                init:
+                  type: func
+                  value: setApplyToIfReady
+                options:
+                  - text: IfReady (OpsRequest will be applied if database is ready)
+                    value: IfReady
+                  - text: Always (OpsRequest will always be applied)
+                    value: Always
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply

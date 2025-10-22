@@ -1,3 +1,6 @@
+let autoscaleType = ''
+let dbDetails = {}
+
 async function getDbDetails() {
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
