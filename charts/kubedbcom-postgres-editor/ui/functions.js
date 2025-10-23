@@ -4,62 +4,22 @@ export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator, watchDependency } =
     useOperator(model, store.state)
 
-  // Initialize discriminators
-  setDiscriminatorValue('activeDatabaseMode', setDatabaseMode())
-  setDiscriminatorValue('configureTLS', !!getValue(model, '/resources/kubedbComPostgres/spec/tls'))
-  setDiscriminatorValue(
-    'enableMonitoring',
-    !!getValue(model, '/resources/kubedbComPostgres/spec/monitor'),
-  )
-  setDiscriminatorValue(
-    'customizeExporter',
-    !!getValue(model, '/resources/kubedbComPostgres/spec/monitor/prometheus/exporter'),
-  )
-  setDiscriminatorValue('prePopulateDatabase', initPrePopulateDatabase())
-  setDiscriminatorValue('dataSource', initDataSource())
-  setDiscriminatorValue('sourceVolumeType', initVolumeType())
-  setDiscriminatorValue('repositoryChoise', setInitialRestoreSessionRepo())
-  setDiscriminatorValue(
-    'customizeRestoreJobRuntimeSettings',
-    initCustomizeRestoreJobRuntimeSettings(),
-  )
-  setDiscriminatorValue('scheduleBackup', initScheduleBackup())
-  setDiscriminatorValue('repositoryChoise', initRepositoryChoise())
-  setDiscriminatorValue(
-    'customizeRestoreJobRuntimeSettings',
-    initCustomizeRestoreJobRuntimeSettingsForBackup(),
-  )
-  setDiscriminatorValue('backupInvoker', initBackupInvoker())
-  setDiscriminatorValue('createAuthSecret', getCreateAuthSecret())
-  setDiscriminatorValue('password', setAuthSecretPassword())
-  setDiscriminatorValue('configurationSource', setConfigurationSource())
-  setDiscriminatorValue('configuration', setConfiguration())
-  setDiscriminatorValue('setCustomConfig', 'no')
-  setDiscriminatorValue('backupType', 'BackupConfig')
-  setDiscriminatorValue('isBackupDataLoaded', false)
-  setDiscriminatorValue('backupConfigContext', 'Create')
-  setDiscriminatorValue('blueprintEnabled', setBlueprintSwitch())
-  setDiscriminatorValue('archiverEnabled', setArchiverSwitch())
-  setDiscriminatorValue('blueprintOptions', initBlueprint())
-  setDiscriminatorValue('usagePolicy', initUsagePolicy())
-  setDiscriminatorValue('autoscalingType', '')
   setDiscriminatorValue('dbDetails', false)
-  setDiscriminatorValue('topologyMachines', [])
-  setDiscriminatorValue('allowedMachine-min', setAllowedMachine('min'))
-  setDiscriminatorValue('allowedMachine-max', setAllowedMachine('max'))
-  setDiscriminatorValue('binding', isBindingAlreadyOn())
 
   function isKubedb() {
     return !!storeGet('/route/params/actions')
   }
 
   function showOpsRequestOptions() {
+    console.log('showOpsRequestOptions called')
     if (isKubedb() === true) return true
     // watchDependency('model#/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name')
     // watchDependency('discriminator#/autoscalingType')
     return (
-      !!getValue(model, '/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name') &&
-      !!getValue(discriminator, '/autoscalingType')
+      !!getValue(
+        model,
+        '/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name',
+      ) && !!getValue(discriminator, '/autoscalingType')
     )
   }
 
