@@ -75,7 +75,7 @@ export const useFunc = (model) => {
     return backup
   }
 
-  function buildCommand({ getValue, discriminator, commit }) {
+  function buildCommand() {
     const sessions = getValue(discriminator, '/selectedSessions')
     let generatedCommand = `trigger ${backupName} -n ${backupNamespace}`
     sessions?.forEach((ele) => {
