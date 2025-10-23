@@ -129,7 +129,7 @@ async function fetchTopologyMachines() {
 }
 
 async function dbTypeEqualsTo(type) {
-  watchDependency('discriminator#/dbDetails')
+  // watchDependency('discriminator#/dbDetails')
 
   const { spec } = dbDetails || {}
   const { topology } = spec || {}
@@ -181,11 +181,11 @@ function setAllowedMachine(type, minmax) {
 }
 
 async function getMachines(type, minmax) {
-  watchDependency('discriminator#/topologyMachines')
+  // watchDependency('discriminator#/topologyMachines')
   const depends = minmax === 'min' ? 'max' : 'min'
   const dependantPath = `/allowedMachine-${type}-${depends}`
 
-  watchDependency(`discriminator#${dependantPath}`)
+  // watchDependency(`discriminator#${dependantPath}`)
   const dependantMachine = getValue(discriminator, dependantPath)
 
   const nodeGroups = getValue(discriminator, '/topologyMachines') || []
@@ -268,8 +268,8 @@ function setControlledResources(type) {
 
 function showOpsRequestOptions() {
   if (isKubedb() === true) return true
-  watchDependency('model#/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name')
-  watchDependency('discriminator#/autoscalingType')
+  // watchDependency('model#/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name')
+  // watchDependency('discriminator#/autoscalingType')
   return (
     !!getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name') &&
     !!getValue(discriminator, '/autoscalingType')

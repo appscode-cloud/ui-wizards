@@ -1,26 +1,66 @@
 let autoscaleType = ''
 let dbDetails = {}
 
+function isConsole() {
+  const isKube = isKubedb()
+
+  if (isKube) {
+    const dbName = storeGet('/route/params/name') || ''
+    commit('wizard/model$update', {
+      path: '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+      value: dbName,
+      force: true,
+    })
+    const operation = storeGet('/route/params/actions') || ''
+    if (operation.length) {
+      const splitOp = operation.split('-')
+      if (splitOp.length > 2) autoscaleType = splitOp[2]
+    }
+    const date = Math.floor(Date.now() / 1000)
+    const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
+    commit('wizard/model$update', {
+      path: '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/name',
+      value: modifiedName,
+      force: true,
+    })
+    const namespace = storeGet('/route/query/namespace') || ''
+    if (namespace) {
+      commit('wizard/model$update', {
+        path: '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace',
+        value: namespace,
+        force: true,
+      })
+    }
+  }
+
+  return !isKube
+}
+
+function isKubedb() {
+  return !!storeGet('/route/params/actions')
+}
+
 async function getDbDetails() {
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
-
   const namespace =
     storeGet('/route/query/namespace') ||
-    getValue(model, '/resources/autoscalingKubedbComRedisAutoscaler/metadata/namespace') ||
+    getValue(model, '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace') ||
     ''
   const name =
     storeGet('/route/params/name') ||
-    getValue(model, '/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name') ||
+    getValue(
+      model,
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+    ) ||
     ''
 
   if (namespace && name) {
     try {
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises/${name}`,
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/perconaxtradbs/${name}`,
       )
       dbDetails = resp.data || {}
-
       setDiscriminatorValue('/dbDetails', true)
     } catch (e) {
       console.log(e)
@@ -38,54 +78,15 @@ async function getDbDetails() {
     force: true,
   })
   commit('wizard/model$update', {
-    path: `/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name`,
+    path: `/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name`,
     value: name,
     force: true,
   })
   commit('wizard/model$update', {
-    path: `/resources/autoscalingKubedbComRedisAutoscaler/metadata/labels`,
+    path: `/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/labels`,
     value: dbDetails.metadata.labels,
     force: true,
   })
-}
-
-function isKubedb() {
-  return !!storeGet('/route/params/actions')
-}
-
-function isConsole() {
-  const isKube = isKubedb()
-
-  if (isKube) {
-    const dbName = storeGet('/route/params/name') || ''
-    commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name',
-      value: dbName,
-      force: true,
-    })
-    const operation = storeGet('/route/params/actions') || ''
-    if (operation.length) {
-      const splitOp = operation.split('-')
-      if (splitOp.length > 2) autoscaleType = splitOp[2]
-    }
-    const date = Math.floor(Date.now() / 1000)
-    const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
-    commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComRedisAutoscaler/metadata/name',
-      value: modifiedName,
-      force: true,
-    })
-    const namespace = storeGet('/route/query/namespace') || ''
-    if (namespace) {
-      commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComRedisAutoscaler/metadata/namespace',
-        value: namespace,
-        force: true,
-      })
-    }
-  }
-
-  return !isKube
 }
 
 async function getNamespaces() {
@@ -115,7 +116,7 @@ function isRancherManaged() {
 
 function onNamespaceChange() {
   const namespace = getValue(model, '/metadata/release/namespace')
-  const agent = getValue(model, '/resources/kubedbComRedis/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComPerconaXtraDB/spec/monitor/agent')
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
@@ -125,9 +126,52 @@ function onNamespaceChange() {
   }
 }
 
+function onNamespaceChange() {
+  const namespace = getValue(
+    model,
+    '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace',
+  )
+  if (!namespace) {
+    commit(
+      'wizard/model$delete',
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+    )
+  }
+}
+
+async function getDbs() {
+  // watchDependency('model#/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace')
+  const namespace = getValue(
+    model,
+    '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace',
+  )
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
+    {
+      params: { filter: { items: { metadata: { name: null } } } },
+    },
+  )
+
+  const resources = (resp && resp.data && resp.data.items) || []
+
+  return resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || ''
+    return {
+      text: name,
+      value: name,
+    }
+  })
+}
+
 function initMetadata() {
   const dbName =
-    getValue(model, '/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name') || ''
+    getValue(
+      model,
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+    ) || ''
   const type = getValue(discriminator, '/autoscalingType') || ''
   const date = Math.floor(Date.now() / 1000)
   const resource = storeGet('/route/params/resource')
@@ -135,20 +179,57 @@ function initMetadata() {
   const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
   if (modifiedName)
     commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComRedisAutoscaler/metadata/name',
+      path: '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/name',
       value: modifiedName,
       force: true,
     })
 
-  // delete the other type object from vuex wizard model
+  // delete the other type object from model
   if (type === 'compute')
-    commit('wizard/model$delete', '/resources/autoscalingKubedbComRedisAutoscaler/spec/storage')
+    commit(
+      'wizard/model$delete',
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/storage',
+    )
   if (type === 'storage')
-    commit('wizard/model$delete', '/resources/autoscalingKubedbComRedisAutoscaler/spec/compute')
+    commit(
+      'wizard/model$delete',
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute',
+    )
+}
+
+function initMetadata() {
+  const dbName =
+    getValue(
+      model,
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+    ) || ''
+  const type = getValue(discriminator, '/autoscalingType') || ''
+  const date = Math.floor(Date.now() / 1000)
+  const resource = storeGet('/route/params/resource')
+  const scalingName = dbName ? dbName : resource
+  const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
+  if (modifiedName)
+    commit('wizard/model$update', {
+      path: '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/name',
+      value: modifiedName,
+      force: true,
+    })
+
+  // delete the other type object from model
+  if (type === 'compute')
+    commit(
+      'wizard/model$delete',
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/storage',
+    )
+  if (type === 'storage')
+    commit(
+      'wizard/model$delete',
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute',
+    )
 }
 
 async function fetchTopologyMachines() {
-  const instance = hasAnnotations({ model, getValue })
+  const instance = hasAnnotations()
 
   const user = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -173,20 +254,28 @@ function setTrigger(path) {
   return 'On'
 }
 
+function setApplyToIfReady() {
+  return 'IfReady'
+}
+
 function hasAnnotations() {
   const annotations = getValue(
     model,
-    '/resources/autoscalingKubedbComRedisAutoscaler/metadata/annotations',
+    '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/annotations',
   )
   const instance = annotations['kubernetes.io/instance-type']
 
   return !!instance
 }
 
+function hasNoAnnotations() {
+  return !hasAnnotations()
+}
+
 function setAllowedMachine(minmax) {
   const annotations = getValue(
     model,
-    '/resources/autoscalingKubedbComRedisAutoscaler/metadata/annotations',
+    '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/annotations',
   )
   const instance = annotations['kubernetes.io/instance-type']
   const mx = instance?.includes(',') ? instance.split(',')[1] : ''
@@ -222,7 +311,7 @@ async function getMachines(minmax) {
 }
 
 function onMachineChange(type) {
-  const annoPath = '/resources/autoscalingKubedbComRedisAutoscaler/metadata/annotations'
+  const annoPath = '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/annotations'
   const annotations = getValue(model, annoPath)
   const instance = annotations['kubernetes.io/instance-type']
 
@@ -236,7 +325,7 @@ function onMachineChange(type) {
   const maxMachineObj = machines.find((item) => item.topologyValue === maxMachine)
   const minMachineAllocatable = minMachineObj?.allocatable
   const maxMachineAllocatable = maxMachineObj?.allocatable
-  const allowedPath = `/resources/autoscalingKubedbComRedisAutoscaler/spec/compute/${type}`
+  const allowedPath = `/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/${type}`
 
   if (minMachine && maxMachine && instance !== minMaxMachine) {
     commit('wizard/model$update', {
@@ -251,19 +340,15 @@ function onMachineChange(type) {
     })
     commit('wizard/model$update', {
       path: annoPath,
-      value: { ...annotations },
+      value: annotations,
       force: true,
     })
   }
 }
 
-function hasNoAnnotations() {
-  return !hasAnnotations()
-}
-
 function setControlledResources(type) {
   const list = ['cpu', 'memory']
-  const path = `/resources/autoscalingKubedbComRedisAutoscaler/spec/compute/${type}/controlledResources`
+  const path = `/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/${type}/controlledResources`
   commit('wizard/model$update', {
     path: path,
     value: list,
@@ -271,7 +356,6 @@ function setControlledResources(type) {
   })
   return list
 }
-
 async function fetchNodeTopology() {
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
@@ -292,26 +376,26 @@ async function fetchNodeTopology() {
 
 function isNodeTopologySelected() {
   // watchDependency(
-  //   'model#/resources/autoscalingKubedbComRedisAutoscaler/spec/compute/nodeTopology/name',
+  //   'model#/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/nodeTopology/name',
   // )
   const nodeTopologyName =
     getValue(
       model,
-      '/resources/autoscalingKubedbComRedisAutoscaler/spec/compute/nodeTopology/name',
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/nodeTopology/name',
     ) || ''
   return !!nodeTopologyName.length
 }
 
 function showOpsRequestOptions() {
   if (isKubedb() === true) return true
-  // watchDependency('model#/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name')
+  // watchDependency(
+  //   'model#/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+  // )
   // watchDependency('discriminator#/autoscalingType')
   return (
-    !!getValue(model, '/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name') &&
-    !!getValue(discriminator, '/autoscalingType')
+    !!getValue(
+      model,
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+    ) && !!getValue(discriminator, '/autoscalingType')
   )
-}
-
-function setApplyToIfReady() {
-  return 'IfReady'
 }

@@ -116,7 +116,7 @@ function onNamespaceChange({ model, getValue, commit }) {
 }
 
 async function getDbs() {
-  watchDependency('model#/metadata/namespace')
+  // watchDependency('model#/metadata/namespace')
   const namespace = getValue(model, '/metadata/namespace')
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -192,11 +192,11 @@ function hasAnnotations(ype) {
 }
 
 async function getMachines(type, minmax) {
-  watchDependency('discriminator#/topologyMachines')
+  // watchDependency('discriminator#/topologyMachines')
   const depends = minmax === 'min' ? 'max' : 'min'
   const dependantPath = `/allowedMachine-${type}-${depends}`
 
-  watchDependency(`discriminator#${dependantPath}`)
+  // watchDependency(`discriminator#${dependantPath}`)
   const dependantMachine = getValue(discriminator, dependantPath)
 
   const nodeGroups = getValue(discriminator, '/topologyMachines') || []
@@ -324,9 +324,9 @@ async function fetchNodeTopology() {
 }
 
 function isNodeTopologySelected() {
-  watchDependency(
-    'model#/resources/autoscalingKubedbComDruidAutoscaler/spec/compute/nodeTopology/name',
-  )
+  // watchDependency(
+  //   'model#/resources/autoscalingKubedbComDruidAutoscaler/spec/compute/nodeTopology/name',
+  // )
   const nodeTopologyName =
     getValue(
       model,
@@ -341,8 +341,8 @@ function isKubedb({ storeGet }) {
 
 function showOpsRequestOptions() {
   if (isKubedb() === true) return true
-  watchDependency('model#/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name')
-  watchDependency('discriminator#/autoscalingType')
+  // watchDependency('model#/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name')
+  // watchDependency('discriminator#/autoscalingType')
   return (
     !!getValue(model, '/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name') &&
     !!getValue(discriminator, '/autoscalingType')

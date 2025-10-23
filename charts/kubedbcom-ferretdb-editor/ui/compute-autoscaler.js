@@ -121,7 +121,7 @@ function onNamespaceChange({ model, getValue, commit }) {
 }
 
 async function getDbs() {
-  watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace')
+  // watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace')
   const namespace = getValue(
     model,
     '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace',
@@ -228,11 +228,11 @@ function setAllowedMachine(type, minmax) {
 }
 
 async function getMachines(type, minmax) {
-  watchDependency('discriminator#/topologyMachines')
+  // watchDependency('discriminator#/topologyMachines')
   const depends = minmax === 'min' ? 'max' : 'min'
   const dependantPath = `/allowedMachine-${type}-${depends}`
 
-  watchDependency(`discriminator#${dependantPath}`)
+  // watchDependency(`discriminator#${dependantPath}`)
   const dependantMachine = getValue(discriminator, dependantPath)
 
   const nodeGroups = getValue(discriminator, '/topologyMachines') || []
@@ -358,9 +358,9 @@ async function fetchNodeTopology() {
   return []
 }
 function isNodeTopologySelected() {
-  watchDependency(
-    'model#/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/nodeTopology/name',
-  )
+  // watchDependency(
+  //   'model#/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/nodeTopology/name',
+  // )
   const nodeTopologyName =
     getValue(
       model,
@@ -370,8 +370,8 @@ function isNodeTopologySelected() {
 }
 function showOpsRequestOptions() {
   if (isKubedb({ storeGet }) === true) return true
-  watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name')
-  watchDependency('discriminator#/autoscalingType')
+  // watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name')
+  // watchDependency('discriminator#/autoscalingType')
   return (
     !!getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name') &&
     !!getValue(discriminator, '/autoscalingType')

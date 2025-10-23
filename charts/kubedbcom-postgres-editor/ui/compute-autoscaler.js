@@ -126,7 +126,7 @@ function onNamespaceChange() {
 }
 
 async function getPostgresDbs() {
-  watchDependency('model#/resources/autoscalingKubedbComPostgresAutoscaler/metadata/namespace')
+  // watchDependency('model#/resources/autoscalingKubedbComPostgresAutoscaler/metadata/namespace')
   const namespace = getValue(
     model,
     '/resources/autoscalingKubedbComPostgresAutoscaler/metadata/namespace',
@@ -224,11 +224,11 @@ function setAllowedMachine(minmax) {
 }
 
 async function getMachines(minmax) {
-  watchDependency('discriminator#/topologyMachines')
+  // watchDependency('discriminator#/topologyMachines')
   const depends = minmax === 'min' ? 'max' : 'min'
   const dependantPath = `/allowedMachine-${depends}`
 
-  watchDependency(`discriminator#${dependantPath}`)
+  // watchDependency(`discriminator#${dependantPath}`)
   const dependantMachine = getValue(discriminator, dependantPath)
 
   const nodeGroups = getValue(discriminator, '/topologyMachines') || []
@@ -318,9 +318,9 @@ async function fetchNodeTopology() {
 }
 
 function isNodeTopologySelected() {
-  watchDependency(
-    'model#/resources/autoscalingKubedbComPostgresAutoscaler/spec/compute/nodeTopology/name',
-  )
+  // watchDependency(
+  //   'model#/resources/autoscalingKubedbComPostgresAutoscaler/spec/compute/nodeTopology/name',
+  // )
   const nodeTopologyName =
     getValue(
       model,
@@ -331,8 +331,8 @@ function isNodeTopologySelected() {
 
 function showOpsRequestOptions() {
   if (isKubedb() === true) return true
-  watchDependency('model#/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name')
-  watchDependency('discriminator#/autoscalingType')
+  // watchDependency('model#/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name')
+  // watchDependency('discriminator#/autoscalingType')
   return (
     !!getValue(model, '/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name') &&
     !!getValue(discriminator, '/autoscalingType')

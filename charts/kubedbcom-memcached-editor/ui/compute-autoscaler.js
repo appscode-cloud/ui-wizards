@@ -124,7 +124,7 @@ function onNamespaceChange() {
   }
 }
 async function getDbs() {
-  watchDependency('model#/resources/autoscalingKubedbComMemcachedAutoscaler/metadata/namespace')
+  // watchDependency('model#/resources/autoscalingKubedbComMemcachedAutoscaler/metadata/namespace')
   const namespace = getValue(
     model,
     '/resources/autoscalingKubedbComMemcachedAutoscaler/metadata/namespace',
@@ -217,11 +217,11 @@ function setAllowedMachine(minmax) {
 }
 
 async function getMachines(minmax) {
-  watchDependency('discriminator#/topologyMachines')
+  // watchDependency('discriminator#/topologyMachines')
   const depends = minmax === 'min' ? 'max' : 'min'
   const dependantPath = `/allowedMachine-${depends}`
 
-  watchDependency(`discriminator#${dependantPath}`)
+  // watchDependency(`discriminator#${dependantPath}`)
   const dependantMachine = getValue(discriminator, dependantPath)
 
   const nodeGroups = getValue(discriminator, '/topologyMachines') || []
@@ -292,9 +292,9 @@ function hasNoAnnotations() {
 }
 
 function isNodeTopologySelected() {
-  watchDependency(
-    'model#/resources/autoscalingKubedbComMemcachedAutoscaler/spec/compute/nodeTopology/name',
-  )
+  // watchDependency(
+  //   'model#/resources/autoscalingKubedbComMemcachedAutoscaler/spec/compute/nodeTopology/name',
+  // )
   const nodeTopologyName =
     getValue(
       model,
@@ -343,8 +343,8 @@ async function fetchNodeTopology() {
 
 function showOpsRequestOptions() {
   if (isKubedb() === true) return true
-  watchDependency('model#/resources/autoscalingKubedbComMemcachedAutoscaler/spec/databaseRef/name')
-  watchDependency('discriminator#/autoscalingType')
+  // watchDependency('model#/resources/autoscalingKubedbComMemcachedAutoscaler/spec/databaseRef/name')
+  // watchDependency('discriminator#/autoscalingType')
   return (
     !!getValue(model, '/resources/autoscalingKubedbComMemcachedAutoscaler/spec/databaseRef/name') &&
     !!getValue(discriminator, '/autoscalingType')
