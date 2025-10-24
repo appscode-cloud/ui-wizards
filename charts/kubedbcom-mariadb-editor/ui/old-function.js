@@ -2720,13 +2720,13 @@ export const useFunc = (model) => {
   }
 
   function showOpsRequestOptions() {
+    console.log('showOpsRequestOptions')
     if (isKubedb() === true) return true
     // watchDependency('model#/spec/databaseRef/name')
     return (
       !!getValue(model, '/spec/databaseRef/name') && !!getValue(discriminator, '/autoscalingType')
     )
   }
-
 
   async function getDbDetails() {
     const owner = storeGet('/route/params/user') || ''
@@ -2935,7 +2935,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function handleUnit(path, type = 'bound') {
+  function handleUnit({ commit, model, getValue }, path, type = 'bound') {
     let value = getValue(model, `/resources/${path}`)
     if (type === 'scalingRules') {
       const updatedValue = []
