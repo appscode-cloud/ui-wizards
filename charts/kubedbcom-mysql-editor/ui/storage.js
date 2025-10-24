@@ -7,7 +7,7 @@ function showOpsRequestOptions() {
   // watchDependency('model#/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name')
   // watchDependency('discriminator#/autoscalingType')
   return (
-    !!getValue(model, '/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name') &&
+    !!getValue(model, '/resources/autoscalingKubedbComMySQLAutoscaler/spec/databaseRef/name') &&
     !!getValue(discriminator, '/autoscalingType')
   )
 }
