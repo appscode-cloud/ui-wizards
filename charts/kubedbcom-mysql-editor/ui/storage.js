@@ -1,3 +1,27 @@
+function isKubedb() {
+  return !!storeGet('/route/params/actions')
+}
+
+function showOpsRequestOptions() {
+  if (isKubedb() === true) return true
+  // watchDependency('model#/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name')
+  // watchDependency('discriminator#/autoscalingType')
+  return (
+    !!getValue(model, '/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name') &&
+    !!getValue(discriminator, '/autoscalingType')
+  )
+}
+
+function setTrigger(path) {
+  let value = getValue(model, `/resources/${path}`)
+  if (value) return value
+  return 'On'
+}
+
+function setApplyToIfReady() {
+  return 'IfReady'
+}
+
 function handleUnit(path, type = 'bound') {
   let value = getValue(model, `/resources/${path}`)
   if (type === 'scalingRules') {
