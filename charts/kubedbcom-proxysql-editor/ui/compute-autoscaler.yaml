@@ -1,0 +1,217 @@
+  - type: single-step-form
+    id: compute-autoscaler
+    loader: getDbDetails
+    elements:
+      - type: block-layout
+        if:
+         type: function
+         name: isConsole
+        elements:
+          - type: input
+            label: Name
+            schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/metadata/properties/name
+          - type: select
+            label: Select Namespace
+            loader: getNamespaces
+            if:
+              type: function
+              name: isRancherManaged
+            schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/metadata/properties/namespace
+            watcher:
+              func: onNamespaceChange
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/metadata/properties/namespace
+          - type: select
+            label: Select Db
+            loader: getDbs
+            validation:
+              type: required
+            refresh: true
+            schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/databaseRef/properties/name
+            watcher:
+              func: initMetadata
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/databaseRef/properties/name
+
+      - type: radio
+        if:
+          type: function
+          name: isConsole
+        label: Select Type
+        validation:
+          type: required
+        schema: temp/properties/autoscalingType
+        watcher:
+          func: initMetadata
+          paths:
+            - temp/properties/autoscalingType
+        options:
+          - text: Compute
+            value: compute
+            description: Scale your CPU Memory based on resource usage
+          - text: Storage
+            value: storage
+            description: Expand your database size based on volume usage
+
+      - type: block-layout
+        showLabels: false
+        loader: fetchTopologyMachines
+        elements:
+          # proxysql mode
+          - type: block-layout
+            label: ProxySQL
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql
+            elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComProxySQLAutoscaler/spec/compute/proxysql/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/podLifeTimeThreshold
+              - type: input
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/resourceDiffPercentage
+              - type: block-layout
+                showLabels: false
+                elements:
+                  - type: select
+                    label: Min Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|min
+                    loader:
+                      name: getMachines|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-max
+                    watcher:
+                      func: onMachineChange|proxysql
+                      paths:
+                        - temp/properties/allowedMachine-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/minAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/minAllowed/properties/memory
+                  - type: select
+                    label: Max Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|max
+                    loader:
+                      name: getMachines|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-min
+                    watcher:
+                      func: onMachineChange|proxysql
+                      paths:
+                        - temp/properties/allowedMachine-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/maxAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/maxAllowed/properties/memory
+              - type: select
+                label: Controlled Resources
+                loader: setControlledResources|proxysql
+                multiple: true
+                schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/controlledResources
+
+          - type: block-layout
+            label: Node Topology
+            if:
+              type: function
+              name: hasNoAnnotations
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+            elements:
+              - type: select
+                label: Select Node Topology
+                loader: fetchNodeTopology
+                schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+              - type: input
+                label: ScaleUp Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected
+                schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+              - type: input
+                label: ScaleDown Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected
+                schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+
+          - type: block-layout
+            label: Ops Request Options
+            showLabels: true
+            if:
+              type: function
+              name: showOpsRequestOptions
+            # schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/opsRequestOptions
+            elements:
+              - type: select
+                label: Timeout
+                schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+                options:
+                - text: 5 minutes
+                  value: 5m0s
+                - text: 10 minutes
+                  value: 10m0s
+                - text: 30 minutes
+                  value: 30m0s
+                - text: 1 hour
+                  value: 1h0m
+                - text: 2 hours
+                  value: 2h0m
+                - text: 5 hours
+                  value: 5h0m
+                - text: 10 hours
+                  value: 10h0m
+              - type: radio
+                label: Apply
+                init:
+                  type: func
+                  value: setApplyToIfReady
+                options:
+                  - text: IfReady (OpsRequest will be applied if database is ready)
+                    value: IfReady
+                  - text: Always (OpsRequest will always be applied)
+                    value: Always
+                schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply

@@ -1,0 +1,308 @@
+- form:
+    discriminator:
+      dbDetails:
+        default: false
+        type: boolean
+    elements:
+    - computed: getDbDetails
+      if: returnFalse
+      type: input
+    - elements:
+      - computed: getDbDetails
+        if: returnFalse
+        type: input
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        hasGroup: isRancherManaged
+        label:
+          text: SelectNamespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getDbs
+        label:
+          text: Select Db
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: Select Type
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - elements:
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/expansionMode
+          type: select
+        - label:
+            text: UsageThreshold (%)
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/usageThreshold
+          type: input
+        - addFormLabel: ScalingRules
+          element:
+            elements:
+            - label:
+                text: AppliesUpto (In Storage units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold (In %, Or In Storage Units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/scalingRules|scalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: AppliesUpto (In Storage units)
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold (In %, Or In Storage Units)
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/upperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/upperBound
+          type: input
+        if: dbTypeEqualsTo|topology
+        label:
+          text: Standalone
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/expansionMode
+          type: select
+        - label:
+            text: UsageThreshold (%)
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/usageThreshold
+          type: input
+        - addFormLabel: ScalingRules
+          element:
+            elements:
+            - label:
+                text: AppliesUpto (In Storage units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold (In %, Or In Storage Units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/scalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: AppliesUpto (In Storage units)
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold (In %, Or In Storage Units)
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/upperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/upperBound
+          type: input
+        if: dbTypeEqualsTo|topology
+        label:
+          text: Standalone
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
+          type: select
+        - label:
+            text: UsageThreshold (%)
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
+          type: input
+        - addFormLabel: ScalingRules
+          element:
+            elements:
+            - label:
+                text: AppliesUpto (In Storage units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold (In %, Or In Storage Units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/scalingRules|scalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: AppliesUpto (In Storage units)
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold (In %, Or In Storage Units)
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/upperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+          type: input
+        if: dbTypeEqualsTo|standalone
+        label:
+          text: Standalone
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: Ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: storage-autoscaler
+  title: steps.10.label
