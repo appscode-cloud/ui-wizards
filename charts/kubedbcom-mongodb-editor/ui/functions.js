@@ -176,15 +176,21 @@ export const useFunc = (model) => {
     return getValue(model, path)
   }
 
-  function isEqualToValueFromType(index, value) {
+  function isEqualToValueFromType(value) {
     //watchDependency('discriminator#/valueFromType')
-    // const valueFrom = getValue(discriminator, '/valueFromType')
-    const valueFrom = getValue(
-      model,
-      '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env',
-    )
-    return valueFrom[index].valueFromType === value
+    const valueFrom = getValue(discriminator, '/valueFromType')
+    return valueFrom === value
   }
+
+  // function isEqualToValueFromType(index, value) {
+  //   //watchDependency('discriminator#/valueFromType')
+  //   // const valueFrom = getValue(discriminator, '/valueFromType')
+  //   const valueFrom = getValue(
+  //     model,
+  //     '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env',
+  //   )
+  //   return valueFrom[index].valueFromType === value
+  // }
 
   function isNotShardModeSelected({ model, getValue, watchDependency }) {
     watchDependency('model#/resources/kubedbComMongoDB/spec')
@@ -2277,13 +2283,15 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecretKeys(index) {
+  async function getSecretKeys() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
-    const env = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env')
-    const secretName = env[index]?.items?.valueFrom?.secretKeyRef?.name || ''
+    const secretName = getValue(
+      model,
+      '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env/items/valueFrom/secretKeyRef/name',
+    )
 
     // watchDependency('data#/namespace')
     // watchDependency('rootModel#/valueFrom/secretKeyRef/name')
@@ -2835,13 +2843,15 @@ export const useFunc = (model) => {
       )
     }
   }
-  async function getConfigMapKeys(index) {
+  async function getConfigMapKeys() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
-    const env = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env')
-    const configMapName = env[index]?.items?.valueFrom?.configMapKeyRef?.name || ''
+    const configMapName = getValue(
+      model,
+      '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env/items/valueFrom/configMapKeyRef/name',
+    )
 
     // watchDependency('data#/namespace')
     // watchDependency('rootModel#/valueFrom/configMapKeyRef/name')
@@ -2920,7 +2930,8 @@ export const useFunc = (model) => {
   function setMetadata() {
     const dbname = storeGet('/route/params/name') || ''
     const namespace = storeGet('/route/query/namespace') || ''
-    if (mode === 'standalone-step') {
+    const isKube = !!storeGet('/route/params/actions')
+    if (isKube) {
       commit('wizard/model$update', {
         path: '/metadata/release/name',
         value: dbname,
@@ -3028,10 +3039,9 @@ export const useFunc = (model) => {
     const pathConstructedForKubedb =
       pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
 
-    // TODO:- mode must be defined
-    const mode = 'standalone-step' // must removed
+    const isKube = !!storeGet('/route/params/actions')
 
-    if (mode === 'standalone-step') return pathConstructedForKubedb
+    if (isKube) return pathConstructedForKubedb
     else
       return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
   }
