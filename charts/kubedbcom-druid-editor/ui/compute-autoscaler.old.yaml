@@ -1,0 +1,511 @@
+- form:
+    discriminator:
+      dbDetails:
+        default: false
+        type: boolean
+    elements:
+    - computed: getDbDetails
+      if: returnFalse
+      type: input
+    - elements:
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        hasGroup: isRancherManaged
+        label:
+          text: SelectNamespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getDbs
+        label:
+          text: SelectDb
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: SelectType
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - elements:
+      - discriminator:
+          topologyMachines:
+            default: []
+            type: array
+        elements:
+        - fetch: fetchTopologyMachines
+          if: returnFalse
+          schema:
+            $ref: discriminator#/topologyMachines
+          type: input
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/brokers/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-brokers-max:
+                type: string
+              allowedMachine-brokers-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|brokers|min
+              disableUnselect: true
+              fetch: getMachines|brokers|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|brokers
+              schema:
+                $ref: discriminator#/properties/allowedMachine-brokers-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed
+              show_label: true
+              type: single-step-form
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Max Allowed
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|brokers|max
+              disableUnselect: true
+              fetch: getMachines|brokers|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|brokers
+              schema:
+                $ref: discriminator#/properties/allowedMachine-brokers-max
+              type: select
+            type: single-step-form
+          - fetch: setControlledResources|brokers
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/controlledResources
+            type: multiselect
+          label:
+            text: Brokers
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/coordinators/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-coordinators-max:
+                type: string
+              allowedMachine-coordinators-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|coordinators|min
+              disableUnselect: true
+              fetch: getMachines|coordinators|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|coordinators
+              schema:
+                $ref: discriminator#/properties/allowedMachine-coordinators-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed
+              show_label: true
+              type: single-step-form
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Max Allowed
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|coordinators|max
+              disableUnselect: true
+              fetch: getMachines|coordinators|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|coordinators
+              schema:
+                $ref: discriminator#/properties/allowedMachine-coordinators-max
+              type: select
+            type: single-step-form
+          - fetch: setControlledResources|coordinators
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/controlledResources
+            type: multiselect
+          label:
+            text: Coordinators
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/historicals/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-historicals-max:
+                type: string
+              allowedMachine-historicals-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|historicals|min
+              disableUnselect: true
+              fetch: getMachines|historicals|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|historicals
+              schema:
+                $ref: discriminator#/properties/allowedMachine-historicals-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|historicals|max
+              disableUnselect: true
+              fetch: getMachines|historicals|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|historicals
+              schema:
+                $ref: discriminator#/properties/allowedMachine-historicals-max
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Max Allowed
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed
+              show_label: true
+              type: single-step-form
+            type: single-step-form
+          - fetch: setControlledResources|historicals
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/controlledResources
+            type: multiselect
+          label:
+            text: Historicals
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/middleManagers/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-middleManagers-max:
+                type: string
+              allowedMachine-middleManagers-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|middleManagers|min
+              disableUnselect: true
+              fetch: getMachines|middleManagers|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|middleManagers
+              schema:
+                $ref: discriminator#/properties/allowedMachine-middleManagers-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|middleManagers|max
+              disableUnselect: true
+              fetch: getMachines|middleManagers|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|middleManagers
+              schema:
+                $ref: discriminator#/properties/allowedMachine-middleManagers-max
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Max Allowed
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed
+              show_label: true
+              type: single-step-form
+            type: single-step-form
+          - fetch: setControlledResources|middleManagers
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/controlledResources
+            type: multiselect
+          label:
+            text: MiddleManagers
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers
+          show_label: true
+          type: single-step-form
+        type: single-step-form
+      - elements:
+        - fetch: fetchNodeTopology
+          label:
+            text: Select NodeTopology
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+          type: select
+        - if: isNodeTopologySelected
+          label:
+            text: ScaleUp Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+          type: input
+        - if: isNodeTopologySelected
+          label:
+            text: ScaleDown Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+          type: input
+        if: hasNoAnnotations
+        label:
+          text: NodeTopology
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: OpsRequest Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: compute-autoscaler
+  title: steps.0.label

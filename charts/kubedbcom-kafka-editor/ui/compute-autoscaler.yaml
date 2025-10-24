@@ -1,0 +1,427 @@
+  - type: single-step-form
+    id: compute-autoscaler
+    loader: getDbDetails
+    elements:
+      - type: block-layout
+        if:
+         type: function
+         name: isConsole
+        elements:
+          - type: input
+            label: Name
+            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/metadata/properties/name
+          - type: select
+            label: Select Namespace
+            loader: getNamespaces
+            if:
+              type: function
+              name: isRancherManaged
+            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/metadata/properties/namespace
+            watcher:
+              func: onNamespaceChange
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/metadata/properties/namespace
+          - type: select
+            label: Select Db
+            loader: getDbs
+            validation:
+              type: required
+            refresh: true
+            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/databaseRef/properties/name
+            watcher:
+              func: initMetadata
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/databaseRef/properties/name
+
+      - type: radio
+        if:
+          type: function
+          name: isConsole
+        label: Select Type
+        validation:
+          type: required
+        schema: temp/properties/autoscalingType
+        watcher:
+          func: initMetadata
+          paths:
+            - temp/properties/autoscalingType
+        options:
+          - text: Compute
+            value: compute
+            description: Scale your CPU Memory based on resource usage
+          - text: Storage
+            value: storage
+            description: Expand your database size based on volume usage
+
+      - type: block-layout
+        showLabels: false
+        loader: fetchTopologyMachines
+        elements:
+          # topology mode - broker and controller
+          - type: block-layout
+            label: Topology
+            if:
+              type: function
+              name: dbTypeEqualsTo|topology
+            showLabels: false
+            # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute
+            elements:
+              # Broker section
+              - type: block-layout
+                label: Broker
+                showLabels: true
+                # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker
+                elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/broker/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/podLifeTimeThreshold
+                  - type: input
+                    label: Resource Diff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/resourceDiffPercentage
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                      - type: select
+                        label: Min Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-broker-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|broker|min
+                        loader:
+                          name: getMachines|broker|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-broker-max
+                        watcher:
+                          func: onMachineChange|broker
+                          paths:
+                            - temp/properties/allowedMachine-broker-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/minAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/minAllowed/properties/memory
+                      - type: select
+                        label: Max Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-broker-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|broker|max
+                        loader:
+                          name: getMachines|broker|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-broker-min
+                        watcher:
+                          func: onMachineChange|broker
+                          paths:
+                            - temp/properties/allowedMachine-broker-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/maxAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|broker
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/controlledResources
+
+              # Controller section
+              - type: block-layout
+                label: Controller
+                showLabels: true
+                # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller
+                elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/controller/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/podLifeTimeThreshold
+                  - type: input
+                    label: Resource Diff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/resourceDiffPercentage
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                      - type: select
+                        label: Min Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-controller-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|controller|min
+                        loader:
+                          name: getMachines|controller|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-controller-max
+                        watcher:
+                          func: onMachineChange|controller
+                          paths:
+                            - temp/properties/allowedMachine-controller-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/minAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/minAllowed/properties/memory
+                      - type: select
+                        label: Max Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-controller-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|controller|max
+                        loader:
+                          name: getMachines|controller|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-controller-min
+                        watcher:
+                          func: onMachineChange|controller
+                          paths:
+                            - temp/properties/allowedMachine-controller-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/maxAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|controller
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/controlledResources
+
+          # combined mode - node only
+          - type: block-layout
+            label: Combined
+            if:
+              type: function
+              name: dbTypeEqualsTo|combined
+            showLabels: false
+            # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute
+            elements:
+              # Node section
+              - type: block-layout
+                label: Node
+                showLabels: true
+                # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node
+                elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/node/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+                  - type: input
+                    label: Resource Diff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                      - type: select
+                        label: Min Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-node-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|node|min
+                        loader:
+                          name: getMachines|node|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-node-max
+                        watcher:
+                          func: onMachineChange|node
+                          paths:
+                            - temp/properties/allowedMachine-node-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+                      - type: select
+                        label: Max Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-node-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|node|max
+                        loader:
+                          name: getMachines|node|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-node-min
+                        watcher:
+                          func: onMachineChange|node
+                          paths:
+                            - temp/properties/allowedMachine-node-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|node
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+
+          - type: block-layout
+            label: Node Topology
+            if:
+              type: function
+              name: hasNoAnnotations
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+            elements:
+              - type: select
+                label: Select Node Topology
+                loader: fetchNodeTopology
+                schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+              - type: input
+                label: ScaleUp Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected
+                schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+              - type: input
+                label: ScaleDown Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected
+                schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+
+          - type: block-layout
+            label: Ops Request Options
+            showLabels: true
+            if:
+              type: function
+              name: showOpsRequestOptions
+            # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions
+            elements:
+              - type: select
+                label: Timeout
+                schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+                options:
+                - text: 5 minutes
+                  value: 5m0s
+                - text: 10 minutes
+                  value: 10m0s
+                - text: 30 minutes
+                  value: 30m0s
+                - text: 1 hour
+                  value: 1h0m
+                - text: 2 hours
+                  value: 2h0m
+                - text: 5 hours
+                  value: 5h0m
+                - text: 10 hours
+                  value: 10h0m
+              - type: radio
+                label: Apply
+                init:
+                  type: func
+                  value: setApplyToIfReady
+                options:
+                  - text: IfReady (OpsRequest will be applied if database is ready)
+                    value: IfReady
+                  - text: Always (OpsRequest will always be applied)
+                    value: Always
+                schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
