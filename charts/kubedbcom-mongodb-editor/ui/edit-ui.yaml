@@ -297,20 +297,21 @@ step:
                 # isSubsection: true
             - type: block-layout
               label: Metadata
-              showLabels: false 
+              showLabels: false
               elements: 
-                - type: array-object-form
+                  #remove: should be array-object-form after fixes
+                - type: block-layout
                   label: New Environment Variable
-                  schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+                  showLabels: true
+                  hideBlock: true
+                  # schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
                   elements:
                   - type: input
                     label: Name
-                    schema: items/properties/name
-                    validation:
-                      type: required
+                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/name
                   - type: radio
                     label: Value From
-                    schema: valueFromType
+                    schema: temp/properties/valueFromType
                     init: 
                       type: func 
                       value: setValueFrom
@@ -324,10 +325,10 @@ step:
                     watcher:
                       func: onValueFromChange
                       paths:
-                        - valueFromType
+                        - temp/properties/valueFromType
                   - type: input 
                     label: Value 
-                    schema: value
+                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/value
                     if:
                       name: isEqualToValueFromType|input
                       type: function
@@ -336,7 +337,7 @@ step:
                       type: function
                       name: isEqualToValueFromType|configMap
                     label: ConfigMap Name
-                    schema: items/properties/valueFrom/properties/configMapKeyRef/properties/name
+                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/name
                     loader:
                       name: resourceNames|core|v1|configmaps
                       watchPaths:
@@ -344,19 +345,19 @@ step:
                     # allowUserDefinedOption: true
                   - type: select
                     label: ConfigMap Key
-                    schema: items/properties/valueFrom/properties/configMapKeyRef/properties/key
+                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/key
                     if:
                       type: function
                       name: isEqualToValueFromType|configMap
                     loader:
                       name: getConfigMapKeys
                       watchPaths:
-                        - valueFrom/configMapKeyRef/name
+                        - schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/configMapKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
                   - type: select
                     label: Secret Name
-                    schema: items/properties/valueFrom/properties/secretKeyRef/properties/name
+                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/name
                     if:
                       type: function
                       name: isEqualToValueFromType|secret
@@ -367,14 +368,14 @@ step:
                     # allowUserDefinedOption: true
                   - type: select
                     label: Secret Key
-                    schema: items/properties/valueFrom/properties/secretKeyRef/properties/key
+                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/key
                     if:
                       type: function
                       name: isEqualToValueFromType|secret
                     loader:
                       name: getSecretKeys
                       watchPaths:
-                        - valueFrom/secretKeyRef/name
+                        - schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/secretKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
 
