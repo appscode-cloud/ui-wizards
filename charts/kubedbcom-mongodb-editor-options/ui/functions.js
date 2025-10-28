@@ -566,7 +566,7 @@ export const useFunc = (model) => {
       ? `/spec/${type}/podResources/resources/requests/${resource}`
       : `/spec/podResources/resources/requests/${resource}`
     const val = getValue(model, modelPath)
-    commitPath = type
+    const commitPath = type
       ? `/spec/${type}/podResources/resources/limits/${resource}`
       : `/spec/podResources/resources/limits/${resource}`
     commit('wizard/model$update', {
@@ -1282,7 +1282,7 @@ export const useFunc = (model) => {
     return features.length
   }
 
-  async function checkHostnameOrIP() {
+  function checkHostnameOrIP() {
     const tls = getValue(model, '/spec/admin/tls/default')
     const expose = getValue(model, '/spec/admin/expose/default')
     if (tls && expose) {

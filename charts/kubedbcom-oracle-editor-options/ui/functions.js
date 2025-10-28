@@ -1211,7 +1211,7 @@ function setRequests({ getValue, model, commit }, resource, type) {
     ? `/spec/${type}/podResources/resources/requests/${resource}`
     : `/spec/podResources/resources/requests/${resource}`
   const val = getValue(model, modelPath)
-  commitPath = type
+  const commitPath = type
     ? `/spec/${type}/podResources/resources/limits/${resource}`
     : `/spec/podResources/resources/limits/${resource}`
   commit('wizard/model$update', {
@@ -1326,7 +1326,7 @@ function showArchiver({ watchDependency, getValue, model, commit }) {
   return checkIfFeatureOn({ getValue, model }, 'archiver')
 }
 
-async function checkHostnameOrIP({ commit, model, getValue }) {
+function checkHostnameOrIP({ commit, model, getValue }) {
   const tls = getValue(model, '/spec/admin/tls/default')
   const expose = getValue(model, '/spec/admin/expose/default')
   if (tls && expose) {
