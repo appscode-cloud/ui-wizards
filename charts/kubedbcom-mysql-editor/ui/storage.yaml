@@ -1,0 +1,98 @@
+type: multi-step-form
+step:
+  - type: single-step-form
+    id: storage-autoscaler
+    elements:
+    - type: block-layout
+      showLabels: false
+      elements:
+        - type: block-layout
+          showLabels: false
+          elements:
+            - type: block-layout
+              label: Mysql
+              showLabels: true
+              elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComMySQLAutoscaler/spec/storage/mysql/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/expansionMode
+                - type: input
+                  label: UsageThreshold (%)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/usageThreshold
+                - type: input
+                  label: Scaling Threshold
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingThreshold
+                - type: array-object-form
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingRules
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMySQLAutoscaler/spec/storage/mysql/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingRules
+                  elements:
+                    - type: input
+                      label: AppliesUpto (In Storage units)
+                      schema: appliesUpto
+                    - type: input
+                      label: Threshold (In %, Or In Storage Units)
+                      schema: threshold
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMySQLAutoscaler/spec/storage/mysql/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/upperBound
+        - type: block-layout
+          label: OpsRequest Options
+          showLabels: true
+          if:
+            type: function
+            name: showOpsRequestOptions
+          elements:
+            - type: select
+              label: Timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+              options:
+                - text: 5 minutes
+                  value: 5m0s
+                - text: 10 minutes
+                  value: 10m0s
+                - text: 30 minutes
+                  value: 30m0s
+                - text: 1 hour
+                  value: 1h0m
+                - text: 2 hours
+                  value: 2h0m
+                - text: 5 hours
+                  value: 5h0m
+                - text: 10 hours
+                  value: 10h0m
+            - type: radio
+              label: Apply
+              init:
+                type: func
+                value: setApplyToIfReady
+              options:
+                - text: IfReady (OpsRequest will be applied if database is ready)
+                  value: IfReady
+                - text: Always (OpsRequest will always be applied)
+                  value: Always
+              schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+  
