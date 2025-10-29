@@ -10,20 +10,20 @@ step:
           showLabels: false
           elements:
             - type: block-layout
-              label: Postgres
+              label: Standalone
               showLabels: true
               elements:
                 - type: select
                   label: Trigger
                   init:
                     type: func
-                    value: setTrigger|autoscalingKubedbComPostgresAutoscaler/spec/storage/postgres/trigger
+                    value: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/trigger
                   options:
                     - text: 'On'
                       value: 'On'
                     - text: 'Off'
                       value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/postgres/properties/trigger
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
                 - type: select
                   label: Expansion Mode
                   options:
@@ -31,20 +31,17 @@ step:
                       value: Online
                     - text: Offline
                       value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/postgres/properties/expansionMode
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
                 - type: input
                   label: UsageThreshold (%)
-                  schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/postgres/properties/usageThreshold
-                - type: input
-                  label: Scaling Threshold
-                  schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/postgres/properties/scalingThreshold
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
                 - type: array-object-form
                   label: Scaling Rules
-                  schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/postgres/properties/scalingRules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
                   watcher:
-                    func: handleUnit|autoscalingKubedbComPostgresAutoscaler/spec/storage/postgres/scalingRules|scalingRules
+                    func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/scalingRules|scalingRules
                     paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/postgres/properties/scalingRules
+                      - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
                   elements:
                     - type: input
                       label: AppliesUpto (In Storage units)
@@ -54,11 +51,11 @@ step:
                       schema: threshold
                 - type: input
                   label: UpperBound
-                  schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/postgres/properties/upperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
                   watcher:
-                    func: handleUnit|autoscalingKubedbComPostgresAutoscaler/spec/storage/postgres/upperBound
+                    func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/upperBound
                     paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/postgres/properties/upperBound
+                      - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
         - type: block-layout
           label: OpsRequest Options
           showLabels: true
@@ -68,7 +65,7 @@ step:
           elements:
             - type: select
               label: Timeout
-              schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
               options:
                 - text: 5 minutes
                   value: 5m0s
@@ -94,5 +91,5 @@ step:
                   value: IfReady
                 - text: Always (OpsRequest will always be applied)
                   value: Always
-              schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+              schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
   

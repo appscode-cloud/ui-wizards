@@ -1,33 +1,29 @@
-  function isKubedb() {
-    console.log('isKubedb')
+function isKubedb() {
     return !!storeGet('/route/params/actions')
   }
 
   function showOpsRequestOptions() {
-    console.log('showOpsRequestOptions')
     if (isKubedb() === true) return true
+
     return (
       !!getValue(
         model,
-        '/resources/autoscalingKubedbComDruidAutoscaler/spec/databaseRef/name',
+        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
       ) && !!getValue(discriminator, '/autoscalingType')
     )
   }
 
   function setTrigger(path) {
-    console.log('setTrigger')
     let value = getValue(model, `/resources/${path}`)
     if (value) return value
     return 'On'
   }
 
   function setApplyToIfReady() {
-    console.log('setApplyToIfReady')
     return 'IfReady'
   }
 
   function handleUnit(path, type = 'bound') {
-    console.log('handleUnit')
     let value = getValue(model, `/resources/${path}`)
     if (type === 'scalingRules') {
       const updatedValue = []
