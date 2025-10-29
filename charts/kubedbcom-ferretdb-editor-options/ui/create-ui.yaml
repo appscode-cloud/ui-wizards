@@ -1,20 +1,12 @@
 step:
 - type: single-step-form
   elements:
-  - init:
-     type: func
-     value: initBundle
-    if:
-      type: function
-      name: returnFalse
-    label: ''
-    type: label-element
   - disableUnselect: true
     loader: getAdminOptions|databases/FerretDB/versions
     if:
       type: function
       name: isToggleOn|databases/FerretDB/versions
-    label: labels.database.version
+    label: Database version
     schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/default
     type: select
   - init:
@@ -24,7 +16,7 @@ step:
     if:
       type: function
       name: isToggleOn|databases/FerretDB/mode
-    label:  labels.database.mode
+    label: Database mode
     watcher:
       func: onModeChange
       paths:
@@ -32,7 +24,7 @@ step:
     schema: schema/properties/spec/properties/mode
     type: radio
   - elements:
-    - label: labels.replicaset.number
+    - label: Replicaset number
       schema: schema/properties/spec/properties/server/properties/primary/properties/replicas
       type: input
     - init:
@@ -45,11 +37,10 @@ step:
     - init:
         type: func
         value: setLimits|cpu|server/primary
-      disable: isMachineNotCustom
       if:
         type: function
         name: isMachineCustom|server/primary
-      label: labels.cpu
+      label: cpu
       watcher:
         func: setRequests|cpu|server/primary
         paths:
@@ -59,11 +50,10 @@ step:
     - init:
         type: func
         value: setLimits|memory|server/primary
-      disable: isMachineNotCustom
       if:
         type: function
         name: isMachineCustom|server/primary
-      label: labels.memory
+      label: memory
       watcher:
         func: setRequests|memory|server/primary
         paths:
@@ -74,7 +64,7 @@ step:
     showLabels: true
     type: block-layout
   - elements:
-    - label: labels.replicaset.number
+    - label: Replicaset number
       schema: schema/properties/spec/properties/server/properties/secondary/properties/replicas
       type: input
     - init:
@@ -87,11 +77,10 @@ step:
     - init:
         type: func
         value: setLimits|cpu|server/secondary
-      disable: isMachineNotCustom
       if:
         type: function
         name: isMachineCustom|server/secondary
-      label: labels.cpu
+      label: cpu
       watcher:
         func: setRequests|cpu|server/secondary
         paths:
@@ -101,11 +90,10 @@ step:
     - init:
         type: func
         value: setLimits|memory|server/secondary
-      disable: isMachineNotCustom
       if:
         type: function
         name: isMachineCustom|server/secondary
-      label: labels.memory
+      label: memory
       watcher:
         func: setRequests|memory|server/secondary
         paths:
@@ -119,14 +107,14 @@ step:
     showLabels: true
     type: block-layout
   - loader: getAdminOptions|storageClasses
-    label: labels.storage.class
+    label: Storage class
     schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
     type: select
   - elements:
-    - label: labels.storage.size
+    - label: Storage size
       schema: schema/properties/spec/properties/backend/properties/persistence/properties/size
       type: input
-    - label: labels.replicaset.number
+    - label: Replicaset number
       schema: schema/properties/spec/properties/backend/properties/replicas
       type: input
     - init:
@@ -139,11 +127,10 @@ step:
     - init:
         type: func
         value: setLimits|cpu|backend
-      disable: isMachineNotCustom
       if:
         type: function
         name: isMachineCustom|backend
-      label: labels.cpu
+      label: cpu
       watcher:
         func: setRequests|cpu|backend
         paths:
@@ -153,11 +140,10 @@ step:
     - init:
         type: func
         value: setLimits|memory|backend
-      disable: isMachineNotCustom
       if:
         type: function
         name: isMachineCustom|backend
-      label: labels.memory
+      label: memory
       watcher:
         func: setRequests|memory|backend
         paths:
@@ -171,13 +157,14 @@ step:
     elements:
     - elements:
       - type: object-item
-        label: labels.labels.label
+        label: Labels
         schema: schema/properties/spec/properties/labels/additionalProperties
       - type: object-item
-        label: labels.annotations.label
+        label: Annotations
         schema: schema/properties/spec/properties/annotations/additionalProperties
       label: Labels & Annotations
       showLabels: true
+      hideBlock: true
       type: block-layout
     - init:
         type: func
@@ -186,23 +173,23 @@ step:
       if:
         type: function
         name: isToggleOn|deletionPolicy
-      label: labels.deletionPolicy
+      label: Deletion Policy
       watcher:
         func: setStorageClass
         paths:
           - schema/properties/spec/properties/deletionPolicy
       options:
       - description: options.deletionPolicy.delete.description
-        text: options.deletionPolicy.delete.label
+        text: Delete
         value: Delete
       - description: options.deletionPolicy.halt.description
-        text: options.deletionPolicy.halt.label
+        text: Halt
         value: Halt
       - description: options.deletionPolicy.wipeOut.description
-        text: options.deletionPolicy.wipeOut.label
+        text: WipeOut
         value: WipeOut
       - description: options.deletionPolicy.doNotTerminate.description
-        text: options.deletionPolicy.doNotTerminate.label
+        text: DoNotTerminate
         value: DoNotTerminate
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
@@ -236,7 +223,7 @@ step:
     - if:
         type: function
         name: showReferSecret
-      label: labels.password
+      label: password
       schema: schema/properties/spec/properties/authSecret/properties/password
       type: input
     - init:
@@ -262,7 +249,7 @@ step:
     - if:
         type: function
         name: isToggleOn|deployment
-      label: labels.deployment.name
+      label: Deployment name
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -276,7 +263,7 @@ step:
         type: function
         name: isToggleOn|clusterTier
       isHorizontal: true
-      label: labels.clusterTier
+      label: Cluster Tier
       options:
       - text: General Purpose
         value: GeneralPurpose
@@ -291,7 +278,7 @@ step:
       if:
         type: function
         name: isToggleOn|clusterTier/placement
-      label: labels.placement
+      label: Placement
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
@@ -299,7 +286,7 @@ step:
       if:
         type: function
         name: isToggleOn|clusterTier/nodeTopology
-      label: labels.nodeTopology
+      label: Node Topology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     label: Advanced Configuration
@@ -311,7 +298,7 @@ step:
       - init:
           type: func
           value: setMonitoring
-        label: labels.enable_monitoring
+        label: Enable Monitoring?
         watcher:
           func: updateAlertValue
           paths:
@@ -340,7 +327,7 @@ step:
         if:
           type: function
           name: showIssuer
-        label: labels.clusterIssuers
+        label: Cluster Issuers
         validation:
           type: required
         schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default

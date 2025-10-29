@@ -1,20 +1,12 @@
 step:
 - type: single-step-form
   elements:
-  - init:
-     type: func
-     value: initBundle
-    if:
-      type: function
-      name: returnFalse
-    label: ''
-    type: label-element
   - disableUnselect: true
     loader: getAdminOptions|databases/Kafka/versions
     if:
       type: function
       name: isToggleOn|databases/Kafka/versions
-    label: labels.database.version
+    label: Database version
     schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/default
     type: select
   - init:
@@ -24,11 +16,11 @@ step:
     if:
       type: function
       name: isToggleOn|databases/Kafka/mode
-    label:  labels.database.mode
+    label: Database mode
     schema: schema/properties/spec/properties/mode
     type: radio
   - elements:
-    - label: labels.replicaset.number
+    - label: Replicaset number
       schema: schema/properties/spec/properties/replicas
       type: input
     if:
@@ -37,13 +29,13 @@ step:
     type: block-layout
   - elements:
     - elements:
-      - label: labels.controller_nodes
+      - label: Controller nodes
         type: label-element
-      - label: labels.replicaset.number
+      - label: Replicaset number
         schema: schema/properties/spec/properties/topology/properties/controller/properties/replicas
         type: input
       - elements:
-        - label: labels.storage.size
+        - label: Storage size
           schema: schema/properties/spec/properties/topology/properties/controller/properties/persistence/properties/size
           type: input
         type: block-layout
@@ -58,11 +50,10 @@ step:
         - init:
             type: func
             value: setLimits|cpu|topology/controller
-          disable: isMachineNotCustom|topology/controller
           if:
             type: function
             name: isMachineCustom|topology/controller
-          label: labels.cpu
+          label: cpu
           watcher:
             func: setRequests|cpu|topology/controller
             paths:
@@ -72,29 +63,28 @@ step:
         - init:
             type: func
             value: setLimits|memory|topology/controller
-          disable: isMachineNotCustom|topology/controller
           if:
             type: function
             name: isMachineCustom|topology/controller
-          label: labels.memory
+          label: memory
           watcher:
             func: setRequests|memory|topology/controller
             paths:
               - schema/properties/spec/properties/topology/properties/controller/properties/podResources/properties/resources/properties/requests/properties/memory
           schema: schema/properties/spec/properties/topology/properties/controller/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
-        label: labels.machine_profile
+        label: Machine_profile
         showLabels: true
         type: block-layout
       type: block-layout
     - elements:
-      - label: labels.broker_nodes
+      - label: Broker nodes
         type: label-element
-      - label: labels.replicaset.number
+      - label: Replicaset number
         schema: schema/properties/spec/properties/topology/properties/broker/properties/replicas
         type: input
       - elements:
-        - label: labels.storage.size
+        - label: Storage size
           schema: schema/properties/spec/properties/topology/properties/broker/properties/persistence/properties/size
           type: input
         type: block-layout
@@ -109,11 +99,10 @@ step:
         - init:
             type: func
             value: setLimits|cpu|topology/broker
-          disable: isMachineNotCustom|topology/broker
           if:
             type: function
             name: isMachineCustom|topology/broker
-          label: labels.cpu
+          label: cpu
           watcher:
             func: setRequests|cpu|topology/broker
             paths:
@@ -123,18 +112,17 @@ step:
         - init:
             type: func
             value: setLimits|memory|topology/broker
-          disable: isMachineNotCustom|topology/broker
           if:
             type: function
             name: isMachineCustom|topology/broker
-          label: labels.memory
+          label: memory
           watcher:
             func: setRequests|memory|topology/broker
             paths:
               - schema/properties/spec/properties/topology/properties/broker/properties/podResources/properties/resources/properties/requests/properties/memory
           schema: schema/properties/spec/properties/topology/properties/broker/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
-        label: labels.machine_profile
+        label: Machine_profile
         showLabels: true
         type: block-layout
       type: block-layout
@@ -153,11 +141,10 @@ step:
     - init:
         type: func
         value: setLimits|cpu
-      disable: isMachineNotCustom
       if:
         type: function
         name: isMachineCustom
-      label: labels.cpu
+      label: cpu
       watcher:
         func: setRequests|cpu
         paths:
@@ -167,11 +154,10 @@ step:
     - init:
         type: func
         value: setLimits|memory
-      disable: isMachineNotCustom
       if:
         type: function
         name: isMachineCustom
-      label: labels.memory
+      label: memory
       watcher:
         func: setRequests|memory
         paths:
@@ -181,30 +167,31 @@ step:
     if:
       type: function
       name: notEqualToDatabaseMode|Topology
-    label: labels.machine_profile
+    label: Machine_profile
     showLabels: true
     type: block-layout
   - loader: getAdminOptions|storageClasses
-    label: labels.storage.class
+    label: Storage class
     schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
     type: select
   - if:
       type: function
       name: isEqualToModelPathValue|Combined|/spec/mode
-    label: labels.storage.size
+    label: Storage size
     schema: schema/properties/spec/properties/persistence/properties/size
     type: input
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
       - type: object-item
-        label: labels.labels.label
+        label: Labels
         schema: schema/properties/spec/properties/labels/additionalProperties
       - type: object-item
-        label: labels.annotations.label
+        label: Annotations
         schema: schema/properties/spec/properties/annotations/additionalProperties
       label: Labels & Annotations
       showLabels: true
+      hideBlock: true
       type: block-layout
     - init:
         type: func
@@ -213,17 +200,17 @@ step:
       if:
         type: function
         name: isToggleOn|deletionPolicy
-      label: labels.deletionPolicy
+      label: Deletion Policy
       watcher:
         func: setStorageClass
         paths:
           - schema/properties/spec/properties/deletionPolicy
       options:
       - description: options.deletionPolicy.wipeOut.description
-        text: options.deletionPolicy.wipeOut.label
+        text: WipeOut
         value: WipeOut
       - description: options.deletionPolicy.doNotTerminate.description
-        text: options.deletionPolicy.doNotTerminate.label
+        text: DoNotTerminate
         value: DoNotTerminate
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
@@ -257,7 +244,7 @@ step:
     - if:
         type: function
         name: showReferSecret
-      label: labels.password
+      label: password
       schema: schema/properties/spec/properties/authSecret/properties/password
       type: input
     - init:
@@ -283,7 +270,7 @@ step:
     - if:
         type: function
         name: isToggleOn|deployment
-      label: labels.deployment.name
+      label: Deployment name
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -297,7 +284,7 @@ step:
         type: function
         name: isToggleOn|clusterTier
       isHorizontal: true
-      label: labels.clusterTier
+      label: Cluster Tier
       options:
       - text: General Purpose
         value: GeneralPurpose
@@ -312,7 +299,7 @@ step:
       if:
         type: function
         name: isToggleOn|clusterTier/placement
-      label: labels.placement
+      label: Placement
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
@@ -320,7 +307,7 @@ step:
       if:
         type: function
         name: isToggleOn|clusterTier/nodeTopology
-      label: labels.nodeTopology
+      label: Node Topology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     label: Advanced Configuration
@@ -332,7 +319,7 @@ step:
       - init:
           type: func
           value: setMonitoring
-        label: labels.enable_monitoring
+        label: Enable Monitoring?
         watcher:
           func: updateAlertValue
           paths:
@@ -343,7 +330,7 @@ step:
         if:
           type: function
           name: showAlerts
-        label: labels.alert.options
+        label: Alert Options
         options:
         - text: None
           value: none
@@ -370,7 +357,7 @@ step:
         if:
           type: function
           name: showIssuer
-        label: labels.clusterIssuers
+        label: Cluster Issuers
         validation:
           type: required
         schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
