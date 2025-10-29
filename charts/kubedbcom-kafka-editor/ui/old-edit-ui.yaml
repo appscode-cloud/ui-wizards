@@ -1,0 +1,1311 @@
+steps:
+- form:
+    elements:
+    - disabled: true
+      label:
+        text: labels.database.name
+      onChange: onNameChange
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - disabled: true
+      fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      onChange: onNamespaceChange
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - disableUnselect: true
+      disabled: true
+      fetch: getKafkaVersions|catalog.kubedb.com|v1alpha1|kafkaversions
+      label:
+        text: labels.database.version
+      onChange: onVersionChange
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/version
+      type: select
+    - individualItemDisabilityCheck: disableLableChecker
+      isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      onChange: onLabelChange
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/metadata/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/metadata/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/metadata/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/metadata/properties/annotations/additionalProperties
+        type: input
+    - hasDescription: true
+      label:
+        text: labels.deletionPolicy
+      options:
+      - description: options.deletionPolicy.wipeOut.description
+        text: options.deletionPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.deletionPolicy.doNotTerminate.description
+        text: options.deletionPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/deletionPolicy
+      type: radio
+    - disabled: true
+      label:
+        text: labels.disable_security_question
+      onChange: onDisableSecurityChange
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/disableSecurity
+      type: switch
+    - elements:
+      - label:
+          text: labels.database.admin_secret
+        type: label-element
+      - disabled: true
+        label:
+          text: labels.secret
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/authSecret/properties/name
+        type: input
+      if: isSecurityEnabled
+      type: single-step-form
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+- form:
+    discriminator:
+      activeDatabaseMode:
+        type: string
+    elements:
+    - label:
+        text: labels.to_update_disabled_section
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/route/params/cluster
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          group:
+            $ref: model#/metadata/resource/group
+          kind:
+            $ref: model#/metadata/resource/kind
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/route/params/user
+          resource:
+            $ref: model#/metadata/resource/name
+          version:
+            $ref: model#/metadata/resource/version
+        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
+    - computed: setDatabaseMode
+      disabled: true
+      hasDescription: true
+      label:
+        text: labels.database.mode
+      onChange: deleteDatabaseModePath
+      options:
+      - description: options.database.mode.Combined.description
+        text: options.database.mode.Combined.label
+        value: Combined
+      - description: options.database.mode.Dedicated.description
+        text: options.database.mode.Dedicated.label
+        value: Dedicated
+      schema:
+        $ref: discriminator#/activeDatabaseMode
+      type: radio
+    - elements:
+      - disabled: true
+        label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/replicas
+        type: input
+      - disabled: true
+        label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+        type: input
+      - disabled: true
+        label:
+          text: labels.storage.class
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/storage/properties/storageClassName
+        type: input
+      if: isEqualToDatabaseMode|Combined
+      type: single-step-form
+    - element:
+        elements:
+        - disabled: true
+          label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn/properties/replicas
+          type: input
+        - disabled: true
+          elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources
+            type: single-step-form
+          - label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/storageClassName
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn/properties/storage
+          type: single-step-form
+        - disabled: true
+          label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn/properties/suffix
+          type: input
+        - disabled: true
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn/properties/resources
+          type: resource-input-form
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn
+        show_label: true
+        type: single-step-form
+      if: isEqualToDatabaseMode|Dedicated
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology
+      type: array-input-form
+    type: single-step-form
+  id: topology
+  title: steps.1.label
+- form:
+    elements:
+    - if: showTlsRecommendation
+      label:
+        text: labels.tls_recommended_text
+      type: label-element
+    - label:
+        text: labels.to_update_tls
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/route/params/cluster
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          group:
+            $ref: model#/metadata/resource/group
+          kind:
+            $ref: model#/metadata/resource/kind
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/route/params/user
+          resource:
+            $ref: model#/metadata/resource/name
+          version:
+            $ref: model#/metadata/resource/version
+        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
+    - disabled: true
+      label:
+        text: labels.enable_tls
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/enableSSL
+      type: switch
+    - disabled: true
+      elements:
+      - elements:
+        - computed: setApiGroupEdit
+          disabled: true
+          label:
+            text: labels.api_group
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+          type: input
+        - label:
+            text: labels.kind
+          options:
+          - text: Issuer
+            value: Issuer
+          - text: ClusterIssuer
+            value: ClusterIssuer
+          required: returnFalse
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/tls/properties/issuerRef/properties/kind
+          type: select
+        - allowUserDefinedOption: true
+          fetch: getIssuerRefsName
+          label:
+            text: labels.name
+          required: returnFalse
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/tls/properties/issuerRef/properties/name
+          type: select
+        label:
+          text: labels.issuer_ref
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/tls/properties/issuerRef
+        type: single-step-form
+      - alias: reusable_certificates
+        chart:
+          name: uibytebuildersdev-component-certificates
+          version: v0.25.0
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/tls/properties/certificates
+        type: reusable-element
+      if: showTlsConfigureSection
+      type: single-step-form
+    type: single-step-form
+  id: tls
+  if: isSecurityEnabled
+  title: steps.2.label
+- form:
+    discriminator:
+      enableMonitoring:
+        default: true
+        type: boolean
+    elements:
+    - label:
+        text: labels.to_update_exporter_resources
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        function: getOpsRequestUrl|VerticalScaling
+    - computed: isValueExistInModel|/resources/kubedbComKafka/spec/monitor
+      label:
+        text: labels.enable_monitoring
+      onChange: onEnableMonitoringChange
+      schema:
+        $ref: discriminator#/enableMonitoring
+      type: switch
+    - discriminator:
+        customizeExporter:
+          default: true
+          type: boolean
+      elements:
+      - hasDescription: true
+        label:
+          text: labels.agent
+        onChange: onAgentChange
+        options:
+        - description: options.agent.prometheus_operator.description
+          text: options.agent.prometheus_operator.label
+          value: prometheus.io/operator
+        - description: options.agent.prometheus.description
+          text: options.agent.prometheus.label
+          value: prometheus.io
+        - description: options.agent.prometheus_builtin.description
+          text: options.agent.prometheus_builtin.label
+          value: prometheus.io/builtin
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/agent
+        type: radio
+      - elements:
+        - label:
+            text: labels.scrapping_interval
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+          type: input
+        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComKafka/spec/monitor/agent
+        label:
+          text: labels.service_monitor_configuration
+        show_label: true
+        type: single-step-form
+      - elements:
+        - elements:
+          - addFormLabel: labels.endpoint
+            element:
+              elements:
+              - label:
+                  text: labels.honor_labels
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/honorLabels
+                type: switch
+              - label:
+                  text: labels.interval
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/interval
+                type: input
+              - label:
+                  text: labels.path
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/path
+                type: input
+              - label:
+                  text: labels.port
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/port
+                type: input
+              type: single-step-form
+            label:
+              text: labels.endpoints
+            schema:
+              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.honor_labels
+              path: honorLabels
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.interval
+              path: interval
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.path
+              path: path
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.port
+              path: port
+              type: value
+              typeOfValue: string
+            type: single-step-form-array
+          - elements:
+            - fetch: getResources|core|v1|namespaces
+              label:
+                text: labels.matchNames
+              schema:
+                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
+              type: multiselect
+            if: returnFalse
+            schema:
+              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector
+            type: single-step-form
+          - elements:
+            - isArray: true
+              keys:
+                label:
+                  text: labels.labels.key
+              label:
+                text: labels.labels.label
+              schema:
+                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.labels.value
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels/additionalProperties
+                type: input
+            if: returnFalse
+            schema:
+              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
+            type: single-step-form
+          schema:
+            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
+          type: single-step-form
+        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComKafka/spec/monitor/agent
+        label:
+          text: labels.service_monitor
+        schema:
+          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor
+        show_label: true
+        type: single-step-form
+      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComKafka/spec/monitor/agent
+        individualItemDisabilityCheck: disableLableChecker
+        isArray: true
+        keys:
+          label:
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.labels.value
+          schema:
+            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
+          type: input
+      - label:
+          text: labels.exporter_configuration
+        type: label-element
+      - label:
+          text: labels.customize_exporter
+        onChange: onCustomizeExporterChange
+        schema:
+          $ref: discriminator#/customizeExporter
+        type: switch
+      - elements:
+        - if: returnFalse
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+          type: resource-input-form
+        - label:
+            text: labels.security_context
+          type: label-element
+        - label:
+            text: labels.run_as_user
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+          type: input
+        - customClass: mb-0
+          label:
+            text: labels.run_as_group
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+          type: input
+        - label:
+            text: labels.port
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+          type: input
+        - element:
+            label:
+              isSubsection: true
+              text: labels.args
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+            type: input
+          label:
+            text: labels.args
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+          type: list-input-form
+        - alias: reusable_env
+          chart:
+            name: uibytebuildersdev-component-env
+            version: v0.25.0
+          dataContext:
+            namespace:
+              $ref: schema#/properties/metadata/properties/release/properties/namespace
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+          type: reusable-element
+        if: showCustomizeExporterSection
+        type: single-step-form
+      if: showMonitoringSection
+      type: single-step-form
+    type: single-step-form
+  id: monitoring
+  title: steps.3.label
+- form:
+    elements:
+    - alias: reusable_service_templates
+      chart:
+        name: uibytebuildersdev-component-service-templates
+        version: v0.25.0
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/serviceTemplates
+      type: reusable-element
+    type: single-step-form
+  id: networking
+  title: steps.4.label
+- form:
+    elements:
+    - alias: pod_template_standalone
+      chart:
+        name: uibytebuildersdev-component-pod-template
+        version: v0.25.0
+      dataContext:
+        namespace:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        topology:
+          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology
+      functionCallbacks:
+        isEditWizard:
+          $ref: functions#/returnTrue
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/podTemplate
+      type: reusable-element
+    type: single-step-form
+  id: pod-template
+  title: steps.5.label
+- form:
+    discriminator:
+      dbDetails:
+        default: false
+        type: boolean
+    elements:
+    - computed: getDbDetails
+      if: returnFalse
+      type: input
+    - elements:
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        hasGroup: isRancherManaged
+        label:
+          text: SelectNamespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getDbs
+        label:
+          text: Select Db
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: Select Type
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - discriminator:
+        topologyMachines:
+          default: []
+          type: array
+      elements:
+      - fetch: fetchTopologyMachines
+        if: returnFalse
+        schema:
+          $ref: discriminator#/topologyMachines
+        type: input
+      - elements:
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/broker/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-broker-max:
+                type: string
+              allowedMachine-broker-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|broker|min
+              disableUnselect: true
+              fetch: getMachines|broker|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|broker
+              schema:
+                $ref: discriminator#/properties/allowedMachine-broker-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|broker|max
+              disableUnselect: true
+              fetch: getMachines|broker|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|broker
+              schema:
+                $ref: discriminator#/properties/allowedMachine-broker-max
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Max Allowed
+              show_label: true
+              type: single-step-form
+            type: single-step-form
+          - fetch: setControlledResources|broker
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/controlledResources
+            type: multiselect
+          label:
+            text: Broker
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/controller/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-controller-max:
+                type: string
+              allowedMachine-controller-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|controller|min
+              disableUnselect: true
+              fetch: getMachines|controller|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|controller
+              schema:
+                $ref: discriminator#/properties/allowedMachine-controller-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: Memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|controller|max
+              disableUnselect: true
+              fetch: getMachines|controller|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|controller
+              schema:
+                $ref: discriminator#/properties/allowedMachine-controller-max
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: Memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Max Allowed
+              show_label: true
+              type: single-step-form
+            type: single-step-form
+          - fetch: setControlledResources|controller
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/controlledResources
+            type: multiselect
+          label:
+            text: Controller
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller
+          show_label: true
+          type: single-step-form
+        if: dbTypeEqualsTo|topology
+        label:
+          text: Topology
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute
+        type: single-step-form
+      - elements:
+        - elements:
+          - computed: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/node/trigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+            type: input
+          - discriminator:
+              allowedMachine-node-max:
+                type: string
+              allowedMachine-node-min:
+                type: string
+            elements:
+            - computed: setAllowedMachine|node|min
+              disableUnselect: true
+              fetch: getMachines|node|min
+              if: hasAnnotations
+              label:
+                text: Min Allowed Profile
+              onChange: onMachineChange|node
+              schema:
+                $ref: discriminator#/properties/allowedMachine-node-min
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: Memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Min Allowed
+              show_label: true
+              type: single-step-form
+            - computed: setAllowedMachine|node|max
+              disableUnselect: true
+              fetch: getMachines|node|max
+              if: hasAnnotations
+              label:
+                text: Max Allowed Profile
+              onChange: onMachineChange|node
+              schema:
+                $ref: discriminator#/properties/allowedMachine-node-max
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: Memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+                type: input
+              if: hasNoAnnotations
+              label:
+                text: Max Allowed
+              show_label: true
+              type: single-step-form
+            type: single-step-form
+          - fetch: setControlledResources|node
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+            type: multiselect
+          label:
+            text: Node
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node
+          show_label: true
+          type: single-step-form
+        if: dbTypeEqualsTo|combined
+        label:
+          text: Combined
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute
+        type: single-step-form
+      - elements:
+        - fetch: fetchNodeTopology
+          label:
+            text: Select Node Topology
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+          type: select
+        - if: isNodeTopologySelected
+          label:
+            text: ScaleUp Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+          type: input
+        - if: isNodeTopologySelected
+          label:
+            text: ScaleDown Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+          type: input
+        if: hasNoAnnotations
+        label:
+          text: NodeTopology
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: Ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: compute-autoscaler
+  title: steps.6.label
+- form:
+    discriminator:
+      dbDetails:
+        default: false
+        type: boolean
+    elements:
+    - computed: getDbDetails
+      if: returnFalse
+      type: input
+    - elements:
+      - computed: getDbDetails
+        if: returnFalse
+        type: input
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        hasGroup: isRancherManaged
+        label:
+          text: SelectNamespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getDbs
+        label:
+          text: Select Db
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: Select Type
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - elements:
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/storage/broker/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/expansionMode
+          type: select
+        - label:
+            text: UsageThreshold (%)
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/usageThreshold
+          type: input
+        - addFormLabel: ScalingRules
+          element:
+            elements:
+            - label:
+                text: AppliesUpto (In Storage units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold (In %, Or In Storage Units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/broker/scalingRules|scalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: AppliesUpto (In Storage units)
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold (In %, Or In Storage Units)
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/broker/upperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/upperBound
+          type: input
+        if: dbTypeEqualsTo|topology
+        label:
+          text: Broker
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker
+        show_label: true
+        type: single-step-form
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/storage/controller/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/expansionMode
+          type: select
+        - label:
+            text: UsageThreshold (%)
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/usageThreshold
+          type: input
+        - addFormLabel: ScalingRules
+          element:
+            elements:
+            - label:
+                text: AppliesUpto (In Storage units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold (In %, Or In Storage Units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/controller/scalingRules|scalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: AppliesUpto (In Storage units)
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold (In %, Or In Storage Units)
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/controller/upperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/upperBound
+          type: input
+        if: dbTypeEqualsTo|topology
+        label:
+          text: Controller
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller
+        show_label: true
+        type: single-step-form
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/storage/node/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
+          type: select
+        - label:
+            text: Usage Threshold (%)
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
+          type: input
+        - addFormLabel: Scaling Rules
+          element:
+            elements:
+            - label:
+                text: AppliesUpto (In Storage units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold (In %, Or In Storage Units)
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: Scaling Rules
+          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/node/scalingRules|scalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: AppliesUpto (In Storage units)
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold (In %, Or In Storage Units)
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/node/upperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+          type: input
+        if: dbTypeEqualsTo|combined
+        label:
+          text: Node
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: Ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: storage-autoscaler
+  title: steps.7.label
+- form:
+    discriminator:
+      binding:
+        default: false
+        type: boolean
+    elements:
+    - computed: isBindingAlreadyOn
+      label:
+        text: Expose Database
+      onChange: addOrRemoveBinding
+      schema:
+        $ref: discriminator#/properties/binding
+      type: switch
+    type: single-step-form
+  id: binding
+  title: Gateway Binding
+type: multi-step-form
