@@ -317,43 +317,7 @@ const modeDetails = {
   },
 }
 
-async function getAppBindings(type) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null, namespace: null },
-        spec: { type: null },
-      },
-    },
-  }
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
-      queryParams,
-    )
-    const resources = (resp && resp.data && resp.data.items) || []
 
-    const fileredResources = resources
-      .filter((item) => item.spec?.type === `kubedb.com/${type}`)
-      .map((item) => {
-        const name = item.metadata?.name || ''
-        const namespace = item.metadata?.namespace || ''
-        return {
-          text: `${namespace}/${name}`,
-          value: {
-            name: name,
-            namespace: namespace,
-          },
-        }
-      })
-    return fileredResources
-  } catch (e) {
-    console.log(e)
-    return []
-  }
-}
 
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
@@ -368,6 +332,44 @@ export const useFunc = (model) => {
   setDiscriminatorValue('referSecret', false)
   setDiscriminatorValue('backup', false)
   setDiscriminatorValue('monitoring', false)
+
+  async function getAppBindings(type) {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const queryParams = {
+      filter: {
+        items: {
+          metadata: { name: null, namespace: null },
+          spec: { type: null },
+        },
+      },
+    }
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+        queryParams,
+      )
+      const resources = (resp && resp.data && resp.data.items) || []
+  
+      const fileredResources = resources
+        .filter((item) => item.spec?.type === `kubedb.com/${type}`)
+        .map((item) => {
+          const name = item.metadata?.name || ''
+          const namespace = item.metadata?.namespace || ''
+          return {
+            text: `${namespace}/${name}`,
+            value: {
+              name: name,
+              namespace: namespace,
+            },
+          }
+        })
+      return fileredResources
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
 
   function onRefChange() {
     const ref = getValue(discriminator, '/pgRef') || {}
