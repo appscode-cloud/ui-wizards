@@ -303,15 +303,15 @@ const machineList = [
   'db.r.16xlarge',
   'db.r.24xlarge',
 ]
-let archiverMap = []
+
 const modeDetails = {
-  Standalone: {
-    description: 'Single node Oracle without high availability.',
-    text: 'Standalone',
+  Combined: {
+    description: 'Hazelcast cluster with all node-role enabled.',
+    text: 'Combined Cluster',
   },
-  DataGuard: {
-    description: 'Oracle Data Guard for high availability, data protection, and disaster recovery',
-    text: 'DataGuard',
+  Topology: {
+    description: 'Hazelcast cluster with dedicated node-role.',
+    text: 'Topology Cluster',
   },
 }
 
@@ -760,10 +760,10 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
     force: true,
   })
 
-  if (!getValue(model, `/spec/admin/databases/Oracle/mode/toggle`)) {
-    let defMode = getDefault({ getValue, model }, 'databases/Oracle/mode') || ''
+  if (!getValue(model, `/spec/admin/databases/Hazelcast/mode/toggle`)) {
+    let defMode = getDefault({ getValue, model }, 'databases/Hazelcast/mode') || ''
     if (defMode === '') {
-      const arr = getValue(model, '/spec/databases/Oracle/mode/available') || []
+      const arr = getValue(model, '/spec/databases/Hazelcast/mode/available') || []
       if (arr.length) defMode = arr[0]
     }
     commit('wizard/model$update', {
@@ -841,8 +841,15 @@ function fetchOptions({ model, getValue, commit }, type) {
   return returnArray
 }
 
-function getAdminOptions({ getValue, model, watchDependency, commit }, type) {
+let archiverMap = []
+let archiverCalled = false
+
+function getAdminOptions({ getValue, axios, model, watchDependency, storeGet, commit }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
+
+  if (type === 'storageClasses' && !archiverCalled) {
+    getArchiverName({ axios, storeGet })
+  }
 
   const options = getValue(model, `/spec/admin/${type}/available`) || []
 
@@ -1311,6 +1318,28 @@ function onReferSecretChange({ commit }) {
   })
 }
 
+function showArchiverAlert({ watchDependency, model, getValue, commit }) {
+  watchDependency('model#/spec/admin/storageClasses/default')
+
+  const mode = getValue(model, '/spec/mode')
+  if (mode === 'Standalone') return false
+
+  const stClass = getValue(model, '/spec/admin/storageClasses/default')
+  const found = archiverMap.find((item) => item.storageClass === stClass)
+  const show = !found?.annotation
+
+  // toggle archiver to false when storageClass annotation not found
+  if (show)
+    commit('wizard/model$update', {
+      path: '/spec/admin/archiver/enable/default',
+      value: false,
+      force: true,
+    })
+  else onArchiverChange({ model, getValue, commit })
+
+  return show
+}
+
 function showArchiver({ watchDependency, getValue, model, commit }) {
   watchDependency('model#/spec/mode')
   const dbmode = getValue(model, '/spec/mode')
@@ -1357,29 +1386,51 @@ function checkHostnameOrIP({ commit, model, getValue }) {
   }
 }
 
-function showArchiverAlert({ watchDependency, model, getValue, commit }) {
-  watchDependency('model#/spec/admin/storageClasses/default')
-
-  const mode = getValue(model, '/spec/mode')
-  if (mode === 'Standalone') return false
-
+function onArchiverChange({ model, getValue, commit }) {
+  const isArchiverOn = getValue(model, '/spec/admin/archiver/enable/default')
   const stClass = getValue(model, '/spec/admin/storageClasses/default')
   const found = archiverMap.find((item) => item.storageClass === stClass)
-  const show = !found?.annotation
 
-  // toggle archiver to false when storageClass annotation not found
-  if (show)
+  if (isArchiverOn && found?.annotation)
     commit('wizard/model$update', {
-      path: '/spec/admin/archiver/enable/default',
-      value: false,
+      path: '/spec/archiverName',
+      value: found.annotation,
       force: true,
     })
-  else onArchiverChange({ model, getValue, commit })
+  else
+    commit('wizard/model$update', {
+      path: '/spec/archiverName',
+      value: '',
+      force: true,
+    })
+}
 
-  return show
+async function getArchiverName({ axios, storeGet }) {
+  try {
+    archiverCalled = true
+    const params = storeGet('/route/params')
+    const { user, cluster, group, resource } = params
+    const url = `/clusters/${user}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
+    const resp = await axios.get(url)
+
+    resp.data?.items?.forEach((item) => {
+      const annotations = item.metadata?.annotations
+      const classname = item.metadata?.name
+      const annotationKeyToFind = `${resource}.${group}/archiver`
+      archiverMap.push({ storageClass: classname, annotation: annotations[annotationKeyToFind] })
+      return resp.data
+    })
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 return {
+  getArchiverName,
+  onArchiverChange,
+  checkHostnameOrIP,
+  showArchiver,
+  showArchiverAlert,
   showReferSecretSwitch,
   onReferSecretChange,
   getDefaultValue,
@@ -1400,6 +1451,7 @@ return {
   showAlerts,
   getNodeTopology,
   clearArbiterHidden,
+  returnFalse,
   showHidden,
   isConfigDatabaseOn,
   notEqualToDatabaseMode,
@@ -1441,7 +1493,4 @@ return {
   setBackup,
   showAdditionalSettings,
   getDefault,
-  showArchiver,
-  checkHostnameOrIP,
-  showArchiverAlert,
 }

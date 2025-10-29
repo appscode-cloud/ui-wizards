@@ -303,15 +303,15 @@ const machineList = [
   'db.r.16xlarge',
   'db.r.24xlarge',
 ]
-let archiverMap = []
+
 const modeDetails = {
   Standalone: {
-    description: 'Single node Oracle without high availability.',
+    description: 'Single node ClickHouse without high availability',
     text: 'Standalone',
   },
-  DataGuard: {
-    description: 'Oracle Data Guard for high availability, data protection, and disaster recovery',
-    text: 'DataGuard',
+  Topology: {
+    description: 'ClickHouse Topology cluster for high performance and high availability.',
+    text: 'Cluster Topology',
   },
 }
 
@@ -321,12 +321,36 @@ function isEqualToModelPathValue({ model, getValue, watchDependency }, value, mo
   return modelPathValue === value
 }
 
-function showAuthSecretField({ discriminator, getValue, watchDependency }) {
-  return !showAuthPasswordField({
-    discriminator,
-    getValue,
-    watchDependency,
-  })
+function showStorageSizeField({ model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  const validType = ['Standalone', 'Cluster']
+  return validType.includes(modelPathValue)
+}
+
+function showReplicaField({ model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  const validType = ['Replicaset']
+  return validType.includes(modelPathValue)
+}
+
+function onModeChange({ model, getValue, watchDependency, commit }) {
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  if (modelPathValue === 'Replicaset') {
+    commit('wizard/model$update', {
+      path: '/spec/replicas',
+      value: 3,
+      force: true,
+    })
+  } else {
+    commit('wizard/model$update', {
+      path: '/spec/replicas',
+      value: 1,
+      force: true,
+    })
+  }
 }
 
 async function getResources({ axios, storeGet }, group, version, resource) {
@@ -351,7 +375,7 @@ async function getResources({ axios, storeGet }, group, version, resource) {
   return resources
 }
 
-async function getMySqlVersions({ axios, storeGet }, group, version, resource) {
+async function getMongoDbVersions({ axios, storeGet }, group, version, resource) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -374,16 +398,16 @@ async function getMySqlVersions({ axios, storeGet }, group, version, resource) {
   const resources = (resp && resp.data && resp.data.items) || []
 
   // keep only non deprecated versions
-  const filteredMySqlVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
+  const filteredMongoDbVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
 
-  filteredMySqlVersions.map((item) => {
+  filteredMongoDbVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || ''
     const specVersion = (item.spec && item.spec.version) || ''
     item.text = `${name} (${specVersion})`
     item.value = name
     return true
   })
-  return filteredMySqlVersions
+  return filteredMongoDbVersions
 }
 
 function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
@@ -393,54 +417,6 @@ function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   } else if (createAuthSecret === false) {
     commit('wizard/model$delete', '/spec/authSecret/password')
   }
-}
-
-async function getSecrets({ storeGet, axios, model, getValue, watchDependency }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const namespace = getValue(model, '/metadata/release/namespace')
-  watchDependency('model#/metadata/release/namespace')
-
-  if (owner && cluster && namespace) {
-    try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-        {
-          params: {
-            filter: {
-              items: {
-                data: { username: null, password: null },
-                metadata: { name: null },
-                type: null,
-              },
-            },
-          },
-        },
-      )
-
-      const secrets = (resp && resp.data && resp.data.items) || []
-
-      const filteredSecrets = secrets.filter((item) => {
-        const validType = [
-          'kubernetes.io/service-account-token',
-          'Opaque',
-          'kubernetes.io/basic-auth',
-        ]
-        return validType.includes(item.type)
-      })
-
-      filteredSecrets.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        item.text = name
-        item.value = name
-        return true
-      })
-      return filteredSecrets
-    } catch (e) {
-      console.log(e)
-    }
-  }
-  return []
 }
 
 function getMachineListForOptions({ model, getValue }) {
@@ -473,6 +449,77 @@ function getMachineListForOptions({ model, getValue }) {
       .filter((val) => !!val)
   }
   return array
+}
+
+function setLimits({ model, getValue, commit, watchDependency }, resource, type) {
+  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
+  watchDependency(`model#${path}`)
+  const selectedMachine = getValue(model, path) || 'custom'
+  const reqCommitPath = type
+    ? `/spec/${type}/podResources/resources/limits/${resource}`
+    : `/spec/podResources/resources/limits/${resource}`
+  const comparePath = type
+    ? `/spec/${type}/podResources/resources/requests/${resource}`
+    : `/spec/podResources/resources/requests/${resource}`
+
+  const resourceValue = getValue(model, comparePath)
+  const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
+  const available = getValue(model, '/spec/admin/machineProfiles/available')
+
+  let cpu = '',
+    memory = ''
+  if (available.length && selectedMachine !== 'custom') {
+    const machineData = machinesFromPreset.find((val) => val.id === selectedMachine)
+    if (machineData) {
+      cpu = machineData.limits.cpu
+      memory = machineData.limits.memory
+    }
+  } else {
+    if (selectedMachine === 'custom') {
+      cpu = resourceValue
+      memory = resourceValue
+    } else {
+      cpu = machines[selectedMachine].resources.limits.cpu
+      memory = machines[selectedMachine].resources.limits.memory
+    }
+  }
+
+  if (resource === 'memory') {
+    commit('wizard/model$update', {
+      path: reqCommitPath,
+      value: memory,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: comparePath,
+      value: memory,
+      force: true,
+    })
+    return memory
+  } else {
+    commit('wizard/model$update', {
+      path: reqCommitPath,
+      value: cpu,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: comparePath,
+      value: cpu,
+      force: true,
+    })
+    return cpu
+  }
+}
+
+function setRequests({ getValue, model, commit }, resource) {
+  const modelPath = `/spec/podResources/resources/requests/${resource}`
+  const val = getValue(model, modelPath)
+  commitPath = `/spec/podResources/resources/limits/${resource}`
+  commit('wizard/model$update', {
+    path: commitPath,
+    value: val,
+    force: true,
+  })
 }
 
 function setMachineToCustom({ getValue, model }) {
@@ -523,19 +570,6 @@ function updateAgentValue({ commit }, val) {
     value: val ? 'warning' : 'none',
     force: true,
   })
-}
-
-function setReplicaNumber({ model, getValue }) {
-  const modelPathValue = getValue(model, '/spec/mode')
-  if (modelPathValue === 'Topology') {
-    return 2
-  } else return 1
-}
-function setRouterNumber({ model, getValue }) {
-  const modelPathValue = getValue(model, '/spec/mode')
-  if (modelPathValue === 'Topology') {
-    return 3
-  } else return 1
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
@@ -681,37 +715,6 @@ function setStorageClass({ model, getValue, commit, discriminator, watchDependen
   }
 }
 
-function showAlerts({ watchDependency, model, getValue, discriminator }) {
-  watchDependency('discriminator#/monitoring')
-  const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  return (
-    isMonitorEnabled && isToggleOn({ getValue, model, discriminator, watchDependency }, 'alert')
-  )
-}
-
-function onBackupSwitch({ discriminator, getValue, commit }) {
-  const isBackupOn = getValue(discriminator, '/backup')
-  commit('wizard/model$update', {
-    path: '/spec/backup/tool',
-    value: isBackupOn ? 'KubeStash' : '',
-    force: true,
-  })
-}
-
-function clearArbiterHidden({ commit }) {
-  commit('wizard/model$update', {
-    path: `/spec/arbiter/enabled`,
-    value: false,
-    force: true,
-  })
-
-  commit('wizard/model$update', {
-    path: `/spec/hidden/enabled`,
-    value: false,
-    force: true,
-  })
-}
-
 let placement = []
 let versions = []
 let storageClass = []
@@ -723,12 +726,10 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const namespace = getValue(model, '/metadata/release/namespace')
-
   let db = getValue(model, '/metadata/resource/kind')
   db = db.toLowerCase()
   let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
   const annotationUrl = `clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`
-
   try {
     const resp = await axios.get(url)
     features = resp.data.features || []
@@ -760,10 +761,10 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
     force: true,
   })
 
-  if (!getValue(model, `/spec/admin/databases/Oracle/mode/toggle`)) {
-    let defMode = getDefault({ getValue, model }, 'databases/Oracle/mode') || ''
+  if (!getValue(model, `/spec/admin/databases/ClickHouse/mode/toggle`)) {
+    let defMode = getDefault({ getValue, model }, 'databases/ClickHouse/mode') || ''
     if (defMode === '') {
-      const arr = getValue(model, '/spec/databases/Oracle/mode/available') || []
+      const arr = getValue(model, '/spec/databases/ClickHouse/mode/available') || []
       if (arr.length) defMode = arr[0]
     }
     commit('wizard/model$update', {
@@ -843,7 +844,6 @@ function fetchOptions({ model, getValue, commit }, type) {
 
 function getAdminOptions({ getValue, model, watchDependency, commit }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
-
   const options = getValue(model, `/spec/admin/${type}/available`) || []
 
   if (options.length === 0) {
@@ -879,6 +879,11 @@ function checkIfFeatureOn({ getValue, model }, type) {
   } else if (type === 'archiver') {
     return features.includes('backup') && backupVal === 'KubeStash' && val
   }
+}
+
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
 }
 
 function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
@@ -997,6 +1002,37 @@ function returnFalse() {
   return false
 }
 
+function showAlerts({ watchDependency, model, getValue, discriminator }) {
+  watchDependency('discriminator#/monitoring')
+  const isMonitorEnabled = getValue(discriminator, '/monitoring')
+  return (
+    isMonitorEnabled && isToggleOn({ getValue, model, watchDependency, discriminator }, 'alert')
+  )
+}
+
+function onBackupSwitch({ discriminator, getValue, commit }) {
+  const isBackupOn = getValue(discriminator, '/backup')
+  commit('wizard/model$update', {
+    path: '/spec/backup/tool',
+    value: isBackupOn ? 'KubeStash' : '',
+    force: true,
+  })
+}
+
+function clearArbiterHidden({ commit }) {
+  commit('wizard/model$update', {
+    path: `/spec/arbiter/enabled`,
+    value: false,
+    force: true,
+  })
+
+  commit('wizard/model$update', {
+    path: `/spec/hidden/enabled`,
+    value: false,
+    force: true,
+  })
+}
+
 function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
   watchDependency('discriminator#/configDatabase')
   return getValue(discriminator, '/configDatabase')
@@ -1046,6 +1082,7 @@ function showIssuer({ model, getValue, watchDependency, discriminator }) {
   )
   return isTlsEnabled && isIssuerToggleEnabled
 }
+
 function onAuthChange({ commit }) {
   commit('wizard/model$update', {
     path: '/spec/authSecret/name',
@@ -1082,6 +1119,7 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path) {
   watchDependency(`model#${fullpath}`)
   return modelPathValue !== 'custom' && !!modelPathValue
 }
+
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
@@ -1144,100 +1182,6 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
     value: agent,
     force: true,
   })
-}
-
-function setLimits({ model, getValue, commit, watchDependency }, resource, type) {
-  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  watchDependency(`model#${path}`)
-  const selectedMachine = getValue(model, path) || 'custom'
-  const reqCommitPath = type
-    ? `/spec/${type}/podResources/resources/limits/${resource}`
-    : `/spec/podResources/resources/limits/${resource}`
-  const comparePath = type
-    ? `/spec/${type}/podResources/resources/requests/${resource}`
-    : `/spec/podResources/resources/requests/${resource}`
-
-  const resourceValue = getValue(model, comparePath)
-  const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
-  const available = getValue(model, '/spec/admin/machineProfiles/available')
-
-  let cpu = '',
-    memory = ''
-  if (available.length && selectedMachine !== 'custom') {
-    const machineData = machinesFromPreset.find((val) => val.id === selectedMachine)
-    if (machineData) {
-      cpu = machineData.limits.cpu
-      memory = machineData.limits.memory
-    }
-  } else {
-    if (selectedMachine === 'custom') {
-      cpu = resourceValue
-      memory = resourceValue
-    } else {
-      cpu = machines[selectedMachine].resources.limits.cpu
-      memory = machines[selectedMachine].resources.limits.memory
-    }
-  }
-
-  if (resource === 'memory') {
-    commit('wizard/model$update', {
-      path: reqCommitPath,
-      value: memory,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: comparePath,
-      value: memory,
-      force: true,
-    })
-    return memory
-  } else {
-    commit('wizard/model$update', {
-      path: reqCommitPath,
-      value: cpu,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: comparePath,
-      value: cpu,
-      force: true,
-    })
-    return cpu
-  }
-}
-
-function setRequests({ getValue, model, commit }, resource, type) {
-  const modelPath = type
-    ? `/spec/${type}/podResources/resources/requests/${resource}`
-    : `/spec/podResources/resources/requests/${resource}`
-  const val = getValue(model, modelPath)
-  const commitPath = type
-    ? `/spec/${type}/podResources/resources/limits/${resource}`
-    : `/spec/podResources/resources/limits/${resource}`
-  commit('wizard/model$update', {
-    path: commitPath,
-    value: val,
-    force: true,
-  })
-}
-
-function toggleTls({ commit, model, getValue }) {
-  let modelPathValue = getValue(model, '/spec/mode')
-  commit('wizard/model$update', {
-    path: '/spec/admin/tls/default',
-    value: modelPathValue !== 'Standalone',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: '/spec/admin/tls/toggle',
-    value: modelPathValue !== 'Standalone',
-    force: true,
-  })
-}
-
-function showAdditionalSettings({ watchDependency }) {
-  watchDependency('discriminator#/bundleApiLoaded')
-  return features.length
 }
 
 function getDefault({ getValue, model }, type) {
@@ -1311,75 +1255,14 @@ function onReferSecretChange({ commit }) {
   })
 }
 
-function showArchiver({ watchDependency, getValue, model, commit }) {
-  watchDependency('model#/spec/mode')
-  const dbmode = getValue(model, '/spec/mode')
-
-  if (dbmode === 'Standalone') {
-    commit('wizard/model$update', {
-      path: '/spec/admin/archiver/enable/default',
-      value: false,
-      force: true,
-    })
-    return false
-  }
-  return checkIfFeatureOn({ getValue, model }, 'archiver')
-}
-
-function checkHostnameOrIP({ commit, model, getValue }) {
-  const tls = getValue(model, '/spec/admin/tls/default')
-  const expose = getValue(model, '/spec/admin/expose/default')
-  if (tls && expose) {
-    if (hostName) {
-      commit('wizard/model$update', {
-        path: '/spec/hostName',
-        value: hostName,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$update', {
-        path: '/spec/ip',
-        value: ip,
-        force: true,
-      })
-    }
-  } else {
-    commit('wizard/model$update', {
-      path: '/spec/hostName',
-      value: '',
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/spec/ip',
-      value: '',
-      force: true,
-    })
-  }
-}
-
-function showArchiverAlert({ watchDependency, model, getValue, commit }) {
-  watchDependency('model#/spec/admin/storageClasses/default')
-
-  const mode = getValue(model, '/spec/mode')
-  if (mode === 'Standalone') return false
-
-  const stClass = getValue(model, '/spec/admin/storageClasses/default')
-  const found = archiverMap.find((item) => item.storageClass === stClass)
-  const show = !found?.annotation
-
-  // toggle archiver to false when storageClass annotation not found
-  if (show)
-    commit('wizard/model$update', {
-      path: '/spec/admin/archiver/enable/default',
-      value: false,
-      force: true,
-    })
-  else onArchiverChange({ model, getValue, commit })
-
-  return show
+function isExternallyManaged({ getValue, model, watchDependency }, expected) {
+  watchDependency('model#/spec/topology/clickHouseKeeper/externallyManaged')
+  const val = getValue(model, 'spec/topology/clickHouseKeeper/externallyManaged')
+  return (val && expected === 'true') || (!val && expected === 'false')
 }
 
 return {
+  isExternallyManaged,
   showReferSecretSwitch,
   onReferSecretChange,
   getDefaultValue,
@@ -1388,11 +1271,9 @@ return {
   showReferSecret,
   getReferSecrets,
   isConfigAvailable,
-  initBundle,
+  showAdditionalSettings,
   returnFalse,
-  setLimits,
-  setRequests,
-  toggleTls,
+  initBundle,
   getNamespaces,
   updateAlertValue,
   getAdminOptions,
@@ -1417,12 +1298,13 @@ return {
   fetchJsons,
   showAuthPasswordField,
   isEqualToModelPathValue,
-  showAuthSecretField,
+  showStorageSizeField,
   getResources,
-  getMySqlVersions,
+  getMongoDbVersions,
   onCreateAuthSecretChange,
-  getSecrets,
   getMachineListForOptions,
+  setLimits,
+  setRequests,
   setMachineToCustom,
   updateAgentValue,
   getCreateNameSpaceUrl,
@@ -1436,12 +1318,8 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
-  setReplicaNumber,
-  setRouterNumber,
+  showReplicaField,
+  onModeChange,
   setBackup,
-  showAdditionalSettings,
   getDefault,
-  showArchiver,
-  checkHostnameOrIP,
-  showArchiverAlert,
 }
