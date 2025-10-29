@@ -332,7 +332,7 @@ export const useFunc = (model) => {
 
   function isEqualToModelPathValue(value, modelPath) {
     const modelPathValue = getValue(model, modelPath)
-    // watchDependency('model#' + modelPath)
+    // // watchDependency('model#' + modelPath)
     return modelPathValue === value
   }
 
@@ -410,7 +410,7 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/release/namespace')
-    // // // watchDependency('model#/metadata/release/namespace')
+    // // // // watchDependency('model#/metadata/release/namespace')
 
     if (owner && cluster && namespace) {
       try {
@@ -563,20 +563,20 @@ export const useFunc = (model) => {
   }
 
   const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
-    // // // watchDependency('model#/form/capi/provider')
+    // // // // watchDependency('model#/form/capi/provider')
     const val = getValue(model, '/form/capi/provider')
     if (val) return true
   }
 
   const showMultiselectZone = ({ model, getValue, watchDependency }) => {
-    // // // watchDependency('model#/form/capi/dedicated')
+    // // // // watchDependency('model#/form/capi/dedicated')
     const val = getValue(model, '/form/capi/provider')
 
     if (val === 'capz' && ifDedicated()) return true
   }
 
   const showSelectZone = ({ model, getValue, watchDependency }) => {
-    // // // watchDependency('model#/form/capi/dedicated')
+    // // // // watchDependency('model#/form/capi/dedicated')
     const val = getValue(model, '/form/capi/provider')
     if (val !== 'capz' && ifDedicated()) return true
   }
@@ -595,8 +595,8 @@ export const useFunc = (model) => {
   }
 
   const ifZones = ({ model, getValue, watchDependency }) => {
-    // // // watchDependency('model#/form/capi/zones')
-    // // // watchDependency('model#/form/capi/dedicated')
+    // // // // watchDependency('model#/form/capi/zones')
+    // // // // watchDependency('model#/form/capi/dedicated')
     const zones = getValue(model, 'form/capi/zones') || []
     const isDedicated = getValue(model, 'form/capi/dedicated')
     if (zones.length && isDedicated) return true
@@ -626,7 +626,7 @@ export const useFunc = (model) => {
   }
 
   async function getSKU() {
-    // // // watchDependency('model#/form/capi/zones')
+    // // // // watchDependency('model#/form/capi/zones')
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const zones = getValue(model, 'form/capi/zones') || []
@@ -691,7 +691,7 @@ export const useFunc = (model) => {
   }
 
   function showAlerts() {
-    // // // watchDependency('discriminator#/monitoring')
+    // // // // watchDependency('discriminator#/monitoring')
     const isMonitorEnabled = getValue(discriminator, '/monitoring')
     return (
       isMonitorEnabled && isToggleOn('alert')
@@ -851,7 +851,7 @@ export const useFunc = (model) => {
   }
 
   function getAdminOptions(type) {
-    // // // watchDependency('discriminator#/bundleApiLoaded')
+    // // // // watchDependency('discriminator#/bundleApiLoaded')
 
     const options = getValue(model, `/spec/admin/${type}/available`) || []
 
@@ -891,8 +891,8 @@ export const useFunc = (model) => {
   }
 
   function isToggleOn(type) {
-    // // // watchDependency('discriminator#/bundleApiLoaded')
-    // // // watchDependency('model#/spec/admin/deployment/default')
+    // // // // watchDependency('discriminator#/bundleApiLoaded')
+    // // // // watchDependency('model#/spec/admin/deployment/default')
     const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
     let deploymentType = getValue(model, `/spec/admin/deployment/default`)
     if (
@@ -928,8 +928,8 @@ export const useFunc = (model) => {
   }
 
   async function getNodeTopology() {
-    // // // watchDependency('model#/spec/admin/deployment/default')
-    // // // watchDependency('model#/spec/admin/clusterTier/default')
+    // // // // watchDependency('model#/spec/admin/deployment/default')
+    // // // // watchDependency('model#/spec/admin/clusterTier/default')
     const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
     const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
     let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
@@ -1007,33 +1007,33 @@ export const useFunc = (model) => {
   }
 
   function isConfigDatabaseOn() {
-    // // // watchDependency('discriminator#/configDatabase')
+    // // // // watchDependency('discriminator#/configDatabase')
     return getValue(discriminator, '/configDatabase')
   }
   function notEqualToDatabaseMode(mode) {
     const modelPathValue = getValue(model, '/spec/mode')
-    // // // watchDependency('model#/spec/mode')
+    // // // // watchDependency('model#/spec/mode')
     return modelPathValue && modelPathValue !== mode
   }
   function showStorageSizeField() {
     const modelPathValue = getValue(model, '/spec/mode')
-    // // // watchDependency('model#/spec/mode')
+    // // // // watchDependency('model#/spec/mode')
     const validType = []
     return !validType.includes(modelPathValue)
   }
   function showHidden() {
-    // // // watchDependency('model#/spec/hidden/enabled')
+    // // // // watchDependency('model#/spec/hidden/enabled')
     const isHiddenOn = getValue(model, '/spec/hidden/enabled') || ''
     const notStandalone = notEqualToDatabaseMode('Standalone')
     return isHiddenOn && notStandalone
   }
   function notEqualToDatabaseMode(mode) {
     const modelPathValue = getValue(model, '/spec/mode')
-    // // // watchDependency('model#/spec/mode')
+    // // // // watchDependency('model#/spec/mode')
     return modelPathValue && modelPathValue !== mode
   }
   function showArbiter() {
-    // // // watchDependency('model#/spec/arbiter/enabled')
+    // // // // watchDependency('model#/spec/arbiter/enabled')
     const isArbiterOn = getValue(model, '/spec/arbiter/enabled') || ''
     const notStandalone = notEqualToDatabaseMode('Standalone')
     return isArbiterOn && notStandalone
@@ -1047,7 +1047,7 @@ export const useFunc = (model) => {
   }
 
   function showIssuer() {
-    // // // watchDependency('model#/spec/admin/tls/default')
+    // // // // watchDependency('model#/spec/admin/tls/default')
     const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
     const isIssuerToggleEnabled = isToggleOn('clusterIssuers',
     )
@@ -1079,14 +1079,14 @@ export const useFunc = (model) => {
   function isMachineCustom(path) {
     const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
     const modelPathValue = getValue(model, fullpath)
-    watchDependency(`model#${fullpath}`)
+    // watchDependency(`model#${fullpath}`)
     return modelPathValue === 'custom'
   }
 
   function isMachineNotCustom(path) {
     const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
     const modelPathValue = getValue(model, fullpath)
-    watchDependency(`model#${fullpath}`)
+    // watchDependency(`model#${fullpath}`)
     return modelPathValue !== 'custom' && !!modelPathValue
   }
   async function getNamespaces() {
@@ -1155,7 +1155,7 @@ export const useFunc = (model) => {
 
   function setLimits(resource, type) {
     const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-    watchDependency(`model#${path}`)
+    // watchDependency(`model#${path}`)
     const selectedMachine = getValue(model, path) || 'custom'
     const reqCommitPath = type
       ? `/spec/${type}/podResources/resources/limits/${resource}`
@@ -1243,7 +1243,7 @@ export const useFunc = (model) => {
   }
 
   function showAdditionalSettings() {
-    // // // watchDependency('discriminator#/bundleApiLoaded')
+    // // // // watchDependency('discriminator#/bundleApiLoaded')
     return features.length
   }
 
@@ -1283,19 +1283,19 @@ export const useFunc = (model) => {
 
   function showAuthPasswordField() {
     const modelPathValue = getValue(discriminator, '/referSecret')
-    // // // watchDependency('discriminator#/referSecret')
+    // // // // watchDependency('discriminator#/referSecret')
     return !modelPathValue && showReferSecret()
   }
 
   function showSecretDropdown() {
     const modelPathValue = getValue(discriminator, '/referSecret')
-    // // // watchDependency('discriminator#/referSecret')
+    // // // // watchDependency('discriminator#/referSecret')
     return !!modelPathValue && showReferSecret()
   }
 
   function showReferSecret() {
     const modelPathValue = getValue(discriminator, '/createAuthSecret')
-    // // // watchDependency('discriminator#/createAuthSecret')
+    // // // // watchDependency('discriminator#/createAuthSecret')
     return !!modelPathValue
   }
 
@@ -1306,7 +1306,7 @@ export const useFunc = (model) => {
 
   function showReferSecretSwitch() {
     const modelPathValue = getValue(model, '/spec/admin/authCredential/referExisting')
-    // // // watchDependency('discriminator#/createAuthSecret')
+    // // // // watchDependency('discriminator#/createAuthSecret')
     return !!modelPathValue && showReferSecret()
   }
 
@@ -1319,7 +1319,7 @@ export const useFunc = (model) => {
   }
 
   function showArchiver() {
-    // // // watchDependency('model#/spec/mode')
+    // // // // watchDependency('model#/spec/mode')
     const dbmode = getValue(model, '/spec/mode')
 
     if (dbmode === 'Standalone') {
@@ -1364,8 +1364,27 @@ export const useFunc = (model) => {
     }
   }
 
+  function onArchiverChange() {
+    const isArchiverOn = getValue(model, '/spec/admin/archiver/enable/default')
+    const stClass = getValue(model, '/spec/admin/storageClasses/default')
+    const found = archiverMap.find((item) => item.storageClass === stClass)
+
+    if (isArchiverOn && found?.annotation)
+      commit('wizard/model$update', {
+        path: '/spec/archiverName',
+        value: found.annotation,
+        force: true,
+      })
+    else
+      commit('wizard/model$update', {
+        path: '/spec/archiverName',
+        value: '',
+        force: true,
+      })
+  }
+
   function showArchiverAlert() {
-    // // // watchDependency('model#/spec/admin/storageClasses/default')
+    // // // // watchDependency('model#/spec/admin/storageClasses/default')
 
     const mode = getValue(model, '/spec/mode')
     if (mode === 'Standalone') return false
@@ -1451,6 +1470,7 @@ export const useFunc = (model) => {
     getDefault,
     showArchiver,
     checkHostnameOrIP,
+    onArchiverChange,
     showArchiverAlert,
   }
 
