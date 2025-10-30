@@ -1,5 +1,6 @@
 step:
 - type: single-step-form
+  loader: initBundle
   elements:
   - disableUnselect: true
     loader: getAdminOptions|databases/MSSQLServer/versions
@@ -17,21 +18,23 @@ step:
       type: function
       name: isToggleOn|databases/MSSQLServer/mode
     label: Database mode
+    isHorizontal: true
     watcher:
       func: onModeChange
       paths:
         - schema/properties/spec/properties/mode
     schema: schema/properties/spec/properties/mode
     type: radio
-  # - type: array-item-form
-  #   element:
-  #     label: Databases
-  #     type: input
-  #   if:
-  #     type: function
-  #     name: isEqualToModelPathValue|Topology|/spec/mode
-  #   label: Availability Group
-  #   schema: schema/properties/spec/properties/topology/properties/availabilityGroup/properties/databases
+  - type: array-item-form
+    element:
+      label: Databases
+      type: input
+      schema: schema/properties/spec/properties/topology/properties/availabilityGroup/properties/databases
+    if:
+      type: function
+      name: isEqualToModelPathValue|Topology|/spec/mode
+    label: Availability Group
+    schema: schema/properties/spec/properties/topology/properties/availabilityGroup/properties/databases
   - if:
       type: function
       name: isEqualToModelPathValue|Topology|/spec/mode
@@ -218,9 +221,9 @@ step:
         type: function
         name: isConfigDatabaseOn
       label: Configuration
-      hasCopy: true
+      # hasCopy: true
       schema: schema/properties/spec/properties/configuration
-      type: editor
+      type: textarea
     - init:
         type: func
         value: getDefault|pointInTimeRecovery
