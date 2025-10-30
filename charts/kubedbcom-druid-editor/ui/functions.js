@@ -230,11 +230,9 @@ export const useFunc = (model) => {
     }
   }
 
-  function hasAnnotations(ype) {
-    const annotations = getValue(
-      model,
-      '/resources/autoscalingKubedbComDruidAutoscaler/metadata/annotations',
-    )
+  function hasAnnotations() {
+    const annotations =
+      getValue(model, '/resources/autoscalingKubedbComDruidAutoscaler/metadata/annotations') || {}
     const instance = annotations['kubernetes.io/instance-type']
 
     return !!instance

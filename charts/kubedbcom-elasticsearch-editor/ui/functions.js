@@ -727,10 +727,11 @@ export const useFunc = (model) => {
   }
 
   function hasAnnotations(type) {
-    const annotations = getValue(
-      model,
-      '/resources/autoscalingKubedbComElasticsearchAutoscaler/metadata/annotations',
-    )
+    const annotations =
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComElasticsearchAutoscaler/metadata/annotations',
+      ) || {}
     const instance = annotations['kubernetes.io/instance-type']
 
     return !!instance
