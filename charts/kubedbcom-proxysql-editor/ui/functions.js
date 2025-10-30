@@ -207,19 +207,6 @@ export const useFunc = (model) => {
       )
   }
 
-  function onNamespaceChange() {
-    const namespace = getValue(
-      model,
-      '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace',
-    )
-    if (!namespace) {
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name',
-      )
-    }
-  }
-
   async function fetchNodeTopology() {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
@@ -801,7 +788,6 @@ export const useFunc = (model) => {
     isEqualToModelPathValue,
     onCustomizeExporterChange,
     showCustomizeExporterSection,
-    onNamespaceChange,
     onLabelChange,
     setValueFrom,
     onValueFromChange,

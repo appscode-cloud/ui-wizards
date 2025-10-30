@@ -140,19 +140,6 @@ export const useFunc = (model) => {
     return !!found
   }
 
-  function onNamespaceChange() {
-    const namespace = getValue(
-      model,
-      '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace',
-    )
-    if (!namespace) {
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name',
-      )
-    }
-  }
-
   async function getDbs() {
     // watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace')
     const namespace = getValue(
@@ -860,7 +847,6 @@ export const useFunc = (model) => {
     isEqualToModelPathValue,
     onCustomizeExporterChange,
     showCustomizeExporterSection,
-    onNamespaceChange,
     onLabelChange,
     setValueFrom,
     onValueFromChange,

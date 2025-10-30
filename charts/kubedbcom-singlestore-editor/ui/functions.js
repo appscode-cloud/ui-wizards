@@ -1393,8 +1393,6 @@ export const useFunc = (model) => {
     showScheduleBackup,
     getDefaultSchedule,
     onInputChangeSchedule,
-    addOrRemoveBinding,
-    isBindingAlreadyOn,
 
     isConsole,
     isKubedb,
@@ -1423,7 +1421,6 @@ export const useFunc = (model) => {
     isEqualToModelPathValue,
     onCustomizeExporterChange,
     showCustomizeExporterSection,
-    onNamespaceChange,
     onLabelChange,
     setValueFrom,
     onValueFromChange,

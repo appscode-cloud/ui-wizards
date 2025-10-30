@@ -559,8 +559,8 @@ export const useFunc = (model) => {
         force: true,
       })
 
-      onNamespaceChange({ commit, model, getValue })
-      onLabelChange({ commit, model, getValue })
+      onNamespaceChange()
+      onLabelChange()
     } else {
       commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
     }

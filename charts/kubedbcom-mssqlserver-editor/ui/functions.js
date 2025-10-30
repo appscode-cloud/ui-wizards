@@ -733,17 +733,17 @@ export const useFunc = (model) => {
     return !!found
   }
 
-  function onNamespaceChange() {
-    const namespace = getValue(model, '/metadata/release/namespace')
-    const agent = getValue(model, '/resources/kubedbComMSSQLServer/spec/monitor/agent')
-    if (agent === 'prometheus.io') {
-      commit('wizard/model$update', {
-        path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-        value: [namespace],
-        force: true,
-      })
-    }
-  }
+  // function onNamespaceChange() {
+  //   const namespace = getValue(model, '/metadata/release/namespace')
+  //   const agent = getValue(model, '/resources/kubedbComMSSQLServer/spec/monitor/agent')
+  //   if (agent === 'prometheus.io') {
+  //     commit('wizard/model$update', {
+  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
+  //       value: [namespace],
+  //       force: true,
+  //     })
+  //   }
+  // }
 
   function initMetadata() {
     const dbName =
@@ -774,19 +774,6 @@ export const useFunc = (model) => {
         'wizard/model$delete',
         '/resources/autoscalingKubedbComMSSQLServerAutoscaler/spec/compute',
       )
-  }
-
-  function onNamespaceChange() {
-    const namespace = getValue(
-      model,
-      '/resources/autoscalingKubedbComMSSQLServerAutoscaler/metadata/namespace',
-    )
-    if (!namespace) {
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComMSSQLServerAutoscaler/spec/databaseRef/name',
-      )
-    }
   }
 
   async function fetchTopologyMachines() {
@@ -1078,18 +1065,6 @@ export const useFunc = (model) => {
     const modelValue = getValue(model, path) || null
     return !!modelValue
   }
-
-  // function onNamespaceChange() {
-  //   const namespace = getValue(model, '/metadata/release/namespace')
-  //   const agent = getValue(model, '/resources/kubedbComMSSQLServer/spec/monitor/agent')
-  //   if (agent === 'prometheus.io') {
-  //     commit('wizard/model$update', {
-  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-  //       value: [namespace],
-  //       force: true,
-  //     })
-  //   }
-  // }
 
   function onLabelChange() {
     const labels = getValue(model, '/resources/kubedbComMSSQLServer/spec/metadata/labels')
@@ -1415,8 +1390,6 @@ export const useFunc = (model) => {
     showScheduleBackup,
     getDefaultSchedule,
     onInputChangeSchedule,
-    addOrRemoveBinding,
-    isBindingAlreadyOn,
 
     isConsole,
     isKubedb,
@@ -1450,7 +1423,6 @@ export const useFunc = (model) => {
     isEqualToModelPathValue,
     onCustomizeExporterChange,
     showCustomizeExporterSection,
-    onNamespaceChange,
     onLabelChange,
     setValueFrom,
     onValueFromChange,

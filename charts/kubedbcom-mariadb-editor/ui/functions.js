@@ -524,45 +524,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function addOrRemoveBinding() {
-    const value = getValue(discriminator, `/binding`)
-    const dbName = getValue(model, '/metadata/release/name')
-    const dbNamespace = getValue(model, '/metadata/release/namespace')
-    const labels = getValue(model, '/resources/kubedbComMariaDB/metadata/labels')
-    const bindingValues = {
-      apiVersion: 'catalog.appscode.com/v1alpha1',
-      kind: 'MariaDBBinding',
-      metadata: {
-        labels,
-        name: dbName,
-        namespace: dbNamespace,
-      },
-      spec: {
-        sourceRef: {
-          name: dbName,
-          namespace: dbNamespace,
-        },
-      },
-    }
-
-    if (value) {
-      commit('wizard/model$update', {
-        path: '/resources/catalogAppscodeComMariaDBBinding',
-        value: bindingValues,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', '/resources/catalogAppscodeComMariaDBBinding')
-    }
-  }
-
-  function isBindingAlreadyOn() {
-    const value = getValue(model, '/resources')
-    const keys = Object.keys(value)
-    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMariaDBBinding')
-    return isExposeBinding
-  }
-
   function objectCopy(obj) {
     const temp = JSON.stringify(obj)
     return JSON.parse(temp)
@@ -875,24 +836,21 @@ export const useFunc = (model) => {
     return !!found
   }
 
-  function onNamespaceChange() {
-    const namespace = getValue(model, '/metadata/release/namespace')
-    const agent = getValue(model, '/resources/kubedbComPostgres/spec/monitor/agent')
-    if (agent === 'prometheus.io') {
-      commit('wizard/model$update', {
-        path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-        value: [namespace],
-        force: true,
-      })
-    }
-  }
+  // function onNamespaceChange() {
+  //   const namespace = getValue(model, '/metadata/release/namespace')
+  //   const agent = getValue(model, '/resources/kubedbComMariaDB/spec/monitor/agent')
+  //   if (agent === 'prometheus.io') {
+  //     commit('wizard/model$update', {
+  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
+  //       value: [namespace],
+  //       force: true,
+  //     })
+  //   }
+  // }
 
-  async function getPostgresDbs() {
-    // watchDependency('model#/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/namespace')
-    const namespace = getValue(
-      model,
-      '/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/namespace',
-    )
+  async function getMariaDbs() {
+    // watchDependency('model#/metadata/namespace')
+    const namespace = getValue(model, '/metadata/namespace')
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
@@ -1436,8 +1394,6 @@ export const useFunc = (model) => {
     showScheduleBackup,
     getDefaultSchedule,
     onInputChangeSchedule,
-    addOrRemoveBinding,
-    isBindingAlreadyOn,
     getBackupConfigsAndAnnotations,
     deleteKubeDbComMariaDbAnnotation,
     valueExists,
@@ -1448,7 +1404,7 @@ export const useFunc = (model) => {
     getNamespaces,
     isRancherManaged,
     onNamespaceChange,
-    getPostgresDbs,
+    getMariaDbs,
     initMetadata,
     fetchTopologyMachines,
     setTrigger,
@@ -1474,7 +1430,6 @@ export const useFunc = (model) => {
     isEqualToModelPathValue,
     onCustomizeExporterChange,
     showCustomizeExporterSection,
-    onNamespaceChange,
     onLabelChange,
     setValueFrom,
     onValueFromChange,

@@ -522,45 +522,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function addOrRemoveBinding() {
-    const value = getValue(discriminator, `/binding`)
-    const dbName = getValue(model, '/metadata/release/name')
-    const dbNamespace = getValue(model, '/metadata/release/namespace')
-    const labels = getValue(model, '/resources/kubedbComMySQL/metadata/labels')
-    const bindingValues = {
-      apiVersion: 'catalog.appscode.com/v1alpha1',
-      kind: 'MySQLBinding',
-      metadata: {
-        labels,
-        name: dbName,
-        namespace: dbNamespace,
-      },
-      spec: {
-        sourceRef: {
-          name: dbName,
-          namespace: dbNamespace,
-        },
-      },
-    }
-
-    if (value) {
-      commit('wizard/model$update', {
-        path: '/resources/catalogAppscodeComMySQLBinding',
-        value: bindingValues,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', '/resources/catalogAppscodeComMySQLBinding')
-    }
-  }
-
-  function isBindingAlreadyOn() {
-    const value = getValue(model, '/resources')
-    const keys = Object.keys(value)
-    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMySQLBinding')
-    return isExposeBinding
-  }
-
   function objectCopy(obj) {
     const temp = JSON.stringify(obj)
     return JSON.parse(temp)
@@ -1349,14 +1310,11 @@ export const useFunc = (model) => {
     showScheduleBackup,
     getDefaultSchedule,
     onInputChangeSchedule,
-    addOrRemoveBinding,
-    isBindingAlreadyOn,
 
     isKubedb,
     isConsole,
     getNamespaces,
     isRancherManaged,
-    onNamespaceChange,
     getMysqlDbs,
     initMetadata,
     fetchTopologyMachines,

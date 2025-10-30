@@ -684,17 +684,17 @@ export const useFunc = (model) => {
     return !!found
   }
 
-  function onNamespaceChange() {
-    const namespace = getValue(model, '/metadata/release/namespace')
-    const agent = getValue(model, '/resources/kubedbComPostgres/spec/monitor/agent')
-    if (agent === 'prometheus.io') {
-      commit('wizard/model$update', {
-        path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-        value: [namespace],
-        force: true,
-      })
-    }
-  }
+  // function onNamespaceChange() {
+  //   const namespace = getValue(model, '/metadata/release/namespace')
+  //   const agent = getValue(model, '/resources/kubedbComPostgres/spec/monitor/agent')
+  //   if (agent === 'prometheus.io') {
+  //     commit('wizard/model$update', {
+  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
+  //       value: [namespace],
+  //       force: true,
+  //     })
+  //   }
+  // }
 
   async function getPostgresDbs() {
     // watchDependency('model#/resources/autoscalingKubedbComPostgresAutoscaler/metadata/namespace')
@@ -1032,18 +1032,6 @@ export const useFunc = (model) => {
     const modelValue = getValue(model, path)
     return !!modelValue
   }
-
-  // function onNamespaceChange() {
-  //   const namespace = getValue(model, '/metadata/release/namespace')
-  //   const agent = getValue(model, '/resources/kubedbComPostgres/spec/monitor/agent')
-  //   if (agent === 'prometheus.io') {
-  //     commit('wizard/model$update', {
-  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-  //       value: [namespace],
-  //       force: true,
-  //     })
-  //   }
-  // }
 
   function onLabelChange() {
     const labels = getValue(model, '/resources/kubedbComPostgres/spec/metadata/labels')
@@ -1415,8 +1403,6 @@ export const useFunc = (model) => {
     addLabelAnnotation,
     deleteLabelAnnotation,
     onInputChangeSchedule,
-    addOrRemoveBinding,
-    isBindingAlreadyOn,
     objectCopy,
     valueExists,
 
@@ -1452,7 +1438,6 @@ export const useFunc = (model) => {
     isEqualToModelPathValue,
     onCustomizeExporterChange,
     showCustomizeExporterSection,
-    onNamespaceChange,
     onLabelChange,
     setValueFrom,
     onValueFromChange,
