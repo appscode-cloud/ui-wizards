@@ -822,7 +822,7 @@ export const useFunc = (model) => {
     const value = getValue(discriminator, `/binding`)
     const dbName = getValue(model, '/metadata/release/name')
     const dbNamespace = getValue(model, '/metadata/release/namespace')
-    const labels = getValue(model, '/resources/kubedbComPostgres/metadata/labels')
+    const labels = getValue(model, '/resources/kubedbComRabbitMQ/metadata/labels')
     const bindingValues = {
       apiVersion: 'catalog.appscode.com/v1alpha1',
       kind: 'PostgresBinding',
@@ -841,19 +841,19 @@ export const useFunc = (model) => {
 
     if (value) {
       commit('wizard/model$update', {
-        path: '/resources/catalogAppscodeComPostgresBinding',
+        path: '/resources/catalogAppscodeComRabbitMQBinding',
         value: bindingValues,
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/catalogAppscodeComPostgresBinding')
+      commit('wizard/model$delete', '/resources/catalogAppscodeComRabbitMQBinding')
     }
   }
 
   function isBindingAlreadyOn() {
     const value = getValue(model, '/resources')
     const keys = Object.keys(value)
-    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComPostgresBinding')
+    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComRabbitMQBinding')
     return isExposeBinding
   }
 

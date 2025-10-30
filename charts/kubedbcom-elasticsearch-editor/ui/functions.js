@@ -467,6 +467,8 @@ export const useFunc = (model) => {
     }
   }
 
+  // binding
+
   function addOrRemoveBinding() {
     const value = getValue(discriminator, `/binding`)
     const dbName = getValue(model, '/metadata/release/name')
@@ -1342,6 +1344,7 @@ export const useFunc = (model) => {
     showScheduleBackup,
     getDefaultSchedule,
     onInputChangeSchedule,
+    // binding
     addOrRemoveBinding,
     isBindingAlreadyOn,
     // storage
