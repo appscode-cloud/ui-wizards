@@ -149,20 +149,16 @@ function setTrigger({ model, getValue }, path) {
 }
 
 function hasAnnotations(type) {
-  const annotations = getValue(
-    model,
-    '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations',
-  )
+  const annotations =
+    getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations') || {}
   const instance = annotations['kubernetes.io/instance-type']
 
   return !!instance
 }
 
 function setAllowedMachine(type, minmax) {
-  const annotations = getValue(
-    model,
-    '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations',
-  )
+  const annotations =
+    getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations') || {}
   const instance = annotations['kubernetes.io/instance-type']
   let parsedInstance = {}
   try {
@@ -207,7 +203,7 @@ async function getMachines(type, minmax) {
 
 function onMachineChange(type) {
   const annoPath = '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations'
-  const annotations = getValue(model, annoPath)
+  const annotations = getValue(model, annoPath) || {}
   const instance = annotations['kubernetes.io/instance-type']
   let parsedInstance = {}
   try {
