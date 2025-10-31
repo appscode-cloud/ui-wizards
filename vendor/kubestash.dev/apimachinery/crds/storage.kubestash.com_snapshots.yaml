@@ -92,6 +92,8 @@ spec:
                       - Restic
                       - WalG
                       - VolumeSnapshotter
+                      - Solr
+                      - Medusa
                       type: string
                     duration:
                       type: string
@@ -136,6 +138,21 @@ spec:
                           format: int64
                           type: integer
                       type: object
+                    medusaStats:
+                      properties:
+                        backupName:
+                          type: string
+                        backupNodes:
+                          items:
+                            type: string
+                          type: array
+                        finishTime:
+                          type: string
+                        startTime:
+                          type: string
+                        status:
+                          type: string
+                      type: object
                     path:
                       type: string
                     phase:
@@ -166,6 +183,27 @@ spec:
                       type: array
                     size:
                       type: string
+                    solrStats:
+                      items:
+                        properties:
+                          backupId:
+                            type: integer
+                          collection:
+                            type: string
+                          indexFileCount:
+                            type: integer
+                          indexSizeMB:
+                            format: double
+                            type: number
+                          location:
+                            type: string
+                          startTime:
+                            type: string
+                          uploadedIndexFileMB:
+                            format: double
+                            type: number
+                        type: object
+                      type: array
                     volumeSnapshotterStats:
                       items:
                         properties:
