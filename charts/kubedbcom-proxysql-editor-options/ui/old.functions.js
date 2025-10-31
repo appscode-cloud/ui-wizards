@@ -1,5 +1,3 @@
-const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
-
 const machines = {
   'db.t.micro': {
     resources: {
@@ -308,41 +306,19 @@ const machineList = [
 
 const modeDetails = {
   Standalone: {
-    description: 'Single node Solr without high availability and sharding.',
+    description: 'Single node ProxySQL without high availability',
     text: 'Standalone',
   },
   Replicaset: {
-    description: 'Solr ReplicaSet for high availability.',
-    text: 'Replicated Cluster',
-  },
-  Topology: {
-    description: 'Solr Topology cluster for high performance and high availability.',
-    text: 'Topology Cluster',
+    description: 'ProxySQL Replicaset for high availability.',
+    text: 'Replicaset',
   },
 }
 
-export const useFunc = (model) => {
-  const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
-    model,
-    store.state,
-  )
-
-  setDiscriminatorValue('bundleApiLoaded', false)
-  setDiscriminatorValue('createAuthSecret', false)
-  setDiscriminatorValue('referSecret', false)
-  setDiscriminatorValue('configDatabase', false)
-  setDiscriminatorValue('monitoring', false)
-
-
-
-
-
-
-
 function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
   const modelPathValue = getValue(model, modelPath)
-  // watchDependency('model#' + modelPath)
-  return value.includes(modelPathValue)
+  watchDependency('model#' + modelPath)
+  return modelPathValue === value
 }
 
 function showAuthSecretField({ discriminator, getValue, watchDependency }) {
@@ -351,13 +327,6 @@ function showAuthSecretField({ discriminator, getValue, watchDependency }) {
     getValue,
     watchDependency,
   })
-}
-
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, '/spec/mode')
-  // watchDependency('model#/spec/mode')
-  const validType = ['Standalone', 'Replicaset']
-  return validType.includes(modelPathValue)
 }
 
 async function getResources({ axios, storeGet }, group, version, resource) {
@@ -382,7 +351,7 @@ async function getResources({ axios, storeGet }, group, version, resource) {
   return resources
 }
 
-async function getMongoDbVersions({ axios, storeGet }, group, version, resource) {
+async function getProxysqlVersions({ axios, storeGet }, group, version, resource) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -405,16 +374,55 @@ async function getMongoDbVersions({ axios, storeGet }, group, version, resource)
   const resources = (resp && resp.data && resp.data.items) || []
 
   // keep only non deprecated versions
-  const filteredMongoDbVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
+  const filteredProxysqlVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
 
-  filteredMongoDbVersions.map((item) => {
+  filteredProxysqlVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || ''
     const specVersion = (item.spec && item.spec.version) || ''
     item.text = `${name} (${specVersion})`
     item.value = name
     return true
   })
-  return filteredMongoDbVersions
+  return filteredProxysqlVersions
+}
+
+async function getAppBindings({ axios, storeGet }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null },
+        spec: { type: null },
+      },
+    },
+  }
+
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      {
+        params: queryParams,
+      },
+    )
+
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === 'kubedb.com/mysql')
+      .map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        return {
+          text: name,
+          value: name,
+        }
+      })
+    return fileredResources
+  } catch (e) {
+    console.log(e)
+    return []
+  }
 }
 
 function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
@@ -430,7 +438,7 @@ async function getSecrets({ storeGet, axios, model, getValue, watchDependency })
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const namespace = getValue(model, '/metadata/release/namespace')
-  // watchDependency('model#/metadata/release/namespace')
+  watchDependency('model#/metadata/release/namespace')
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
@@ -491,7 +499,7 @@ function getMachineListForOptions({ model, getValue }) {
 
 function setLimits({ model, getValue, commit, watchDependency }, resource, type) {
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  // watchDependency(`model#${path}`)
+  watchDependency(`model#${path}`)
   const selectedMachine = getValue(model, path) || 'custom'
   const reqCommitPath = type
     ? `/spec/${type}/podResources/resources/limits/${resource}`
@@ -549,14 +557,10 @@ function setLimits({ model, getValue, commit, watchDependency }, resource, type)
   }
 }
 
-function setRequests({ getValue, model, commit }, resource, type) {
-  const modelPath = type
-    ? `/spec/${type}/podResources/resources/requests/${resource}`
-    : `/spec/podResources/resources/requests/${resource}`
+function setRequests({ getValue, model, commit }, resource) {
+  const modelPath = `/spec/podResources/resources/requests/${resource}`
   const val = getValue(model, modelPath)
-  const commitPath = type
-    ? `/spec/${type}/podResources/resources/limits/${resource}`
-    : `/spec/podResources/resources/limits/${resource}`
+  commitPath = `/spec/podResources/resources/limits/${resource}`
   commit('wizard/model$update', {
     path: commitPath,
     value: val,
@@ -598,7 +602,6 @@ async function fetchJsons({ axios, itemCtx }) {
     functions,
   }
 }
-
 function updateAgentValue({ commit }, val) {
   commit('wizard/model$update', {
     path: '/spec/monitoring/agent',
@@ -628,20 +631,20 @@ function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
 }
 
 const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
-  // watchDependency('model#/form/capi/provider')
+  watchDependency('model#/form/capi/provider')
   const val = getValue(model, '/form/capi/provider')
   if (val) return true
 }
 
 const showMultiselectZone = ({ model, getValue, watchDependency }) => {
-  // watchDependency('model#/form/capi/dedicated')
+  watchDependency('model#/form/capi/dedicated')
   const val = getValue(model, '/form/capi/provider')
 
   if (val === 'capz' && ifDedicated({ model, getValue })) return true
 }
 
 const showSelectZone = ({ model, getValue, watchDependency }) => {
-  // watchDependency('model#/form/capi/dedicated')
+  watchDependency('model#/form/capi/dedicated')
   const val = getValue(model, '/form/capi/provider')
   if (val !== 'capz' && ifDedicated({ model, getValue })) return true
 }
@@ -660,8 +663,8 @@ const dedicatedOnChange = ({ model, getValue, commit }) => {
 }
 
 const ifZones = ({ model, getValue, watchDependency }) => {
-  // watchDependency('model#/form/capi/zones')
-  // watchDependency('model#/form/capi/dedicated')
+  watchDependency('model#/form/capi/zones')
+  watchDependency('model#/form/capi/dedicated')
   const zones = getValue(model, 'form/capi/zones') || []
   const isDedicated = getValue(model, 'form/capi/dedicated')
   if (zones.length && isDedicated) return true
@@ -691,7 +694,7 @@ async function getZones({ storeGet, axios, model, getValue }) {
 }
 
 async function getSKU({ storeGet, axios, model, getValue, watchDependency }) {
-  // watchDependency('model#/form/capi/zones')
+  watchDependency('model#/form/capi/zones')
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const zones = getValue(model, 'form/capi/zones') || []
@@ -724,37 +727,6 @@ async function getSKU({ storeGet, axios, model, getValue, watchDependency }) {
 function isVariantAvailable({ storeGet }) {
   const variant = storeGet('/route/query/variant')
   return variant ? true : false
-}
-
-function setStorageClass({ model, getValue, commit, watchDependency, discriminator }) {
-  const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
-  let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
-  const storageClassList = getValue(model, '/spec/admin/storageClasses/available') || []
-  const suffix = '-retain'
-
-  const simpleClassList = storageClassList.filter((item) => {
-    return !item.endsWith(suffix)
-  })
-  const retainClassList = storageClassList.filter((item) => {
-    return item.endsWith(suffix)
-  })
-  if (deletionPolicy === 'WipeOut' || deletionPolicy === 'Delete') {
-    storageClass = simpleClassList.length ? simpleClassList[0] : retainClassList[0]
-  } else {
-    storageClass = retainClassList.length ? retainClassList[0] : simpleClassList[0]
-  }
-
-  const isChangeable = isToggleOn(
-    { getValue, model, watchDependency, discriminator },
-    'storageClasses',
-  )
-  if (isChangeable && storageClass) {
-    commit('wizard/model$update', {
-      path: '/spec/admin/storageClasses/default',
-      value: storageClass,
-      force: true,
-    })
-  }
 }
 
 async function getNamespaces({ axios, storeGet }) {
@@ -802,6 +774,119 @@ function isRancherManaged({ storeGet }) {
   const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
   const found = managers.find((item) => item === 'Rancher')
   return !!found
+}
+
+function updateAlertValue({ commit, model, discriminator, getValue }) {
+  const isMonitorEnabled = getValue(discriminator, '/monitoring')
+  const alert = isMonitorEnabled ? 'warning' : 'none'
+  // update alert value depend on monitoring profile
+  commit('wizard/model$update', {
+    path: '/form/alert/enabled',
+    value: alert,
+    force: true,
+  })
+  const agent = isMonitorEnabled ? 'prometheus.io/operator' : ''
+  commit('wizard/model$update', {
+    path: '/spec/admin/monitoring/agent',
+    value: agent,
+    force: true,
+  })
+}
+
+function setStorageClass({ model, getValue, commit, watchDependency, discriminator }) {
+  const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
+  let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
+  const storageClassList = getValue(model, '/spec/admin/storageClasses/available') || []
+  const suffix = '-retain'
+
+  const simpleClassList = storageClassList.filter((item) => {
+    return !item.endsWith(suffix)
+  })
+  const retainClassList = storageClassList.filter((item) => {
+    return item.endsWith(suffix)
+  })
+  if (deletionPolicy === 'WipeOut' || deletionPolicy === 'Delete') {
+    storageClass = simpleClassList.length ? simpleClassList[0] : retainClassList[0]
+  } else {
+    storageClass = retainClassList.length ? retainClassList[0] : simpleClassList[0]
+  }
+
+  const isChangeable = isToggleOn(
+    { getValue, model, watchDependency, discriminator },
+    'storageClasses',
+  )
+  if (isChangeable && storageClass) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/storageClasses/default',
+      value: storageClass,
+      force: true,
+    })
+  }
+}
+
+function showAlerts({ watchDependency, model, getValue, discriminator }) {
+  watchDependency('discriminator#/monitoring')
+  const isMonitorEnabled = getValue(discriminator, '/monitoring')
+  return (
+    isMonitorEnabled && isToggleOn({ getValue, model, discriminator, watchDependency }, 'alert')
+  )
+}
+
+function onBackupSwitch({ discriminator, getValue, commit }) {
+  const isBackupOn = getValue(discriminator, '/backup')
+  commit('wizard/model$update', {
+    path: '/spec/backup/tool',
+    value: isBackupOn ? 'KubeStash' : '',
+    force: true,
+  })
+}
+
+function clearArbiterHidden({ commit }) {
+  commit('wizard/model$update', {
+    path: `/spec/arbiter/enabled`,
+    value: false,
+    force: true,
+  })
+
+  commit('wizard/model$update', {
+    path: `/spec/hidden/enabled`,
+    value: false,
+    force: true,
+  })
+}
+
+function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/configDatabase')
+  return getValue(discriminator, '/configDatabase')
+}
+function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  return modelPathValue && modelPathValue !== mode
+}
+function showHidden({ watchDependency, model, getValue }) {
+  watchDependency('model#/spec/hidden/enabled')
+  const isHiddenOn = getValue(model, '/spec/hidden/enabled') || ''
+  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
+  return isHiddenOn && notStandalone
+}
+function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  return modelPathValue && modelPathValue !== mode
+}
+function showArbiter({ watchDependency, model, getValue }) {
+  watchDependency('model#/spec/arbiter/enabled')
+  const isArbiterOn = getValue(model, '/spec/arbiter/enabled') || ''
+  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
+  return isArbiterOn && notStandalone
+}
+function clearConfiguration({ discriminator, getValue, commit }) {
+  const configOn = getValue(discriminator, '/configDatabase')
+
+  if (!configOn) {
+    commit('wizard/model$delete', '/spec/configuration')
+  }
 }
 
 let placement = []
@@ -852,10 +937,10 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
     force: true,
   })
 
-  if (!getValue(model, `/spec/admin/databases/Solr/mode/toggle`)) {
-    let defMode = getDefault({ getValue, model }, 'databases/Solr/mode') || ''
+  if (!getValue(model, `/spec/admin/databases/ProxySQL/mode/toggle`)) {
+    let defMode = getDefault({ getValue, model }, 'databases/ProxySQL/mode') || ''
     if (defMode === '') {
-      const arr = getValue(model, '/spec/databases/Solr/mode/available') || []
+      const arr = getValue(model, '/spec/databases/ProxySQL/mode/available') || []
       if (arr.length) defMode = arr[0]
     }
     commit('wizard/model$update', {
@@ -934,7 +1019,7 @@ function fetchOptions({ model, getValue, commit }, type) {
 }
 
 function getAdminOptions({ getValue, model, watchDependency, commit }, type) {
-  // watchDependency('discriminator#/bundleApiLoaded')
+  watchDependency('discriminator#/bundleApiLoaded')
 
   const options = getValue(model, `/spec/admin/${type}/available`) || []
 
@@ -974,8 +1059,8 @@ function checkIfFeatureOn({ getValue, model }, type) {
 }
 
 function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
-  // watchDependency('discriminator#/bundleApiLoaded')
-  // watchDependency('model#/spec/admin/deployment/default')
+  watchDependency('discriminator#/bundleApiLoaded')
+  watchDependency('model#/spec/admin/deployment/default')
   const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
   let deploymentType = getValue(model, `/spec/admin/deployment/default`)
   if (
@@ -1011,8 +1096,8 @@ function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
 }
 
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
-  // watchDependency('model#/spec/admin/deployment/default')
-  // watchDependency('model#/spec/admin/clusterTier/default')
+  watchDependency('model#/spec/admin/deployment/default')
+  watchDependency('model#/spec/admin/clusterTier/default')
   const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
   const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
   let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
@@ -1089,18 +1174,14 @@ function returnFalse() {
   return false
 }
 
-function isMachineCustom({ model, getValue, watchDependency }, path) {
-  const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
-  const modelPathValue = getValue(model, fullpath)
-  // watchDependency(`model#${fullpath}`)
-  return modelPathValue === 'custom'
-}
-
-function isMachineNotCustom({ model, getValue, watchDependency }, path) {
-  const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
-  const modelPathValue = getValue(model, fullpath)
-  // watchDependency(`model#${fullpath}`)
-  return modelPathValue !== 'custom' && !!modelPathValue
+function showIssuer({ model, getValue, watchDependency, discriminator }) {
+  watchDependency('model#/spec/admin/tls/default')
+  const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
+  const isIssuerToggleEnabled = isToggleOn(
+    { getValue, model, watchDependency, discriminator },
+    'clusterIssuers',
+  )
+  return isTlsEnabled && isIssuerToggleEnabled
 }
 
 function onAuthChange({ commit }) {
@@ -1116,66 +1197,9 @@ function onAuthChange({ commit }) {
   })
 }
 
-function clearConfiguration({ discriminator, getValue, commit }) {
-  const configOn = getValue(discriminator, '/configDatabase')
-
-  if (!configOn) {
-    commit('wizard/model$delete', '/spec/configuration')
-  }
-}
-
-function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
-  // watchDependency('discriminator#/configDatabase')
-  return getValue(discriminator, '/configDatabase')
-}
-
-function showIssuer({ model, getValue, watchDependency, discriminator }) {
-  // watchDependency('model#/spec/admin/tls/default')
-  const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
-  const isIssuerToggleEnabled = isToggleOn(
-    { getValue, model, watchDependency, discriminator },
-    'clusterIssuers',
-  )
-  return isTlsEnabled && isIssuerToggleEnabled
-}
-
 function setMonitoring({ getValue, model }) {
   const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
   return !!agent
-}
-
-function updateAlertValue({ commit, model, discriminator, getValue }) {
-  const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  const alert = isMonitorEnabled ? 'warning' : 'none'
-  // update alert value depend on monitoring profile
-  commit('wizard/model$update', {
-    path: '/form/alert/enabled',
-    value: alert,
-    force: true,
-  })
-  const agent = isMonitorEnabled ? 'prometheus.io/operator' : ''
-  commit('wizard/model$update', {
-    path: '/spec/admin/monitoring/agent',
-    value: agent,
-    force: true,
-  })
-}
-
-function showAlerts({ watchDependency, model, getValue, discriminator }) {
-  // watchDependency('discriminator#/monitoring')
-  const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  return (
-    isMonitorEnabled && isToggleOn({ getValue, model, watchDependency, discriminator }, 'alert')
-  )
-}
-
-function onBackupSwitch({ discriminator, getValue, commit }) {
-  const isBackupOn = getValue(discriminator, '/backup')
-  commit('wizard/model$update', {
-    path: '/spec/backup/tool',
-    value: isBackupOn ? 'KubeStash' : '',
-    force: true,
-  })
 }
 
 function setBackup({ model, getValue }) {
@@ -1184,59 +1208,28 @@ function setBackup({ model, getValue }) {
   return backup === 'KubeStash' && features.includes('backup') && val
 }
 
-async function getAppBindings({ commit, axios, storeGet, model, getValue }) {
-  const namespace = getValue(model, '/metadata/release/namespace')
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { type: null },
-      },
-    },
-  }
-  setNamespace({ commit, model, getValue })
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
-      {
-        params: queryParams,
-      },
-    )
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    const fileredResources = resources
-      .filter((item) => item.spec?.type === 'kubedb.com/zookeeper')
-      .map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        return {
-          text: `${namespace}/${name}`,
-          value: name,
-        }
-      })
-    return fileredResources
-  } catch (e) {
-    console.log(e)
-    return []
-  }
+function isMachineCustom({ model, getValue, watchDependency }, path) {
+  const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
+  const modelPathValue = getValue(model, fullpath)
+  watchDependency(`model#${fullpath}`)
+  return modelPathValue === 'custom'
 }
 
-function setNamespace({ commit, model, getValue }) {
-  let modelPathValue = getValue(model, '/metadata/release/namespace')
-  if (modelPathValue) {
-    commit('wizard/model$update', {
-      path: '/spec/zookeeperRef/namespace',
-      value: modelPathValue,
-      force: true,
-    })
-  }
+function isMachineNotCustom({ model, getValue, watchDependency }, path) {
+  const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
+  const modelPathValue = getValue(model, fullpath)
+  watchDependency(`model#${fullpath}`)
+  return modelPathValue !== 'custom' && !!modelPathValue
+}
+
+function EqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  return modelPathValue && modelPathValue === mode
 }
 
 function showAdditionalSettings({ watchDependency }) {
-  // watchDependency('discriminator#/bundleApiLoaded')
+  watchDependency('discriminator#/bundleApiLoaded')
   return features.length
 }
 
@@ -1276,19 +1269,19 @@ async function getReferSecrets({ getValue, model, storeGet, axios, discriminator
 
 function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
   const modelPathValue = getValue(discriminator, '/referSecret')
-  // watchDependency('discriminator#/referSecret')
+  watchDependency('discriminator#/referSecret')
   return !modelPathValue && showReferSecret({ discriminator, getValue, watchDependency })
 }
 
 function showSecretDropdown({ discriminator, getValue, watchDependency }) {
   const modelPathValue = getValue(discriminator, '/referSecret')
-  // watchDependency('discriminator#/referSecret')
+  watchDependency('discriminator#/referSecret')
   return !!modelPathValue && showReferSecret({ discriminator, getValue, watchDependency })
 }
 
 function showReferSecret({ discriminator, getValue, watchDependency }) {
   const modelPathValue = getValue(discriminator, '/createAuthSecret')
-  // watchDependency('discriminator#/createAuthSecret')
+  watchDependency('discriminator#/createAuthSecret')
   return !!modelPathValue
 }
 
@@ -1299,7 +1292,7 @@ function getDefaultValue({ getValue, model }, path) {
 
 function showReferSecretSwitch({ model, getValue, watchDependency, discriminator }) {
   const modelPathValue = getValue(model, '/spec/admin/authCredential/referExisting')
-  // watchDependency('discriminator#/createAuthSecret')
+  watchDependency('discriminator#/createAuthSecret')
   return !!modelPathValue && showReferSecret({ discriminator, getValue, watchDependency })
 }
 
@@ -1311,6 +1304,65 @@ function onReferSecretChange({ commit }) {
   })
 }
 
-
-  return { text: machine, value: machine   }
+return {
+  showReferSecretSwitch,
+  onReferSecretChange,
+  getDefaultValue,
+  isRancherManaged,
+  showSecretDropdown,
+  showReferSecret,
+  getReferSecrets,
+  isConfigAvailable,
+  initBundle,
+  returnFalse,
+  EqualToDatabaseMode,
+  getNamespaces,
+  updateAlertValue,
+  setStorageClass,
+  getAdminOptions,
+  isToggleOn,
+  showAlerts,
+  getNodeTopology,
+  clearArbiterHidden,
+  returnFalse,
+  showHidden,
+  isConfigDatabaseOn,
+  notEqualToDatabaseMode,
+  filterNodeTopology,
+  onAuthChange,
+  setMonitoring,
+  isMachineNotCustom,
+  isMachineCustom,
+  showIssuer,
+  showArbiter,
+  clearConfiguration,
+  onBackupSwitch,
+  isVariantAvailable,
+  fetchJsons,
+  showAuthPasswordField,
+  isEqualToModelPathValue,
+  showAuthSecretField,
+  getResources,
+  getProxysqlVersions,
+  getAppBindings,
+  onCreateAuthSecretChange,
+  getSecrets,
+  getMachineListForOptions,
+  setLimits,
+  setRequests,
+  setMachineToCustom,
+  updateAgentValue,
+  getCreateNameSpaceUrl,
+  ifCapiProviderIsNotEmpty,
+  ifDedicated,
+  dedicatedOnChange,
+  ifZones,
+  zonesOnChange,
+  getZones,
+  getSKU,
+  showMultiselectZone,
+  showSelectZone,
+  setBackup,
+  showAdditionalSettings,
+  getDefault,
 }
