@@ -1,0 +1,427 @@
+steps:
+- form:
+    discriminator:
+      bundleApiLoaded:
+        default: false
+        type: boolean
+    elements:
+    - computed: initBundle
+      if: returnFalse
+      type: label-element
+    - disableUnselect: true
+      fetch: getAdminOptions|databases/Redis/versions
+      if: isToggleOn|databases/Redis/versions
+      label:
+        text: labels.database.version
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
+      type: select
+    - computed: getDefault|databases/Redis/mode
+      fetch: getAdminOptions|databases/Redis/mode
+      hasDescription: true
+      if: isToggleOn|databases/Redis/mode
+      label:
+        text: labels.database.mode
+      schema:
+        $ref: schema#/properties/spec/properties/mode
+      type: radio
+    - if: isEqualToModelPathValue|Cluster|/spec/mode
+      label:
+        text: labels.shards
+      schema:
+        $ref: schema#/properties/spec/properties/cluster/properties/master
+      type: input
+    - if: isEqualToModelPathValue|Cluster|/spec/mode
+      label:
+        text: labels.replicaset.number
+      schema:
+        $ref: schema#/properties/spec/properties/cluster/properties/replicas
+      type: input
+    - discriminator:
+        announce:
+          default: false
+          type: boolean
+        createSentinel:
+          default: true
+          type: boolean
+      elements:
+      - label:
+          text: labels.sentinel_section
+        type: label-element
+      - onChange: onCreateSentinelChange
+        options:
+        - text: options.sentinelType.existingSentinel.label
+          value: false
+        - text: options.sentinelType.customSentinel.label
+          value: true
+        schema:
+          $ref: discriminator#/properties/createSentinel
+        type: radio
+      - fetch: getResources|core|v1|namespaces
+        if: showSentinelNameAndNamespace
+        keepEmpty: true
+        label:
+          text: labels.namespace
+        schema:
+          $ref: schema#/properties/spec/properties/sentinelRef/properties/namespace
+        type: select
+      - allowUserDefinedOption: true
+        fetch: getRedisSentinels
+        if: showSentinelNameAndNamespace
+        keepEmpty: true
+        label:
+          text: labels.name
+        schema:
+          $ref: schema#/properties/spec/properties/sentinelRef/properties/name
+        type: select
+      - label:
+          text: labels.replicaset.number
+        minValue: 2
+        schema:
+          $ref: schema#/properties/spec/properties/replicas
+        type: input
+      if: isEqualToModelPathValue|Sentinel|/spec/mode
+      type: single-step-form
+    - elements:
+      - computed: setMachineToCustom
+        fetch: getMachineListForOptions
+        label:
+          text: Machine
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/machine
+        type: select
+      - computed: setLimits|cpu
+        disabled: isMachineNotCustom
+        if: isMachineCustom
+        label:
+          text: labels.cpu
+        onChange: setRequests|cpu
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+      - computed: setLimits|memory
+        disabled: isMachineNotCustom
+        if: isMachineCustom
+        label:
+          text: labels.memory
+        onChange: setRequests|memory
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+      if: notEqualToDatabaseMode|Sharded
+      label:
+        text: labels.machine_profile
+      show_label: true
+      type: single-step-form
+    - fetch: getAdminOptions|storageClasses
+      label:
+        text: labels.storage.class
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
+      type: select
+    - if: isNotEqualToModelPathValue|Sentinel|/spec/mode
+      label:
+        text: labels.storage.size
+      schema:
+        $ref: schema#/properties/spec/properties/persistence/properties/size
+      type: input
+    - computed: setAnnounce
+      if: isEqualToModelPathValue|Cluster|/spec/mode
+      label:
+        text: Announce Redis Endpoints ?
+      onChange: setAnnounce
+      schema:
+        $ref: discriminator#/announce
+      type: switch
+    - elements:
+      - label:
+          text: Type
+        options:
+        - ip
+        - hostname
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/type
+        type: select
+      - addFormLabel: Shards
+        element:
+          elements:
+          - element:
+              label:
+                text: Endpoints
+              schema:
+                $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints/items
+              type: input
+            label:
+              text: Endpoints
+            schema:
+              $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints
+            type: list-input-form
+          type: single-step-form
+        label:
+          text: Shards
+        newItemValidator: validateEndpoints
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: Endpoints
+          path: endpoints
+          type: value
+          typeOfValue: string
+        temporaryPath: /endpoints
+        type: single-step-form-array
+        validationRuleObject:
+          func: isAnnounceValid
+      if: showAnnounce
+      label:
+        text: Announce
+      schema:
+        $ref: schema#/properties/spec/properties/cluster/properties/announce
+      show_label: true
+      type: single-step-form
+    - accordion: true
+      description:
+        text: Configure Credentials, Deployment Mode etc.
+      discriminator:
+        configDatabase:
+          default: false
+          type: boolean
+        createAuthSecret:
+          default: false
+          type: boolean
+        referSecret:
+          default: false
+          type: boolean
+      elements:
+      - elements:
+        - isArray: true
+          keys:
+            label:
+              text: labels.labels.key
+          label:
+            text: labels.labels.label
+          schema:
+            $ref: schema#/properties/spec/properties/labels
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.labels.value
+            schema:
+              $ref: schema#/properties/spec/properties/labels/additionalProperties
+            type: input
+        - isArray: true
+          keys:
+            label:
+              text: labels.annotations.key
+          label:
+            text: labels.annotations.label
+          schema:
+            $ref: schema#/properties/spec/properties/annotations
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.annotations.value
+            schema:
+              $ref: schema#/properties/spec/properties/annotations/additionalProperties
+            type: input
+        hideForm: true
+        label:
+          text: Labels & Annotations
+        show_label: true
+        type: single-step-form
+      - computed: getDefault|deletionPolicy
+        customClass: mt-20
+        if: isToggleOn|deletionPolicy
+        label:
+          text: labels.deletionPolicy
+        onChange: setStorageClass
+        options:
+        - description: options.deletionPolicy.delete.description
+          text: options.deletionPolicy.delete.label
+          value: Delete
+        - description: options.deletionPolicy.halt.description
+          text: options.deletionPolicy.halt.label
+          value: Halt
+        - description: options.deletionPolicy.wipeOut.description
+          text: options.deletionPolicy.wipeOut.label
+          value: WipeOut
+        - description: options.deletionPolicy.doNotTerminate.description
+          text: options.deletionPolicy.doNotTerminate.label
+          value: DoNotTerminate
+        schema:
+          $ref: schema#/properties/spec/properties/deletionPolicy
+        type: select
+      - if: getDefaultValue|spec/admin/authCredential/customize
+        label:
+          text: Provide Authentication Credentials?
+        onChange: onAuthChange
+        schema:
+          $ref: discriminator#/createAuthSecret
+        type: switch
+      - if: showReferSecretSwitch
+        label:
+          text: Refer existing Secret?
+        onChange: onReferSecretChange
+        schema:
+          $ref: discriminator#/referSecret
+        type: switch
+      - fetch: getReferSecrets
+        if: showSecretDropdown
+        label:
+          text: Secret
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/name
+        type: select
+      - if: showReferSecret
+        label:
+          text: labels.password
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/password
+        type: input
+      - computed: isConfigAvailable
+        if: getDefaultValue|spec/admin/customConfiguration
+        label:
+          text: Configure Database?
+        onChange: clearConfiguration
+        schema:
+          $ref: discriminator#/configDatabase
+        type: switch
+      - if: isConfigDatabaseOn
+        label:
+          text: Configuration
+        schema:
+          $ref: schema#/properties/spec/properties/configuration
+        type: editor
+      - hasDescription: true
+        if: isToggleOn|deployment
+        label:
+          text: labels.deployment.name
+        options:
+        - description: labels.deployment.shared
+          text: Shared
+          value: Shared
+        - description: labels.deployment.dedicated
+          text: Dedicated
+          value: Dedicated
+        schema:
+          $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
+        type: radio
+      - if: isToggleOn|clusterTier
+        isHorizontal: true
+        label:
+          text: labels.clusterTier
+        options:
+        - text: General Purpose
+          value: GeneralPurpose
+        - text: Memory Optimized
+          value: MemoryOptimized
+        - text: CPU Optimized
+          value: CPUOptimized
+        schema:
+          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
+        type: radio
+      - disableUnselect: true
+        fetch: getAdminOptions|clusterTier/placement
+        if: isToggleOn|clusterTier/placement
+        label:
+          text: labels.placement
+        schema:
+          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+        type: select
+      - disableUnselect: true
+        fetch: getNodeTopology
+        if: isToggleOn|clusterTier/nodeTopology
+        label:
+          text: labels.nodeTopology
+        refresh: true
+        schema:
+          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+        type: select
+      hideForm: true
+      label:
+        text: Advanced Configuration
+      show_label: true
+      type: single-step-form
+    - accordion: true
+      description:
+        text: Enable Backup, Monitoring, TLS etc.
+      discriminator:
+        backup:
+          default: false
+          type: boolean
+      elements:
+      - discriminator:
+          monitoring:
+            default: false
+            type: boolean
+        elements:
+        - computed: setMonitoring
+          label:
+            text: labels.enable_monitoring
+          onChange: updateAlertValue
+          schema:
+            $ref: discriminator#/monitoring
+          type: switch
+        - customClass: mt-10
+          if: showAlerts
+          label:
+            text: labels.alert.options
+          options:
+          - text: None
+            value: none
+          - text: Critical
+            value: critical
+          - text: Warning
+            value: warning
+          - text: Info
+            value: info
+          schema:
+            $ref: schema#/properties/form/properties/alert/properties/enabled
+          sortable: true
+          type: select
+        if: isToggleOn|monitoring
+        type: single-step-form
+      - computed: setBackup
+        if: isToggleOn|backup
+        label:
+          text: Enable Backup?
+        onChange: onBackupSwitch
+        schema:
+          $ref: discriminator#/backup
+        type: switch
+      - elements:
+        - label:
+            text: Enable TLS?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+          type: switch
+        - fetch: getAdminOptions|clusterIssuers
+          if: showIssuer
+          label:
+            text: labels.clusterIssuers
+          required: true
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+          type: select
+        if: isToggleOn|tls
+        type: single-step-form
+      - elements:
+        - if: isToggleOn|expose
+          label:
+            text: Expose via Gateway?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
+          type: switch
+        type: single-step-form
+      if: showAdditionalSettings
+      label:
+        text: Additional Options
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
