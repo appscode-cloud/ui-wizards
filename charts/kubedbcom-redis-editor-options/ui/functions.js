@@ -328,7 +328,7 @@ export const useFunc = (model) => {
   )
 
   setDiscriminatorValue('bundleApiLoaded', false)
-  setDiscriminatorValue('createSentinel', true)
+  setDiscriminatorValue('createSentinel', 'false')
   setDiscriminatorValue('announce', false)
   setDiscriminatorValue('createAuthSecret', false)
   setDiscriminatorValue('referSecret', false)
@@ -1284,7 +1284,7 @@ export const useFunc = (model) => {
     // watchDependency('discriminator#/createSentinel')
     const verd = getValue(discriminator, '/createSentinel')
 
-    return !verd
+    return verd === 'false' || verd === false
   }
 
   function updateAgentValue(val) {

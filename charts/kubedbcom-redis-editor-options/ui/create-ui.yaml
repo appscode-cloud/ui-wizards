@@ -34,8 +34,6 @@ step:
     schema: schema/properties/spec/properties/cluster/properties/replicas
     type: input
   - elements:
-    - label: Sentinel Section
-      type: label-element
     - label: Sentinel Type
       watcher:
         func: onCreateSentinelChange
@@ -124,9 +122,6 @@ step:
   - init:
       type: func
       value: setAnnounce
-    if:
-      type: function
-      name: isEqualToModelPathValue|Cluster|/spec/mode
     label: Announce Redis Endpoints ?
     watcher:
       func: setAnnounce
@@ -145,9 +140,9 @@ step:
       type: select
     - type: array-item-form
       element:
-        label: Shard Endpoints (comma separated or one per line)
+        label: Shard Endpoints (comma-separated, e.g. "endpoint1,endpoint2,endpoint3")
         schema: schema/properties/spec/properties/cluster/properties/announce/properties/shards/items
-        type: textarea
+        type: input
       label: Shards
       schema: schema/properties/spec/properties/cluster/properties/announce/properties/shards
     if:
