@@ -355,7 +355,7 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
 
     const namespace = getValue(model, '/metadata/namespace')
-    watchDependency('model#/metadata/namespace')
+    // watchDependency'model#/metadata/namespace')
 
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/zookeepers`,
@@ -517,7 +517,7 @@ export const useFunc = (model) => {
 
   function ifRequestTypeEqualsTo(type) {
     const selectedType = getValue(model, '/spec/type')
-    watchDependency('model#/spec/type')
+    // watchDependency'model#/spec/type')
 
     return selectedType === type
   }
@@ -545,7 +545,6 @@ export const useFunc = (model) => {
       const dbType = getDbType({
         discriminator,
         getValue,
-        watchDependency,
       })
 
       if (dbType === 'Standalone') return true
@@ -554,7 +553,7 @@ export const useFunc = (model) => {
   }
 
   function getDbTls() {
-    watchDependency('discriminator#/dbDetails')
+    // watchDependency'discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
 
     const { spec } = dbDetails || {}
@@ -562,7 +561,7 @@ export const useFunc = (model) => {
   }
 
   function getDbType() {
-    watchDependency('discriminator#/dbDetails')
+    // watchDependency'discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
 
     const { spec } = dbDetails || {}
@@ -577,7 +576,7 @@ export const useFunc = (model) => {
   }
 
   function initDatabaseRef() {
-    watchDependency('model#/metadata/namespace')
+    // watchDependency'model#/metadata/namespace')
     const { name } = route.params || {}
     return name
   }
@@ -600,8 +599,8 @@ export const useFunc = (model) => {
   }
 
   function showAndInitName() {
-    watchDependency('model#/spec/type')
-    watchDependency('model#/spec/databaseRef/name')
+    // watchDependency'model#/spec/type')
+    // watchDependency'model#/spec/databaseRef/name')
     const ver = asDatabaseOperation(route)
 
     const selectedType = getValue(model, '/spec/type')
@@ -682,7 +681,7 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/namespace')
-    watchDependency('model#/metadata/namespace')
+    // watchDependency'model#/metadata/namespace')
 
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
@@ -720,7 +719,7 @@ export const useFunc = (model) => {
   }
 
   function isEqualToValueFromType(value) {
-    watchDependency('discriminator#/valueFromType')
+    // watchDependency'discriminator#/valueFromType')
     const valueFrom = getValue(discriminator, '/valueFromType')
     return valueFrom === value
   }
@@ -777,7 +776,7 @@ export const useFunc = (model) => {
 
   async function resourceNames(group, version, resource) {
     const namespace = getValue(model, '/metadata/namespace')
-    watchDependency('model#/metadata/namespace')
+    // watchDependency'model#/metadata/namespace')
 
     let resources = await getNamespacedResourceList(axios, storeGet, {
       namespace,
@@ -828,7 +827,7 @@ export const useFunc = (model) => {
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {
     const reconfigurationType = getValue(discriminator, '/reconfigurationType')
-    watchDependency('discriminator#/reconfigurationType')
+    // watchDependency'discriminator#/reconfigurationType')
 
     return reconfigurationType === value
   }
@@ -870,7 +869,7 @@ export const useFunc = (model) => {
   }
 
   function getRequestTypeFromRoute() {
-    const isDbloading = isDbDetailsLoading({ discriminator, model, getValue, watchDependency })
+    const isDbloading = isDbDetailsLoading({ discriminator, model, getValue })
     const { query } = route || {}
     const { requestType } = query || {}
     return isDbloading ? '' : requestType || ''
@@ -879,8 +878,8 @@ export const useFunc = (model) => {
   // ************************************** Set db details *****************************************
 
   function isDbDetailsLoading() {
-    watchDependency('discriminator#/dbDetails')
-    watchDependency('model#/spec/databaseRef/name')
+    // watchDependency'discriminator#/dbDetails')
+    // watchDependency'model#/spec/databaseRef/name')
     const dbDetails = getValue(discriminator, '/dbDetails')
     const dbName = getValue(model, '/spec/databaseRef/name')
 
@@ -888,9 +887,10 @@ export const useFunc = (model) => {
   }
 
   function setValueFromDbDetails(path, commitPath) {
-    watchDependency('discriminator#/dbDetails')
+    // watchDependency'discriminator#/dbDetails')
 
     const retValue = getValue(discriminator, `/dbDetails${path}`)
+    console.log(retValue)
 
     if (commitPath && retValue) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
@@ -911,7 +911,7 @@ export const useFunc = (model) => {
   }
 
   function setResource(path) {
-    watchDependency('discriminator#/dbDetails')
+    // watchDependency'discriminator#/dbDetails')
     const containers = getValue(discriminator, `/dbDetails${path}`) || []
     const kind = getValue(discriminator, '/dbDetails/kind')
     const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
@@ -942,8 +942,8 @@ export const useFunc = (model) => {
   }
 
   function isVerticalScaleTopologyRequired() {
-    watchDependency('discriminator#/topologyKey')
-    watchDependency('discriminator#/topologyValue')
+    // watchDependency'discriminator#/topologyKey')
+    // watchDependency'discriminator#/topologyValue')
 
     const key = getValue(discriminator, '/topologyKey')
     const value = getValue(discriminator, '/topologyValue')
@@ -1043,7 +1043,7 @@ export const useFunc = (model) => {
   }
 
   function isMachineCustom() {
-    watchDependency('discriminator#/machine')
+    // watchDependency'discriminator#/machine')
     const machine = getValue(discriminator, '/machine')
     return machine === 'custom'
   }
