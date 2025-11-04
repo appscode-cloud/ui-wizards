@@ -750,6 +750,7 @@ export const useFunc = (model) => {
     const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
     const modelPathValue = getValue(model, fullpath)
     // watchDependency(`model#${fullpath}`)
+    console.log('isMachineNotCustom', path)
     return modelPathValue !== 'custom' && !!modelPathValue
   }
 
