@@ -2,6 +2,14 @@ step:
 - type: single-step-form
   loader: initBundle
   elements:
+  - if:
+      type: function
+      name: returnFalse
+    init:
+      type: func
+      value: initBundle
+    label: ''
+    type: label-element
   - disableUnselect: true
     loader: getAdminOptions|databases/Solr/versions
     if:
@@ -14,10 +22,11 @@ step:
       type: func
       value: getDefault|databases/Solr/mode
     loader: getAdminOptions|databases/Solr/mode
+    isHorizontal: true
     if:
       type: function
       name: isToggleOn|databases/Solr/mode
-    label:  Database Mode
+    label: Database Mode
     schema: schema/properties/spec/properties/mode
     type: radio
   - elements:
@@ -26,13 +35,13 @@ step:
       type: input
     if:
       type: function
-      name: isEqualToModelPathValue|[Replicaset]|/spec/mode
+      name: isEqualToModelPathValue|Replicaset|/spec/mode
     type: block-layout
   - elements:
     - label: Replica Number
       schema: schema/properties/spec/properties/topology/properties/overseer/properties/replicas
       type: input
-    - label: Storage size
+    - label: Storage Size
       schema: schema/properties/spec/properties/topology/properties/overseer/properties/persistence/properties/size
       type: input
     - elements:
@@ -74,7 +83,7 @@ step:
       type: block-layout
     if:
       type: function
-      name: isEqualToModelPathValue|[Topology]|/spec/mode
+      name: isEqualToModelPathValue|Topology|/spec/mode
     label: Overseer
     showLabels: true
     type: block-layout
@@ -82,7 +91,7 @@ step:
     - label: Replica Number
       schema: schema/properties/spec/properties/topology/properties/data/properties/replicas
       type: input
-    - label: Storage size
+    - label: Storage Size
       schema: schema/properties/spec/properties/topology/properties/data/properties/persistence/properties/size
       type: input
     - elements:
@@ -124,7 +133,7 @@ step:
       type: block-layout
     if:
       type: function
-      name: isEqualToModelPathValue|[Topology]|/spec/mode
+      name: isEqualToModelPathValue|Topology|/spec/mode
     label: Data
     showLabels: true
     type: block-layout
@@ -132,7 +141,7 @@ step:
     - label: Replica Number
       schema: schema/properties/spec/properties/topology/properties/coordinator/properties/replicas
       type: input
-    - label: Storage size
+    - label: Storage Size
       schema: schema/properties/spec/properties/topology/properties/coordinator/properties/persistence/properties/size
       type: input
     - elements:
@@ -174,7 +183,7 @@ step:
       type: block-layout
     if:
       type: function
-      name: isEqualToModelPathValue|[Topology]|/spec/mode
+      name: isEqualToModelPathValue|Topology|/spec/mode
     label: Coordinator
     showLabels: true
     type: block-layout
@@ -216,8 +225,8 @@ step:
       type: input
     if:
       type: function
-      name: isEqualToModelPathValue|[Replicaset, Standalone]|/spec/mode
-    label: Machine profile
+      name: isEqualToModelPathValue|Replicaset,Standalone|/spec/mode
+    label: Machine Profile
     showLabels: true
     type: block-layout
   - loader: getAdminOptions|storageClasses
@@ -230,15 +239,16 @@ step:
   - if:
       type: function
       name: showStorageSizeField
-    label: Storage size
+    label: Storage Size
     schema: schema/properties/spec/properties/persistence/properties/size
     type: input
   - elements:
     - loader: getAppBindings
-      label: ZookeeperRef Name
+      label: Name
       schema: schema/properties/spec/properties/zookeeperRef/properties/name
       type: select
     label: ZookeeperRef
+    schema: schema/properties/spec/properties/zookeeperRef
     showLabels: true
     type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
@@ -250,9 +260,9 @@ step:
       - type: object-item
         label: Annotations
         schema: schema/properties/spec/properties/annotations/additionalProperties
+      hideBlock: true
       label: Labels & Annotations
       showLabels: true
-      hideBlock: true
       type: block-layout
     - init:
         type: func
@@ -336,12 +346,12 @@ step:
     - if:
         type: function
         name: isToggleOn|deployment
-      label: Deployment
+      label: Deployment Mode
       options:
-      - description: shared
+      - description: For exploring databases when high-performance is not required.
         text: Shared
         value: Shared
-      - description: Dedicated
+      - description: For production applications with sophisticated workload
         text: Dedicated
         value: Dedicated
       schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
@@ -350,7 +360,7 @@ step:
         type: function
         name: isToggleOn|clusterTier
       isHorizontal: true
-      label: ClusterTier
+      label: Cluster Tier
       options:
       - text: General Purpose
         value: GeneralPurpose
@@ -373,9 +383,10 @@ step:
       if:
         type: function
         name: isToggleOn|clusterTier/nodeTopology
-      label: NodeTopology
+      label: Node Topology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
+    hideBlock: true
     label: Advanced Configuration
     showLabels: true
     type: block-layout
@@ -427,5 +438,4 @@ step:
     showLabels: true
     type: block-layout
   id: options
-  # title: steps.0.label
 type: multi-step-form
