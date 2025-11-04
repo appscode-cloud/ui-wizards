@@ -837,7 +837,6 @@ export const useFunc = (model) => {
     const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
     const modelPathValue = getValue(model, fullpath)
     // watchDependency(`model#${fullpath}`)
-    console.log('isMachineNotCustom ', modelPathValue !== 'custom' && !!modelPathValue)
     return modelPathValue !== 'custom' && !!modelPathValue
   }
 
@@ -908,7 +907,6 @@ export const useFunc = (model) => {
   }
 
   function setLimits(resource, type) {
-    console.log('setLimits ', resource, type)
     const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
     // watchDependency(`model#${path}`)
     const selectedMachine = getValue(model, path) || 'custom'
