@@ -850,7 +850,7 @@ export const useFunc = (model) => {
       const sizeInBytes = parseSize(volume)
       const inputSizeInBytes = parseSize(input)
 
-      if (inputSizeInBytes >= sizeInBytes) return { isInvalid: false }
+      if (inputSizeInBytes >= sizeInBytes) return
       else return { isInvalid: true, message: 'Cannot expand to lower volume!' }
     } catch (err) {
       return { isInvalid: true, message: err.message || 'Invalid' }
