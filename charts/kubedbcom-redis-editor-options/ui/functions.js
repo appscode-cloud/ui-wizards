@@ -328,7 +328,7 @@ export const useFunc = (model) => {
   )
 
   setDiscriminatorValue('bundleApiLoaded', false)
-  setDiscriminatorValue('createSentinel', 'false')
+  setDiscriminatorValue('createSentinel', 'true')
   setDiscriminatorValue('announce', false)
   setDiscriminatorValue('createAuthSecret', false)
   setDiscriminatorValue('referSecret', false)
@@ -1339,6 +1339,10 @@ export const useFunc = (model) => {
     if (!zones.length) commit('wizard/model$delete', 'form/capi/sku')
   }
 
+  function returnTrue() {
+    return 'true'
+  }
+
   return {
     checkIfFeatureOn,
     clearConfiguration,
@@ -1380,6 +1384,7 @@ export const useFunc = (model) => {
     onCreateSentinelChange,
     onReferSecretChange,
     returnFalse,
+    returnTrue,
     setAnnounce,
     setBackup,
     setLimits,
