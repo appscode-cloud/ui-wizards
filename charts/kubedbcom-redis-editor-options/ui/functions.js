@@ -1178,7 +1178,7 @@ export const useFunc = (model) => {
   function setRequests(resource) {
     const modelPath = `/spec/podResources/resources/requests/${resource}`
     const val = getValue(model, modelPath)
-    commitPath = `/spec/podResources/resources/limits/${resource}`
+    const commitPath = `/spec/podResources/resources/limits/${resource}`
     commit('wizard/model$update', {
       path: commitPath,
       value: val,
