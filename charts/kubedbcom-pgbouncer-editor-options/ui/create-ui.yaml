@@ -1,308 +1,280 @@
-steps:
-- form:
-    discriminator:
-      bundleApiLoaded:
-        default: false
-        type: boolean
+step:
+- type: single-step-form
+  loader: initBundle
+  elements:
+  - disableUnselect: true
+    loader: getAdminOptions|databases/PgBouncer/versions
+    if:
+      type: function
+      name: isToggleOn|databases/PgBouncer/versions
+    label: Database Version
+    schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
+    type: select
+  - init:
+      type: func
+      value: getDefault|databases/PgBouncer/mode
+    loader: getAdminOptions|databases/PgBouncer/mode
+    isHorizontal: true
+    if:
+      type: function
+      name: isToggleOn|databases/PgBouncer/mode
+    label: Database Mode
+    watcher:
+      func: onDatabaseModeChange
+      paths:
+        - schema/properties/spec/properties/mode
+    schema: schema/properties/spec/properties/mode
+    type: radio
+  - if:
+      type: function
+      name: isEqualToModelPathValue|Replicaset|/spec/mode
+    label: Replica number
+    schema: schema/properties/spec/properties/replicas
+    type: input
+  - elements:
+    - init:
+        type: func
+        value: setMachineToCustom
+      loader: getMachineListForOptions
+      label: Machine
+      schema: schema/properties/spec/properties/podResources/properties/machine
+      type: select
+    - init:
+        type: func
+        value: setLimits|cpu
+      disable: isMachineNotCustom
+      if:
+        type: function
+        name: isMachineCustom
+      label: CPU
+      watcher:
+        func: setRequests|cpu
+        paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+      type: input
+    - init:
+        type: func
+        value: setLimits|memory
+      disable: isMachineNotCustom
+      if:
+        type: function
+        name: isMachineCustom
+      label: Memory
+      watcher:
+        func: setRequests|memory
+        paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+      type: input
+    label: Machine Profile
+    showLabels: true
+    type: block-layout
+  - label: Database Reference Name
+    schema: schema/properties/spec/properties/database/properties/databaseName
+    type: input
+  - loader: getAppBindings|postgres
+    label: Select Database Reference
+    watcher:
+      func: onRefChange
+      paths:
+        - temp/pgRef
+    refresh: true
+    validation:
+      type: required
+    schema: temp/pgRef
+    type: select
+  - description: Configure Credentials, Deployment Mode etc.
     elements:
-    - computed: initBundle
-      if: returnFalse
-      type: label-element
-    - disableUnselect: true
-      fetch: getAdminOptions|databases/PgBouncer/versions
-      if: isToggleOn|databases/PgBouncer/versions
-      label:
-        text: labels.database.version
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
-      type: select
-    - computed: getDefault|databases/PgBouncer/mode
-      fetch: getAdminOptions|databases/PgBouncer/mode
-      hasDescription: true
-      if: isToggleOn|databases/PgBouncer/mode
-      label:
-        text: labels.database.mode
-      onChange: onDatabaseModeChange
-      schema:
-        $ref: schema#/properties/spec/properties/mode
-      type: radio
-    - if: isEqualToModelPathValue|Replicaset|/spec/mode
-      label:
-        text: labels.replicaset.number
-      schema:
-        $ref: schema#/properties/spec/properties/replicas
-      type: input
     - elements:
-      - computed: setMachineToCustom
-        fetch: getMachineListForOptions
-        label:
-          text: Machine
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/machine
-        type: select
-      - computed: setLimits|cpu
-        disabled: isMachineNotCustom
-        if: isMachineCustom
-        label:
-          text: labels.cpu
-        onChange: setRequests|cpu
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-        type: input
-      - computed: setLimits|memory
-        disabled: isMachineNotCustom
-        if: isMachineCustom
-        label:
-          text: labels.memory
-        onChange: setRequests|memory
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-        type: input
-      label:
-        text: labels.machine_profile
-      show_label: true
-      type: single-step-form
-    - label:
-        text: labels.databaseref.name
-      schema:
-        $ref: schema#/properties/spec/properties/database/properties/databaseName
-      type: input
-    - fetch: getAppBindings|postgres
-      label:
-        text: labels.databaseref.select
-      onChange: onRefChange
-      refresh: true
-      required: true
-      schema:
-        $ref: discriminator#/pgRef
+      - type: object-item
+        label: Labels
+        schema: schema/properties/spec/properties/labels/additionalProperties
+      - type: object-item
+        label: Annotations
+        schema: schema/properties/spec/properties/annotations/additionalProperties
+      label: Labels & Annotations
+      showLabels: true
+      hideBlock: true
+      type: block-layout
+    - init:
+        type: func
+        value: getDefault|deletionPolicy
+      customClass: mt-20
+      if:
+        type: function
+        name: isToggleOn|deletionPolicy
+      label: Deletion Policy
+      options:
+      - description: options.deletionPolicy.delete.description
+        text: Delete
+        value: Delete
+      - description: options.deletionPolicy.wipeOut.description
+        text: WipeOut
+        value: WipeOut
+      - description: options.deletionPolicy.doNotTerminate.description
+        text: DoNotTerminate
+        value: DoNotTerminate
+      schema: schema/properties/spec/properties/deletionPolicy
       type: select
-    - accordion: true
-      description:
-        text: Configure Credentials, Deployment Mode etc.
-      discriminator:
-        configDatabase:
-          default: false
-          type: boolean
-        createAuthSecret:
-          default: false
-          type: boolean
-        pgRef:
-          default: {}
-          type: object
-        referSecret:
-          default: false
-          type: boolean
-      elements:
-      - elements:
-        - isArray: true
-          keys:
-            label:
-              text: labels.labels.key
-          label:
-            text: labels.labels.label
-          schema:
-            $ref: schema#/properties/spec/properties/labels
-          type: key-value-input-form
-          values:
-            label:
-              text: labels.labels.value
-            schema:
-              $ref: schema#/properties/spec/properties/labels/additionalProperties
-            type: input
-        - isArray: true
-          keys:
-            label:
-              text: labels.annotations.key
-          label:
-            text: labels.annotations.label
-          schema:
-            $ref: schema#/properties/spec/properties/annotations
-          type: key-value-input-form
-          values:
-            label:
-              text: labels.annotations.value
-            schema:
-              $ref: schema#/properties/spec/properties/annotations/additionalProperties
-            type: input
-        hideForm: true
-        label:
-          text: Labels & Annotations
-        show_label: true
-        type: single-step-form
-      - computed: getDefault|deletionPolicy
-        customClass: mt-20
-        if: isToggleOn|deletionPolicy
-        label:
-          text: labels.deletionPolicy
+    - if:
+        type: function
+        name: getDefaultValue|spec/admin/authCredential/customize
+      label: Provide Authentication Credentials?
+      watcher:
+        func: onAuthChange
+        paths:
+          - temp/createAuthSecret
+      schema: temp/createAuthSecret
+      type: switch
+    - if:
+        type: function
+        name: showReferSecretSwitch
+      label: Refer existing Secret?
+      watcher:
+        func: onReferSecretChange
+        paths:
+          - temp/referSecret
+      schema: temp/referSecret
+      type: switch
+    - loader: getReferSecrets
+      if:
+        type: function
+        name: showSecretDropdown
+      label: Secret
+      schema: schema/properties/spec/properties/authSecret/properties/name
+      type: select
+    - if:
+        type: function
+        name: showReferSecret
+      label: Password
+      schema: schema/properties/spec/properties/authSecret/properties/password
+      type: input
+    - init:
+        type: func
+        value: isConfigAvailable
+      if:
+        type: function
+        name: getDefaultValue|spec/admin/customConfiguration
+      label: Configure Database?
+      watcher:
+        func: clearConfiguration
+        paths:
+          - temp/configDatabase
+      schema: temp/configDatabase
+      type: switch
+    - if:
+        type: function
+        name: isConfigDatabaseOn
+      label: Configuration
+      schema: schema/properties/spec/properties/configuration
+      type: textarea
+    - label: Sync Users
+      schema: schema/properties/spec/properties/database/properties/syncUsers
+      type: switch
+    - isHorizontal: true
+      if:
+        type: function
+        name: isToggleOn|deployment
+      label: Deployment Mode
+      options:
+      - description: Shared
+        text: Shared
+        value: Shared
+      - description: Dedicated
+        text: Dedicated
+        value: Dedicated
+      schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
+      type: radio
+    - if:
+        type: function
+        name: isToggleOn|clusterTier
+      isHorizontal: true
+      label: Cluster Tier
+      options:
+      - text: General Purpose
+        value: GeneralPurpose
+      - text: Memory Optimized
+        value: MemoryOptimized
+      - text: CPU Optimized
+        value: CPUOptimized
+      schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
+      type: radio
+    - disableUnselect: true
+      loader: getAdminOptions|clusterTier/placement
+      if:
+        type: function
+        name: isToggleOn|clusterTier/placement
+      label: Placement Policy
+      schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
+    - disableUnselect: true
+      loader: getNodeTopology
+      if:
+        type: function
+        name: isToggleOn|clusterTier/nodeTopology
+      label: Node Topology
+      schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    label: Advanced Configuration
+    showLabels: true
+    type: block-layout
+  - description: Enable Backup, Monitoring, TLS etc.
+    elements:
+    - elements:
+      - init:
+          type: func
+          value: setMonitoring
+        label: Enable Monitoring
+        watcher:
+          func: updateAlertValue
+          paths:
+            - temp/monitoring
+        schema: temp/monitoring
+        type: switch
+      - customClass: mt-10
+        if:
+          type: function
+          name: showAlerts
+        label: Alert Options
         options:
-        - description: options.deletionPolicy.delete.description
-          text: options.deletionPolicy.delete.label
-          value: Delete
-        - description: options.deletionPolicy.wipeOut.description
-          text: options.deletionPolicy.wipeOut.label
-          value: WipeOut
-        - description: options.deletionPolicy.doNotTerminate.description
-          text: options.deletionPolicy.doNotTerminate.label
-          value: DoNotTerminate
-        schema:
-          $ref: schema#/properties/spec/properties/deletionPolicy
+        - text: None
+          value: none
+        - text: Critical
+          value: critical
+        - text: Warning
+          value: warning
+        - text: Info
+          value: info
+        schema: schema/properties/form/properties/alert/properties/enabled
+        sortable: true
         type: select
-      - if: getDefaultValue|spec/admin/authCredential/customize
-        label:
-          text: Provide Authentication Credentials?
-        onChange: onAuthChange
-        schema:
-          $ref: discriminator#/createAuthSecret
+      if:
+        type: function
+        name: isToggleOn|monitoring
+      type: block-layout
+    - elements:
+      - if:
+          type: function
+          name: isToggleOn|tls
+        label: Enable TLS?
+        schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
-      - if: showReferSecretSwitch
-        label:
-          text: Refer existing Secret?
-        onChange: onReferSecretChange
-        schema:
-          $ref: discriminator#/referSecret
-        type: switch
-      - fetch: getReferSecrets
-        if: showSecretDropdown
-        label:
-          text: Secret
-        schema:
-          $ref: schema#/properties/spec/properties/authSecret/properties/name
+      - loader: getAdminOptions|clusterIssuers
+        if:
+          type: function
+          name: showIssuer
+        label: Cluster Issuers
+        validation:
+          type: required
+        schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
         type: select
-      - if: showReferSecret
-        label:
-          text: labels.password
-        schema:
-          $ref: schema#/properties/spec/properties/authSecret/properties/password
-        type: input
-      - computed: isConfigAvailable
-        if: getDefaultValue|spec/admin/customConfiguration
-        label:
-          text: Configure Database?
-        onChange: clearConfiguration
-        schema:
-          $ref: discriminator#/configDatabase
-        type: switch
-      - if: isConfigDatabaseOn
-        label:
-          text: Configuration
-        schema:
-          $ref: schema#/properties/spec/properties/configuration
-        type: editor
-      - label:
-          text: labels.sync_users_question
-        schema:
-          $ref: schema#/properties/spec/properties/database/properties/syncUsers
-        type: switch
-      - hasDescription: true
-        if: isToggleOn|deployment
-        label:
-          text: labels.deployment.name
-        options:
-        - description: labels.deployment.shared
-          text: Shared
-          value: Shared
-        - description: labels.deployment.dedicated
-          text: Dedicated
-          value: Dedicated
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
-        type: radio
-      - if: isToggleOn|clusterTier
-        isHorizontal: true
-        label:
-          text: labels.clusterTier
-        options:
-        - text: General Purpose
-          value: GeneralPurpose
-        - text: Memory Optimized
-          value: MemoryOptimized
-        - text: CPU Optimized
-          value: CPUOptimized
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
-        type: radio
-      - disableUnselect: true
-        fetch: getAdminOptions|clusterTier/placement
-        if: isToggleOn|clusterTier/placement
-        label:
-          text: labels.placement
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
-        type: select
-      - disableUnselect: true
-        fetch: getNodeTopology
-        if: isToggleOn|clusterTier/nodeTopology
-        label:
-          text: labels.nodeTopology
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
-        type: select
-      hideForm: true
-      label:
-        text: Advanced Configuration
-      show_label: true
-      type: single-step-form
-    - accordion: true
-      description:
-        text: Enable Backup, Monitoring, TLS etc.
-      discriminator:
-        backup:
-          default: false
-          type: boolean
-      elements:
-      - discriminator:
-          monitoring:
-            default: false
-            type: boolean
-        elements:
-        - computed: setMonitoring
-          label:
-            text: labels.enable_monitoring
-          onChange: updateAlertValue
-          schema:
-            $ref: discriminator#/monitoring
-          type: switch
-        - customClass: mt-10
-          if: showAlerts
-          label:
-            text: labels.alert.options
-          options:
-          - text: None
-            value: none
-          - text: Critical
-            value: critical
-          - text: Warning
-            value: warning
-          - text: Info
-            value: info
-          schema:
-            $ref: schema#/properties/form/properties/alert/properties/enabled
-          sortable: true
-          type: select
-        if: isToggleOn|monitoring
-        type: single-step-form
-      - elements:
-        - if: isToggleOn|tls
-          label:
-            text: Enable TLS?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-          type: switch
-        - fetch: getAdminOptions|clusterIssuers
-          if: showIssuer
-          label:
-            text: labels.clusterIssuers
-          required: true
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-          type: select
-        type: single-step-form
-      if: showAdditionalSettings
-      label:
-        text: Additional Options
-      show_label: true
-      type: single-step-form
-    type: single-step-form
+      type: block-layout
+    if:
+      type: function
+      name: showAdditionalSettings
+    label: Additional Options
+    showLabels: true
+    type: block-layout
   id: options
-  title: steps.0.label
 type: multi-step-form
