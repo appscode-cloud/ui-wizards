@@ -132,28 +132,30 @@ step:
         - temp/announce
     schema: temp/announce
     type: switch
-  - elements:
-    - label: Type
-      options:
-      - text: ip
-        value: ip
-      - text: hostname
-        value: hostname
-      schema: schema/properties/spec/properties/cluster/properties/announce/properties/type
-      type: select
-    - type: array-item-form
-      element:
-        label: Shard Endpoints (comma-separated, e.g. "endpoint1,endpoint2,endpoint3")
-        schema: schema/properties/spec/properties/cluster/properties/announce/properties/shards/items
-        type: input
-      label: Shards
-      schema: schema/properties/spec/properties/cluster/properties/announce/properties/shards
+  - type: block-layout
+    label: Announce
+    showLabels: true
     if:
       type: function
       name: showAnnounce
-    label: Announce
-    showLabels: true
-    type: block-layout
+    elements:
+      - label: Type
+        type: select
+        options: 
+        - ip
+        - hostname
+        schema: schema/properties/spec/properties/cluster/properties/announce/properties/type 
+      - type: block-layout
+        label: Shards
+        showLabels: true
+        elements:
+          - label: Endpoints
+            schema: schema/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints
+            type: array-item-form
+            element: 
+              label: Endpoints
+              schema: schema/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints/items
+              type: input
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
