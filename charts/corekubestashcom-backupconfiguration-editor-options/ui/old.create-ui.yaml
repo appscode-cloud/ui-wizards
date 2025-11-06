@@ -1,0 +1,237 @@
+steps:
+- form:
+    discriminator:
+      nameSpaceApi:
+        default: false
+        type: boolean
+    elements:
+    - computed: init
+      if: returnFalse
+      type: label-element
+    - fetch: getNamespaces
+      label:
+        text: Namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - label:
+        text: Name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - fetch: getData|storageRef
+      label:
+        text: Storage Ref
+      schema:
+        $ref: schema#/properties/spec/properties/backend/properties/storageRef
+      type: select
+    - fetch: getData|retentionPolicy
+      label:
+        text: Retention Policy
+      schema:
+        $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy
+      type: select
+    - elements:
+      - isArray: true
+        keys:
+          label:
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/spec/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.labels.value
+          schema:
+            $ref: schema#/properties/spec/properties/labels/additionalProperties
+          type: input
+      - isArray: true
+        keys:
+          label:
+            text: labels.annotations.key
+        label:
+          text: labels.annotations.label
+        schema:
+          $ref: schema#/properties/spec/properties/annotations
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.annotations.value
+          schema:
+            $ref: schema#/properties/spec/properties/annotations/additionalProperties
+          type: input
+      hideForm: true
+      label:
+        text: Labels & Annotations
+      show_label: true
+      type: single-step-form
+    - elements:
+      - addFormLabel: Session
+        element:
+          elements:
+          - label:
+              text: Session Name
+            required: true
+            schema:
+              $ref: schema#/items/properties/sessionName
+            type: input
+          - label:
+              text: Schedule
+            required: true
+            schema:
+              $ref: schema#/items/properties/schedule
+            type: input
+          - elements:
+            - inputType: number
+              label:
+                text: Security Context
+              schema:
+                $ref: schema#/properties/jobTemplate/properties/securityContext
+              type: input
+            - fetch: getAddon
+              label:
+                text: Name
+              onChange: clearTasks
+              required: true
+              schema:
+                $ref: schema#/items/properties/addon/properties/name
+              type: select
+            - addFormLabel: Task
+              element:
+                elements:
+                - fetch: getTaskNames
+                  label:
+                    text: Name
+                  required: true
+                  schema:
+                    $ref: schema#/items/properties/name
+                  type: select
+                - label:
+                    text: Params
+                  schema:
+                    $ref: schema#/items/properties/params
+                  type: editor
+                type: single-step-form
+              label:
+                text: Tasks
+              required: true
+              resetDependencyPath: /session/addon/name
+              resetOnChange: true
+              schema:
+                $ref: schema#/properties/tasks
+              tableContents:
+              - inTableColumn: true
+                label:
+                  text: Name
+                path: name
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
+                  text: Params
+                path: params
+                type: value
+                typeOfValue: string
+              type: single-step-form-array
+            label:
+              text: Addon
+            schema:
+              $ref: schema#/items/properties/addon
+            show_label: true
+            type: single-step-form
+          - elements:
+            - fetch: getNamespaces
+              label:
+                text: Namespace
+              required: true
+              schema:
+                $ref: schema#/properties/namespace
+              type: select
+            - fetch: getEncryptionSecretNames
+              label:
+                text: Name
+              required: true
+              schema:
+                $ref: schema#/items/properties/encryptionSecret/properties/name
+              type: select
+            label:
+              text: Encryption Secret
+            schema:
+              $ref: schema#/items/properties/encryptionSecret
+            show_label: true
+            type: single-step-form
+          - label:
+              text: Repo Name
+            required: true
+            schema:
+              $ref: schema#/items/properties/repoName
+            type: input
+          type: single-step-form
+        label:
+          text: Session
+        schema:
+          $ref: schema#/properties/spec/properties/sessions
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: Repo Name
+          path: repoName
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: Schedule
+          path: schedule
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: Session Name
+          path: sessionName
+          type: value
+          typeOfValue: string
+        temporaryPath: /session
+        type: single-step-form-array
+      type: single-step-form
+    - elements:
+      - fetch: getApiGroup
+        label:
+          text: Api Group
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/apiGroup
+        type: select
+      - fetch: getKinds
+        label:
+          text: Kind
+        onChange: setVersion
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/kind
+        type: select
+      - fetch: getNamespaces
+        label:
+          text: Namespace
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/namespace
+        type: select
+      - fetch: getTargetName
+        label:
+          text: Name
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/name
+        type: select
+      hideForm: true
+      if: showTarget
+      label:
+        text: Target
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
