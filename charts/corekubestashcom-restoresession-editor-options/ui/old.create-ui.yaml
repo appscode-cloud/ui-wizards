@@ -1,0 +1,125 @@
+steps:
+- form:
+    elements:
+    - discriminator:
+        database:
+          default: {}
+          type: object
+        nameSpaceApi:
+          default: false
+          type: boolean
+      elements:
+      - fetch: fetchNamespaces
+        hasGroup: isRancherManaged
+        if: isConsole
+        label:
+          text: Select Namespace
+        schema:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        type: select
+      - computed: init
+        if: returnFalse
+        type: input
+      - if: isConsole
+        label:
+          text: labels.name
+        schema:
+          $ref: schema#/properties/metadata/properties/release/properties/name
+        type: input
+      - elements:
+        - computed: initMetadata
+          if: returnFalse
+          type: input
+        - discriminator:
+            repository:
+              type: object
+          elements:
+          - disableUnselect: true
+            fetch: getRepositories
+            label:
+              text: Repository
+            onChange: onRepoChange
+            refresh: true
+            required: true
+            schema:
+              $ref: discriminator#/properties/repository
+            type: select
+          - disableUnselect: true
+            fetch: getSnapshots
+            label:
+              text: labels.dataSource.snapshot
+            refresh: true
+            schema:
+              $ref: schema#/properties/spec/properties/dataSource/properties/snapshot
+            type: select
+          schema:
+            $ref: schema#/properties/spec/properties/dataSource
+          type: single-step-form
+        - discriminator:
+            params:
+              default: ""
+              type: string
+          elements:
+          - fetch: getAddons
+            if: isConsole
+            label:
+              text: labels.name
+            refresh: true
+            schema:
+              $ref: schema#/properties/spec/properties/addon/properties/name
+            type: select
+          - label:
+              text: Additional Parameters
+            onChange: onParameterChange
+            schema:
+              $ref: discriminator#/properties/params
+            type: textarea
+          - computed: setSecurityContext
+            if: returnFalse
+            type: input
+          schema:
+            $ref: schema#/properties/spec/properties/addon
+          type: single-step-form
+        - elements:
+          - fetch: getApiGroup
+            label:
+              text: Api Group
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/apiGroup
+            type: select
+          - fetch: getKinds
+            label:
+              text: Kind
+            onChange: setVersion
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/kind
+            type: select
+          - fetch: fetchNamespaces
+            hasGroup: isRancherManaged
+            label:
+              text: Namespace
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/namespace
+            type: select
+          - fetch: getTargetName
+            label:
+              text: Name
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/name
+            type: select
+          hideForm: true
+          if: isConsole
+          label:
+            text: Target
+          schema:
+            $ref: schema#/properties/spec/properties/target
+          show_label: true
+          type: single-step-form
+        schema:
+          $ref: schema#/properties/spec
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
