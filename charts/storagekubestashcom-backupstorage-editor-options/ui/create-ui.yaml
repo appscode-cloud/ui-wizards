@@ -1,287 +1,184 @@
-steps:
-- form:
-    elements:
+step:
+- type: single-step-form
+  elements:
+  - loader: getNamespaces
+    hasGroup: isRancherManaged
+    label: Namespace
+    schema: schema/properties/metadata/properties/release/properties/namespace
+    type: select
+  - label: Name
+    schema: schema/properties/metadata/properties/release/properties/name
+    type: input
+  - elements:
+    - type: object-item
+      label: Labels
+      schema: schema/properties/spec/properties/labels/additionalProperties
+    - type: object-item
+      label: Annotations
+      schema: schema/properties/spec/properties/annotations/additionalProperties
+    label: Labels & Annotations
+    showLabels: true
+    hideBlock: true
+    type: block-layout
+  - customClass: mt-20
+    label: Deletion Policy
+    options:
+    - description: options.deletionPolicy.delete.description
+      text: Delete (Keep only database Secrets and backed up data)
+      value: Delete
+    - description: options.deletionPolicy.wipeOut.description
+      text: WipeOut (Delete everything including backed up data)
+      value: WipeOut
+    schema: schema/properties/spec/properties/deletionPolicy
+    type: select
+  - label: Security Context
+    schema: schema/properties/spec/properties/runtimeSettings/properties/securityContext
+    type: input
+  - elements:
+    - label: Provider
+      options:
+      - text: Azure
+        value: azure
+      - text: S3
+        value: s3
+      - text: GCS
+        value: gcs
+      - text: Local
+        value: local
+      init:
+        type: func
+        value: initBackendProvider
+      watcher:
+        func: onBackendProviderChange
+        paths:
+          - schema/properties/spec/properties/backend/properties/provider
+      schema: schema/properties/spec/properties/backend/properties/provider
+      type: select
     - elements:
-      - fetch: getNamespaces
-        hasGroup: isRancherManaged
-        label:
-          text: Namespace
-        schema:
-          $ref: schema#/properties/metadata/properties/release/properties/namespace
-        type: select
-      - label:
-          text: Name
-        schema:
-          $ref: schema#/properties/metadata/properties/release/properties/name
+      - elements:
+        - label: Account Key
+          schema: schema/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
+          type: input
+        - label: Account Name
+          schema: schema/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
+          type: input
+        label: Auth
+        showLabels: true
+        type: block-layout
+      - elements:
+        - label: Container
+          schema: schema/properties/spec/properties/backend/properties/azure/properties/spec/properties/container
+          type: input
+        - label: Max Connections
+          schema: schema/properties/spec/properties/backend/properties/azure/properties/spec/properties/maxConnections
+          type: input
+        - label: Prefix
+          schema: schema/properties/spec/properties/backend/properties/azure/properties/spec/properties/prefix
+          type: input
+        label: Spec
+        showLabels: true
+        type: block-layout
+      if:
+        type: function
+        name: isProvider|azure
+      label: Azure
+      showLabels: true
+      type: block-layout
+    - elements:
+      - elements:
+        - label: Google Project ID
+          schema: schema/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
+          type: input
+        - label: Google Service Account JSON Key
+          schema: schema/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+          type: input
+        label: Auth
+        showLabels: true
+        type: block-layout
+      - elements:
+        - label: Bucket
+          schema: schema/properties/spec/properties/backend/properties/gcs/properties/spec/properties/bucket
+          type: input
+        - label: Max Connections
+          schema: schema/properties/spec/properties/backend/properties/gcs/properties/spec/properties/maxConnections
+          type: input
+        - label: Prefix
+          schema: schema/properties/spec/properties/backend/properties/gcs/properties/spec/properties/prefix
+          type: input
+        label: Spec
+        showLabels: true
+        type: block-layout
+      if:
+        type: function
+        name: isProvider|gcs
+      label: GCS
+      showLabels: true
+      type: block-layout
+    - elements:
+      - elements:
+        - label: AWS Access Key ID
+          schema: schema/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
+          type: input
+        - label: AWS Secret Access Key
+          schema: schema/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
+          type: input
+        - label: CA Cert Data
+          schema: schema/properties/spec/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
+          type: textarea
+        label: Auth
+        showLabels: true
+        type: block-layout
+      - elements:
+        - label: Insecure TLS
+          schema: schema/properties/spec/properties/backend/properties/s3/properties/spec/properties/insecureTLS
+          type: switch
+        - label: Bucket
+          schema: schema/properties/spec/properties/backend/properties/s3/properties/spec/properties/bucket
+          type: input
+        - label: End Point
+          schema: schema/properties/spec/properties/backend/properties/s3/properties/spec/properties/endpoint
+          type: input
+        - label: Prefix
+          schema: schema/properties/spec/properties/backend/properties/s3/properties/spec/properties/prefix
+          type: input
+        - label: Region
+          schema: schema/properties/spec/properties/backend/properties/s3/properties/spec/properties/region
+          type: input
+        label: Spec
+        showLabels: true
+        type: block-layout
+      if:
+        type: function
+        name: isProvider|s3
+      label: S3
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Mount Path
+        schema: schema/properties/spec/properties/backend/properties/local/properties/mountPath
+        type: input
+      - label: Sub Path
+        schema: schema/properties/spec/properties/backend/properties/local/properties/subPath
         type: input
       - elements:
-        - isArray: true
-          keys:
-            label:
-              text: Key
-          label:
-            text: Labels
-          schema:
-            $ref: schema#/properties/spec/properties/labels
-          type: key-value-input-form
-          values:
-            label:
-              text: Value
-            schema:
-              $ref: schema#/properties/spec/properties/labels/additionalProperties
-            type: input
-        - isArray: true
-          keys:
-            label:
-              text: Key
-          label:
-            text: Annotations
-          schema:
-            $ref: schema#/properties/spec/properties/annotations
-          type: key-value-input-form
-          values:
-            label:
-              text: Value
-            schema:
-              $ref: schema#/properties/spec/properties/annotations/additionalProperties
-            type: input
-        hideForm: true
-        label:
-          text: Labels & Annotations
-        show_label: true
-        type: single-step-form
-      - customClass: mt-20
-        label:
-          text: Deletion Policy
-        options:
-        - description: options.deletionPolicy.delete.description
-          text: Delete (Keep only database Secrets and backed up data)
-          value: Delete
-        - description: options.deletionPolicy.wipeOut.description
-          text: WipeOut (Delete everything including backed up data)
-          value: WipeOut
-        schema:
-          $ref: schema#/properties/spec/properties/deletionPolicy
-        type: select
-      - label:
-          text: Security Context
-        schema:
-          $ref: schema#/properties/spec/properties/runtimeSettings/properties/securityContext
-        type: input
-      - elements:
-        - label:
-            text: Provider
-          options:
-          - text: Azure
-            value: azure
-          - text: S3
-            value: s3
-          - text: GCS
-            value: gcs
-          - text: Local
-            value: local
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/provider
-          type: select
-        - elements:
-          - elements:
-            - label:
-                text: Account Key
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
-              type: input
-            - label:
-                text: Account Name
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
-              type: input
-            label:
-              text: Auth
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth
-            show_label: true
-            type: single-step-form
-          - elements:
-            - label:
-                text: Container
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/container
-              type: input
-            - label:
-                text: Max Connections
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/maxConnections
-              type: input
-            - label:
-                text: Prefix
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/prefix
-              type: input
-            label:
-              text: Spec
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec
-            show_label: true
-            type: single-step-form
-          if: isProvider|azure
-          label:
-            text: Azure
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/azure
-          show_label: true
-          type: single-step-form
-        - elements:
-          - elements:
-            - label:
-                text: Google Project ID
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
-              type: input
-            - label:
-                text: Google Service Account JSON Key
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
-              type: input
-            label:
-              text: Auth
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth
-            show_label: true
-            type: single-step-form
-          - elements:
-            - label:
-                text: Bucket
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/bucket
-              type: input
-            - label:
-                text: Max Connections
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/maxConnections
-              type: input
-            - label:
-                text: Prefix
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/prefix
-              type: input
-            label:
-              text: Spec
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec
-            show_label: true
-            type: single-step-form
-          if: isProvider|gcs
-          label:
-            text: GCS
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/gcs
-          show_label: true
-          type: single-step-form
-        - elements:
-          - elements:
-            - label:
-                text: AWS Access Key ID
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
-              type: input
-            - label:
-                text: AWS Secret Access Key
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
-              type: input
-            - label:
-                text: CA Cert Data
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
-              type: textarea
-            label:
-              text: Auth
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth
-            show_label: true
-            type: single-step-form
-          - elements:
-            - label:
-                text: Insecure TLS
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/insecureTLS
-              type: switch
-            - label:
-                text: Bucket
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/bucket
-              type: input
-            - label:
-                text: End Point
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/endpoint
-              type: input
-            - label:
-                text: Prefix
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/prefix
-              type: input
-            - label:
-                text: Region
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/region
-              type: input
-            label:
-              text: Spec
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec
-            show_label: true
-            type: single-step-form
-          if: isProvider|s3
-          label:
-            text: S3
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/s3
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: Mount Path
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/local/properties/mountPath
-            type: input
-          - label:
-              text: Sub Path
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/local/properties/subPath
-            type: input
-          - elements:
-            - label:
-                text: claim Name
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/claimName
-              type: input
-            - label:
-                text: ReadOnly?
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/readOnly
-              type: switch
-            label:
-              text: Persistent Volume Claim
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim
-            show_label: true
-            type: single-step-form
-          if: isProvider|local
-          label:
-            text: Local
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/local
-          show_label: true
-          type: single-step-form
-        label:
-          text: Backend
-        show_label: true
-        type: single-step-form
-      schema:
-        $ref: schema#/properties/spec
-      type: single-step-form
-    type: single-step-form
+        - label: claim Name
+          schema: schema/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/claimName
+          type: input
+        - label: ReadOnly?
+          schema: schema/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/readOnly
+          type: switch
+        label: Persistent Volume Claim
+        showLabels: true
+        type: block-layout
+      if:
+        type: function
+        name: isProvider|local
+      label: Local
+      showLabels: true
+      type: block-layout
+    label: Backend
+    showLabels: true
+    type: block-layout
   id: options
-  title: steps.0.label
+  # title: steps.0.label
 type: multi-step-form
