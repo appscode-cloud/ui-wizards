@@ -1,88 +1,62 @@
-steps:
-- form:
+step:
+- type: single-step-form
+  elements:
+  - loader: fetchNamespaces
+    hasGroup: isRancherManaged
+    label: Namespace
+    schema: schema/properties/metadata/properties/release/properties/namespace
+    type: select
+  - type: block-layout
+    label: Labels & Annotations
+    showLabels: true
     elements:
-    - fetch: fetchNamespaces
-      hasGroup: isRancherManaged
-      label:
-        text: labels.namespace
-      schema:
-        $ref: schema#/properties/metadata/properties/release/properties/namespace
-      type: select
-    - isArray: true
-      keys:
-        label:
-          text: labels.labels.key
-      label:
-        text: labels.labels.label
-      schema:
-        $ref: schema#/properties/spec/properties/labels
-      type: key-value-input-form
-      values:
-        label:
-          text: labels.labels.value
-        schema:
-          $ref: schema#/properties/spec/properties/labels/additionalProperties
-        type: input
-    - isArray: true
-      keys:
-        label:
-          text: labels.annotations.key
-      label:
-        text: labels.annotations.label
-      schema:
-        $ref: schema#/properties/spec/properties/annotations
-      type: key-value-input-form
-      values:
-        label:
-          text: labels.annotations.value
-        schema:
-          $ref: schema#/properties/spec/properties/annotations/additionalProperties
-        type: input
-    - label:
-        text: Invoker Kind
-      options:
-      - text: Backup Configurations
-        value: BackupConfiguration
-      - text: Backup Blueprints
-        value: BackupBlueprint
-      schema:
-        $ref: schema#/properties/spec/properties/invoker/properties/kind
-      type: select
-    - fetch: fetchInvokerName
-      label:
-        text: Invoker Name
-      onChange: initName
-      schema:
-        $ref: schema#/properties/spec/properties/invoker/properties/name
-      type: select
-    - fetch: fetchSessions
-      label:
-        text: Session
-      onChange: initName
-      schema:
-        $ref: schema#/properties/spec/properties/session
-      type: select
-    - label:
-        text: labels.timeout
-      options:
-      - text: 5 minutes
-        value: 5m
-      - text: 10 minutes
-        value: 10m
-      - text: 30 minutes
-        value: 30m
-      - text: 1 hour
-        value: 1h
-      - text: 2 hours
-        value: 2h
-      - text: 5 hours
-        value: 5h
-      - text: 10 hours
-        value: 10h
-      schema:
-        $ref: schema#/properties/spec/properties/backupTimeout
-      type: select
-    type: single-step-form
+      - type: object-item
+        label: Labels
+        schema: schema/properties/spec/properties/labels/additionalProperties
+      - type: object-item
+        label: Annotations
+        schema: schema/properties/spec/properties/annotations/additionalProperties
+  - label: Invoker Kind
+    options:
+    - text: Backup Configurations
+      value: BackupConfiguration
+    - text: Backup Blueprints
+      value: BackupBlueprint
+    schema: schema/properties/spec/properties/invoker/properties/kind
+    type: select
+  - loader: fetchInvokerName
+    label: Invoker Name
+    watcher:
+      func: initName
+      paths:
+        - schema/properties/spec/properties/invoker/properties/name
+    schema: schema/properties/spec/properties/invoker/properties/name
+    type: select
+  - loader: fetchSessions
+    label: Session
+    watcher:
+      func: initName
+      paths:
+        - schema/properties/spec/properties/session
+    schema: schema/properties/spec/properties/session
+    type: select
+  - label: Timeout
+    options:
+    - text: 5 minutes
+      value: 5m
+    - text: 10 minutes
+      value: 10m
+    - text: 30 minutes
+      value: 30m
+    - text: 1 hour
+      value: 1h
+    - text: 2 hours
+      value: 2h
+    - text: 5 hours
+      value: 5h
+    - text: 10 hours
+      value: 10h
+    schema: schema/properties/spec/properties/backupTimeout
+    type: select
   id: options
-  title: steps.0.label
 type: multi-step-form
