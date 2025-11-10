@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -25,12 +26,19 @@ step:
           type: required
         hasGroup: isRancherManaged
         schema: schema/properties/metadata/properties/namespace
+        watcher:
+          func: onNamespaceChange
+          paths:
+            - schema/properties/metadata/properties/namespace
       - type: select
         label: Database Ref
         if:
           type: function
           name: showAndInitDatabaseRef
-        loader: getDbs
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         init:
           type: func
           value: initDatabaseRef
@@ -40,12 +48,8 @@ step:
         refresh: true
         watcher:
           paths:
-            - schema/properties/metadata/properties/namespace
-          func: getDbs
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
+            - schema/properties/spec/properties/databaseRef/properties/name
+          func: onDbChange
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -84,10 +88,9 @@ step:
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
         watcher:
-          func: isDbDetailsLoading
+          func: onRequestTypeChange
           paths:
-            - temp/dbDetails
-            - schema/properties/spec/properties/databaseRef/properties/name
+            - schema/properties/spec/properties/type
         isHorizontal: true
         schema: schema/properties/spec/properties/type
 # UpdateVersion
@@ -187,10 +190,10 @@ step:
                 init:
                   type: func
                   value: setMachine|standalone                
-                # watcher:
-                #   func: onMachineChange|standalone|/spec/podTemplate/spec/resources
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
+                watcher:
+                  func: onMachineChange|standalone|/spec/podTemplate/spec/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -228,10 +231,10 @@ step:
                   type: func
                   value: setMachine|replicaSet
                 loader: getMachines
-                # watcher:
-                #   func: onMachineChange|replicaSet|/spec/podTemplate/spec/resources
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
+                watcher:
+                  func: onMachineChange|replicaSet|/spec/podTemplate/spec/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -274,10 +277,10 @@ step:
                     init:
                       type: func
                       value: setMachine|configServer
-                    # watcher:
-                    #   func: onMachineChange|configServer|/spec/shardTopology/configServer/podTemplate/spec/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
+                    watcher:
+                      func: onMachineChange|configServer|/spec/shardTopology/configServer/podTemplate/spec/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -313,10 +316,10 @@ step:
                     init:
                       type: func
                       value: setMachine|mongos
-                    # watcher:
-                    #   func: onMachineChange|mongos|/spec/shardTopology/mongos/podTemplate/spec/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
+                    watcher:
+                      func: onMachineChange|mongos|/spec/shardTopology/mongos/podTemplate/spec/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -352,10 +355,10 @@ step:
                     init:
                       type: func
                       value: setMachine|shard
-                    # watcher:
-                    #   func: onMachineChange|shard|/spec/shardTopology/shard/podTemplate/spec/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
+                    watcher:
+                      func: onMachineChange|shard|/spec/shardTopology/shard/podTemplate/spec/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -492,7 +495,10 @@ step:
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                     type: function
-                  loader: getConfigSecrets
+                  loader:
+                    name: getConfigSecrets
+                    watchPaths:
+                      - schema/properties/metadata/properties/namespace
                   init: 
                     type: func
                     value: setValueFromDbDetails|/spec/configSecret/name
@@ -500,7 +506,7 @@ step:
                   validation: 
                     type: required
                   schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-              - type: array-object-form
+              - type: object-item
                 label: Apply Config
                 if:
                   name: ifReconfigurationTypeEqualsTo|applyConfig
@@ -512,17 +518,17 @@ step:
                   paths:
                     - temp/properties/standalone/applyConfig
                 schema: temp/properties/standalone/applyConfig
-                elements:
-                  - type: input 
-                    label: key
-                    validation: 
-                      type: required
-                    schema: temp/properties/configArray/items/properties/key
-                  - type: textarea
-                    label: value
-                    validation: 
-                      type: required
-                    schema:  temp/properties/configArray/items/properties/value
+                # elements:
+                #   - type: input 
+                #     label: key
+                #     validation: 
+                #       type: required
+                #     schema: temp/properties/configArray/items/properties/key
+                #   - type: textarea
+                #     label: value
+                #     validation: 
+                #       type: required
+                #     schema:  temp/properties/configArray/items/properties/value
               - type: switch
                 schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
                 label: Remove CustomConfig
@@ -568,10 +574,9 @@ step:
                       type: required
                     refresh: true
                     label: Config Secret
-                    loader: getConfigSecrets
-                    watcher:
-                      func: getConfigSecrets
-                      paths:
+                    loader:
+                      name: getConfigSecrets
+                      watchPaths:
                         - schema/properties/metadata/properties/namespace
                     init:
                       type: func
@@ -640,7 +645,10 @@ step:
                       init:
                         type: func
                         value: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
-                      loader: getConfigSecrets
+                      loader:
+                        name: getConfigSecrets
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
                       refresh: true
                       addNewButton:
                         label: Create Config
@@ -710,7 +718,10 @@ step:
                       init:
                         type: func
                         value: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
-                      loader: getConfigSecrets
+                      loader:
+                        name: getConfigSecrets
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
                       refresh: true
                       addNewButton:
                         label: Create Config
@@ -780,7 +791,10 @@ step:
                       init:
                         type: func
                         value: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
-                      loader: getConfigSecrets
+                      loader:
+                        name: getConfigSecrets
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
                       refresh: true
                       addNewButton:
                         label: Create Config
@@ -829,6 +843,7 @@ step:
         elements:
           - type: radio
             label: TLS Operation
+            schema: temp/properties/tlsOperation
             if:
               name: hasTlsField
               type: function
@@ -842,7 +857,10 @@ step:
             init:
               type: func
               value: initTlsOperation
-            schema: temp/properties/tlsOperation
+            watcher:
+              func: onTlsOperationChange
+              paths:
+                - temp/properties/tlsOperation
           - type: switch
             label: remove
             if:
@@ -889,10 +907,9 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
               - type: select
                 label: Name
-                loader: getIssuerRefsName
-                watcher:
-                  func: getIssuerRefsName
-                  paths:
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
                     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                     - schema/properties/metadata/properties/namespace
                 init:

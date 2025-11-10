@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -41,10 +42,10 @@ step:
           type: required
         disable: isDatabaseRefDisabled
         refresh: true
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -229,10 +230,10 @@ step:
                     init:
                       type: func
                       value: setMachine|master
-                    # watcher:
-                    #   func: onMachineChange|master|/spec/topology/master/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/master/properties/resources
+                    watcher:
+                      func: onMachineChange|master|/spec/topology/master/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/master/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/master/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -271,10 +272,10 @@ step:
                     init:
                       type: func
                       value: setMachine|data
-                    # watcher:
-                    #   func: onMachineChange|data|/spec/topology/data/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/data/properties/resources
+                    watcher:
+                      func: onMachineChange|data|/spec/topology/data/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/data/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/data/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -313,10 +314,10 @@ step:
                     init:
                       type: func
                       value: setMachine|ingest
-                    # watcher:
-                    #   func: onMachineChange|ingest|/spec/topology/ingest/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/ingest/properties/resources
+                    watcher:
+                      func: onMachineChange|ingest|/spec/topology/ingest/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/ingest/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/ingest/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -355,10 +356,10 @@ step:
                     init:
                       type: func
                       value: setMachine|ml
-                    # watcher:
-                    #   func: onMachineChange|ml|/spec/topology/ml/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/ml/properties/resources
+                    watcher:
+                      func: onMachineChange|ml|/spec/topology/ml/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/ml/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/ml/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -397,10 +398,10 @@ step:
                     init:
                       type: func
                       value: setMachine|transform
-                    # watcher:
-                    #   func: onMachineChange|transform|/spec/topology/transform/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/transform/properties/resources
+                    watcher:
+                      func: onMachineChange|transform|/spec/topology/transform/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/transform/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/transform/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -439,10 +440,10 @@ step:
                     init:
                       type: func
                       value: setMachine|dataCold
-                    # watcher:
-                    #   func: onMachineChange|dataCold|/spec/topology/dataCold/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/dataCold/properties/resources
+                    watcher:
+                      func: onMachineChange|dataCold|/spec/topology/dataCold/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/dataCold/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/dataCold/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -481,10 +482,10 @@ step:
                     init:
                       type: func
                       value: setMachine|dataContent
-                    # watcher:
-                    #   func: onMachineChange|dataContent|/spec/topology/dataContent/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/dataContent/properties/resources
+                    watcher:
+                      func: onMachineChange|dataContent|/spec/topology/dataContent/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/dataContent/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/dataContent/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -523,10 +524,10 @@ step:
                     init:
                       type: func
                       value: setMachine|dataFrozen
-                    # watcher:
-                    #   func: onMachineChange|dataFrozen|/spec/topology/dataFrozen/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/resources
+                    watcher:
+                      func: onMachineChange|dataFrozen|/spec/topology/dataFrozen/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -565,10 +566,10 @@ step:
                     init:
                       type: func
                       value: setMachine|dataHot
-                    # watcher:
-                    #   func: onMachineChange|dataHot|/spec/topology/dataHot/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/dataHot/properties/resources
+                    watcher:
+                      func: onMachineChange|dataHot|/spec/topology/dataHot/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/dataHot/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/dataHot/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -607,10 +608,10 @@ step:
                     init:
                       type: func
                       value: setMachine|dataWarm
-                    # watcher:
-                    #   func: onMachineChange|dataWarm|/spec/topology/dataWarm/resources
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/dataWarm/properties/resources
+                    watcher:
+                      func: onMachineChange|dataWarm|/spec/topology/dataWarm/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/dataWarm/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/dataWarm/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -649,10 +650,10 @@ step:
                 init:
                   type: func
                   value: setMachine|node
-                # watcher:
-                #   func: onMachineChange|node|/spec/podTemplate/spec/resources
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+                watcher:
+                  func: onMachineChange|node|/spec/podTemplate/spec/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
               - type: select
                 label: Node Selection Policy

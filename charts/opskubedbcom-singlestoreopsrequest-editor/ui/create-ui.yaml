@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -30,7 +31,10 @@ step:
         if:
           type: function
           name: showAndInitDatabaseRef
-        loader: getDbs
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         init:
           type: func
           value: initDatabaseRef
@@ -38,15 +42,11 @@ step:
           type: required
         disable: isDatabaseRefDisabled
         refresh: true
-        watcher:
-          paths:
-            - schema/properties/metadata/properties/namespace
-          func: getDbs
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
         schema: schema/properties/spec/properties/databaseRef/properties/name
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
         if:
@@ -142,10 +142,10 @@ step:
                 init:
                   type: func
                   value: setMachine|aggregator
-                # watcher:
-                #   func: onMachineChange|aggregator|/spec/topology/aggregator/podTemplate/spec/containers
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/aggregator/properties/resources
+                watcher:
+                  func: onMachineChange|aggregator|/spec/topology/aggregator/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/aggregator/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/aggregator/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -178,10 +178,10 @@ step:
                 init:
                   type: func
                   value: setMachine|leaf
-                # watcher:
-                #   func: onMachineChange|leaf|/spec/topology/leaf/podTemplate/spec/containers
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/leaf/properties/resources
+                watcher:
+                  func: onMachineChange|leaf|/spec/topology/leaf/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/leaf/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/leaf/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -250,10 +250,10 @@ step:
                 init:
                   type: func
                   value: setMachine|coordinator
-                # watcher:
-                #   func: onMachineChange|coordinator|/spec/topology/aggregator/podTemplate/spec/containers
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
+                watcher:
+                  func: onMachineChange|coordinator|/spec/topology/aggregator/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
 # Volume Expansion
       - type: block-layout
@@ -360,7 +360,10 @@ step:
               if:
                 name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                 type: function
-              loader: getConfigSecrets
+              loader:
+                name: getConfigSecrets
+                watchPaths:
+                  - schema/properties/metadata/properties/namespace
               init:
                 type: func
                 value: setValueFromDbDetails|/spec/configSecret/name
@@ -466,10 +469,9 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
               - type: select
                 label: Name
-                loader: getIssuerRefsName
-                watcher:
-                  func: getIssuerRefsName
-                  paths:
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
                     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                     - schema/properties/metadata/properties/namespace
                 init:

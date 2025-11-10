@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -30,7 +31,10 @@ step:
         if:
           type: function
           name: showAndInitDatabaseRef
-        loader: getDbs
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         init:
           type: func
           value: initDatabaseRef
@@ -39,9 +43,9 @@ step:
         disable: isDatabaseRefDisabled
         refresh: true
         watcher:
+          func: onDbChange
           paths:
-            - schema/properties/metadata/properties/namespace
-          func: getDbs
+            - schema/properties/spec/properties/databaseRef/properties/name
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -157,10 +161,10 @@ step:
                 init:
                   type: func
                   value: setMachine|node
-                # watcher:
-                #   func: onMachineChange|node|/spec/podTemplate/spec/containers
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+                watcher:
+                  func: onMachineChange|node|/spec/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -196,10 +200,10 @@ step:
                     init:
                       type: func
                       value: setMachine|coordinator
-                    # watcher:
-                    #   func: onMachineChange|coordinator|/spec/topology/coordinator/podTemplate/spec/containers
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
+                    watcher:
+                      func: onMachineChange|coordinator|/spec/topology/coordinator/podTemplate/spec/containers
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -229,10 +233,10 @@ step:
                     init:
                       type: func
                       value: setMachine|data
-                    # watcher:
-                    #   func: onMachineChange|data|/spec/topology/data/podTemplate/spec/containers
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/data/properties/resources
+                    watcher:
+                      func: onMachineChange|data|/spec/topology/data/podTemplate/spec/containers
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/data/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/data/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -262,10 +266,10 @@ step:
                     init:
                       type: func
                       value: setMachine|overseer
-                    # watcher:
-                    #   func: onMachineChange|overseer|/spec/topology/overseer/podTemplate/spec/containers
-                    #   paths:
-                    #     - schema/properties/spec/properties/verticalScaling/properties/overseer/properties/resources
+                    watcher:
+                      func: onMachineChange|overseer|/spec/topology/overseer/podTemplate/spec/containers
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/overseer/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/overseer/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -389,7 +393,10 @@ step:
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                     type: function
-                  loader: getConfigSecrets
+                  loader:
+                    name: getConfigSecrets
+                    watchPaths:
+                      - schema/properties/metadata/properties/namespace
                   init:
                     type: func
                     value: setValueFromDbDetails|/spec/configSecret/name
@@ -495,10 +502,9 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
               - type: select
                 label: Name
-                loader: getIssuerRefsName
-                watcher:
-                  func: getIssuerRefsName
-                  paths:
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
                     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                     - schema/properties/metadata/properties/namespace
                 init:

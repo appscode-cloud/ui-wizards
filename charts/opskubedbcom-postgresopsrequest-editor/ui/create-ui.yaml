@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -41,10 +42,10 @@ step:
           type: required
         disable: isDatabaseRefDisabled
         refresh: true
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -380,11 +381,6 @@ step:
                 loader:
                   name: getIssuerRefsName
                   watchPaths:
-                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-                    - schema/properties/metadata/properties/namespace
-                watcher:
-                  func: getIssuerRefsName
-                  paths:
                     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                     - schema/properties/metadata/properties/namespace
                 init:
