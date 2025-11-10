@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -41,10 +42,10 @@ step:
           type: required
         disable: isDatabaseRefDisabled
         refresh: true
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -129,10 +130,10 @@ step:
                 init:
                   type: func
                   value: setMachine
-                # watcher:
-                #   func: onMachineChange|memcached|/spec/podTemplate/spec/resources
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/memcached/properties/resources
+                watcher:
+                  func: onMachineChange|memcached|/spec/podTemplate/spec/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/memcached/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/memcached/properties/resources
               - type: select
                 label: Node Selection Policy

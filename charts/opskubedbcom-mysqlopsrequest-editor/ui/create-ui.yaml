@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -25,6 +26,10 @@ step:
           type: required
         hasGroup: isRancherManaged
         schema: schema/properties/metadata/properties/namespace
+        watcher:
+          func: onNamespaceChange
+          paths:
+            - schema/properties/metadata/properties/namespace
       - type: select
         label: Database Ref
         if:
@@ -41,10 +46,10 @@ step:
           type: required
         disable: isDatabaseRefDisabled
         refresh: true
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -83,10 +88,9 @@ step:
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
         watcher:
-          func: isDbDetailsLoading
+          func: onRequestTypeChange
           paths:
-            - temp/dbDetails
-            - schema/properties/spec/properties/databaseRef/properties/name
+            - schema/properties/spec/properties/type
         isHorizontal: true
         schema: schema/properties/spec/properties/type
 # UpdateVersion
@@ -135,10 +139,10 @@ step:
                 init:
                   type: func
                   value: setMachine
-                # watcher:
-                #   func: onMachineChange|mysql|/spec/podTemplate/spec/resources
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/mysql/properties/resources
+                watcher:
+                  func: onMachineChange|mysql|/spec/podTemplate/spec/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/mysql/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/mysql/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -302,6 +306,10 @@ step:
               type: func
               value: initTlsOperation
             schema: temp/properties/tlsOperation
+            watcher:
+              func: onTlsOperationChange
+              paths:
+                - temp/properties/tlsOperation
           - type: switch
             label: remove
             if:
@@ -363,11 +371,6 @@ step:
                 loader:
                   name: getIssuerRefsName
                   watchPaths:
-                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-                    - schema/properties/metadata/properties/namespace
-                watcher:
-                  func: getIssuerRefsName
-                  paths:
                     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                     - schema/properties/metadata/properties/namespace
                 init:
