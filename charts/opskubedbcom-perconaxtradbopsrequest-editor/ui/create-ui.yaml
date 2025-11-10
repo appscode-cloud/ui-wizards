@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -25,27 +26,30 @@ step:
           type: required
         hasGroup: isRancherManaged
         schema: schema/properties/metadata/properties/namespace
+        watcher:
+          func: onNamespaceChange
+          paths:
+            - schema/properties/metadata/properties/namespace
       - type: select
         label: Database Ref
         if:
           type: function
           name: showAndInitDatabaseRef
-        loader: getDbs
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         init:
           type: func
           value: initDatabaseRef
         validation:
           type: required
         disable: isDatabaseRefDisabled
-        refresh: true
+        refresh: true          
         watcher:
+          func: onDbChange
           paths:
             - schema/properties/metadata/properties/namespace
-          func: getDbs
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -81,10 +85,9 @@ step:
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
         watcher:
-          func: isDbDetailsLoading
+          func: onRequestTypeChange
           paths:
-            - temp/dbDetails
-            - schema/properties/spec/properties/databaseRef/properties/name
+            - schema/properties/spec/properties/type
         isHorizontal: true
         schema: schema/properties/spec/properties/type
 # Horizontal Scale
@@ -122,10 +125,10 @@ step:
                 init:
                   type: func
                   value: setMachine
-                # watcher:
-                #   func: onMachineChange|perconaxtradb|/spec/podTemplate/spec/resources
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/perconaxtradb/properties/resources
+                watcher:
+                  func: onMachineChange|perconaxtradb|/spec/podTemplate/spec/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/perconaxtradb/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/perconaxtradb/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -161,10 +164,10 @@ step:
                 init:
                   type: func
                   value: setMachine
-                # watcher:
-                #   func: onMachineChange|coordinator|/spec/coordinator/resources
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
+                watcher:
+                  func: onMachineChange|coordinator|/spec/coordinator/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
 # Volume Expansion
       - type: block-layout
@@ -232,7 +235,10 @@ step:
               if:
                 name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                 type: function
-              loader: getConfigSecrets
+              loader:
+                name: getConfigSecrets
+                watchPaths:
+                  - schema/properties/metadata/properties/namespace
               init:
                 type: func
                 value: setValueFromDbDetails|/spec/configSecret/name
@@ -338,10 +344,9 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
               - type: select
                 label: Name
-                loader: getIssuerRefsName
-                watcher:
-                  func: getIssuerRefsName
-                  paths:
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
                     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                     - schema/properties/metadata/properties/namespace
                 init:

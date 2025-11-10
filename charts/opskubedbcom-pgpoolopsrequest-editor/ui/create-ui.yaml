@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -30,7 +31,10 @@ step:
         if:
           type: function
           name: showAndInitDatabaseRef
-        loader: getDbs
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         init:
           type: func
           value: initDatabaseRef
@@ -38,14 +42,10 @@ step:
           type: required
         disable: isDatabaseRefDisabled
         refresh: true
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: getDbs
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -80,11 +80,10 @@ step:
           type: func
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
-        # watcher:
-        #   func: isDbDetailsLoading
-        #   paths:
-        #     - temp/dbDetails
-        #     - schema/properties/spec/properties/databaseRef/properties/name
+        watcher:
+          func: onRequestTypeChange
+          paths:
+            - schema/properties/spec/properties/type
         isHorizontal: true
         schema: schema/properties/spec/properties/type
 # UpdateVersion
@@ -130,10 +129,10 @@ step:
                 init:
                   type: func
                   value: setMachine
-                # watcher:
-                #   func: onMachineChange|node|/spec/podTemplate/spec/containers
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+                watcher:
+                  func: onMachineChange|node|/spec/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -178,10 +177,10 @@ step:
                   value: applyConfig
                 - text: Remove
                   value: remove
-                # watcher:
-                #   func: onReconfigurationTypeChange
-                #   paths:
-                #     - temp/properties/reconfigurationType
+                watcher:
+                  func: onReconfigurationTypeChange
+                  paths:
+                    - temp/properties/reconfigurationType
                 validation:
                   type: required
                 schema: temp/properties/reconfigurationType
@@ -202,7 +201,10 @@ step:
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                     type: function
-                  loader: getConfigSecrets
+                  loader:
+                    name: getConfigSecrets
+                    watchPaths:
+                      - schema/properties/metadata/properties/namespace
                   init:
                     type: func
                     value: setValueFromDbDetails|/spec/configSecret/name
@@ -217,10 +219,10 @@ step:
                   type: function
                 validation:
                   type: required
-                # watcher:
-                #   func: onApplyconfigChange
-                #   paths:
-                #     - temp/properties/applyConfig
+                watcher:
+                  func: onApplyconfigChange
+                  paths:
+                    - temp/properties/applyConfig
                 schema: temp/properties/applyConfig
                 elements:
                   - type: input
@@ -308,12 +310,11 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
               - type: select
                 label: Name
-                loader: getIssuerRefsName
-                # watcher:
-                #   func: getIssuerRefsName
-                #   paths:
-                #     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-                #     - schema/properties/metadata/properties/namespace
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                    - schema/properties/metadata/properties/namespace
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/tls/issuerRef/name
@@ -326,7 +327,7 @@ step:
             if:
               name: showIssuerRefAndCertificates
               type: function
-            # loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+            loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
             elements:
               - type: select
                 label: Alias
