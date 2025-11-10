@@ -1,38 +1,19 @@
 const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
 
-let addonList = []
-
-const securityContextMap = {
-  MongoDB: 999,
-  Postgres: 70,
-  Elasticsearch: 1000,
-  MSSQLServer: 10001,
-  MySQL: 999,
-  MariaDB: 999,
-  Redis: 999,
-  Singlestore: 999,
-  ZooKeeper: 999,
-}
-
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
   )
 
+  /********** Initialize Discriminator **************/
+
   setDiscriminatorValue('database', {})
   setDiscriminatorValue('nameSpaceApi', false)
-  setDiscriminatorValue('repository', {})
+  setDiscriminatorValue('repository', '')
   setDiscriminatorValue('params', '')
 
-  let appKind = []
-  let coreKind = []
-  let kubedbKind = []
-  let availableKinds = {}
-  let kindToResourceMap = {}
-  let namespaces = []
-  let version = ''
-
+  let addonList = []
   function isConsole() {
     const group = storeGet('/route/params/group') || ''
     return group !== 'kubedb.com'
@@ -77,6 +58,7 @@ export const useFunc = (model) => {
 
     // get encryptionSecret from stash-preset
     await getPreset()
+    setSecurityContext()
   }
 
   async function getPreset() {
@@ -277,7 +259,8 @@ export const useFunc = (model) => {
         const filteredSnapshots =
           snapshots.filter((item) => {
             const owners = item?.metadata?.ownerReferences || []
-            if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
+            if (owners.length)
+              return owners[0].name === repository && owners[0].kind === 'Repository'
           }) || []
 
         filteredSnapshots.forEach((item) => {
@@ -301,7 +284,7 @@ export const useFunc = (model) => {
 
     const now = new Date()
     const timeConvert = new Date(time)
-    diffInMs = now - timeConvert
+    const diffInMs = now - timeConvert
 
     // const diffInSeconds = Math.floor(diffInMs / 1000) % 60
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60)) % 60
@@ -362,6 +345,18 @@ export const useFunc = (model) => {
     return !!target.name
   }
 
+  const securityContextMap = {
+    MongoDB: 999,
+    Postgres: 70,
+    Elasticsearch: 1000,
+    MSSQLServer: 10001,
+    MySQL: 999,
+    MariaDB: 999,
+    Redis: 999,
+    Singlestore: 999,
+    ZooKeeper: 999,
+  }
+
   async function setSecurityContext() {
     const namespace = storeGet('/route/query/namespace') || ''
     const user = storeGet('/route/params/user') || ''
@@ -398,6 +393,14 @@ export const useFunc = (model) => {
   function returnFalse() {
     return false
   }
+
+  let appKind = []
+  let coreKind = []
+  let kubedbKind = []
+  let availableKinds = {}
+  let kindToResourceMap = {}
+  let namespaces = []
+  let version = ''
 
   function init() {
     getKindsApi()
