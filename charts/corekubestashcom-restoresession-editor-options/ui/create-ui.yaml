@@ -1,105 +1,102 @@
+type: multi-step-form
 step:
 - type: single-step-form
+  id: options
   loader: init
   elements:
-  - loader: fetchNamespaces
-    hasGroup: isRancherManaged
-    if:
-      type: function
-      name: isConsole
-    label: Select Namespace
-    schema: schema/properties/metadata/properties/release/properties/namespace
-    type: select
-  - if:
-      type: function
-      name: isConsole
-    label: labels.name
-    schema: schema/properties/metadata/properties/release/properties/name
-    type: input
-  - init:
-      type: func
-      value: initMetadata
-    if:
-      type: function
-      name: returnFalse
-    label: ''
-    schema: schema/properties/metadata
-    type: input
-  - elements:
-    - disableUnselect: true
-      loader: getRepositories
-      label: Repository
-      watcher:
-        func: onRepoChange
-        paths:
-          - discriminator/repository
-      refresh: true
-      schema: discriminator/repository
-      type: select
-    - disableUnselect: true
-      loader: getSnapshots
-      label: labels.dataSource.snapshot
-      refresh: true
-      schema: schema/properties/spec/properties/dataSource/properties/snapshot
-      type: select
-    label: Data Source
-    schema: schema/properties/spec/properties/dataSource
-    type: single-step-form
-  - elements:
-    - loader: getAddons
+    - type: select
+      label: Select Namespace
+      schema: schema/properties/metadata/properties/release/properties/namespace
+      hasGroup: isRancherManaged
       if:
         type: function
         name: isConsole
-      label: labels.name
-      refresh: true
-      schema: schema/properties/spec/properties/addon/properties/name
-      type: select
-    - label: Additional Parameters
-      watcher:
-        func: onParameterChange
-        paths:
-          - discriminator/params
-      schema: discriminator/params
-      type: textarea
-    - init:
-        type: func
-        value: setSecurityContext
+      loader:
+        name: fetchNamespaces
+        watchPaths:
+          - temp/properties/nameSpaceApi
+    - type: input
+      label: Name
+      schema: schema/properties/metadata/properties/release/properties/name
       if:
         type: function
-        name: returnFalse
-      label: ''
-      schema: schema/properties/spec/properties/addon/properties/jobTemplate
-      type: input
-    label: Addon
-    type: block-layout
-  - elements:
-    - loader: getApiGroup
-      label: Api Group
-      schema: schema/properties/spec/properties/target/properties/apiGroup
-      type: select
-    - loader: getKinds
-      label: Kind
-      watcher:
-        func: setVersion
-        paths:
-          - schema/properties/spec/properties/target/properties/kind
-      schema: schema/properties/spec/properties/target/properties/kind
-      type: select
-    - loader: fetchNamespaces
-      hasGroup: isRancherManaged
-      label: Namespace
-      schema: schema/properties/spec/properties/target/properties/namespace
-      type: select
-    - loader: getTargetName
-      label: Name
-      schema: schema/properties/spec/properties/target/properties/name
-      type: select
-    if:
-      type: function
-      name: isConsole
-    label: Target
-    showLabels: true
-    type: block-layout
-  id: options
-  # title: steps.0.label
-type: multi-step-form
+        name: isConsole
+    - type: block-layout
+      showLabels: false
+      loader: initMetadata
+      elements:
+        - type: select
+          label: Repository
+          disableUnselect: true
+          schema: temp/properties/repository
+          refresh: true
+          validation: 
+            type: required
+          loader: getRepositories
+        - type: select
+          disableUnselect: true
+          label: Snapshot
+          refresh: true
+          schema: schema/properties/spec/properties/dataSource/properties/snapshot
+          loader:
+            name: getSnapshots
+            watchPaths:
+              - temp/properties/repository
+          watcher:
+            func: onRepoChange
+            paths:
+              - temp/properties/repository
+        - type: select
+          label: Name
+          refresh: true
+          schema: schema/properties/spec/properties/addon/properties/name
+          if:
+            type: function
+            name: isConsole
+          loader: getAddons
+        - type: textarea
+          label: Additional Parameters
+          schema: temp/properties/params
+          watcher:
+            func: onParameterChange
+            paths:
+              - temp/properties/params
+    - type: block-layout
+      showLabels: true
+      hideBlock: true
+      label: Target
+      if:
+        type: function
+        name: isConsole
+      elements:
+      - type: select
+        label: Api Group
+        schema: schema/properties/spec/properties/target/properties/apiGroup
+        loader: getApiGroup
+      - type: select
+        label: Kind
+        schema: schema/properties/spec/properties/target/properties/kind
+        loader: getKinds
+        watcher:
+          func: setVersion
+          paths:
+            - schema/properties/spec/properties/target/properties/kind
+            - schema/properties/spec/properties/target/properties/apiGroup
+      - type: select
+        label: Namespace
+        schema: schema/properties/spec/properties/target/properties/namespace
+        loader: fetchNamespaces
+        hasGroup: isRancherManaged
+        watcher:
+          func: fetchNamespaces
+          paths:
+            - temp/properties/nameSpaceApi
+      - type: select
+        label: Name
+        schema: schema/properties/spec/properties/target/properties/name
+        loader:
+          name: getTargetName
+          watchPaths:
+            - schema/properties/spec/properties/target/properties/apiGroup
+            - schema/properties/spec/properties/target/properties/namespace
+            - schema/properties/spec/properties/target/properties/kind
