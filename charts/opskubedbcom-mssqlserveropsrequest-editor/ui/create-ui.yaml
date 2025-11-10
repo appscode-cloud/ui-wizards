@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -25,12 +26,19 @@ step:
           type: required
         hasGroup: isRancherManaged
         schema: schema/properties/metadata/properties/namespace
+        watcher:
+          func: onNamespaceChange
+          paths:
+            - schema/properties/metadata/properties/namespace
       - type: select
         label: Database Ref
         if:
           type: function
           name: showAndInitDatabaseRef
-        loader: getDbs
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         init:
           type: func
           value: initDatabaseRef
@@ -38,14 +46,10 @@ step:
           type: required
         disable: isDatabaseRefDisabled
         refresh: true
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: getDbs
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -80,11 +84,10 @@ step:
           type: func
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
-        # watcher:
-        #   func: isDbDetailsLoading
-        #   paths:
-        #     - temp/dbDetails
-        #     - schema/properties/spec/properties/databaseRef/properties/name
+        watcher:
+          func: onRequestTypeChange
+          paths:
+            - schema/properties/spec/properties/type
         schema: schema/properties/spec/properties/type
 # UpdateVersion
       - type: block-layout
@@ -129,10 +132,10 @@ step:
                 init:
                   type: func
                   value: setMachine
-                # watcher:
-                #   func: onMachineChange|mssqlserver|/spec/podTemplate/spec/containers
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/mssqlserver/properties/resources
+                watcher:
+                  func: onMachineChange|mssqlserver|/spec/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/mssqlserver/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/mssqlserver/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -154,6 +157,7 @@ step:
                     schema: schema/properties/spec/properties/verticalScaling/properties/mssqlserver/properties/topology/properties/value
           - type: block-layout
             label: Exporter
+            showLabels: true
             elements:
               - type: input
                 label: CPU
@@ -163,6 +167,7 @@ step:
                 schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
           - type: block-layout
             label: Coordinator
+            showLabels: true
             elements:
               - type: input
                 label: CPU
@@ -219,10 +224,10 @@ step:
                   value: applyConfig
                 - text: Remove
                   value: remove
-                # watcher:
-                #   func: onReconfigurationTypeChange
-                #   paths:
-                #     - temp/properties/reconfigurationType
+                watcher:
+                  func: onReconfigurationTypeChange
+                  paths:
+                    - temp/properties/reconfigurationType
                 validation:
                   type: required
                 schema: temp/properties/reconfigurationType
@@ -243,7 +248,10 @@ step:
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                     type: function
-                  loader: getConfigSecrets
+                  loader:
+                    name: getConfigSecrets
+                    watchPaths:
+                      - schema/properties/metadata/properties/namespace
                   init:
                     type: func
                     value: setValueFromDbDetails|/spec/configSecret/name
@@ -251,29 +259,29 @@ step:
                   validation:
                     type: required
                   schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-              - type: array-object-form
+              - type: object-item
                 label: Apply Config
                 if:
                   name: ifReconfigurationTypeEqualsTo|applyConfig
                   type: function
                 validation:
                   type: required
-                # watcher:
-                #   func: onApplyconfigChange
-                #   paths:
-                #     - temp/properties/applyConfig
+                watcher:
+                  func: onApplyconfigChange
+                  paths:
+                    - temp/properties/applyConfig
                 schema: temp/properties/applyConfig
-                elements:
-                  - type: input
-                    label: key
-                    validation:
-                      type: required
-                    schema: temp/properties/configArray/items/properties/key
-                  - type: textarea
-                    label: value
-                    validation:
-                      type: required
-                    schema: temp/properties/configArray/items/properties/value
+                # elements:
+                #   - type: input
+                #     label: key
+                #     validation:
+                #       type: required
+                #     schema: temp/properties/configArray/items/properties/key
+                #   - type: textarea
+                #     label: value
+                #     validation:
+                #       type: required
+                #     schema: temp/properties/configArray/items/properties/value
               - type: switch
                 schema: schema/properties/spec/properties/configuration/properties/removeCustomConfig
                 label: Remove CustomConfig

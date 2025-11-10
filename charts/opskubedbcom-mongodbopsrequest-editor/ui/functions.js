@@ -586,10 +586,7 @@ export const useFunc = (model) => {
 
   function disableOpsRequest() {
     if (itemCtx.value === 'HorizontalScaling') {
-      const dbType = getDbType({
-        discriminator,
-        getValue,
-      })
+      const dbType = getDbType()
 
       if (dbType === 'standalone') return true
       else return false

@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -41,10 +42,10 @@ step:
           type: required
         disable: isDatabaseRefDisabled
         refresh: true
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: initDatabaseRef
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -135,10 +136,10 @@ step:
                 init:
                   type: func
                   value: setMachine|primary
-                # watcher:
-                #   func: onMachineChange|primary|/spec/server/primary/podTemplate/spec/containers
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/primary/properties/resources
+                watcher:
+                  func: onMachineChange|primary|/spec/server/primary/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/primary/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/primary/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -176,10 +177,10 @@ step:
                   type: func
                   value: setMachine|secondary
                 loader: getMachines
-                # watcher:
-                #   func: onMachineChange|secondary|/spec/server/secondary/podTemplate/spec/containers
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/secondary/properties/resources
+                watcher:
+                  func: onMachineChange|secondary|/spec/server/secondary/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/secondary/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/secondary/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -277,11 +278,6 @@ step:
                 loader:
                   name: getIssuerRefsName
                   watchPaths:
-                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-                    - schema/properties/metadata/properties/namespace
-                watcher:
-                  func: getIssuerRefsName
-                  paths:
                     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                     - schema/properties/metadata/properties/namespace
                 init:
