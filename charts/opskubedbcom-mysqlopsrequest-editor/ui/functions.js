@@ -1352,5 +1352,6 @@ export const useFunc = (model) => {
     onMachineChange,
     isMachineCustom,
     checkVolume,
+    setConfigFiles,
   }
 }

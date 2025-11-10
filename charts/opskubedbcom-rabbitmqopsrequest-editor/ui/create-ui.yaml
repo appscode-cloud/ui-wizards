@@ -1,6 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
+    loader: getDbDetails
     elements:
 # common
       - type: input
@@ -30,7 +31,10 @@ step:
         if:
           type: function
           name: showAndInitDatabaseRef
-        loader: getDbs
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         init:
           type: func
           value: initDatabaseRef
@@ -38,11 +42,11 @@ step:
           type: required
         disable: isDatabaseRefDisabled
         refresh: true
-        watcher:
-          paths:
-            - schema/properties/metadata/properties/namespace
-          func: getDbs
         schema: schema/properties/spec/properties/databaseRef/properties/name
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
         if:
@@ -132,10 +136,10 @@ step:
                 init:
                   type: func
                   value: setMachine
-                # watcher:
-                #   func: onMachineChange|node|/spec/podTemplate/spec/containers
-                #   paths:
-                #     - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+                watcher:
+                  func: onMachineChange|node|/spec/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -234,7 +238,10 @@ step:
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                     type: function
-                  loader: getConfigSecrets
+                  loader:
+                    name: getConfigSecrets
+                    watchPaths:
+                      - schema/properties/metadata/properties/namespace
                   init:
                     type: func
                     value: setValueFromDbDetails|/spec/configSecret/name
@@ -340,10 +347,9 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
               - type: select
                 label: Name
-                loader: getIssuerRefsName
-                watcher:
-                  func: getIssuerRefsName
-                  paths:
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
                     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                     - schema/properties/metadata/properties/namespace
                 init:
