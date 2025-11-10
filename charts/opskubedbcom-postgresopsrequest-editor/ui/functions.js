@@ -455,7 +455,6 @@ export const useFunc = (model) => {
         versionCompare(a.spec.version, b.spec.version),
       )
       let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
-      console.log({ ver })
       const found = sortedVersions.find((item) => item.metadata.name === ver)
       if (found) ver = found.spec?.version
       const allowed = found?.spec?.updateConstraints?.allowlist || []
@@ -1120,7 +1119,6 @@ export const useFunc = (model) => {
   }
 
   function showIssuerRefAndCertificates() {
-    console.log('showIssuerRefAndCertificates fired')
     const tlsOperation = getValue(discriminator, '/tlsOperation')
     // watchDependency('discriminator#/tlsOperation')
     const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
@@ -1178,10 +1176,6 @@ export const useFunc = (model) => {
   function setValueFromDbDetails(path, commitPath) {
     // watchDependency('discriminator#/dbDetails')
     const retValue = getValue(discriminator, `/dbDetails${path}`)
-
-    console.log({ path })
-    // console.log({ val })
-    console.log({ retValue })
 
     if (commitPath && retValue) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
