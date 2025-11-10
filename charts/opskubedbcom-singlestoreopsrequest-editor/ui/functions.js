@@ -1168,8 +1168,8 @@ export const useFunc = (model) => {
     return !dbDetails || !dbName
   }
 
-  async function setValueFromDbDetails(path, commitPath) {
-    const retValue = await getValue(discriminator, `/dbDetails${path}`)
+  function setValueFromDbDetails(path, commitPath) {
+    const retValue = getValue(discriminator, `/dbDetails${path}`)
 
     if (commitPath) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
