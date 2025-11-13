@@ -899,6 +899,11 @@ export const useFunc = (model) => {
     return !!found
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
     isKubedb,
     isConsole,
@@ -948,5 +953,7 @@ export const useFunc = (model) => {
     isBindingAlreadyOn,
     addOrRemoveBinding,
     returnFalse,
+
+    setValueFromDbDetails,
   }
 }
