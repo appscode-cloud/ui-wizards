@@ -542,7 +542,7 @@ step:
               type: function
             elements:
               - type: radio
-                label: Reconfigure Type test
+                label: Reconfigure Type
                 subtitle: Choose the action you'd like to perform. Select a new configuration secret, apply a custom configuration , or remove an existing setup.
                 validation:
                   type: required
@@ -551,7 +551,7 @@ step:
                   value: selectNewConfigSecret
                 - text: Apply Config
                   value: applyConfig
-                - text: Remove
+                - text: Remove testing
                   value: remove
                 schema: temp/properties/reconfigurationType
                 watcher:
@@ -559,7 +559,7 @@ step:
                   paths:
                     - temp/properties/reconfigurationType
               - type: block-layout
-                label: config secret
+                label: Config Secret
                 showLabels: true
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
@@ -589,7 +589,7 @@ step:
               - type: array-object-form
                 label: ApplyConfig
                 schema: temp/properties/replicaSet/applyConfig
-                validation: 
+                validation:
                   type: required
                 if:
                   name: ifReconfigurationTypeEqualsTo|applyConfig
@@ -599,14 +599,18 @@ step:
                   paths:
                     - temp/properties/replicaSet/applyConfig
                 elements:
+                  - type: label-element
+                    label: New Apply Config
+                    description: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
+                    customClass: mb-10
                   - type: input
                     label: key
-                    validation: 
+                    validation:
                       type: required
                     schema: temp/properties/configArray/items/properties/key
                   - type: textarea
                     label: value
-                    validation: 
+                    validation:
                       type: required
                     schema: temp/properties/configArray/items/properties/value
               - type: switch
