@@ -161,7 +161,7 @@ export const useFunc = (model) => {
     }
   }
 
-  async function dbTypeEqualsTo(type) {
+  function dbTypeEqualsTo(type) {
     // watchDependency('discriminator#/dbDetails')
 
     const { spec } = dbDetails || {}
