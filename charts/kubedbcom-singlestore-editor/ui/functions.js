@@ -831,6 +831,11 @@ export const useFunc = (model) => {
     return 'On'
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   function setApplyToIfReady() {
     return 'IfReady'
   }
@@ -858,7 +863,7 @@ export const useFunc = (model) => {
     return !!found
   }
 
-  async function dbTypeEqualsTo(type) {
+  function dbTypeEqualsTo(type) {
     // watchDependency('discriminator#/dbDetails')
 
     const { spec } = dbDetails || {}
@@ -1411,6 +1416,7 @@ export const useFunc = (model) => {
     isRancherManaged,
     dbTypeEqualsTo,
     handleUnit,
+    setValueFromDbDetails,
 
     getOpsRequestUrl,
     isValueExistInModel,
