@@ -88,7 +88,7 @@ step:
                   - type: input
                     label: Pod LifeTime Threshold
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/podLifeTimeThreshold
-                  - type: input
+                  - type: threshold-input
                     label: Resource Diff Percentage
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/resourceDiffPercentage
                   - type: block-layout
@@ -184,7 +184,7 @@ step:
                   - type: input
                     label: Pod LifeTime Threshold
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/podLifeTimeThreshold
-                  - type: input
+                  - type: threshold-input
                     label: Resource Diff Percentage
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/resourceDiffPercentage
                   - type: block-layout
@@ -289,7 +289,7 @@ step:
                   - type: input
                     label: Pod LifeTime Threshold
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
-                  - type: input
+                  - type: threshold-input
                     label: Resource Diff Percentage
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
                   - type: block-layout
@@ -377,13 +377,13 @@ step:
                 label: Select Node Topology
                 loader: fetchNodeTopology
                 schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-              - type: input
+              - type: threshold-input
                 label: ScaleUp Diff Percentage
                 if:
                   type: function
                   name: isNodeTopologySelected
                 schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-              - type: input
+              - type: threshold-input
                 label: ScaleDown Diff Percentage
                 if:
                   type: function
@@ -398,24 +398,9 @@ step:
               name: showOpsRequestOptions
             # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions
             elements:
-              - type: select
+              - type: time-picker
                 label: Timeout
                 schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-                options:
-                - text: 5 minutes
-                  value: 5m0s
-                - text: 10 minutes
-                  value: 10m0s
-                - text: 30 minutes
-                  value: 30m0s
-                - text: 1 hour
-                  value: 1h0m
-                - text: 2 hours
-                  value: 2h0m
-                - text: 5 hours
-                  value: 5h0m
-                - text: 10 hours
-                  value: 10h0m
               - type: radio
                 label: Apply
                 init:
@@ -511,23 +496,17 @@ step:
                 - text: Offline
                   value: Offline
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/expansionMode
-            - type: input
+            - type: threshold-input
               label: UsageThreshold (%)
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/usageThreshold
-            - type: array-object-form
-              label: ScalingRules
+            - type: scaling-rules
+              label: Scaling Rules
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingRules
+              loader: setValueFromDbDetails|resources/kubedbComKafka/spec/topology/broker/storage/resources/requests/storage
               watcher:
                 func: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/broker/scalingRules|scalingRules
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingRules
-              elements:
-                - type: input
-                  label: AppliesUpto (In Storage units)
-                  schema: appliesUpto
-                - type: input
-                  label: Threshold (In %, Or In Storage Units)
-                  schema: threshold
             - type: input
               label: UpperBound
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/upperBound
@@ -562,23 +541,17 @@ step:
                 - text: Offline
                   value: Offline
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/expansionMode
-            - type: input
+            - type: threshold-input
               label: UsageThreshold (%)
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/usageThreshold
-            - type: array-object-form
-              label: ScalingRules
+            - type: scaling-rules
+              label: Scaling Rules
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules
+              loader: setValueFromDbDetails|resources/kubedbComKafka/spec/topology/controller/storage/resources/requests/storage
               watcher:
                 func: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/controller/scalingRules|scalingRules
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules
-              elements:
-                - type: input
-                  label: AppliesUpto (In Storage units)
-                  schema: appliesUpto
-                - type: input
-                  label: Threshold (In %, Or In Storage Units)
-                  schema: threshold
             - type: input
               label: UpperBound
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/upperBound
@@ -613,23 +586,17 @@ step:
                 - text: Offline
                   value: Offline
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
-            - type: input
+            - type: threshold-input
               label: Usage Threshold (%)
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-            - type: array-object-form
+            - type: scaling-rules
               label: Scaling Rules
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+              loader: setValueFromDbDetails|resources/kubedbComKafka/spec/topology/node/storage/resources/requests/storage
               watcher:
                 func: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/node/scalingRules|scalingRules
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-              elements:
-                - type: input
-                  label: AppliesUpto (In Storage units)
-                  schema: appliesUpto
-                - type: input
-                  label: Threshold (In %, Or In Storage Units)
-                  schema: threshold
             - type: input
               label: UpperBound
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
@@ -645,24 +612,9 @@ step:
             type: function
             name: showOpsRequestOptions
           elements:
-            - type: select
+            - type: time-picker
               label: Timeout
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-              options:
-                - text: 5 minutes
-                  value: 5m0s
-                - text: 10 minutes
-                  value: 10m0s
-                - text: 30 minutes
-                  value: 30m0s
-                - text: 1 hour
-                  value: 1h0m
-                - text: 2 hours
-                  value: 2h0m
-                - text: 5 hours
-                  value: 5h0m
-                - text: 10 hours
-                  value: 10h0m
             - type: radio
               label: Apply
               init:

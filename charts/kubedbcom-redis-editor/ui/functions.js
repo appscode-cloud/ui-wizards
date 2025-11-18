@@ -882,7 +882,7 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
-  async function dbTypeEqualsTo(type) {
+  function dbTypeEqualsTo(type) {
     // watchDependency('discriminator#/dbDetails')
 
     const { spec } = dbDetails || {}
@@ -1393,6 +1393,11 @@ export const useFunc = (model) => {
     }
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
     initScheduleBackup,
     initScheduleBackupForEdit,
@@ -1465,5 +1470,7 @@ export const useFunc = (model) => {
 
     isBindingAlreadyOn,
     addOrRemoveBinding,
+
+    setValueFromDbDetails,
   }
 }

@@ -589,6 +589,11 @@ export const useFunc = (model) => {
     return ans
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   /****** Monitoring *********/
 
   function showMonitoringSection() {
@@ -1418,6 +1423,7 @@ export const useFunc = (model) => {
     isNodeTopologySelected,
     showOpsRequestOptions,
     setApplyToIfReady,
+    setValueFromDbDetails,
 
     handleUnit,
 

@@ -230,7 +230,8 @@ step:
                     validation:
                       type: required
                     schema: temp/properties/configArray/items/properties/key
-                  - type: textarea
+                  - type: editor
+                    hasCopy: false
                     label: value
                     validation:
                       type: required
@@ -324,6 +325,7 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
           - type: block-layout
             label: Certificates
+            showLabels: true
             if:
               name: showIssuerRefAndCertificates
               type: function
@@ -347,48 +349,48 @@ step:
                 label: Subject
                 showLabels: true
                 elements:
-                  - type: array-object-form
+                  - type: array-item-form
                     label: Organizations
                     schema: schema/items/properties/subject/properties/organizations
-                    elements:
-                      - type: input
-                        label: organization
-                        schema: schema/items/properties/subject/properties/organizations/items
-                  - type: array-object-form
-                    label: countries
+                    element:
+                      type: input
+                      label: Organization
+                      schema: items
+                  - type: array-item-form
+                    label: Countries
                     schema: schema/items/properties/subject/properties/countries
-                    elements:
-                      - type: input
-                        label: country
-                        schema: schema/items/properties/subject/properties/countries/items
-                  - type: array-object-form
-                    label: organizational_units
+                    element:
+                      type: input
+                      label: Country
+                      schema: items
+                  - type: array-item-form
+                    label: Organizational Units
                     schema: schema/items/properties/subject/properties/organizationalUnits
-                    elements:
-                      - type: input
-                        label: organizational_unit
-                        schema: schema/items/properties/subject/properties/organizationalUnits/items
-                  - type: array-object-form
-                    label: provinces
+                    element:
+                      type: input
+                      label: Organizational Unit
+                      schema: items
+                  - type: array-item-form
+                    label: Provinces
                     schema: schema/items/properties/subject/properties/provinces
-                    elements:
-                      - type: input
-                        label: province
-                        schema: schema/items/properties/subject/properties/provinces/items
-              - type: array-object-form
+                    element:
+                      type: input
+                      label: Province
+                      schema: items
+              - type: array-item-form
                 label: DNS Names
                 schema: schema/items/properties/dnsNames
-                elements:
-                  - type: input
-                    label: dns name
-                    schema: schema/items/properties/dnsNames/items
-              - type: array-object-form
+                element:
+                  type: input
+                  label: DNS Name
+                  schema: items
+              - type: array-item-form
                 label: IP Addresses
                 schema: schema/items/properties/ipAddresses
-                elements:
-                  - type: input
-                    label: ip Address
-                    schema: schema/items/properties/ipAddresses/items
+                element:
+                  type: input
+                  label: IP Address
+                  schema: items
 # common
       - type: time-picker
         label: Timeout

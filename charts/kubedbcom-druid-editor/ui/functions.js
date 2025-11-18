@@ -795,6 +795,11 @@ export const useFunc = (model) => {
     return false
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
     returnFalse,
     handleUnit,
@@ -839,5 +844,6 @@ export const useFunc = (model) => {
     getSecrets,
     getSecretKeys,
     getOpsRequestUrl,
+    setValueFromDbDetails,
   }
 }

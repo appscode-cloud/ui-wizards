@@ -87,12 +87,13 @@ step:
                       - text: Offline
                         value: Offline
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/expansionMode
-                  - type: input
+                  - type: threshold-input
                     label: Usage Threshold (%)
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/usageThreshold
                   - type: scaling-rules
                     label: Scaling Rules
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/scalingRules
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
                     watcher:
                       func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/coordinator/scalingRules|scalingRules
                       paths:
@@ -130,12 +131,13 @@ step:
                       - text: Offline
                         value: Offline
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/expansionMode
-                  - type: input
+                  - type: threshold-input
                     label: Usage Threshold (%)
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/usageThreshold
                   - type: scaling-rules
                     label: Scaling Rules
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
                     watcher:
                       func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/data/scalingRules|scalingRules
                       paths:
@@ -173,17 +175,18 @@ step:
                       - text: Offline
                         value: Offline
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
-                  - type: input
+                  - type: threshold-input
                     label: Usage Threshold (%)
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
                   - type: scaling-rules
                     label: Scaling Rules
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
                     watcher:
                       func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/node/scalingRules|scalingRules
                       paths:
                         - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                  - type: input
+                  - type: threshold-input
                     label: Upper Bound
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
                     watcher:
@@ -216,12 +219,13 @@ step:
                       - text: Offline
                         value: Offline
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/expansionMode
-                  - type: input
+                  - type: threshold-input
                     label: Usage Threshold (%)
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/usageThreshold
                   - type: scaling-rules
                     label: Scaling Rules
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/scalingRules
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
                     watcher:
                       func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/overseer/scalingRules|scalingRules
                       paths:
@@ -244,13 +248,13 @@ step:
                 label: Select NodeTopology
                 loader: fetchNodeTopology
                 schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology/properties/name
-              - type: input
+              - type: threshold-input
                 label: ScaleUp Diff Percentage
                 if:
                   type: function
                   name: isNodeTopologySelected|storage
                 schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology/properties/scaleUpDiffPercentage
-              - type: input
+              - type: threshold-input
                 label: ScaleDown Diff Percentage
                 if:
                   type: function
@@ -266,24 +270,9 @@ step:
               name: showOpsRequestOptions
             # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions
             elements:
-              - type: select
+              - type: time-picker
                 label: Timeout
                 schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-                options:
-                - text: 5 minutes
-                  value: 5m0s
-                - text: 10 minutes
-                  value: 10m0s
-                - text: 30 minutes
-                  value: 30m0s
-                - text: 1 hour
-                  value: 1h0m
-                - text: 2 hours
-                  value: 2h0m
-                - text: 5 hours
-                  value: 5h0m
-                - text: 10 hours
-                  value: 10h0m
               - type: radio
                 label: Apply
                 init:
@@ -568,23 +557,17 @@ step:
                     - text: Offline
                       value: Offline
                   schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
-                - type: input
+                - type: threshold-input
                   label: UsageThreshold (%)
                   schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-                - type: array-object-form
+                - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/node/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                  elements:
-                    - type: input
-                      label: AppliesUpto (In Storage units)
-                      schema: appliesUpto
-                    - type: input
-                      label: Threshold (In %, Or In Storage Units)
-                      schema: threshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
@@ -599,24 +582,9 @@ step:
             type: function
             name: showOpsRequestOptions
           elements:
-            - type: select
+            - type: time-picker
               label: Timeout
               schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-              options:
-                - text: 5 minutes
-                  value: 5m0s
-                - text: 10 minutes
-                  value: 10m0s
-                - text: 30 minutes
-                  value: 30m0s
-                - text: 1 hour
-                  value: 1h0m
-                - text: 2 hours
-                  value: 2h0m
-                - text: 5 hours
-                  value: 5h0m
-                - text: 10 hours
-                  value: 10h0m
             - type: radio
               label: Apply
               init:
