@@ -156,16 +156,38 @@ step:
                       type: custom
                       name: isVerticalScaleTopologyRequired
                     schema: temp/topologyValue
-          - type: block-layout
-            label: Exporter Vertical Scaling
+          - type: horizontal-layout
             showLabels: true
+            label: Exporter
+            # schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
+            # init:
+            #   type: func
+            #   value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter/resources
             elements:
               - type: input
-                label: Resources
+                label: CPU Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/cpu
                 init:
                   type: func
-                  value: setResource|/spec/podTemplate/spec/containers
-                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/cpu|/spec/verticalScaling/exporter/resources/requests/cpu
+              - type: input
+                label: CPU Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/cpu|/spec/verticalScaling/exporter/resources/limits/cpu
+              - type: input
+                label: Memory Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/memory|/spec/verticalScaling/exporter/resources/requests/memory
+              - type: input
+                label: Memory Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/memory|/spec/verticalScaling/exporter/resources/limits/memory
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
@@ -175,7 +197,6 @@ step:
         elements:
           - type: block-layout
             label: PgBouncer Configuration
-            showLabels: true
             elements:
               - type: radio
                 label: Reconfigure Type
@@ -239,7 +260,8 @@ step:
                     validation:
                       type: required
                     schema: temp/properties/configArray/items/properties/key
-                  - type: textarea
+                  - type: editor
+                    hasCopy: false
                     label: value
                     validation:
                       type: required

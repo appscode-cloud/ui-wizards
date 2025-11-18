@@ -830,6 +830,11 @@ export const useFunc = (model) => {
     return false
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
     isConsole,
     isKubedb,
@@ -874,5 +879,7 @@ export const useFunc = (model) => {
     isSecretTypeValueFrom,
     getNamespacedResourceList,
     returnFalse,
+
+    setValueFromDbDetails,
   }
 }

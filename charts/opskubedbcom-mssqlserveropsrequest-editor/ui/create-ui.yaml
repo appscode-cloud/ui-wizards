@@ -155,26 +155,82 @@ step:
                   - type: input
                     label: Value
                     schema: schema/properties/spec/properties/verticalScaling/properties/mssqlserver/properties/topology/properties/value
-          - type: block-layout
+          # - type: block-layout
+          #   label: Exporter
+          #   showLabels: true
+          #   elements:
+          #     - type: input
+          #       label: CPU
+          #       schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/cpu
+          #     - type: input
+          #       label: Memory
+          #       schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+          - type: horizontal-layout
+            showLabels: true
             label: Exporter
-            showLabels: true
             elements:
               - type: input
-                label: CPU
-                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/cpu
+                label: CPU Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/cpu|/spec/verticalScaling/exporter/resources/requests/cpu
               - type: input
-                label: Memory
-                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-          - type: block-layout
+                label: CPU Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/cpu|/spec/verticalScaling/exporter/resources/limits/cpu
+              - type: input
+                label: Memory Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/memory|/spec/verticalScaling/exporter/resources/requests/memory
+              - type: input
+                label: Memory Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/memory|/spec/verticalScaling/exporter/resources/limits/memory
+          # - type: block-layout
+          #   label: Coordinator
+          #   showLabels: true
+          #   elements:
+          #     - type: input
+          #       label: CPU
+          #       schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/properties/cpu
+          #     - type: input
+          #       label: Memory
+          #       schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/properties/memory
+          - type: horizontal-layout
+            showLabels: true
             label: Coordinator
-            showLabels: true
             elements:
               - type: input
-                label: CPU
-                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/properties/cpu
+                label: CPU Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/requests/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/cpu|/spec/verticalScaling/exporter/resources/requests/cpu
               - type: input
-                label: Memory
-                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/properties/memory
+                label: CPU Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/cpu|/spec/verticalScaling/exporter/resources/limits/cpu
+              - type: input
+                label: Memory Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/requests/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/memory|/spec/verticalScaling/exporter/resources/requests/memory
+              - type: input
+                label: Memory Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/memory|/spec/verticalScaling/exporter/resources/limits/memory
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form
@@ -259,7 +315,7 @@ step:
                   validation:
                     type: required
                   schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-              - type: object-item
+              - type: array-object-form
                 label: Apply Config
                 if:
                   name: ifReconfigurationTypeEqualsTo|applyConfig
@@ -271,17 +327,18 @@ step:
                   paths:
                     - temp/properties/applyConfig
                 schema: temp/properties/applyConfig
-                # elements:
-                #   - type: input
-                #     label: key
-                #     validation:
-                #       type: required
-                #     schema: temp/properties/configArray/items/properties/key
-                #   - type: textarea
-                #     label: value
-                #     validation:
-                #       type: required
-                #     schema: temp/properties/configArray/items/properties/value
+                elements:
+                  - type: input
+                    label: key
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/key
+                  - type: editor
+                    hasCopy: false
+                    label: value
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
               - type: switch
                 schema: schema/properties/spec/properties/configuration/properties/removeCustomConfig
                 label: Remove CustomConfig

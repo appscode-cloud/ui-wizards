@@ -79,7 +79,7 @@ step:
               - type: input
                 label: Pod LifeTime Threshold
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/podLifeTimeThreshold
-              - type: input
+              - type: threshold-input
                 label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/resourceDiffPercentage
               - type: block-layout
@@ -175,7 +175,7 @@ step:
               - type: input
                 label: Pod LifeTime Threshold
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/podLifeTimeThreshold
-              - type: input
+              - type: threshold-input
                 label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/resourceDiffPercentage
               - type: block-layout
@@ -271,7 +271,7 @@ step:
               - type: input
                 label: Pod LifeTime Threshold
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/podLifeTimeThreshold
-              - type: input
+              - type: threshold-input
                 label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/resourceDiffPercentage
               - type: block-layout
@@ -367,7 +367,7 @@ step:
               - type: input
                 label: Pod LifeTime Threshold
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/podLifeTimeThreshold
-              - type: input
+              - type: threshold-input
                 label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/resourceDiffPercentage
               - type: block-layout
@@ -455,13 +455,13 @@ step:
                 label: Select NodeTopology
                 loader: fetchNodeTopology
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-              - type: input
+              - type: threshold-input
                 label: ScaleUp Diff Percentage
                 if:
                   type: function
                   name: isNodeTopologySelected
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-              - type: input
+              - type: threshold-input
                 label: ScaleDown Diff Percentage
                 if:
                   type: function
@@ -476,24 +476,9 @@ step:
               name: showOpsRequestOptions
             # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions
             elements:
-              - type: select
+              - type: time-picker
                 label: Timeout
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-                options:
-                - text: 5 minutes
-                  value: 5m0s
-                - text: 10 minutes
-                  value: 10m0s
-                - text: 30 minutes
-                  value: 30m0s
-                - text: 1 hour
-                  value: 1h0m
-                - text: 2 hours
-                  value: 2h0m
-                - text: 5 hours
-                  value: 5h0m
-                - text: 10 hours
-                  value: 10h0m
               - type: radio
                 label: Apply
                 init:
@@ -537,23 +522,17 @@ step:
                     - text: Offline
                       value: Offline
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/expansionMode
-                - type: input
+                - type: threshold-input
                   label: UsageThreshold (%)
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/usageThreshold
-                - type: array-object-form
+                - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComDruid/spec/topology/historicals/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComDruidAutoscaler/spec/storage/historicals/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/scalingRules
-                  elements:
-                    - type: input
-                      label: AppliesUpto (In Storage units)
-                      schema: appliesUpto
-                    - type: input
-                      label: Threshold (In %, Or In Storage Units)
-                      schema: threshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/upperBound
@@ -584,23 +563,17 @@ step:
                     - text: Offline
                       value: Offline
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/expansionMode
-                - type: input
+                - type: threshold-input
                   label: UsageThreshold (%)
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/usageThreshold
-                - type: array-object-form
+                - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComDruid/spec/topology/middleManagers/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComDruidAutoscaler/spec/storage/middleManagers/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/scalingRules
-                  elements:
-                    - type: input
-                      label: AppliesUpto (In Storage units)
-                      schema: appliesUpto
-                    - type: input
-                      label: Threshold (In %, Or In Storage Units)
-                      schema: threshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/upperBound
@@ -615,24 +588,9 @@ step:
             type: function
             name: showOpsRequestOptions
           elements:
-            - type: select
+            - type: time-picker
               label: Timeout
               schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-              options:
-                - text: 5 minutes
-                  value: 5m0s
-                - text: 10 minutes
-                  value: 10m0s
-                - text: 30 minutes
-                  value: 30m0s
-                - text: 1 hour
-                  value: 1h0m
-                - text: 2 hours
-                  value: 2h0m
-                - text: 5 hours
-                  value: 5h0m
-                - text: 10 hours
-                  value: 10h0m
             - type: radio
               label: Apply
               init:
