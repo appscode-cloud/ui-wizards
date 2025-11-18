@@ -236,18 +236,24 @@ step:
                   paths:
                     - schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
-              - type: select
-                label: Node Selection Policy
-                schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/nodeSelectionPolicy
-                options:
-                  - text: LabelSelector
-                    value: LabelSelector
-                  - text: Taint
-                    value: Taint
               - type: block-layout
-                label: Topology
+                label: Node Selection
                 showLabels: true
                 elements:
+                  - type: label-element
+                    label: Node Selection Policy
+                    subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                  - type: select
+                    label: Node Selection Policy
+                    schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/nodeSelectionPolicy
+                    options:
+                      - text: LabelSelector
+                        value: LabelSelector
+                      - text: Taint
+                        value: Taint
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
                   - type: input
                     label: Key
                     validation:
@@ -260,6 +266,7 @@ step:
                       type: custom
                       name: isVerticalScaleTopologyRequired|replicaSet
                     schema: temp/topologyValue-replicaSet
+                      
           - type: block-layout
             if:
               type: function
@@ -283,7 +290,7 @@ step:
                         - schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
                   - type: select
-                    label: Node Selection Policy
+                    label: Node Selection Policy 
                     options:
                       - text: LabelSelector
                         value: LabelSelector
@@ -322,7 +329,7 @@ step:
                         - schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
                   - type: select
-                    label: Node Selection Policy
+                    label: Node Selection Policy 
                     options:
                       - text: LabelSelector
                         value: LabelSelector
