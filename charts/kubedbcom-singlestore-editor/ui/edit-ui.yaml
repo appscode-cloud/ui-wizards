@@ -194,172 +194,334 @@ step:
             description: Expand your database size based on volume usage
 
       - type: block-layout
+        label: Topology
+        if:
+          type: function
+          name: dbTypeEqualsTo|topology
         showLabels: false
+        # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute
         elements:
-          # aggregator storage
+          # Aggregator section
           - type: block-layout
             label: Aggregator
-            if:
-              type: function
-              name: dbTypeEqualsTo|topology
             showLabels: true
-            # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator
+            # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator
             elements:
               - type: select
                 label: Trigger
                 init:
                   type: func
-                  value: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/trigger
+                  value: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/compute/aggregator/trigger
                 options:
                   - text: 'On'
                     value: 'On'
                   - text: 'Off'
                     value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/trigger
-              - type: select
-                label: Expansion Mode
-                options:
-                  - text: Online
-                    value: Online
-                  - text: Offline
-                    value: Offline
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/expansionMode
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/trigger
               - type: input
-                label: UsageThreshold (%)
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/usageThreshold
-              - type: array-object-form
-                label: ScalingRules
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules
-                watcher:
-                  func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/scalingRules|scalingRules
-                  paths:
-                    - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/podLifeTimeThreshold
+              - type: input
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/resourceDiffPercentage
+              - type: block-layout
+                showLabels: false
                 elements:
-                  - type: input
-                    label: AppliesUpto (In Storage units)
-                    schema: appliesUpto
-                  - type: input
-                    label: Threshold (In %, Or In Storage Units)
-                    schema: threshold
-              - type: input
-                label: UpperBound
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/upperBound
-                watcher:
-                  func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/upperBound
-                  paths:
-                    - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/upperBound
+                  - type: select
+                    label: Min Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-aggregator-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|aggregator|min
+                    loader:
+                      name: getMachines|aggregator|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-aggregator-max
+                    watcher:
+                      func: onMachineChange|aggregator
+                      paths:
+                        - temp/properties/allowedMachine-aggregator-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/minAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/minAllowed/properties/memory
+                  - type: select
+                    label: Max Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-aggregator-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|aggregator|max
+                    loader:
+                      name: getMachines|aggregator|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-aggregator-min
+                    watcher:
+                      func: onMachineChange|aggregator
+                      paths:
+                        - temp/properties/allowedMachine-aggregator-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/maxAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/maxAllowed/properties/memory
+              - type: select
+                label: Controlled Resources
+                loader: setControlledResources|aggregator
+                multiple: true
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/controlledResources
 
-      - type: block-layout
-        showLabels: false
-        elements:
-          # leaf storage
+          # Leaf section
           - type: block-layout
             label: Leaf
-            if:
-              type: function
-              name: dbTypeEqualsTo|topology
             showLabels: true
-            # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf
+            # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf
             elements:
               - type: select
                 label: Trigger
                 init:
                   type: func
-                  value: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/trigger
+                  value: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/compute/leaf/trigger
                 options:
                   - text: 'On'
                     value: 'On'
                   - text: 'Off'
                     value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/trigger
-              - type: select
-                label: Expansion Mode
-                options:
-                  - text: Online
-                    value: Online
-                  - text: Offline
-                    value: Offline
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/expansionMode
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/trigger
               - type: input
-                label: UsageThreshold (%)
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/usageThreshold
-              - type: array-object-form
-                label: ScalingRules
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules
-                watcher:
-                  func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/scalingRules
-                  paths:
-                    - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/podLifeTimeThreshold
+              - type: input
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/resourceDiffPercentage
+              - type: block-layout
+                showLabels: false
                 elements:
-                  - type: input
-                    label: AppliesUpto (In Storage units)
-                    schema: appliesUpto
-                  - type: input
-                    label: Threshold (In %, Or In Storage Units)
-                    schema: threshold
-              - type: input
-                label: UpperBound
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/upperBound
-                watcher:
-                  func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/upperBound
-                  paths:
-                    - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/upperBound
+                  - type: select
+                    label: Min Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-leaf-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|leaf|min
+                    loader:
+                      name: getMachines|leaf|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-leaf-max
+                    watcher:
+                      func: onMachineChange|leaf
+                      paths:
+                        - temp/properties/allowedMachine-leaf-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/minAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/minAllowed/properties/memory
+                  - type: select
+                    label: Max Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-leaf-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|leaf|max
+                    loader:
+                      name: getMachines|leaf|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-leaf-min
+                    watcher:
+                      func: onMachineChange|leaf
+                      paths:
+                        - temp/properties/allowedMachine-leaf-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/maxAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/maxAllowed/properties/memory
+              - type: select
+                label: Controlled Resources
+                loader: setControlledResources|leaf
+                multiple: true
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/controlledResources
 
+      # combined mode - node only
       - type: block-layout
+        label: Combined
+        if:
+          type: function
+          name: dbTypeEqualsTo|standalone
         showLabels: false
+        # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute
         elements:
-          # node storage (standalone)
+          # Node section
           - type: block-layout
             label: Node
-            if:
-              type: function
-              name: dbTypeEqualsTo|standalone
             showLabels: true
-            # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node
+            # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node
             elements:
               - type: select
                 label: Trigger
                 init:
                   type: func
-                  value: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/trigger
+                  value: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/compute/node/trigger
                 options:
                   - text: 'On'
                     value: 'On'
                   - text: 'Off'
                     value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
-              - type: select
-                label: Expansion Mode
-                options:
-                  - text: Online
-                    value: Online
-                  - text: Offline
-                    value: Offline
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
               - type: input
-                label: UsageThreshold (%)
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-              - type: array-object-form
-                label: ScalingRules
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                watcher:
-                  func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/scalingRules|scalingRules
-                  paths:
-                    - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+              - type: input
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+              - type: block-layout
+                showLabels: false
                 elements:
-                  - type: input
-                    label: AppliesUpto (In Storage units)
-                    schema: appliesUpto
-                  - type: input
-                    label: Threshold (In %, Or In Storage Units)
-                    schema: threshold
-              - type: input
-                label: UpperBound
-                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
-                watcher:
-                  func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/upperBound
-                  paths:
-                    - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+                  - type: select
+                    label: Min Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-node-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|node|min
+                    loader:
+                      name: getMachines|node|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-node-max
+                    watcher:
+                      func: onMachineChange|node
+                      paths:
+                        - temp/properties/allowedMachine-node-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+                  - type: select
+                    label: Max Allowed Profile
+                    disableUnselect: true
+                    schema: temp/properties/allowedMachine-node-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|node|max
+                    loader:
+                      name: getMachines|node|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-node-min
+                    watcher:
+                      func: onMachineChange|node
+                      paths:
+                        - temp/properties/allowedMachine-node-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+              - type: select
+                label: Controlled Resources
+                loader: setControlledResources|node
+                multiple: true
+                schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+
+      - type: block-layout
+        label: Node Topology
+        if:
+          type: function
+          name: hasNoAnnotations
+        showLabels: true
+        # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+        elements:
+          - type: select
+            label: Select Node Topology
+            loader: fetchNodeTopology
+            schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+          - type: input
+            label: ScaleUp Diff Percentage
+            if:
+              type: function
+              name: isNodeTopologySelected
+            schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+          - type: input
+            label: ScaleDown Diff Percentage
+            if:
+              type: function
+              name: isNodeTopologySelected
+            schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
 
       - type: block-layout
         label: Ops Request Options
@@ -401,6 +563,7 @@ step:
 
   - type: single-step-form
     id: storage-autoscaler
+    loader: getDbDetails
     elements:
     - type: block-layout
       showLabels: false
@@ -408,9 +571,104 @@ step:
         - type: block-layout
           showLabels: false
           elements:
+            # aggregator storage
             - type: block-layout
-              label: Standalone
+              label: Aggregator
+              if:
+                type: function
+                name: dbTypeEqualsTo|topology
               showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator
+              elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/expansionMode
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/upperBound
+
+        - type: block-layout
+          showLabels: false
+          elements:
+            # leaf storage
+            - type: block-layout
+              label: Leaf
+              if:
+                type: function
+                name: dbTypeEqualsTo|topology
+              showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf
+              elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/expansionMode
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/upperBound
+
+        - type: block-layout
+          showLabels: false
+          elements:
+            # node storage (standalone)
+            - type: block-layout
+              label: Node
+              if:
+                type: function
+                name: dbTypeEqualsTo|standalone
+              showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node
               elements:
                 - type: select
                   label: Trigger
@@ -431,23 +689,13 @@ step:
                     - text: Offline
                       value: Offline
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
-                - type: input
+                - type: threshold-input
                   label: UsageThreshold (%)
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-                - type: array-object-form
+                - type: scaling-rules
+                  loader: setValueFromDbDetails|/resources/kubedbComSinglestore/spec/storage/resources/requests/storage
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                  watcher:
-                    func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/scalingRules|scalingRules
-                    paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                  elements:
-                    - type: input
-                      label: AppliesUpto (In Storage units)
-                      schema: appliesUpto
-                    - type: input
-                      label: Threshold (In %, Or In Storage Units)
-                      schema: threshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
@@ -455,6 +703,8 @@ step:
                     func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/upperBound
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+
+        
         - type: block-layout
           label: OpsRequest Options
           showLabels: true
