@@ -1365,6 +1365,11 @@ export const useFunc = (model) => {
     }
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
     initScheduleBackup,
     initScheduleBackupForEdit,
@@ -1435,5 +1440,7 @@ export const useFunc = (model) => {
     isSecretTypeValueFrom,
     getNamespacedResourceList,
     returnFalse,
+
+    setValueFromDbDetails,
   }
 }

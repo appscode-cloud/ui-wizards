@@ -771,10 +771,18 @@ export const useFunc = (model) => {
         else {
           const machineData = machinesFromPreset.find((val) => val.id === machine)
           if (machineData) {
-            const subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
+            // const subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
             const text = machineData.name ? machineData.name : machineData.id
-            return { text, subText, value: machine }
-          } else return { text: machine, value: machine }
+            return {
+              text,
+              // subText,
+              value: {
+                machine: text,
+                cpu: machineData.limits.cpu,
+                memory: machineData.limits.memory,
+              },
+            }
+          } else return { text: machine, value: { machine } }
         }
       })
     } else {
@@ -782,9 +790,17 @@ export const useFunc = (model) => {
         .map((machine) => {
           if (machine === 'custom')
             return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
-          const subText = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
+          // const subText = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
           const text = machine
-          return { text, subText, value: machine }
+          return {
+            text,
+            // subText,
+            value: {
+              machine: text,
+              cpu: machines[machine].resources.limits.cpu,
+              memory: machines[machine].resources.limits.memory,
+            },
+          }
         })
         .filter((val) => !!val)
     }
@@ -1056,6 +1072,54 @@ export const useFunc = (model) => {
     return false
   }
 
+  function onMachineChange(type, valPath) {
+    let selectedMachine = ''
+    selectedMachine = getValue(discriminator, `/machine-${type}`)
+    const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
+
+    let obj = {}
+    if (selectedMachine !== 'custom') {
+      if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
+      else obj = machines[selectedMachine]?.resources
+    } else {
+      const val = getValue(discriminator, `/dbDetails${valPath}`) || {}
+      obj = Array.isArray(val) ? val[0]?.resources : { ...val }
+    }
+
+    const path = `/spec/verticalScaling/${type}/resources`
+
+    if (obj && Object.keys(obj).length)
+      commit('wizard/model$update', {
+        path: path,
+        value: obj,
+        force: true,
+      })
+
+    // update metadata.annotations
+    const annotations = getValue(model, '/metadata/annotations') || {}
+    const instance = annotations['kubernetes.io/instance-type']
+    let parsedInstance = {}
+    try {
+      if (instance) parsedInstance = JSON.parse(instance)
+    } catch (e) {
+      console.log(e)
+      parsedInstance = {}
+    }
+    if (selectedMachine === 'custom') delete parsedInstance[type]
+    else parsedInstance[type] = selectedMachine
+    annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
+
+    if (machinesFromPreset.length)
+      commit('wizard/model$update', {
+        path: '/metadata/annotations',
+        value: annotations,
+        force: true,
+      })
+
+    if (parsedInstance && Object.keys(parsedInstance).length === 0)
+      commit('wizard/model$delete', '/metadata/annotations')
+  }
+
   return {
     returnFalse,
     getNamespaces,
@@ -1098,5 +1162,6 @@ export const useFunc = (model) => {
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,
+    onMachineChange,
   }
 }
