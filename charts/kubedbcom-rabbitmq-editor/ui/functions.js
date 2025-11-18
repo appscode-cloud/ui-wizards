@@ -861,6 +861,11 @@ export const useFunc = (model) => {
     return false
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
     returnFalse,
     isEqualToModelPathValue,
@@ -904,5 +909,6 @@ export const useFunc = (model) => {
     addOrRemoveBinding,
     isBindingAlreadyOn,
     handleUnit,
+    setValueFromDbDetails,
   }
 }
