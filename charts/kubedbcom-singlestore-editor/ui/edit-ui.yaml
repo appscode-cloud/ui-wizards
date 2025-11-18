@@ -221,7 +221,7 @@ step:
               - type: input
                 label: Pod LifeTime Threshold
                 schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/podLifeTimeThreshold
-              - type: input
+              - type: threshold-input
                 label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/resourceDiffPercentage
               - type: block-layout
@@ -317,7 +317,7 @@ step:
               - type: input
                 label: Pod LifeTime Threshold
                 schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/podLifeTimeThreshold
-              - type: input
+              - type: threshold-input
                 label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/resourceDiffPercentage
               - type: block-layout
@@ -422,7 +422,7 @@ step:
               - type: input
                 label: Pod LifeTime Threshold
                 schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
-              - type: input
+              - type: threshold-input
                 label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
               - type: block-layout
@@ -510,13 +510,13 @@ step:
             label: Select Node Topology
             loader: fetchNodeTopology
             schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-          - type: input
+          - type: threshold-input
             label: ScaleUp Diff Percentage
             if:
               type: function
               name: isNodeTopologySelected
             schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-          - type: input
+          - type: threshold-input
             label: ScaleDown Diff Percentage
             if:
               type: function
@@ -590,6 +590,7 @@ step:
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules
+                  loader: setValueFromDbDetails|/resources/kubedbComSinglestore/spec/topology/aggregator/storage/resources/requests/storage
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/upperBound
@@ -635,6 +636,7 @@ step:
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules
+                  loader: setValueFromDbDetails|/resources/kubedbComSinglestore/spec/topology/leaf/storage/resources/requests/storage
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/upperBound
@@ -678,7 +680,7 @@ step:
                   label: UsageThreshold (%)
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
                 - type: scaling-rules
-                  loader: setValueFromDbDetails|/resources/kubedbComSinglestore/spec/storage/resources/requests/storage
+                  loader: setValueFromDbDetails|/resources/kubedbComSinglestore/spec/topology/node/storage/resources/requests/storage
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
                 - type: input
@@ -689,7 +691,6 @@ step:
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
 
-        
         - type: block-layout
           label: OpsRequest Options
           showLabels: true
