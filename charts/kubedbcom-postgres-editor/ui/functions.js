@@ -1033,6 +1033,11 @@ export const useFunc = (model) => {
     return !!modelValue
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   function onLabelChange() {
     const labels = getValue(model, '/resources/kubedbComPostgres/spec/metadata/labels')
 
@@ -1431,6 +1436,7 @@ export const useFunc = (model) => {
 
     getOpsRequestUrl,
     isValueExistInModel,
+    setValueFromDbDetails,
     onEnableMonitoringChange,
     showMonitoringSection,
     onAgentChange,

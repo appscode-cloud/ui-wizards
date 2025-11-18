@@ -894,7 +894,7 @@ export const useFunc = (model) => {
     return list
   }
 
-  async function dbTypeEqualsTo(type) {
+  function dbTypeEqualsTo(type) {
     // watchDependency('discriminator#/dbDetails')
 
     const { spec } = dbDetails || {}
@@ -1318,6 +1318,34 @@ export const useFunc = (model) => {
     return false
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    console.log({ value })
+    return value
+  }
+
+  function isKubedb() {
+    return !!storeGet('/route/params/actions')
+  }
+
+  function showOpsRequestOptions() {
+    if (isKubedb() === true) return true
+    // watchDependency(
+    //   'model#/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
+    // )
+    // watchDependency('discriminator#/autoscalingType')
+    return (
+      !!getValue(
+        model,
+        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
+      ) && !!getValue(discriminator, '/autoscalingType')
+    )
+  }
+
+  function setApplyToIfReady() {
+    return 'IfReady'
+  }
+
   return {
     returnFalse,
     initScheduleBackup,
@@ -1387,5 +1415,10 @@ export const useFunc = (model) => {
     getConfigMapKeys,
     getSecrets,
     getSecretKeys,
+
+    setValueFromDbDetails,
+    showOpsRequestOptions,
+    isKubedb,
+    setApplyToIfReady,
   }
 }

@@ -1134,6 +1134,8 @@ export const useFunc = (model) => {
     if (commitPath) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
       // computed called when tls fields is not visible
+      console.log('tlsOperation', tlsOperation)
+      console.log('commitPath', commitPath)
       if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
 
       // direct model update required for reusable element.
@@ -1144,6 +1146,7 @@ export const useFunc = (model) => {
         force: true,
       })
     }
+    console.log({ retValue })
     return retValue || undefined
   }
 
