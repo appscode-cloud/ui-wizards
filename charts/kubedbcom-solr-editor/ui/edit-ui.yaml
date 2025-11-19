@@ -66,6 +66,9 @@ step:
               - type: block-layout
                 label: Coordinator
                 showLabels: true
+                if:
+                  type: function
+                  name: isTopology
                 # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator
                 elements:
                   - type: select
@@ -93,7 +96,7 @@ step:
                   - type: scaling-rules
                     label: Scaling Rules
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/scalingRules
-                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/topology/coordinator/storage/resources/requests/storage
                     watcher:
                       func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/coordinator/scalingRules|scalingRules
                       paths:
@@ -110,6 +113,9 @@ step:
               - type: block-layout
                 label: Data
                 showLabels: true
+                if:
+                  type: function
+                  name: isTopology
                 # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data
                 elements:
                   - type: select
@@ -137,7 +143,7 @@ step:
                   - type: scaling-rules
                     label: Scaling Rules
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
-                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/topology/data/storage/resources/requests/storage
                     watcher:
                       func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/data/scalingRules|scalingRules
                       paths:
@@ -154,6 +160,9 @@ step:
               - type: block-layout
                 label: Node
                 showLabels: true
+                if:
+                  type: function
+                  name: isNotTopology
                 # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node
                 elements:
                   - type: select
@@ -181,7 +190,7 @@ step:
                   - type: scaling-rules
                     label: Scaling Rules
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/topology/node/storage/resources/requests/storage
                     watcher:
                       func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/node/scalingRules|scalingRules
                       paths:
@@ -198,6 +207,9 @@ step:
               - type: block-layout
                 label: Overseer
                 showLabels: true
+                if:
+                  type: function
+                  name: isTopology
                 # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer
                 elements:
                   - type: select
@@ -225,7 +237,7 @@ step:
                   - type: scaling-rules
                     label: Scaling Rules
                     schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/scalingRules
-                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/topology/overseer/storage/resources/requests/storage
                     watcher:
                       func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/overseer/scalingRules|scalingRules
                       paths:
@@ -284,6 +296,514 @@ step:
                   - text: Always (OpsRequest will always be applied)
                     value: Always
                 schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+
+  - type: single-step-form
+    id: compute-autoscaler
+    loader: getDbDetails
+    elements:
+      - type: block-layout
+        if:
+          type: function
+          name: isConsole
+        elements:
+          - type: input
+            label: Name
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/name
+          - type: select
+            label: Select Namespace
+            loader: getNamespaces
+            if:
+              type: function
+              name: isRancherManaged
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
+            watcher:
+              func: onNamespaceChange
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
+          - type: select
+            label: Select Db
+            loader: getDbs
+            validation:
+              type: required
+            refresh: true
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
+            watcher:
+              func: initMetadata
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
+
+      - type: radio
+        if:
+          type: function
+          name: isConsole
+        label: Select Type
+        validation:
+          type: required
+        schema: temp/properties/autoscalingType
+        watcher:
+          func: initMetadata
+          paths:
+            - temp/properties/autoscalingType
+        options:
+          - text: Compute
+            value: compute
+            description: Scale your CPU Memory based on resource usage
+          - text: Storage
+            value: storage
+            description: Expand your database size based on volume usage
+
+      - type: block-layout
+        showLabels: false
+        elements:
+          - type: block-layout
+            showLabels: false
+            loader: fetchTopologyMachines
+            elements:
+              # Coordinator
+              - type: block-layout
+                label: Coordinator
+                showLabels: true
+                if:
+                  type: function
+                  name: isTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator
+                elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/coordinator/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/podLifeTimeThreshold
+                  - type: threshold-input
+                    label: Resource Diff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/resourceDiffPercentage
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                      - type: select
+                        label: Min Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-coordinator-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|coordinator|min
+                        loader:
+                          name: getMachines|coordinator|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-coordinator-max
+                        watcher:
+                          func: onMachineChange|coordinator
+                          paths:
+                            - temp/properties/allowedMachine-coordinator-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed/properties/memory
+                      - type: select
+                        label: Max Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-coordinator-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|coordinator|max
+                        loader:
+                          name: getMachines|coordinator|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-coordinator-min
+                        watcher:
+                          func: onMachineChange|coordinator
+                          paths:
+                            - temp/properties/allowedMachine-coordinator-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|coordinator
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/controlledResources
+
+              # Data
+              - type: block-layout
+                label: Data
+                showLabels: true
+                if:
+                  type: function
+                  name: isTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data
+                elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/data/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/podLifeTimeThreshold
+                  - type: threshold-input
+                    label: Resource Diff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/resourceDiffPercentage
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                      - type: select
+                        label: Min Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-data-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|data|min
+                        loader:
+                          name: getMachines|data|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-data-max
+                        watcher:
+                          func: onMachineChange|data
+                          paths:
+                            - temp/properties/allowedMachine-data-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
+                      - type: select
+                        label: Max Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-data-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|data|max
+                        loader:
+                          name: getMachines|data|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-data-min
+                        watcher:
+                          func: onMachineChange|data
+                          paths:
+                            - temp/properties/allowedMachine-data-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|data
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
+
+              # Node
+              - type: block-layout
+                label: Node
+                showLabels: true
+                if:
+                  type: function
+                  name: isNotTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node
+                elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/node/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+                  - type: threshold-input
+                    label: Resource Diff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                      - type: select
+                        label: Min Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-node-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|node|min
+                        loader:
+                          name: getMachines|node|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-node-max
+                        watcher:
+                          func: onMachineChange|node
+                          paths:
+                            - temp/properties/allowedMachine-node-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+                      - type: select
+                        label: Max Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-node-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|node|max
+                        loader:
+                          name: getMachines|node|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-node-min
+                        watcher:
+                          func: onMachineChange|node
+                          paths:
+                            - temp/properties/allowedMachine-node-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|node
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+
+              # Overseer
+              - type: block-layout
+                label: Overseer
+                showLabels: true
+                if:
+                  type: function
+                  name: isTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer
+                elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/overseer/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/podLifeTimeThreshold
+                  - type: threshold-input
+                    label: Resource Diff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/resourceDiffPercentage
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                      - type: select
+                        label: Min Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-overseer-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|overseer|min
+                        loader:
+                          name: getMachines|overseer|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-overseer-max
+                        watcher:
+                          func: onMachineChange|overseer
+                          paths:
+                            - temp/properties/allowedMachine-overseer-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed/properties/memory
+                      - type: select
+                        label: Max Allowed Profile
+                        disableUnselect: true
+                        schema: temp/properties/allowedMachine-overseer-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|overseer|max
+                        loader:
+                          name: getMachines|overseer|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-overseer-min
+                        watcher:
+                          func: onMachineChange|overseer
+                          paths:
+                            - temp/properties/allowedMachine-overseer-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed/properties/cpu
+                          - type: input
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|overseer
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/controlledResources
+
+          # Node Topology
+          - type: block-layout
+            label: Node Topology
+            if:
+              type: function
+              name: hasNoAnnotations
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+            elements:
+              - type: select
+                label: Select NodeTopology
+                loader: fetchNodeTopology
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+              - type: threshold-input
+                label: ScaleUp Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected|compute
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+              - type: threshold-input
+                label: ScaleDown Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected|compute
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+
+      # Ops Request Options
+      - type: block-layout
+        label: Ops Request Options
+        showLabels: true
+        if:
+          type: function
+          name: showOpsRequestOptions
+        # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions
+        elements:
+          - type: time-picker
+            label: Timeout
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+          - type: radio
+            label: Apply
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
 
   - type: single-step-form
     id: monitoring
@@ -524,79 +1044,6 @@ step:
                         - schema/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/secretKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
-
-  - type: single-step-form
-    id: storage-autoscaler
-    elements:
-    - type: block-layout
-      showLabels: false
-      elements:
-        - type: block-layout
-          showLabels: false
-          elements:
-            - type: block-layout
-              label: Standalone
-              showLabels: true
-              elements:
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/storage/node/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
-                - type: select
-                  label: Expansion Mode
-                  options:
-                    - text: Online
-                      value: Online
-                    - text: Offline
-                      value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
-                - type: threshold-input
-                  label: UsageThreshold (%)
-                  schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-                - type: scaling-rules
-                  label: Scaling Rules
-                  schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                  loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
-                  watcher:
-                    func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/node/scalingRules|scalingRules
-                    paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                - type: input
-                  label: UpperBound
-                  schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
-                  watcher:
-                    func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/node/upperBound
-                    paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
-        - type: block-layout
-          label: OpsRequest Options
-          showLabels: true
-          if:
-            type: function
-            name: showOpsRequestOptions
-          elements:
-            - type: time-picker
-              label: Timeout
-              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-            - type: radio
-              label: Apply
-              init:
-                type: func
-                value: setApplyToIfReady
-              options:
-                - text: IfReady (OpsRequest will be applied if database is ready)
-                  value: IfReady
-                - text: Always (OpsRequest will always be applied)
-                  value: Always
-              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-
 
   - type: single-step-form
     id: binding
