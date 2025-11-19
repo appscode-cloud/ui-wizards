@@ -2945,7 +2945,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function handleUnit({ commit, model, getValue }, path, type = 'bound') {
+  function handleUnit(path, type = 'bound') {
     let value = getValue(model, `/resources/${path}`)
     if (type === 'scalingRules') {
       const updatedValue = []
