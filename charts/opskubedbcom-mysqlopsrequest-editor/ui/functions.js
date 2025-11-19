@@ -598,11 +598,7 @@ export const useFunc = (model) => {
     const { topology } = spec || {}
     const { mode } = topology || {}
 
-    if (mode) {
-      verd = 'cluster'
-    } else {
-      verd = 'standalone'
-    }
+    const verd = mode ? 'cluster' : 'standalone'
 
     return verd
   }
