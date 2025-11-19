@@ -348,7 +348,7 @@ export const useFunc = (model) => {
   }
 
   function returnFalse() {
-    return false
+    return true
   }
 
   function isRancherManaged() {
