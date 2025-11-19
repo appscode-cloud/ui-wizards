@@ -1304,6 +1304,13 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
+  function getSelectedConfigSecret(type) {
+    const path = `/spec/configuration/${type}/configSecret/name`
+    const selectedSecret = getValue(model, path)
+    // watchDependency(`model#${path}`)
+    return `You have selected ${selectedSecret} secret` || 'No secret selected'
+  }
+
   return {
     fetchAliasOptions,
     validateNewCertificates,
@@ -1330,6 +1337,7 @@ export const useFunc = (model) => {
     showAndInitOpsRequestType,
     ifDbTypeEqualsTo,
     getConfigSecrets,
+    getSelectedConfigSecret,
     createSecretUrl,
     isEqualToValueFromType,
     getNamespacedResourceList,
