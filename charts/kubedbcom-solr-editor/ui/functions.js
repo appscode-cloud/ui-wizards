@@ -8,6 +8,29 @@ export const useFunc = (model) => {
     store.state,
   )
 
+  /********** Initialize Discriminator **************/
+
+  setDiscriminatorValue('binding', false)
+  setDiscriminatorValue('hidePreviewFromWizard', undefined)
+
+  setDiscriminatorValue('/enableMonitoring', false)
+  setDiscriminatorValue('/customizeExporter', true)
+  setDiscriminatorValue('/valueFromType', 'input')
+
+  // Autoscaler Discriminators
+  setDiscriminatorValue('/dbDetails', false)
+  setDiscriminatorValue('/topologyMachines', [])
+  setDiscriminatorValue('/allowedMachine-standalone-min', '')
+  setDiscriminatorValue('/allowedMachine-standalone-max', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
+  setDiscriminatorValue('/allowedMachine-shard-min', '')
+  setDiscriminatorValue('/allowedMachine-shard-max', '')
+  setDiscriminatorValue('/allowedMachine-configServer-min', '')
+  setDiscriminatorValue('/allowedMachine-configServer-max', '')
+  setDiscriminatorValue('/allowedMachine-mongos-min', '')
+  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+
   // compute
 
   let autoscaleType = ''
@@ -200,9 +223,9 @@ export const useFunc = (model) => {
   }
 
   function isNodeTopologySelected(type) {
-    watchDependency(
-      `model#/resources/autoscalingKubedbComSolrAutoscaler/spec/${type}/nodeTopology/name`,
-    )
+    // watchDependency(
+    //   `model#/resources/autoscalingKubedbComSolrAutoscaler/spec/${type}/nodeTopology/name`,
+    // )
     const nodeTopologyName =
       getValue(
         model,
@@ -853,6 +876,23 @@ export const useFunc = (model) => {
     return value
   }
 
+  function isRancherManaged() {
+    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+    const found = managers.find((item) => item === 'Rancher')
+    return !!found
+  }
+
+  function isTopology() {
+    // watchDependency('model#/resources/kubedbComSolr/spec/topology')
+    const topo = getValue(model, '/resources/kubedbComSolr/spec/topology')
+
+    return !!topo
+  }
+
+  function isNotTopology() {
+    return !isTopology()
+  }
+
   return {
     isConsole,
     isKubedb,
@@ -900,5 +940,9 @@ export const useFunc = (model) => {
     addOrRemoveBinding,
     isBindingAlreadyOn,
     setValueFromDbDetails,
+
+    isRancherManaged,
+    isTopology,
+    isNotTopology,
   }
 }
