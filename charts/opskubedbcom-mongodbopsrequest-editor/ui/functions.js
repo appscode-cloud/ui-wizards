@@ -865,6 +865,7 @@ export const useFunc = (model) => {
   }
 
   // for config secret
+  let secretArray = []
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -873,14 +874,10 @@ export const useFunc = (model) => {
 
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      },
     )
 
     const secrets = (resp && resp.data && resp.data.items) || []
+    secretArray = secrets
 
     const filteredSecrets = secrets
 
@@ -1311,6 +1308,44 @@ export const useFunc = (model) => {
     return `You have selected ${selectedSecret} secret` || 'No secret selected'
   }
 
+  function objectToYaml(obj, indent = 0) {
+    if (obj === null || obj === undefined) return 'null'
+    if (typeof obj !== 'object') return JSON.stringify(obj)
+
+    const nextSpaces = '  '.repeat(indent + 1)
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => `\n${nextSpaces}- ${objectToYaml(item, indent + 1).trim()}`).join('')
+    }
+
+    return Object.keys(obj).map(key => {
+      const value = obj[key]
+      if (value === null || value === undefined) {
+        return `\n${nextSpaces}${key}: null`
+      } else if (typeof value === 'object' && !Array.isArray(value)) {
+        return `\n${nextSpaces}${key}:${objectToYaml(value, indent + 1)}`
+      } else if (Array.isArray(value)) {
+        return `\n${nextSpaces}${key}:${objectToYaml(value, indent + 1)}`
+      } else if (typeof value === 'string') {
+        return `\n${nextSpaces}${key}: "${value}"`
+      } else {
+        return `\n${nextSpaces}${key}: ${value}`
+      }
+    }).join('')
+  }
+
+  function getSelectedConfigSecretValue(type) {
+    const path = `/spec/configuration/${type}/configSecret/name`
+    const selectedSecret = getValue(model, path)
+    let data;
+    secretArray.forEach((item) => {
+      if (item.value === selectedSecret) {
+         data = objectToYaml(item.data).trim() || 'No Data Found'
+      }
+    })
+    return data || 'No Data Found'
+  }
+
   return {
     fetchAliasOptions,
     validateNewCertificates,
@@ -1369,5 +1404,6 @@ export const useFunc = (model) => {
     onMachineChange,
     isMachineCustom,
     checkVolume,
+    getSelectedConfigSecretValue,
   }
 }
