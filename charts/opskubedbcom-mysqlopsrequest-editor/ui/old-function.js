@@ -386,7 +386,7 @@ export const useFunc = (model) => {
     // watchDependency('model#/metadata/namespace')
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mariadbs`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mysqls`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -410,7 +410,7 @@ export const useFunc = (model) => {
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
 
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mariadbs/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mysqls/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -422,7 +422,9 @@ export const useFunc = (model) => {
   async function getDbVersions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
+
     const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+
     let presets = storeGet('/kubedbuiPresets') || {}
     if (!storeGet('/route/params/actions')) {
       try {
@@ -433,8 +435,9 @@ export const useFunc = (model) => {
         presets.status = String(e.status)
       }
     }
+
     try {
-      const presetVersions = presets.admin?.databases?.MariaDB?.versions?.available || []
+      const presetVersions = presets.admin?.databases?.MySQL?.versions?.available || []
       const queryParams = {
         filter: {
           items: {
@@ -443,24 +446,35 @@ export const useFunc = (model) => {
           },
         },
       }
+
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mariadbversions`,
+        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mysqlversions`,
         {
           params: queryParams,
         },
       )
+
       const resources = (resp && resp.data && resp.data.items) || []
+
       const sortedVersions = resources.sort((a, b) =>
         versionCompare(a.spec.version, b.spec.version),
       )
+
       let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
       const found = sortedVersions.find((item) => item.metadata.name === ver)
+
       if (found) ver = found.spec?.version
-      const allowed = found?.spec?.updateConstraints?.allowlist || []
+
+      const isGroupRepl = !!getValue(discriminator, '/dbDetails/spec/topology')
+      const allowed = isGroupRepl
+        ? found?.spec?.updateConstraints?.allowlist.groupReplication
+        : found?.spec?.updateConstraints?.allowlist.standalone
+
       const limit = allowed.length ? allowed[0] : '0.0'
+
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
       // if presets.status is 404, it means no presets available, no need to filter with presets
-      const filteredMariaDbVersions = sortedVersions.filter((item) => {
+      const filteredMySQLVersions = sortedVersions.filter((item) => {
         // default limit 0.0 means no restrictions, show all higher versions
         if (limit === '0.0')
           return (
@@ -483,7 +497,8 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      return filteredMariaDbVersions.map((item) => {
+
+      return filteredMySQLVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -558,6 +573,15 @@ export const useFunc = (model) => {
     })
   }
 
+  function disableOpsRequest() {
+    if (itemCtx.value === 'HorizontalScaling') {
+      const dbType = getDbType()
+
+      if (dbType === 'standalone') return true
+      else return false
+    } else return false
+  }
+
   function getDbTls() {
     // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
@@ -571,28 +595,12 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
 
     const { spec } = dbDetails || {}
-    const { replicas } = spec || {}
-    let verd = ''
+    const { topology } = spec || {}
+    const { mode } = topology || {}
 
-    if (replicas > 1) {
-      verd = 'cluster'
-    } else {
-      verd = 'standalone'
-    }
+    const verd = mode ? 'cluster' : 'standalone'
 
     return verd
-  }
-
-  function disableOpsRequest() {
-    if (itemCtx.value === 'HorizontalScaling') {
-      const dbType = getDbType({
-        discriminator,
-        getValue,
-      })
-
-      if (dbType === 'standalone') return true
-      else return false
-    } else return false
   }
 
   function initNamespace() {
@@ -693,6 +701,7 @@ export const useFunc = (model) => {
     }
     if (ver) {
       const operation = route.params.actions
+
       const match = /^(.*)-opsrequest-(.*)$/.exec(operation)
       const opstype = match[2]
       commit('wizard/model$update', {
@@ -718,7 +727,7 @@ export const useFunc = (model) => {
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -767,20 +776,20 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const machine = annotations['kubernetes.io/instance-type'] || 'custom'
 
     machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
-    if (machinePresets) return { machine }
+    if (machinePresets) return machine
     else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
   function onMachineChange(type, valPath) {
     let selectedMachine = ''
-    selectedMachine = getValue(discriminator, `/machine`)
+    selectedMachine = getValue(discriminator, '/machine')
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
 
     let obj = {}
@@ -816,8 +825,8 @@ export const useFunc = (model) => {
   }
 
   function isMachineCustom() {
-    // watchDependency(`discriminator#/machine`)
-    const machine = getValue(discriminator, `/machine`)
+    // watchDependency('discriminator#/machine')
+    const machine = getValue(discriminator, '/machine')
     return machine === 'custom'
   }
 
@@ -962,9 +971,8 @@ export const useFunc = (model) => {
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {
     const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+    // watchDependency('discriminator#/reconfigurationType')
 
-    const watchPath = `discriminator#/reconfigurationType`
-    // watchDependency(watchPath)
     return reconfigurationType === value
   }
 
@@ -981,15 +989,15 @@ export const useFunc = (model) => {
     }
 
     commit('wizard/model$update', {
-      path: `/spec/configuration/applyConfig`,
+      path: '/spec/configuration/applyConfig',
       value: configObj,
       force: true,
     })
   }
 
   function onReconfigurationTypeChange() {
-    setDiscriminatorValue(`/applyConfig`, [])
     const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+    setDiscriminatorValue('/applyConfig', [])
     if (reconfigurationType === 'remove') {
       commit('wizard/model$delete', `/spec/configuration`)
 
@@ -1122,6 +1130,8 @@ export const useFunc = (model) => {
     return isDbloading ? '' : requestType || ''
   }
 
+  // ************************************** Set db details *****************************************
+
   function isDbDetailsLoading() {
     // watchDependency('discriminator#/dbDetails')
     // watchDependency('model#/spec/databaseRef/name')
@@ -1132,10 +1142,13 @@ export const useFunc = (model) => {
   }
 
   function setValueFromDbDetails(path, commitPath) {
+    // watchDependency('discriminator#/dbDetails')
+
     const retValue = getValue(discriminator, `/dbDetails${path}`)
 
-    if (commitPath) {
+    if (commitPath && retValue) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
+
       // computed called when tls fields is not visible
       if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
 
@@ -1147,7 +1160,24 @@ export const useFunc = (model) => {
         force: true,
       })
     }
+
     return retValue || undefined
+  }
+
+  function setConfigFiles() {
+    // watchDependency('model#/resources/secret_config/stringData')
+    const configFiles = getValue(model, '/resources/secret_config/stringData')
+
+    const files = []
+
+    for (const item in configFiles) {
+      const obj = {}
+      obj.key = item
+      obj.value = configFiles[item]
+      files.push(obj)
+    }
+
+    return files
   }
 
   function getAliasOptions() {
@@ -1178,12 +1208,12 @@ export const useFunc = (model) => {
   }
 
   function isVerticalScaleTopologyRequired() {
-    // watchDependency(`discriminator#/topologyKey`)
-    // watchDependency(`discriminator#/topologyValue`)
+    // watchDependency('discriminator#/topologyKey')
+    // watchDependency('discriminator#/topologyValue')
 
-    const key = getValue(discriminator, `/topologyKey`)
-    const value = getValue(discriminator, `/topologyValue`)
-    const path = `/spec/verticalScaling/mariadb/topology`
+    const key = getValue(discriminator, '/topologyKey')
+    const value = getValue(discriminator, '/topologyValue')
+    const path = `/spec/verticalScaling/mysql/topology`
 
     if (key || value) {
       commit('wizard/model$update', {
@@ -1352,10 +1382,10 @@ export const useFunc = (model) => {
     isDbDetailsLoading,
     setValueFromDbDetails,
     getAliasOptions,
-    isNamespaceDisabled,
     isDatabaseRefDisabled,
-    onDbChange,
+    isNamespaceDisabled,
     onNamespaceChange,
+    onDbChange,
     setApplyToIfReady,
     isVerticalScaleTopologyRequired,
     getMachines,
@@ -1363,5 +1393,6 @@ export const useFunc = (model) => {
     onMachineChange,
     isMachineCustom,
     checkVolume,
+    setConfigFiles,
   }
 }
