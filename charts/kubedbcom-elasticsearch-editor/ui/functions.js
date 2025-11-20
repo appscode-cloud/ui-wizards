@@ -32,6 +32,27 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
 
+  const stashAppscodeComBackupConfiguration = {
+    spec: {
+      repository: {
+        name: '',
+      },
+      retentionPolicy: {
+        keepLast: 5,
+        name: 'keep-last-5',
+        prune: true,
+      },
+      schedule: '*/5 * * * *',
+      target: {
+        ref: {
+          apiVersion: 'appcatalog.appscode.com/v1alpha1',
+          kind: 'AppBinding',
+          name: '',
+        },
+      },
+    },
+  }
+
   function initScheduleBackupForEdit() {
     const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
       getValue,
@@ -44,7 +65,7 @@ export const useFunc = (model) => {
     else return 'no'
   }
 
-  function initScheduleBackup({ getValue, model }) {
+  function initScheduleBackup() {
     const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
       getValue,
       model,
@@ -85,6 +106,53 @@ export const useFunc = (model) => {
         })
       }
     }
+  }
+
+  function deleteKubedbComElasticsearchDbAnnotation(getValue, model, commit) {
+    const annotations =
+      getValue(model, '/resources/kubedbComElasticsearch/metadata/annotations') || {}
+    const filteredKeyList =
+      Object.keys(annotations).filter(
+        (k) =>
+          k !== 'stash.appscode.com/backup-blueprint' &&
+          k !== 'stash.appscode.com/schedule' &&
+          !k.startsWith('params.stash.appscode.com/'),
+      ) || []
+    const filteredAnnotations = {}
+    filteredKeyList.forEach((k) => {
+      filteredAnnotations[k] = annotations[k]
+    })
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComElasticsearch/metadata/annotations',
+      value: filteredAnnotations,
+    })
+  }
+
+  function getBackupConfigsAndAnnotations(getValue, model) {
+    const stashAppscodeComBackupConfiguration = getValue(
+      model,
+      '/resources/stashAppscodeComBackupConfiguration',
+    )
+    const kubedbComElasticsearchAnnotations =
+      getValue(model, '/resources/kubedbComElasticsearch/metadata/annotations') || {}
+
+    const isBluePrint = Object.keys(kubedbComElasticsearchAnnotations).some(
+      (k) =>
+        k === 'stash.appscode.com/backup-blueprint' ||
+        k === 'stash.appscode.com/schedule' ||
+        k.startsWith('params.stash.appscode.com/'),
+    )
+
+    return {
+      stashAppscodeComBackupConfiguration,
+      isBluePrint,
+    }
+  }
+
+  function valueExists(value, getValue, path) {
+    const val = getValue(value, path)
+    if (val) return true
+    else return false
   }
 
   // backup form
@@ -832,53 +900,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function setAllowedMachine(type, minmax) {
-    const annotations = getValue(
-      model,
-      '/resources/autoscalingKubedbComElasticsearchAutoscaler/metadata/annotations',
-    )
-    const instance = annotations['kubernetes.io/instance-type']
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
-
-    const machine = parsedInstance[type] || ''
-    const mx = machine?.includes(',') ? machine.split(',')[1] : ''
-    const mn = machine?.includes(',') ? machine.split(',')[0] : ''
-
-    if (minmax === 'min') return mn
-    else return mx
-  }
-
-  async function getMachines(type, minmax) {
-    // watchDependency('discriminator#/topologyMachines')
-    const depends = minmax === 'min' ? 'max' : 'min'
-    const dependantPath = `/allowedMachine-${type}-${depends}`
-
-    // watchDependency(`discriminator#${dependantPath}`)
-    const dependantMachine = getValue(discriminator, dependantPath)
-
-    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
-
-    const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
-
-    const machines = nodeGroups?.map((item) => {
-      const subText = `CPU: ${item.allocatable.cpu}, Memory: ${item.allocatable.memory}`
-      const text = item.topologyValue
-      return { text, subText, value: item.topologyValue }
-    })
-
-    const filteredMachine = machines?.filter((item, ind) =>
-      minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
-    )
-
-    return dependantIndex === -1 ? machines : filteredMachine
-  }
-
   function hasNoAnnotations() {
     return !hasAnnotations()
   }
@@ -902,8 +923,30 @@ export const useFunc = (model) => {
     let verd = ''
     if (topology) verd = 'topology'
     else verd = 'node'
-    clearSpecModel({ commit }, verd)
+    clearSpecModel(verd)
     return type === verd && spec
+  }
+
+  function clearSpecModel(dbtype) {
+    if (dbtype === 'node') {
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/data`,
+      )
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/ingest`,
+      )
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/master`,
+      )
+    } else if (dbtype === 'topology') {
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/node`,
+      )
+    }
   }
 
   // monitoring
@@ -1080,16 +1123,6 @@ export const useFunc = (model) => {
     if (isKube) return pathConstructedForKubedb
     else
       return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
-  }
-
-  function onNamespaceChange() {
-    const namespace = getValue(model, '/metadata/namespace')
-    if (!namespace) {
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
-      )
-    }
   }
 
   function setValueFrom() {
@@ -1346,6 +1379,36 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
+  async function fetchNodeTopology() {
+    const owner = storeGet('/route/params/user') || ''
+    const cluster = storeGet('/route/params/cluster') || ''
+    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+    try {
+      const resp = await axios.get(url)
+      const list = (resp && resp.data?.items) || []
+      const mappedList = list.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        return name
+      })
+      return mappedList
+    } catch (e) {
+      console.log(e)
+    }
+    return []
+  }
+
+  function isNodeTopologySelected() {
+    // watchDependency(
+    //   'model#/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/compute/nodeTopology/name',
+    // )
+    const nodeTopologyName =
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/compute/nodeTopology/name',
+      ) || ''
+    return !!nodeTopologyName.length
+  }
+
   return {
     returnFalse,
     initScheduleBackup,
@@ -1381,7 +1444,6 @@ export const useFunc = (model) => {
     getDbDetails,
     isConsole,
     getNamespaces,
-    onNamespaceChange,
     initMetadata,
     fetchTopologyMachines,
     setTrigger,
@@ -1420,5 +1482,8 @@ export const useFunc = (model) => {
     showOpsRequestOptions,
     isKubedb,
     setApplyToIfReady,
+    fetchNodeTopology,
+    isNodeTopologySelected,
+    isRancherManaged,
   }
 }

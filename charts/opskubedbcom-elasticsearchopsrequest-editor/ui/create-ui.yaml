@@ -124,25 +124,25 @@ step:
               name: ifDbTypeEqualsTo|Topology|horizontalScaling
             showLabels: true
             elements:
-              - type: input
+              - type: input-compare
                 label: Master Node
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/master/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/master
-              - type: input
+              - type: input-compare
                 label: Data Node
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/data/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/data
-              - type: input
+              - type: input-compare
                 label: Ingest Node
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/ingest/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/ingest
-              - type: input
+              - type: input-compare
                 label: ML Node
                 if:
                   type: function
@@ -151,7 +151,7 @@ step:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/ml/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/ml
-              - type: input
+              - type: input-compare
                 label: Transform Node
                 if:
                   type: function
@@ -160,7 +160,7 @@ step:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/transform/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/transform
-              - type: input
+              - type: input-compare
                 label: Data Cold Node
                 if:
                   type: function
@@ -169,7 +169,7 @@ step:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/dataCold/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/dataCold
-              - type: input
+              - type: input-compare
                 label: Data Content Node
                 if:
                   type: function
@@ -178,7 +178,7 @@ step:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/dataContent/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/dataContent
-              - type: input
+              - type: input-compare
                 label: Data Frozen Node
                 if:
                   type: function
@@ -187,7 +187,7 @@ step:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/dataFrozen/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/dataFrozen
-              - type: input
+              - type: input-compare
                 label: Data Hot Node
                 if:
                   type: function
@@ -196,7 +196,7 @@ step:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/dataHot/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/dataHot
-              - type: input
+              - type: input-compare
                 label: Data Warm Node
                 if:
                   type: function
@@ -679,12 +679,34 @@ step:
                       type: custom
                       name: isVerticalScaleTopologyRequired|node
                     schema: temp/topologyValue-node
-          - type: machine-compare
+          - type: horizontal-layout
+            showLabels: true
             label: Exporter
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter/resources
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
+            elements:
+              - type: input
+                label: CPU Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/cpu|/spec/verticalScaling/exporter/resources/requests/cpu
+              - type: input
+                label: CPU Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/cpu|/spec/verticalScaling/exporter/resources/limits/cpu
+              - type: input
+                label: Memory Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/memory|/spec/verticalScaling/exporter/resources/requests/memory
+              - type: input
+                label: Memory Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/memory|/spec/verticalScaling/exporter/resources/limits/memory
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form
@@ -841,6 +863,88 @@ step:
                   type: custom
                   name: checkVolume|/spec/topology/dataWarm/storage/resources/requests/storage|/spec/volumeExpansion/dataWarm
                 schema: schema/properties/spec/properties/volumeExpansion/properties/dataWarm
+      # Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        elements:
+          - type: block-layout
+            label: Configuration
+            elements:
+              - type: radio
+                label: Reconfigure Type
+                options:
+                - text: Select New Config Secret
+                  value: selectNewConfigSecret
+                - text: Apply Config
+                  value: applyConfig
+                - text: Remove
+                  value: remove
+                watcher:
+                  func: onReconfigurationTypeChange
+                  paths:
+                    - temp/properties/reconfigurationType
+                validation:
+                  type: required
+                schema: temp/properties/reconfigurationType
+              - type: block-layout
+                label: Configuration config secret
+                showLabels: false
+                if:
+                  name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  type: function
+                elements:
+                - type: select
+                  addNewButton:
+                    label: Create Secret
+                    target: _blank
+                    url:
+                      function: createSecretUrl
+                  label: Config Secret
+                  loader:
+                    name: getConfigSecrets
+                    watchPaths:
+                      - schema/properties/metadata/properties/namespace
+                  init:
+                    type: func
+                    value: setValueFromDbDetails|/spec/configSecret/name
+                  refresh: true
+                  validation:
+                    type: required
+                  schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+              - type: array-object-form
+                label: Apply Config
+                if:
+                  name: ifReconfigurationTypeEqualsTo|applyConfig
+                  type: function
+                validation:
+                  type: required
+                watcher:
+                  func: onApplyconfigChange
+                  paths:
+                    - temp/properties/applyConfig
+                schema: temp/properties/applyConfig
+                elements:
+                  - type: input
+                    label: key
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/key
+                  - type: editor
+                    hasCopy: false
+                    label: value
+                    validation:
+                      type: required
+                    schema:  temp/properties/configArray/items/properties/value
+              - type: switch
+                schema:  schema/properties/spec/properties/configuration/properties/removeCustomConfig
+                label: Remove CustomConfig
+                if:
+                  name: returnFalse
+                  type: function
+
 # Reconfigure TLS
       - type: block-layout
         label: TLS

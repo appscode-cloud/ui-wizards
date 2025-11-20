@@ -863,6 +863,20 @@ export const useFunc = (model) => {
     return !!found
   }
 
+  function hasAnnotations() {
+    const annotations = getValue(
+      model,
+      '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/annotations',
+    )
+    const instance = annotations['kubernetes.io/instance-type']
+
+    return !!instance
+  }
+
+  function hasNoAnnotations() {
+    return !hasAnnotations()
+  }
+
   function dbTypeEqualsTo(type) {
     // watchDependency('discriminator#/dbDetails')
 
@@ -1448,5 +1462,7 @@ export const useFunc = (model) => {
     isBindingAlreadyOn,
     addOrRemoveBinding,
     setValueFromDbDetails,
+    hasAnnotations,
+    hasNoAnnotations,
   }
 }

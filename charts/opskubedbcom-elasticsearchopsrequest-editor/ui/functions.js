@@ -330,7 +330,7 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
 
     try {
-      const resp = await store.state.$axios.get(
+      const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/elasticsearches`,
         {
           params: { filter: { items: { metadata: { name: null } } } },
@@ -362,7 +362,7 @@ export const useFunc = (model) => {
       const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/elasticsearches/${name}`
 
       try {
-        const resp = await store.state.$axios.get(url)
+        const resp = await axios.get(url)
 
         const { version } = resp?.data?.spec || {}
         const selectedVersion = elasticVersions?.find((item) => item?.metadata?.name === version)
@@ -390,7 +390,7 @@ export const useFunc = (model) => {
     let presets = storeGet('/kubedbuiPresets') || {}
     if (!storeGet('/route/params/actions')) {
       try {
-        const presetResp = await store.state.$axios.get(url)
+        const presetResp = await axios.get(url)
         presets = presetResp.data?.spec?.values?.spec
       } catch (e) {
         console.log(e)
@@ -409,7 +409,7 @@ export const useFunc = (model) => {
         },
       }
 
-      const resp = await store.state.$axios.get(
+      const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/elasticsearchversions`,
         {
           params: queryParams,
@@ -670,6 +670,90 @@ export const useFunc = (model) => {
     // watchDependency('model#/spec/type')
 
     return selectedType === value
+  }
+
+  // reconfiguration type
+  function ifReconfigurationTypeEqualsTo(value) {
+    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+    // watchDependency('discriminator#/reconfigurationType')
+
+    return reconfigurationType === value
+  }
+
+  function onReconfigurationTypeChange() {
+    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+    if (reconfigurationType === 'remove') {
+      commit('wizard/model$delete', `/spec/configuration`)
+
+      commit('wizard/model$update', {
+        path: `/spec/configuration/removeCustomConfig`,
+        value: true,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$delete', `/spec/configuration/configSecret`)
+      commit('wizard/model$delete', `/spec/configuration/inlineConfig`)
+      commit('wizard/model$delete', `/spec/configuration/removeCustomConfig`)
+    }
+  }
+
+  async function getConfigSecrets() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getValue(model, '/metadata/namespace')
+    // watchDependency('model#/metadata/namespace')
+
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+      {
+        params: {
+          filter: { items: { metadata: { name: null }, type: null } },
+        },
+      },
+    )
+
+    const secrets = (resp && resp.data && resp.data.items) || []
+
+    const filteredSecrets = secrets
+
+    filteredSecrets.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      item.text = name
+      item.value = name
+      return true
+    })
+    return filteredSecrets
+  }
+
+  function onApplyconfigChange() {
+    const applyconfig = getValue(discriminator, '/applyConfig')
+
+    const configObj = {}
+    if (applyconfig) {
+      applyconfig.forEach((item) => {
+        const { key, value } = item
+        configObj[key] = value
+      })
+    }
+
+    commit('wizard/model$update', {
+      path: '/spec/configuration/applyConfig',
+      value: configObj,
+      force: true,
+    })
+  }
+
+  function createSecretUrl() {
+    const user = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+
+    const domain = storeGet('/domain') || ''
+    if (domain.includes('bb.test')) {
+      return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/secrets/create`
+    } else {
+      const editedDomain = domain.replace('kubedb', 'console')
+      return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/secrets/create`
+    }
   }
 
   function setValueFromDbDetails(path, commitPath) {
@@ -983,7 +1067,7 @@ export const useFunc = (model) => {
       let presets = storeGet('/kubedbuiPresets') || {}
       if (!storeGet('/route/params/actions')) {
         try {
-          const presetResp = await store.state.$axios.get(url)
+          const presetResp = await axios.get(url)
           presets = presetResp.data?.spec?.values?.spec
         } catch (e) {
           console.log(e)
@@ -1000,7 +1084,7 @@ export const useFunc = (model) => {
 
     async function getIssuer(url) {
       try {
-        const resp = await store.state.$axios.get(url)
+        const resp = await axios.get(url)
         const resources = (resp && resp.data && resp.data.items) || []
 
         resources.map((item) => {
@@ -1163,5 +1247,10 @@ export const useFunc = (model) => {
     validateNewCertificates,
     disableAlias,
     onMachineChange,
+    onReconfigurationTypeChange,
+    ifReconfigurationTypeEqualsTo,
+    getConfigSecrets,
+    onApplyconfigChange,
+    createSecretUrl,
   }
 }
