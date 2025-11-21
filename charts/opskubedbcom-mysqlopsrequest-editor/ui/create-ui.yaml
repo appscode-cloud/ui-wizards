@@ -312,6 +312,9 @@ step:
                   - type: label-element
                     label: Selected Config Secret
                     loader: getSelectedConfigSecret|mysql
+                    if:
+                      name: isConfigSelected
+                      type: function
                     watcher:
                       func: getSelectedConfigSecret|mysql
                       paths:
@@ -320,9 +323,12 @@ step:
                     label: Value
                     readonly: true
                     hasCopy: true
-                    watcher:
-                      func: getSelectedConfigSecretValue|mysql
-                      paths:
+                    if:
+                      name: isConfigSelected
+                      type: function
+                    loader:
+                      name: getSelectedConfigSecretValue|mysql
+                      watchPaths:
                         - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
                     validation:
                       type: required
