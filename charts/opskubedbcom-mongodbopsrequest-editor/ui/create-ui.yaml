@@ -409,6 +409,7 @@ step:
                           name: isVerticalScaleTopologyRequired|shard
                         schema: temp/topologyValue-shard
 # Volume Expansion
+      
       - type: block-layout
         label: Volume Expansion Form
         if:
@@ -427,20 +428,20 @@ step:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
             schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
-          - type: input-compare
-            header: Replica Set
-            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-            label: ReplicaSet
-            if:
-              type: function
-              name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+          - type: label-element
+            label: Mode (Required)
+            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose offline Mode if you can afford a brief downntime for added reliability during the volume expansion.
+          - type: select
+            label: Mode
+            customClass: w-50
+            options:
+              - text: Offline
+                value: Offline
+              - text: Online
+                value: Online
             validation:
-              type: custom
-              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
-            schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
+              type: required
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
           - type: block-layout
             label: Sharded volume expansion
             if:
@@ -465,19 +466,20 @@ step:
                   type: custom
                   name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
                 schema: schema/properties/spec/properties/volumeExpansion/properties/shard
-          - type: label-element
-            label: Mode (Required)
-            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose offline Mode if you can afford a brief downntime for added reliability during the volume expansion.
-          - type: select
-            label: Mode
-            options:
-              - text: Offline
-                value: Offline
-              - text: Online
-                value: Online
+          - type: input-compare
+            header: Replica Set
+            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+            label: ReplicaSet
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
             validation:
-              type: required
-            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+              type: custom
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
+            schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
@@ -565,7 +567,7 @@ step:
                   name: returnFalse
                   type: function
           - type: block-layout
-            label: Replica Set
+            label: Replica Set 
             if:
               name: ifDbTypeEqualsTo|replicaSet|configuration
               type: function
