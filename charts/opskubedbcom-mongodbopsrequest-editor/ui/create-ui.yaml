@@ -271,18 +271,20 @@ step:
                   - type: label-element
                     label: Topology
                     subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-                  - type: input
-                    label: Key
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|replicaSet
-                    schema: temp/topologyKey-replicaSet
-                  - type: input
-                    label: Value
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|replicaSet
-                    schema: temp/topologyValue-replicaSet
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|replicaSet
+                        schema: temp/topologyKey-replicaSet
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|replicaSet
+                        schema: temp/topologyValue-replicaSet
                       
           - type: block-layout
             if:
@@ -428,20 +430,29 @@ step:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
             schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
-          - type: label-element
-            label: Mode (Required)
-            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose offline Mode if you can afford a brief downntime for added reliability during the volume expansion.
-          - type: select
-            label: Mode
-            customClass: w-50
-            options:
-              - text: Offline
-                value: Offline
-              - text: Online
-                value: Online
-            validation:
-              type: required
-            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+          - type: horizontal-layout
+            elements:
+              - type: block-layout
+                showLabels: true
+                hideBorder: true
+                elements:
+                  - type: label-element
+                    label: Mode (Required)
+                    subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose offline Mode if you can afford a brief downntime for added reliability during the volume expansion.
+                  - type: select
+                    label: Mode
+                    options:
+                      - text: Offline
+                        value: Offline
+                      - text: Online
+                        value: Online
+                    validation:
+                      type: required
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+              - type: block-layout
+                showLabels: true
+                hideBorder: true
+                elements: []
           - type: block-layout
             label: Sharded volume expansion
             if:
