@@ -922,6 +922,52 @@ export const useFunc = (model) => {
     }
   }
 
+  function onMachineChange(type) {
+    const annoPath = '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/annotations'
+    const annotations = getValue(model, annoPath)
+    const instance = annotations['kubernetes.io/instance-type']
+    let parsedInstance = {}
+    try {
+      if (instance) parsedInstance = JSON.parse(instance)
+    } catch (e) {
+      console.log(e)
+      parsedInstance = {}
+    }
+
+    const minMachine = getValue(discriminator, `/allowedMachine-${type}-min`)
+    const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
+    const minMaxMachine = `${minMachine},${maxMachine}`
+
+    parsedInstance[type] = minMaxMachine
+    const instanceString = JSON.stringify(parsedInstance)
+    annotations['kubernetes.io/instance-type'] = instanceString
+
+    const machines = getValue(discriminator, `/topologyMachines`) || []
+    const minMachineObj = machines.find((item) => item.topologyValue === minMachine)
+    const maxMachineObj = machines.find((item) => item.topologyValue === maxMachine)
+    const minMachineAllocatable = minMachineObj?.allocatable
+    const maxMachineAllocatable = maxMachineObj?.allocatable
+    const allowedPath = `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute/${type}`
+
+    if (minMachine && maxMachine && instance !== instanceString) {
+      commit('wizard/model$update', {
+        path: `${allowedPath}/maxAllowed`,
+        value: maxMachineAllocatable,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `${allowedPath}/minAllowed`,
+        value: minMachineAllocatable,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: annoPath,
+        value: annotations,
+        force: true,
+      })
+    }
+  }
+
   function handleUnit(path, type = 'bound') {
     let value = getValue(model, `/resources/${path}`)
     if (type === 'scalingRules') {
@@ -1434,6 +1480,7 @@ export const useFunc = (model) => {
     setMetadata,
     isRancherManaged,
     dbTypeEqualsTo,
+    onMachineChange,
     handleUnit,
     setValueFromDbDetails,
 
