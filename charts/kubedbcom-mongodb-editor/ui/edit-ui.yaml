@@ -533,7 +533,7 @@ step:
             - type: label-element
               label: Resource Diff Percentage 
               subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance 
-            - type:  input
+            - type:  threshold-input
               label: Resource Diff Percentage (Integer only)
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/resourceDiffPercentage
               customClass: width-300
@@ -625,10 +625,10 @@ step:
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage
               elements:
-                - type: input
+                - type: threshold-input
                   label: Scaling Factor Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage/properties/scalingFactorPercentage
-                - type: input
+                - type: threshold-input
                   label: Usage Threshold Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage/properties/usageThresholdPercentage
         # type sharded
@@ -748,10 +748,10 @@ step:
                   showLabels: true
                   # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage
                   elements:
-                    - type: input
+                    - type: threshold-input
                       label: Scaling Factor Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage/properties/scalingFactorPercentage
-                    - type: input
+                    - type: threshold-input
                       label: Usage Threshold Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage/properties/usageThresholdPercentage
               
@@ -865,10 +865,10 @@ step:
                   showLabels: true
                   # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage
                   elements:
-                    - type: input
+                    - type: threshold-input
                       label: Scaling Factor Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage/properties/scalingFactorPercentage
-                    - type: input
+                    - type: threshold-input
                       label: Usage Threshold Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage/properties/usageThresholdPercentage
             - type: block-layout
@@ -935,10 +935,10 @@ step:
                   showLabels: true
                   # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage
                   elements:
-                    - type: input
+                    - type: threshold-input
                       label: Scaling Factor Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage/properties/scalingFactorPercentage
-                    - type: input
+                    - type: threshold-input
                       label: Usage Threshold Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage/properties/usageThresholdPercentage
             - type: block-layout
@@ -1004,10 +1004,10 @@ step:
                   showLabels: true
                   # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage
                   elements:
-                    - type: input
+                    - type: threshold-input
                       label: Scaling Factor Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage/properties/scalingFactorPercentage
-                    - type: input
+                    - type: threshold-input
                       label: Usage Threshold Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage/properties/usageThresholdPercentage
             - type: block-layout
@@ -1029,7 +1029,7 @@ step:
                 - type: input
                   label: Pod LifeTime Threshold
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/podLifeTimeThreshold
-                - type: input
+                - type: threshold-input
                   label: Resource Diff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/resourceDiffPercentage
                 - type: label-element
@@ -1120,10 +1120,10 @@ step:
                   showLabels: true
                   # schema:  schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage
                   elements:
-                    - type: input
+                    - type: threshold-input
                       label: Scaling Factor Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage/properties/scalingFactorPercentage
-                    - type: input
+                    - type: threshold-input
                       label: Usage Threshold Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage/properties/usageThresholdPercentage
         - type: block-layout
@@ -1138,13 +1138,13 @@ step:
               label: Select NodeTopology
               loader: fetchNodeTopology
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-            - type: input
+            - type: threshold-input
               label: Scale Up DiffPercentage
               if:
                 type: function
                 name: isNodeTopologySelected
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-            - type: input
+            - type: threshold-input
               label: Scale Down DiffPercentage
               if:
                 type: function
@@ -1169,24 +1169,9 @@ step:
                 - type: input
                   label: Oplog Max Lag Seconds
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria/properties/oplogMaxLagSeconds
-            - type: select
+            - type: time-picker
               label: Timeout
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-              options:
-              - text: 5 minutes
-                value: 5m0s
-              - text: 10 minutes
-                value: 10m0s
-              - text: 30 minutes
-                value: 30m0s
-              - text: 1 hour
-                value: 1h0m
-              - text: 2 hours
-                value: 2h0m
-              - text: 5 hours
-                value: 5h0m
-              - text: 10 hours
-                value: 10h0m
             - type: radio
               label: Apply
               init:
@@ -1282,20 +1267,14 @@ step:
               subtitle: Set the threshold percentage of storage usage to trigger scaling.
               customClass: width-300
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/usageThreshold
-            - type: array-object-form
+            - type: scaling-rules
               label: Scaling Rules
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules
+              loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/storage/resources/requests/storage
               watcher:
                 func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/scalingRules|scalingRules
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules
-              elements:
-                - type: input
-                  label: AppliesUpto (In Storage units)
-                  schema: appliesUpto
-                - type: input
-                  label: Threshold (In %, Or In Storage Units)
-                  schema: threshold
             - type: input
               label: Scaling Threshold
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingThreshold
@@ -1336,23 +1315,17 @@ step:
                     - text: Offline
                       value: Offline
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/expansionMode
-                - type: input
+                - type: threshold-input
                   label: UsageThreshold (%)
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/usageThreshold
-                - type: array-object-form
+                - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules
-                  elements:
-                    - type: input
-                      label: AppliesUpto (In Storage units)
-                      schema: appliesUpto
-                    - type: input
-                      label: Threshold (In %, Or In Storage Units)
-                      schema: threshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/upperBound
@@ -1386,23 +1359,17 @@ step:
                     - text: Offline
                       value: Offline
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/expansionMode
-                - type: input
+                - type: threshold-input
                   label: UsageThreshold (%)
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/usageThreshold
-                - type: array-object-form
+                - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules
-                  elements:
-                    - type: input
-                      label: AppliesUpto (In Storage units)
-                      schema: appliesUpto
-                    - type: input
-                      label: Threshold (In %, Or In Storage Units)
-                      schema: threshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/upperBound
@@ -1436,23 +1403,17 @@ step:
                     - text: Offline
                       value: Offline
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/expansionMode
-                - type: input
+                - type: threshold-input
                   label: UsageThreshold (%)
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/usageThreshold
-                - type: array-object-form
+                - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules
-                  elements:
-                    - type: input
-                      label: AppliesUpto (In Storage units)
-                      schema: appliesUpto
-                    - type: input
-                      label: Threshold (In %, Or In Storage Units)
-                      schema: threshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/upperBound
@@ -1480,24 +1441,9 @@ step:
                 - type: input
                   label: Oplog Max Lag Seconds
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria/properties/oplogMaxLagSeconds
-            - type: select
+            - type: time-picker
               label: Timeout
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-              options:
-              - text: 5 minutes
-                value: 5m0s
-              - text: 10 minutes
-                value: 10m0s
-              - text: 30 minutes
-                value: 30m0s
-              - text: 1 hour
-                value: 1h0m
-              - text: 2 hours
-                value: 2h0m
-              - text: 5 hours
-                value: 5h0m
-              - text: 10 hours
-                value: 10h0m
             - type: radio
               label: Apply
               init:

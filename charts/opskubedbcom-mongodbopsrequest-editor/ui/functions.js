@@ -740,7 +740,7 @@ export const useFunc = (model) => {
   // // machine profile stuffs
   // let machinesFromPreset = []
 
-  function getMachines() {
+  function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
     const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
