@@ -1273,33 +1273,35 @@ export const useFunc = (model) => {
     const nextSpaces = '  '.repeat(indent + 1)
 
     if (Array.isArray(obj)) {
-      return obj.map(item => `\n${nextSpaces}- ${objectToYaml(item, indent + 1).trim()}`).join('')
+      return obj.map((item) => `\n${nextSpaces}- ${objectToYaml(item, indent + 1).trim()}`).join('')
     }
 
-    return Object.keys(obj).map(key => {
-      const value = obj[key]
-      if (value === null || value === undefined) {
-        return `\n${nextSpaces}${key}: null`
-      } else if (typeof value === 'object' && !Array.isArray(value)) {
-        return `\n${nextSpaces}${key}:${objectToYaml(value, indent + 1)}`
-      } else if (Array.isArray(value)) {
-        return `\n${nextSpaces}${key}:${objectToYaml(value, indent + 1)}`
-      } else if (typeof value === 'string') {
-        return `\n${nextSpaces}${key}: "${value}"`
-      } else {
-        return `\n${nextSpaces}${key}: ${value}`
-      }
-    }).join('')
+    return Object.keys(obj)
+      .map((key) => {
+        const value = obj[key]
+        if (value === null || value === undefined) {
+          return `\n${nextSpaces}${key}: null`
+        } else if (typeof value === 'object' && !Array.isArray(value)) {
+          return `\n${nextSpaces}${key}:${objectToYaml(value, indent + 1)}`
+        } else if (Array.isArray(value)) {
+          return `\n${nextSpaces}${key}:${objectToYaml(value, indent + 1)}`
+        } else if (typeof value === 'string') {
+          return `\n${nextSpaces}${key}: "${value}"`
+        } else {
+          return `\n${nextSpaces}${key}: ${value}`
+        }
+      })
+      .join('')
   }
 
   function getSelectedConfigSecretValue(type) {
     const path = `/spec/configuration/configSecret/name`
     const selectedSecret = getValue(model, path)
-    let data;
+    let data
     secretArray.forEach((item) => {
       if (item.value === selectedSecret) {
-         data = objectToYaml(item.data).trim() || 'No Data Found'
-         console.log('data -> ',item.value,data)
+        data = objectToYaml(item.data).trim() || 'No Data Found'
+        console.log('data -> ', item.value, data)
       }
     })
     return data || 'No Data Found'
