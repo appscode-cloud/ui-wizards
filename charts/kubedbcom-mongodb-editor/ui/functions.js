@@ -3188,6 +3188,11 @@ export const useFunc = (model) => {
     }
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
     getOpsRequestUrl,
     handleUnit,
@@ -3366,5 +3371,6 @@ export const useFunc = (model) => {
     setValueFrom,
     isInputTypeValueFrom,
     getSecretKeys,
+    setValueFromDbDetails,
   }
 }
