@@ -966,7 +966,8 @@ export const useFunc = (model) => {
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
     if (avlMachines.length) {
@@ -1014,7 +1015,8 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests
     const annotations = dbDetails?.metadata?.annotations || {}
     const machine = annotations['kubernetes.io/instance-type'] || 'custom'
 
