@@ -730,10 +730,16 @@ export const useFunc = (model) => {
   // // machine profile stuffs
   // let machinesFromPreset = []
 
-  function getMachines() {
+  function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    const limits = (type && type !== 'node'
+      ? dbDetails?.spec?.topology?.[type]?.resources?.requests
+      : dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests) || {
+      cpu: '',
+      memory: '',
+    }
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -782,7 +788,13 @@ export const useFunc = (model) => {
 
   function setMachine(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    const limits = (type && type !== 'node'
+      ? dbDetails?.spec?.topology?.[type]?.resources?.requests
+      : dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests) || {
+      cpu: '',
+      memory: '',
+    }
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}

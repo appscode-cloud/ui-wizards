@@ -707,7 +707,7 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
     const mssqlContainer = containers.find((c) => c.name === 'mssql')
-    const limits = mssqlContainer?.resources?.limits || {}
+    const limits = mssqlContainer?.resources?.requests || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -754,7 +754,7 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
     const mssqlContainer = containers.find((c) => c.name === 'mssql')
-    const limits = mssqlContainer?.resources?.limits || {}
+    const limits = mssqlContainer?.resources?.requests || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}

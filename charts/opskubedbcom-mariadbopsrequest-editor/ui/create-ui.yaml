@@ -161,16 +161,34 @@ step:
                   type: custom
                   name: isVerticalScaleTopologyRequired
                 schema: temp/topologyValue
-          - type: block-layout
+          - type: horizontal-layout
+            showLabels: true
             label: Exporter
-            showLabels: false
             elements:
               - type: input
-                label: CPU
-                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
+                label: CPU Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/cpu|/spec/verticalScaling/exporter/resources/requests/cpu
               - type: input
-                label: Memory
-                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/memory
+                label: CPU Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/cpu|/spec/verticalScaling/exporter/resources/limits/cpu
+              - type: input
+                label: Memory Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/requests/memory|/spec/verticalScaling/exporter/resources/requests/memory
+              - type: input
+                label: Memory Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources/limits/memory|/spec/verticalScaling/exporter/resources/limits/memory
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form

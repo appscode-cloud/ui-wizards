@@ -154,21 +154,34 @@ step:
                       type: custom
                       name: isVerticalScaleTopologyRequired
                     schema: temp/topologyValue
-          - type: block-layout
-            label: Coordinator Vertical Scaling
-            showLabels: false
+          - type: horizontal-layout
+            showLabels: true
+            label: Coordinator
             elements:
-              - type: machine-compare
-                label: Resources
-                loader: getMachines
+              - type: input
+                label: CPU Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/requests/cpu
                 init:
                   type: func
-                  value: setMachine
-                watcher:
-                  func: onMachineChange|coordinator|/spec/coordinator/resources
-                  paths:
-                    - schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
-                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
+                  value: setValueFromDbDetails|/spec/coordinator/resources/requests/cpu|/spec/verticalScaling/coordinator/resources/requests/cpu
+              - type: input
+                label: CPU Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/cpu
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/coordinator/resources/limits/cpu|/spec/verticalScaling/coordinator/resources/limits/cpu
+              - type: input
+                label: Memory Requests
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/requests/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/coordinator/resources/requests/memory|/spec/verticalScaling/coordinator/resources/requests/memory
+              - type: input
+                label: Memory Limits
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/memory
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/coordinator/resources/limits/memory|/spec/verticalScaling/coordinator/resources/limits/memory
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form

@@ -707,10 +707,12 @@ export const useFunc = (model) => {
   }
 
   // machine profile stuffs
-  function getMachines() {
+  function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    const limits =
+      dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -732,14 +734,14 @@ export const useFunc = (model) => {
                 memory: machineData.limits.memory,
               },
             }
-          } else
-            return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
+          } else return { text: machine, value: { machine } }
         }
       })
     } else {
       arr = machineList
         .map((machine) => {
-          if (machine === 'custom') return { text: machine, value: { machine } }
+          if (machine === 'custom')
+            return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
           // const subText = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
           const text = machine
           return {
@@ -759,7 +761,9 @@ export const useFunc = (model) => {
 
   function setMachine(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    const limits =
+      dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
