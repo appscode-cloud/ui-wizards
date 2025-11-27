@@ -193,7 +193,7 @@ step:
             elements:
               - type: machine-compare
                 label: Resources
-                loader: getMachines
+                loader: getMachines|standalone
                 init:
                   type: func
                   value: setMachine|standalone                
@@ -235,10 +235,10 @@ step:
               - type: machine-compare
                 label: Resources
                 subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
+                loader: getMachines|replicaSet
                 init:
                   type: func
                   value: setMachine|replicaSet
-                loader: getMachines
                 watcher:
                   func: onMachineChange|replicaSet|/spec/podTemplate/spec/resources
                   paths:
@@ -299,7 +299,7 @@ step:
                 elements:
                   - type: machine-compare
                     label: Resources
-                    loader: getMachines
+                    loader: getMachines|configServer
                     init:
                       type: func
                       value: setMachine|configServer
@@ -338,7 +338,7 @@ step:
                 elements:
                   - type: machine-compare
                     label: Resources
-                    loader: getMachines
+                    loader: getMachines|mongos
                     init:
                       type: func
                       value: setMachine|mongos
@@ -377,7 +377,7 @@ step:
                 elements:
                   - type: machine-compare
                     label: Resources
-                    loader: getMachines
+                    loader: getMachines|shard
                     init:
                       type: func
                       value: setMachine|shard
@@ -548,7 +548,7 @@ step:
                   validation: 
                     type: required
                   schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-              - type: object-item
+              - type: array-object-form
                 label: Apply Config
                 if:
                   name: ifReconfigurationTypeEqualsTo|applyConfig
@@ -560,17 +560,17 @@ step:
                   paths:
                     - temp/properties/standalone/applyConfig
                 schema: temp/properties/standalone/applyConfig
-                # elements:
-                #   - type: input 
-                #     label: key
-                #     validation: 
-                #       type: required
-                #     schema: temp/properties/configArray/items/properties/key
-                #   - type: textarea
-                #     label: value
-                #     validation: 
-                #       type: required
-                #     schema:  temp/properties/configArray/items/properties/value
+                elements:
+                  - type: input 
+                    label: key
+                    validation: 
+                      type: required
+                    schema: temp/properties/configArray/items/properties/key
+                  - type: editor
+                    label: value
+                    validation: 
+                      type: required
+                    schema:  temp/properties/configArray/items/properties/value
               - type: switch
                 schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
                 label: Remove CustomConfig

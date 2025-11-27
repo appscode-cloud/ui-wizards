@@ -1225,6 +1225,11 @@ step:
             - type: scaling-rules
               label: Scaling Rules
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
+              loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/storage/resources/requests/storage
+              watcher:
+                func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/scalingRules|scalingRules
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/satandalone/properties/scalingRules
             - type: input
               label: Scaling Threshold
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingThreshold
@@ -1321,7 +1326,7 @@ step:
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules
-                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/storage/resources/requests/storage
+                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/shardTopology/shard/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/scalingRules|scalingRules
                     paths:
@@ -1365,7 +1370,7 @@ step:
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules
-                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/storage/resources/requests/storage
+                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/scalingRules|scalingRules
                     paths:
@@ -1409,7 +1414,7 @@ step:
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules
-                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/storage/resources/requests/storage
+                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/shardTopology/hidden/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/scalingRules|scalingRules
                     paths:
