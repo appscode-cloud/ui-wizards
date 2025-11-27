@@ -707,10 +707,16 @@ export const useFunc = (model) => {
   // // machine profile stuffs
   // let machinesFromPreset = []
 
-  function getMachines() {
+  function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+    const limits = (type && type !== 'node'
+      ? dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests
+      : dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests) || {
+      cpu: '',
+      memory: '',
+    }
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -782,17 +788,18 @@ export const useFunc = (model) => {
           dbDetails?.spec?.topology?.aggregator?.podTemplate?.spec?.containers || []
         const kind = dbDetails?.kind
         const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
-        limits = resource[0]?.resources?.limits || {}
+        limits = resource[0]?.resources?.requests || {}
+        console.log({ limits })
       } else if (type === 'node') {
         const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
         const kind = dbDetails?.kind
         const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
-        limits = resource[0]?.resources?.limits || {}
+        limits = resource[0]?.resources?.requests || {}
       } else {
         // For aggregator and leaf
         const topologyLimits =
           dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources
-            ?.limits || {}
+            ?.requests || {}
         limits = topologyLimits
       }
       return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }

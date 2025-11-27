@@ -708,7 +708,7 @@ export const useFunc = (model) => {
     const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
     const kind = dbDetails?.kind || 'RabbitMQ'
     const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
-    const limits = resource[0]?.resources?.limits || {}
+    const limits = resource[0]?.resources?.requests || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -756,7 +756,7 @@ export const useFunc = (model) => {
     const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
     const kind = dbDetails?.kind || 'RabbitMQ'
     const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
-    const limits = resource[0]?.resources?.limits || {}
+    const limits = resource[0]?.resources?.requests || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const machine = annotations['kubernetes.io/instance-type'] || 'custom'
 
