@@ -396,26 +396,16 @@ step:
           showLabels: true
           # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone
           elements:
-            - type: select
-              label: Trigger
-              init:
-                type: func
-                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/standalone/trigger
-              options: 
-                - text: 'On'
-                  value: 'On'
-                - text: 'Off'
-                  value: 'Off'
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/trigger
-            - type: input
-              label: Pod LifeTime Threshold 
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/podLifeTimeThreshold
-            - type: threshold-input
-              label: Resource Diff Percentage
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/resourceDiffPercentage
             - type: label-element
-              label: Resource Limits
-              subtitle: Set minimum and maximum CPU and memory limits for your database pods to ensure optimal resource allocation and prevent over or under provisioning
+              label: Resource Diff Percentage
+              subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
+            - type:  threshold-input
+              label: Resource Diff Percentage (Integer only)
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/resourceDiffPercentage
+              customClass: width-300
+            - type: label-element
+              label: Resource Configuration
+              subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
             - type: block-layout
               showLabels: false
               elements:
@@ -508,20 +498,6 @@ step:
                   label: Usage Threshold Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage/properties/usageThresholdPercentage
         #  replicaset mode
-        - type: switch
-          label: Trigger
-          fullwidth: true
-          init:
-              type: func
-              value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/replicaSet/trigger
-          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/trigger
-        - type: label-element
-          label: Pod lifetime threshold 
-          subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability  
-        - type: input
-          label: Pod LifeTime Threshold (e.g., 10m 30s)
-          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/podLifeTimeThreshold
-          customClass: width-300  
         - type: block-layout
           label: ReplicaSet
           if:
@@ -638,31 +614,35 @@ step:
             type: function
             name: mongoTypeEqualsTo|sharded|compute
           elements:
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/shard/trigger
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold  test3
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s) 
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/podLifeTimeThreshold
+              customClass: width-300
             - type: block-layout
               label: Shard
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard
               elements:
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/shard/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/trigger
-                - type: input
-                  label: Pod LifeTime Threshold
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/podLifeTimeThreshold
-                - type: threshold-input
-                  label: Resource Diff Percentage
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/resourceDiffPercentage
                 - type: label-element
-                  label: Resource Limits
-                  subtitle: Set minimum and maximum CPU and memory limits for your database pods to ensure optimal resource allocation and prevent over or under provisioning
+                  label: Resource Diff Percentage
+                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
+                - type:  threshold-input
+                  label: Resource Diff Percentage (Integer only)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
                 - type: block-layout
                   showLabels: false
                   elements:
@@ -737,7 +717,7 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/controlledResources
                 - type: select
                   label: Container Controlled Values
-                  options: 
+                  options:
                     - text: Requests And Limits
                       value: RequestsAndLimits
                     - text: Requests Only
@@ -755,31 +735,35 @@ step:
                       label: Usage Threshold Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage/properties/usageThresholdPercentage
               
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/configServer/trigger
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold test4
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s) 
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/podLifeTimeThreshold
+              customClass: width-300
             - type: block-layout
               label: Config Server
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer
               elements:
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/configServer/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/trigger
-                - type: input
-                  label: Pod LifeTime Threshold
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/podLifeTimeThreshold
-                - type: threshold-input
-                  label: Resource Diff Percentage
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/resourceDiffPercentage
                 - type: label-element
-                  label: Resource Limits
-                  subtitle: Set minimum and maximum CPU and memory limits for your database pods to ensure optimal resource allocation and prevent over or under provisioning
+                  label: Resource Diff Percentage
+                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
+                - type:  threshold-input
+                  label: Resource Diff Percentage (Integer only)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
                 - type: block-layout
                   showLabels: false
                   elements:
@@ -854,7 +838,7 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/controlledResources
                 - type: select
                   label: Container Controlled Values
-                  options: 
+                  options:
                     - text: Requests And Limits
                       value: RequestsAndLimits
                     - text: Requests Only
@@ -871,52 +855,103 @@ step:
                     - type: threshold-input
                       label: Usage Threshold Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage/properties/usageThresholdPercentage
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/arbiter/trigger
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold test5
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s) 
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/podLifeTimeThreshold
+              customClass: width-300
             - type: block-layout
               label: Arbiter
               showLabels: true
               hideBlock: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter
-              elements: 
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/arbiter/trigger
-                  options: 
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/trigger
-                - type: input
-                  label: Pod LifeTime Threshold
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/podLifeTimeThreshold
-                - type: threshold-input
+              elements:
+                - type: label-element
                   label: Resource Diff Percentage
+                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
+                - type: threshold-input
+                  label: Resource Diff Percentage (Integer only)
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
                 - type: block-layout
-                  label: Min Allowed
-                  showLabels: true
-                  # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed                 
+                  showLabels: false
                   elements:
-                    - type: input
-                      label: Cpu
-                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/cpu
-                    - type: input
-                      label: Memory
-                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/memory
-                   
-                - type: block-layout
-                  label: Max Allowed
-                  showLabels: true
-                  # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed
-                  elements:
-                    - type: input
-                      label: Cpu
-                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/cpu
-                    - type: input
-                      label: Memory
-                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/memory
+                    - type: horizontal-layout
+                      elements:
+                      - type: machine-compare
+                        label: Min Allowed Profile
+                        schema: temp/properties/allowedMachine-arbiter-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|arbiter|min
+                        loader:
+                          name: getMachines|arbiter|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-arbiter-max
+                        watcher:
+                          func: onMachineChange|arbiter
+                          paths:
+                            - temp/properties/allowedMachine-arbiter-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/memory
+                      - type: machine-compare
+                        label: Max Allowed Profile
+                        schema: temp/properties/allowedMachine-arbiter-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|arbiter|max
+                        loader:
+                          name: getMachines|arbiter|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-arbiter-min
+                        watcher:
+                          func: onMachineChange|arbiter
+                          paths:
+                            - temp/properties/allowedMachine-arbiter-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/memory
                 - type: select
                   label: Controlled Resources
                   loader: setControlledResources|compute/arbiter
@@ -924,7 +959,7 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/controlledResources
                 - type: select
                   label: Container Controlled Values
-                  options: 
+                  options:
                     - text: Requests And Limits
                       value: RequestsAndLimits
                     - text: Requests Only
@@ -941,51 +976,103 @@ step:
                     - type: threshold-input
                       label: Usage Threshold Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage/properties/usageThresholdPercentage
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/hidden/trigger
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold test6
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s) 
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/podLifeTimeThreshold
+              customClass: width-300
             - type: block-layout
               label: Hidden
               showLabels: true
               hideBlock: true
               # schema:  schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden
-              elements: 
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/hidden/trigger
-                  options: 
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/trigger
-                - type: input
-                  label: Pod LifeTime Threshold
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/podLifeTimeThreshold
-                - type: threshold-input
+              elements:
+                - type: label-element
                   label: Resource Diff Percentage
+                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
+                - type: threshold-input
+                  label: Resource Diff Percentage (Integer only)
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
                 - type: block-layout
-                  label: Min Allowed
-                  showLabels: true
-                  # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed                
+                  showLabels: false
                   elements:
-                    - type: input
-                      label: Cpu
-                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/cpu
-                    - type: input
-                      label: Memory
-                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/memory
-                - type: block-layout
-                  label: Max Allowed
-                  showLabels: true
-                  # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed
-                  elements:
-                    - type: input
-                      label: Cpu
-                      schema:  schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/cpu
-                    - type: input
-                      label: Memory
-                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/memory
+                    - type: horizontal-layout
+                      elements:
+                      - type: machine-compare
+                        label: Min Allowed Profile
+                        schema: temp/properties/allowedMachine-hidden-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|hidden|min
+                        loader:
+                          name: getMachines|hidden|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-hidden-max
+                        watcher:
+                          func: onMachineChange|hidden
+                          paths:
+                            - temp/properties/allowedMachine-hidden-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/memory
+                      - type: machine-compare
+                        label: Max Allowed Profile
+                        schema: temp/properties/allowedMachine-hidden-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|hidden|max
+                        loader:
+                          name: getMachines|hidden|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-hidden-min
+                        watcher:
+                          func: onMachineChange|hidden
+                          paths:
+                            - temp/properties/allowedMachine-hidden-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/memory
                 - type: select
                   label: Controlled Resources
                   loader: setControlledResources|compute/hidden
@@ -993,7 +1080,7 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/controlledResources
                 - type: select
                   label: Container Controlled Values
-                  options: 
+                  options:
                     - text: Requests And Limits
                       value: RequestsAndLimits
                     - text: Requests Only
@@ -1010,31 +1097,35 @@ step:
                     - type: threshold-input
                       label: Usage Threshold Percentage
                       schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage/properties/usageThresholdPercentage
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/mongos/trigger
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold test7
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s) 
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/podLifeTimeThreshold
+              customClass: width-300
             - type: block-layout
               label: Mongos
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos
               elements:
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/mongos/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/trigger
-                - type: input
-                  label: Pod LifeTime Threshold
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/podLifeTimeThreshold
-                - type: threshold-input
-                  label: Resource Diff Percentage
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/resourceDiffPercentage
                 - type: label-element
-                  label: Resource Limits
-                  subtitle: Set minimum and maximum CPU and memory limits for your database pods to ensure optimal resource allocation and prevent over or under provisioning
+                  label: Resource Diff Percentage
+                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
+                - type:  threshold-input
+                  label: Resource Diff Percentage (Integer only)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
                 - type: block-layout
                   showLabels: false
                   elements:
@@ -1109,7 +1200,7 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/controlledResources
                 - type: select
                   label: Container Controlled Values
-                  options: 
+                  options:
                     - text: Requests And Limits
                       value: RequestsAndLimits
                     - text: Requests Only
@@ -1199,19 +1290,19 @@ step:
             name: mongoTypeEqualsTo|standalone|storage
           showLabels: true
           elements:
-            - type: select
+            - type: switch
               label: Trigger
+              fullwidth: true
               init:
                 type: func
                 value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/trigger
-              options:
-                - text: 'On'
-                  value: 'On'
-                - text: 'Off'
-                  value: 'Off'
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
             - type: select
-              label: Expansion Mode
+              label: Mode
+              description: Select how the storage expansion should be handled.
               options:
                 - text: Online
                   value: Online
@@ -1220,7 +1311,8 @@ step:
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/expansionMode
             - type: threshold-input
               label: UsageThreshold (%)
-              description: hdhdhd
+              subtitle: Set the threshold percentage of storage usage to trigger scaling.
+              customClass: width-300
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/usageThreshold
             - type: scaling-rules
               label: Scaling Rules
@@ -1301,19 +1393,19 @@ step:
               label: Shard
               showLabels: true
               elements:
-                - type: select
+                - type: switch
                   label: Trigger
+                  fullwidth: true
                   init:
                     type: func
                     value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/trigger
+                - type: label-element
+                  label: Expansion Mode (Online/Offline)
+                  subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
                 - type: select
-                  label: Expansion Mode
+                  label: Mode
+                  description: Select how the storage expansion should be handled.
                   options:
                     - text: Online
                       value: Online
@@ -1322,6 +1414,8 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  customClass: width-300
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/usageThreshold
                 - type: scaling-rules
                   label: Scaling Rules
@@ -1345,19 +1439,19 @@ step:
               label: Config Server
               showLabels: true
               elements:
-                - type: select
+                - type: switch
                   label: Trigger
+                  fullwidth: true
                   init:
                     type: func
                     value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/trigger
+                - type: label-element
+                  label: Expansion Mode (Online/Offline)
+                  subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
                 - type: select
-                  label: Expansion Mode
+                  label: Mode
+                  description: Select how the storage expansion should be handled.
                   options:
                     - text: Online
                       value: Online
@@ -1366,6 +1460,8 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  customClass: width-300
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/usageThreshold
                 - type: scaling-rules
                   label: Scaling Rules
@@ -1389,19 +1485,19 @@ step:
               label: Hidden
               showLabels: true
               elements:
-                - type: select
+                - type: switch
                   label: Trigger
+                  fullwidth: true
                   init:
                     type: func
                     value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/trigger
+                - type: label-element
+                  label: Expansion Mode (Online/Offline)
+                  subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
                 - type: select
-                  label: Expansion Mode
+                  label: Mode
+                  description: Select how the storage expansion should be handled.
                   options:
                     - text: Online
                       value: Online
@@ -1410,6 +1506,8 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  customClass: width-300
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/usageThreshold
                 - type: scaling-rules
                   label: Scaling Rules
