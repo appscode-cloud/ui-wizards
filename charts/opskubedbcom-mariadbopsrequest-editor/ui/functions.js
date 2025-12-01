@@ -1270,28 +1270,35 @@ export const useFunc = (model) => {
     if (obj === null || obj === undefined) return 'null'
     if (typeof obj !== 'object') return JSON.stringify(obj)
 
-    const nextSpaces = '  '.repeat(indent + 1)
+    const spaces = '  '.repeat(indent)
 
     if (Array.isArray(obj)) {
-      return obj.map((item) => `\n${nextSpaces}- ${objectToYaml(item, indent + 1).trim()}`).join('')
+      return obj
+        .map((item) => `${spaces}- ${objectToYaml(item, indent + 1).trimStart()}`)
+        .join('\n')
     }
 
     return Object.keys(obj)
       .map((key) => {
         const value = obj[key]
+        const keyLine = `${spaces}${key}:`
+
         if (value === null || value === undefined) {
-          return `\n${nextSpaces}${key}: null`
-        } else if (typeof value === 'object' && !Array.isArray(value)) {
-          return `\n${nextSpaces}${key}:${objectToYaml(value, indent + 1)}`
-        } else if (Array.isArray(value)) {
-          return `\n${nextSpaces}${key}:${objectToYaml(value, indent + 1)}`
-        } else if (typeof value === 'string') {
-          return `\n${nextSpaces}${key}: "${value}"`
-        } else {
-          return `\n${nextSpaces}${key}: ${value}`
+          return `${keyLine} null`
         }
+
+        if (typeof value === 'object') {
+          const nested = objectToYaml(value, indent + 1)
+          return `${keyLine}\n${nested}`
+        }
+
+        if (typeof value === 'string') {
+          return `${keyLine} "${value}"`
+        }
+
+        return `${keyLine} ${value}`
       })
-      .join('')
+      .join('\n')
   }
 
   function getSelectedConfigSecretValue(type) {
