@@ -388,6 +388,29 @@ step:
       loader: fetchTopologyMachines
       elements:
         # standalone mode
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: mongoTypeEqualsTo|standalone|compute
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/standalone/trigger
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/trigger
+        - type: label-element
+          label: Pod lifetime threshold
+          subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+          if:
+            type: function
+            name: mongoTypeEqualsTo|standalone|compute
+        - type: input
+          label: Pod LifeTime Threshold (e.g., 10m 30s)
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/podLifeTimeThreshold
+          customClass: width-300
+          if:
+            type: function
+            name: mongoTypeEqualsTo|standalone|compute
         - type: block-layout
           label: Standalone
           if:
@@ -396,11 +419,8 @@ step:
           showLabels: true
           # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone
           elements:
-            - type: label-element
-              label: Resource Diff Percentage
-              subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
             - type:  threshold-input
-              label: Resource Diff Percentage 
+              label: ResourceDiff Percentage
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/resourceDiffPercentage
               customClass: width-300
             - type: label-element
@@ -498,6 +518,29 @@ step:
                   label: Usage Threshold Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage/properties/usageThresholdPercentage
         #  replicaset mode
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: mongoTypeEqualsTo|replicaSet|compute
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/replicaSet/trigger
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/trigger
+        - type: label-element
+          label: Pod lifetime threshold
+          subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+          if:
+            type: function
+            name: mongoTypeEqualsTo|replicaSet|compute
+        - type: input
+          label: Pod LifeTime Threshold (e.g., 10m 30s)
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/podLifeTimeThreshold
+          customClass: width-300
+          if:
+            type: function
+            name: mongoTypeEqualsTo|replicaSet|compute
         - type: block-layout
           label: ReplicaSet
           if:
@@ -506,11 +549,8 @@ step:
           showLabels: true
           # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet
           elements:
-            - type: label-element
-              label: Resource Diff Percentage 
-              subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance 
             - type:  threshold-input
-              label: Resource Diff Percentage
+              label: ResourceDiff Percentage
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/resourceDiffPercentage
               customClass: width-300
             - type: label-element
@@ -633,11 +673,8 @@ step:
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard
               elements:
-                - type: label-element
-                  label: Resource Diff Percentage
-                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
                 - type:  threshold-input
-                  label: Resource Diff Percentage 
+                  label: ResourceDiff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/resourceDiffPercentage
                   customClass: width-300
                 - type: label-element
@@ -754,11 +791,8 @@ step:
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer
               elements:
-                - type: label-element
-                  label: Resource Diff Percentage
-                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
                 - type:  threshold-input
-                  label: Resource Diff Percentage
+                  label: ResourceDiff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/resourceDiffPercentage
                   customClass: width-300
                 - type: label-element
@@ -875,11 +909,8 @@ step:
               hideBlock: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter
               elements:
-                - type: label-element
-                  label: Resource Diff Percentage
-                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
                 - type: threshold-input
-                  label: Resource Diff Percentage
+                  label: ResourceDiff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/resourceDiffPercentage
                   customClass: width-300
                 - type: label-element
@@ -996,11 +1027,8 @@ step:
               hideBlock: true
               # schema:  schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden
               elements:
-                - type: label-element
-                  label: Resource Diff Percentage
-                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
                 - type: threshold-input
-                  label: Resource Diff Percentage
+                  label: ResourceDiff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/resourceDiffPercentage
                   customClass: width-300
                 - type: label-element
@@ -1116,11 +1144,8 @@ step:
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos
               elements:
-                - type: label-element
-                  label: Resource Diff Percentage
-                  subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
                 - type:  threshold-input
-                  label: Resource Diff Percentage
+                  label: ResourceDiff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/resourceDiffPercentage
                   customClass: width-300
                 - type: label-element
@@ -1330,7 +1355,7 @@ step:
               watcher:
                 func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/scalingRules|scalingRules
                 paths:
-                  - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/satandalone/properties/scalingRules
+                  - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
             - type: input
               label: Scaling Threshold
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingThreshold
