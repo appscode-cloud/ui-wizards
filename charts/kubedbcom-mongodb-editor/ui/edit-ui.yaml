@@ -1283,6 +1283,34 @@ step:
       showLabels: false
       elements:
         # standalone mode
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: mongoTypeEqualsTo|standalone|storage
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/trigger
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/trigger
+        - type: label-element
+          label: Expansion Mode (Online/Offline)
+          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+          if:
+            type: function
+            name: mongoTypeEqualsTo|standalone|storage
+        - type: select
+          label: Mode
+          description: Select how the storage expansion should be handled.
+          if:
+            type: function
+            name: mongoTypeEqualsTo|standalone|storage
+          options:
+            - text: Online
+              value: Online
+            - text: Offline
+              value: Offline
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/expansionMode
         - type: block-layout
           label: Standalone
           if:
@@ -1290,25 +1318,6 @@ step:
             name: mongoTypeEqualsTo|standalone|storage
           showLabels: true
           elements:
-            - type: switch
-              label: Trigger
-              fullwidth: true
-              init:
-                type: func
-                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/trigger
-            - type: label-element
-              label: Expansion Mode (Online/Offline)
-              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-            - type: select
-              label: Mode
-              description: Select how the storage expansion should be handled.
-              options:
-                - text: Online
-                  value: Online
-                - text: Offline
-                  value: Offline
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/expansionMode
             - type: threshold-input
               label: UsageThreshold (%)
               subtitle: Set the threshold percentage of storage usage to trigger scaling.
@@ -1333,6 +1342,34 @@ step:
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/upperBound
         # replicaset mode
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: mongoTypeEqualsTo|replicaSet|storage
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/trigger
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/trigger
+        - type: label-element
+          label: Expansion Mode (Online/Offline)
+          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+          if:
+            type: function
+            name: mongoTypeEqualsTo|replicaSet|storage
+        - type: select
+          label: Mode
+          description: Select how the storage expansion should be handled.
+          if:
+            type: function
+            name: mongoTypeEqualsTo|replicaSet|storage
+          options:
+            - text: Online
+              value: Online
+            - text: Offline
+              value: Offline
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/expansionMode
         - type: block-layout
           label: ReplicaSet
           if:
@@ -1340,25 +1377,6 @@ step:
             name: mongoTypeEqualsTo|replicaSet|storage
           showLabels: true
           elements:
-            - type: switch
-              label: Trigger
-              fullwidth: true
-              init:
-                type: func
-                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/trigger
-            - type: label-element
-              label: Expansion Mode (Online/Offline)
-              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-            - type: select
-              label: Mode
-              description: Select how the storage expansion should be handled.
-              options:
-                - text: Online
-                  value: Online
-                - text: Offline
-                  value: Offline
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/expansionMode
             - type: threshold-input
               label: UsageThreshold (%)
               subtitle: Set the threshold percentage of storage usage to trigger scaling.
@@ -1383,6 +1401,34 @@ step:
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/upperBound
         # sharded mode
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: mongoTypeEqualsTo|sharded|storage
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/trigger
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/trigger
+        - type: label-element
+          label: Expansion Mode (Online/Offline)
+          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+          if:
+            type: function
+            name: mongoTypeEqualsTo|sharded|storage
+        - type: select
+          label: Mode
+          description: Select how the storage expansion should be handled.
+          if:
+            type: function
+            name: mongoTypeEqualsTo|sharded|storage
+          options:
+            - text: Online
+              value: Online
+            - text: Offline
+              value: Offline
+          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/expansionMode
         - type: block-layout
           showLabels: false
           if:
@@ -1393,25 +1439,6 @@ step:
               label: Shard
               showLabels: true
               elements:
-                - type: switch
-                  label: Trigger
-                  fullwidth: true
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/trigger
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/trigger
-                - type: label-element
-                  label: Expansion Mode (Online/Offline)
-                  subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-                - type: select
-                  label: Mode
-                  description: Select how the storage expansion should be handled.
-                  options:
-                    - text: Online
-                      value: Online
-                    - text: Offline
-                      value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
                   subtitle: Set the threshold percentage of storage usage to trigger scaling.
@@ -1435,29 +1462,29 @@ step:
                 - type: input
                   label: Scaling Threshold
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingThreshold
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/trigger
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/expansionMode
             - type: block-layout
               label: Config Server
               showLabels: true
               elements:
-                - type: switch
-                  label: Trigger
-                  fullwidth: true
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/trigger
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/trigger
-                - type: label-element
-                  label: Expansion Mode (Online/Offline)
-                  subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-                - type: select
-                  label: Mode
-                  description: Select how the storage expansion should be handled.
-                  options:
-                    - text: Online
-                      value: Online
-                    - text: Offline
-                      value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
                   subtitle: Set the threshold percentage of storage usage to trigger scaling.
@@ -1481,29 +1508,29 @@ step:
                 - type: input
                   label: Scaling Threshold
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingThreshold
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/trigger
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/expansionMode
             - type: block-layout
               label: Hidden
               showLabels: true
               elements:
-                - type: switch
-                  label: Trigger
-                  fullwidth: true
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/trigger
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/trigger
-                - type: label-element
-                  label: Expansion Mode (Online/Offline)
-                  subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-                - type: select
-                  label: Mode
-                  description: Select how the storage expansion should be handled.
-                  options:
-                    - text: Online
-                      value: Online
-                    - text: Offline
-                      value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
                   subtitle: Set the threshold percentage of storage usage to trigger scaling.
