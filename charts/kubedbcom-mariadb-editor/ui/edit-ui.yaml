@@ -198,30 +198,27 @@ step:
         loader: fetchTopologyMachines
         elements:
           # mariadb mode
+          - type: switch
+            label: Trigger
+            fullwidth: true
+            init:
+              type: func
+              value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/compute/mariadb/trigger
+            schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/trigger
+          - type: label-element
+            label: Pod lifetime threshold
+            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+          - type: input
+            label: Pod LifeTime Threshold (e.g., 10m 30s)
+            schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
+            customClass: width-300
           - type: block-layout
             label: Mariadb
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb
             elements:
-              - type: switch
-                label: Trigger
-                fullwidth: true
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/compute/mariadb/trigger
-                schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/trigger
-              - type: label-element
-                label: Pod lifetime threshold
-                subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-              - type: input
-                label: Pod LifeTime Threshold (e.g., 10m 30s)
-                schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
-                customClass: width-300
-              - type: label-element
-                label: Resource Diff Percentage
-                subtitle: Defines the threshold for resource usage variation (in percentage) that triggers scaling actions to maintain optimal performance
               - type: threshold-input
-                label: Resource Diff Percentage (Integer only)
+                label: ResourceDiff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
                 customClass: width-300
               - type: label-element
@@ -354,6 +351,25 @@ step:
     - type: block-layout
       showLabels: false
       elements:
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/storage/mariadb/trigger
+          schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/trigger
+        - type: label-element
+          label: Expansion Mode (Online/Offline)
+          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+        - type: select
+          label: Mode
+          description: Select how the storage expansion should be handled.
+          options:
+            - text: Online
+              value: Online
+            - text: Offline
+              value: Offline
+          schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/expansionMode
         - type: block-layout
           showLabels: false
           elements:
@@ -361,25 +377,6 @@ step:
               label: Mariadb
               showLabels: true
               elements:
-                - type: switch
-                  label: Trigger
-                  fullwidth: true
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/storage/mariadb/trigger
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/trigger
-                - type: label-element
-                  label: Expansion Mode (Online/Offline)
-                  subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-                - type: select
-                  label: Mode
-                  description: Select how the storage expansion should be handled.
-                  options:
-                    - text: Online
-                      value: Online
-                    - text: Offline
-                      value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
                   subtitle: Set the threshold percentage of storage usage to trigger scaling.
