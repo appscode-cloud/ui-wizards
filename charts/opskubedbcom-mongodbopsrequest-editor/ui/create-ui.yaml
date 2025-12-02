@@ -118,8 +118,8 @@ step:
             elements:
               - type: input-compare
                 label: Replicas
-                header: Replica 
-                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources 
+                header: Replica
+                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
                 if:
                   type: function
                   name: ifDbTypeEqualsTo|replicaSet|horizontalScaling
@@ -127,7 +127,9 @@ step:
                   type: func
                   value: setValueFromDbDetails|/spec/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
-             
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
           - type: block-layout
             label: 'Sharded horizontal scaling'
             if:
@@ -506,48 +508,63 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|VolumeExpansion
         elements:
-          - type: input-compare
-            header: Standalone
-            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-            label: Standalone
+          - type: horizontal-layout
             if:
               type: function
               name: ifDbTypeEqualsTo|standalone|volumeExpansion
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-            validation:
-              type: custom
-              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
-            schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
+            elements:
+              - type: input-compare
+                header: Standalone
+                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                label: Standalone
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
+                schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
           - type: block-layout
             label: Sharded volume expansion
             if:
               type: function
               name: ifDbTypeEqualsTo|sharded|volumeExpansion
             elements:
-              - type: input-compare
-                header: Config Server
-                label: Config Server
-                subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
-                schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
-              - type: input-compare
-                header: Shard
-                label: Shard
-                subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
-                schema: schema/properties/spec/properties/volumeExpansion/properties/shard
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Config Server
+                    label: Config Server
+                    subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
+                  - type: info
+                    hasIcon: true
+                    label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Shard
+                    label: Shard
+                    subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/shard
+                  - type: info
+                    hasIcon: true
+                    label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
               - type: horizontal-layout
                 elements:
                   - type: block-layout
@@ -570,20 +587,25 @@ step:
                     showLabels: true
                     hideBorder: true
                     elements: []
-          - type: input-compare
-            header: Replica Set
-            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-            label: ReplicaSet
+          - type: horizontal-layout
             if:
               type: function
               name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-            validation:
-              type: custom
-              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
-            schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
+            elements:
+              - type: input-compare
+                header: Replica Set
+                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                label: ReplicaSet
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
+                schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
