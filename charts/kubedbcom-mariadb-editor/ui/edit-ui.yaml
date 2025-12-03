@@ -204,7 +204,11 @@ step:
             init:
               type: func
               value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/compute/mariadb/trigger
-            schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/trigger
+            schema: temp/properties/compute/properties/mariadb/properties/trigger
+            watcher:
+              func: onTriggerChange|compute/mariadb
+              paths:
+                - temp/properties/compute/properties/mariadb/properties/trigger
           - type: label-element
             label: Pod lifetime threshold
             subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
@@ -357,7 +361,11 @@ step:
           init:
             type: func
             value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/storage/mariadb/trigger
-          schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/trigger
+          schema: temp/properties/storage/properties/mariadb/properties/trigger
+          watcher:
+            func: onTriggerChange|storage/mariadb
+            paths:
+              - temp/properties/storage/properties/mariadb/properties/trigger
         - type: label-element
           label: Expansion Mode (Online/Offline)
           subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
