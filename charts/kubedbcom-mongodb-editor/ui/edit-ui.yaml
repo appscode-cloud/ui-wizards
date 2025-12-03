@@ -401,7 +401,11 @@ step:
           init:
             type: func
             value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/standalone/trigger
-          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/trigger
+          schema: temp/properties/compute/properties/standalone/properties/trigger
+          watcher:
+            func: onTriggerChange|compute/standalone
+            paths:
+              - temp/properties/compute/properties/standalone/properties/trigger
         - type: label-element
           label: Pod lifetime threshold
           subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
@@ -531,7 +535,11 @@ step:
           init:
             type: func
             value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/replicaSet/trigger
-          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/trigger
+          schema: temp/properties/compute/properties/replicaSet/properties/trigger
+          watcher:
+            func: onTriggerChange|compute/replicaSet
+            paths:
+              - temp/properties/compute/properties/replicaSet/properties/trigger
         - type: label-element
           label: Pod lifetime threshold
           subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
@@ -664,7 +672,11 @@ step:
               init:
                 type: func
                 value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/shard/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/trigger
+              schema: temp/properties/compute/properties/shard/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/shard
+                paths:
+                  - temp/properties/compute/properties/shard/properties/trigger
             - type: label-element
               label: Pod lifetime threshold  
               subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
@@ -782,7 +794,11 @@ step:
               init:
                 type: func
                 value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/configServer/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/trigger
+              schema: temp/properties/compute/properties/configServer/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/configServer
+                paths:
+                  - temp/properties/compute/properties/configServer/properties/trigger
             - type: label-element
               label: Pod lifetime threshold 
               subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
@@ -899,7 +915,11 @@ step:
               init:
                 type: func
                 value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/arbiter/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/trigger
+              schema: temp/properties/compute/properties/arbiter/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/arbiter
+                paths:
+                  - temp/properties/compute/properties/arbiter/properties/trigger
             - type: label-element
               label: Pod lifetime threshold 
               subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
@@ -1017,7 +1037,11 @@ step:
               init:
                 type: func
                 value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/hidden/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/trigger
+              schema: temp/properties/compute/properties/hidden/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/hidden
+                paths:
+                  - temp/properties/compute/properties/hidden/properties/trigger
             - type: label-element
               label: Pod lifetime threshold 
               subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
@@ -1135,7 +1159,11 @@ step:
               init:
                 type: func
                 value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/mongos/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/trigger
+              schema: temp/properties/compute/properties/mongos/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/mongos
+                paths:
+                  - temp/properties/compute/properties/mongos/properties/trigger
             - type: label-element
               label: Pod lifetime threshold 
               subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
@@ -1321,7 +1349,11 @@ step:
           init:
             type: func
             value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/trigger
-          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/trigger
+          schema: temp/properties/storage/properties/standalone/properties/trigger
+          watcher:
+            func: onTriggerChange|storage/standalone
+            paths:
+              - temp/properties/storage/properties/standalone/properties/trigger
         - type: label-element
           label: Expansion Mode (Online/Offline)
           subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
@@ -1380,7 +1412,11 @@ step:
           init:
             type: func
             value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/trigger
-          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/trigger
+          schema: temp/properties/storage/properties/replicaSet/properties/trigger
+          watcher:
+            func: onTriggerChange|storage/replicaSet
+            paths:
+              - temp/properties/storage/properties/replicaSet/properties/trigger
         - type: label-element
           label: Expansion Mode (Online/Offline)
           subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
@@ -1439,7 +1475,11 @@ step:
           init:
             type: func
             value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/trigger
-          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/trigger
+          schema: temp/properties/storage/properties/shard/properties/trigger
+          watcher:
+            func: onTriggerChange|storage/shard
+            paths:
+              - temp/properties/storage/properties/shard/properties/trigger
         - type: label-element
           label: Expansion Mode (Online/Offline)
           subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
@@ -1497,7 +1537,11 @@ step:
               init:
                 type: func
                 value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/trigger
+              schema: temp/properties/storage/properties/configServer/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/configServer
+                paths:
+                  - temp/properties/storage/properties/configServer/properties/trigger
             - type: label-element
               label: Expansion Mode (Online/Offline)
               subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
@@ -1543,7 +1587,11 @@ step:
               init:
                 type: func
                 value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/trigger
+              schema: temp/properties/storage/properties/hidden/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/hidden
+                paths:
+                  - temp/properties/storage/properties/hidden/properties/trigger
             - type: label-element
               label: Expansion Mode (Online/Offline)
               subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
