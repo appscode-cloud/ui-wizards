@@ -796,7 +796,6 @@ export const useFunc = (model) => {
   }
 
   function setMachine(type) {
-    console.log({ type })
     const dbDetails = getValue(discriminator, '/dbDetails')
     // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
     const limits = (type === 'replicaSet' || type === 'standalone'
