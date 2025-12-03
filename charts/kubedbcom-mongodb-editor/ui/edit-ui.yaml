@@ -113,6 +113,8 @@ step:
             elements:
               - type: switch
                 label: Enable Backup Blueprint
+                fullwidth: true
+                subtitle: Use a backup blueprint template to automatically configure backups for similar databases
                 schema: temp/properties/blueprintEnabled
                 init:
                   type: func
@@ -151,8 +153,9 @@ step:
         value: getOpsRequestUrl|VerticalScaling
     - type: switch
       label: Enable Monitoring
+      fullwidth: true
       schema: temp/properties/enableMonitoring
-      init: 
+      init:
         type: func
         value: isValueExistInModel|/resources/kubedbComMongoDB/spec/monitor
       watcher:
@@ -250,13 +253,14 @@ step:
           schema: ''
         - type: switch
           label: Customize Exporter Sidecar
+          fullwidth: true
           schema: temp/properties/customizeExporter
-          init: 
+          init:
             type: static
             value: true
           watcher:
             func: onCustomizeExporterChange
-            paths: 
+            paths:
               - temp/properties/customizeExporter
         - type: block-layout
           label: Customer Exporter Section 
