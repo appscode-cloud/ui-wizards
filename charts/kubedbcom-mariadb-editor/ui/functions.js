@@ -922,7 +922,6 @@ export const useFunc = (model) => {
 
   function setTrigger(path) {
     let value = getValue(model, `/resources/${path}`)
-
     return value === 'On'
   }
 

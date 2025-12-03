@@ -167,23 +167,25 @@ step:
                         - text: Taint
                           value: Taint
                 - type: info
-                  label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taint:</b> Define tolerations for node traints to ensure your workload runs only on compatible nodes"
+                  label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
                   customClass: mt-20
               - type: label-element
                 label: Topology
                 subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-              - type: input
-                label: Key
-                validation:
-                  type: custom
-                  name: isVerticalScaleTopologyRequired
-                schema: temp/topologyKey
-              - type: input
-                label: Value
-                validation:
-                  type: custom
-                  name: isVerticalScaleTopologyRequired
-                schema: temp/topologyValue
+              - type: horizontal-layout
+                elements:
+                  - type: input
+                    label: Key
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired
+                    schema: temp/topologyKey
+                  - type: input
+                    label: Value
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired
+                    schema: temp/topologyValue
           - type: horizontal-layout
             showLabels: true
             label: Exporter
@@ -305,7 +307,7 @@ step:
               - type: editor
                 label: Value
                 readonly: true
-                hasCopy: true
+                hasCopy: false
                 watcher:
                   func: getSelectedConfigSecretValue|mariadb
                   paths:
@@ -315,6 +317,7 @@ step:
                 schema: temp/properties/configArray/items/properties/value
           - type: array-object-form
             label: ApplyConfig
+            buttonClass: is-light is-outlined
             schema: temp/properties/applyConfig
             validation:
               type: required
@@ -337,6 +340,7 @@ step:
                 schema: temp/properties/configArray/items/properties/key
               - type: editor
                 label: value
+                hasCopy: false
                 validation:
                   type: required
                 schema: temp/properties/configArray/items/properties/value
@@ -468,46 +472,46 @@ step:
                 elements:
                   - type: array-item-form
                     label: Organizations
-                    schema: schema/items/properties/subject/properties/organizations
+                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/organizations/items
                     element:
                       type: input
                       label: Organization
-                      schema: items
                   - type: array-item-form
                     label: Countries
-                    schema: schema/items/properties/subject/properties/countries
+                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/countries/items
                     element:
                       type: input
                       label: Country
-                      schema: items
                   - type: array-item-form
                     label: Organizational Units
-                    schema: schema/items/properties/subject/properties/organizationalUnits
+                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/organizationalUnits/items
                     element:
                       type: input
                       label: Organizational Unit
-                      schema: items
                   - type: array-item-form
                     label: Provinces
-                    schema: schema/items/properties/subject/properties/provinces
+                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/provinces/items
                     element:
                       type: input
                       label: Province
-                      schema: items
               - type: array-item-form
                 label: DNS Names
-                schema: schema/items/properties/dnsNames
+                buttonClass: is-light is-outlined
+                schema: schema/items/properties/dnsNames/items
                 element:
                   type: input
                   label: DNS Name
-                  schema: items
               - type: array-item-form
                 label: IP Addresses
-                schema: schema/items/properties/ipAddresses
+                buttonClass: is-light is-outlined
+                schema: schema/items/properties/ipAddresses/items
                 element:
                   type: input
                   label: IP Address
-                  schema: items
 # common
       - type: block-layout
         label: OpsRequest Options
