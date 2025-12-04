@@ -85,70 +85,70 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: select
-                    label: Min Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-primary-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|primary|min
-                    loader:
-                      name: getMachines|primary|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-primary-max
-                    watcher:
-                      func: onMachineChange|primary
-                      paths:
-                        - temp/properties/allowedMachine-primary-min
-                  - type: block-layout
-                    label: Min Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
+                  - type: horizontal-layout
                     elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed/properties/memory
-                  - type: select
-                    label: Max Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-primary-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|primary|max
-                    loader:
-                      name: getMachines|primary|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-primary-min
-                    watcher:
-                      func: onMachineChange|primary
-                      paths:
-                        - temp/properties/allowedMachine-primary-max
-                  - type: block-layout
-                    label: Max Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed/properties/memory
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      schema: temp/properties/allowedMachine-primary-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|primary|min
+                      loader:
+                        name: getMachines|primary|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-primary-max
+                      watcher:
+                        func: onMachineChange|primary
+                        paths:
+                          - temp/properties/allowedMachine-primary-min
+                    - type: block-layout
+                      label: Min Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      schema: temp/properties/allowedMachine-primary-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|primary|max
+                      loader:
+                        name: getMachines|primary|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-primary-min
+                      watcher:
+                        func: onMachineChange|primary
+                        paths:
+                          - temp/properties/allowedMachine-primary-max
+                    - type: block-layout
+                      label: Max Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|primary
@@ -184,70 +184,70 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: select
-                    label: Min Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-secondary-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|secondary|min
-                    loader:
-                      name: getMachines|secondary|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-secondary-max
-                    watcher:
-                      func: onMachineChange|secondary
-                      paths:
-                        - temp/properties/allowedMachine-secondary-min
-                  - type: block-layout
-                    label: Min Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
+                  - type: horizontal-layout
                     elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/memory
-                  - type: select
-                    label: Max Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-secondary-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|secondary|max
-                    loader:
-                      name: getMachines|secondary|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-secondary-min
-                    watcher:
-                      func: onMachineChange|secondary
-                      paths:
-                        - temp/properties/allowedMachine-secondary-max
-                  - type: block-layout
-                    label: Max Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/memory
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      schema: temp/properties/allowedMachine-secondary-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|secondary|min
+                      loader:
+                        name: getMachines|secondary|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-secondary-max
+                      watcher:
+                        func: onMachineChange|secondary
+                        paths:
+                          - temp/properties/allowedMachine-secondary-min
+                    - type: block-layout
+                      label: Min Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      schema: temp/properties/allowedMachine-secondary-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|secondary|max
+                      loader:
+                        name: getMachines|secondary|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-secondary-min
+                      watcher:
+                        func: onMachineChange|secondary
+                        paths:
+                          - temp/properties/allowedMachine-secondary-max
+                    - type: block-layout
+                      label: Max Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|secondary
