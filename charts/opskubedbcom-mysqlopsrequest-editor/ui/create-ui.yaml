@@ -100,8 +100,9 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
-          - type: select
+          - type: select-compare
             label: Target Version
+            header: Version
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -115,14 +116,14 @@ step:
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
           - type: horizontal-layout
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|cluster|horizontalScaling
             elements:
               - type: input-compare
                 label: Replicas
                 header: Replica
                 subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
-                if:
-                  type: function
-                  name: ifDbTypeEqualsTo|cluster|horizontalScaling
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/replicas
@@ -174,23 +175,25 @@ step:
                             - text: Taint
                               value: Taint
                     - type: info
-                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taint:</b> Define tolerations for node traints to ensure your workload runs only on compatible nodes"
+                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
                       customClass: mt-20
                   - type: label-element
                     label: Topology
                     subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-                  - type: input
-                    label: Key
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired
-                    schema: temp/topologyKey
-                  - type: input
-                    label: Value
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired
-                    schema: temp/topologyValue
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired
+                        schema: temp/topologyKey
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired
+                        schema: temp/topologyValue
           - type: horizontal-layout
             showLabels: true
             label: Exporter
@@ -322,7 +325,7 @@ step:
                   - type: editor
                     label: Value
                     readonly: true
-                    hasCopy: true
+                    hasCopy: false
                     if:
                       name: isConfigSelected
                       type: function
@@ -335,6 +338,7 @@ step:
                     schema: temp/properties/configArray/items/properties/value
               - type: array-object-form
                 label: ApplyConfig
+                buttonClass: is-light is-outlined
                 schema: temp/properties/applyConfig
                 validation:
                   type: required
@@ -357,12 +361,14 @@ step:
                     schema: temp/properties/configArray/items/properties/key
                   - type: editor
                     label: value
+                    hasCopy: false
                     validation:
                       type: required
                     schema: temp/properties/configArray/items/properties/value
               - type: switch
                 schema: schema/properties/spec/properties/configuration/properties/removeCustomConfig
                 label: Remove CustomConfig
+                fullwidth: true
                 if:
                   name: returnFalse
                   type: function
@@ -395,12 +401,14 @@ step:
                 - temp/properties/tlsOperation
           - type: switch
             label: remove
+            fullwidth: true
             if:
               name: returnFalse
               type: function
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
             label: rotateCertificates
+            fullwidth: true
             schema: schema/properties/spec/properties/tls/properties/rotateCertificates
             if:
               name: returnFalse
@@ -413,6 +421,7 @@ step:
             elements:
               - type: switch
                 label: Require SSL
+                fullwidth: true
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/tls/requireSSL
@@ -491,46 +500,46 @@ step:
                 elements:
                   - type: array-item-form
                     label: Organizations
+                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/organizations
                     element:
                       type: input
                       label: Organization
-                      schema: items
                   - type: array-item-form
                     label: Countries
+                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/countries
                     element:
                       type: input
                       label: Country
-                      schema: items
                   - type: array-item-form
                     label: Organizational Units
+                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/organizationalUnits
                     element:
                       type: input
                       label: Organizational Unit
-                      schema: items
                   - type: array-item-form
                     label: Provinces
+                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/provinces
                     element:
                       type: input
                       label: Province
-                      schema: items
               - type: array-item-form
                 label: DNS Names
+                buttonClass: is-light is-outlined
                 schema: schema/items/properties/dnsNames
                 element:
                   type: input
                   label: DNS Name
-                  schema: items
               - type: array-item-form
                 label: IP Addresses
+                buttonClass: is-light is-outlined
                 schema: schema/items/properties/ipAddresses
                 element:
                   type: input
                   label: IP Address
-                  schema: items
 # common
       - type: time-picker
         label: Timeout
