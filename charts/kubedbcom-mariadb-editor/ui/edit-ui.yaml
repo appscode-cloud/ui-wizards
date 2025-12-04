@@ -198,95 +198,103 @@ step:
         loader: fetchTopologyMachines
         elements:
           # mariadb mode
+          - type: switch
+            label: Trigger
+            fullwidth: true
+            init:
+              type: func
+              value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/compute/mariadb/trigger
+            schema: temp/properties/compute/properties/mariadb/properties/trigger
+            watcher:
+              func: onTriggerChange|compute/mariadb
+              paths:
+                - temp/properties/compute/properties/mariadb/properties/trigger
+          - type: label-element
+            label: Pod lifetime threshold
+            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+          - type: input
+            label: Pod LifeTime Threshold (e.g., 10m 30s)
+            schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
+            customClass: width-300
           - type: block-layout
             label: Mariadb
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb
             elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/compute/mariadb/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: Resource Diff Percentage
+                label: ResourceDiff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
+                customClass: width-300
+              - type: label-element
+                label: Resource Configuration
+                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: select
-                    label: Min Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|min
-                    loader:
-                      name: getMachines|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-max
-                    watcher:
-                      func: onMachineChange|mariadb
-                      paths:
-                        - temp/properties/allowedMachine-min
-                  - type: block-layout
-                    label: Min Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
+                  - type: horizontal-layout
                     elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
-                  - type: select
-                    label: Max Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|max
-                    loader:
-                      name: getMachines|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-min
-                    watcher:
-                      func: onMachineChange|mariadb
-                      paths:
-                        - temp/properties/allowedMachine-max
-                  - type: block-layout
-                    label: Max Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/memory
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      schema: temp/properties/allowedMachine-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|min
+                      loader:
+                        name: getMachines|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-max
+                      watcher:
+                        func: onMachineChange|mariadb
+                        paths:
+                          - temp/properties/allowedMachine-min
+                    - type: block-layout
+                      label: Min Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      schema: temp/properties/allowedMachine-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|max
+                      loader:
+                        name: getMachines|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-min
+                      watcher:
+                        func: onMachineChange|mariadb
+                        paths:
+                          - temp/properties/allowedMachine-max
+                    - type: block-layout
+                      label: Max Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|mariadb
@@ -347,6 +355,29 @@ step:
     - type: block-layout
       showLabels: false
       elements:
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/storage/mariadb/trigger
+          schema: temp/properties/storage/properties/mariadb/properties/trigger
+          watcher:
+            func: onTriggerChange|storage/mariadb
+            paths:
+              - temp/properties/storage/properties/mariadb/properties/trigger
+        - type: label-element
+          label: Expansion Mode (Online/Offline)
+          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+        - type: select
+          label: Mode
+          description: Select how the storage expansion should be handled.
+          options:
+            - text: Online
+              value: Online
+            - text: Offline
+              value: Offline
+          schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/expansionMode
         - type: block-layout
           showLabels: false
           elements:
@@ -354,28 +385,11 @@ step:
               label: Mariadb
               showLabels: true
               elements:
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/storage/mariadb/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/trigger
-                - type: select
-                  label: Expansion Mode
-                  options:
-                    - text: Online
-                      value: Online
-                    - text: Offline
-                      value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
                   schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/usageThreshold
+                  customClass: width-300
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/scalingRules
