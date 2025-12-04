@@ -85,70 +85,72 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: select
-                    label: Min Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-brokers-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|brokers|min
-                    loader:
-                      name: getMachines|brokers|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-brokers-max
-                    watcher:
-                      func: onMachineChange|brokers
-                      paths:
-                        - temp/properties/allowedMachine-brokers-min
-                  - type: block-layout
-                    label: Min Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
+                  - type: horizontal-layout
                     elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/memory
-                  - type: select
-                    label: Max Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-brokers-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|brokers|max
-                    loader:
-                      name: getMachines|brokers|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-brokers-min
-                    watcher:
-                      func: onMachineChange|brokers
-                      paths:
-                        - temp/properties/allowedMachine-brokers-max
-                  - type: block-layout
-                    label: Max Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      schema: temp/properties/allowedMachine-brokers-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|brokers|min
+                      loader:
+                        name: getMachines|brokers|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-brokers-max
+                      watcher:
+                        func: onMachineChange|brokers
+                        paths:
+                          - temp/properties/allowedMachine-brokers-min
+                    - type: block-layout
+                      label: Min Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/cpu
+                        - type: input
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/memory
+                  - type: horizontal-layout
                     elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      schema: temp/properties/allowedMachine-brokers-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|brokers|max
+                      loader:
+                        name: getMachines|brokers|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-brokers-min
+                      watcher:
+                        func: onMachineChange|brokers
+                        paths:
+                          - temp/properties/allowedMachine-brokers-max
+                    - type: block-layout
+                      label: Max Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|brokers
@@ -181,70 +183,70 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: select
-                    label: Min Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-coordinators-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|coordinators|min
-                    loader:
-                      name: getMachines|coordinators|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-coordinators-max
-                    watcher:
-                      func: onMachineChange|coordinators
-                      paths:
-                        - temp/properties/allowedMachine-coordinators-min
-                  - type: block-layout
-                    label: Min Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
+                  - type: horizontal-layout
                     elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/memory
-                  - type: select
-                    label: Max Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-coordinators-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|coordinators|max
-                    loader:
-                      name: getMachines|coordinators|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-coordinators-min
-                    watcher:
-                      func: onMachineChange|coordinators
-                      paths:
-                        - temp/properties/allowedMachine-coordinators-max
-                  - type: block-layout
-                    label: Max Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/memory
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      schema: temp/properties/allowedMachine-coordinators-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|coordinators|min
+                      loader:
+                        name: getMachines|coordinators|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-coordinators-max
+                      watcher:
+                        func: onMachineChange|coordinators
+                        paths:
+                          - temp/properties/allowedMachine-coordinators-min
+                    - type: block-layout
+                      label: Min Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      schema: temp/properties/allowedMachine-coordinators-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|coordinators|max
+                      loader:
+                        name: getMachines|coordinators|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-coordinators-min
+                      watcher:
+                        func: onMachineChange|coordinators
+                        paths:
+                          - temp/properties/allowedMachine-coordinators-max
+                    - type: block-layout
+                      label: Max Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|coordinators
@@ -277,70 +279,70 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: select
-                    label: Min Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-historicals-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|historicals|min
-                    loader:
-                      name: getMachines|historicals|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-historicals-max
-                    watcher:
-                      func: onMachineChange|historicals
-                      paths:
-                        - temp/properties/allowedMachine-historicals-min
-                  - type: block-layout
-                    label: Min Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
+                  - type: horizontal-layout
                     elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/memory
-                  - type: select
-                    label: Max Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-historicals-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|historicals|max
-                    loader:
-                      name: getMachines|historicals|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-historicals-min
-                    watcher:
-                      func: onMachineChange|historicals
-                      paths:
-                        - temp/properties/allowedMachine-historicals-max
-                  - type: block-layout
-                    label: Max Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/memory
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      schema: temp/properties/allowedMachine-historicals-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|historicals|min
+                      loader:
+                        name: getMachines|historicals|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-historicals-max
+                      watcher:
+                        func: onMachineChange|historicals
+                        paths:
+                          - temp/properties/allowedMachine-historicals-min
+                    - type: block-layout
+                      label: Min Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      schema: temp/properties/allowedMachine-historicals-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|historicals|max
+                      loader:
+                        name: getMachines|historicals|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-historicals-min
+                      watcher:
+                        func: onMachineChange|historicals
+                        paths:
+                          - temp/properties/allowedMachine-historicals-max
+                    - type: block-layout
+                      label: Max Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|historicals
@@ -373,70 +375,70 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: select
-                    label: Min Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-middleManagers-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|middleManagers|min
-                    loader:
-                      name: getMachines|middleManagers|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-middleManagers-max
-                    watcher:
-                      func: onMachineChange|middleManagers
-                      paths:
-                        - temp/properties/allowedMachine-middleManagers-min
-                  - type: block-layout
-                    label: Min Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
+                  - type: horizontal-layout
                     elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/memory
-                  - type: select
-                    label: Max Allowed Profile
-                    disableUnselect: true
-                    schema: temp/properties/allowedMachine-middleManagers-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|middleManagers|max
-                    loader:
-                      name: getMachines|middleManagers|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-middleManagers-min
-                    watcher:
-                      func: onMachineChange|middleManagers
-                      paths:
-                        - temp/properties/allowedMachine-middleManagers-max
-                  - type: block-layout
-                    label: Max Allowed
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/cpu
-                      - type: input
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/memory
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      schema: temp/properties/allowedMachine-middleManagers-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|middleManagers|min
+                      loader:
+                        name: getMachines|middleManagers|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-middleManagers-max
+                      watcher:
+                        func: onMachineChange|middleManagers
+                        paths:
+                          - temp/properties/allowedMachine-middleManagers-min
+                    - type: block-layout
+                      label: Min Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      schema: temp/properties/allowedMachine-middleManagers-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|middleManagers|max
+                      loader:
+                        name: getMachines|middleManagers|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-middleManagers-min
+                      watcher:
+                        func: onMachineChange|middleManagers
+                        paths:
+                          - temp/properties/allowedMachine-middleManagers-max
+                    - type: block-layout
+                      label: Max Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|middleManagers
