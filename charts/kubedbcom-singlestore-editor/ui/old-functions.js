@@ -827,7 +827,8 @@ export const useFunc = (model) => {
 
   function setTrigger(path) {
     let value = getValue(model, `/resources/${path}`)
-    return value === 'On'
+    if (value) return value
+    return 'On'
   }
 
   function setValueFromDbDetails(path) {
@@ -1437,17 +1438,6 @@ export const useFunc = (model) => {
     return value
   }
 
-  function onTriggerChange(type) {
-    const trigger = getValue(discriminator, `/${type}/trigger`)
-    const commitPath = `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${type}/trigger`
-
-    commit('wizard/model$update', {
-      path: commitPath,
-      value: trigger ? 'On' : 'Off',
-      force: true,
-    })
-  }
-
   return {
     initScheduleBackup,
     initScheduleBackupForEdit,
@@ -1486,7 +1476,6 @@ export const useFunc = (model) => {
     isNodeTopologySelected,
     setControlledResources,
     setTrigger,
-    onTriggerChange,
     setApplyToIfReady,
     setMetadata,
     isRancherManaged,
