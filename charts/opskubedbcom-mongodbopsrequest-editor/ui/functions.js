@@ -715,7 +715,8 @@ export const useFunc = (model) => {
       reconfigure: 'Reconfigure',
     }
     if (ver) {
-      const operation = route.params.actions
+      const operation = storeGet('/resource/activeActionItem/result/operationId') || ''
+
       const match = /^(.*)-opsrequest-(.*)$/.exec(operation)
       const opstype = match[2]
       commit('wizard/model$update', {
