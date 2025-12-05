@@ -62,6 +62,9 @@
     "ArrayItem": {
       "additionalProperties": false,
       "properties": {
+        "buttonClass": {
+          "type": "string"
+        },
         "customClass": {
           "type": "string"
         },
@@ -72,7 +75,159 @@
           "type": ["boolean", "string"]
         },
         "element": {
-          "$ref": "#/definitions/BaseElement"
+          "additionalProperties": false,
+          "properties": {
+            "addNewButton": {
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "function": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["function"],
+                      "type": "object"
+                    }
+                  ]
+                }
+              },
+              "required": ["label", "url"],
+              "type": "object"
+            },
+            "box": {
+              "type": "boolean"
+            },
+            "customClass": {
+              "type": "string"
+            },
+            "data": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "disable": {
+              "type": ["boolean", "string"]
+            },
+            "disableUnselect": {
+              "type": "boolean"
+            },
+            "editorHeight": {
+              "type": "string"
+            },
+            "fullwidth": {
+              "type": "boolean"
+            },
+            "hasCopy": {
+              "type": "boolean"
+            },
+            "hasGroup": {
+              "type": ["boolean", "string"]
+            },
+            "hasIcon": {
+              "type": "boolean"
+            },
+            "header": {
+              "type": "string"
+            },
+            "height": {
+              "type": "string"
+            },
+            "if": {
+              "$ref": "#/definitions/IfType"
+            },
+            "init": {
+              "$ref": "#/definitions/Init"
+            },
+            "isHorizontal": {
+              "type": "boolean"
+            },
+            "isSecret": {
+              "type": "boolean"
+            },
+            "label": {
+              "type": "string"
+            },
+            "loader": {
+              "$ref": "#/definitions/LoaderType"
+            },
+            "maxValue": {
+              "type": "number"
+            },
+            "minValue": {
+              "type": "number"
+            },
+            "multiple": {
+              "type": "boolean"
+            },
+            "options": {
+              "$ref": "#/definitions/Options"
+            },
+            "readonly": {
+              "type": "boolean"
+            },
+            "refresh": {
+              "type": "boolean"
+            },
+            "showCodeGroup": {
+              "type": "boolean"
+            },
+            "sortable": {
+              "type": "boolean"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "label-element",
+                "alert",
+                "info",
+                "warning",
+                "error",
+                "success",
+                "neutral",
+                "input",
+                "date",
+                "date-time",
+                "select",
+                "textarea",
+                "radio",
+                "checkbox",
+                "switch",
+                "anchor",
+                "editor",
+                "time-picker",
+                "threshold-input",
+                "input-compare"
+              ],
+              "type": "string"
+            },
+            "validation": {
+              "$ref": "#/definitions/Validation"
+            },
+            "watcher": {
+              "$ref": "#/definitions/Watchers"
+            },
+            "width": {
+              "type": "string"
+            }
+          },
+          "required": ["type", "label"],
+          "type": "object"
         },
         "if": {
           "$ref": "#/definitions/IfType"
@@ -109,6 +264,9 @@
     "ArrayObject": {
       "additionalProperties": false,
       "properties": {
+        "buttonClass": {
+          "type": "string"
+        },
         "customClass": {
           "type": "string"
         },
@@ -144,6 +302,66 @@
         },
         "type": {
           "const": "array-object-form",
+          "type": "string"
+        },
+        "validation": {
+          "$ref": "#/definitions/Validation"
+        },
+        "watcher": {
+          "$ref": "#/definitions/Watchers"
+        }
+      },
+      "required": ["elements", "label", "schema", "type"],
+      "type": "object"
+    },
+    "ArrayOfArrayObject": {
+      "additionalProperties": false,
+      "properties": {
+        "butttonClass": {
+          "type": "string"
+        },
+        "customClass": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "disable": {
+          "type": ["boolean", "string"]
+        },
+        "elements": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/BaseElement"
+              },
+              {
+                "$ref": "#/definitions/ArrayObject"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "if": {
+          "$ref": "#/definitions/IfType"
+        },
+        "init": {
+          "$ref": "#/definitions/Init"
+        },
+        "label": {
+          "type": "string"
+        },
+        "loader": {
+          "$ref": "#/definitions/LoaderType"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "type": {
+          "const": "array-of-array-object",
           "type": "string"
         },
         "validation": {
@@ -296,6 +514,9 @@
           "$ref": "#/definitions/ArrayItem"
         },
         {
+          "$ref": "#/definitions/ArrayOfArrayObject"
+        },
+        {
           "$ref": "#/definitions/ObjectItem"
         },
         {
@@ -365,7 +586,7 @@
           "$ref": "#/definitions/Watchers"
         }
       },
-      "required": ["hasCopy", "label", "schema", "type"],
+      "required": ["label", "schema", "type"],
       "type": "object"
     },
     "FormType": {
@@ -554,6 +775,9 @@
     "Label": {
       "additionalProperties": false,
       "properties": {
+        "box": {
+          "type": "boolean"
+        },
         "customClass": {
           "type": "string"
         },
@@ -562,6 +786,9 @@
         },
         "disable": {
           "type": ["boolean", "string"]
+        },
+        "hasIcon": {
+          "type": "boolean"
         },
         "if": {
           "$ref": "#/definitions/IfType"
@@ -582,7 +809,7 @@
           "type": "string"
         },
         "type": {
-          "enum": ["label-element", "alert", "info", "warning", "error", "success"],
+          "enum": ["label-element", "alert", "info", "warning", "error", "success", "neutral"],
           "type": "string"
         },
         "validation": {
@@ -701,6 +928,9 @@
     "ObjectItem": {
       "additionalProperties": false,
       "properties": {
+        "buttonClass": {
+          "type": "string"
+        },
         "customClass": {
           "type": "string"
         },
@@ -1200,6 +1430,9 @@
         },
         "schema": {
           "type": "string"
+        },
+        "sortable": {
+          "type": "boolean"
         },
         "subtitle": {
           "type": "string"
