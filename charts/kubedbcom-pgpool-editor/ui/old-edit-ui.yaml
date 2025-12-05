@@ -65,31 +65,23 @@ step:
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComPgpoolAutoscaler/properties/spec/properties/compute/properties/pgpool
             elements:
-              - type: switch
+              - type: select
                 label: Trigger
-                fullwidth: true
                 init:
                   type: func
                   value: setTrigger|autoscalingKubedbComPgpoolAutoscaler/spec/compute/pgpool/trigger
-                schema: temp/properties/compute/properties/pgpool/properties/trigger
-                watcher:
-                  func: onTriggerChange|compute/pgpool
-                  paths:
-                    - temp/properties/compute/properties/pgpool/properties/trigger
-              - type: label-element
-                label: Pod lifetime threshold
-                subtitle: Specifies the duration a pod can exist before being considered for scaling decisions, ensuring resource optimization and workload stability
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComPgpoolAutoscaler/properties/spec/properties/compute/properties/pgpool/properties/trigger
               - type: input
-                label: Pod LifeTime Threshold (e.g., 10m 30s)
+                label: Pod LifeTime Threshold
                 schema: schema/properties/resources/properties/autoscalingKubedbComPgpoolAutoscaler/properties/spec/properties/compute/properties/pgpool/properties/podLifeTimeThreshold
-                customClass: width-300
               - type: threshold-input
                 label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComPgpoolAutoscaler/properties/spec/properties/compute/properties/pgpool/properties/resourceDiffPercentage
-                customClass: width-300
-              - type: label-element
-                label: Resource Configuration
-                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
@@ -159,17 +151,10 @@ step:
                           schema: schema/properties/resources/properties/autoscalingKubedbComPgpoolAutoscaler/properties/spec/properties/compute/properties/pgpool/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
-                loader: setControlledResources|compute/pgpool
+                loader: setControlledResources|pgpool
                 multiple: true
                 schema: schema/properties/resources/properties/autoscalingKubedbComPgpoolAutoscaler/properties/spec/properties/compute/properties/pgpool/properties/controlledResources
-              - type: select
-                label: Container Controlled Values
-                options:
-                  - text: Requests And Limits
-                    value: RequestsAndLimits
-                  - text: Requests Only
-                    value: RequestsOnly
-                schema: schema/properties/resources/properties/autoscalingKubedbComPgpoolAutoscaler/properties/spec/properties/compute/properties/pgpool/properties/containerControlledValues
+
           - type: block-layout
             label: Node Topology
             if:
@@ -178,9 +163,6 @@ step:
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComPgpoolAutoscaler/properties/spec/properties/compute/properties/nodeTopology
             elements:
-              - type: label-element
-                label: Node Topology Configuration
-                subtitle: Configure node topology constraints to control where your database pods are scheduled based on node labels
               - type: select
                 label: Select Node Topology
                 loader: fetchNodeTopology
@@ -208,7 +190,6 @@ step:
             elements:
               - type: time-picker
                 label: Timeout
-                subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30s, 1m (1 minute) or 2h (2 hours).
                 schema: schema/properties/resources/properties/autoscalingKubedbComPgpoolAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
               - type: radio
                 label: Apply
@@ -244,15 +225,12 @@ step:
         paths:
           - temp/properties/enableMonitoring
     - type: block-layout
-      label: Monitoring Configuration
+      label: Backup form 
       showLabels: false
       if:
         type: function
         name: showMonitoringSection
       elements:
-        - type: label-element
-          label: Monitoring Method Selection
-          subtitle: Choose the monitoring approach that best fits your infrastructure. Prometheus Operator provides automated ServiceMonitor creation, while custom options give you more control.
         - type: radio
           label: Select a Monitoring Method
           schema: schema/properties/resources/properties/kubedbComPgpool/properties/spec/properties/monitor/properties/agent
@@ -264,7 +242,7 @@ step:
           - text: Custom ServiceMonitor
             value: prometheus.io
             description: Injects the metric exporter sidecar and let you customize ServiceMonitor
-          - text: Custom Scraper
+          - text: Custom Scrapper
             value: prometheus.io/builtin
             description: Inject metric exporter sidecar and add Prometheus annotations to the stats Service
           init:
@@ -281,12 +259,9 @@ step:
             type: function
             name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComPgpool/spec/monitor/agent
           elements:
-            - type: label-element
-              label: Scraping Interval
-              subtitle: Define how frequently Prometheus should scrape metrics from your database
-            - type: input
-              label: Scraping Interval
-              schema: schema/properties/resources/properties/kubedbComPgpool/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval 
+            - label: Scrapping Interval
+              schema: schema/properties/resources/properties/kubedbComPgpool/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+              type: input 
         - type: block-layout
           label: Service Monitor
           showLabels: true
