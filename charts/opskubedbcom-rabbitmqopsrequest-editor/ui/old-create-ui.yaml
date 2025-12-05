@@ -97,9 +97,8 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
-          - type: select-compare
+          - type: select
             label: Target Version
-            header: Version
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -112,25 +111,15 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: horizontal-layout
-            elements:
-              - type: input-compare
-                label: Node
-                header: Node
-                subtitle: Define the total number of nodes for the database. Increasing nodes improves fault tolerance and load distribution, while reducing nodes conserves resources
-                if:
-                  type: function
-                  name: ifDbTypeEqualsTo|Combined|horizontalScaling
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/replicas
-                schema: schema/properties/spec/properties/horizontalScaling/properties/node
-              - type: info
-                hasIcon: true
-                label: Each node represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
-                if:
-                  type: function
-                  name: ifDbTypeEqualsTo|Combined|horizontalScaling
+          - type: input-compare
+            label: Node
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|Combined|horizontalScaling
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/replicas
+            schema: schema/properties/spec/properties/horizontalScaling/properties/node
 # vertical Scale
       - type: block-layout
         if:
@@ -139,11 +128,10 @@ step:
         elements:
           - type: block-layout
             label: Node
-            showLabels: false
+            showLabels: true
             elements:
               - type: machine-compare
                 label: Resources
-                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                 loader: getMachines
                 init:
                   type: func
@@ -153,47 +141,30 @@ step:
                   paths:
                     - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+              - type: select
+                label: Node Selection Policy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
               - type: block-layout
-                label: Node Selection
+                label: Topology
                 showLabels: true
                 elements:
-                  - type: horizontal-layout
-                    elements:
-                    - type: block-layout
-                      showLabels: false
-                      hideBorder: true
-                      elements:
-                        - type: label-element
-                          label: Node Selection Policy
-                          subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
-                        - type: select
-                          label: Node Selection Policy
-                          schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
-                          options:
-                            - text: LabelSelector
-                              value: LabelSelector
-                            - text: Taint
-                              value: Taint
-                    - type: info
-                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
-                      customClass: mt-20
-                  - type: label-element
-                    label: Topology
-                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-                  - type: horizontal-layout
-                    elements:
-                      - type: input
-                        label: Key
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired
-                        schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
-                      - type: input
-                        label: Value
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired
-                        schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/value
+                  - type: input
+                    label: Key
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired
+                    schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
+                  - type: input
+                    label: Value
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired
+                    schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/value
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form
@@ -201,12 +172,12 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|VolumeExpansion
         elements:
-          - type: horizontal-layout
+          - type: block-layout
+            label: Node
+            showLabels: true
             elements:
               - type: input-compare
-                header: Storage Size
                 label: Storage Size
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/storage/resources/requests/storage
@@ -214,31 +185,16 @@ step:
                   type: custom
                   name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
                 schema: schema/properties/spec/properties/volumeExpansion/properties/node
-              - type: info
-                hasIcon: true
-                label: Storage expansion allows you to increase your database's disk space without downtime (Online mode) or with brief downtime (Offline mode).
-          - type: horizontal-layout
-            elements:
-              - type: block-layout
-                showLabels: false
-                elements:
-                  - type: label-element
-                    label: Mode (Required)
-                    subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose offline Mode if you can afford a brief downntime for added reliability during the volume expansion.
-                  - type: select
-                    label: Mode
-                    options:
-                      - text: Offline
-                        value: Offline
-                      - text: Online
-                        value: Online
-                    validation:
-                      type: required
-                    schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-              - type: block-layout
-                showLabels: true
-                hideBorder: true
-                elements: []
+          - type: select
+            label: Mode
+            options:
+              - text: Offline
+                value: Offline
+              - text: Online
+                value: Online
+            validation:
+              type: required
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
@@ -248,12 +204,11 @@ step:
         elements:
           - type: block-layout
             label: Configuration
-            showLabels: false
             elements:
               - type: radio
                 label: Reconfigure Type
                 options:
-                - text: New Config Secret
+                - text: Select New Config Secret
                   value: selectNewConfigSecret
                 - text: Apply Config
                   value: applyConfig
@@ -267,63 +222,35 @@ step:
                   type: required
                 schema: temp/properties/reconfigurationType
               - type: block-layout
-                label: Config Secret
-                showLabels: true
+                label: Configuration config secret
+                showLabels: false
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                   type: function
                 elements:
-                  - type: label-element
-                    label: Select a configuration secret from the available list to update your database settings
-                    customClass: mb-10
-                  - type: select
-                    addNewButton:
-                      label: Create Secret
-                      target: _blank
-                      url:
-                        function: createSecretUrl
-                    label: Config Secret
-                    if:
-                      name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-                      type: function
-                    loader:
-                      name: getConfigSecrets
-                      watchPaths:
-                        - schema/properties/metadata/properties/namespace
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/configSecret/name
-                    refresh: true
-                    validation:
-                      type: required
-                    schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                  - type: label-element
-                    label: Selected Config Secret
-                    loader: getSelectedConfigSecret
-                    if:
-                      name: isConfigSelected
-                      type: function
-                    watcher:
-                      func: getSelectedConfigSecret
-                      paths:
-                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                  - type: editor
-                    label: Value
-                    readonly: true
-                    hasCopy: false
-                    if:
-                      name: isConfigSelected
-                      type: function
-                    loader:
-                      name: getSelectedConfigSecretValue
-                      watchPaths:
-                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                    validation:
-                      type: required
-                    schema: temp/properties/configArray/items/properties/value
+                - type: select
+                  addNewButton:
+                    label: Create Secret
+                    target: _blank
+                    url:
+                      function: createSecretUrl
+                  label: Config Secret
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                    type: function
+                  loader:
+                    name: getConfigSecrets
+                    watchPaths:
+                      - schema/properties/metadata/properties/namespace
+                  init:
+                    type: func
+                    value: setValueFromDbDetails|/spec/configSecret/name
+                  refresh: true
+                  validation:
+                    type: required
+                  schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
               - type: array-object-form
                 label: Apply Config
-                buttonClass: is-light is-outlined
                 if:
                   name: ifReconfigurationTypeEqualsTo|applyConfig
                   type: function
@@ -349,7 +276,6 @@ step:
               - type: switch
                 schema:  schema/properties/spec/properties/configuration/properties/removeCustomConfig
                 label: Remove CustomConfig
-                fullwidth: true
                 if:
                   name: returnFalse
                   type: function
@@ -378,14 +304,12 @@ step:
             schema: temp/properties/tlsOperation
           - type: switch
             label: remove
-            fullwidth: true
             if:
               name: returnFalse
               type: function
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
             label: rotateCertificates
-            fullwidth: true
             schema: schema/properties/spec/properties/tls/properties/rotateCertificates
             if:
               name: returnFalse
@@ -464,7 +388,6 @@ step:
                 elements:
                   - type: array-item-form
                     label: Organizations
-                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/organizations
                     element:
                       type: input
@@ -472,7 +395,6 @@ step:
                       schema: items
                   - type: array-item-form
                     label: Countries
-                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/countries
                     element:
                       type: input
@@ -480,7 +402,6 @@ step:
                       schema: items
                   - type: array-item-form
                     label: Organizational Units
-                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/organizationalUnits
                     element:
                       type: input
@@ -488,7 +409,6 @@ step:
                       schema: items
                   - type: array-item-form
                     label: Provinces
-                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/provinces
                     element:
                       type: input
@@ -496,7 +416,6 @@ step:
                       schema: items
               - type: array-item-form
                 label: DNS Names
-                buttonClass: is-light is-outlined
                 schema: schema/items/properties/dnsNames
                 element:
                   type: input
@@ -504,28 +423,23 @@ step:
                   schema: items
               - type: array-item-form
                 label: IP Addresses
-                buttonClass: is-light is-outlined
                 schema: schema/items/properties/ipAddresses
                 element:
                   type: input
                   label: IP Address
                   schema: items
 # common
-      - type: block-layout
-        label: OpsRequest Options
-        showLabels: true
-        elements:
-          - type: time-picker
-            label: Timeout
-            schema: 'schema/properties/spec/properties/timeout'
-          - type: radio
-            label: apply
-            schema: 'schema/properties/spec/properties/apply'
-            init:
-              type: func
-              value: setApplyToIfReady
-            options:
-              - text: IfReady (OpsRequest will be applied if database is ready)
-                value: IfReady
-              - text: Always (OpsRequest will always be applied)
-                value: Always
+      - type: time-picker
+        label: Timeout
+        schema: 'schema/properties/spec/properties/timeout'
+      - type: radio
+        label: apply
+        schema: 'schema/properties/spec/properties/apply'
+        init:
+          type: func
+          value: setApplyToIfReady
+        options:
+          - text: IfReady (OpsRequest will be applied if database is ready)
+            value: IfReady
+          - text: Always (OpsRequest will always be applied)
+            value: Always

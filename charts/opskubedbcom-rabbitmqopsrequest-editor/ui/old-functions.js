@@ -809,7 +809,6 @@ export const useFunc = (model) => {
     return machine === 'custom'
   }
 
-  let secretArray = []
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -835,7 +834,6 @@ export const useFunc = (model) => {
       item.value = name
       return true
     })
-    secretArray = secrets
     return filteredSecrets
   }
 
@@ -1258,63 +1256,6 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  function isConfigSelected() {
-    const selectedSecret = getValue(model, '/spec/configuration/configSecret/name')
-    return !!selectedSecret
-  }
-
-  function getSelectedConfigSecret() {
-    const selectedSecret = getValue(model, '/spec/configuration/configSecret/name')
-    // watchDependency(`model#/spec/configuration/configSecret/name`)
-    return `You have selected ${selectedSecret} secret` || 'No secret selected'
-  }
-
-  function objectToYaml(obj, indent = 0) {
-    if (obj === null || obj === undefined) return 'null'
-    if (typeof obj !== 'object') return JSON.stringify(obj)
-
-    const spaces = '  '.repeat(indent)
-
-    if (Array.isArray(obj)) {
-      return obj
-        .map((item) => `${spaces}- ${objectToYaml(item, indent + 1).trimStart()}`)
-        .join('\n')
-    }
-
-    return Object.keys(obj)
-      .map((key) => {
-        const value = obj[key]
-        const keyLine = `${spaces}${key}:`
-
-        if (value === null || value === undefined) {
-          return `${keyLine} null`
-        }
-
-        if (typeof value === 'object') {
-          const nested = objectToYaml(value, indent + 1)
-          return `${keyLine}\n${nested}`
-        }
-
-        if (typeof value === 'string') {
-          return `${keyLine} "${value}"`
-        }
-
-        return `${keyLine} ${value}`
-      })
-      .join('\n')
-  }
-
-  function getSelectedConfigSecretValue() {
-    const selectedSecret = getValue(model, '/spec/configuration/configSecret/name')
-    let data
-    secretArray.forEach((item) => {
-      if (item.value === selectedSecret) {
-        data = objectToYaml(item.data).trim() || 'No Data Found'
-      }
-    })
-    return data || 'No Data Found'
-  }
-
   return {
     fetchAliasOptions,
     validateNewCertificates,
@@ -1372,8 +1313,5 @@ export const useFunc = (model) => {
     onMachineChange,
     isMachineCustom,
     checkVolume,
-    isConfigSelected,
-    getSelectedConfigSecret,
-    getSelectedConfigSecretValue,
   }
 }
