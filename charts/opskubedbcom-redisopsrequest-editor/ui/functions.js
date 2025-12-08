@@ -817,6 +817,7 @@ export const useFunc = (model) => {
   }
 
   // for config secret
+  let secretArray = []
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -833,6 +834,7 @@ export const useFunc = (model) => {
     )
 
     const secrets = (resp && resp.data && resp.data.items) || []
+    secretArray = secrets
 
     const filteredSecrets = secrets
 
@@ -856,6 +858,65 @@ export const useFunc = (model) => {
       const editedDomain = domain.replace('kubedb', 'console')
       return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/secrets/create`
     }
+  }
+
+  function isConfigSelected() {
+    const secretName = getValue(model, '/spec/configuration/configSecret/name')
+    return !!secretName
+  }
+
+  function getSelectedConfigSecret() {
+    const path = `/spec/configuration/configSecret/name`
+    const selectedSecret = getValue(model, path)
+    // watchDependency(`model#${path}`)
+    return `You have selected ${selectedSecret} secret` || 'No secret selected'
+  }
+
+  function objectToYaml(obj, indent = 0) {
+    if (obj === null || obj === undefined) return 'null'
+    if (typeof obj !== 'object') return JSON.stringify(obj)
+
+    const spaces = '  '.repeat(indent)
+
+    if (Array.isArray(obj)) {
+      return obj
+        .map((item) => `${spaces}- ${objectToYaml(item, indent + 1).trimStart()}`)
+        .join('\n')
+    }
+
+    return Object.keys(obj)
+      .map((key) => {
+        const value = obj[key]
+        const keyLine = `${spaces}${key}:`
+
+        if (value === null || value === undefined) {
+          return `${keyLine} null`
+        }
+
+        if (typeof value === 'object') {
+          const nested = objectToYaml(value, indent + 1)
+          return `${keyLine}\n${nested}`
+        }
+
+        if (typeof value === 'string') {
+          return `${keyLine} "${value}"`
+        }
+
+        return `${keyLine} ${value}`
+      })
+      .join('\n')
+  }
+
+  function getSelectedConfigSecretValue() {
+    const path = `/spec/configuration/configSecret/name`
+    const selectedSecret = getValue(model, path)
+    let data
+    secretArray.forEach((item) => {
+      if (item.value === selectedSecret) {
+        data = objectToYaml(item.data).trim() || 'No Data Found'
+      }
+    })
+    return data || 'No Data Found'
   }
 
   function isEqualToValueFromType(value) {
@@ -1281,6 +1342,9 @@ export const useFunc = (model) => {
     ifDbTypeEqualsTo,
     getConfigSecrets,
     createSecretUrl,
+    isConfigSelected,
+    getSelectedConfigSecret,
+    getSelectedConfigSecretValue,
     isEqualToValueFromType,
     getNamespacedResourceList,
     getResourceList,

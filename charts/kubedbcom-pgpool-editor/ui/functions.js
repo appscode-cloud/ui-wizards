@@ -15,16 +15,10 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-standalone-min', '')
-  setDiscriminatorValue('/allowedMachine-standalone-max', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
-  setDiscriminatorValue('/allowedMachine-shard-min', '')
-  setDiscriminatorValue('/allowedMachine-shard-max', '')
-  setDiscriminatorValue('/allowedMachine-configServer-min', '')
-  setDiscriminatorValue('/allowedMachine-configServer-max', '')
-  setDiscriminatorValue('/allowedMachine-mongos-min', '')
-  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  setDiscriminatorValue('/allowedMachine-pgpool-min', '')
+  setDiscriminatorValue('/allowedMachine-pgpool-max', '')
+  setDiscriminatorValue('/allowedMachine-min', '')
+  setDiscriminatorValue('/allowedMachine-max', '')
 
   let autoscaleType = ''
   let dbDetails = {}
@@ -258,6 +252,17 @@ export const useFunc = (model) => {
     return 'On'
   }
 
+  function onTriggerChange(path) {
+    const value = getValue(discriminator, `/temp/${path}/trigger`)
+    const modelPath = `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/${path}/trigger`
+    
+    commit('wizard/model$update', {
+      path: modelPath,
+      value: value === 'On' ? 'On' : 'Off',
+      force: true,
+    })
+  }
+
   function setApplyToIfReady() {
     return 'IfReady'
   }
@@ -282,21 +287,31 @@ export const useFunc = (model) => {
     }
   }
 
-  function setAllowedMachine(minmax) {
+  function setAllowedMachine(type, minmax) {
     const annotations =
       getValue(model, '/resources/autoscalingKubedbComPgpoolAutoscaler/metadata/annotations') || {}
     const instance = annotations['kubernetes.io/instance-type']
-    const mx = instance?.includes(',') ? instance.split(',')[1] : ''
-    const mn = instance?.includes(',') ? instance.split(',')[0] : ''
-
+    
+    // For pgpool, the instance format is stored as: "min,max" or as a JSON object like {"pgpool": "min,max"}
+    let instanceValue = instance
+    try {
+      const parsed = JSON.parse(instance)
+      instanceValue = parsed[type]
+    } catch (e) {
+      // If not JSON, use as-is
+    }
+    
+    const mx = instanceValue?.includes(',') ? instanceValue.split(',')[1] : ''
+    const mn = instanceValue?.includes(',') ? instanceValue.split(',')[0] : ''
+    console.log('values', mn, mx)
     if (minmax === 'min') return mn
     else return mx
   }
 
-  async function getMachines(minmax) {
+  async function getMachines(type, minmax) {
     // watchDependency('discriminator#/topologyMachines')
     const depends = minmax === 'min' ? 'max' : 'min'
-    const dependantPath = `/allowedMachine-${depends}`
+    const dependantPath = `/allowedMachine-${type}-${depends}`
 
     // watchDependency(`discriminator#${dependantPath}`)
     const dependantMachine = getValue(discriminator, dependantPath)
@@ -335,10 +350,21 @@ export const useFunc = (model) => {
     const annotations = getValue(model, annoPath) || {}
     const instance = annotations['kubernetes.io/instance-type']
 
-    const minMachine = getValue(discriminator, '/allowedMachine-min')
-    const maxMachine = getValue(discriminator, '/allowedMachine-max')
+    const minMachine = getValue(discriminator, `/allowedMachine-${type}-min`)
+    const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
     const minMaxMachine = `${minMachine},${maxMachine}`
-    annotations['kubernetes.io/instance-type'] = minMaxMachine
+    
+    // Store as JSON object like MongoDB: {"pgpool": "min,max"}
+    let parsedInstance = {}
+    try {
+      if (instance) parsedInstance = JSON.parse(instance)
+    } catch (e) {
+      // If not JSON, treat as pgpool value
+      parsedInstance = {}
+    }
+    
+    parsedInstance[type] = minMaxMachine
+    annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
 
     const machines = getValue(discriminator, `/topologyMachines`) || []
     const minMachineObj = machines.find((item) => item.topologyValue === minMachine)
@@ -347,7 +373,7 @@ export const useFunc = (model) => {
     const maxMachineAllocatable = maxMachineObj?.allocatable
     const allowedPath = `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/compute/${type}`
 
-    if (minMachine && maxMachine && instance !== minMaxMachine) {
+    if (minMachine && maxMachine) {
       commit('wizard/model$update', {
         path: `${allowedPath}/maxAllowed`,
         value: maxMachineAllocatable,

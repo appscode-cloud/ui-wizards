@@ -677,6 +677,8 @@ export const useFunc = (model) => {
   }
 
   // for config secret
+  let secretArray = []
+  
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -702,8 +704,65 @@ export const useFunc = (model) => {
       item.value = name
       return true
     })
+    
+    secretArray = filteredSecrets
     return filteredSecrets
   }
+
+  function objectToYaml(obj, indent = 0) {
+    if (obj === null || obj === undefined) return 'null'
+    if (typeof obj !== 'object') return JSON.stringify(obj)
+
+    const spaces = '  '.repeat(indent)
+
+    if (Array.isArray(obj)) {
+      return obj
+        .map((item) => `${spaces}- ${objectToYaml(item, indent + 1).trimStart()}`)
+        .join('\n')
+    }
+
+    return Object.keys(obj)
+      .map((key) => {
+        const value = obj[key]
+        const keyLine = `${spaces}${key}:`
+
+        if (value === null || value === undefined) {
+          return `${keyLine} null`
+        }
+
+        if (typeof value === 'object') {
+          const nested = objectToYaml(value, indent + 1)
+          return `${keyLine}\n${nested}`
+        }
+
+        if (typeof value === 'string') {
+          return `${keyLine} "${value}"`
+        }
+
+        return `${keyLine} ${value}`
+      })
+      .join('\n')
+  }
+
+  function getSelectedConfigSecret() {
+    const path = '/spec/configuration/configSecret/name'
+    const selectedSecret = getValue(model, path)
+    // watchDependency(`model#${path}`)
+    return `You have selected ${selectedSecret} secret` || 'No secret selected'
+  }
+
+  function getSelectedConfigSecretValue() {
+    const path = '/spec/configuration/configSecret/name'
+    const selectedSecret = getValue(model, path)
+    let data
+    secretArray.forEach((item) => {
+      if (item.value === selectedSecret) {
+        data = objectToYaml(item.data).trim() || 'No Data Found'
+      }
+    })
+    return data || 'No Data Found'
+  }
+
 
   function createSecretUrl() {
     const user = storeGet('/route/params/user')
@@ -1133,6 +1192,9 @@ export const useFunc = (model) => {
     showConfigureOpsrequestLabel,
     showAndInitOpsRequestType,
     getConfigSecrets,
+    objectToYaml,
+    getSelectedConfigSecret,
+    getSelectedConfigSecretValue,
     createSecretUrl,
     isEqualToValueFromType,
     disableOpsRequest,

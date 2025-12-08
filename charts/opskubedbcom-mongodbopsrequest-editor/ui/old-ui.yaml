@@ -1,0 +1,1003 @@
+type: multi-step-form
+step:
+  - type: single-step-form
+    loader: getDbDetails
+    elements:
+# common
+      - type: input
+        label: op_req_name
+        if:
+          type: function
+          name: showAndInitName        
+        validation:
+          type: required
+        schema: schema/properties/metadata/properties/name
+      - type: select
+        label: Namespace
+        if:
+          type: function
+          name: showAndInitNamespace
+        init:
+          type: func
+          value: initNamespace
+        disable: isNamespaceDisabled
+        loader: getNamespaces
+        validation:
+          type: required
+        hasGroup: isRancherManaged
+        schema: schema/properties/metadata/properties/namespace
+        watcher:
+          func: onNamespaceChange
+          paths:
+            - schema/properties/metadata/properties/namespace
+      - type: select
+        label: Database Ref
+        if:
+          type: function
+          name: showAndInitDatabaseRef
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
+        init:
+          type: func
+          value: initDatabaseRef
+        validation:
+          type: required
+        disable: isDatabaseRefDisabled
+        refresh: true
+        watcher:
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
+          func: onDbChange
+        schema: schema/properties/spec/properties/databaseRef/properties/name
+      - type: label-element
+        label: config_ops_request
+        if:
+          type: function
+          name: showConfigureOpsrequestLabel
+      - type: radio
+        label: Type of Ops Request
+        if:
+          type: function
+          name: showAndInitOpsRequestType
+        options:
+          - description: Update your database to any version
+            text: Update Version
+            value: UpdateVersion
+          - description: Scale up or down pod count
+            text: Horizontal Scaling
+            value: HorizontalScaling
+          - description: Manage your CPU resources
+            text: Vertical Scaling
+            value: VerticalScaling
+          - description: Manage your database size
+            text: Volume Expansion
+            value: VolumeExpansion
+          - description: Restart your database
+            text: Restart
+            value: Restart
+          - description: Reconfigure your database
+            text: Reconfigure
+            value: Reconfigure
+          - description: Reconfigure your database tls configuration
+            text: Reconfigure TLS
+            value: ReconfigureTLS
+        init:
+          type: func
+          value: getRequestTypeFromRoute
+        disable: isDbDetailsLoading
+        watcher:
+          func: onRequestTypeChange
+          paths:
+            - schema/properties/spec/properties/type
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
+# UpdateVersion
+      - type: block-layout
+        showLabels: false
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|UpdateVersion
+        elements:
+          - type: select
+            label: Target Version
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/version
+            loader: getDbVersions
+            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+# Horizontal Scale
+      - type: block-layout
+        label: Horizontal Scaling Form
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|HorizontalScaling
+        elements:
+          - type: input-compare
+            label: Replicas
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|replicaSet|horizontalScaling
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/replicas
+            schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
+          - type: block-layout
+            label: 'Sharded horizontal scaling'
+            if:
+              name: ifDbTypeEqualsTo|sharded|horizontalScaling
+              type: function
+            elements:
+              - type: block-layout
+                label: Config Server horizontal Scaling
+                showLabels: false
+                elements:
+                  - type: label-element
+                    label: Config Server
+                  - type: input-compare
+                    label: Replicas
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
+              - type: block-layout
+                label: Mongo Horizontal Scaling
+                showLabels: false
+                elements:
+                  - type: label-element
+                    label: Mongos
+                  - type: input-compare
+                    label: Replicas
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
+              - type: block-layout
+                label: Shard horizontal Scaling
+                showLabels: false
+                elements:
+                  - type: label-element
+                    label: Shard
+                  - type: input-compare
+                    label: Replicas
+                    init: 
+                      type: func
+                      value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
+                  - type: input
+                    label: Shards
+                    init: 
+                      type: func
+                      value: setValueFromDbDetails|/spec/shardTopology/shard/shards
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
+# vertical Scale           
+      - type: block-layout
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VerticalScaling
+        elements:
+          - type: block-layout
+            label: Standalone Vertical Scaling
+            showLabels: false
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|standalone|verticalScaling
+            elements:
+              - type: machine-compare
+                label: Resources
+                loader: getMachines
+                init:
+                  type: func
+                  value: setMachine|standalone                
+                watcher:
+                  func: onMachineChange|standalone|/spec/podTemplate/spec/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
+              - type: select
+                label: Node Selection Policy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/nodeSelectionPolicy
+              - type: block-layout
+                label: Topology
+                showLabels: true
+                elements:
+                  - type: input
+                    label: Key
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired|standalone
+                    schema: temp/topologyKey-standalone
+                  - type: input
+                    label: Value
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired|standalone
+                    schema: temp/topologyValue-standalone
+          - type: block-layout
+            label: ReplicaSet Vertical Scaling
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|replicaSet|verticalScaling
+            elements:
+              - type: machine-compare
+                label: Resources
+                init:
+                  type: func
+                  value: setMachine|replicaSet
+                loader: getMachines
+                watcher:
+                  func: onMachineChange|replicaSet|/spec/podTemplate/spec/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
+              - type: select
+                label: Node Selection Policy
+                schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/nodeSelectionPolicy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+              - type: block-layout
+                label: Topology
+                showLabels: true
+                elements:
+                  - type: input
+                    label: Key
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired|replicaSet
+                    schema: temp/topologyKey-replicaSet
+                  - type: input
+                    label: Value
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired|replicaSet
+                    schema: temp/topologyValue-replicaSet
+          - type: block-layout
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|sharded|verticalScaling
+            label: Sharded Vertical Scaling
+            showLabels: false
+            elements:
+              - type: block-layout
+                label: Config Server Vertical Scaling
+                showLabels: true
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    loader: getMachines
+                    init:
+                      type: func
+                      value: setMachine|configServer
+                    watcher:
+                      func: onMachineChange|configServer|/spec/shardTopology/configServer/podTemplate/spec/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
+                    schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
+                  - type: select
+                    label: Node Selection Policy
+                    options:
+                      - text: LabelSelector
+                        value: LabelSelector
+                      - text: Taint
+                        value: Taint
+                    schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/nodeSelectionPolicy
+                  - type: block-layout
+                    label: Topology
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|configServer
+                        schema: temp/topologyKey-configServer
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|configServer
+                        schema: temp/topologyValue-configServer
+              - type: block-layout
+                label: Mongos Vertical Scaling
+                showLabels: true
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    loader: getMachines
+                    init:
+                      type: func
+                      value: setMachine|mongos
+                    watcher:
+                      func: onMachineChange|mongos|/spec/shardTopology/mongos/podTemplate/spec/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
+                    schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
+                  - type: select
+                    label: Node Selection Policy
+                    options:
+                      - text: LabelSelector
+                        value: LabelSelector
+                      - text: Taint
+                        value: Taint
+                    schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/nodeSelectionPolicy
+                  - type: block-layout
+                    label: Topology
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|mongos
+                        schema: temp/topologyKey-mongos
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|mongos
+                        schema: temp/topologyValue-mongos
+              - type: block-layout
+                label: Shard Vertical Scaling
+                showLabels: true
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    loader: getMachines
+                    init:
+                      type: func
+                      value: setMachine|shard
+                    watcher:
+                      func: onMachineChange|shard|/spec/shardTopology/shard/podTemplate/spec/resources
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
+                    schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
+                  - type: select
+                    label: Node Selection Policy
+                    options:
+                      - text: LabelSelector
+                        value: LabelSelector
+                      - text: Taint
+                        value: Taint
+                    schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/nodeSelectionPolicy
+                  - type: block-layout
+                    label: Topology
+                    showLabels: true
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|shard
+                        schema: temp/topologyKey-shard
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|shard
+                        schema: temp/topologyValue-shard
+# Volume Expansion
+      - type: block-layout
+        label: Volume Expansion Form
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VolumeExpansion
+        elements:
+          - type: input-compare
+            label: Standalone
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|standalone|volumeExpansion
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+            validation:
+              type: custom
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
+            schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
+          - type: input-compare
+            label: ReplicaSet
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+            validation:
+              type: custom
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
+            schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
+          - type: block-layout
+            label: Sharded volume expansion
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|sharded|volumeExpansion
+            elements:
+              - type: input-compare
+                label: Config Server
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
+                schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
+              - type: input-compare
+                label: Shard
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
+                schema: schema/properties/spec/properties/volumeExpansion/properties/shard
+          - type: select
+            label: Mode
+            options:
+              - text: Offline
+                value: Offline
+              - text: Online
+                value: Online
+            validation:
+              type: required
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+# Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        elements:
+          - type: block-layout
+            label: Standalone
+            if:
+              name: ifDbTypeEqualsTo|standalone|configuration
+              type: function
+            elements:
+              - type: radio
+                label: Reconfigure Type
+                options: 
+                - text: Select New Config Secret
+                  value: selectNewConfigSecret
+                - text: Apply Config
+                  value: applyConfig
+                - text: Remove
+                  value: remove                  
+                watcher:
+                  func: onReconfigurationTypeChange|standalone
+                  paths:
+                    - temp/properties/reconfigurationType
+                validation: 
+                  type: required
+                schema: temp/properties/reconfigurationType
+              - type: block-layout
+                label: Standalone config secret
+                showLabels: false
+                if:
+                  name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  type: function
+                elements:
+                - type: select
+                  addNewButton:
+                    label: Create Secret
+                    target: _blank
+                    url:
+                      function: createSecretUrl
+                  label: Config Secret
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                    type: function
+                  loader:
+                    name: getConfigSecrets
+                    watchPaths:
+                      - schema/properties/metadata/properties/namespace
+                  init: 
+                    type: func
+                    value: setValueFromDbDetails|/spec/configSecret/name
+                  refresh: true
+                  validation: 
+                    type: required
+                  schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+              - type: object-item
+                label: Apply Config
+                if:
+                  name: ifReconfigurationTypeEqualsTo|applyConfig
+                  type: function
+                validation: 
+                  type: required
+                watcher:
+                  func: onApplyconfigChange|standalone
+                  paths:
+                    - temp/properties/standalone/applyConfig
+                schema: temp/properties/standalone/applyConfig
+                # elements:
+                #   - type: input 
+                #     label: key
+                #     validation: 
+                #       type: required
+                #     schema: temp/properties/configArray/items/properties/key
+                #   - type: textarea
+                #     label: value
+                #     validation: 
+                #       type: required
+                #     schema:  temp/properties/configArray/items/properties/value
+              - type: switch
+                schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
+                label: Remove CustomConfig
+                if:
+                  name: returnFalse
+                  type: function
+          - type: block-layout
+            label: Replica Set
+            if:
+              name: ifDbTypeEqualsTo|replicaSet|configuration
+              type: function
+            elements:
+              - type: radio
+                label: Reconfigure Type
+                validation: 
+                  type: required
+                options:
+                - text: Select New Config Secret
+                  value: selectNewConfigSecret
+                - text: Apply Config
+                  value: applyConfig
+                - text: Remove
+                  value: remove
+                schema: temp/properties/reconfigurationType
+                watcher:
+                  func: onReconfigurationTypeChange|replicaSet
+                  paths:
+                    - temp/properties/reconfigurationType
+              - type: block-layout
+                label: Replica Set config secret
+                if:
+                  name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  type: function
+                elements:
+                  - type: select
+                    addNewButton:
+                      label: Create Secret
+                      target: _blank
+                      url:
+                        function: createSecretUrl
+                    schema: schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
+                    validation: 
+                      type: required
+                    refresh: true
+                    label: Config Secret
+                    loader:
+                      name: getConfigSecrets
+                      watchPaths:
+                        - schema/properties/metadata/properties/namespace
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/configSecret/name
+              - type: array-object-form
+                label: ApplyConfig
+                schema: temp/properties/replicaSet/applyConfig
+                validation: 
+                  type: required
+                if:
+                  name: ifReconfigurationTypeEqualsTo|applyConfig
+                  type: function
+                watcher:
+                  func: onApplyconfigChange|replicaSet
+                  paths:
+                    - temp/properties/replicaSet/applyConfig
+                elements:
+                  - type: input
+                    label: key
+                    validation: 
+                      type: required
+                    schema: temp/properties/configArray/items/properties/key
+                  - type: textarea
+                    label: value
+                    validation: 
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
+              - type: switch
+                schema: schema/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
+                label: Remove CustomConfig
+                if:
+                  name: returnFalse
+                  type: function
+          - type: block-layout
+            elements:
+            - type: block-layout
+              label: Config Server
+              showLabels: true
+              elements:
+                - type: radio
+                  label: Reconfigure Type
+                  validation:
+                    type: required
+                  schema: temp/properties/reconfigurationType-configServer
+                  options:
+                    - text: Select New Config Secret
+                      value: selectNewConfigSecret
+                    - text: Apply Config
+                      value: applyConfig
+                    - text: Remove
+                      value: remove
+                  watcher:
+                    func: onReconfigurationTypeChange|configServer|true
+                    paths:
+                      - temp/properties/reconfigurationType-configServer
+                - type: block-layout
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|configServer|true
+                    type: function
+                  elements:
+                    - type: select
+                      label: Config Secret
+                      schema: schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
+                      validation:
+                        type: required
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
+                      loader:
+                        name: getConfigSecrets
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                      refresh: true
+                      addNewButton:
+                        label: Create Config
+                        target: _blank
+                        url:
+                          function: createSecretUrl
+                - type: array-object-form
+                  label: Apply Config
+                  schema: temp/properties/configServer/applyConfig
+                  validation:
+                    type: required
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|applyConfig|configServer|true
+                    type: function
+                  watcher:
+                    func: onApplyconfigChange|configServer
+                    paths:
+                      - temp/properties/configServer/applyConfig
+                  elements:
+                    - type: input
+                      label: Key
+                      schema: temp/properties/configArray/items/properties/key
+                      validation:
+                        type: required
+                    - type: textarea
+                      label: Value
+                      schema: temp/properties/configArray/items/properties/value
+                      validation:
+                        type: required
+
+                - type: switch
+                  label: Remove CustomConfig
+                  schema: schema/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
+                  if:
+                    name: returnFalse
+                    type: function
+            - type: block-layout
+              label: Mongos
+              showLabels: true
+              elements:
+                - type: radio
+                  label: Reconfigure Type
+                  validation:
+                    type: required
+                  schema: temp/properties/reconfigurationType-mongos
+                  options:
+                    - text: Select New Config Secret
+                      value: selectNewConfigSecret
+                    - text: Apply Config
+                      value: applyConfig
+                    - text: Remove
+                      value: remove
+                  watcher:
+                    func: onReconfigurationTypeChange|mongos|true
+                    paths:
+                      - temp/properties/reconfigurationType-mongos
+                - type: block-layout
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|mongos|true
+                    type: function
+                  elements:
+                    - type: select
+                      label: Config Secret
+                      schema: schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
+                      validation:
+                        type: required
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
+                      loader:
+                        name: getConfigSecrets
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                      refresh: true
+                      addNewButton:
+                        label: Create Config
+                        target: _blank
+                        url:
+                          function: createSecretUrl
+                - type: array-object-form
+                  label: Apply Config
+                  schema: temp/properties/mongos/applyConfig
+                  validation:
+                    type: required
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|applyConfig|mongos|true
+                    type: function
+                  watcher:
+                    func: onApplyconfigChange|mongos
+                    paths:
+                      - temp/properties/mongos/applyConfig
+                  elements:
+                    - type: input
+                      label: Key
+                      schema: temp/properties/configArray/items/properties/key
+                      validation:
+                        type: required
+                    - type: textarea
+                      label: Value
+                      schema: temp/properties/configArray/items/properties/value
+                      validation:
+                        type: required
+                - type: switch
+                  label: Remove CustomConfig
+                  schema: schema/properties/spec/properties/configuration/properties/mongos/properties/removeCustomConfig
+                  if:
+                    name: returnFalse
+                    type: function
+            - type: block-layout
+              label: Shard
+              showLabels: true
+              elements:
+                - type: radio
+                  label: Reconfigure Type
+                  validation:
+                    type: required
+                  schema: temp/properties/reconfigurationType-shard
+                  options:
+                    - text: Select New Config Secret
+                      value: selectNewConfigSecret
+                    - text: Apply Config
+                      value: applyConfig
+                    - text: Remove
+                      value: remove
+                  watcher:
+                    func: onReconfigurationTypeChange|shard|true
+                    paths:
+                      - temp/properties/reconfigurationType-shard
+
+                - type: block-layout
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|shard|true
+                    type: function
+                  elements:
+                    - type: select
+                      label: Config Secret
+                      schema: schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
+                      validation:
+                        type: required
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
+                      loader:
+                        name: getConfigSecrets
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                      refresh: true
+                      addNewButton:
+                        label: Create Config
+                        target: _blank
+                        url:
+                          function: createSecretUrl
+                - type: array-object-form
+                  label: Apply Config
+                  schema: temp/properties/shard/applyConfig
+                  validation:
+                    type: required
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|applyConfig|shard|true
+                    type: function
+                  watcher:
+                    func: onApplyconfigChange|shard
+                    paths:
+                      - temp/properties/shard/applyConfig
+                  elements:
+                    - type: input
+                      label: Key
+                      schema: temp/properties/configArray/items/properties/key
+                      validation:
+                        type: required
+                    - type: textarea
+                      label: Value
+                      schema: temp/properties/configArray/items/properties/value
+                      validation:
+                        type: required
+                - type: switch
+                  label: Remove CustomConfig
+                  schema: schema/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
+                  if:
+                    name: returnFalse
+                    type: function
+            label: Sharded Reconfigure form
+            if:
+              name: ifDbTypeEqualsTo|sharded|configuration
+              type: function
+# Reconfigure TLS
+      - type: block-layout
+        label: TLS
+        if:
+          name: ifRequestTypeEqualsTo|ReconfigureTLS
+          type: function
+        elements:
+          - type: radio
+            label: TLS Operation
+            schema: temp/properties/tlsOperation
+            if:
+              name: hasTlsField
+              type: function
+            options:
+              - text: Update
+                value: update
+              - text: Rotate
+                value: rotate
+              - text: Remove
+                value: remove
+            init:
+              type: func
+              value: initTlsOperation
+            watcher:
+              func: onTlsOperationChange
+              paths:
+                - temp/properties/tlsOperation
+          - type: switch
+            label: remove
+            if:
+              name: returnFalse
+              type: function
+            schema: schema/properties/spec/properties/tls/properties/remove
+          - type: switch
+            label: rotateCertificates
+            schema: schema/properties/spec/properties/tls/properties/rotateCertificates
+            if:
+              name: returnFalse
+              type: function
+          - type: block-layout
+            label: Issuer Reference
+            showLabels: true
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            elements:
+              - type: input
+                label: API Group
+                init:
+                  type: func
+                  value: initIssuerRefApiGroup
+                watcher:
+                  func: initIssuerRefApiGroup
+                  paths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                disable: true
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+              - type: select
+                label: Kind
+                options:
+                  - text: Issuer
+                    value: Issuer
+                  - text: ClusterIssuer
+                    value: ClusterIssuer
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/kind
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+              - type: select
+                label: Name
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                    - schema/properties/metadata/properties/namespace
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/name
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
+          - type: block-layout
+            label: Certificates
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+            elements:
+              - type: select
+                label: Alias
+                loader: fetchAliasOptions
+                disable: disableAlias
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/alias
+              - type: input
+                label: Secret Name
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/secretName
+              - type: input
+                label: Duration
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/duration
+              - type: input
+                label: Renew Before
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/renewBefore
+              - type: block-layout
+                label: Subject
+                showLabels: true
+                elements:
+                  - type: array-object-form
+                    label: Organizations
+                    schema: schema/items/properties/subject/properties/organizations
+                    elements:
+                      - type: input
+                        label: organization
+                        schema: schema/items/properties/subject/properties/organizations/items
+                  - type: array-object-form
+                    label: countries
+                    schema: schema/items/properties/subject/properties/countries
+                    elements:
+                      - type: input
+                        label: country
+                        schema: schema/items/properties/subject/properties/countries/items
+                  - type: array-object-form
+                    label: organizational_units
+                    schema: schema/items/properties/subject/properties/organizationalUnits
+                    elements:
+                      - type: input
+                        label: organizational_unit
+                        schema: schema/items/properties/subject/properties/organizationalUnits/items
+                  - type: array-object-form
+                    label: provinces
+                    schema: schema/items/properties/subject/properties/provinces
+                    elements:
+                      - type: input
+                        label: province
+                        schema: schema/items/properties/subject/properties/provinces/items
+              - type: array-object-form
+                label: DNS Names
+                schema: schema/items/properties/dnsNames
+                elements:
+                  - type: input
+                    label: dns name
+                    schema: schema/items/properties/dnsNames/items
+              - type: array-object-form
+                label: IP Addresses
+                schema: schema/items/properties/ipAddresses
+                elements:
+                  - type: input
+                    label: ip Address
+                    schema: schema/items/properties/ipAddresses/items
+# common
+      - type: time-picker
+        label: Timeout
+        schema: 'schema/properties/spec/properties/timeout'
+      - type: radio
+        label: apply
+        schema: 'schema/properties/spec/properties/apply'
+        init:
+          type: func
+          value: setApplyToIfReady
+        options:
+          - text: IfReady (OpsRequest will be applied if database is ready)
+            value: IfReady
+          - text: Always (OpsRequest will always be applied)
+            value: Always

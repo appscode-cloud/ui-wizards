@@ -2919,8 +2919,18 @@ export const useFunc = (model) => {
 
   function setTrigger(path) {
     let value = getValue(model, `/resources/${path}`)
-    if (value) return value
-    return 'On'
+    return value === 'On'
+  }
+
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
   }
 
   function setApplyToIfReady() {
@@ -3088,7 +3098,7 @@ export const useFunc = (model) => {
     const machine = parsedInstance[type] || ''
     const mx = machine?.includes(',') ? machine.split(',')[1] : ''
     const mn = machine?.includes(',') ? machine.split(',')[0] : ''
-
+    console.log('values', mn, mx)
     if (minmax === 'min') return mn
     else return mx
   }
@@ -3188,6 +3198,11 @@ export const useFunc = (model) => {
     }
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
     getOpsRequestUrl,
     handleUnit,
@@ -3200,6 +3215,7 @@ export const useFunc = (model) => {
     isNodeTopologySelected,
     setControlledResources,
     setTrigger,
+    onTriggerChange,
     setApplyToIfReady,
     showOpsRequestOptions,
     setInitSchedule,
@@ -3366,5 +3382,6 @@ export const useFunc = (model) => {
     setValueFrom,
     isInputTypeValueFrom,
     getSecretKeys,
+    setValueFromDbDetails,
   }
 }

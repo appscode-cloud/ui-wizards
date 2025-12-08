@@ -5,10 +5,14 @@ step:
     # label: Basic Information
     loader: init
     elements:
+      - type: label-element
+        label: ''
+        subtitle: Select a backup configuration and choose which backup sessions to view or manage
       - type: select
-        label: Select Backup
+        label: Backup Configuration
+        subtitle: Select the backup configuration that contains the sessions you want to view
         schema: temp/properties/backup
-        validation: 
+        validation:
           type: required
         if:
           type: function
@@ -20,10 +24,11 @@ step:
             - temp/properties/backup
       - type: select
         multiple: true
-        label: Select Sessions
+        label: Backup Sessions
+        subtitle: Select one or more backup sessions to view their details and status
         schema: temp/properties/selectedSessions
         refresh: true
-        validation: 
+        validation:
           type: required
         if:
           type: function

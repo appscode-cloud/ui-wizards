@@ -161,12 +161,12 @@ export const useFunc = (model) => {
       force: true,
     })
     commit('wizard/model$update', {
-      path: `/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name`,
+      path: `/resources/autoscalingKubedbComSolrAutoscaler/spec/databaseRef/name`,
       value: name,
       force: true,
     })
     commit('wizard/model$update', {
-      path: `/resources/autoscalingKubedbComRedisAutoscaler/metadata/labels`,
+      path: `/resources/autoscalingKubedbComSolrAutoscaler/metadata/labels`,
       value: dbDetails.metadata.labels,
       force: true,
     })
@@ -893,6 +893,17 @@ export const useFunc = (model) => {
     return !isTopology()
   }
 
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComSolrAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
+  }
+
   return {
     isConsole,
     isKubedb,
@@ -944,5 +955,6 @@ export const useFunc = (model) => {
     isRancherManaged,
     isTopology,
     isNotTopology,
+    onTriggerChange,
   }
 }

@@ -1,0 +1,282 @@
+type: multi-step-form
+step:
+  - type: single-step-form
+    loader: getDbDetails
+    elements:
+# common
+      - type: input
+        label: op_req_name
+        if:
+          type: function
+          name: showAndInitName
+        validation:
+          type: required
+        schema: schema/properties/metadata/properties/name
+      - type: select
+        label: Namespace
+        if:
+          type: function
+          name: showAndInitNamespace
+        init:
+          type: func
+          value: initNamespace
+        disable: isNamespaceDisabled
+        loader: getNamespaces
+        validation:
+          type: required
+        hasGroup: isRancherManaged
+        schema: schema/properties/metadata/properties/namespace
+      - type: select
+        label: Database Ref
+        if:
+          type: function
+          name: showAndInitDatabaseRef
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
+        init:
+          type: func
+          value: initDatabaseRef
+        validation:
+          type: required
+        disable: isDatabaseRefDisabled
+        refresh: true
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
+        schema: schema/properties/spec/properties/databaseRef/properties/name
+      - type: label-element
+        label: config_ops_request
+        if:
+          type: function
+          name: showConfigureOpsrequestLabel
+      - type: radio
+        label: Type of Ops Request
+        if:
+          type: function
+          name: showAndInitOpsRequestType
+        options:
+          - description: Update your database to any version
+            text: Update Version
+            value: UpdateVersion
+          - description: Scale up or down pod count
+            text: Horizontal Scaling
+            value: HorizontalScaling
+          - description: Manage your CPU resources
+            text: Vertical Scaling
+            value: VerticalScaling
+          - description: Manage your database size
+            text: Volume Expansion
+            value: VolumeExpansion
+          - description: Restart your database
+            text: Restart
+            value: Restart
+          - description: Reconfigure your database
+            text: Reconfigure
+            value: Reconfigure
+          - description: Reconfigure your database tls configuration
+            text: Reconfigure TLS
+            value: ReconfigureTLS
+        init:
+          type: func
+          value: getRequestTypeFromRoute
+        disable: isDbDetailsLoading
+        watcher:
+          func: isDbDetailsLoading
+          paths:
+            - temp/dbDetails
+            - schema/properties/spec/properties/databaseRef/properties/name
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
+# UpdateVersion
+      - type: block-layout
+        showLabels: false
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|UpdateVersion
+        elements:
+          - type: select
+            label: Target Version
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/version
+            loader: getDbVersions
+            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+# Horizontal Scale
+      - type: block-layout
+        label: Horizontal Scaling Form
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|HorizontalScaling
+        elements:
+          - type: input-compare
+            label: Replicas
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/replicas
+            schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
+# vertical Scale
+      - type: block-layout
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VerticalScaling
+        elements:
+          - type: machine-compare
+            label: Resources
+            loader: getMachines
+            init:
+              type: func
+              value: setMachine
+            watcher:
+              func: onMachineChange|node|/spec/podTemplate/spec/containers
+              paths:
+                - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+            schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+          - type: select
+            label: Node Selection Policy
+            options:
+              - text: LabelSelector
+                value: LabelSelector
+              - text: Taint
+                value: Taint
+            schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+          - type: block-layout
+            label: Topology
+            showLabels: true
+            elements:
+              - type: input
+                label: Key
+                validation:
+                  type: custom
+                  name: isVerticalScaleTopologyRequired
+                schema: temp/topologyKey
+              - type: input
+                label: Value
+                validation:
+                  type: custom
+                  name: isVerticalScaleTopologyRequired
+                schema: temp/topologyValue
+# Volume Expansion
+      - type: block-layout
+        label: Volume Expansion Form
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VolumeExpansion
+        elements:
+          - type: input-compare
+            label: Node
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+            validation:
+              type: custom
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+            schema: schema/properties/spec/properties/volumeExpansion/properties/node
+          - type: select
+            label: Mode
+            options:
+              - text: Offline
+                value: Offline
+              - text: Online
+                value: Online
+            validation:
+              type: required
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+# Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        elements:
+          - type: radio
+            label: Reconfigure Type
+            options:
+            - text: Select New Config Secret
+              value: selectNewConfigSecret
+            - text: Apply Config
+              value: applyConfig
+            - text: Remove
+              value: remove
+            watcher:
+              func: onReconfigurationTypeChange
+              paths:
+                - temp/properties/reconfigurationType
+            validation:
+              type: required
+            schema: temp/properties/reconfigurationType
+          - type: block-layout
+            label: Configuration config secret
+            showLabels: false
+            if:
+              name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+              type: function
+            elements:
+            - type: select
+              addNewButton:
+                label: Create Secret
+                target: _blank
+                url:
+                  function: createSecretUrl
+              label: Config Secret
+              if:
+                name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                type: function
+              loader:
+                name: getConfigSecrets
+                watchPaths:
+                  - schema/properties/metadata/properties/namespace
+              init:
+                type: func
+                value: setValueFromDbDetails|/spec/configSecret/name
+              refresh: true
+              validation:
+                type: required
+              schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+          - type: array-object-form
+            label: Apply Config
+            if:
+              name: ifReconfigurationTypeEqualsTo|applyConfig
+              type: function
+            validation:
+              type: required
+            watcher:
+              func: onApplyconfigChange
+              paths:
+                - temp/properties/applyConfig
+            schema: temp/properties/applyConfig
+            elements:
+              - type: input
+                label: key
+                validation:
+                  type: required
+                schema: temp/properties/configArray/items/properties/key
+              - type: editor
+                hasCopy: false
+                label: value
+                validation:
+                  type: required
+                schema:  temp/properties/configArray/items/properties/value
+          - type: switch
+            schema:  schema/properties/spec/properties/configuration/properties/removeCustomConfig
+            label: Remove CustomConfig
+            if:
+              name: returnFalse
+              type: function
+# common
+      - type: time-picker
+        label: Timeout
+        schema: 'schema/properties/spec/properties/timeout'
+      - type: radio
+        label: apply
+        schema: 'schema/properties/spec/properties/apply'
+        init:
+          type: func
+          value: setApplyToIfReady
+        options:
+          - text: IfReady (OpsRequest will be applied if database is ready)
+            value: IfReady
+          - text: Always (OpsRequest will always be applied)
+            value: Always
