@@ -774,8 +774,21 @@ export const useFunc = (model) => {
 
   function setTrigger(path) {
     let value = getValue(model, `/resources/${path}`)
-    if (value) return value
-    return 'On'
+    console.log('setTrigger', value, path)
+
+    return value === 'On'
+  }
+
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    console.log('trigger', trigger, type)
+    const commitPath = `/resources/autoscalingKubedbComPostgresAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
   }
 
   function hasAnnotations() {
@@ -1421,6 +1434,7 @@ export const useFunc = (model) => {
     initMetadata,
     fetchTopologyMachines,
     setTrigger,
+    onTriggerChange,
     hasAnnotations,
     setAllowedMachine,
     getMachines,
