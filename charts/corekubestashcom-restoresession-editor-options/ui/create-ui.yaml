@@ -25,17 +25,22 @@ step:
       showLabels: false
       loader: initMetadata
       elements:
+        - type: label-element
+          label: Restore Configuration
+          subtitle: Configure the backup repository and snapshot to restore your data from
         - type: select
           label: Repository
+          subtitle: Select the repository where your backup snapshots are stored
           disableUnselect: true
           schema: temp/properties/repository
           refresh: true
-          validation: 
+          validation:
             type: required
           loader: getRepositories
         - type: select
           disableUnselect: true
           label: Snapshot
+          subtitle: Choose a point-in-time backup snapshot to restore from
           refresh: true
           schema: schema/properties/spec/properties/dataSource/properties/snapshot
           loader:
@@ -47,13 +52,17 @@ step:
             paths:
               - temp/properties/repository
         - type: select
-          label: Name
+          label: Addon Name
+          subtitle: Select the restore addon to use
           refresh: true
           schema: schema/properties/spec/properties/addon/properties/name
           if:
             type: function
             name: isConsole
           loader: getAddons
+        - type: label-element
+          label: Advanced Options
+          subtitle: Specify additional restore parameters to customize the restoration behavior
         - type: textarea
           label: Additional Parameters
           schema: temp/properties/params
@@ -64,17 +73,22 @@ step:
     - type: block-layout
       showLabels: true
       hideBlock: true
-      label: Target
+      label: Restore Target
       if:
         type: function
         name: isConsole
       elements:
+      - type: label-element
+        label: Target Resource Configuration
+        subtitle: Specify the Kubernetes resource where you want to restore the data
       - type: select
         label: Api Group
+        subtitle: Select the API group of the target resource (e.g., apps, kubedb.com)
         schema: schema/properties/spec/properties/target/properties/apiGroup
         loader: getApiGroup
       - type: select
         label: Kind
+        subtitle: Select the resource type (e.g., Deployment, StatefulSet, MongoDB, PostgreSQL)
         schema: schema/properties/spec/properties/target/properties/kind
         loader: getKinds
         watcher:
@@ -84,6 +98,7 @@ step:
             - schema/properties/spec/properties/target/properties/apiGroup
       - type: select
         label: Namespace
+        subtitle: Select the namespace where the target resource exists
         schema: schema/properties/spec/properties/target/properties/namespace
         loader: fetchNamespaces
         hasGroup: isRancherManaged
@@ -92,7 +107,8 @@ step:
           paths:
             - temp/properties/nameSpaceApi
       - type: select
-        label: Name
+        label: Resource Name
+        subtitle: Select the specific resource to restore to
         schema: schema/properties/spec/properties/target/properties/name
         loader:
           name: getTargetName

@@ -1,0 +1,476 @@
+type: multi-step-form
+step:
+  - type: single-step-form
+    loader: getDbDetails
+    elements:
+# common
+      - type: input
+        label: op_req_name
+        if:
+          type: function
+          name: showAndInitName
+        validation:
+          type: required
+        schema: schema/properties/metadata/properties/name
+      - type: select
+        label: Namespace
+        if:
+          type: function
+          name: showAndInitNamespace
+        init:
+          type: func
+          value: initNamespace
+        disable: isNamespaceDisabled
+        loader: getNamespaces
+        validation:
+          type: required
+        hasGroup: isRancherManaged
+        schema: schema/properties/metadata/properties/namespace
+      - type: select
+        label: Database Ref
+        if:
+          type: function
+          name: showAndInitDatabaseRef
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
+        init:
+          type: func
+          value: initDatabaseRef
+        validation:
+          type: required
+        disable: isDatabaseRefDisabled
+        refresh: true
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
+        schema: schema/properties/spec/properties/databaseRef/properties/name
+      - type: label-element
+        label: config_ops_request
+        if:
+          type: function
+          name: showConfigureOpsrequestLabel
+      - type: radio
+        label: Type of Ops Request
+        if:
+          type: function
+          name: showAndInitOpsRequestType
+        options:
+          - description: Update your database to any version
+            text: Update Version
+            value: UpdateVersion
+          - description: Scale up or down pod count
+            text: Horizontal Scaling
+            value: HorizontalScaling
+          - description: Manage your CPU resources
+            text: Vertical Scaling
+            value: VerticalScaling
+          - description: Restart your database
+            text: Restart
+            value: Restart
+          - description: Reconfigure your database
+            text: Reconfigure
+            value: Reconfigure
+          - description: Reconfigure your database tls configuration
+            text: Reconfigure TLS
+            value: ReconfigureTLS
+        init:
+          type: func
+          value: getRequestTypeFromRoute
+        disable: isDbDetailsLoading
+        watcher:
+          func: onRequestTypeChange
+          paths:
+            - schema/properties/spec/properties/type
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
+# UpdateVersion
+      - type: block-layout
+        showLabels: false
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|UpdateVersion
+        elements:
+          - type: select-compare
+            label: Target Version
+            header: Version
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/version
+            loader: getDbVersions
+            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+# Horizontal Scale
+      - type: block-layout
+        label: Horizontal Scaling Form
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|HorizontalScaling
+        elements:
+          - type: horizontal-layout
+            elements:
+              - type: input-compare
+                header: Node
+                label: Node
+                subtitle: Define the total number of PgPool nodes for your database
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/node
+              - type: info
+                hasIcon: true
+                label: Each PgPool node acts as a connection pooler and load balancer. For example, setting this to 3 creates three PgPool instances for better availability and load distribution.
+# vertical Scale
+      - type: block-layout
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VerticalScaling
+        elements:
+          - type: block-layout
+            label: Node Vertical Scaling
+            showLabels: false
+            elements:
+              - type: machine-compare
+                label: Resources
+                loader: getMachines
+                init:
+                  type: func
+                  value: setMachine
+                watcher:
+                  func: onMachineChange|node|/spec/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+              - type: block-layout
+                label: Node Selection
+                showLabels: true
+                elements:
+                  - type: horizontal-layout
+                    elements:
+                    - type: block-layout
+                      showLabels: false
+                      hideBorder: true
+                      elements:
+                        - type: label-element
+                          label: Node Selection Policy
+                          subtitle: Control where your workloads runs by defining label selectors or taints. Choose how Kubernetes places your pods across different nodes.
+                        - type: select
+                          label: Node Selection Policy
+                          schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+                          options:
+                            - text: LabelSelector
+                              value: LabelSelector
+                            - text: Taint
+                              value: Taint
+                    - type: info
+                      label: "<b> Label Selector:</b> Specify key-value pairs to match node labels, ensuring pods are scheduled on nodes with specific characteristics (e.g., disktype=ssd). <br/><b> Taints:</b> Define tolerations to allow pods to run on nodes with matching taints, useful for dedicated or specialized nodes."
+                      customClass: mt-20
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences using key-value pairs to control pod distribution across zones or regions
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired
+                        schema: temp/topologyKey
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired
+                        schema: temp/topologyValue
+# Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        elements:
+          - type: block-layout
+            label: Configuration
+            elements:
+              - type: radio
+                label: Reconfigure Type
+                options:
+                - text: New Config Secret
+                  value: selectNewConfigSecret
+                - text: Apply Config
+                  value: applyConfig
+                - text: Remove testing
+                  value: remove
+                watcher:
+                  func: onReconfigurationTypeChange
+                  paths:
+                    - temp/properties/reconfigurationType
+                validation:
+                  type: required
+                schema: temp/properties/reconfigurationType
+              - type: block-layout
+                label: Config Secret
+                showLabels: true
+                if:
+                  name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  type: function
+                elements:
+                  - type: label-element
+                    label: Select a configuration secret from the available list to update your database settings
+                    customClass: mb-10
+                  - type: select
+                    addNewButton:
+                      label: Create Secret
+                      target: _blank
+                      url:
+                        function: createSecretUrl
+                    schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                    validation:
+                      type: required
+                    refresh: true
+                    label: Config Secret
+                    loader:
+                      name: getConfigSecrets
+                      watchPaths:
+                        - schema/properties/metadata/properties/namespace
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/configSecret/name
+                  - type: label-element
+                    label: Selected Config Secret
+                    loader: getSelectedConfigSecret
+                    if:
+                      name: isConfigSelected
+                      type: function
+                    watcher:
+                      func: getSelectedConfigSecret
+                      paths:
+                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                  - type: editor
+                    label: Value
+                    readonly: true
+                    hasCopy: false
+                    if:
+                      name: isConfigSelected
+                      type: function
+                    loader:
+                      name: getSelectedConfigSecretValue
+                      watchPaths:
+                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
+              - type: array-object-form
+                label: ApplyConfig
+                buttonClass: is-light is-outlined
+                schema: temp/properties/applyConfig
+                validation:
+                  type: required
+                if:
+                  name: ifReconfigurationTypeEqualsTo|applyConfig
+                  type: function
+                watcher:
+                  func: onApplyconfigChange
+                  paths:
+                    - temp/properties/applyConfig
+                elements:
+                  - type: label-element
+                    label: New Apply Config
+                    subtitle: Define custom configurations for your database using key-value pairs. Each entry allows you to specify configuration parameters.
+                    customClass: mb-10
+                  - type: input
+                    label: key
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/key
+                  - type: editor
+                    label: value
+                    hasCopy: false
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
+              - type: switch
+                schema: schema/properties/spec/properties/configuration/properties/removeCustomConfig
+                label: Remove CustomConfig
+                fullwidth: true
+                if:
+                  name: returnFalse
+                  type: function
+# Reconfigure TLS
+      - type: block-layout
+        label: TLS
+        if:
+          name: ifRequestTypeEqualsTo|ReconfigureTLS
+          type: function
+        elements:
+          - type: radio
+            label: TLS Operation
+            if:
+              name: hasTlsField
+              type: function
+            options:
+              - text: Update
+                value: update
+              - text: Rotate
+                value: rotate
+              - text: Remove
+                value: remove
+            init:
+              type: func
+              value: initTlsOperation
+            schema: temp/properties/tlsOperation
+          - type: switch
+            label: remove
+            fullwidth: true
+            if:
+              name: returnFalse
+              type: function
+            schema: schema/properties/spec/properties/tls/properties/remove
+          - type: switch
+            label: rotateCertificates
+            fullwidth: true
+            schema: schema/properties/spec/properties/tls/properties/rotateCertificates
+            if:
+              name: returnFalse
+              type: function
+          - type: block-layout
+            label: Issuer Reference
+            showLabels: true
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            elements:
+              - type: input
+                label: API Group
+                init:
+                  type: func
+                  value: initIssuerRefApiGroup
+                # watcher:
+                #   func: initIssuerRefApiGroup
+                #   paths:
+                #     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                disable: true
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+              - type: select
+                label: Kind
+                options:
+                  - text: Issuer
+                    value: Issuer
+                  - text: ClusterIssuer
+                    value: ClusterIssuer
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/kind
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+              - type: select
+                label: Name
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                    - schema/properties/metadata/properties/namespace
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/name
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
+          - type: block-layout
+            label: Certificates
+            showLabels: true
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+            elements:
+              - type: select
+                label: Alias
+                loader: fetchAliasOptions
+                disable: disableAlias
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/alias
+              - type: input
+                label: Secret Name
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/secretName
+              - type: input
+                label: Duration
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/duration
+              - type: input
+                label: Renew Before
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/renewBefore
+              - type: block-layout
+                label: Subject
+                showLabels: true
+                elements:
+                  - type: array-item-form
+                    label: Organizations
+                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/organizations
+                    element:
+                      type: input
+                      label: Organization
+                      schema: items
+                  - type: array-item-form
+                    label: Countries
+                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/countries
+                    element:
+                      type: input
+                      label: Country
+                      schema: items
+                  - type: array-item-form
+                    label: Organizational Units
+                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/organizationalUnits
+                    element:
+                      type: input
+                      label: Organizational Unit
+                      schema: items
+                  - type: array-item-form
+                    label: Provinces
+                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/provinces
+                    element:
+                      type: input
+                      label: Province
+                      schema: items
+              - type: array-item-form
+                label: DNS Names
+                buttonClass: is-light is-outlined
+                schema: schema/items/properties/dnsNames
+                element:
+                  type: input
+                  label: DNS Name
+                  schema: items
+              - type: array-item-form
+                label: IP Addresses
+                buttonClass: is-light is-outlined
+                schema: schema/items/properties/ipAddresses
+                element:
+                  type: input
+                  label: IP Address
+                  schema: items
+# common
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            subtitle: Specify the maximum time allowed for the operation to complete before it times out
+            schema: 'schema/properties/spec/properties/timeout'
+          - type: radio
+            label: Apply
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always

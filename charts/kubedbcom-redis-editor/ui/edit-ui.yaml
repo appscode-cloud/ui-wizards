@@ -113,6 +113,7 @@ step:
           elements:
             - type: switch
               label: Enable Backup Blueprint
+              fullwidth: true
               schema: temp/properties/blueprintEnabled
               init:
                 type: func
@@ -197,6 +198,33 @@ step:
         loader: fetchTopologyMachines
         elements:
           # standalone mode
+          - type: switch
+            label: Trigger
+            fullwidth: true
+            if:
+              type: function
+              name: dbTypeEqualsTo|standalone
+            init:
+              type: func
+              value: setTrigger|autoscalingKubedbComRedisAutoscaler/spec/compute/standalone/trigger
+            schema: temp/properties/compute/properties/standalone/properties/trigger
+            watcher:
+              func: onTriggerChange|compute/standalone
+              paths:
+                - temp/properties/compute/properties/standalone/properties/trigger
+          - type: label-element
+            label: Pod lifetime threshold
+            subtitle: Specifies the duration a pod can exist before being considered for autoscaling. This helps prevent frequent scaling operations on short-lived pods.
+            if:
+              type: function
+              name: dbTypeEqualsTo|standalone
+          - type: input
+            label: Pod LifeTime Threshold (e.g., 10m 30s)
+            customClass: width-300
+            if:
+              type: function
+              name: dbTypeEqualsTo|standalone
+            schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/standalone/properties/podLifeTimeThreshold
           - type: block-layout
             label: Standalone
             showLabels: true
@@ -205,23 +233,12 @@ step:
               name: dbTypeEqualsTo|standalone
             # schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/standalone
             elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComRedisAutoscaler/spec/compute/standalone/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/standalone/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/standalone/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: Resource Diff Percentage
+                label: ResourceDiff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/standalone/properties/resourceDiffPercentage
+              - type: label-element
+                label: Resource Configuration
+                subtitle: Define minimum and maximum allowed resources for autoscaling. The autoscaler will keep resource allocation within these bounds.
               - type: block-layout
                 showLabels: false
                 elements:
@@ -296,6 +313,33 @@ step:
                 schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/standalone/properties/controlledResources
 
           # cluster mode
+          - type: switch
+            label: Trigger
+            fullwidth: true
+            if:
+              type: function
+              name: dbTypeEqualsTo|cluster
+            init:
+              type: func
+              value: setTrigger|autoscalingKubedbComRedisAutoscaler/spec/compute/cluster/trigger
+            schema: temp/properties/compute/properties/cluster/properties/trigger
+            watcher:
+              func: onTriggerChange|compute/cluster
+              paths:
+                - temp/properties/compute/properties/cluster/properties/trigger
+          - type: label-element
+            label: Pod lifetime threshold
+            subtitle: Specifies the duration a pod can exist before being considered for autoscaling. This helps prevent frequent scaling operations on short-lived pods.
+            if:
+              type: function
+              name: dbTypeEqualsTo|cluster
+          - type: input
+            label: Pod LifeTime Threshold (e.g., 10m 30s)
+            customClass: width-300
+            if:
+              type: function
+              name: dbTypeEqualsTo|cluster
+            schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/cluster/properties/podLifeTimeThreshold
           - type: block-layout
             label: Cluster
             showLabels: true
@@ -304,23 +348,12 @@ step:
               name: dbTypeEqualsTo|cluster
             # schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/cluster
             elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComRedisAutoscaler/spec/compute/cluster/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/cluster/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/cluster/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: Resource Diff Percentage
+                label: ResourceDiff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/cluster/properties/resourceDiffPercentage
+              - type: label-element
+                label: Resource Configuration
+                subtitle: Define minimum and maximum allowed resources for autoscaling. The autoscaler will keep resource allocation within these bounds.
               - type: block-layout
                 showLabels: false
                 elements:
@@ -550,40 +583,51 @@ step:
         - type: block-layout
           showLabels: false
           elements:
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComRedisAutoscaler/spec/storage/redis/trigger
+              schema: temp/properties/storage/properties/redis/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/redis
+                paths:
+                  - temp/properties/storage/properties/redis/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing volumes. Offline Mode requires brief downtime but ensures data integrity during expansion.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled. Online mode allows expansion without downtime, while Offline mode may require a restart.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/storage/properties/redis/properties/expansionMode
             - type: block-layout
               label: Cluster
               showLabels: true
               elements:
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComRedisAutoscaler/spec/storage/redis/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/storage/properties/redis/properties/trigger
-                - type: select
-                  label: Expansion Mode
-                  options:
-                    - text: Online
-                      value: Online
-                    - text: Offline
-                      value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/storage/properties/redis/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage that triggers autoscaling
                   schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/storage/properties/redis/properties/usageThreshold
                 - type: scaling-rules
                   label: Scaling Rules
+                  init:
+                    type: func
+                    value: setValueFromDbDetails|resources/kubedbComRedis/spec/storage/resources/requests/storage
                   schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/storage/properties/redis/properties/scalingRules
                   loader: setValueFromDbDetails|resources/kubedbComRedis/spec/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComRedisAutoscaler/spec/storage/redis/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/storage/properties/redis/properties/scalingRules
+                - type: input
+                  label: Scaling Threshold
+                  schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/storage/properties/redis/properties/scalingThreshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/storage/properties/redis/properties/upperBound
@@ -626,6 +670,7 @@ step:
         value: getOpsRequestUrl|VerticalScaling
     - type: switch
       label: Enable Monitoring
+      fullwidth: true
       schema: temp/properties/enableMonitoring
       init: 
         type: func
@@ -681,6 +726,7 @@ step:
           elements:
           - type: array-object-form
             label: Endpoints
+            buttonClass: is-light is-outlined
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
             elements:
             - type: switch
@@ -716,6 +762,7 @@ step:
         - type: object-item
           schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
           label : Labels
+          buttonClass: is-light is-outlined
           if:
             type: function
             name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComRedis/spec/monitor/agent
@@ -725,6 +772,7 @@ step:
           schema: ''
         - type: switch
           label: Customize Exporter Sidecar
+          fullwidth: true
           schema: temp/properties/customizeExporter
           init: 
             type: static
@@ -760,6 +808,7 @@ step:
               label: Port
             - type: array-item-form
               label: Args
+              buttonClass: is-light is-outlined
               schema: schema/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
               init: 
                 type: static
@@ -767,7 +816,6 @@ step:
               element:
                 type: input
                 label: Args
-                schema: items
                 # isSubsection: true
             - type: block-layout
               label: Metadata
