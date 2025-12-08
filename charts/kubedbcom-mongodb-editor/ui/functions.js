@@ -3098,7 +3098,7 @@ export const useFunc = (model) => {
     const machine = parsedInstance[type] || ''
     const mx = machine?.includes(',') ? machine.split(',')[1] : ''
     const mn = machine?.includes(',') ? machine.split(',')[0] : ''
-
+    console.log('values', mn, mx)
     if (minmax === 'min') return mn
     else return mx
   }
