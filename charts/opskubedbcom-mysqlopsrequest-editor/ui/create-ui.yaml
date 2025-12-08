@@ -100,8 +100,9 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
-          - type: select
+          - type: select-compare
             label: Target Version
+            header: Version
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -114,15 +115,22 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: input-compare
-            label: Replicas
+          - type: horizontal-layout
             if:
               type: function
               name: ifDbTypeEqualsTo|cluster|horizontalScaling
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/member
+            elements:
+              - type: input-compare
+                label: Replicas
+                header: Replica
+                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/member
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
 # vertical Scale
       - type: block-layout
         if:
@@ -135,6 +143,7 @@ step:
             elements:
               - type: machine-compare
                 label: Resources
+                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                 loader: getMachines
                 init:
                   type: func
@@ -144,30 +153,47 @@ step:
                   paths:
                     - schema/properties/spec/properties/verticalScaling/properties/mysql/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/mysql/properties/resources
-              - type: select
-                label: Node Selection Policy
-                options:
-                  - text: LabelSelector
-                    value: LabelSelector
-                  - text: Taint
-                    value: Taint
-                schema: schema/properties/spec/properties/verticalScaling/properties/mysql/properties/nodeSelectionPolicy
               - type: block-layout
-                label: Topology
+                label: Node Selection
                 showLabels: true
                 elements:
-                  - type: input
-                    label: Key
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired
-                    schema: temp/topologyKey
-                  - type: input
-                    label: Value
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired
-                    schema: temp/topologyValue
+                  - type: horizontal-layout
+                    elements:
+                    - type: block-layout
+                      showLabels: true
+                      hideBorder: true
+                      elements:
+                        - type: label-element
+                          label: Node Selection Policy
+                          subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                        - type: select
+                          label: Node Selection Policy
+                          schema: schema/properties/spec/properties/verticalScaling/properties/mysql/properties/nodeSelectionPolicy
+                          options:
+                            - text: LabelSelector
+                              value: LabelSelector
+                            - text: Taint
+                              value: Taint
+                    - type: info
+                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                      customClass: mt-20
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired
+                        schema: temp/topologyKey
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired
+                        schema: temp/topologyValue
           - type: horizontal-layout
             showLabels: true
             label: Exporter
@@ -209,6 +235,8 @@ step:
         elements:
           - type: input-compare
             label: Storage Size
+            header: MySQL
+            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
             init:
               type: func
               value: setValueFromDbDetails|/spec/storage/resources/requests/storage
@@ -216,6 +244,9 @@ step:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/mysql
             schema: schema/properties/spec/properties/volumeExpansion/properties/mysql
+          - type: label-element
+            label: Mode (Required)
+            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose offline Mode if you can afford a brief downntime for added reliability during the volume expansion.
           - type: select
             label: Mode
             options:
@@ -238,75 +269,106 @@ step:
             elements:
               - type: radio
                 label: Reconfigure Type
+                subtitle: Choose the action you'd like to perform. Select a new configuration secret, apply a custom configuration , or remove an existing setup.
+                validation:
+                  type: required
                 options:
-                - text: Select New Config Secret
+                - text: New Config Secret
                   value: selectNewConfigSecret
                 - text: Apply Config
                   value: applyConfig
                 - text: Remove
                   value: remove
+                schema: temp/properties/reconfigurationType
                 watcher:
                   func: onReconfigurationTypeChange
                   paths:
                     - temp/properties/reconfigurationType
-                validation:
-                  type: required
-                schema: temp/properties/reconfigurationType
               - type: block-layout
-                label: Configuration config secret
-                showLabels: false
+                label: Config Secret
+                showLabels: true
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                   type: function
                 elements:
-                - type: select
-                  addNewButton:
-                    label: Create Secret
-                    target: _blank
-                    url:
-                      function: createSecretUrl
-                  label: Config Secret
-                  if:
-                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-                    type: function
-                  loader:
-                    name: getConfigSecrets
-                    watchPaths:
-                      - schema/properties/metadata/properties/namespace
-                  init:
-                    type: func
-                    value: setValueFromDbDetails|/spec/configSecret/name
-                  refresh: true
-                  validation:
-                    type: required
-                  schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                  - type: label-element
+                    label: Select a configuration secret from the available list to update your database settings
+                    customClass: mb-10
+                  - type: select
+                    addNewButton:
+                      label: Create Secret
+                      target: _blank
+                      url:
+                        function: createSecretUrl
+                    schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                    validation:
+                      type: required
+                    refresh: true
+                    label: Config Secret
+                    loader:
+                      name: getConfigSecrets
+                      watchPaths:
+                        - schema/properties/metadata/properties/namespace
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/configSecret/name
+                  - type: label-element
+                    label: Selected Config Secret
+                    loader: getSelectedConfigSecret|mysql
+                    if:
+                      name: isConfigSelected
+                      type: function
+                    watcher:
+                      func: getSelectedConfigSecret|mysql
+                      paths:
+                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                  - type: editor
+                    label: Value
+                    readonly: true
+                    hasCopy: false
+                    if:
+                      name: isConfigSelected
+                      type: function
+                    loader:
+                      name: getSelectedConfigSecretValue|mysql
+                      watchPaths:
+                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
               - type: array-object-form
-                label: Apply Config
+                label: ApplyConfig
+                buttonClass: is-light is-outlined
+                schema: temp/properties/applyConfig
+                validation:
+                  type: required
                 if:
                   name: ifReconfigurationTypeEqualsTo|applyConfig
                   type: function
-                validation:
-                  type: required
                 watcher:
                   func: onApplyconfigChange
                   paths:
                     - temp/properties/applyConfig
-                schema: temp/properties/applyConfig
                 elements:
+                  - type: label-element
+                    label: New Apply Config
+                    subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
+                    customClass: mb-10
                   - type: input
                     label: key
                     validation:
                       type: required
                     schema: temp/properties/configArray/items/properties/key
                   - type: editor
-                    hasCopy: false
                     label: value
+                    hasCopy: false
                     validation:
                       type: required
-                    schema:  temp/properties/configArray/items/properties/value
+                    schema: temp/properties/configArray/items/properties/value
               - type: switch
-                schema:  schema/properties/spec/properties/configuration/properties/removeCustomConfig
+                schema: schema/properties/spec/properties/configuration/properties/removeCustomConfig
                 label: Remove CustomConfig
+                fullwidth: true
                 if:
                   name: returnFalse
                   type: function
@@ -339,12 +401,14 @@ step:
                 - temp/properties/tlsOperation
           - type: switch
             label: remove
+            fullwidth: true
             if:
               name: returnFalse
               type: function
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
             label: rotateCertificates
+            fullwidth: true
             schema: schema/properties/spec/properties/tls/properties/rotateCertificates
             if:
               name: returnFalse
@@ -357,6 +421,7 @@ step:
             elements:
               - type: switch
                 label: Require SSL
+                fullwidth: true
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/tls/requireSSL
@@ -435,58 +500,63 @@ step:
                 elements:
                   - type: array-item-form
                     label: Organizations
+                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/organizations
                     element:
                       type: input
                       label: Organization
-                      schema: items
                   - type: array-item-form
                     label: Countries
+                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/countries
                     element:
                       type: input
                       label: Country
-                      schema: items
                   - type: array-item-form
                     label: Organizational Units
+                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/organizationalUnits
                     element:
                       type: input
                       label: Organizational Unit
-                      schema: items
                   - type: array-item-form
                     label: Provinces
+                    buttonClass: is-light is-outlined
                     schema: schema/items/properties/subject/properties/provinces
                     element:
                       type: input
                       label: Province
-                      schema: items
               - type: array-item-form
                 label: DNS Names
+                buttonClass: is-light is-outlined
                 schema: schema/items/properties/dnsNames
                 element:
                   type: input
                   label: DNS Name
-                  schema: items
               - type: array-item-form
                 label: IP Addresses
+                buttonClass: is-light is-outlined
                 schema: schema/items/properties/ipAddresses
                 element:
                   type: input
                   label: IP Address
-                  schema: items
 # common
-      - type: time-picker
-        label: Timeout
-        schema: 'schema/properties/spec/properties/timeout'
-      - type: radio
-        label: apply
-        schema: 'schema/properties/spec/properties/apply'
-        init:
-          type: func
-          value: setApplyToIfReady
-        options:
-          - text: IfReady (OpsRequest will be applied if database is ready)
-            value: IfReady
-          - text: Always (OpsRequest will always be applied)
-            value: Always
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            schema: 'schema/properties/spec/properties/timeout'
+            subtitle: Specify the maximum time allowed for the operation to complete before it times out
+          - type: radio
+            label: Apply
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always

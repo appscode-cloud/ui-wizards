@@ -100,8 +100,9 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
-          - type: select
+          - type: select-compare
             label: Target Version
+            header: Version
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -114,15 +115,25 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: input-compare
-            label: Replicas
-            if:
-              type: function
-              name: ifDbTypeEqualsTo|replicaSet|horizontalScaling
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
+          - type: horizontal-layout
+            elements:
+              - type: input-compare
+                label: Replicas
+                header: Replica
+                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
+                if:
+                  type: function
+                  name: ifDbTypeEqualsTo|replicaSet|horizontalScaling
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
+                if:
+                  type: function
+                  name: ifDbTypeEqualsTo|replicaSet|horizontalScaling
           - type: block-layout
             label: 'Sharded horizontal scaling'
             if:
@@ -135,39 +146,56 @@ step:
                 elements:
                   - type: label-element
                     label: Config Server
-                  - type: input-compare
-                    label: Replicas
-                    schema: schema/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
+                      - type: info
+                        hasIcon: true
+                        label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
               - type: block-layout
                 label: Mongo Horizontal Scaling
-                showLabels: false
                 elements:
                   - type: label-element
                     label: Mongos
-                  - type: input-compare
-                    label: Replicas
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
-                    schema: schema/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
+                      - type: info
+                        hasIcon: true
+                        label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
               - type: block-layout
                 label: Shard horizontal Scaling
                 showLabels: false
                 elements:
                   - type: label-element
                     label: Shard
-                  - type: input-compare
-                    label: Replicas
-                    init: 
-                      type: func
-                      value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
-                    schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
+                      - type: info
+                        hasIcon: true
+                        label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 4
                   - type: input
                     label: Shards
-                    init: 
+                    init:
                       type: func
                       value: setValueFromDbDetails|/spec/shardTopology/shard/shards
                     schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
@@ -179,46 +207,63 @@ step:
         elements:
           - type: block-layout
             label: Standalone Vertical Scaling
-            showLabels: false
             if:
               type: function
               name: ifDbTypeEqualsTo|standalone|verticalScaling
             elements:
               - type: machine-compare
                 label: Resources
-                loader: getMachines
+                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
+                loader: getMachines|standalone
                 init:
                   type: func
-                  value: setMachine|standalone                
+                  value: setMachine|standalone
                 watcher:
                   func: onMachineChange|standalone|/spec/podTemplate/spec/resources
                   paths:
                     - schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
-              - type: select
-                label: Node Selection Policy
-                options:
-                  - text: LabelSelector
-                    value: LabelSelector
-                  - text: Taint
-                    value: Taint
-                schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/nodeSelectionPolicy
               - type: block-layout
-                label: Topology
+                label: Node Selection 
                 showLabels: true
                 elements:
-                  - type: input
-                    label: Key
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|standalone
-                    schema: temp/topologyKey-standalone
-                  - type: input
-                    label: Value
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|standalone
-                    schema: temp/topologyValue-standalone
+                  - type: horizontal-layout
+                    elements:
+                    - type: block-layout
+                      showLabels: false
+                      hideBorder: true
+                      elements:
+                        - type: label-element
+                          label: Node Selection Policy
+                          subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                        - type: select
+                          label: Node Selection Policy
+                          schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/nodeSelectionPolicy
+                          options:
+                            - text: LabelSelector
+                              value: LabelSelector
+                            - text: Taint
+                              value: Taint
+                    - type: info
+                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                      customClass: mt-20
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|standalone
+                        schema: temp/topologyKey-standalone
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|standalone
+                        schema: temp/topologyValue-standalone
           - type: block-layout
             label: ReplicaSet Vertical Scaling
             if:
@@ -227,39 +272,60 @@ step:
             elements:
               - type: machine-compare
                 label: Resources
+                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
+                loader: getMachines|replicaSet
                 init:
                   type: func
                   value: setMachine|replicaSet
-                loader: getMachines
                 watcher:
                   func: onMachineChange|replicaSet|/spec/podTemplate/spec/resources
                   paths:
                     - schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
-              - type: select
-                label: Node Selection Policy
-                schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/nodeSelectionPolicy
-                options:
-                  - text: LabelSelector
-                    value: LabelSelector
-                  - text: Taint
-                    value: Taint
               - type: block-layout
-                label: Topology
+                label: Node Selection 
                 showLabels: true
                 elements:
-                  - type: input
-                    label: Key
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|replicaSet
-                    schema: temp/topologyKey-replicaSet
-                  - type: input
-                    label: Value
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|replicaSet
-                    schema: temp/topologyValue-replicaSet
+                  - type: horizontal-layout
+                    elements:
+                    - type: block-layout
+                      showLabels: false
+                      hideBorder: true
+                      elements:
+                        - type: label-element
+                          label: Node Selection Policy 
+                          subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                        - type: select
+                          label: Node Selection Policy
+                          schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/nodeSelectionPolicy
+                          options:
+                            - text: LabelSelector
+                              value: LabelSelector
+                            - text: Taint
+                              value: Taint
+                    - type: info
+                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                      customClass: mt-20
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|replicaSet
+                        schema: temp/topologyKey-replicaSet
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|replicaSet
+                        schema: temp/topologyValue-replicaSet
+              - type: label-element
+                label: ''
+                customClass: mb-20
           - type: block-layout
             if:
               type: function
@@ -273,7 +339,8 @@ step:
                 elements:
                   - type: machine-compare
                     label: Resources
-                    loader: getMachines
+                    subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
+                    loader: getMachines|configServer
                     init:
                       type: func
                       value: setMachine|configServer
@@ -282,37 +349,55 @@ step:
                       paths:
                         - schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
-                  - type: select
-                    label: Node Selection Policy
-                    options:
-                      - text: LabelSelector
-                        value: LabelSelector
-                      - text: Taint
-                        value: Taint
-                    schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/nodeSelectionPolicy
                   - type: block-layout
-                    label: Topology
+                    label: Node Selection 
                     showLabels: true
                     elements:
-                      - type: input
-                        label: Key
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|configServer
-                        schema: temp/topologyKey-configServer
-                      - type: input
-                        label: Value
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|configServer
-                        schema: temp/topologyValue-configServer
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|configServer
+                            schema: temp/topologyKey-configServer
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|configServer
+                            schema: temp/topologyValue-configServer
               - type: block-layout
                 label: Mongos Vertical Scaling
                 showLabels: true
                 elements:
                   - type: machine-compare
                     label: Resources
-                    loader: getMachines
+                    subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
+                    loader: getMachines|mongos
                     init:
                       type: func
                       value: setMachine|mongos
@@ -321,37 +406,55 @@ step:
                       paths:
                         - schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
-                  - type: select
-                    label: Node Selection Policy
-                    options:
-                      - text: LabelSelector
-                        value: LabelSelector
-                      - text: Taint
-                        value: Taint
-                    schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/nodeSelectionPolicy
                   - type: block-layout
-                    label: Topology
+                    label: Node Selection 
                     showLabels: true
                     elements:
-                      - type: input
-                        label: Key
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|mongos
-                        schema: temp/topologyKey-mongos
-                      - type: input
-                        label: Value
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|mongos
-                        schema: temp/topologyValue-mongos
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|mongos
+                            schema: temp/topologyKey-mongos
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|mongos
+                            schema: temp/topologyValue-mongos
               - type: block-layout
                 label: Shard Vertical Scaling
                 showLabels: true
                 elements:
                   - type: machine-compare
                     label: Resources
-                    loader: getMachines
+                    subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
+                    loader: getMachines|shard
                     init:
                       type: func
                       value: setMachine|shard
@@ -360,95 +463,150 @@ step:
                       paths:
                         - schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
-                  - type: select
-                    label: Node Selection Policy
-                    options:
-                      - text: LabelSelector
-                        value: LabelSelector
-                      - text: Taint
-                        value: Taint
-                    schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/nodeSelectionPolicy
                   - type: block-layout
-                    label: Topology
+                    label: Node Selection
                     showLabels: true
                     elements:
-                      - type: input
-                        label: Key
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|shard
-                        schema: temp/topologyKey-shard
-                      - type: input
-                        label: Value
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|shard
-                        schema: temp/topologyValue-shard
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|shard
+                            schema: temp/topologyKey-shard
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|shard
+                            schema: temp/topologyValue-shard
 # Volume Expansion
+      
       - type: block-layout
         label: Volume Expansion Form
         if:
           type: function
           name: ifRequestTypeEqualsTo|VolumeExpansion
         elements:
-          - type: input-compare
-            label: Standalone
+          - type: horizontal-layout
             if:
               type: function
               name: ifDbTypeEqualsTo|standalone|volumeExpansion
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-            validation:
-              type: custom
-              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
-            schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
-          - type: input-compare
-            label: ReplicaSet
-            if:
-              type: function
-              name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-            validation:
-              type: custom
-              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
-            schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
+            elements:
+              - type: input-compare
+                header: Standalone
+                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                label: Standalone
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
+                schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
           - type: block-layout
             label: Sharded volume expansion
             if:
               type: function
               name: ifDbTypeEqualsTo|sharded|volumeExpansion
             elements:
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Config Server
+                    label: Config Server
+                    subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
+                  - type: info
+                    hasIcon: true
+                    label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.  
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Shard
+                    label: Shard
+                    subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/shard
+                  - type: info
+                    hasIcon: true
+                    label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
+              - type: horizontal-layout
+                elements:
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                      - type: label-element
+                        label: Mode (Required)
+                        subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose offline Mode if you can afford a brief downntime for added reliability during the volume expansion.
+                      - type: select
+                        label: Mode
+                        options:
+                          - text: Offline
+                            value: Offline
+                          - text: Online
+                            value: Online
+                        validation:
+                          type: required
+                        schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+                  - type: block-layout
+                    showLabels: true
+                    hideBorder: true
+                    elements: []
+          - type: horizontal-layout
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
+            elements:
               - type: input-compare
-                label: Config Server
+                header: Replica Set
+                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                label: ReplicaSet
                 init:
                   type: func
-                  value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
+                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
                 validation:
                   type: custom
-                  name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
-                schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
-              - type: input-compare
-                label: Shard
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
-                schema: schema/properties/spec/properties/volumeExpansion/properties/shard
-          - type: select
-            label: Mode
-            options:
-              - text: Offline
-                value: Offline
-              - text: Online
-                value: Online
-            validation:
-              type: required
-            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
+                schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
@@ -464,93 +622,120 @@ step:
             elements:
               - type: radio
                 label: Reconfigure Type
-                options: 
-                - text: Select New Config Secret
+                subtitle: Choose the action you'd like to perform. Select a new configuration secret, apply a custom configuration , or remove an existing setup.
+                validation:
+                  type: required
+                options:
+                - text: New Config Secret
                   value: selectNewConfigSecret
                 - text: Apply Config
                   value: applyConfig
-                - text: Remove
-                  value: remove                  
+                - text: Remove testing
+                  value: remove
+                schema: temp/properties/reconfigurationType
                 watcher:
                   func: onReconfigurationTypeChange|standalone
                   paths:
                     - temp/properties/reconfigurationType
-                validation: 
-                  type: required
-                schema: temp/properties/reconfigurationType
               - type: block-layout
-                label: Standalone config secret
-                showLabels: false
+                label: Config Secret
+                showLabels: true
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                   type: function
                 elements:
-                - type: select
-                  addNewButton:
-                    label: Create Secret
-                    target: _blank
-                    url:
-                      function: createSecretUrl
-                  label: Config Secret
-                  if:
-                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-                    type: function
-                  loader:
-                    name: getConfigSecrets
-                    watchPaths:
-                      - schema/properties/metadata/properties/namespace
-                  init: 
-                    type: func
-                    value: setValueFromDbDetails|/spec/configSecret/name
-                  refresh: true
-                  validation: 
-                    type: required
-                  schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-              - type: object-item
-                label: Apply Config
+                  - type:  label-element
+                    label: Select a configuration secret from the available list to update your database settings
+                    customClass: mb-10
+                  - type: select
+                    addNewButton:
+                      label: Create Secret
+                      target: _blank
+                      url:
+                        function: createSecretUrl
+                    schema: schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+                    validation:
+                      type: required
+                    refresh: true
+                    label: Config Secret
+                    loader:
+                      name: getConfigSecrets
+                      watchPaths:
+                        - schema/properties/metadata/properties/namespace
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/configSecret/name
+                  - type: label-element
+                    label: Selected Config Secret
+                    loader: getSelectedConfigSecret|standalone
+                    watcher:
+                      func: getSelectedConfigSecret|standalone
+                      paths:
+                        - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+                  - type: editor
+                    label: Value
+                    readonly: true
+                    hasCopy: false
+                    watcher:
+                      func: getSelectedConfigSecretValue|standalone
+                      paths:
+                        - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
+              - type: array-object-form
+                label: ApplyConfig
+                buttonClass: is-light is-outlined
+                schema: temp/properties/standalone/applyConfig
+                validation:
+                  type: required
                 if:
                   name: ifReconfigurationTypeEqualsTo|applyConfig
                   type: function
-                validation: 
-                  type: required
                 watcher:
                   func: onApplyconfigChange|standalone
                   paths:
                     - temp/properties/standalone/applyConfig
-                schema: temp/properties/standalone/applyConfig
-                # elements:
-                #   - type: input 
-                #     label: key
-                #     validation: 
-                #       type: required
-                #     schema: temp/properties/configArray/items/properties/key
-                #   - type: textarea
-                #     label: value
-                #     validation: 
-                #       type: required
-                #     schema:  temp/properties/configArray/items/properties/value
+                elements:
+                  - type: label-element
+                    label: New Apply Config
+                    subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
+                    customClass: mb-10
+                  - type: input
+                    label: key
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/key
+                  - type: editor
+                    label: value
+                    hasCopy: false
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
               - type: switch
                 schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
                 label: Remove CustomConfig
+                fullwidth: true
                 if:
                   name: returnFalse
                   type: function
           - type: block-layout
-            label: Replica Set
+            label: Replica Set 
             if:
               name: ifDbTypeEqualsTo|replicaSet|configuration
               type: function
             elements:
               - type: radio
                 label: Reconfigure Type
-                validation: 
+                subtitle: Choose the action you'd like to perform. Select a new configuration secret, apply a custom configuration , or remove an existing setup.
+                validation:
                   type: required
                 options:
-                - text: Select New Config Secret
+                - text: New Config Secret
                   value: selectNewConfigSecret
                 - text: Apply Config
                   value: applyConfig
-                - text: Remove
+                - text: Remove testing
                   value: remove
                 schema: temp/properties/reconfigurationType
                 watcher:
@@ -558,11 +743,15 @@ step:
                   paths:
                     - temp/properties/reconfigurationType
               - type: block-layout
-                label: Replica Set config secret
+                label: Config Secret 
+                showLabels: true
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                   type: function
                 elements:
+                  - type:  label-element
+                    label: Select a configuration secret from the available list to update your database settings
+                    customClass: mb-10
                   - type: select
                     addNewButton:
                       label: Create Secret
@@ -581,10 +770,29 @@ step:
                     init:
                       type: func
                       value: setValueFromDbDetails|/spec/configSecret/name
+                  - type: label-element
+                    label: Selected Config Secret
+                    loader: getSelectedConfigSecret|replicaSet
+                    watcher:
+                      func: getSelectedConfigSecret|replicaSet
+                      paths:
+                        - schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
+                  - type: editor
+                    label: Value
+                    readonly: true
+                    hasCopy: false
+                    watcher:
+                      func: getSelectedConfigSecretValue|replicaSet
+                      paths:
+                        - schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
+                    validation: 
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
               - type: array-object-form
                 label: ApplyConfig
                 schema: temp/properties/replicaSet/applyConfig
-                validation: 
+                buttonClass: is-light is-outlined
+                validation:
                   type: required
                 if:
                   name: ifReconfigurationTypeEqualsTo|applyConfig
@@ -594,19 +802,25 @@ step:
                   paths:
                     - temp/properties/replicaSet/applyConfig
                 elements:
+                  - type: label-element
+                    label: New Apply Config 
+                    subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
+                    customClass: mb-10
                   - type: input
                     label: key
-                    validation: 
+                    validation:
                       type: required
                     schema: temp/properties/configArray/items/properties/key
-                  - type: textarea
+                  - type: editor
                     label: value
-                    validation: 
+                    hasCopy: false
+                    validation:
                       type: required
                     schema: temp/properties/configArray/items/properties/value
               - type: switch
                 schema: schema/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
                 label: Remove CustomConfig
+                fullwidth: true
                 if:
                   name: returnFalse
                   type: function
@@ -618,46 +832,71 @@ step:
               elements:
                 - type: radio
                   label: Reconfigure Type
+                  subtitle: Choose the action you'd like to perform. Select a new configuration secret, apply a custom configuration , or remove an existing setup.
                   validation:
                     type: required
                   schema: temp/properties/reconfigurationType-configServer
                   options:
-                    - text: Select New Config Secret
+                    - text: New Config Secret
                       value: selectNewConfigSecret
                     - text: Apply Config
                       value: applyConfig
-                    - text: Remove
+                    - text: Remove testing
                       value: remove
                   watcher:
                     func: onReconfigurationTypeChange|configServer|true
                     paths:
                       - temp/properties/reconfigurationType-configServer
                 - type: block-layout
+                  label: Config Secret
+                  showLabels: true
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|configServer|true
                     type: function
                   elements:
+                    - type:  label-element
+                      label: Select a configuration secret from the available list to update your database settings
+                      customClass: mb-10
                     - type: select
-                      label: Config Secret
+                      addNewButton:
+                        label: Create Secret
+                        target: _blank
+                        url:
+                          function: createSecretUrl
                       schema: schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
                       validation:
                         type: required
-                      init:
-                        type: func
-                        value: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
+                      refresh: true
+                      label: Config Secret
                       loader:
                         name: getConfigSecrets
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
-                      refresh: true
-                      addNewButton:
-                        label: Create Config
-                        target: _blank
-                        url:
-                          function: createSecretUrl
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
+                    - type: label-element
+                      label: Selected Config Secret
+                      loader: getSelectedConfigSecret|configServer
+                      watcher:
+                        func: getSelectedConfigSecret|configServer
+                        paths:
+                          - schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
+                    - type: editor
+                      label: Value
+                      readonly: true
+                      hasCopy: false
+                      watcher:
+                        func: getSelectedConfigSecretValue|configServer
+                        paths:
+                          - schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
+                      validation:
+                        type: required
+                      schema: temp/properties/configArray/items/properties/value
                 - type: array-object-form
-                  label: Apply Config
+                  label: ApplyConfig
                   schema: temp/properties/configServer/applyConfig
+                  buttonClass: is-light is-outlined
                   validation:
                     type: required
                   if:
@@ -668,19 +907,25 @@ step:
                     paths:
                       - temp/properties/configServer/applyConfig
                   elements:
+                    - type: label-element
+                      label: New Apply Config
+                      subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
+                      customClass: mb-10
                     - type: input
-                      label: Key
+                      label: key
+                      validation:
+                        type: required
                       schema: temp/properties/configArray/items/properties/key
+                    - type: editor
+                      label: value
+                      hasCopy: false
                       validation:
                         type: required
-                    - type: textarea
-                      label: Value
                       schema: temp/properties/configArray/items/properties/value
-                      validation:
-                        type: required
 
                 - type: switch
                   label: Remove CustomConfig
+                  fullwidth: true
                   schema: schema/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
                   if:
                     name: returnFalse
@@ -691,46 +936,71 @@ step:
               elements:
                 - type: radio
                   label: Reconfigure Type
+                  subtitle: Choose the action you'd like to perform. Select a new configuration secret, apply a custom configuration , or remove an existing setup.
                   validation:
                     type: required
                   schema: temp/properties/reconfigurationType-mongos
                   options:
-                    - text: Select New Config Secret
+                    - text: New Config Secret
                       value: selectNewConfigSecret
                     - text: Apply Config
                       value: applyConfig
-                    - text: Remove
+                    - text: Remove testing
                       value: remove
                   watcher:
                     func: onReconfigurationTypeChange|mongos|true
                     paths:
                       - temp/properties/reconfigurationType-mongos
                 - type: block-layout
+                  label: Config Secret
+                  showLabels: true
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|mongos|true
                     type: function
                   elements:
+                    - type:  label-element
+                      label: Select a configuration secret from the available list to update your database settings
+                      customClass: mb-10
                     - type: select
-                      label: Config Secret
+                      addNewButton:
+                        label: Create Secret
+                        target: _blank
+                        url:
+                          function: createSecretUrl
                       schema: schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
                       validation:
                         type: required
-                      init:
-                        type: func
-                        value: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
+                      refresh: true
+                      label: Config Secret
                       loader:
                         name: getConfigSecrets
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
-                      refresh: true
-                      addNewButton:
-                        label: Create Config
-                        target: _blank
-                        url:
-                          function: createSecretUrl
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
+                    - type: label-element
+                      label: Selected Config Secret
+                      loader: getSelectedConfigSecret|mongos
+                      watcher:
+                        func: getSelectedConfigSecret|mongos
+                        paths:
+                          - schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
+                    - type: editor
+                      label: Value
+                      readonly: true
+                      hasCopy: false
+                      watcher:
+                        func: getSelectedConfigSecretValue|mongos
+                        paths:
+                          - schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
+                      validation:
+                        type: required
+                      schema: temp/properties/configArray/items/properties/value
                 - type: array-object-form
-                  label: Apply Config
+                  label: ApplyConfig
                   schema: temp/properties/mongos/applyConfig
+                  buttonClass: is-light is-outlined
                   validation:
                     type: required
                   if:
@@ -741,18 +1011,24 @@ step:
                     paths:
                       - temp/properties/mongos/applyConfig
                   elements:
+                    - type: label-element
+                      label: New Apply Config
+                      subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
+                      customClass: mb-10
                     - type: input
-                      label: Key
+                      label: key
+                      validation:
+                        type: required
                       schema: temp/properties/configArray/items/properties/key
+                    - type: editor
+                      label: value
+                      hasCopy: false
                       validation:
                         type: required
-                    - type: textarea
-                      label: Value
                       schema: temp/properties/configArray/items/properties/value
-                      validation:
-                        type: required
                 - type: switch
                   label: Remove CustomConfig
+                  fullwidth: true
                   schema: schema/properties/spec/properties/configuration/properties/mongos/properties/removeCustomConfig
                   if:
                     name: returnFalse
@@ -763,15 +1039,16 @@ step:
               elements:
                 - type: radio
                   label: Reconfigure Type
+                  subtitle: Choose the action you'd like to perform. Select a new configuration secret, apply a custom configuration , or remove an existing setup.
                   validation:
                     type: required
                   schema: temp/properties/reconfigurationType-shard
                   options:
-                    - text: Select New Config Secret
+                    - text: New Config Secret
                       value: selectNewConfigSecret
                     - text: Apply Config
                       value: applyConfig
-                    - text: Remove
+                    - text: Remove testing
                       value: remove
                   watcher:
                     func: onReconfigurationTypeChange|shard|true
@@ -779,31 +1056,55 @@ step:
                       - temp/properties/reconfigurationType-shard
 
                 - type: block-layout
+                  label: Config Secret
+                  showLabels: true
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|shard|true
                     type: function
                   elements:
+                    - type:  label-element
+                      label: Select a configuration secret from the available list to update your database settings
+                      customClass: mb-10
                     - type: select
-                      label: Config Secret
+                      addNewButton:
+                        label: Create Secret
+                        target: _blank
+                        url:
+                          function: createSecretUrl
                       schema: schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
                       validation:
                         type: required
-                      init:
-                        type: func
-                        value: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
+                      refresh: true
+                      label: Config Secret
                       loader:
                         name: getConfigSecrets
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
-                      refresh: true
-                      addNewButton:
-                        label: Create Config
-                        target: _blank
-                        url:
-                          function: createSecretUrl
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
+                    - type: label-element
+                      label: Selected Config Secret
+                      loader: getSelectedConfigSecret|shard
+                      watcher:
+                        func: getSelectedConfigSecret|shard
+                        paths:
+                          - schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
+                    - type: editor
+                      label: Value
+                      readonly: true
+                      hasCopy: false
+                      watcher:
+                        func: getSelectedConfigSecretValue|shard
+                        paths:
+                          - schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
+                      validation:
+                        type: required
+                      schema: temp/properties/configArray/items/properties/value
                 - type: array-object-form
-                  label: Apply Config
+                  label: ApplyConfig
                   schema: temp/properties/shard/applyConfig
+                  buttonClass: is-light is-outlined
                   validation:
                     type: required
                   if:
@@ -814,18 +1115,24 @@ step:
                     paths:
                       - temp/properties/shard/applyConfig
                   elements:
+                    - type: label-element
+                      label: New Apply Config
+                      subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
+                      customClass: mb-10
                     - type: input
-                      label: Key
+                      label: key
+                      validation:
+                        type: required
                       schema: temp/properties/configArray/items/properties/key
+                    - type: editor
+                      label: value
+                      hasCopy: false
                       validation:
                         type: required
-                    - type: textarea
-                      label: Value
                       schema: temp/properties/configArray/items/properties/value
-                      validation:
-                        type: required
                 - type: switch
                   label: Remove CustomConfig
+                  fullwidth: true
                   schema: schema/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
                   if:
                     name: returnFalse
@@ -863,12 +1170,14 @@ step:
                 - temp/properties/tlsOperation
           - type: switch
             label: remove
+            fullwidth: true
             if:
               name: returnFalse
               type: function
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
             label: rotateCertificates
+            fullwidth: true
             schema: schema/properties/spec/properties/tls/properties/rotateCertificates
             if:
               name: returnFalse
@@ -921,6 +1230,7 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
           - type: block-layout
             label: Certificates
+            showLabels: true
             if:
               name: showIssuerRefAndCertificates
               type: function
@@ -944,60 +1254,65 @@ step:
                 label: Subject
                 showLabels: true
                 elements:
-                  - type: array-object-form
+                  - type: array-item-form
                     label: Organizations
-                    schema: schema/items/properties/subject/properties/organizations
-                    elements:
-                      - type: input
-                        label: organization
-                        schema: schema/items/properties/subject/properties/organizations/items
-                  - type: array-object-form
-                    label: countries
-                    schema: schema/items/properties/subject/properties/countries
-                    elements:
-                      - type: input
-                        label: country
-                        schema: schema/items/properties/subject/properties/countries/items
-                  - type: array-object-form
-                    label: organizational_units
-                    schema: schema/items/properties/subject/properties/organizationalUnits
-                    elements:
-                      - type: input
-                        label: organizational_unit
-                        schema: schema/items/properties/subject/properties/organizationalUnits/items
-                  - type: array-object-form
-                    label: provinces
-                    schema: schema/items/properties/subject/properties/provinces
-                    elements:
-                      - type: input
-                        label: province
-                        schema: schema/items/properties/subject/properties/provinces/items
-              - type: array-object-form
+                    buttonClass: is-light is-outlined
+                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations/items
+                    element:
+                      type: input
+                      label: Organization
+                  - type: array-item-form
+                    label: Countries
+                    buttonClass: is-light is-outlined
+                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries/items
+                    element:
+                      type: input
+                      label: Country
+                  - type: array-item-form
+                    label: Organizational Units
+                    buttonClass: is-light is-outlined
+                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits/items
+                    element:
+                      type: input
+                      label: Organizational Unit
+                  - type: array-item-form
+                    label: Provinces
+                    buttonClass: is-light is-outlined
+                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces/items
+                    element:
+                      type: input
+                      label: Province
+              - type: array-item-form
                 label: DNS Names
-                schema: schema/items/properties/dnsNames
-                elements:
-                  - type: input
-                    label: dns name
-                    schema: schema/items/properties/dnsNames/items
-              - type: array-object-form
+                buttonClass: is-light  is-outlined
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames/items
+                element:
+                  type: input
+                  label: DNS Name
+              - type: array-item-form
                 label: IP Addresses
-                schema: schema/items/properties/ipAddresses
-                elements:
-                  - type: input
-                    label: ip Address
-                    schema: schema/items/properties/ipAddresses/items
+                buttonClass: is-light is-outlined
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses/items
+                element:
+                  type: input
+                  label: IP Address
 # common
-      - type: time-picker
-        label: Timeout
-        schema: 'schema/properties/spec/properties/timeout'
-      - type: radio
-        label: apply
-        schema: 'schema/properties/spec/properties/apply'
-        init:
-          type: func
-          value: setApplyToIfReady
-        options:
-          - text: IfReady (OpsRequest will be applied if database is ready)
-            value: IfReady
-          - text: Always (OpsRequest will always be applied)
-            value: Always
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            schema: 'schema/properties/spec/properties/timeout'
+            subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
+          - type: radio
+            label: Apply
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always
