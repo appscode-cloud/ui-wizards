@@ -318,9 +318,6 @@ export const useFunc = (model) => {
   getDbDetails()
   showAndInitOpsRequestType()
 
-  // for config secret
-  let secretArray = []
-
   async function fetchJsons({ axios, itemCtx }) {
     let ui = {}
     let language = {}
@@ -352,7 +349,7 @@ export const useFunc = (model) => {
   }
 
   function returnFalse() {
-    return true
+    return false
   }
 
   function isRancherManaged() {
@@ -599,23 +596,6 @@ export const useFunc = (model) => {
     return name
   }
 
-  function clearOpsReqSpec(verd, opsReqType) {
-    if (
-      opsReqType === 'verticalScaling' ||
-      opsReqType === 'horizontalScaling' ||
-      opsReqType === 'volumeExpansion' ||
-      opsReqType === 'configuration'
-    ) {
-      if (verd === 'Topology') {
-        commit('wizard/model$delete', `/spec/${opsReqType}/node`)
-      } else {
-        commit('wizard/model$delete', `/spec/${opsReqType}/coordinator`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/data`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/overseer`)
-      }
-    }
-  }
-
   function asDatabaseOperation() {
     return !!route.params.actions
   }
@@ -702,8 +682,7 @@ export const useFunc = (model) => {
       reconfigure: 'Reconfigure',
     }
     if (ver) {
-      const operation = storeGet('/resource/activeActionItem/result/operationId') || ''
-
+      const operation = route.params.actions
       const match = /^(.*)-opsrequest-(.*)$/.exec(operation)
       const opstype = match[2]
       commit('wizard/model$update', {
@@ -716,17 +695,13 @@ export const useFunc = (model) => {
     return !ver
   }
 
-  // // vertical scaling
+  // vertical scaling
   function ifDbTypeEqualsTo(value, opsReqType) {
     const verd = getDbType()
-
-    clearOpsReqSpec(verd, opsReqType)
     return value === verd
   }
 
-  // // machine profile stuffs
-  // let machinesFromPreset = []
-
+  // machine profile stuffs
   function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
@@ -792,6 +767,7 @@ export const useFunc = (model) => {
       cpu: '',
       memory: '',
     }
+
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
@@ -873,10 +849,14 @@ export const useFunc = (model) => {
 
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+      {
+        params: {
+          filter: { items: { metadata: { name: null }, type: null } },
+        },
+      },
     )
 
     const secrets = (resp && resp.data && resp.data.items) || []
-    secretArray = secrets
 
     const filteredSecrets = secrets
 
@@ -930,6 +910,7 @@ export const useFunc = (model) => {
 
     return ans
   }
+
   async function getResourceList({ group, version, resource }) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -952,6 +933,7 @@ export const useFunc = (model) => {
 
     return ans
   }
+
   async function resourceNames(group, version, resource) {
     const namespace = getValue(model, '/metadata/namespace')
     // watchDependency('model#/metadata/namespace')
@@ -978,6 +960,7 @@ export const useFunc = (model) => {
       }
     })
   }
+
   async function unNamespacedResourceNames(group, version, resource) {
     let resources = await getResourceList({
       group,
@@ -1002,22 +985,17 @@ export const useFunc = (model) => {
   }
 
   // reconfiguration type
-  function ifReconfigurationTypeEqualsTo(value, property, isShard) {
-    let path = '/reconfigurationType'
-    if (isShard) path += `-${property}`
-    const reconfigurationType = getValue(discriminator, path)
+  function ifReconfigurationTypeEqualsTo(value) {
+    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+    // watchDependency('discriminator#/reconfigurationType')
 
-    const watchPath = `discriminator#${path}`
-    // watchDependency(watchPath)
     return reconfigurationType === value
   }
 
-  function onApplyconfigChange(type) {
-    const configPath = `/${type}/applyConfig`
-    const applyconfig = getValue(discriminator, configPath)
+  function onApplyconfigChange() {
+    const applyconfig = getValue(discriminator, '/applyConfig')
 
     const configObj = {}
-
     if (applyconfig) {
       applyconfig.forEach((item) => {
         const { key, value } = item
@@ -1026,29 +1004,27 @@ export const useFunc = (model) => {
     }
 
     commit('wizard/model$update', {
-      path: `/spec/configuration/${type}/applyConfig`,
+      path: '/spec/configuration/applyConfig',
       value: configObj,
       force: true,
     })
   }
 
-  function onReconfigurationTypeChange(property, isShard) {
-    setDiscriminatorValue(`/${property}/applyConfig`, [])
-    let path = '/reconfigurationType'
-    if (isShard) path += `-${property}`
-    const reconfigurationType = getValue(discriminator, path)
+  function onReconfigurationTypeChange() {
+    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+    setDiscriminatorValue('/applyConfig', [])
     if (reconfigurationType === 'remove') {
-      commit('wizard/model$delete', `/spec/configuration/${property}`)
+      commit('wizard/model$delete', `/spec/configuration`)
 
       commit('wizard/model$update', {
-        path: `/spec/configuration/${property}/removeCustomConfig`,
+        path: `/spec/configuration/removeCustomConfig`,
         value: true,
         force: true,
       })
     } else {
-      commit('wizard/model$delete', `/spec/configuration/${property}/configSecret`)
-      commit('wizard/model$delete', `/spec/configuration/${property}/applyConfig`)
-      commit('wizard/model$delete', `/spec/configuration/${property}/removeCustomConfig`)
+      commit('wizard/model$delete', `/spec/configuration/configSecret`)
+      commit('wizard/model$delete', `/spec/configuration/applyConfig`)
+      commit('wizard/model$delete', `/spec/configuration/removeCustomConfig`)
     }
   }
 
@@ -1064,6 +1040,8 @@ export const useFunc = (model) => {
     // watchDependency('model#/spec/tls/issuerRef/kind')
 
     if (kind) {
+      const apiGroup = getValue(discriminator, '/dbDetails/spec/tls/issuerRef/apiGroup')
+      if (apiGroup) return apiGroup
       return 'cert-manager.io'
     } else return undefined
   }
@@ -1122,6 +1100,7 @@ export const useFunc = (model) => {
   function initTlsOperation() {
     return 'update'
   }
+
   function onTlsOperationChange() {
     const tlsOperation = getValue(discriminator, '/tlsOperation')
 
@@ -1218,27 +1197,6 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
-  function isVerticalScaleTopologyRequired(type) {
-    // watchDependency(`discriminator#/topologyKey-${type}`)
-    // watchDependency(`discriminator#/topologyValue-${type}`)
-
-    const key = getValue(discriminator, `/topologyKey-${type}`)
-    const value = getValue(discriminator, `/topologyValue-${type}`)
-    const path = `/spec/verticalScaling/${type}/topology`
-
-    if (key || value) {
-      commit('wizard/model$update', {
-        path: path,
-        value: { key, value },
-        force: true,
-      })
-      return ''
-    } else {
-      commit('wizard/model$delete', path)
-      return false
-    }
-  }
-
   function checkVolume(initpath, path) {
     const volume = getValue(discriminator, `/dbDetails${initpath}`)
     const input = getValue(model, path)
@@ -1300,60 +1258,6 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  function getSelectedConfigSecret(type) {
-    const path = `/spec/configuration/${type}/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    // watchDependency(`model#${path}`)
-    return `You have selected ${selectedSecret} secret` || 'No secret selected'
-  }
-
-  function objectToYaml(obj, indent = 0) {
-    if (obj === null || obj === undefined) return 'null'
-    if (typeof obj !== 'object') return JSON.stringify(obj)
-
-    const spaces = '  '.repeat(indent)
-
-    if (Array.isArray(obj)) {
-      return obj
-        .map((item) => `${spaces}- ${objectToYaml(item, indent + 1).trimStart()}`)
-        .join('\n')
-    }
-
-    return Object.keys(obj)
-      .map((key) => {
-        const value = obj[key]
-        const keyLine = `${spaces}${key}:`
-
-        if (value === null || value === undefined) {
-          return `${keyLine} null`
-        }
-
-        if (typeof value === 'object') {
-          const nested = objectToYaml(value, indent + 1)
-          return `${keyLine}\n${nested}`
-        }
-
-        if (typeof value === 'string') {
-          return `${keyLine} "${value}"`
-        }
-
-        return `${keyLine} ${value}`
-      })
-      .join('\n')
-  }
-
-  function getSelectedConfigSecretValue(type) {
-    const path = `/spec/configuration/${type}/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    let data
-    secretArray.forEach((item) => {
-      if (item.value === selectedSecret) {
-        data = objectToYaml(item.data).trim() || 'No Data Found'
-      }
-    })
-    return data || 'No Data Found'
-  }
-
   return {
     fetchAliasOptions,
     validateNewCertificates,
@@ -1372,7 +1276,6 @@ export const useFunc = (model) => {
     disableOpsRequest,
     initNamespace,
     initDatabaseRef,
-    clearOpsReqSpec,
     showAndInitName,
     showAndInitNamespace,
     showAndInitDatabaseRef,
@@ -1380,7 +1283,6 @@ export const useFunc = (model) => {
     showAndInitOpsRequestType,
     ifDbTypeEqualsTo,
     getConfigSecrets,
-    getSelectedConfigSecret,
     createSecretUrl,
     isEqualToValueFromType,
     getNamespacedResourceList,
@@ -1406,13 +1308,10 @@ export const useFunc = (model) => {
     onDbChange,
     onNamespaceChange,
     setApplyToIfReady,
-    isVerticalScaleTopologyRequired,
     getMachines,
     setMachine,
     onMachineChange,
     isMachineCustom,
     checkVolume,
-    getSelectedConfigSecretValue,
-    objectToYaml,
   }
 }
