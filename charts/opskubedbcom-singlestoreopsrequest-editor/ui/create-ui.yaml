@@ -386,11 +386,19 @@ step:
                 schema: schema/properties/spec/properties/volumeExpansion/properties/leaf
           - type: block-layout
             label: Node Volume Expansion
-            showLabels: true
+            showLabels: false
             if:
               type: function
               name: ifDbTypeEqualsTo|Combined|VolumeExpansion
             elements:
+              - type: horizontal-layout
+                elements:
+                  - type: label-element
+                    label: Storage Size
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                  - type: info
+                    hasIcon: true
+                    label: Storage expansion allows you to increase your database's disk space without downtime (Online mode) or with brief downtime (Offline mode).
               - type: input-compare
                 label: Storage Size
                 init:
