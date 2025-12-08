@@ -31,16 +31,12 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-standalone-min', '')
-  setDiscriminatorValue('/allowedMachine-standalone-max', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
-  setDiscriminatorValue('/allowedMachine-shard-min', '')
-  setDiscriminatorValue('/allowedMachine-shard-max', '')
-  setDiscriminatorValue('/allowedMachine-configServer-min', '')
-  setDiscriminatorValue('/allowedMachine-configServer-max', '')
-  setDiscriminatorValue('/allowedMachine-mongos-min', '')
-  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  setDiscriminatorValue('/allowedMachine-aggregator-min', '')
+  setDiscriminatorValue('/allowedMachine-aggregator-max', '')
+  setDiscriminatorValue('/allowedMachine-leaf-min', '')
+  setDiscriminatorValue('/allowedMachine-leaf-max', '')
+  setDiscriminatorValue('/allowedMachine-node-min', '')
+  setDiscriminatorValue('/allowedMachine-node-max', '')
 
   function initScheduleBackupForEdit() {
     const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
@@ -827,8 +823,7 @@ export const useFunc = (model) => {
 
   function setTrigger(path) {
     let value = getValue(model, `/resources/${path}`)
-    if (value) return value
-    return 'On'
+    return value === 'On'
   }
 
   function setValueFromDbDetails(path) {
@@ -1438,6 +1433,85 @@ export const useFunc = (model) => {
     return value
   }
 
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
+  }
+
+  async function fetchTopologyMachines() {
+    const annotations = getValue(
+      model,
+      '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/annotations',
+    )
+    const instance = annotations['kubernetes.io/instance-type']
+
+    const user = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    if (instance) {
+      try {
+        const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
+        const resp = await axios.get(url)
+
+        const nodeGroups = resp.data?.spec?.nodeGroups || []
+        setDiscriminatorValue('/topologyMachines', nodeGroups)
+      } catch (e) {
+        console.log(e)
+        setDiscriminatorValue('/topologyMachines', [])
+      }
+    }
+  }
+
+  function setAllowedMachine(type, minmax) {
+    const annotations = getValue(
+      model,
+      '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/annotations',
+    )
+    const instance = annotations['kubernetes.io/instance-type']
+    let parsedInstance = {}
+    try {
+      if (instance) parsedInstance = JSON.parse(instance)
+    } catch (e) {
+      console.log(e)
+      parsedInstance = {}
+    }
+
+    const machine = parsedInstance[type] || ''
+    const mx = machine?.includes(',') ? machine.split(',')[1] : ''
+    const mn = machine?.includes(',') ? machine.split(',')[0] : ''
+
+    if (minmax === 'min') return mn
+    else return mx
+  }
+
+  function getMachines(type, minmax) {
+    const depends = minmax === 'min' ? 'max' : 'min'
+    const dependantPath = `/allowedMachine-${type}-${depends}`
+
+    const dependantMachine = getValue(discriminator, dependantPath)
+
+    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+
+    const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
+
+    const machines = nodeGroups?.map((item) => {
+      const subText = `CPU: ${item.allocatable.cpu}, Memory: ${item.allocatable.memory}`
+      const text = item.topologyValue
+      return { text, subText, value: item.topologyValue }
+    })
+
+    const filteredMachine = machines?.filter((item, ind) =>
+      minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
+    )
+
+    return dependantIndex === -1 ? machines : filteredMachine
+  }
+
   return {
     initScheduleBackup,
     initScheduleBackupForEdit,
@@ -1476,6 +1550,7 @@ export const useFunc = (model) => {
     isNodeTopologySelected,
     setControlledResources,
     setTrigger,
+    onTriggerChange,
     setApplyToIfReady,
     setMetadata,
     isRancherManaged,
@@ -1511,5 +1586,8 @@ export const useFunc = (model) => {
     setValueFromDbDetails,
     hasAnnotations,
     hasNoAnnotations,
+    fetchTopologyMachines,
+    setAllowedMachine,
+    getMachines,
   }
 }
