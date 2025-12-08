@@ -596,8 +596,15 @@ step:
                 func: onTriggerChange|storage/aggregator
                 paths:
                   - temp/properties/storage/properties/aggregator/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+              if:
+                type: function
+                name: dbTypeEqualsTo|topology
             - type: select
-              label: Expansion Mode
+              label: Mode
+              description: Select how the storage expansion should be handled.
               if:
                 type: function
                 name: dbTypeEqualsTo|topology
@@ -617,13 +624,20 @@ step:
               elements:
                 - type: threshold-input
                   label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  customClass: width-300
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/usageThreshold
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules
-                  init:
-                    type: func
-                    value: setValueFromDbDetails|/resources/kubedbComSinglestore/spec/topology/aggregator/storage/resources/requests/storage
+                  loader: setValueFromDbDetails|resources/kubedbComSinglestore/spec/topology/aggregator/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules
+                - type: input
+                  label: Scaling Threshold
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingThreshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/upperBound
@@ -650,8 +664,15 @@ step:
                 func: onTriggerChange|storage/leaf
                 paths:
                   - temp/properties/storage/properties/leaf/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+              if:
+                type: function
+                name: dbTypeEqualsTo|topology
             - type: select
-              label: Expansion Mode
+              label: Mode
+              description: Select how the storage expansion should be handled.
               if:
                 type: function
                 name: dbTypeEqualsTo|topology
@@ -671,13 +692,20 @@ step:
               elements:
                 - type: threshold-input
                   label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  customClass: width-300
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/usageThreshold
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules
-                  init:
-                    type: func
-                    value: setValueFromDbDetails|/resources/kubedbComSinglestore/spec/topology/leaf/storage/resources/requests/storage
+                  loader: setValueFromDbDetails|resources/kubedbComSinglestore/spec/topology/leaf/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules
+                - type: input
+                  label: Scaling Threshold
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingThreshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/upperBound
@@ -704,8 +732,15 @@ step:
                 func: onTriggerChange|storage/node
                 paths:
                   - temp/properties/storage/properties/node/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+              if:
+                type: function
+                name: dbTypeEqualsTo|standalone
             - type: select
-              label: Expansion Mode
+              label: Mode
+              description: Select how the storage expansion should be handled.
               if:
                 type: function
                 name: dbTypeEqualsTo|standalone
@@ -725,13 +760,20 @@ step:
               elements:
                 - type: threshold-input
                   label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  customClass: width-300
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                  init:
-                    type: func
-                    value: setValueFromDbDetails|/resources/kubedbComSinglestore/spec/topology/node/storage/resources/requests/storage
+                  loader: setValueFromDbDetails|resources/kubedbComSinglestore/spec/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+                - type: input
+                  label: Scaling Threshold
+                  schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingThreshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
