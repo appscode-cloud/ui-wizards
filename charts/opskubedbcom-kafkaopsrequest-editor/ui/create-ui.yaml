@@ -111,15 +111,22 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: input-compare
-            label: Node
+          - type: horizontal-layout
             if:
               type: function
               name: ifDbTypeEqualsTo|Combined|horizontalScaling
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/node
+            elements:
+              - type: input-compare
+                label: Replicas
+                header: Node
+                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/node
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
           - type: block-layout
             label: Topology horizontal scaling
             if:
@@ -166,6 +173,7 @@ step:
               - type: machine-compare
                 label: Resources
                 loader: getMachines|node
+                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                 init:
                   type: func
                   value: setMachine|node
@@ -174,18 +182,33 @@ step:
                   paths:
                     - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
-              - type: select
-                label: Node Selection Policy
-                options:
-                  - text: LabelSelector
-                    value: LabelSelector
-                  - text: Taint
-                    value: Taint
-                schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
               - type: block-layout
-                label: Topology
+                label: Node Selection
                 showLabels: true
                 elements:
+                  - type: horizontal-layout
+                    elements:
+                    - type: block-layout
+                      showLabels: true
+                      hideBorder: true
+                      elements:
+                        - type: label-element
+                          label: Node Selection Policy
+                          subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                        - type: select
+                          label: Node Selection Policy
+                          schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+                          options:
+                            - text: LabelSelector
+                              value: LabelSelector
+                            - text: Taint
+                              value: Taint
+                    - type: info
+                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taint:</b> Define tolerations for node traints to ensure your workload runs only on compatible nodes"
+                      customClass: mt-20
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
                   - type: input
                     label: Key
                     schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
@@ -206,6 +229,7 @@ step:
                   - type: machine-compare
                     label: Resources
                     loader: getMachines|broker
+                    subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                     init:
                       type: func
                       value: setMachine|broker
@@ -214,18 +238,33 @@ step:
                       paths:
                         - schema/properties/spec/properties/verticalScaling/properties/broker/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/broker/properties/resources
-                  - type: select
-                    label: Node Selection Policy
-                    options:
-                      - text: LabelSelector
-                        value: LabelSelector
-                      - text: Taint
-                        value: Taint
-                    schema: schema/properties/spec/properties/verticalScaling/properties/broker/properties/nodeSelectionPolicy
                   - type: block-layout
-                    label: Topology
+                    label: Node Selection
                     showLabels: true
                     elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: true
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/broker/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taint:</b> Define tolerations for node traints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
                       - type: input
                         label: Key
                         schema: schema/properties/spec/properties/verticalScaling/properties/broker/properties/topology/properties/key
@@ -239,6 +278,7 @@ step:
                   - type: machine-compare
                     label: Resources
                     loader: getMachines|controller
+                    subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                     init:
                       type: func
                       value: setMachine|controller
@@ -247,18 +287,33 @@ step:
                       paths:
                         - schema/properties/spec/properties/verticalScaling/properties/controller/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/controller/properties/resources
-                  - type: select
-                    label: Node Selection Policy
-                    options:
-                      - text: LabelSelector
-                        value: LabelSelector
-                      - text: Taint
-                        value: Taint
-                    schema: schema/properties/spec/properties/verticalScaling/properties/controller/properties/nodeSelectionPolicy
                   - type: block-layout
-                    label: Topology
+                    label: Node Selection
                     showLabels: true
                     elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: true
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/controller/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taint:</b> Define tolerations for node traints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
                       - type: input
                         label: Key
                         schema: schema/properties/spec/properties/verticalScaling/properties/controller/properties/topology/properties/key
@@ -273,6 +328,8 @@ step:
           name: ifRequestTypeEqualsTo|VolumeExpansion
         elements:
           - type: input-compare
+            header: Node
+            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
             label: Node
             if:
               type: function
@@ -284,6 +341,9 @@ step:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
             schema: schema/properties/spec/properties/volumeExpansion/properties/node
+          - type: label-element
+            label: Mode (Required)
+            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose offline Mode if you can afford a brief downntime for added reliability during the volume expansion.
           - type: select
             label: Mode
             options:
@@ -330,6 +390,7 @@ step:
             elements:
               - type: radio
                 label: Reconfigure Type
+                subtitle: Choose the action you'd like to perform. Select a new configuration secret, apply a custom configuration, or remove an existing setup.
                 options:
                 - text: Select New Config Secret
                   value: selectNewConfigSecret
@@ -346,32 +407,32 @@ step:
                 schema: temp/properties/reconfigurationType
               - type: block-layout
                 label: Configuration config secret
-                showLabels: false
+                showLabels: true
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                   type: function
                 elements:
-                - type: select
-                  addNewButton:
-                    label: Create Secret
-                    target: _blank
-                    url:
-                      function: createSecretUrl
-                  label: Config Secret
-                  if:
-                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-                    type: function
-                  loader:
-                    name: getConfigSecrets
-                    watchPaths:
-                      - schema/properties/metadata/properties/namespace
-                  init:
-                    type: func
-                    value: setValueFromDbDetails|/spec/configSecret/name
-                  refresh: true
-                  validation:
-                    type: required
-                  schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                  - type: label-element
+                    label: Select a configuration secret from the available list to update your database settings
+                    customClass: mb-10
+                  - type: select
+                    addNewButton:
+                      label: Create Secret
+                      target: _blank
+                      url:
+                        function: createSecretUrl
+                    label: Config Secret
+                    loader:
+                      name: getConfigSecrets
+                      watchPaths:
+                        - schema/properties/metadata/properties/namespace
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/configSecret/name
+                    refresh: true
+                    validation:
+                      type: required
+                    schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
               - type: array-object-form
                 label: Apply Config
                 if:
@@ -385,6 +446,10 @@ step:
                     - temp/properties/applyConfig
                 schema: temp/properties/applyConfig
                 elements:
+                  - type: label-element
+                    label: New Apply Config
+                    subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
+                    customClass: mb-10
                   - type: input
                     label: key
                     validation:
@@ -551,17 +616,22 @@ step:
                     label: ip Address
                     schema: schema/items/properties/ipAddresses/items
 # common
-      - type: time-picker
-        label: Timeout
-        schema: 'schema/properties/spec/properties/timeout'
-      - type: radio
-        label: apply
-        schema: 'schema/properties/spec/properties/apply'
-        init:
-          type: func
-          value: setApplyToIfReady
-        options:
-          - text: IfReady (OpsRequest will be applied if database is ready)
-            value: IfReady
-          - text: Always (OpsRequest will always be applied)
-            value: Always
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            schema: 'schema/properties/spec/properties/timeout'
+            subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
+          - type: radio
+            label: Apply
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always
