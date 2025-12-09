@@ -843,11 +843,6 @@ export const useFunc = (model) => {
 
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null, data: null } },
-        },
-      },
     )
 
     const secrets = (resp && resp.data && resp.data.items) || []

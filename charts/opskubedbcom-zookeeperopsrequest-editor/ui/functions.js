@@ -678,7 +678,7 @@ export const useFunc = (model) => {
 
   // for config secret
   let secretArray = []
-  
+
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -687,11 +687,6 @@ export const useFunc = (model) => {
 
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      },
     )
 
     const secrets = (resp && resp.data && resp.data.items) || []
@@ -704,7 +699,7 @@ export const useFunc = (model) => {
       item.value = name
       return true
     })
-    
+
     secretArray = filteredSecrets
     return filteredSecrets
   }
@@ -762,7 +757,6 @@ export const useFunc = (model) => {
     })
     return data || 'No Data Found'
   }
-
 
   function createSecretUrl() {
     const user = storeGet('/route/params/user')
