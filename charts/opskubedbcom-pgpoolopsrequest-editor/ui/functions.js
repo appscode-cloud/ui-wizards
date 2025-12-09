@@ -843,11 +843,6 @@ export const useFunc = (model) => {
 
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null, data: null } },
-        },
-      },
     )
 
     const secrets = (resp && resp.data && resp.data.items) || []
@@ -928,10 +923,10 @@ export const useFunc = (model) => {
 
     const domain = storeGet('/domain') || ''
     if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/secrets/create`
+      return `http://console.bb.test:5990/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
     } else {
       const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/secrets/create`
+      return `${editedDomain}/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
     }
   }
 
