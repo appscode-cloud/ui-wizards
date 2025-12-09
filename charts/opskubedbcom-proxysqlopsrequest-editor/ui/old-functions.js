@@ -348,7 +348,7 @@ export const useFunc = (model) => {
   }
 
   function returnFalse() {
-    return true
+    return false
   }
 
   function isRancherManaged() {
@@ -694,13 +694,10 @@ export const useFunc = (model) => {
   }
 
   // machine profile stuffs
-  function getMachines(type) {
+  function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {
-      cpu: '',
-      memory: '',
-    }
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -747,12 +744,9 @@ export const useFunc = (model) => {
     return arr
   }
 
-  function setMachine(type) {
+  function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {
-      cpu: '',
-      memory: '',
-    }
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const machine = annotations['kubernetes.io/instance-type'] || 'custom'
 
@@ -841,10 +835,10 @@ export const useFunc = (model) => {
 
     const domain = storeGet('/domain') || ''
     if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
+      return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/secrets/create`
     } else {
       const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
+      return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/secrets/create`
     }
   }
 
@@ -1102,7 +1096,8 @@ export const useFunc = (model) => {
 
   function isIssuerRefRequired() {
     const hasTls = hasTlsField()
-    return hasTls ? false : ''
+
+    return !hasTls
   }
 
   function getRequestTypeFromRoute() {
