@@ -97,21 +97,18 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: horizontal-layout
-            elements:
-              - type: input-compare
-                label: Member
-                header: Member
-                subtitle: Define the total number of members for the database cluster. Increasing members improves fault tolerance and load distribution, while reducing members conserves resources
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/replicas
-                schema: schema/properties/spec/properties/horizontalScaling/properties/member
-              - type: info
-                hasIcon: true
-                label: Each member represents an independent node in your database cluster. For example, setting this to 3 creates three database nodes for better availability.
-          - type: input
+          - type: input-compare
+            label: Member
+            header: Member
+            subtitle: Define the total number of members for the database cluster. Increasing members improves fault tolerance and load distribution, while reducing members conserves resources
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/replicas
+            schema: schema/properties/spec/properties/horizontalScaling/properties/member
+          - type: input-compare
             label: Member Weight
+            header: Member Weight
+            subtitle: Specify the weight for each member in the cluster to control load distribution and priority
             init:
               type: func
               value: setValueFromDbDetails|/spec/replicas
