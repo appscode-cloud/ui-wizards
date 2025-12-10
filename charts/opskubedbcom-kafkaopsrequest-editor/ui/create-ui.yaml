@@ -115,66 +115,37 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: horizontal-layout
+          - type: input-compare
+            header: Node
+            subtitle: How many replicas do you want for your database? Specify the replica count to balance performance and resource usage
+            label: Node
             if:
               type: function
               name: ifDbTypeEqualsTo|Combined|horizontalScaling
-            elements:
-              - type: input-compare
-                label: Replicas
-                header: Replica
-                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/replicas
-                schema: schema/properties/spec/properties/horizontalScaling/properties/node
-              - type: info
-                hasIcon: true
-                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/replicas
+            schema: schema/properties/spec/properties/horizontalScaling/properties/node
           - type: block-layout
             label: Topology horizontal scaling
             if:
               name: ifDbTypeEqualsTo|Topology|horizontalScaling
               type: function
             elements:
-              - type: block-layout
-                label: Broker Horizontal Scaling
-                showLabels: false
-                elements:
-                  - type: label-element
-                    label: Broker
-                  - type: horizontal-layout
-                    elements:
-                      - type: input-compare
-                        label: Replicas
-                        header: Replica
-                        subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
-                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/broker
-                        init:
-                          type: func
-                          value: setValueFromDbDetails|/spec/topology/broker/replicas
-                      - type: info
-                        hasIcon: true
-                        label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
-              - type: block-layout
-                label: Controller Horizontal Scaling
-                showLabels: false
-                elements:
-                  - type: label-element
-                    label: Controller
-                  - type: horizontal-layout
-                    elements:
-                      - type: input-compare
-                        label: Replicas
-                        header: Replica
-                        subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
-                        init:
-                          type: func
-                          value: setValueFromDbDetails|/spec/topology/controller/replicas
-                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/controller
-                      - type: info
-                        hasIcon: true
-                        label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
+              - type: input-compare
+                label: Broker
+                subtitle: How many replicas do you want for your database? Specify the replica count to balance performance and resource usage
+                schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/broker
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/topology/broker/replicas
+              - type: input-compare
+                label: Controller
+                subtitle: How many replicas do you want for your database? Specify the replica count to balance performance and resource usage
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/topology/controller/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/controller
 # vertical Scale
       - type: block-layout
         if:
@@ -367,20 +338,6 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|VolumeExpansion
         elements:
-          - type: input-compare
-            header: Node 
-            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-            label: Node 
-            if:
-              type: function
-              name: ifDbTypeEqualsTo|Combined|volumeExpansion
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-            validation:
-              type: custom
-              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
-            schema: schema/properties/spec/properties/volumeExpansion/properties/node
           - type: label-element
             label: Mode
             subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose Offline Mode if you can afford a brief downtime for added reliability during the volume expansion.
@@ -394,6 +351,20 @@ step:
             validation:
               type: required
             schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+          - type: input-compare
+            header: Node
+            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+            label: Node
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|Combined|volumeExpansion
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+            validation:
+              type: custom
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+            schema: schema/properties/spec/properties/volumeExpansion/properties/node
           - type: block-layout
             label: Topology volume expansion
             if:
@@ -402,15 +373,17 @@ step:
             elements:
               - type: input-compare
                 label: Broker
+                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/broker/storage/resources/requests/storage
                 validation:
                   type: custom
-                  name: checkVolume|/spec/topology/broker/storage/resources/requests/storage|/spec/volumeExpansion/broker
+                  name: checkVolume|/spec/topology/broker/storage/requests/storage|/spec/volumeExpansion/broker
                 schema: schema/properties/spec/properties/volumeExpansion/properties/broker
               - type: input-compare
                 label: Controller
+                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/controller/storage/resources/requests/storage
