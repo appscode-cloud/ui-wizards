@@ -1,7 +1,5 @@
 const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
 
-// *************************      common functions ********************************************
-// eslint-disable-next-line no-empty-pattern
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
@@ -24,13 +22,56 @@ export const useFunc = (model) => {
   setDiscriminatorValue('binding', false)
   setDiscriminatorValue('hidePreviewFromWizard', undefined)
 
-  setDiscriminatorValue('/enableMonitoring', false)
+  setDiscriminatorValue('/enableMonitoring', true)
   setDiscriminatorValue('/customizeExporter', true)
   setDiscriminatorValue('/valueFromType', 'input')
 
   // Compute Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
+  setDiscriminatorValue('/allowedMachine-node-min', '')
+  setDiscriminatorValue('/allowedMachine-node-max', '')
+  setDiscriminatorValue('/allowedMachine-master-min', '')
+  setDiscriminatorValue('/allowedMachine-master-max', '')
+  setDiscriminatorValue('/allowedMachine-data-min', '')
+  setDiscriminatorValue('/allowedMachine-data-max', '')
+  setDiscriminatorValue('/allowedMachine-ingest-min', '')
+  setDiscriminatorValue('/allowedMachine-ingest-max', '')
+
+  // *************************      Common Helper Functions ********************************************
+
+  function objectCopy(obj) {
+    const temp = JSON.stringify(obj)
+    return JSON.parse(temp)
+  }
+
+  function valueExists(value, getValue, path) {
+    const val = getValue(value, path)
+    if (val) return true
+    else return false
+  }
+
+  function returnFalse() {
+    return false
+  }
+
+  function isEqualToModelPathValue(value, modelPath) {
+    const modelPathValue = getValue(model, modelPath)
+    return modelPathValue === value
+  }
+
+  function isValueExistInModel(path) {
+    const modelValue = getValue(model, path)
+    return !!modelValue
+  }
+
+  function isRancherManaged() {
+    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+    const found = managers.find((item) => item === 'Rancher')
+    return !!found
+  }
+
+  // *************************      Backup & Restore Configuration ********************************************
 
   const stashAppscodeComBackupConfiguration = {
     spec: {
@@ -51,6 +92,47 @@ export const useFunc = (model) => {
         },
       },
     },
+  }
+
+  function getBackupConfigsAndAnnotations(getValue, model) {
+    const stashAppscodeComBackupConfiguration = getValue(
+      model,
+      '/resources/stashAppscodeComBackupConfiguration',
+    )
+    const kubedbComElasticsearchAnnotations =
+      getValue(model, '/resources/kubedbComElasticsearch/metadata/annotations') || {}
+
+    const isBluePrint = Object.keys(kubedbComElasticsearchAnnotations).some(
+      (k) =>
+        k === 'stash.appscode.com/backup-blueprint' ||
+        k === 'stash.appscode.com/schedule' ||
+        k.startsWith('params.stash.appscode.com/'),
+    )
+
+    return {
+      stashAppscodeComBackupConfiguration,
+      isBluePrint,
+    }
+  }
+
+  function deleteKubeDbComElasticsearchDbAnnotation(getValue, model, commit) {
+    const annotations =
+      getValue(model, '/resources/kubedbComElasticsearch/metadata/annotations') || {}
+    const filteredKeyList =
+      Object.keys(annotations).filter(
+        (k) =>
+          k !== 'stash.appscode.com/backup-blueprint' &&
+          k !== 'stash.appscode.com/schedule' &&
+          !k.startsWith('params.stash.appscode.com/'),
+      ) || []
+    const filteredAnnotations = {}
+    filteredKeyList.forEach((k) => {
+      filteredAnnotations[k] = annotations[k]
+    })
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComElasticsearch/metadata/annotations',
+      value: filteredAnnotations,
+    })
   }
 
   function initScheduleBackupForEdit() {
@@ -108,60 +190,48 @@ export const useFunc = (model) => {
     }
   }
 
-  function deleteKubedbComElasticsearchDbAnnotation(getValue, model, commit) {
-    const annotations =
-      getValue(model, '/resources/kubedbComElasticsearch/metadata/annotations') || {}
-    const filteredKeyList =
-      Object.keys(annotations).filter(
-        (k) =>
-          k !== 'stash.appscode.com/backup-blueprint' &&
-          k !== 'stash.appscode.com/schedule' &&
-          !k.startsWith('params.stash.appscode.com/'),
-      ) || []
-    const filteredAnnotations = {}
-    filteredKeyList.forEach((k) => {
-      filteredAnnotations[k] = annotations[k]
-    })
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComElasticsearch/metadata/annotations',
-      value: filteredAnnotations,
-    })
-  }
-
-  function getBackupConfigsAndAnnotations(getValue, model) {
-    const stashAppscodeComBackupConfiguration = getValue(
-      model,
-      '/resources/stashAppscodeComBackupConfiguration',
-    )
-    const kubedbComElasticsearchAnnotations =
-      getValue(model, '/resources/kubedbComElasticsearch/metadata/annotations') || {}
-
-    const isBluePrint = Object.keys(kubedbComElasticsearchAnnotations).some(
-      (k) =>
-        k === 'stash.appscode.com/backup-blueprint' ||
-        k === 'stash.appscode.com/schedule' ||
-        k.startsWith('params.stash.appscode.com/'),
-    )
-
-    return {
-      stashAppscodeComBackupConfiguration,
-      isBluePrint,
-    }
-  }
-
-  function valueExists(value, getValue, path) {
-    const val = getValue(value, path)
-    if (val) return true
-    else return false
-  }
-
-  // backup form
   function showBackupForm() {
     const scheduleBackup = getValue(discriminator, '/scheduleBackup')
-    // watchDependency('discriminator#/scheduleBackup')
     if (scheduleBackup === 'yes') return true
     else return false
   }
+
+  function showScheduleBackup() {
+    const operationQuery = storeGet('/route/params/actions') || ''
+    const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
+    return !isBackupOperation
+  }
+
+  function initRepositoryChoiseForEdit() {
+    const stashAppscodeComRepository_repo = getValue(
+      model,
+      '/resources/stashAppscodeComRepository_repo',
+    )
+    const repoInitialSelectionStatus = stashAppscodeComRepository_repo ? 'yes' : 'no'
+    setDiscriminatorValue('/repoInitialSelectionStatus', repoInitialSelectionStatus)
+
+    return repoInitialSelectionStatus
+  }
+
+  function getDefaultSchedule(modelPath) {
+    const config = getValue(discriminator, '/config')
+    const session = getValue(model, modelPath)
+    return session?.length ? session[0]?.scheduler.schedule : ''
+  }
+
+  function onInputChangeSchedule(modelPath, discriminatorName) {
+    const value = getValue(discriminator, `/${discriminatorName}`)
+    const session = getValue(model, modelPath) || []
+    if (session.length) {
+      session[0].scheduler.schedule = value
+      commit('wizard/model$update', {
+        path: modelPath,
+        value: session,
+      })
+    }
+  }
+
+  // *************************      New Backup Data Management (KubeStash) ********************************************
 
   let initialModel = {}
   let isBackupOn = false
@@ -294,7 +364,6 @@ export const useFunc = (model) => {
   }
 
   function isBackupDataLoadedTrue() {
-    // watchDependency('discriminator#/isBackupDataLoaded')
     return !!getValue(discriminator, '/isBackupDataLoaded')
   }
 
@@ -316,7 +385,7 @@ export const useFunc = (model) => {
       },
     ]
 
-    if ((dbResource?.spec?.replicaSet || dbResource?.spec?.shardTopology) && isArchiverAvailable) {
+    if (dbResource?.spec?.topology && isArchiverAvailable) {
       arr.push({
         description: 'Enable/Disable Archiver',
         text: 'Archiver',
@@ -351,9 +420,7 @@ export const useFunc = (model) => {
   }
 
   function isBackupType(type) {
-    // watchDependency('discriminator#/backupType')
     const selectedType = getValue(discriminator, '/backupType')
-
     return selectedType === type
   }
 
@@ -476,22 +543,17 @@ export const useFunc = (model) => {
   }
 
   function showPause() {
-    // watchDependency('discriminator#/backupConfigContext')
-    // watchDependency('discriminator#/config')
     const contex = getValue(discriminator, '/backupConfigContext')
     const configName = getValue(discriminator, '/config')
     return !!configName && contex === 'Modify'
   }
 
   function showConfigList() {
-    // watchDependency('discriminator#/backupConfigContext')
     const contex = getValue(discriminator, '/backupConfigContext')
     return contex === 'Modify' || contex === 'Delete'
   }
 
   function showSchedule() {
-    // watchDependency('discriminator#/backupConfigContext')
-    // watchDependency('discriminator#/config')
     const configName = getValue(discriminator, '/config')
     const contex = getValue(discriminator, '/backupConfigContext')
     if (contex === 'Create') return true
@@ -499,43 +561,7 @@ export const useFunc = (model) => {
     else return !!configName
   }
 
-  function showScheduleBackup() {
-    const operationQuery = storeGet('/route/params/actions') || ''
-    const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
-    return !isBackupOperation
-  }
-
-  function getDefaultSchedule(modelPath) {
-    // watchDependency('discriminator#/config')
-    const config = getValue(discriminator, '/config') // only for computed behaviour
-    const session = getValue(model, modelPath)
-    return session?.length ? session[0]?.scheduler.schedule : ''
-  }
-
-  function initRepositoryChoiseForEdit() {
-    const stashAppscodeComRepository_repo = getValue(
-      model,
-      '/resources/stashAppscodeComRepository_repo',
-    )
-    const repoInitialSelectionStatus = stashAppscodeComRepository_repo ? 'yes' : 'no'
-    setDiscriminatorValue('/repoInitialSelectionStatus', repoInitialSelectionStatus)
-
-    return repoInitialSelectionStatus
-  }
-
-  function onInputChangeSchedule(modelPath, discriminatorName) {
-    const value = getValue(discriminator, `/${discriminatorName}`)
-    const session = getValue(model, modelPath) || []
-    if (session.length) {
-      session[0].scheduler.schedule = value
-      commit('wizard/model$update', {
-        path: modelPath,
-        value: session,
-      })
-    }
-  }
-
-  // binding
+  // *************************      Gateway Binding ********************************************
 
   function addOrRemoveBinding() {
     const value = getValue(discriminator, `/binding`)
@@ -576,12 +602,7 @@ export const useFunc = (model) => {
     return isExposeBinding
   }
 
-  function objectCopy(obj) {
-    const temp = JSON.stringify(obj)
-    return JSON.parse(temp)
-  }
-
-  // storage
+  // *************************      Storage Autoscaling & Unit Handling ********************************************
 
   function handleUnit(path, type = 'bound') {
     let value = getValue(model, `/resources/${path}`)
@@ -617,7 +638,7 @@ export const useFunc = (model) => {
     }
   }
 
-  // compute
+  // *************************      Compute Autoscaling ********************************************
 
   let autoscaleType = ''
   let dbDetails = {}
@@ -658,116 +679,80 @@ export const useFunc = (model) => {
       force: true,
     })
     commit('wizard/model$update', {
-      path: `/resources/autoscalingkubedbComElasticsearchAutoscaler/spec/databaseRef/name`,
+      path: `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name`,
       value: name,
       force: true,
     })
     commit('wizard/model$update', {
-      path: `/resources/autoscalingkubedbComElasticsearchAutoscaler/metadata/labels`,
-      value: dbDetails.metadata.labels,
+      path: `/resources/autoscalingKubedbComElasticsearchAutoscaler/metadata/labels`,
+      value: dbDetails.metadata?.labels || {},
       force: true,
     })
   }
 
-  function isConsole() {
-    const isKube = isKubedb()
+  function dbTypeEqualsTo(dbType, type) {
+    autoscaleType = type
+    const dbDetailsSuccess = getValue(discriminator, '/dbDetails')
 
-    if (isKube) {
-      const dbName = storeGet('/route/params/name') || ''
-      commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
-        value: dbName,
-        force: true,
-      })
-      const operation = storeGet('/route/params/actions') || ''
-      if (operation.length) {
-        const splitOp = operation.split('-')
-        if (splitOp.length > 2) autoscaleType = splitOp[2]
-      }
-      const date = Math.floor(Date.now() / 1000)
-      const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
-      commit('wizard/model$update', {
-        path: '/metadata/name',
-        value: modifiedName,
-        force: true,
-      })
-      const namespace = storeGet('/route/query/namespace') || ''
-      if (namespace) {
-        commit('wizard/model$update', {
-          path: '/metadata/namespace',
-          value: namespace,
-          force: true,
-        })
-      }
-    }
+    if (!dbDetailsSuccess) return false
 
-    return !isKube
+    const { spec } = dbDetails || {}
+    const { topology } = spec || {}
+    let verd = ''
+    if (topology) verd = 'topology'
+    else verd = 'node'
+    clearSpecModel(verd)
+    return dbType === verd && spec
   }
 
-  async function getNamespaces() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-      params: { filter: { items: { metadata: { name: null } } } },
-    })
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    return resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
-
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
-  }
-
-  function onNamespaceChange() {
-    const namespace = getValue(model, '/metadata/namespace')
-    if (!namespace) {
+  function clearSpecModel(dbtype) {
+    if (dbtype === 'node') {
       commit(
         'wizard/model$delete',
-        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
+        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/data`,
+      )
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/ingest`,
+      )
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/master`,
+      )
+    } else if (dbtype === 'topology') {
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/node`,
       )
     }
   }
 
-  function initMetadata() {
-    const dbName =
-      getValue(
-        model,
-        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
-      ) || ''
-    const type = getValue(discriminator, '/autoscalingType') || ''
-    const date = Math.floor(Date.now() / 1000)
-    const resource = storeGet('/route/params/resource')
-    const scalingName = dbName ? dbName : resource
-    const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
-    if (modifiedName)
-      commit('wizard/model$update', {
-        path: '/metadata/name',
-        value: modifiedName,
-        force: true,
-      })
+  function setTrigger(path) {
+    let value = getValue(model, `/resources/${path}`)
+    if (value) return value
+    return 'On'
+  }
 
-    // delete the other type object from model
-    if (type === 'compute')
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/storage',
-      )
-    if (type === 'storage')
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/compute',
-      )
+  function onTriggerChange(path) {
+    const trigger = getValue(discriminator, `/${path}`)
+    const commitPath = `/resources/${path}`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
+  }
+
+  function setControlledResources(path) {
+    const list = ['cpu', 'memory']
+    const resourcePath = `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/compute/${path}/controlledResources`
+    commit('wizard/model$update', {
+      path: resourcePath,
+      value: list,
+      force: true,
+    })
+    return list
   }
 
   async function fetchTopologyMachines() {
@@ -790,13 +775,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function setTrigger(path) {
-    let value = getValue(model, `/resources/${path}`)
-    if (value) return value
-    return 'On'
-  }
-
-  function hasAnnotations(type) {
+  function hasAnnotations() {
     const annotations =
       getValue(
         model,
@@ -805,6 +784,10 @@ export const useFunc = (model) => {
     const instance = annotations['kubernetes.io/instance-type']
 
     return !!instance
+  }
+
+  function hasNoAnnotations() {
+    return !hasAnnotations()
   }
 
   function setAllowedMachine(type, minmax) {
@@ -829,12 +812,10 @@ export const useFunc = (model) => {
     else return mx
   }
 
-  async function getMachines(type, minmax) {
-    // watchDependency('discriminator#/topologyMachines')
+  function getMachines(type, minmax) {
     const depends = minmax === 'min' ? 'max' : 'min'
     const dependantPath = `/allowedMachine-${type}-${depends}`
 
-    // watchDependency(`discriminator#${dependantPath}`)
     const dependantMachine = getValue(discriminator, dependantPath)
 
     const nodeGroups = getValue(discriminator, '/topologyMachines') || []
@@ -900,61 +881,171 @@ export const useFunc = (model) => {
     }
   }
 
-  function hasNoAnnotations() {
-    return !hasAnnotations()
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
   }
 
-  function setControlledResources(type) {
-    const list = ['cpu', 'memory']
-    const path = `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/compute/${type}/controlledResources`
+  function isKubedb() {
+    return !!storeGet('/route/params/actions')
+  }
+
+  function showOpsRequestOptions() {
+    if (isKubedb() === true) return true
+    return (
+      !!getValue(
+        model,
+        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
+      ) && !!getValue(discriminator, '/autoscalingType')
+    )
+  }
+
+  function setApplyToIfReady() {
+    return 'IfReady'
+  }
+
+  async function fetchNodeTopology() {
+    const owner = storeGet('/route/params/user') || ''
+    const cluster = storeGet('/route/params/cluster') || ''
+    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+    try {
+      const resp = await axios.get(url)
+      const list = (resp && resp.data?.items) || []
+      const mappedList = list.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        return name
+      })
+      return mappedList
+    } catch (e) {
+      console.log(e)
+    }
+    return []
+  }
+
+  function isNodeTopologySelected() {
+    const nodeTopologyName =
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/compute/nodeTopology/name',
+      ) || ''
+    return !!nodeTopologyName.length
+  }
+
+  function setMetadata() {
+    const dbname = storeGet('/route/params/name') || ''
+    const namespace = storeGet('/route/query/namespace') || ''
+    const isKube = !!storeGet('/route/params/actions')
+    if (isKube) {
+      commit('wizard/model$update', {
+        path: '/metadata/release/name',
+        value: dbname,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: '/metadata/release/namespace',
+        value: namespace,
+        force: true,
+      })
+    }
+  }
+
+  // *************************      Monitoring Functions ********************************************
+
+  function showMonitoringSection() {
+    const configureStatus = getValue(discriminator, '/enableMonitoring')
+    return configureStatus
+  }
+
+  function onEnableMonitoringChange() {
+    const configureStatus = getValue(discriminator, '/enableMonitoring')
+
+    if (configureStatus) {
+      commit('wizard/model$update', {
+        path: '/resources/kubedbComElasticsearch/spec/monitor',
+        value: {},
+        force: true,
+      })
+    } else {
+      commit('wizard/model$delete', '/resources/kubedbComElasticsearch/spec/monitor')
+    }
+
+    // update alert value depend on monitoring profile
     commit('wizard/model$update', {
-      path: path,
-      value: list,
+      path: '/form/alert/enabled',
+      value: configureStatus ? 'warning' : 'none',
       force: true,
     })
-    return list
   }
 
-  function dbTypeEqualsTo(type) {
-    // watchDependency('discriminator#/dbDetails')
-
-    const { spec } = dbDetails || {}
-    const { topology } = spec || {}
-    let verd = ''
-    if (topology) verd = 'topology'
-    else verd = 'node'
-    clearSpecModel(verd)
-    return type === verd && spec
+  function showCustomizeExporterSection() {
+    const configureStatus = getValue(discriminator, '/customizeExporter')
+    return configureStatus
   }
 
-  function clearSpecModel(dbtype) {
-    if (dbtype === 'node') {
+  function onCustomizeExporterChange() {
+    const configureStatus = getValue(discriminator, '/customizeExporter')
+    if (configureStatus) {
+      commit('wizard/model$update', {
+        path: '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter',
+        value: {},
+        force: true,
+      })
+    } else {
       commit(
         'wizard/model$delete',
-        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/data`,
-      )
-      commit(
-        'wizard/model$delete',
-        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/ingest`,
-      )
-      commit(
-        'wizard/model$delete',
-        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/master`,
-      )
-    } else if (dbtype === 'topology') {
-      commit(
-        'wizard/model$delete',
-        `/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/${autoscaleType}/node`,
+        '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter',
       )
     }
   }
 
-  // monitoring
-  function isEqualToModelPathValue(value, modelPath) {
-    const modelPathValue = getValue(model, modelPath)
-    // watchDependency('model#' + modelPath)
-    return modelPathValue === value
+  function onAgentChange() {
+    const agent = getValue(model, '/resources/kubedbComElasticsearch/spec/monitor/agent')
+
+    if (!agent) {
+      removeCertificatesOfAliases(['metrics-exporter'])
+    }
+
+    if (agent === 'prometheus.io') {
+      commit('wizard/model$update', {
+        path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
+        value: [],
+        force: true,
+      })
+
+      onNamespaceChange()
+      onLabelChange()
+    } else {
+      commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
+    }
   }
+
+  function onNamespaceChange() {
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const agent = getValue(model, '/resources/kubedbComElasticsearch/spec/monitor/agent')
+    if (agent === 'prometheus.io') {
+      commit('wizard/model$update', {
+        path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
+        value: [namespace],
+        force: true,
+      })
+    }
+  }
+
+  function onLabelChange() {
+    const labels = getValue(model, '/resources/kubedbComElasticsearch/spec/metadata/labels')
+
+    const agent = getValue(model, '/resources/kubedbComElasticsearch/spec/monitor/agent')
+
+    if (agent === 'prometheus.io') {
+      commit('wizard/model$update', {
+        path: '/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels',
+        value: labels,
+        force: true,
+      })
+    }
+  }
+
+  // *************************      Resource & Network Functions ********************************************
 
   async function getResources(group, version, resource) {
     const owner = storeGet('/route/params/user')
@@ -994,114 +1085,6 @@ export const useFunc = (model) => {
     })
   }
 
-  /****** Monitoring *********/
-
-  function showMonitoringSection() {
-    // watchDependency('discriminator#/enableMonitoring')
-    const configureStatus = getValue(discriminator, '/enableMonitoring')
-    console.log(configureStatus)
-
-    return configureStatus
-  }
-
-  function onEnableMonitoringChange() {
-    const configureStatus = getValue(discriminator, '/enableMonitoring')
-    console.log(configureStatus)
-
-    if (configureStatus) {
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComElasticsearch/spec/monitor',
-        value: {},
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', '/resources/kubedbComElasticsearch/spec/monitor')
-    }
-
-    // update alert value depend on monitoring profile
-    commit('wizard/model$update', {
-      path: '/form/alert/enabled',
-      value: configureStatus ? 'warning' : 'none',
-      force: true,
-    })
-  }
-
-  function showCustomizeExporterSection() {
-    // watchDependency('discriminator#/customizeExporter')
-    const configureStatus = getValue(discriminator, '/customizeExporter')
-    return configureStatus
-  }
-
-  function onCustomizeExporterChange() {
-    const configureStatus = getValue(discriminator, '/customizeExporter')
-    if (configureStatus) {
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter',
-        value: {},
-        force: true,
-      })
-    } else {
-      commit(
-        'wizard/model$delete',
-        '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter',
-      )
-    }
-  }
-
-  function isValueExistInModel(path) {
-    const modelValue = getValue(model, path) || null
-    console.log(path, modelValue)
-
-    return !!modelValue
-  }
-
-  // function onNamespaceChange() {
-  //   const namespace = getValue(model, '/metadata/release/namespace')
-  //   const agent = getValue(model, '/resources/kubedbComElasticsearch/spec/monitor/agent')
-  //   if (agent === 'prometheus.io') {
-  //     commit('wizard/model$update', {
-  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-  //       value: [namespace],
-  //       force: true,
-  //     })
-  //   }
-  // }
-
-  function onLabelChange() {
-    const labels = getValue(model, '/resources/kubedbComElasticsearch/spec/metadata/labels')
-
-    const agent = getValue(model, '/resources/kubedbComElasticsearch/spec/monitor/agent')
-
-    if (agent === 'prometheus.io') {
-      commit('wizard/model$update', {
-        path: '/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels',
-        value: labels,
-        force: true,
-      })
-    }
-  }
-
-  function onAgentChange() {
-    const agent = getValue(model, '/resources/kubedbComElasticsearch/spec/monitor/agent')
-
-    if (!agent) {
-      removeCertificatesOfAliases(['metrics-exporter'])
-    }
-
-    if (agent === 'prometheus.io') {
-      commit('wizard/model$update', {
-        path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
-        value: [],
-        force: true,
-      })
-
-      onNamespaceChange()
-      onLabelChange()
-    } else {
-      commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
-    }
-  }
-
   function getOpsRequestUrl(reqType) {
     const cluster = storeGet('/route/params/cluster')
     const domain = storeGet('/domain') || ''
@@ -1124,6 +1107,8 @@ export const useFunc = (model) => {
     else
       return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
   }
+
+  // *************************      ValueFrom Functions (ConfigMap/Secret) ********************************************
 
   function setValueFrom() {
     if (isConfigMapTypeValueFrom()) {
@@ -1184,7 +1169,6 @@ export const useFunc = (model) => {
   }
 
   function isEqualToValueFromType(value) {
-    //watchDependency('discriminator#/valueFromType')
     const valueFrom = getValue(discriminator, '/valueFromType')
     return valueFrom === value
   }
@@ -1218,7 +1202,6 @@ export const useFunc = (model) => {
 
   async function resourceNames(group, version, resource) {
     const namespace = getValue(model, '/metadata/release/namespace')
-    // watchDependency('model#/metadata/release/namespace')
 
     let resources = await getNamespacedResourceList(axios, storeGet, {
       namespace,
@@ -1246,15 +1229,11 @@ export const useFunc = (model) => {
   async function getConfigMapKeys() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
     const configMapName = getValue(
       model,
       '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env/items/valueFrom/configMapKeyRef/name',
     )
-
-    // watchDependency('data#/namespace')
-    // watchDependency('rootModel#/valueFrom/configMapKeyRef/name')
 
     if (!configMapName) return []
 
@@ -1281,7 +1260,6 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/release/namespace')
-    // watchDependency('model#/metadata/release/namespace')
 
     try {
       const resp = await axios.get(
@@ -1316,15 +1294,11 @@ export const useFunc = (model) => {
   async function getSecretKeys() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
     const secretName = getValue(
       model,
       '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env/items/valueFrom/secretKeyRef/name',
     )
-
-    // watchDependency('data#/namespace')
-    // watchDependency('rootModel#/valueFrom/secretKeyRef/name')
 
     if (!secretName) return []
 
@@ -1347,74 +1321,26 @@ export const useFunc = (model) => {
     }
   }
 
-  function returnFalse() {
-    return false
-  }
-
-  function setValueFromDbDetails(path) {
-    const value = getValue(model, path)
-    console.log({ value })
-    return value
-  }
-
-  function isKubedb() {
-    return !!storeGet('/route/params/actions')
-  }
-
-  function showOpsRequestOptions() {
-    if (isKubedb() === true) return true
-    // watchDependency(
-    //   'model#/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
-    // )
-    // watchDependency('discriminator#/autoscalingType')
-    return (
-      !!getValue(
-        model,
-        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
-      ) && !!getValue(discriminator, '/autoscalingType')
-    )
-  }
-
-  function setApplyToIfReady() {
-    return 'IfReady'
-  }
-
-  async function fetchNodeTopology() {
-    const owner = storeGet('/route/params/user') || ''
-    const cluster = storeGet('/route/params/cluster') || ''
-    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-    try {
-      const resp = await axios.get(url)
-      const list = (resp && resp.data?.items) || []
-      const mappedList = list.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        return name
-      })
-      return mappedList
-    } catch (e) {
-      console.log(e)
-    }
-    return []
-  }
-
-  function isNodeTopologySelected() {
-    // watchDependency(
-    //   'model#/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/compute/nodeTopology/name',
-    // )
-    const nodeTopologyName =
-      getValue(
-        model,
-        '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/compute/nodeTopology/name',
-      ) || ''
-    return !!nodeTopologyName.length
-  }
+  // *************************      Export All Functions ********************************************
 
   return {
+    // Common helpers
     returnFalse,
+    objectCopy,
+    isEqualToModelPathValue,
+    isValueExistInModel,
+    isRancherManaged,
+
+    // Backup & restore
     initScheduleBackup,
     initScheduleBackupForEdit,
     onScheduleBackupChange,
     showBackupForm,
+    showScheduleBackup,
+    getDefaultSchedule,
+    onInputChangeSchedule,
+
+    // New backup data management (KubeStash)
     initBackupData,
     isBackupDataLoadedTrue,
     setBackupType,
@@ -1432,41 +1358,49 @@ export const useFunc = (model) => {
     showPause,
     showConfigList,
     showSchedule,
-    showScheduleBackup,
-    getDefaultSchedule,
-    onInputChangeSchedule,
-    // binding
+
+    // Gateway binding
     addOrRemoveBinding,
     isBindingAlreadyOn,
-    // storage
+
+    // Storage autoscaling
     handleUnit,
-    // compute
+
+    // Compute autoscaling
     getDbDetails,
-    isConsole,
-    getNamespaces,
-    initMetadata,
-    fetchTopologyMachines,
+    dbTypeEqualsTo,
     setTrigger,
-    hasAnnotations,
-    setAllowedMachine,
+    onTriggerChange,
+    fetchTopologyMachines,
     getMachines,
+    setAllowedMachine,
     onMachineChange,
+    hasAnnotations,
     hasNoAnnotations,
     setControlledResources,
-    dbTypeEqualsTo,
-    // monitoring
-    isEqualToModelPathValue,
-    getResources,
-    removeCertificatesOfAliases,
+    setValueFromDbDetails,
+    showOpsRequestOptions,
+    setApplyToIfReady,
+    fetchNodeTopology,
+    isNodeTopologySelected,
+    setMetadata,
+    isKubedb,
+
+    // Monitoring
     showMonitoringSection,
     onEnableMonitoringChange,
     showCustomizeExporterSection,
     onCustomizeExporterChange,
-    isValueExistInModel,
+    onAgentChange,
     onNamespaceChange,
     onLabelChange,
-    onAgentChange,
+
+    // Resources & network
+    getResources,
+    removeCertificatesOfAliases,
     getOpsRequestUrl,
+
+    // ValueFrom (ConfigMap/Secret)
     setValueFrom,
     isConfigMapTypeValueFrom,
     isSecretTypeValueFrom,
@@ -1477,13 +1411,5 @@ export const useFunc = (model) => {
     getConfigMapKeys,
     getSecrets,
     getSecretKeys,
-
-    setValueFromDbDetails,
-    showOpsRequestOptions,
-    isKubedb,
-    setApplyToIfReady,
-    fetchNodeTopology,
-    isNodeTopologySelected,
-    isRancherManaged,
   }
 }
