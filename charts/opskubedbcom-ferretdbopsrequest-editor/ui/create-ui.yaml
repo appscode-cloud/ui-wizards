@@ -359,17 +359,22 @@ step:
                   type: input
                   label: IP Address
 # common
-      - type: time-picker
-        label: Timeout
-        schema: 'schema/properties/spec/properties/timeout'
-      - type: radio
-        label: apply
-        schema: 'schema/properties/spec/properties/apply'
-        init:
-          type: func
-          value: setApplyToIfReady
-        options:
-          - text: IfReady (OpsRequest will be applied if database is ready)
-            value: IfReady
-          - text: Always (OpsRequest will always be applied)
-            value: Always
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            schema: 'schema/properties/spec/properties/timeout'
+            subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
+          - type: radio
+            label: Apply
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always

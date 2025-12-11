@@ -396,6 +396,7 @@ export const useFunc = (model) => {
   }
 
   function showOpsRequestOptions() {
+    console.log('isKubedb:')
     if (isKubedb() === true) return true
     // watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name')
     // watchDependency('discriminator#/autoscalingType')
