@@ -511,25 +511,6 @@ step:
               loader: setControlledResources|compute/node
               multiple: true
               schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
-            - type: select
-              label: Container Controlled Values
-              options:
-                - text: Requests And Limits
-                  value: RequestsAndLimits
-                - text: Requests Only
-                  value: RequestsOnly
-              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/containerControlledValues
-            - type: block-layout
-              label: In Memory Storage
-              showLabels: true
-              # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/inMemoryStorage
-              elements:
-                - type: threshold-input
-                  label: Scaling Factor Percentage
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/inMemoryStorage/properties/scalingFactorPercentage
-                - type: threshold-input
-                  label: Usage Threshold Percentage
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/inMemoryStorage/properties/usageThresholdPercentage
 
         # Topology mode
         - type: block-layout
@@ -641,25 +622,6 @@ step:
                   loader: setControlledResources|compute/master
                   multiple: true
                   schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/controlledResources
-                - type: select
-                  label: Container Controlled Values
-                  options:
-                    - text: Requests And Limits
-                      value: RequestsAndLimits
-                    - text: Requests Only
-                      value: RequestsOnly
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/containerControlledValues
-                - type: block-layout
-                  label: In Memory Storage
-                  showLabels: true
-                  # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/inMemoryStorage
-                  elements:
-                    - type: threshold-input
-                      label: Scaling Factor Percentage
-                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/inMemoryStorage/properties/scalingFactorPercentage
-                    - type: threshold-input
-                      label: Usage Threshold Percentage
-                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/inMemoryStorage/properties/usageThresholdPercentage
 
             # Data
             - type: switch
@@ -764,25 +726,7 @@ step:
                   loader: setControlledResources|compute/data
                   multiple: true
                   schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
-                - type: select
-                  label: Container Controlled Values
-                  options:
-                    - text: Requests And Limits
-                      value: RequestsAndLimits
-                    - text: Requests Only
-                      value: RequestsOnly
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/containerControlledValues
-                - type: block-layout
-                  label: In Memory Storage
-                  showLabels: true
-                  # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/inMemoryStorage
-                  elements:
-                    - type: threshold-input
-                      label: Scaling Factor Percentage
-                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/inMemoryStorage/properties/scalingFactorPercentage
-                    - type: threshold-input
-                      label: Usage Threshold Percentage
-                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/inMemoryStorage/properties/usageThresholdPercentage
+               
 
             # Ingest
             - type: switch
@@ -887,25 +831,6 @@ step:
                   loader: setControlledResources|compute/ingest
                   multiple: true
                   schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/controlledResources
-                - type: select
-                  label: Container Controlled Values
-                  options:
-                    - text: Requests And Limits
-                      value: RequestsAndLimits
-                    - text: Requests Only
-                      value: RequestsOnly
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/containerControlledValues
-                - type: block-layout
-                  label: In Memory Storage
-                  showLabels: true
-                  # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/inMemoryStorage
-                  elements:
-                    - type: threshold-input
-                      label: Scaling Factor Percentage
-                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/inMemoryStorage/properties/scalingFactorPercentage
-                    - type: threshold-input
-                      label: Usage Threshold Percentage
-                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/inMemoryStorage/properties/usageThresholdPercentage
 
         - type: block-layout
           label: NodeTopology
@@ -1014,9 +939,7 @@ step:
                 func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/scalingRules|scalingRules
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-            - type: input
-              label: Scaling Threshold
-              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingThreshold
+          
             - type: input
               label: UpperBound
               schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
@@ -1073,9 +996,7 @@ step:
                     func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
-                - type: input
-                  label: Scaling Threshold
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingThreshold
+          
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
@@ -1125,9 +1046,7 @@ step:
                     func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
-                - type: input
-                  label: Scaling Threshold
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingThreshold
+               
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
@@ -1177,9 +1096,6 @@ step:
                     func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules
-                - type: input
-                  label: Scaling Threshold
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingThreshold
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/upperBound
