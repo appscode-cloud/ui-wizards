@@ -373,9 +373,9 @@ export const useFunc = (model) => {
     return false
   }
 
-  function isEqualToModelPathValue({ model, getValue, watchDependency }, value, path) {
+  function isEqualToModelPathValue(value, path) {
     const modelValue = getValue(model, path)
-    watchDependency(`model#${path}`)
+    // watchDependency(`model#${path}`)
     return modelValue === value
   }
 
@@ -569,6 +569,7 @@ export const useFunc = (model) => {
   }
 
   function initDatabaseRef() {
+    // watchDependency('model#/metadata/namespace')
     const { name } = route.params || {}
     return name
   }
@@ -611,9 +612,9 @@ export const useFunc = (model) => {
     })
   }
 
-  function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
+  function ifRequestTypeEqualsTo(type) {
     const selectedType = getValue(model, '/spec/type')
-    watchDependency('model#/spec/type')
+    // watchDependency('model#/spec/type')
     return selectedType === type
   }
 
@@ -632,6 +633,8 @@ export const useFunc = (model) => {
   }
 
   function showAndInitName() {
+    // watchDependency('model#/spec/type')
+    // watchDependency('model#/spec/databaseRef/name')
     const ver = asDatabaseOperation()
     const selectedType = getValue(model, '/spec/type')
     const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
@@ -716,6 +719,8 @@ export const useFunc = (model) => {
   }
 
   function isDbDetailsLoading() {
+    // watchDependency('discriminator#/dbDetails')
+    // watchDependency('model#/spec/databaseRef/name')
     const dbDetails = getValue(discriminator, '/dbDetails')
     const dbName = getValue(model, '/spec/databaseRef/name')
     return !dbDetails || !dbName
@@ -726,6 +731,7 @@ export const useFunc = (model) => {
   // ============================================================
 
   function getDbType() {
+    // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
     const { spec } = dbDetails || {}
     const { topology } = spec || {}
@@ -737,8 +743,8 @@ export const useFunc = (model) => {
     }
   }
 
-  function ifDbTypeEqualsTo({ model, getValue, discriminator, watchDependency }, type, mode, section) {
-    watchDependency('discriminator#/dbDetails')
+  function ifDbTypeEqualsTo(type, mode, section) {
+    // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
     const { spec } = dbDetails || {}
     const { topology } = spec || {}
@@ -800,7 +806,7 @@ export const useFunc = (model) => {
   // MACHINE PROFILE FUNCTIONS
   // ============================================================
 
-  function getMachines({ model, getValue, discriminator, storeGet }, type) {
+  function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
 
@@ -856,7 +862,7 @@ export const useFunc = (model) => {
     return arr
   }
 
-  function setMachine({ model, getValue, discriminator, storeGet }, type) {
+  function setMachine(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
 
     let limits = {}
@@ -887,7 +893,7 @@ export const useFunc = (model) => {
     else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
-  function onMachineChange({ model, getValue, discriminator, commit }, type, path) {
+  function onMachineChange(type, path) {
     let selectedMachine = ''
     selectedMachine = getValue(discriminator, `/machine-${type}`)
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
@@ -935,14 +941,14 @@ export const useFunc = (model) => {
       commit('wizard/model$delete', '/metadata/annotations')
   }
 
-  function isMachineCustom({ discriminator, getValue, watchDependency }, path) {
-    watchDependency(`discriminator#${path}`)
+  function isMachineCustom(path) {
+    // watchDependency(`discriminator#${path}`)
     const machine = getValue(discriminator, `${path}`)
     return machine === 'custom'
   }
 
-  function setValueFromDbDetails({ model, getValue, discriminator, commit, watchDependency }, watchPath, commitPath) {
-    watchDependency(`discriminator#${watchPath}`)
+  function setValueFromDbDetails(watchPath, commitPath) {
+    // watchDependency(`discriminator#${watchPath}`)
     const retValue = getValue(discriminator, `/dbDetails${watchPath}`)
 
     if (commitPath) {
@@ -962,9 +968,9 @@ export const useFunc = (model) => {
   // VERTICAL SCALING FUNCTIONS
   // ============================================================
 
-  function isVerticalScaleTopologyRequired({ model, getValue, discriminator, commit, watchDependency }, type) {
-    watchDependency(`discriminator#/topologyKey-${type}`)
-    watchDependency(`discriminator#/topologyValue-${type}`)
+  function isVerticalScaleTopologyRequired(type) {
+    // watchDependency(`discriminator#/topologyKey-${type}`)
+    // watchDependency(`discriminator#/topologyValue-${type}`)
 
     const key = getValue(discriminator, `/topologyKey-${type}`)
     const value = getValue(discriminator, `/topologyValue-${type}`)
@@ -987,9 +993,9 @@ export const useFunc = (model) => {
   // VOLUME EXPANSION FUNCTIONS
   // ============================================================
 
-  function checkVolume({ model, getValue, discriminator, watchDependency }, currentVolPath, newVolPath) {
-    watchDependency(`discriminator#${currentVolPath}`)
-    watchDependency(`model#${newVolPath}`)
+  function checkVolume(currentVolPath, newVolPath) {
+    // watchDependency(`discriminator#${currentVolPath}`)
+    // watchDependency(`model#${newVolPath}`)
 
     const volume = getValue(discriminator, `/dbDetails${currentVolPath}`)
     const input = getValue(model, newVolPath)
@@ -1047,6 +1053,7 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/namespace')
+    // watchDependency('model#/metadata/namespace')
 
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
@@ -1086,25 +1093,27 @@ export const useFunc = (model) => {
   /**
    * Display the name of the currently selected config secret
    * @param {Object} params - Function parameters
-   * @param {String} type - Node type (e.g., 'brokers', 'historicals')
+   * @param {String} type - Node type (optional, Druid doesn't use it)
    * @returns {String} Message indicating selected secret
    */
-  function getSelectedConfigSecret({ model, getValue, watchDependency }, type) {
-    const path = `/spec/configuration/${type}/configSecret/name`
+  function getSelectedConfigSecret(type) {
+    // Druid doesn't use type-specific paths, just /spec/configuration/configSecret/name
+    const path = type ? `/spec/configuration/${type}/configSecret/name` : `/spec/configuration/configSecret/name`
     const selectedSecret = getValue(model, path)
-    watchDependency(`model#${path}`)
+    // watchDependency(`model#${path}`)
     return `You have selected ${selectedSecret} secret` || 'No secret selected'
   }
 
   /**
    * Get the YAML representation of the selected config secret's data
    * @param {Object} params - Function parameters
-   * @param {String} type - Node type (e.g., 'brokers', 'historicals')
+   * @param {String} type - Node type (optional, Druid doesn't use it)
    * @returns {String} YAML formatted secret data
    */
-  function getSelectedConfigSecretValue({ model, getValue, watchDependency }, type) {
-    const path = `/spec/configuration/${type}/configSecret/name`
-    watchDependency(`model#${path}`)
+  function getSelectedConfigSecretValue(type) {
+    // Druid doesn't use type-specific paths, just /spec/configuration/configSecret/name
+    const path = type ? `/spec/configuration/${type}/configSecret/name` : `/spec/configuration/configSecret/name`
+    // watchDependency(`model#${path}`)
     const selectedSecret = getValue(model, path)
     let data
     secretArray.forEach((item) => {
@@ -1162,7 +1171,7 @@ export const useFunc = (model) => {
    * @param {String} value - Secret name to set
    * @param {String} type - Node type (e.g., 'brokers', 'historicals')
    */
-  function setSelectedConfigSecret({ commit, model, getValue }, value, type) {
+  function setSelectedConfigSecret(value, type) {
     const path = `/spec/configuration/${type}/configSecret/name`
     commit('wizard/model$update', {
       path: path,
@@ -1178,9 +1187,9 @@ export const useFunc = (model) => {
    * @param {String} type - Node type
    * @returns {String} YAML formatted secret data
    */
-  function getSelectedConfigSecretData({ model, getValue, watchDependency }, type) {
+  function getSelectedConfigSecretData(type) {
     const path = `/spec/configuration/${type}/configSecret/name`
-    watchDependency(`model#${path}`)
+    // watchDependency(`model#${path}`)
     const selectedSecret = getValue(model, path)
     let data
     secretArray.forEach((item) => {
@@ -1191,7 +1200,7 @@ export const useFunc = (model) => {
     return data || 'No Data Found'
   }
 
-  function onApplyconfigChange({ model, getValue, discriminator, commit }, type) {
+  function onApplyconfigChange(type) {
     const configPath = `/${type}/applyConfig`
     const applyconfig = getValue(discriminator, configPath)
 
@@ -1215,16 +1224,16 @@ export const useFunc = (model) => {
   // RECONFIGURATION FUNCTIONS
   // ============================================================
 
-  function ifReconfigurationTypeEqualsTo({ discriminator, getValue, watchDependency }, value, property) {
+  function ifReconfigurationTypeEqualsTo(value, property) {
     let path = '/reconfigurationType'
     if (property) path += `-${property}`
     const reconfigurationType = getValue(discriminator, path)
     const watchPath = `discriminator#${path}`
-    watchDependency(watchPath)
+    // watchDependency(watchPath)
     return reconfigurationType === value
   }
 
-  function onReconfigurationTypeChange({ model, getValue, discriminator, setDiscriminatorValue, commit }, property) {
+  function onReconfigurationTypeChange(property) {
     setDiscriminatorValue(`/${property}/applyConfig`, [])
     let path = '/reconfigurationType'
     if (property) path += `-${property}`
@@ -1249,6 +1258,7 @@ export const useFunc = (model) => {
   // ============================================================
 
   function getDbTls() {
+    // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
     const { spec } = dbDetails || {}
     return spec?.tls || undefined
@@ -1259,7 +1269,7 @@ export const useFunc = (model) => {
     return !!tls
   }
 
-  function setApiGroup({ commit }) {
+  function setApiGroup() {
     return commit('wizard/model$update', {
       path: '/spec/tls/issuerRef/apiGroup',
       value: 'cert-manager.io',
@@ -1267,7 +1277,7 @@ export const useFunc = (model) => {
     })
   }
 
-  function onSetAliasChange({ commit, itemCtx }) {
+  function onSetAliasChange() {
     const alias = itemCtx.alias
     if (alias) {
       commit('wizard/model$update', {
@@ -1282,37 +1292,38 @@ export const useFunc = (model) => {
     return ['server', 'client', 'metrics-exporter']
   }
 
-  function showIssuerRefAndCertificates({ discriminator, getValue, watchDependency }) {
-    watchDependency('discriminator#/tlsOperation')
+  function showIssuerRefAndCertificates() {
+    // watchDependency('discriminator#/tlsOperation')
     const tlsOperation = getValue(discriminator, '/tlsOperation')
     const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
     return verd
   }
 
-  function onIssuerRefChange({ commit, model, getValue }) {
-    setApiGroup({ commit })
+  function onIssuerRefChange() {
+    setApiGroup()
   }
 
-  function hasIssuerRefName({ model, getValue, watchDependency }) {
-    watchDependency('model#/spec/tls/issuerRef/name')
+  function hasIssuerRefName() {
+    // watchDependency('model#/spec/tls/issuerRef/name')
     const name = getValue(model, '/spec/tls/issuerRef/name')
     return !!name
   }
 
-  function hasNoIssuerRefName({ model, getValue, watchDependency }) {
-    watchDependency('model#/spec/tls/issuerRef/name')
+  function hasNoIssuerRefName() {
+    // watchDependency('model#/spec/tls/issuerRef/name')
     const name = getValue(model, '/spec/tls/issuerRef/name')
     return !name
   }
 
-  function showTlsConfigureSection({ watchDependency, discriminator, getValue }) {
-    watchDependency('discriminator#/tlsOperation')
+  function showTlsConfigureSection() {
+    // watchDependency('discriminator#/tlsOperation')
     const tlsOperation = getValue(discriminator, '/tlsOperation')
     return tlsOperation === 'update'
   }
 
   function initIssuerRefApiGroup() {
     const kind = getValue(model, '/spec/tls/issuerRef/kind')
+    // watchDependency('model#/spec/tls/issuerRef/kind')
     if (kind) {
       return 'cert-manager.io'
     } else return undefined
@@ -1321,6 +1332,8 @@ export const useFunc = (model) => {
   async function getIssuerRefsName() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
+    // watchDependency('model#/spec/tls/issuerRef/kind')
+    // watchDependency('model#/metadata/namespace')
     const kind = getValue(model, '/spec/tls/issuerRef/kind')
     const namespace = getValue(model, '/metadata/namespace')
 
@@ -1399,7 +1412,7 @@ export const useFunc = (model) => {
     return getAliasOptions ? getAliasOptions() : []
   }
 
-  function validateNewCertificates({ itemCtx }) {
+  function validateNewCertificates() {
     const addedAliases = (model && model.map((item) => item.alias)) || []
 
     if (addedAliases.includes(itemCtx.alias) && itemCtx.isCreate) {
@@ -1420,8 +1433,8 @@ export const useFunc = (model) => {
   // RESOURCE MANAGEMENT FUNCTIONS
   // ============================================================
 
-  function isToggleOn({ discriminator, getValue, watchDependency }, path) {
-    watchDependency(`discriminator#${path}`)
+  function isToggleOn(path) {
+    // watchDependency(`discriminator#${path}`)
     const val = getValue(discriminator, path)
     return !!val
   }
@@ -1500,6 +1513,7 @@ export const useFunc = (model) => {
 
   async function resourceNames(group, version, resource) {
     const namespace = getValue(model, '/metadata/namespace')
+    // watchDependency('model#/metadata/namespace')
 
     let resources = await getNamespacedResourceList({
       namespace,
@@ -1547,7 +1561,7 @@ export const useFunc = (model) => {
     })
   }
 
-  function unsets({ discriminator, getValue, commit }, path) {
+  function unsets(path) {
     const val = getValue(discriminator, path)
     if (val) {
       commit('wizard/model$delete', path)
@@ -1559,6 +1573,7 @@ export const useFunc = (model) => {
   }
 
   function isEqualToValueFromType(value) {
+    // watchDependency('discriminator#/valueFromType')
     const valueFrom = getValue(discriminator, '/valueFromType')
     return valueFrom === value
   }

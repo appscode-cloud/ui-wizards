@@ -426,7 +426,6 @@ step:
                 elements:
                   - type: input-compare
                     label: Storage Size
-                    header: Historicals
                     subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
                     init:
                       type: func
@@ -446,7 +445,6 @@ step:
                 elements:
                   - type: input-compare
                     label: Storage Size
-                    header: Middle Managers
                     subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
                     init:
                       type: func
@@ -486,36 +484,51 @@ step:
                   type: required
                 schema: temp/properties/reconfigurationType
               - type: block-layout
-                label: Configuration config secret
-                showLabels: false
+                label: Config Secret
+                showLabels: true
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                   type: function
                 elements:
-                - type: label-element
-                  label: Select a configuration secret from the available list to update your database settings
-                  customClass: mb-10
-                - type: select
-                  addNewButton:
-                    label: Create a new Secret
-                    target: _blank
-                    url:
-                      function: createSecretUrl
-                  label: Config Secret
-                  if:
-                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-                    type: function
-                  loader:
-                    name: getConfigSecrets
-                    watchPaths:
-                      - schema/properties/metadata/properties/namespace
-                  init:
-                    type: func
-                    value: setValueFromDbDetails|/spec/configSecret/name
-                  refresh: true
-                  validation:
-                    type: required
-                  schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                  - type: label-element
+                    label: Select a configuration secret from the available list to update your database settings
+                    customClass: mb-10
+                  - type: select
+                    addNewButton:
+                      label: Create Secret
+                      target: _blank
+                      url:
+                        function: createSecretUrl
+                    label: Config Secret
+                    loader:
+                      name: getConfigSecrets
+                      watchPaths:
+                        - schema/properties/metadata/properties/namespace
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/configSecret/name
+                    refresh: true
+                    validation:
+                      type: required
+                    schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                  - type: label-element
+                    label: Selected Config Secret
+                    loader: getSelectedConfigSecret
+                    watcher:
+                      func: getSelectedConfigSecret
+                      paths:
+                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                  - type: editor
+                    label: Value
+                    readonly: true
+                    hasCopy: false
+                    watcher:
+                      func: getSelectedConfigSecretValue
+                      paths:
+                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                    validation:
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
               - type: array-object-form
                 label: Apply Config
                 buttonClass: is-light is-outlined
