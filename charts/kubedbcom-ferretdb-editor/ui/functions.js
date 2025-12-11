@@ -222,6 +222,17 @@ export const useFunc = (model) => {
     return 'On'
   }
 
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComFerretDBAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
+  }
+
   function hasAnnotations(type) {
     const annotations =
       getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations') ||
@@ -827,6 +838,7 @@ export const useFunc = (model) => {
     initMetadata,
     fetchTopologyMachines,
     setTrigger,
+    onTriggerChange,
     hasAnnotations,
     setAllowedMachine,
     getMachines,

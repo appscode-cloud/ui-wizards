@@ -60,28 +60,36 @@ step:
         loader: fetchTopologyMachines
         elements:
           # primary
+          - type: switch
+            label: Trigger
+            fullwidth: true
+            init:
+              type: func
+              value: setTrigger|autoscalingKubedbComFerretDBAutoscaler/spec/compute/primary/trigger
+            schema: temp/properties/compute/properties/primary/properties/trigger
+            watcher:
+              func: onTriggerChange|compute/primary
+              paths:
+                - temp/properties/compute/properties/primary/properties/trigger
+          - type: label-element
+            label: Pod lifetime threshold
+            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+          - type: input
+            label: Pod LifeTime Threshold (e.g., 10m 30s)
+            schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/podLifeTimeThreshold
+            customClass: width-300
           - type: block-layout
-            label: Primary 
+            label: Primary
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary
             elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComFerretDBAutoscaler/spec/compute/primary/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: Resource Diff Percentage
+                label: ResourceDiff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/resourceDiffPercentage
+                customClass: width-300
+              - type: label-element
+                label: Resource Configuration
+                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
@@ -151,11 +159,38 @@ step:
                           schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
-                loader: setControlledResources|primary
+                loader: setControlledResources|compute/primary
                 multiple: true
                 schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/controlledResources
 
           # secondary
+          - type: switch
+            label: Trigger
+            fullwidth: true
+            if:
+              type: function
+              name: ferretTypeEqualsTo|secondary
+            init:
+              type: func
+              value: setTrigger|autoscalingKubedbComFerretDBAutoscaler/spec/compute/secondary/trigger
+            schema: temp/properties/compute/properties/secondary/properties/trigger
+            watcher:
+              func: onTriggerChange|compute/secondary
+              paths:
+                - temp/properties/compute/properties/secondary/properties/trigger
+          - type: label-element
+            label: Pod lifetime threshold
+            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            if:
+              type: function
+              name: ferretTypeEqualsTo|secondary
+          - type: input
+            label: Pod LifeTime Threshold (e.g., 10m 30s)
+            schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/podLifeTimeThreshold
+            customClass: width-300
+            if:
+              type: function
+              name: ferretTypeEqualsTo|secondary
           - type: block-layout
             label: Secondary
             if:
@@ -164,23 +199,13 @@ step:
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary
             elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComFerretDBAutoscaler/spec/compute/secondary/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: Resource Diff Percentage
+                label: ResourceDiff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/resourceDiffPercentage
+                customClass: width-300
+              - type: label-element
+                label: Resource Configuration
+                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
@@ -250,7 +275,7 @@ step:
                           schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
-                loader: setControlledResources|secondary
+                loader: setControlledResources|compute/secondary
                 multiple: true
                 schema: schema/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/controlledResources
 
