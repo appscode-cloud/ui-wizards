@@ -3203,6 +3203,11 @@ export const useFunc = (model) => {
     return value
   }
 
+  function isHidden(path) {
+    const value = getValue(model, path)
+    return !!value
+  }
+
   return {
     getOpsRequestUrl,
     handleUnit,
@@ -3383,5 +3388,6 @@ export const useFunc = (model) => {
     isInputTypeValueFrom,
     getSecretKeys,
     setValueFromDbDetails,
+    isHidden,
   }
 }
