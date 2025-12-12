@@ -101,6 +101,7 @@ step:
                     - temp/properties/schedule
               - type: switch
                 label: Paused
+                fullwidth: true
                 schema: schema/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
                 if:
                   type: function
@@ -131,6 +132,7 @@ step:
             elements:
               - type: switch
                 label: Enable Archiver
+                fullwidth: true
                 schema: temp/properties/archiverEnabled
                 init:
                   type: func
@@ -214,6 +216,7 @@ step:
             elements:
             - type: switch
               label: Honor labels
+              fullwidth: true
               schema: honorLabels
             - type: input
               label: Interval
@@ -1609,6 +1612,9 @@ step:
             - type: block-layout
               label: Hidden
               showLabels: true
+              if:
+                name: isHidden|resources/kubedbComMongoDB/spec/hidden
+                type: function
               elements:
                 - type: threshold-input
                   label: UsageThreshold (%)
@@ -1618,7 +1624,7 @@ step:
                 - type: scaling-rules
                   label: Scaling Rules
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules
-                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/shardTopology/hidden/storage/resources/requests/storage
+                  loader: setValueFromDbDetails|resources/kubedbComMongoDB/spec/hidden/storage/resources/requests/storage
                   watcher:
                     func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/scalingRules|scalingRules
                     paths:
