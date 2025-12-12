@@ -464,6 +464,7 @@ step:
               - type: switch
                 schema:  schema/properties/spec/properties/configuration/properties/removeCustomConfig
                 label: Remove CustomConfig
+                fullwidth: true
                 if:
                   name: returnFalse
                   type: function
@@ -491,13 +492,15 @@ step:
               value: initTlsOperation
             schema: temp/properties/tlsOperation
           - type: switch
-            label: remove
+            label: Remove TLS
+            fullwidth: true
             if:
               name: returnFalse
               type: function
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
-            label: rotateCertificates
+            label: Rotate Certificates
+            fullwidth: true
             schema: schema/properties/spec/properties/tls/properties/rotateCertificates
             if:
               name: returnFalse
@@ -550,6 +553,7 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
           - type: block-layout
             label: Certificates
+            showLabels: true
             if:
               name: showIssuerRefAndCertificates
               type: function
@@ -573,54 +577,48 @@ step:
                 label: Subject
                 showLabels: true
                 elements:
-                  - type: array-object-form
+                  - type: array-item-form
                     label: Organizations
-                    customClass: is-light is-outlined
+                    buttonClass: is-light is-outlined
                     schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations
-                    elements:
-                      - type: input
-                        label: organization
-                        schema: items
-                  - type: array-object-form
-                    label: countries
-                    customClass: is-light is-outlined
+                    element:
+                      type: input
+                      label: Organization
+                  - type: array-item-form
+                    label: Countries
+                    buttonClass: is-light is-outlined
                     schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries
-                    elements:
-                      - type: input
-                        label: country
-                        schema: items
-                  - type: array-object-form
-                    label: organizational_units
-                    customClass: is-light is-outlined
+                    element:
+                      type: input
+                      label: Country
+                  - type: array-item-form
+                    label: Organizational Units
+                    buttonClass: is-light is-outlined
                     schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits
-                    elements:
-                      - type: input
-                        label: organizational_unit
-                        schema: items
-                  - type: array-object-form
-                    label: provinces
-                    customClass: is-light is-outlined
+                    element:
+                      type: input
+                      label: Organizational Unit
+                  - type: array-item-form
+                    label: Provinces
+                    buttonClass: is-light is-outlined
                     schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces
-                    elements:
-                      - type: input
-                        label: province
-                        schema: items
-              - type: array-object-form
+                    element:
+                      type: input
+                      label: Province
+              - type: array-item-form
                 label: DNS Names
-                customClass: is-light is-outlined
+                buttonClass: is-light is-outlined
                 schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames
-                elements:
-                  - type: input
-                    label: dns name
-                    schema: items
-              - type: array-object-form
+                element:
+                  type: input
+                  label: DNS Name
+              - type: array-item-form
                 label: IP Addresses
                 customClass: is-light is-outlined
                 schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses
-                elements:
-                  - type: input
-                    label: ip Address
-                    schema: items
+                element:
+                  type: input
+                  label: IP Address
 # common
       - type: block-layout
         label: OpsRequest Options

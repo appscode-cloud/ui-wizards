@@ -1150,8 +1150,7 @@ export const useFunc = (model) => {
 
   function isIssuerRefRequired() {
     const hasTls = hasTlsField()
-
-    return !hasTls
+    return hasTls ? false : ''
   }
 
   function getRequestTypeFromRoute() {
