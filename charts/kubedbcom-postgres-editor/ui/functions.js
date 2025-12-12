@@ -24,7 +24,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('binding', false)
   setDiscriminatorValue('hidePreviewFromWizard', undefined)
 
-  setDiscriminatorValue('/enableMonitoring', true)
+  setDiscriminatorValue('/enableMonitoring', false)
   setDiscriminatorValue('/customizeExporter', true)
   setDiscriminatorValue('/valueFromType', 'input')
 
