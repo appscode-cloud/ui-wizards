@@ -1522,6 +1522,34 @@ export const useFunc = (model) => {
   }
 
   // =====================================================
+  // Elasticsearch-specific helper functions
+  // =====================================================
+
+  function hasResourceValue(type) {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const spec = dbDetails?.spec || {}
+
+    if (type === 'node') {
+      return !!spec?.podTemplate?.spec?.resources
+    }
+
+    const topology = spec?.topology || {}
+    return !!topology[type]?.resources
+  }
+
+  function hasVolumeExpansion(type) {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const spec = dbDetails?.spec || {}
+
+    if (type === 'node') {
+      return !!spec?.storage
+    }
+
+    const topology = spec?.topology || {}
+    return !!topology[type]?.storage
+  }
+
+  // =====================================================
   // Return all exported functions
   // =====================================================
 
@@ -1617,5 +1645,7 @@ export const useFunc = (model) => {
     // Helper functions
     setValueFromDbDetails,
     setApplyToIfReady,
+    hasResourceValue,
+    hasVolumeExpansion,
   }
 }

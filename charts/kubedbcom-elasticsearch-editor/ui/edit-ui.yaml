@@ -519,110 +519,6 @@ step:
             type: function
             name: dbTypeEqualsTo|topology
           elements:
-            # Master
-            - type: switch
-              label: Trigger
-              fullwidth: true
-              init:
-                type: func
-                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/master/trigger
-              schema: temp/properties/compute/properties/master/properties/trigger
-              watcher:
-                func: onTriggerChange|compute/master
-                paths:
-                  - temp/properties/compute/properties/master/properties/trigger
-            - type: label-element
-              label: Pod lifetime threshold
-              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-            - type: input
-              label: Pod LifeTime Threshold (e.g., 10m 30s)
-              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/podLifeTimeThreshold
-              customClass: width-300
-            - type: block-layout
-              label: Master
-              showLabels: true
-              # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master
-              elements:
-                - type: threshold-input
-                  label: ResourceDiff Percentage
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/resourceDiffPercentage
-                  customClass: width-300
-                - type: label-element
-                  label: Resource Configuration
-                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
-                - type: block-layout
-                  showLabels: false
-                  elements:
-                    - type: horizontal-layout
-                      elements:
-                      - type: machine-compare
-                        label: Min Allowed Profile
-                        schema: temp/properties/allowedMachine-master-min
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|master|min
-                        loader:
-                          name: getMachines|master|min
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-master-max
-                        watcher:
-                          func: onMachineChange|master
-                          paths:
-                            - temp/properties/allowedMachine-master-min
-                      - type: block-layout
-                        label: Min Allowed
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/memory
-                      - type: machine-compare
-                        label: Max Allowed Profile
-                        schema: temp/properties/allowedMachine-master-max
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|master|max
-                        loader:
-                          name: getMachines|master|max
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-master-min
-                        watcher:
-                          func: onMachineChange|master
-                          paths:
-                            - temp/properties/allowedMachine-master-max
-                      - type: block-layout
-                        label: Max Allowed
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/memory
-                - type: select
-                  label: Controlled Resources
-                  loader: setControlledResources|compute/master
-                  multiple: true
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/controlledResources
-
             # Data
             - type: switch
               label: Trigger
@@ -726,7 +622,6 @@ step:
                   loader: setControlledResources|compute/data
                   multiple: true
                   schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
-               
 
             # Ingest
             - type: switch
@@ -831,6 +726,110 @@ step:
                   loader: setControlledResources|compute/ingest
                   multiple: true
                   schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/controlledResources
+
+            # Master
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/master/trigger
+              schema: temp/properties/compute/properties/master/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/master
+                paths:
+                  - temp/properties/compute/properties/master/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s)
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/podLifeTimeThreshold
+              customClass: width-300
+            - type: block-layout
+              label: Master
+              showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master
+              elements:
+                - type: threshold-input
+                  label: ResourceDiff Percentage
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                - type: block-layout
+                  showLabels: false
+                  elements:
+                    - type: horizontal-layout
+                      elements:
+                      - type: machine-compare
+                        label: Min Allowed Profile
+                        schema: temp/properties/allowedMachine-master-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|master|min
+                        loader:
+                          name: getMachines|master|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-master-max
+                        watcher:
+                          func: onMachineChange|master
+                          paths:
+                            - temp/properties/allowedMachine-master-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/memory
+                      - type: machine-compare
+                        label: Max Allowed Profile
+                        schema: temp/properties/allowedMachine-master-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|master|max
+                        loader:
+                          name: getMachines|master|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-master-min
+                        watcher:
+                          func: onMachineChange|master
+                          paths:
+                            - temp/properties/allowedMachine-master-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/memory
+                - type: select
+                  label: Controlled Resources
+                  loader: setControlledResources|compute/master
+                  multiple: true
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/controlledResources
 
         - type: block-layout
           label: NodeTopology
@@ -955,56 +954,6 @@ step:
             type: function
             name: dbTypeEqualsTo|topology
           elements:
-            # Master
-            - type: switch
-              label: Trigger
-              fullwidth: true
-              init:
-                type: func
-                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/trigger
-              schema: temp/properties/storage/properties/master/properties/trigger
-              watcher:
-                func: onTriggerChange|storage/master
-                paths:
-                  - temp/properties/storage/properties/master/properties/trigger
-            - type: label-element
-              label: Expansion Mode (Online/Offline)
-              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-            - type: select
-              label: Mode
-              description: Select how the storage expansion should be handled.
-              options:
-                - text: Online
-                  value: Online
-                - text: Offline
-                  value: Offline
-              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/expansionMode
-            - type: block-layout
-              label: Master
-              showLabels: true
-              elements:
-                - type: threshold-input
-                  label: UsageThreshold (%)
-                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
-                  customClass: width-300
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/usageThreshold
-                - type: scaling-rules
-                  label: Scaling Rules
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
-                  loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/topology/master/storage/resources/requests/storage
-                  watcher:
-                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/scalingRules|scalingRules
-                    paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
-          
-                - type: input
-                  label: UpperBound
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
-                  watcher:
-                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/upperBound
-                    paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
-
             # Data
             - type: switch
               label: Trigger
@@ -1046,7 +995,7 @@ step:
                     func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/scalingRules|scalingRules
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
-               
+
                 - type: input
                   label: UpperBound
                   schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
@@ -1103,6 +1052,56 @@ step:
                     func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/upperBound
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/upperBound
+
+            # Master
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/trigger
+              schema: temp/properties/storage/properties/master/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/master
+                paths:
+                  - temp/properties/storage/properties/master/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/expansionMode
+            - type: block-layout
+              label: Master
+              showLabels: true
+              elements:
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  customClass: width-300
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/topology/master/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
+
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
 
         - type: block-layout
           label: Ops Request Options
