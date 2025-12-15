@@ -59,43 +59,29 @@ step:
         showLabels: false
         loader: fetchTopologyMachines
         elements:
-          # pgbouncer mode - Trigger OUTSIDE block-layout
-          - type: switch
-            label: Trigger
-            fullwidth: true
-            init:
-              type: func
-              value: setTrigger|autoscalingKubedbComPgBouncerAutoscaler/spec/compute/pgbouncer/trigger
-            schema: temp/properties/compute/properties/pgbouncer/properties/trigger
-            watcher:
-              func: onTriggerChange|compute/pgbouncer
-              paths:
-                - temp/properties/compute/properties/pgbouncer/properties/trigger
-
-          # Pod LifeTime label OUTSIDE block-layout
-          - type: label-element
-            label: Pod lifetime threshold
-            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-
-          # Pod LifeTime input OUTSIDE block-layout
-          - type: input
-            label: Pod LifeTime Threshold (e.g., 10m 30s)
-            schema: schema/properties/resources/properties/autoscalingKubedbComPgBouncerAutoscaler/properties/spec/properties/compute/properties/pgbouncer/properties/podLifeTimeThreshold
-            customClass: width-300
-
-          # NOW the pgbouncer block-layout
+          # pgbouncer mode
           - type: block-layout
             label: PgBouncer
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComPgBouncerAutoscaler/properties/spec/properties/compute/properties/pgbouncer
             elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComPgBouncerAutoscaler/spec/compute/pgbouncer/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComPgBouncerAutoscaler/properties/spec/properties/compute/properties/pgbouncer/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComPgBouncerAutoscaler/properties/spec/properties/compute/properties/pgbouncer/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: ResourceDiff Percentage
+                label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComPgBouncerAutoscaler/properties/spec/properties/compute/properties/pgbouncer/properties/resourceDiffPercentage
-                customClass: width-300
-              - type: label-element
-                label: Resource Configuration
-                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
@@ -230,9 +216,8 @@ step:
         value: getOpsRequestUrl|VerticalScaling
     - type: switch
       label: Enable Monitoring
-      fullwidth: true
       schema: temp/properties/enableMonitoring
-      init:
+      init: 
         type: func
         value: isValueExistInModel|/resources/kubedbComPgBouncer/spec/monitor
       watcher:
@@ -240,7 +225,7 @@ step:
         paths:
           - temp/properties/enableMonitoring
     - type: block-layout
-      label: Backup form
+      label: Backup form 
       showLabels: false
       if:
         type: function
@@ -268,15 +253,15 @@ step:
             paths:
               - schema/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/monitor/properties/agent
         - type: block-layout
-          label: ServiceMonitor Configuration
-          showLabels: true
-          if:
+          label: ServiceMonitor Configuration  
+          showLabels: true 
+          if: 
             type: function
             name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComPgBouncer/spec/monitor/agent
           elements:
             - label: Scrapping Interval
               schema: schema/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-              type: input
+              type: input 
         - type: block-layout
           label: Service Monitor
           showLabels: true
@@ -286,12 +271,10 @@ step:
           elements:
           - type: array-object-form
             label: Endpoints
-            buttonClass: is-light is-outlined
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
             elements:
             - type: switch
               label: Honor labels
-              fullwidth: true
               schema: honorLabels
             - type: input
               label: Interval
@@ -307,13 +290,13 @@ step:
             label: Match Namespaces
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
             loader: getResources|core|v1|namespaces
-            if:
+            if: 
               type: function
               name: returnFalse
           - type: block-layout
             showLabels: false
             # schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
-            if:
+            if: 
               type: function
               name: returnFalse
             elements:
@@ -323,7 +306,6 @@ step:
         - type: object-item
           schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
           label : Labels
-          buttonClass: is-light is-outlined
           if:
             type: function
             name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComPgBouncer/spec/monitor/agent
@@ -333,17 +315,16 @@ step:
           schema: ''
         - type: switch
           label: Customize Exporter Sidecar
-          fullwidth: true
           schema: temp/properties/customizeExporter
-          init:
+          init: 
             type: static
             value: true
           watcher:
             func: onCustomizeExporterChange
-            paths:
+            paths: 
               - temp/properties/customizeExporter
         - type: block-layout
-          label: Customer Exporter Section
+          label: Customer Exporter Section 
           showLabels: false
           if:
             type: function
@@ -352,7 +333,7 @@ step:
             - type: machine-compare
               label: Resources
               schema: schema/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
-              if:
+              if: 
                 type: function
                 name: returnFalse
             - type: label-element
@@ -369,9 +350,8 @@ step:
               label: Port
             - type: array-item-form
               label: Args
-              buttonClass: is-light is-outlined
               schema: schema/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-              init:
+              init: 
                 type: static
                 value: ['--compatible-mode']
               element:
@@ -381,7 +361,7 @@ step:
             - type: block-layout
               label: Metadata
               showLabels: false
-              elements:
+              elements: 
                   #remove: should be array-object-form after fixes
                 - type: block-layout
                   label: New Environment Variable
@@ -395,8 +375,8 @@ step:
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
-                    init:
-                      type: func
+                    init: 
+                      type: func 
                       value: setValueFrom
                     options:
                     - text: Input
@@ -409,8 +389,8 @@ step:
                       func: onValueFromChange
                       paths:
                         - temp/properties/valueFromType
-                  - type: input
-                    label: Value
+                  - type: input 
+                    label: Value 
                     schema: schema/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/value
                     if:
                       name: isEqualToValueFromType|input
