@@ -1,0 +1,606 @@
+type: multi-step-form
+step:
+  - type: single-step-form
+    loader: getDbDetails
+    elements:
+# common
+      - type: input
+        label: op_req_name
+        if:
+          type: function
+          name: showAndInitName
+        validation:
+          type: required
+        schema: schema/properties/metadata/properties/name
+      - type: select
+        label: Namespace
+        if:
+          type: function
+          name: showAndInitNamespace
+        init:
+          type: func
+          value: initNamespace
+        disable: isNamespaceDisabled
+        loader: getNamespaces
+        validation:
+          type: required
+        hasGroup: isRancherManaged
+        schema: schema/properties/metadata/properties/namespace
+      - type: select
+        label: Database Ref
+        if:
+          type: function
+          name: showAndInitDatabaseRef
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
+        init:
+          type: func
+          value: initDatabaseRef
+        validation:
+          type: required
+        disable: isDatabaseRefDisabled
+        refresh: true
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
+        schema: schema/properties/spec/properties/databaseRef/properties/name
+      - type: label-element
+        label: config_ops_request
+        if:
+          type: function
+          name: showConfigureOpsrequestLabel
+      - type: radio
+        label: Type of Ops Request
+        if:
+          type: function
+          name: showAndInitOpsRequestType
+        options:
+          - description: Update your database to any version
+            text: Update Version
+            value: UpdateVersion
+          - description: Scale up or down pod count
+            text: Horizontal Scaling
+            value: HorizontalScaling
+          - description: Manage your CPU resources
+            text: Vertical Scaling
+            value: VerticalScaling
+          - description: Expand your database volume
+            text: Volume Expansion
+            value: VolumeExpansion
+          - description: Restart your database
+            text: Restart
+            value: Restart
+          - description: Reconfigure your database
+            text: Reconfigure
+            value: Reconfigure
+          - description: Reconfigure TLS for your database
+            text: Reconfigure TLS
+            value: ReconfigureTLS
+        init:
+          type: func
+          value: getRequestTypeFromRoute
+        disable: isDbDetailsLoading
+        watcher:
+          func: isDbDetailsLoading
+          paths:
+            - temp/dbDetails
+            - schema/properties/spec/properties/databaseRef/properties/name
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
+# UpdateVersion
+      - type: block-layout
+        showLabels: false
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|UpdateVersion
+        elements:
+          - type: select
+            label: Target Version
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/version
+            loader: getDbVersions
+            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+# Vertical Scale
+      - type: block-layout
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VerticalScaling
+        elements:
+          - type: block-layout
+            label: Middle Managers
+            showLabels: true
+            elements:
+              - type: machine-compare
+                label: Resources
+                loader: getMachines|middleManagers
+                init:
+                  type: func
+                  value: setMachine|middleManagers
+                watcher:
+                  func: onMachineChange|middleManagers|/spec/topology/middleManagers/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/middleManagers/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/middleManagers/properties/resources
+              - type: select
+                label: Node Selection Policy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/middleManagers/properties/nodeSelectionPolicy
+              - type: block-layout
+                label: Topology
+                showLabels: true
+                elements:
+                  - type: input
+                    label: Key
+                    schema: schema/properties/spec/properties/verticalScaling/properties/middleManagers/properties/topology/properties/key
+                  - type: input
+                    label: Value
+                    schema: schema/properties/spec/properties/verticalScaling/properties/middleManagers/properties/topology/properties/value
+          - type: block-layout
+            label: Historicals
+            showLabels: true
+            elements:
+              - type: machine-compare
+                label: Resources
+                loader: getMachines|historicals
+                init:
+                  type: func
+                  value: setMachine|historicals
+                watcher:
+                  func: onMachineChange|historicals|/spec/topology/historicals/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/historicals/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/historicals/properties/resources
+              - type: select
+                label: Node Selection Policy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/historicals/properties/nodeSelectionPolicy
+              - type: block-layout
+                label: Topology
+                showLabels: true
+                elements:
+                  - type: input
+                    label: Key
+                    schema: schema/properties/spec/properties/verticalScaling/properties/historicals/properties/topology/properties/key
+                  - type: input
+                    label: Value
+                    schema: schema/properties/spec/properties/verticalScaling/properties/historicals/properties/topology/properties/value
+          - type: block-layout
+            label: Broker
+            showLabels: true
+            elements:
+              - type: machine-compare
+                label: Resources
+                loader: getMachines|brokers
+                init:
+                  type: func
+                  value: setMachine|brokers
+                watcher:
+                  func: onMachineChange|brokers|/spec/topology/brokers/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/brokers/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/brokers/properties/resources
+              - type: select
+                label: Node Selection Policy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/brokers/properties/nodeSelectionPolicy
+              - type: block-layout
+                label: Topology
+                showLabels: true
+                elements:
+                  - type: input
+                    label: Key
+                    schema: schema/properties/spec/properties/verticalScaling/properties/brokers/properties/topology/properties/key
+                  - type: input
+                    label: Value
+                    schema: schema/properties/spec/properties/verticalScaling/properties/brokers/properties/topology/properties/value
+          - type: block-layout
+            label: Coordinators
+            showLabels: true
+            elements:
+              - type: machine-compare
+                label: Resources
+                loader: getMachines|coordinators
+                init:
+                  type: func
+                  value: setMachine|coordinators
+                watcher:
+                  func: onMachineChange|coordinators|/spec/topology/coordinators/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/coordinators/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinators/properties/resources
+              - type: select
+                label: Node Selection Policy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/coordinators/properties/nodeSelectionPolicy
+              - type: block-layout
+                label: Topology
+                showLabels: true
+                elements:
+                  - type: input
+                    label: Key
+                    schema: schema/properties/spec/properties/verticalScaling/properties/coordinators/properties/topology/properties/key
+                  - type: input
+                    label: Value
+                    schema: schema/properties/spec/properties/verticalScaling/properties/coordinators/properties/topology/properties/value
+          - type: block-layout
+            label: Overlords
+            showLabels: true
+            elements:
+              - type: machine-compare
+                label: Resources
+                loader: getMachines|overlords
+                init:
+                  type: func
+                  value: setMachine|overlords
+                watcher:
+                  func: onMachineChange|overlords|/spec/topology/overlords/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/overlords/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/overlords/properties/resources
+              - type: select
+                label: Node Selection Policy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/overlords/properties/nodeSelectionPolicy
+              - type: block-layout
+                label: Topology
+                showLabels: true
+                elements:
+                  - type: input
+                    label: Key
+                    schema: schema/properties/spec/properties/verticalScaling/properties/overlords/properties/topology/properties/key
+                  - type: input
+                    label: Value
+                    schema: schema/properties/spec/properties/verticalScaling/properties/overlords/properties/topology/properties/value
+          - type: block-layout
+            label: Routers
+            showLabels: true
+            elements:
+              - type: machine-compare
+                label: Resources
+                loader: getMachines|routers
+                init:
+                  type: func
+                  value: setMachine|routers
+                watcher:
+                  func: onMachineChange|routers|/spec/topology/routers/podTemplate/spec/containers
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/routers/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/routers/properties/resources
+              - type: select
+                label: Node Selection Policy
+                options:
+                  - text: LabelSelector
+                    value: LabelSelector
+                  - text: Taint
+                    value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/routers/properties/nodeSelectionPolicy
+              - type: block-layout
+                label: Topology
+                showLabels: true
+                elements:
+                  - type: input
+                    label: Key
+                    schema: schema/properties/spec/properties/verticalScaling/properties/routers/properties/topology/properties/key
+                  - type: input
+                    label: Value
+                    schema: schema/properties/spec/properties/verticalScaling/properties/routers/properties/topology/properties/value
+# Volume Expansion
+      - type: block-layout
+        label: Volume Expansion Form
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VolumeExpansion
+        elements:
+          - type: block-layout
+            label: Historicals
+            showLabels: true
+            elements:
+              - type: input-compare
+                label: Storage Size
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/topology/historicals/storage/resources/requests/storage
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/topology/historicals/storage/resources/requests/storage|/spec/volumeExpansion/historicals
+                schema: schema/properties/spec/properties/volumeExpansion/properties/historicals
+          - type: block-layout
+            label: Middle Managers
+            showLabels: true
+            elements:
+              - type: input-compare
+                label: Storage Size
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/topology/middleManagers/storage/resources/requests/storage
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/topology/middleManagers/storage/resources/requests/storage|/spec/volumeExpansion/middleManagers
+                schema: schema/properties/spec/properties/volumeExpansion/properties/middleManagers
+          - type: select
+            label: Mode
+            options:
+              - text: Offline
+                value: Offline
+              - text: Online
+                value: Online
+            validation:
+              type: required
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+# Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        elements:
+          - type: block-layout
+            label: Configuration
+            elements:
+              - type: radio
+                label: Reconfigure Type
+                options:
+                - text: Select New Config Secret
+                  value: selectNewConfigSecret
+                - text: Apply Config
+                  value: applyConfig
+                - text: Remove
+                  value: remove
+                watcher:
+                  func: onReconfigurationTypeChange
+                  paths:
+                    - temp/properties/reconfigurationType
+                validation:
+                  type: required
+                schema: temp/properties/reconfigurationType
+              - type: block-layout
+                label: Configuration config secret
+                showLabels: false
+                if:
+                  name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  type: function
+                elements:
+                - type: select
+                  addNewButton:
+                    label: Create a new Secret
+                    target: _blank
+                    url:
+                      function: createSecretUrl
+                  label: Config Secret
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                    type: function
+                  loader:
+                    name: getConfigSecrets
+                    watchPaths:
+                      - schema/properties/metadata/properties/namespace
+                  init:
+                    type: func
+                    value: setValueFromDbDetails|/spec/configSecret/name
+                  refresh: true
+                  validation:
+                    type: required
+                  schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+              - type: array-object-form
+                label: Apply Config
+                if:
+                  name: ifReconfigurationTypeEqualsTo|applyConfig
+                  type: function
+                validation:
+                  type: required
+                watcher:
+                  func: onApplyconfigChange
+                  paths:
+                    - temp/properties/applyConfig
+                schema: temp/properties/applyConfig
+                elements:
+                  - type: input
+                    label: key
+                    validation:
+                      type: required
+                    schema: key
+                  - type: editor
+                    hasCopy: false
+                    label: value
+                    validation:
+                      type: required
+                    schema:  value
+              - type: switch
+                schema:  schema/properties/spec/properties/configuration/properties/removeCustomConfig
+                label: Remove CustomConfig
+                if:
+                  name: returnFalse
+                  type: function
+# Reconfigure TLS
+      - type: block-layout
+        label: TLS
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|ReconfigureTLS
+        elements:
+          - type: radio
+            label: TLS Operation
+            if:
+              type: function
+              name: hasTlsField
+            init:
+              type: func
+              value: initTlsOperation
+            watcher:
+              func: onTlsOperationChange
+              paths:
+                - temp/tlsOperation
+            options:
+              - text: Update
+                value: update
+              - text: Rotate
+                value: rotate
+              - text: Remove
+                value: remove
+            schema: temp/tlsOperation
+          - type: switch
+            label: Remove TLS
+            if:
+              type: function
+              name: returnFalse
+            schema: schema/properties/spec/properties/tls/properties/remove
+          - type: switch
+            label: Rotate Certificates
+            if:
+              type: function
+              name: returnFalse
+            schema: schema/properties/spec/properties/tls/properties/rotateCertificates
+          - type: block-layout
+            if:
+              type: function
+              name: showIssuerRefAndCertificates
+            elements:
+              - type: input
+                label: API Group
+                init:
+                  type: func
+                  value: initIssuerRefApiGroup
+                disable: true
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+              - type: select
+                label: Kind
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/kind
+                options:
+                  - text: Issuer
+                    value: Issuer
+                  - text: ClusterIssuer
+                    value: ClusterIssuer
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+              - type: select
+                label: Name
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/name
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                    - schema/properties/metadata/properties/namespace
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
+          - type: block-layout
+            label: Certificates
+            if:
+              type: function
+              name: showIssuerRefAndCertificates
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+            elements:
+              - type: select
+                label: Alias
+                loader: fetchAliasOptions
+                disable: disableAlias
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/alias
+              - type: input
+                label: Secret Name
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/secretName
+              - type: input
+                label: Duration
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/duration
+              - type: input
+                label: Renew Before
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/renewBefore
+              - type: block-layout
+                label: Subject
+                showLabels: true
+                elements:
+                  - type: array-item-form
+                    label: Organizations
+                    buttonClass: is-light is-outlined
+                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations
+                    element:
+                      type: input
+                      label: Organization
+                  - type: array-item-form
+                    label: Countries
+                    buttonClass: is-light is-outlined
+                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries
+                    element:
+                      type: input
+                      label: Country
+                  - type: array-item-form
+                    label: Organizational Units
+                    buttonClass: is-light is-outlined
+                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits
+                    element:
+                      type: input
+                      label: Organizational Unit
+                  - type: array-item-form
+                    label: Provinces
+                    buttonClass: is-light is-outlined
+                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces
+                    element:
+                      type: input
+                      label: Province
+              - type: array-item-form
+                label: DNS Names
+                buttonClass: is-light is-outlined
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames
+                element:
+                  type: input
+                  label: DNS Name
+              - type: array-item-form
+                label: IP Addresses
+                buttonClass: is-light is-outlined
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses
+                element:
+                  type: input
+                  label: IP Address
+# common
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
+            schema: 'schema/properties/spec/properties/timeout'
+          - type: radio
+            label: Apply
+            subtitle: Choose when to apply the OpsRequest. 'IfReady' waits for the database to be ready, while 'Always' applies immediately.
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always

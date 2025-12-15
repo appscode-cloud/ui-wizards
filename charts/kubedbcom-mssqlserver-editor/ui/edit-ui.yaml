@@ -177,245 +177,140 @@ step:
                 - schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/databaseRef/properties/name
 
       - type: radio
+        label: Schedule a Backup?
+        schema: temp/properties/scheduleBackup
+        isHorizontal: true
+        options:
+          - text: 'Yes'
+            value: 'yes'
+          - text: 'No'
+            value: 'no'
         if:
           type: function
-          name: isConsole
-        label: Select Type
-        validation:
-          type: required
-        schema: temp/properties/autoscalingType
+          name: showScheduleBackup
+        init:
+          type: func
+          value: initScheduleBackupForEdit
         watcher:
-          func: initMetadata
+          func: onScheduleBackupChange
           paths:
-            - temp/properties/autoscalingType
-        options:
-          - text: Compute
-            value: compute
-            description: Scale your CPU Memory based on resource usage
-          - text: Storage
-            value: storage
-            description: Expand your database size based on volume usage
-
+            - temp/properties/scheduleBackup
       - type: block-layout
+        label: Backup Form
         showLabels: false
-        loader: fetchTopologyMachines
+        loader: initBackupData
+        if:
+          type: function
+          name: showBackupForm
         elements:
-          # mssqlserver mode
+          - type: radio
+            label: Select Backup Type
+            schema: temp/properties/backupType
+            isHorizontal: true
+            options:
+              - text: BackupConfig
+                value: BackupConfig
+                description: 'Create, Delete or Modify BackupConfig'
+              - text: BackupBlueprint
+                value: BackupBlueprint
+                description: Enable/Disable BackupBlueprint
+            if:
+              type: function
+              name: isBackupDataLoadedTrue
+            init:
+              type: func
+              value: setBackupType
+            loader: getTypes
+            watcher:
+              func: onBackupTypeChange
+              paths:
+                - temp/properties/backupType
           - type: block-layout
-            label: MSSQLServer
-            showLabels: true
-            # schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver
+            label: Config
+            if:
+              type: function
+              name: isBackupType|BackupConfig
             elements:
               - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComMSSQLServerAutoscaler/spec/compute/mssqlserver/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/trigger
+                label: Select Context
+                schema: temp/properties/backupConfigContext
+                validation:
+                  type: required
+                loader: getContext
+                watcher:
+                  func: onContextChange
+                  paths:
+                    - temp/properties/backupConfigContext
+              - type: select
+                label: Select BackupConfig
+                schema: temp/properties/config
+                validation:
+                  type: required
+                if:
+                  type: function
+                  name: showConfigList
+                loader: getConfigList
+                watcher:
+                  func: onConfigChange
+                  paths:
+                    - temp/properties/config
               - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/podLifeTimeThreshold
-              - type: threshold-input
-                label: Resource Diff Percentage
-                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/resourceDiffPercentage
-              - type: block-layout
-                showLabels: false
-                elements:
-                  - type: horizontal-layout
-                    elements:
-                    - type: machine-compare
-                      label: Min Allowed Profile
-                      schema: temp/properties/allowedMachine-min
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|min
-                      loader:
-                        name: getMachines|min
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-max
-                      watcher:
-                        func: onMachineChange|mssqlserver
-                        paths:
-                          - temp/properties/allowedMachine-min
-                    - type: block-layout
-                      label: Min Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/minAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/minAllowed/properties/memory
-                    - type: machine-compare
-                      label: Max Allowed Profile
-                      schema: temp/properties/allowedMachine-max
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|max
-                      loader:
-                        name: getMachines|max
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-min
-                      watcher:
-                        func: onMachineChange|mssqlserver
-                        paths:
-                          - temp/properties/allowedMachine-max
-                    - type: block-layout
-                      label: Max Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/maxAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/maxAllowed/properties/memory
-              - type: select
-                label: Controlled Resources
-                loader: setControlledResources|mssqlserver
-                multiple: true
-                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/controlledResources
-
-          - type: block-layout
-            label: Node Topology
-            if:
-              type: function
-              name: hasNoAnnotations
-            showLabels: true
-            # schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology
-            elements:
-              - type: select
-                label: Select Node Topology
-                loader: fetchNodeTopology
-                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-              - type: threshold-input
-                label: ScaleUp Diff Percentage
+                label: Schedule
+                schema: temp/properties/schedule
+                validation:
+                  type: required
                 if:
                   type: function
-                  name: isNodeTopologySelected
-                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-              - type: threshold-input
-                label: ScaleDown Diff Percentage
+                  name: showSchedule
+                loader:
+                  name: getDefaultSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions
+                  watchPaths:
+                    - temp/properties/config
+                watcher:
+                  func: onInputChangeSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions|schedule
+                  paths:
+                    - temp/properties/schedule
+              - type: switch
+                label: Paused
+                schema: schema/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
                 if:
                   type: function
-                  name: isNodeTopologySelected
-                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
-
+                  name: showPause
           - type: block-layout
-            label: Ops Request Options
-            showLabels: true
+            label: Blueprint
             if:
               type: function
-              name: showOpsRequestOptions
-            # schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions
+              name: isBackupType|BackupBlueprint
             elements:
-              - type: time-picker
-                label: Timeout
-                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-              - type: radio
-                label: Apply
+              - type: switch
+                label: Enable Backup Blueprint
+                fullwidth: true
+                subtitle: Use a backup blueprint template to automatically configure backups for similar databases
+                schema: temp/properties/blueprintEnabled
                 init:
                   type: func
-                  value: setApplyToIfReady
-                options:
-                  - text: IfReady (OpsRequest will be applied if database is ready)
-                    value: IfReady
-                  - text: Always (OpsRequest will always be applied)
-                    value: Always
-                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+                  value: setBlueprintSwitch
+                watcher:
+                  func: onBlueprintChange
+                  paths:
+                    - temp/properties/blueprintEnabled
+          - type: block-layout
+            label: Archiver
+            if:
+              type: function
+              name: isBackupType|Archiver
+            elements:
+              - type: switch
+                label: Enable Archiver
+                schema: temp/properties/archiverEnabled
+                init:
+                  type: func
+                  value: setArchiverSwitch
+                watcher:
+                  func: onArchiverChange
+                  paths:
+                    - temp/properties/archiverEnabled
 
-  - type: single-step-form
-    id: storage-autoscaler
-    elements:
-    - type: block-layout
-      showLabels: false
-      elements:
-        - type: block-layout
-          showLabels: false
-          elements:
-            - type: block-layout
-              label: MSSQLServer
-              showLabels: true
-              elements:
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComMSSQLServerAutoscaler/spec/storage/mssqlserver/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/trigger
-                - type: select
-                  label: Expansion Mode
-                  options:
-                    - text: Online
-                      value: Online
-                    - text: Offline
-                      value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/expansionMode
-                - type: threshold-input
-                  label: UsageThreshold (%)
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/usageThreshold
-                - type: scaling-rules
-                  label: Scaling Rules
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/scalingRules
-                  loader: setValueFromDbDetails|resources/kubedbComMSSQLServer/spec/storage/resources/requests/storage
-                  watcher:
-                    func: handleUnit|autoscalingKubedbComMSSQLServerAutoscaler/spec/storage/mssqlserver/scalingRules|scalingRules
-                    paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/scalingRules
-                - type: input
-                  label: UpperBound
-                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/upperBound
-                  watcher:
-                    func: handleUnit|autoscalingKubedbComMSSQLServerAutoscaler/spec/storage/mssqlserver/upperBound
-                    paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/upperBound
-        - type: block-layout
-          label: OpsRequest Options
-          showLabels: true
-          if:
-            type: function
-            name: showOpsRequestOptions
-          elements:
-            - type: time-picker
-              label: Timeout
-              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-            - type: radio
-              label: Apply
-              init:
-                type: func
-                value: setApplyToIfReady
-              options:
-                - text: IfReady (OpsRequest will be applied if database is ready)
-                  value: IfReady
-                - text: Always (OpsRequest will always be applied)
-                  value: Always
-              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-  
   - type: single-step-form
     id: monitoring
     elements:
@@ -431,7 +326,7 @@ step:
       label: Enable Monitoring
       fullwidth: true
       schema: temp/properties/enableMonitoring
-      init: 
+      init:
         type: func
         value: isValueExistInModel|/resources/kubedbComMSSQLServer/spec/monitor
       watcher:
@@ -439,7 +334,7 @@ step:
         paths:
           - temp/properties/enableMonitoring
     - type: block-layout
-      label: Backup form 
+      label: Backup form
       showLabels: false
       if:
         type: function
@@ -467,15 +362,15 @@ step:
             paths:
               - schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/agent
         - type: block-layout
-          label: ServiceMonitor Configuration  
-          showLabels: true 
-          if: 
+          label: ServiceMonitor Configuration
+          showLabels: true
+          if:
             type: function
             name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMSSQLServer/spec/monitor/agent
           elements:
             - label: Scrapping Interval
               schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-              type: input 
+              type: input
         - type: block-layout
           label: Service Monitor
           showLabels: true
@@ -485,11 +380,13 @@ step:
           elements:
           - type: array-object-form
             label: Endpoints
+            buttonClass: is-light is-outlined
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
             elements:
             - type: switch
               fullwidth: true
               label: Honor labels
+              fullwidth: true
               schema: honorLabels
             - type: input
               label: Interval
@@ -505,13 +402,13 @@ step:
             label: Match Namespaces
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
             loader: getResources|core|v1|namespaces
-            if: 
+            if:
               type: function
               name: returnFalse
           - type: block-layout
             showLabels: false
             # schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
-            if: 
+            if:
               type: function
               name: returnFalse
             elements:
@@ -521,6 +418,7 @@ step:
         - type: object-item
           schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
           label : Labels
+          buttonClass: is-light is-outlined
           if:
             type: function
             name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMSSQLServer/spec/monitor/agent
@@ -532,16 +430,17 @@ step:
           label: Customize Exporter Sidecar
           fullwidth: true
           schema: temp/properties/customizeExporter
-          init: 
+          init:
             type: static
             value: true
           watcher:
             func: onCustomizeExporterChange
-            paths: 
+            paths:
               - temp/properties/customizeExporter
         - type: block-layout
-          label: Customer Exporter Section 
+          label: Customer Exporter Section
           showLabels: false
+          loader: setMetadata
           if:
             type: function
             name: showCustomizeExporterSection
@@ -549,7 +448,7 @@ step:
             - type: machine-compare
               label: Resources
               schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
-              if: 
+              if:
                 type: function
                 name: returnFalse
             - type: label-element
@@ -566,8 +465,9 @@ step:
               label: Port
             - type: array-item-form
               label: Args
+              buttonClass: is-light is-outlined
               schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-              init: 
+              init:
                 type: static
                 value: ['--compatible-mode']
               element:
@@ -577,7 +477,7 @@ step:
             - type: block-layout
               label: Metadata
               showLabels: false
-              elements: 
+              elements:
                   #remove: should be array-object-form after fixes
                 - type: block-layout
                   label: New Environment Variable
@@ -591,8 +491,8 @@ step:
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
-                    init: 
-                      type: func 
+                    init:
+                      type: func
                       value: setValueFrom
                     options:
                     - text: Input
@@ -605,8 +505,8 @@ step:
                       func: onValueFromChange
                       paths:
                         - temp/properties/valueFromType
-                  - type: input 
-                    label: Value 
+                  - type: input
+                    label: Value
                     schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/value
                     if:
                       name: isEqualToValueFromType|input
@@ -657,3 +557,277 @@ step:
                         - schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/secretKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
+
+  - type: single-step-form
+    id: compute-autoscaler
+    loader: getDbDetails
+    elements:
+    - type: block-layout
+      showLabels: false
+      loader: fetchTopologyMachines
+      elements:
+        # mssqlserver mode
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: mssqlserverTypeEqualsTo|mssqlserver|compute
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComMSSQLServerAutoscaler/spec/compute/mssqlserver/trigger
+          schema: temp/properties/compute/properties/mssqlserver/properties/trigger
+          watcher:
+            func: onTriggerChange|compute/mssqlserver
+            paths:
+              - temp/properties/compute/properties/mssqlserver/properties/trigger
+        - type: label-element
+          label: Pod lifetime threshold
+          subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+          if:
+            type: function
+            name: mssqlserverTypeEqualsTo|mssqlserver|compute
+        - type: input
+          label: Pod LifeTime Threshold (e.g., 10m 30s)
+          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/podLifeTimeThreshold
+          customClass: width-300
+          if:
+            type: function
+            name: mssqlserverTypeEqualsTo|mssqlserver|compute
+        - type: block-layout
+          label: MSSQLServer
+          if:
+            type: function
+            name: mssqlserverTypeEqualsTo|mssqlserver|compute
+          showLabels: true
+          # schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver
+          elements:
+            - type:  threshold-input
+              label: ResourceDiff Percentage
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/resourceDiffPercentage
+              customClass: width-300
+            - type: label-element
+              label: Resource Configuration
+              subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+            - type: block-layout
+              showLabels: false
+              elements:
+                - type: horizontal-layout
+                  elements:
+                  - type: machine-compare
+                    label: Min Allowed Profile
+                    schema: temp/properties/allowedMachine-mssqlserver-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|mssqlserver|min
+                    loader:
+                      name: getMachines|mssqlserver|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-mssqlserver-max
+                    watcher:
+                      func: onMachineChange|mssqlserver
+                      paths:
+                        - temp/properties/allowedMachine-mssqlserver-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/minAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/minAllowed/properties/memory
+                  - type: machine-compare
+                    label: Max Allowed Profile
+                    schema: temp/properties/allowedMachine-mssqlserver-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|mssqlserver|max
+                    loader:
+                      name: getMachines|mssqlserver|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-mssqlserver-min
+                    watcher:
+                      func: onMachineChange|mssqlserver
+                      paths:
+                        - temp/properties/allowedMachine-mssqlserver-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/maxAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/maxAllowed/properties/memory
+            - type: select
+              label: Controlled Resources
+              loader: setControlledResources|compute/mssqlserver
+              multiple: true
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/controlledResources
+        - type: block-layout
+          label: NodeTopology
+          if:
+            type: function
+            name: hasNoAnnotations
+          showLabels: true
+          # schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+          elements:
+            - type: select
+              label: Select NodeTopology
+              loader: fetchNodeTopology
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+            - type: threshold-input
+              label: Scale Up DiffPercentage
+              if:
+                type: function
+                name: isNodeTopologySelected
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+            - type: threshold-input
+              label: Scale Down DiffPercentage
+              if:
+                type: function
+                name: isNodeTopologySelected
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+        - type: block-layout
+          label: Ops Request Options
+          showLabels: true
+          if:
+            type: function
+            name: showOpsRequestOptions
+          # schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions
+          elements:
+            - type: time-picker
+              label: Timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+            - type: radio
+              label: Apply
+              init:
+                type: func
+                value: setApplyToIfReady
+              options:
+                - text: IfReady (OpsRequest will be applied if database is ready)
+                  value: IfReady
+                - text: Always (OpsRequest will always be applied)
+                  value: Always
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+
+  - type: single-step-form
+    id: storage-autoscaler
+    loader: getDbDetails
+    elements:
+    - type: block-layout
+      showLabels: false
+      elements:
+        # mssqlserver mode
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: mssqlserverTypeEqualsTo|mssqlserver|storage
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComMSSQLServerAutoscaler/spec/storage/mssqlserver/trigger
+          schema: temp/properties/storage/properties/mssqlserver/properties/trigger
+          watcher:
+            func: onTriggerChange|storage/mssqlserver
+            paths:
+              - temp/properties/storage/properties/mssqlserver/properties/trigger
+        - type: label-element
+          label: Expansion Mode (Online/Offline)
+          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+          if:
+            type: function
+            name: mssqlserverTypeEqualsTo|mssqlserver|storage
+        - type: select
+          label: Mode
+          description: Select how the storage expansion should be handled.
+          if:
+            type: function
+            name: mssqlserverTypeEqualsTo|mssqlserver|storage
+          options:
+            - text: Online
+              value: Online
+            - text: Offline
+              value: Offline
+          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/expansionMode
+        - type: block-layout
+          label: MSSQLServer
+          if:
+            type: function
+            name: mssqlserverTypeEqualsTo|mssqlserver|storage
+          showLabels: true
+          elements:
+            - type: threshold-input
+              label: UsageThreshold (%)
+              subtitle: Set the threshold percentage of storage usage to trigger scaling.
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/usageThreshold
+            - type: scaling-rules
+              label: Scaling Rules
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/scalingRules
+              loader: setValueFromDbDetails|resources/kubedbComMSSQLServer/spec/storage/resources/requests/storage
+              watcher:
+                func: handleUnit|autoscalingKubedbComMSSQLServerAutoscaler/spec/storage/mssqlserver/scalingRules|scalingRules
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/scalingRules
+            - type: input
+              label: UpperBound
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/upperBound
+              watcher:
+                func: handleUnit|autoscalingKubedbComMSSQLServerAutoscaler/spec/storage/mssqlserver/upperBound
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/upperBound
+        - type: block-layout
+          label: Ops Request Options
+          showLabels: true
+          if:
+            type: function
+            name: showOpsRequestOptions
+          elements:
+            - type: time-picker
+              label: Timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+            - type: radio
+              label: Apply
+              init:
+                type: func
+                value: setApplyToIfReady
+              options:
+                - text: IfReady (OpsRequest will be applied if database is ready)
+                  value: IfReady
+                - text: Always (OpsRequest will always be applied)
+                  value: Always
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+
+  - type: single-step-form
+    id: binding
+    label: Gateway Binding
+    elements:
+    - type: switch
+      label: Expose Database
+      schema: temp/properties/binding
+      fullwidth: true
+      init:
+        type: func
+        value: isBindingAlreadyOn
+      watcher:
+        func: addOrRemoveBinding
+        paths:
+          - temp/properties/binding

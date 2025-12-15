@@ -10,9 +10,6 @@ export const useFunc = (model) => {
 
   /********** Initialize Discriminator **************/
 
-  setDiscriminatorValue('binding', false)
-  setDiscriminatorValue('hidePreviewFromWizard', undefined)
-
   setDiscriminatorValue('/enableMonitoring', false)
   setDiscriminatorValue('/customizeExporter', true)
   setDiscriminatorValue('/valueFromType', 'input')
@@ -40,7 +37,7 @@ export const useFunc = (model) => {
     if (isKube) {
       const dbName = storeGet('/route/params/name') || ''
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name',
+        path: '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
         value: dbName,
         force: true,
       })
@@ -52,14 +49,14 @@ export const useFunc = (model) => {
       const date = Math.floor(Date.now() / 1000)
       const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/name',
+        path: '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/name',
         value: modifiedName,
         force: true,
       })
       const namespace = storeGet('/route/query/namespace') || ''
       if (namespace) {
         commit('wizard/model$update', {
-          path: '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace',
+          path: '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace',
           value: namespace,
           force: true,
         })
@@ -69,22 +66,32 @@ export const useFunc = (model) => {
     return !isKube
   }
 
+  function isKubedb() {
+    return !!storeGet('/route/params/actions')
+  }
+
   async function getDbDetails() {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
     const namespace =
       storeGet('/route/query/namespace') ||
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace') ||
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace',
+      ) ||
       ''
     const name =
       storeGet('/route/params/name') ||
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name') ||
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+      ) ||
       ''
 
     if (namespace && name) {
       try {
         const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/ferretdbs/${name}`,
+          `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/perconaxtradbs/${name}`,
         )
         dbDetails = resp.data || {}
         setDiscriminatorValue('/dbDetails', true)
@@ -104,12 +111,12 @@ export const useFunc = (model) => {
       force: true,
     })
     commit('wizard/model$update', {
-      path: `/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name`,
+      path: `/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name`,
       value: name,
       force: true,
     })
     commit('wizard/model$update', {
-      path: `/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/labels`,
+      path: `/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/labels`,
       value: dbDetails.metadata.labels,
       force: true,
     })
@@ -140,11 +147,36 @@ export const useFunc = (model) => {
     return !!found
   }
 
-  async function getDbs() {
-    // watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace')
+  // function onNamespaceChange() {
+  //   const namespace = getValue(model, '/metadata/release/namespace')
+  //   const agent = getValue(model, '/resources/kubedbComPerconaXtraDB/spec/monitor/agent')
+  //   if (agent === 'prometheus.io') {
+  //     commit('wizard/model$update', {
+  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
+  //       value: [namespace],
+  //       force: true,
+  //     })
+  //   }
+  // }
+
+  function onNamespaceChange() {
     const namespace = getValue(
       model,
-      '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace',
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace',
+    )
+    if (!namespace) {
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+      )
+    }
+  }
+
+  async function getDbs() {
+    // watchDependency('model#/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace')
+    const namespace = getValue(
+      model,
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace',
     )
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -169,8 +201,10 @@ export const useFunc = (model) => {
 
   function initMetadata() {
     const dbName =
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name') ||
-      ''
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+      ) || ''
     const type = getValue(discriminator, '/autoscalingType') || ''
     const date = Math.floor(Date.now() / 1000)
     const resource = storeGet('/route/params/resource')
@@ -178,7 +212,7 @@ export const useFunc = (model) => {
     const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
     if (modifiedName)
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/name',
+        path: '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/name',
         value: modifiedName,
         force: true,
       })
@@ -187,12 +221,12 @@ export const useFunc = (model) => {
     if (type === 'compute')
       commit(
         'wizard/model$delete',
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/storage',
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/storage',
       )
     if (type === 'storage')
       commit(
         'wizard/model$delete',
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute',
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute',
       )
   }
 
@@ -222,51 +256,43 @@ export const useFunc = (model) => {
     return 'On'
   }
 
-  function onTriggerChange(type) {
-    const trigger = getValue(discriminator, `/${type}/trigger`)
-    const commitPath = `/resources/autoscalingKubedbComFerretDBAutoscaler/spec/${type}/trigger`
-
-    commit('wizard/model$update', {
-      path: commitPath,
-      value: trigger ? 'On' : 'Off',
-      force: true,
-    })
+  function setApplyToIfReady() {
+    return 'IfReady'
   }
 
-  function hasAnnotations(type) {
+  function hasAnnotations() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations') ||
-      {}
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/annotations',
+      ) || {}
     const instance = annotations['kubernetes.io/instance-type']
 
     return !!instance
   }
 
-  function setAllowedMachine(type, minmax) {
-    const annotations =
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations') ||
-      {}
-    const instance = annotations['kubernetes.io/instance-type']
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
+  function hasNoAnnotations() {
+    return !hasAnnotations()
+  }
 
-    const machine = parsedInstance[type] || ''
-    const mx = machine?.includes(',') ? machine.split(',')[1] : ''
-    const mn = machine?.includes(',') ? machine.split(',')[0] : ''
+  function setAllowedMachine(minmax) {
+    const annotations =
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/annotations',
+      ) || {}
+    const instance = annotations['kubernetes.io/instance-type']
+    const mx = instance?.includes(',') ? instance.split(',')[1] : ''
+    const mn = instance?.includes(',') ? instance.split(',')[0] : ''
 
     if (minmax === 'min') return mn
     else return mx
   }
 
-  async function getMachines(type, minmax) {
+  async function getMachines(minmax) {
     // watchDependency('discriminator#/topologyMachines')
     const depends = minmax === 'min' ? 'max' : 'min'
-    const dependantPath = `/allowedMachine-${type}-${depends}`
+    const dependantPath = `/allowedMachine-${depends}`
 
     // watchDependency(`discriminator#${dependantPath}`)
     const dependantMachine = getValue(discriminator, dependantPath)
@@ -289,33 +315,23 @@ export const useFunc = (model) => {
   }
 
   function onMachineChange(type) {
-    const annoPath = '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations'
+    const annoPath = '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/annotations'
     const annotations = getValue(model, annoPath) || {}
     const instance = annotations['kubernetes.io/instance-type']
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
 
-    const minMachine = getValue(discriminator, `/allowedMachine-${type}-min`)
-    const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
+    const minMachine = getValue(discriminator, '/allowedMachine-min')
+    const maxMachine = getValue(discriminator, '/allowedMachine-max')
     const minMaxMachine = `${minMachine},${maxMachine}`
-
-    parsedInstance[type] = minMaxMachine
-    const instanceString = JSON.stringify(parsedInstance)
-    annotations['kubernetes.io/instance-type'] = instanceString
+    annotations['kubernetes.io/instance-type'] = minMaxMachine
 
     const machines = getValue(discriminator, `/topologyMachines`) || []
     const minMachineObj = machines.find((item) => item.topologyValue === minMachine)
     const maxMachineObj = machines.find((item) => item.topologyValue === maxMachine)
     const minMachineAllocatable = minMachineObj?.allocatable
     const maxMachineAllocatable = maxMachineObj?.allocatable
-    const allowedPath = `/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/${type}`
+    const allowedPath = `/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/${type}`
 
-    if (minMachine && maxMachine && instance !== instanceString) {
+    if (minMachine && maxMachine && instance !== minMaxMachine) {
       commit('wizard/model$update', {
         path: `${allowedPath}/maxAllowed`,
         value: maxMachineAllocatable,
@@ -334,34 +350,9 @@ export const useFunc = (model) => {
     }
   }
 
-  function hasNoAnnotations() {
-    return !hasAnnotations()
-  }
-
-  function setAllowedMachine(type, minmax) {
-    const annotations =
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations') ||
-      {}
-    const instance = annotations['kubernetes.io/instance-type']
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
-
-    const machine = parsedInstance[type] || ''
-    const mx = machine?.includes(',') ? machine.split(',')[1] : ''
-    const mn = machine?.includes(',') ? machine.split(',')[0] : ''
-
-    if (minmax === 'min') return mn
-    else return mx
-  }
-
   function setControlledResources(type) {
     const list = ['cpu', 'memory']
-    const path = `/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/${type}/controlledResources`
+    const path = `/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/${type}/controlledResources`
     commit('wizard/model$update', {
       path: path,
       value: list,
@@ -369,13 +360,6 @@ export const useFunc = (model) => {
     })
     return list
   }
-
-  function ferretTypeEqualsTo(param) {
-    const dbDetails = getValue(model, '/resources/kubedbComFerretDB')
-    const type = dbDetails.spec?.server?.secondary ? 'secondary' : 'primary'
-    return param === type
-  }
-
   async function fetchNodeTopology() {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
@@ -396,38 +380,63 @@ export const useFunc = (model) => {
 
   function isNodeTopologySelected() {
     // watchDependency(
-    //   'model#/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/nodeTopology/name',
+    //   'model#/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/nodeTopology/name',
     // )
     const nodeTopologyName =
       getValue(
         model,
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/nodeTopology/name',
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/nodeTopology/name',
       ) || ''
     return !!nodeTopologyName.length
   }
 
   function showOpsRequestOptions() {
-    console.log('isKubedb:')
     if (isKubedb() === true) return true
-    // watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name')
+    // watchDependency(
+    //   'model#/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+    // )
     // watchDependency('discriminator#/autoscalingType')
     return (
       !!getValue(
         model,
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name',
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
       ) && !!getValue(discriminator, '/autoscalingType')
     )
   }
 
-  function setApplyToIfReady() {
-    return 'IfReady'
+  function handleUnit(path, type = 'bound') {
+    let value = getValue(model, `/resources/${path}`)
+    if (type === 'scalingRules') {
+      const updatedValue = []
+      value?.forEach((ele) => {
+        let appliesUpto = ele['appliesUpto']
+        let threshold = ele['threshold']
+        if (appliesUpto && !isNaN(appliesUpto)) {
+          appliesUpto += 'Gi'
+        }
+        if (!isNaN(threshold)) {
+          threshold += 'pc'
+        }
+        updatedValue.push({ threshold, appliesUpto })
+      })
+      if (JSON.stringify(updatedValue) !== JSON.stringify(value)) {
+        commit('wizard/model$update', {
+          path: `/resources/${path}`,
+          value: updatedValue,
+          force: true,
+        })
+      }
+    } else {
+      if (!isNaN(value)) {
+        value += 'Gi'
+        commit('wizard/model$update', {
+          path: `/resources/${path}`,
+          value: value,
+          force: true,
+        })
+      }
+    }
   }
-
-  function isKubedb() {
-    return !!storeGet('/route/params/actions')
-  }
-
-  /********** Monitoring ***********/
 
   function isEqualToModelPathValue(value, modelPath) {
     const modelPathValue = getValue(model, modelPath)
@@ -489,32 +498,7 @@ export const useFunc = (model) => {
     return ans
   }
 
-  async function resourceNames(group, version, resource) {
-    const namespace = getValue(model, '/metadata/release/namespace')
-    // watchDependency('model#/metadata/release/namespace')
-
-    let resources = await getNamespacedResourceList(axios, storeGet, {
-      namespace,
-      group,
-      version,
-      resource,
-    })
-
-    if (resource === 'secrets') {
-      resources = resources.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
-        return validType.includes(item.type)
-      })
-    }
-
-    return resources.map((resource) => {
-      const name = (resource.metadata && resource.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
+  /****** Monitoring *********/
 
   function showMonitoringSection() {
     // watchDependency('discriminator#/enableMonitoring')
@@ -526,12 +510,12 @@ export const useFunc = (model) => {
     const configureStatus = getValue(discriminator, '/enableMonitoring')
     if (configureStatus) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComFerretDB/spec/monitor',
+        path: '/resources/kubedbComPerconaXtraDB/spec/monitor',
         value: {},
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/kubedbComFerretDB/spec/monitor')
+      commit('wizard/model$delete', '/resources/kubedbComPerconaXtraDB/spec/monitor')
     }
 
     // update alert value depend on monitoring profile
@@ -552,12 +536,15 @@ export const useFunc = (model) => {
     const configureStatus = getValue(discriminator, '/customizeExporter')
     if (configureStatus) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComFerretDB/spec/monitor/prometheus/exporter',
+        path: '/resources/kubedbComPerconaXtraDB/spec/monitor/prometheus/exporter',
         value: {},
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/kubedbComFerretDB/spec/monitor/prometheus/exporter')
+      commit(
+        'wizard/model$delete',
+        '/resources/kubedbComPerconaXtraDB/spec/monitor/prometheus/exporter',
+      )
     }
   }
 
@@ -568,7 +555,7 @@ export const useFunc = (model) => {
 
   // function onNamespaceChange() {
   //   const namespace = getValue(model, '/metadata/release/namespace')
-  //   const agent = getValue(model, '/resources/kubedbComFerretDB/spec/monitor/agent')
+  //   const agent = getValue(model, '/resources/kubedbComPerconaXtraDB/spec/monitor/agent')
   //   if (agent === 'prometheus.io') {
   //     commit('wizard/model$update', {
   //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
@@ -579,9 +566,9 @@ export const useFunc = (model) => {
   // }
 
   function onLabelChange() {
-    const labels = getValue(model, '/resources/kubedbComFerretDB/spec/metadata/labels')
+    const labels = getValue(model, '/resources/kubedbComPerconaXtraDB/spec/metadata/labels')
 
-    const agent = getValue(model, '/resources/kubedbComFerretDB/spec/monitor/agent')
+    const agent = getValue(model, '/resources/kubedbComPerconaXtraDB/spec/monitor/agent')
 
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
@@ -593,7 +580,7 @@ export const useFunc = (model) => {
   }
 
   function onAgentChange() {
-    const agent = getValue(model, '/resources/kubedbComFerretDB/spec/monitor/agent')
+    const agent = getValue(model, '/resources/kubedbComPerconaXtraDB/spec/monitor/agent')
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
         path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
@@ -608,57 +595,22 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecrets() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = getValue(model, '/metadata/release/namespace')
-    // watchDependency('model#/metadata/release/namespace')
-
-    if (owner && cluster && namespace) {
-      try {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-          {
-            params: {
-              filter: {
-                items: {
-                  data: { username: null, password: null },
-                  metadata: { name: null },
-                  type: null,
-                },
-              },
-            },
-          },
-        )
-
-        const secrets = (resp && resp.data && resp.data.items) || []
-
-        const filteredSecrets = secrets.filter((item) => {
-          const validType = [
-            'kubernetes.io/service-account-token',
-            'Opaque',
-            'kubernetes.io/basic-auth',
-          ]
-          return validType.includes(item.type)
-        })
-
-        filteredSecrets.map((item) => {
-          const name = (item.metadata && item.metadata.name) || ''
-          item.text = name
-          item.value = name
-          return true
-        })
-        return filteredSecrets
-      } catch (e) {
-        console.log(e)
-      }
+  function onNamespaceChange() {
+    const namespace = getValue(
+      model,
+      '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/metadata/namespace',
+    )
+    if (!namespace) {
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/databaseRef/name',
+      )
     }
-    return []
   }
 
   function getOpsRequestUrl(reqType) {
     const cluster = storeGet('/route/params/cluster')
-    const domain = storeGet('/domain')
+    const domain = storeGet('/domain') || ''
     const owner = storeGet('/route/params/user')
     const dbname = getValue(model, '/metadata/release/name')
     const group = getValue(model, '/metadata/resource/group')
@@ -676,20 +628,7 @@ export const useFunc = (model) => {
 
     if (isKube) return pathConstructedForKubedb
     else
-      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/ferretdbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
-  }
-
-  function onNamespaceChange() {
-    const namespace = getValue(
-      model,
-      '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace',
-    )
-    if (!namespace) {
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name',
-      )
-    }
+      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/perconaxtradbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
   }
 
   function setValueFrom() {
@@ -756,6 +695,33 @@ export const useFunc = (model) => {
     return valueFrom === value
   }
 
+  async function resourceNames(group, version, resource) {
+    const namespace = getValue(model, '/metadata/release/namespace')
+    // watchDependency('model#/metadata/release/namespace')
+
+    let resources = await getNamespacedResourceList(axios, storeGet, {
+      namespace,
+      group,
+      version,
+      resource,
+    })
+
+    if (resource === 'secrets') {
+      resources = resources.filter((item) => {
+        const validType = ['kubernetes.io/service-account-token', 'Opaque']
+        return validType.includes(item.type)
+      })
+    }
+
+    return resources.map((resource) => {
+      const name = (resource.metadata && resource.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
+    })
+  }
+
   async function getConfigMapKeys() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -763,7 +729,7 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     const configMapName = getValue(
       model,
-      '/resources/kubedbComFerretDB/spec/monitor/prometheus/exporter/env/items/valueFrom/configMapKeyRef/name',
+      '/resources/kubedbComPerconaXtraDB/spec/monitor/prometheus/exporter/env/items/valueFrom/configMapKeyRef/name',
     )
 
     // watchDependency('data#/namespace')
@@ -790,6 +756,42 @@ export const useFunc = (model) => {
     }
   }
 
+  async function getSecrets() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    // watchDependency('model#/metadata/release/namespace')
+
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+        {
+          params: {
+            filter: { items: { metadata: { name: null }, type: null } },
+          },
+        },
+      )
+
+      const secrets = (resp && resp.data && resp.data.items) || []
+
+      const filteredSecrets = secrets.filter((item) => {
+        const validType = ['kubernetes.io/service-account-token', 'Opaque']
+        return validType.includes(item.type)
+      })
+
+      filteredSecrets.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return filteredSecrets
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
   async function getSecretKeys() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -797,7 +799,7 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     const secretName = getValue(
       model,
-      '/resources/kubedbComFerretDB/spec/monitor/prometheus/exporter/env/items/valueFrom/secretKeyRef/name',
+      '/resources/kubedbComPerconaXtraDB/spec/monitor/prometheus/exporter/env/items/valueFrom/secretKeyRef/name',
     )
 
     // watchDependency('data#/namespace')
@@ -828,8 +830,14 @@ export const useFunc = (model) => {
     return false
   }
 
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
     isConsole,
+    isKubedb,
     getDbDetails,
     getNamespaces,
     isRancherManaged,
@@ -838,18 +846,17 @@ export const useFunc = (model) => {
     initMetadata,
     fetchTopologyMachines,
     setTrigger,
-    onTriggerChange,
+    setApplyToIfReady,
     hasAnnotations,
+    hasNoAnnotations,
     setAllowedMachine,
     getMachines,
     onMachineChange,
-    hasNoAnnotations,
     setControlledResources,
-    ferretTypeEqualsTo,
     fetchNodeTopology,
     isNodeTopologySelected,
     showOpsRequestOptions,
-    setApplyToIfReady,
+    handleUnit,
 
     getOpsRequestUrl,
     isValueExistInModel,
@@ -872,5 +879,7 @@ export const useFunc = (model) => {
     isSecretTypeValueFrom,
     getNamespacedResourceList,
     returnFalse,
+
+    setValueFromDbDetails,
   }
 }
