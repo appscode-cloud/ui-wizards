@@ -31,8 +31,16 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-mssqlserver-min', '')
-  setDiscriminatorValue('/allowedMachine-mssqlserver-max', '')
+  setDiscriminatorValue('/allowedMachine-standalone-min', '')
+  setDiscriminatorValue('/allowedMachine-standalone-max', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
+  setDiscriminatorValue('/allowedMachine-shard-min', '')
+  setDiscriminatorValue('/allowedMachine-shard-max', '')
+  setDiscriminatorValue('/allowedMachine-configServer-min', '')
+  setDiscriminatorValue('/allowedMachine-configServer-max', '')
+  setDiscriminatorValue('/allowedMachine-mongos-min', '')
+  setDiscriminatorValue('/allowedMachine-mongos-max', '')
 
   function initScheduleBackupForEdit() {
     const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
@@ -1362,80 +1370,6 @@ export const useFunc = (model) => {
     return value
   }
 
-  // MS SQL Server Type Checking for Autoscaling
-  function mssqlserverTypeEqualsTo(mssqlserverType, type) {
-    // watchDependency('discriminator#/dbDetails')
-    autoscaleType = type
-    const dbDetailsSuccess = getValue(discriminator, '/dbDetails')
-
-    if (!dbDetailsSuccess) return false
-
-    // For MS SQL Server, we always use 'mssqlserver' as the type
-    // MS SQL Server doesn't have different topologies like MongoDB (standalone/replicaSet/sharded)
-    return mssqlserverType === 'mssqlserver'
-  }
-
-  function onTriggerChange(type) {
-    const trigger = getValue(discriminator, `/${type}/trigger`)
-    const commitPath = `/resources/autoscalingKubedbComMSSQLServerAutoscaler/spec/${type}/trigger`
-
-    commit('wizard/model$update', {
-      path: commitPath,
-      value: trigger ? 'On' : 'Off',
-      force: true,
-    })
-  }
-
-  function setMetadata() {
-    const dbname = storeGet('/route/params/name') || ''
-    const namespace = storeGet('/route/query/namespace') || ''
-    const isKube = !!storeGet('/route/params/actions')
-    if (isKube) {
-      commit('wizard/model$update', {
-        path: '/metadata/release/name',
-        value: dbname,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/metadata/release/namespace',
-        value: namespace,
-        force: true,
-      })
-    }
-  }
-
-  function addOrRemoveBinding() {
-    const value = getValue(discriminator, `/binding`)
-    const dbName = getValue(model, '/metadata/release/name')
-    const dbNamespace = getValue(model, '/metadata/release/namespace')
-    const labels = getValue(model, '/resources/kubedbComMSSQLServer/metadata/labels')
-    const bindingValues = {
-      apiVersion: 'catalog.appscode.com/v1alpha1',
-      kind: 'MSSQLServerBinding',
-      metadata: {
-        labels,
-        name: dbName,
-        namespace: dbNamespace,
-      },
-      spec: {
-        sourceRef: {
-          name: dbName,
-          namespace: dbNamespace,
-        },
-      },
-    }
-
-    if (value) {
-      commit('wizard/model$update', {
-        path: '/resources/catalogAppscodeComMSSQLServerBinding',
-        value: bindingValues,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', '/resources/catalogAppscodeComMSSQLServerBinding')
-    }
-  }
-
   return {
     initScheduleBackup,
     initScheduleBackupForEdit,
@@ -1508,10 +1442,5 @@ export const useFunc = (model) => {
     returnFalse,
 
     setValueFromDbDetails,
-    mssqlserverTypeEqualsTo,
-    onTriggerChange,
-    setMetadata,
-    addOrRemoveBinding,
-    isBindingAlreadyOn,
   }
 }
