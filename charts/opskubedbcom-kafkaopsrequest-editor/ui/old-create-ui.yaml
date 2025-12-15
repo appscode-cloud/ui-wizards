@@ -26,10 +26,6 @@ step:
           type: required
         hasGroup: isRancherManaged
         schema: schema/properties/metadata/properties/namespace
-        watcher:
-          func: onNamespaceChange
-          paths:
-            - schema/properties/metadata/properties/namespace
       - type: select
         label: Database Ref
         if:
@@ -47,9 +43,9 @@ step:
         disable: isDatabaseRefDisabled
         refresh: true
         watcher:
+          func: onDbChange
           paths:
             - schema/properties/spec/properties/databaseRef/properties/name
-          func: onDbChange
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -88,9 +84,10 @@ step:
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
         watcher:
-          func: onRequestTypeChange
+          func: isDbDetailsLoading
           paths:
-            - schema/properties/spec/properties/type
+            - temp/dbDetails
+            - schema/properties/spec/properties/databaseRef/properties/name
         isHorizontal: true
         schema: schema/properties/spec/properties/type
 # UpdateVersion
@@ -100,9 +97,8 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
-          - type: select-compare
+          - type: select
             label: Target Version
-            header: Version
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -115,37 +111,52 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: input-compare
-            header: Node
-            subtitle: How many replicas do you want for your database? Specify the replica count to balance performance and resource usage
-            label: Node
+          - type: horizontal-layout
             if:
               type: function
               name: ifDbTypeEqualsTo|Combined|horizontalScaling
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/node
+            elements:
+              - type: input-compare
+                label: Replicas
+                header: Node
+                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/node
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
           - type: block-layout
             label: Topology horizontal scaling
             if:
               name: ifDbTypeEqualsTo|Topology|horizontalScaling
               type: function
             elements:
-              - type: input-compare
-                label: Broker
-                subtitle: How many replicas do you want for your database? Specify the replica count to balance performance and resource usage
-                schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/broker
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/topology/broker/replicas
-              - type: input-compare
-                label: Controller
-                subtitle: How many replicas do you want for your database? Specify the replica count to balance performance and resource usage
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/topology/controller/replicas
-                schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/controller
+              - type: block-layout
+                label: Broker Horizontal Scaling
+                showLabels: false
+                elements:
+                  - type: label-element
+                    label: Broker
+                  - type: input-compare
+                    label: Replicas
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/broker
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/broker/replicas
+              - type: block-layout
+                label: Controller Horizontal Scaling
+                showLabels: false
+                elements:
+                  - type: label-element
+                    label: Controller
+                  - type: input-compare
+                    label: Replicas
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/controller/replicas
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/controller
 # vertical Scale
       - type: block-layout
         if:
@@ -161,8 +172,8 @@ step:
             elements:
               - type: machine-compare
                 label: Resources
-                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                 loader: getMachines|node
+                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                 init:
                   type: func
                   value: setMachine|node
@@ -178,7 +189,7 @@ step:
                   - type: horizontal-layout
                     elements:
                     - type: block-layout
-                      showLabels: false
+                      showLabels: true
                       hideBorder: true
                       elements:
                         - type: label-element
@@ -193,25 +204,17 @@ step:
                             - text: Taint
                               value: Taint
                     - type: info
-                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taint:</b> Define tolerations for node traints to ensure your workload runs only on compatible nodes"
                       customClass: mt-20
                   - type: label-element
                     label: Topology
                     subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-                  - type: horizontal-layout
-                    elements:
-                      - type: input
-                        label: Key
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|node
-                        schema: temp/topologyKey-node
-                      - type: input
-                        label: Value
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|node
-                        schema: temp/topologyValue-node
+                  - type: input
+                    label: Key
+                    schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
+                  - type: input
+                    label: Value
+                    schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/value
           - type: block-layout
             if:
               type: function
@@ -261,20 +264,12 @@ step:
                       - type: label-element
                         label: Topology
                         subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-                      - type: horizontal-layout
-                        elements:
-                          - type: input
-                            label: Key
-                            validation:
-                              type: custom
-                              name: isVerticalScaleTopologyRequired|broker
-                            schema: temp/topologyKey-broker
-                          - type: input
-                            label: Value
-                            validation:
-                              type: custom
-                              name: isVerticalScaleTopologyRequired|broker
-                            schema: temp/topologyValue-broker
+                      - type: input
+                        label: Key
+                        schema: schema/properties/spec/properties/verticalScaling/properties/broker/properties/topology/properties/key
+                      - type: input
+                        label: Value
+                        schema: schema/properties/spec/properties/verticalScaling/properties/broker/properties/topology/properties/value
               - type: block-layout
                 label: Controller Vertical Scaling
                 showLabels: true
@@ -317,20 +312,12 @@ step:
                       - type: label-element
                         label: Topology
                         subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-                      - type: horizontal-layout
-                        elements:
-                          - type: input
-                            label: Key
-                            validation:
-                              type: custom
-                              name: isVerticalScaleTopologyRequired|controller
-                            schema: temp/topologyKey-controller
-                          - type: input
-                            label: Value
-                            validation:
-                              type: custom
-                              name: isVerticalScaleTopologyRequired|controller
-                            schema: temp/topologyValue-controller
+                      - type: input
+                        label: Key
+                        schema: schema/properties/spec/properties/verticalScaling/properties/controller/properties/topology/properties/key
+                      - type: input
+                        label: Value
+                        schema: schema/properties/spec/properties/verticalScaling/properties/controller/properties/topology/properties/value
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form
@@ -338,19 +325,6 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|VolumeExpansion
         elements:
-          - type: label-element
-            label: Mode
-            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose Offline Mode if you can afford a brief downtime for added reliability during the volume expansion.
-          - type: select
-            label: Mode
-            options:
-              - text: Offline
-                value: Offline
-              - text: Online
-                value: Online
-            validation:
-              type: required
-            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
           - type: input-compare
             header: Node
             subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
@@ -365,6 +339,19 @@ step:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
             schema: schema/properties/spec/properties/volumeExpansion/properties/node
+          - type: label-element
+            label: Mode (Required)
+            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose offline Mode if you can afford a brief downntime for added reliability during the volume expansion.
+          - type: select
+            label: Mode
+            options:
+              - text: Offline
+                value: Offline
+              - text: Online
+                value: Online
+            validation:
+              type: required
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
           - type: block-layout
             label: Topology volume expansion
             if:
@@ -373,17 +360,15 @@ step:
             elements:
               - type: input-compare
                 label: Broker
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/broker/storage/resources/requests/storage
                 validation:
                   type: custom
-                  name: checkVolume|/spec/topology/broker/storage/requests/storage|/spec/volumeExpansion/broker
+                  name: checkVolume|/spec/topology/broker/storage/resources/requests/storage|/spec/volumeExpansion/broker
                 schema: schema/properties/spec/properties/volumeExpansion/properties/broker
               - type: input-compare
                 label: Controller
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/topology/controller/storage/resources/requests/storage
@@ -446,23 +431,6 @@ step:
                     validation:
                       type: required
                     schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                  - type: label-element
-                    label: Selected Config Secret
-                    loader: getSelectedConfigSecret|node
-                    watcher:
-                      func: getSelectedConfigSecret|node
-                      paths:
-                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                  - type: editor
-                    label: ''
-                    readonly: true
-                    hasCopy: false
-                    loader: getSelectedConfigSecretValue|node
-                    watcher:
-                      func: getSelectedConfigSecretValue|node
-                      paths:
-                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                    schema: temp/properties/selectedConfigSecretData
               - type: array-object-form
                 label: Apply Config
                 if:
@@ -475,7 +443,6 @@ step:
                   paths:
                     - temp/properties/applyConfig
                 schema: temp/properties/applyConfig
-                buttonClass: is-light is-outlined
                 elements:
                   - type: label-element
                     label: New Apply Config
@@ -495,7 +462,6 @@ step:
               - type: switch
                 schema:  schema/properties/spec/properties/configuration/properties/removeCustomConfig
                 label: Remove CustomConfig
-                fullwidth: true
                 if:
                   name: returnFalse
                   type: function
@@ -523,15 +489,13 @@ step:
               value: initTlsOperation
             schema: temp/properties/tlsOperation
           - type: switch
-            label: Remove TLS
-            fullwidth: true
+            label: remove
             if:
               name: returnFalse
               type: function
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
-            label: Rotate Certificates
-            fullwidth: true
+            label: rotateCertificates
             schema: schema/properties/spec/properties/tls/properties/rotateCertificates
             if:
               name: returnFalse
@@ -584,7 +548,6 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
           - type: block-layout
             label: Certificates
-            showLabels: true
             if:
               name: showIssuerRefAndCertificates
               type: function
@@ -608,48 +571,54 @@ step:
                 label: Subject
                 showLabels: true
                 elements:
-                  - type: array-item-form
+                  - type: array-object-form
                     label: Organizations
-                    buttonClass: is-light is-outlined
+                    customClass: is-light is-outlined
                     schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations
-                    element:
-                      type: input
-                      label: Organization
-                  - type: array-item-form
-                    label: Countries
-                    buttonClass: is-light is-outlined
+                    elements:
+                      - type: input
+                        label: organization
+                        schema: items
+                  - type: array-object-form
+                    label: countries
+                    customClass: is-light is-outlined
                     schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries
-                    element:
-                      type: input
-                      label: Country
-                  - type: array-item-form
-                    label: Organizational Units
-                    buttonClass: is-light is-outlined
+                    elements:
+                      - type: input
+                        label: country
+                        schema: items
+                  - type: array-object-form
+                    label: organizational_units
+                    customClass: is-light is-outlined
                     schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits
-                    element:
-                      type: input
-                      label: Organizational Unit
-                  - type: array-item-form
-                    label: Provinces
-                    buttonClass: is-light is-outlined
+                    elements:
+                      - type: input
+                        label: organizational_unit
+                        schema: items
+                  - type: array-object-form
+                    label: provinces
+                    customClass: is-light is-outlined
                     schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces
-                    element:
-                      type: input
-                      label: Province
-              - type: array-item-form
+                    elements:
+                      - type: input
+                        label: province
+                        schema: items
+              - type: array-object-form
                 label: DNS Names
-                buttonClass: is-light is-outlined
+                customClass: is-light is-outlined
                 schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames
-                element:
-                  type: input
-                  label: DNS Name
-              - type: array-item-form
+                elements:
+                  - type: input
+                    label: dns name
+                    schema: items
+              - type: array-object-form
                 label: IP Addresses
                 customClass: is-light is-outlined
                 schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses
-                element:
-                  type: input
-                  label: IP Address
+                elements:
+                  - type: input
+                    label: ip Address
+                    schema: items
 # common
       - type: block-layout
         label: OpsRequest Options
@@ -657,11 +626,10 @@ step:
         elements:
           - type: time-picker
             label: Timeout
-            subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
             schema: 'schema/properties/spec/properties/timeout'
+            subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
           - type: radio
             label: Apply
-            subtitle: Choose when to apply the OpsRequest. 'IfReady' waits for the database to be ready, while 'Always' applies immediately.
             schema: 'schema/properties/spec/properties/apply'
             init:
               type: func

@@ -256,6 +256,17 @@ export const useFunc = (model) => {
     return 'On'
   }
 
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComPerconaXtraDBAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
+  }
+
   function setApplyToIfReady() {
     return 'IfReady'
   }
@@ -846,6 +857,7 @@ export const useFunc = (model) => {
     initMetadata,
     fetchTopologyMachines,
     setTrigger,
+    onTriggerChange,
     setApplyToIfReady,
     hasAnnotations,
     hasNoAnnotations,

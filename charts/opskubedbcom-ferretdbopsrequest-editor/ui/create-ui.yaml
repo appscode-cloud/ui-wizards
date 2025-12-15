@@ -91,8 +91,9 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
-          - type: select
+          - type: select-compare
             label: Target Version
+            header: Version
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -105,21 +106,29 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: input-compare
-            label: Primary Replicas
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/server/primary/replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/primary/properties/replicas
-          - type: input-compare
-            label: Secondary Replicas
-            if:
-              type: function
-              name: ferretTypeEqualsTo|secondary
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/server/secondary/replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/secondary/properties/replicas
+          - type: horizontal-layout
+            elements:
+              - type: input-compare
+                label: Primary Replicas
+                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/server/primary/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/primary/properties/replicas
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.  
+          - type: horizontal-layout
+            elements:
+              - type: input-compare
+                label: Secondary Replicas
+                if:
+                  type: function
+                  name: ferretTypeEqualsTo|secondary
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/server/secondary/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/secondary/properties/replicas
 # vertical Scale
       - type: block-layout
         if:
@@ -132,6 +141,7 @@ step:
             elements:
               - type: machine-compare
                 label: Resources
+                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                 loader: getMachines|primary
                 init:
                   type: func
@@ -141,30 +151,47 @@ step:
                   paths:
                     - schema/properties/spec/properties/verticalScaling/properties/primary/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/primary/properties/resources
-              - type: select
-                label: Node Selection Policy
-                options:
-                  - text: LabelSelector
-                    value: LabelSelector
-                  - text: Taint
-                    value: Taint
-                schema: schema/properties/spec/properties/verticalScaling/properties/primary/properties/nodeSelectionPolicy
               - type: block-layout
-                label: Topology
+                label: Node Selection
                 showLabels: true
                 elements:
-                  - type: input
-                    label: Key
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|primary
-                    schema: temp/topologyKey-primary
-                  - type: input
-                    label: Value
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|primary
-                    schema: temp/topologyValue-primary
+                  - type: horizontal-layout
+                    elements:
+                      - type: block-layout
+                        showLabels: false
+                        hideBorder: true
+                        elements:
+                          - type: label-element
+                            label: Node Selection Policy
+                            subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                          - type: select
+                            label: Node Selection Policy
+                            schema: schema/properties/spec/properties/verticalScaling/properties/primary/properties/nodeSelectionPolicy
+                            options:
+                              - text: LabelSelector
+                                value: LabelSelector
+                              - text: Taint
+                                value: Taint
+                      - type: info
+                        label: "<b>Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b>Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                        customClass: mt-20
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|primary
+                        schema: temp/topologyKey-primary
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|primary
+                        schema: temp/topologyValue-primary
           - type: block-layout
             label: Secondary
             showLabels: true
@@ -174,6 +201,7 @@ step:
             elements:
               - type: machine-compare
                 label: Resources
+                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                 loader: getMachines|secondary
                 init:
                   type: func
@@ -183,17 +211,34 @@ step:
                   paths:
                     - schema/properties/spec/properties/verticalScaling/properties/secondary/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/secondary/properties/resources
-              - type: select
-                label: Node Selection Policy
-                schema: schema/properties/spec/properties/verticalScaling/properties/secondary/properties/nodeSelectionPolicy
-                options:
-                  - text: LabelSelector
-                    value: LabelSelector
-                  - text: Taint
-                    value: Taint
               - type: block-layout
-                label: Topology
+                label: Node Selection
                 showLabels: true
+                elements:
+                  - type: horizontal-layout
+                    elements:
+                      - type: block-layout
+                        showLabels: false
+                        hideBorder: true
+                        elements:
+                          - type: label-element
+                            label: Node Selection Policy
+                            subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                          - type: select
+                            label: Node Selection Policy
+                            schema: schema/properties/spec/properties/verticalScaling/properties/secondary/properties/nodeSelectionPolicy
+                            options:
+                              - text: LabelSelector
+                                value: LabelSelector
+                              - text: Taint
+                                value: Taint
+                      - type: info
+                        label: "<b>Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b>Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                        customClass: mt-20
+              - type: label-element
+                label: Topology
+                subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+              - type: horizontal-layout
                 elements:
                   - type: input
                     label: Key
@@ -359,17 +404,22 @@ step:
                   type: input
                   label: IP Address
 # common
-      - type: time-picker
-        label: Timeout
-        schema: 'schema/properties/spec/properties/timeout'
-      - type: radio
-        label: apply
-        schema: 'schema/properties/spec/properties/apply'
-        init:
-          type: func
-          value: setApplyToIfReady
-        options:
-          - text: IfReady (OpsRequest will be applied if database is ready)
-            value: IfReady
-          - text: Always (OpsRequest will always be applied)
-            value: Always
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            schema: 'schema/properties/spec/properties/timeout'
+            subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
+          - type: radio
+            label: Apply
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always

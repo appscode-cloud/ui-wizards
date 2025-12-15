@@ -26,10 +26,6 @@ step:
           type: required
         hasGroup: isRancherManaged
         schema: schema/properties/metadata/properties/namespace
-        watcher:
-          func: onNamespaceChange
-          paths:
-            - schema/properties/metadata/properties/namespace
       - type: select
         label: Database Ref
         if:
@@ -85,9 +81,10 @@ step:
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
         watcher:
-          func: onRequestTypeChange
+          func: isDbDetailsLoading
           paths:
-            - schema/properties/spec/properties/type
+            - temp/dbDetails
+            - schema/properties/spec/properties/proxyRef/properties/name
         isHorizontal: true
         schema: schema/properties/spec/properties/type
 # UpdateVersion
@@ -97,9 +94,8 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
-          - type: select-compare
+          - type: select
             label: Target Version
-            header: Version
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -112,19 +108,12 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: horizontal-layout
-            elements:
-              - type: input-compare
-                label: Replicas
-                header: Replica
-                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/replicas
-                schema: schema/properties/spec/properties/horizontalScaling/properties/member
-              - type: info
-                hasIcon: true
-                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
+          - type: input-compare
+            label: Replicas
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/replicas
+            schema: schema/properties/spec/properties/horizontalScaling/properties/member
 # vertical Scale
       - type: block-layout
         if:
@@ -133,57 +122,39 @@ step:
         elements:
           - type: machine-compare
             label: Resources
-            subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
-            loader: getMachines|proxysql
+            loader: getMachines
             init:
               type: func
-              value: setMachine|proxysql
+              value: setMachine
             watcher:
               func: onMachineChange|proxysql|/spec/podTemplate/spec/resources
               paths:
                 - schema/properties/spec/properties/verticalScaling/properties/proxysql/properties/resources
             schema: schema/properties/spec/properties/verticalScaling/properties/proxysql/properties/resources
+          - type: select
+            label: Node Selection Policy
+            options:
+              - text: LabelSelector
+                value: LabelSelector
+              - text: Taint
+                value: Taint
+            schema: schema/properties/spec/properties/verticalScaling/properties/proxysql/properties/nodeSelectionPolicy
           - type: block-layout
-            label: Node Selection
+            label: Topology
             showLabels: true
             elements:
-              - type: horizontal-layout
-                elements:
-                - type: block-layout
-                  showLabels: false
-                  hideBorder: true
-                  elements:
-                    - type: label-element
-                      label: Node Selection Policy
-                      subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
-                    - type: select
-                      label: Node Selection Policy
-                      schema: schema/properties/spec/properties/verticalScaling/properties/proxysql/properties/nodeSelectionPolicy
-                      options:
-                        - text: LabelSelector
-                          value: LabelSelector
-                        - text: Taint
-                          value: Taint
-                - type: info
-                  label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
-                  customClass: mt-20
-              - type: label-element
-                label: Topology
-                subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-              - type: horizontal-layout
-                elements:
-                  - type: input
-                    label: Key
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|proxysql
-                    schema: temp/topologyKey-proxysql
-                  - type: input
-                    label: Value
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|proxysql
-                    schema: temp/topologyValue-proxysql
+              - type: input
+                label: Key
+                validation:
+                  type: custom
+                  name: isVerticalScaleTopologyRequired
+                schema: temp/topologyKey
+              - type: input
+                label: Value
+                validation:
+                  type: custom
+                  name: isVerticalScaleTopologyRequired
+                schema: temp/topologyValue
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
@@ -223,7 +194,6 @@ step:
                 schema: schema/properties/spec/properties/configuration/properties/mysqlQueryRules/properties/reqType
               - type: array-item-form
                 label: Query Rules
-                buttonClass: is-light is-outlined
                 init:
                   type: func
                   value: setMySQLRules
@@ -231,10 +201,11 @@ step:
                   func: onMySQLRulesChange
                   paths:
                     - temp/mysqlQueryRules
-                schema: temp/mysqlQueryRules/properties/rules
+                schema: temp/mysqlQueryRules
                 element:
                   type: input
                   label: Rules
+                  schema: items/properties/rules
           - type: block-layout
             label: MySQL Users
             showLabels: true
@@ -255,7 +226,6 @@ step:
                 schema: schema/properties/spec/properties/configuration/properties/mysqlUsers/properties/reqType
               - type: array-object-form
                 label: Users
-                buttonClass: is-light is-outlined
                 if:
                   name: showUserCreationField
                   type: function
@@ -304,16 +274,16 @@ step:
                     schema: items/properties/transaction_persistent
               - type: array-item-form
                 label: Users
-                buttonClass: is-light is-outlined
                 if:
                   name: showUserDeletionField
                   type: function
-                schema: schema/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/properties/username
+                schema: schema/properties/spec/properties/configuration/properties/mysqlUsers/properties/users
                 element:
                   type: input
                   label: Username
                   validation:
                     type: required
+                  schema: items/properties/username
 # Reconfigure TLS
       - type: block-layout
         label: TLS
@@ -338,15 +308,13 @@ step:
               value: initTlsOperation
             schema: temp/properties/tlsOperation
           - type: switch
-            label: Remove TLS
-            fullwidth: true
+            label: remove
             if:
               name: returnFalse
               type: function
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
-            label: Rotate Certificates
-            fullwidth: true
+            label: rotateCertificates
             schema: schema/properties/spec/properties/tls/properties/rotateCertificates
             if:
               name: returnFalse
@@ -425,63 +393,58 @@ step:
                 elements:
                   - type: array-item-form
                     label: Organizations
-                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations
-                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/organizations
                     element:
                       type: input
                       label: Organization
+                      schema: items
                   - type: array-item-form
                     label: Countries
-                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries
-                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/countries
                     element:
                       type: input
                       label: Country
+                      schema: items
                   - type: array-item-form
                     label: Organizational Units
-                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits
-                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/organizationalUnits
                     element:
                       type: input
                       label: Organizational Unit
+                      schema: items
                   - type: array-item-form
                     label: Provinces
-                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces
-                    buttonClass: is-light is-outlined
+                    schema: schema/items/properties/subject/properties/provinces
                     element:
                       type: input
                       label: Province
+                      schema: items
               - type: array-item-form
                 label: DNS Names
-                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames
-                buttonClass: is-light is-outlined
+                schema: schema/items/properties/dnsNames
                 element:
                   type: input
                   label: DNS Name
+                  schema: items
               - type: array-item-form
                 label: IP Addresses
-                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses
-                buttonClass: is-light is-outlined
+                schema: schema/items/properties/ipAddresses
                 element:
                   type: input
                   label: IP Address
+                  schema: items
 # common
-      - type: block-layout
-        label: OpsRequest Options
-        showLabels: true
-        elements:
-          - type: time-picker
-            label: Timeout
-            subtitle: Specify the maximum time allowed for the operation to complete before it times out
-            schema: 'schema/properties/spec/properties/timeout'
-          - type: radio
-            label: Apply
-            schema: 'schema/properties/spec/properties/apply'
-            init:
-              type: func
-              value: setApplyToIfReady
-            options:
-              - text: IfReady (OpsRequest will be applied if database is ready)
-                value: IfReady
-              - text: Always (OpsRequest will always be applied)
-                value: Always
+      - type: time-picker
+        label: Timeout
+        schema: 'schema/properties/spec/properties/timeout'
+      - type: radio
+        label: apply
+        schema: 'schema/properties/spec/properties/apply'
+        init:
+          type: func
+          value: setApplyToIfReady
+        options:
+          - text: IfReady (OpsRequest will be applied if database is ready)
+            value: IfReady
+          - text: Always (OpsRequest will always be applied)
+            value: Always

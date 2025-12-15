@@ -60,36 +60,28 @@ step:
         loader: fetchTopologyMachines
         elements:
           # perconaxtradb mode
-          - type: switch
-            label: Trigger
-            fullwidth: true
-            init:
-              type: func
-              value: setTrigger|autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/perconaxtradb/trigger
-            schema: temp/properties/compute/properties/perconaxtradb/properties/trigger
-            watcher:
-              func: onTriggerChange|compute/perconaxtradb
-              paths:
-                - temp/properties/compute/properties/perconaxtradb/properties/trigger
-          - type: label-element
-            label: Pod lifetime threshold
-            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-          - type: input
-            label: Pod LifeTime Threshold (e.g., 10m 30s)
-            schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/podLifeTimeThreshold
-            customClass: width-300
           - type: block-layout
             label: PerconaXtraDB
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb
             elements:
-              - type:  threshold-input
-                label: ResourceDiff Percentage
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComPerconaXtraDBAutoscaler/spec/compute/perconaxtradb/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/podLifeTimeThreshold
+              - type: threshold-input
+                label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/resourceDiffPercentage
-                customClass: width-300
-              - type: label-element
-                label: Resource Configuration
-                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
@@ -97,22 +89,22 @@ step:
                     elements:
                     - type: machine-compare
                       label: Min Allowed Profile
-                      schema: temp/properties/allowedMachine-perconaxtradb-min
+                      schema: temp/properties/allowedMachine-min
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|perconaxtradb|min
+                        value: setAllowedMachine|min
                       loader:
-                        name: getMachines|perconaxtradb|min
+                        name: getMachines|min
                         watchPaths:
                           - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-perconaxtradb-max
+                          - temp/properties/allowedMachine-max
                       watcher:
                         func: onMachineChange|perconaxtradb
                         paths:
-                          - temp/properties/allowedMachine-perconaxtradb-min
+                          - temp/properties/allowedMachine-min
                     - type: block-layout
                       label: Min Allowed
                       if:
@@ -128,22 +120,22 @@ step:
                           schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/minAllowed/properties/memory
                     - type: machine-compare
                       label: Max Allowed Profile
-                      schema: temp/properties/allowedMachine-perconaxtradb-max
+                      schema: temp/properties/allowedMachine-max
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|perconaxtradb|max
+                        value: setAllowedMachine|max
                       loader:
-                        name: getMachines|perconaxtradb|max
+                        name: getMachines|max
                         watchPaths:
                           - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-perconaxtradb-min
+                          - temp/properties/allowedMachine-min
                       watcher:
                         func: onMachineChange|perconaxtradb
                         paths:
-                          - temp/properties/allowedMachine-perconaxtradb-max
+                          - temp/properties/allowedMachine-max
                     - type: block-layout
                       label: Max Allowed
                       if:
@@ -151,25 +143,17 @@ step:
                         name: hasNoAnnotations
                       showLabels: true
                       elements:
-                        - type: input-compare
+                        - type: machine-compare
                           label: Cpu
                           schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/maxAllowed/properties/cpu
-                        - type: input-compare
+                        - type: machine-compare
                           label: Memory
                           schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
-                loader: setControlledResources|compute/perconaxtradb
+                loader: setControlledResources|perconaxtradb
                 multiple: true
                 schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/controlledResources
-              - type: select
-                label: Container Controlled Values
-                options:
-                - text: Requests And Limits
-                  value: RequestsAndLimits
-                - text: Requests Only
-                  value: RequestsOnly
-                schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/containerControlledValues
 
           - type: block-layout
             label: Node Topology
@@ -221,60 +205,54 @@ step:
 
   - type: single-step-form
     id: storage-autoscaler
-    loader: getDbDetails
     elements:
     - type: block-layout
       showLabels: false
       elements:
-        - type: switch
-          label: Trigger
-          fullwidth: true
-          init:
-            type: func
-            value: setTrigger|autoscalingKubedbComPerconaXtraDBAutoscaler/spec/storage/perconaxtradb/trigger
-          schema: temp/properties/storage/properties/perconaxtradb/properties/trigger
-          watcher:
-            func: onTriggerChange|storage/perconaxtradb
-            paths:
-              - temp/properties/storage/properties/perconaxtradb/properties/trigger
-        - type: label-element
-          label: Expansion Mode (Online/Offline)
-          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-        - type: select
-          label: Mode
-          description: Select how the storage expansion should be handled.
-          options:
-            - text: Online
-              value: Online
-            - text: Offline
-              value: Offline
-          schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/expansionMode
         - type: block-layout
-          label: PerconaXtraDB
-          showLabels: true
+          showLabels: false
           elements:
-            - type: threshold-input
-              label: UsageThreshold (%)
-              subtitle: Set the threshold percentage of storage usage to trigger scaling.
-              schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/usageThreshold
-            - type: scaling-rules
-              label: Scaling Rules
-              schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/scalingRules
-              loader: setValueFromDbDetails|resources/kubedbComPerconaXtraDB/spec/storage/resources/requests/storage
-              watcher:
-                func: handleUnit|autoscalingKubedbComPerconaXtraDBAutoscaler/spec/storage/perconaxtradb/scalingRules|scalingRules
-                paths:
-                  - schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/scalingRules
-            - type: input
-              label: Scaling Threshold
-              schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/scalingThreshold
-            - type: input
-              label: UpperBound
-              schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/upperBound
-              watcher:
-                func: handleUnit|autoscalingKubedbComPerconaXtraDBAutoscaler/spec/storage/perconaxtradb/upperBound
-                paths:
-                  - schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/upperBound
+            - type: block-layout
+              label: PerconaXtraDB
+              showLabels: true
+              elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComPerconaXtraDBAutoscaler/spec/storage/perconaxtradb/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/expansionMode
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComPerconaXtraDB/spec/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComPerconaXtraDBAutoscaler/spec/storage/perconaxtradb/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/scalingRules
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComPerconaXtraDBAutoscaler/spec/storage/perconaxtradb/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/storage/properties/perconaxtradb/properties/upperBound
         - type: block-layout
           label: OpsRequest Options
           showLabels: true
@@ -310,9 +288,8 @@ step:
         value: getOpsRequestUrl|VerticalScaling
     - type: switch
       label: Enable Monitoring
-      fullwidth: true
       schema: temp/properties/enableMonitoring
-      init:
+      init: 
         type: func
         value: isValueExistInModel|/resources/kubedbComPerconaXtraDB/spec/monitor
       watcher:
@@ -366,12 +343,10 @@ step:
           elements:
           - type: array-object-form
             label: Endpoints
-            buttonClass: is-light is-outlined
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
             elements:
             - type: switch
               label: Honor labels
-              fullwidth: true
               schema: honorLabels
             - type: input
               label: Interval
@@ -403,7 +378,6 @@ step:
         - type: object-item
           schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
           label : Labels
-          buttonClass: is-light is-outlined
           if:
             type: function
             name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComPerconaXtraDB/spec/monitor/agent
@@ -413,14 +387,13 @@ step:
           schema: ''
         - type: switch
           label: Customize Exporter Sidecar
-          fullwidth: true
           schema: temp/properties/customizeExporter
-          init:
+          init: 
             type: static
             value: true
           watcher:
             func: onCustomizeExporterChange
-            paths:
+            paths: 
               - temp/properties/customizeExporter
         - type: block-layout
           label: Customer Exporter Section 
@@ -449,9 +422,8 @@ step:
               label: Port
             - type: array-item-form
               label: Args
-              buttonClass: is-light is-outlined
               schema: schema/properties/resources/properties/kubedbComPerconaXtraDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-              init:
+              init: 
                 type: static
                 value: ['--compatible-mode']
               element:

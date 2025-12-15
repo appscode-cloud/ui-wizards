@@ -10,7 +10,7 @@ export const useFunc = (model) => {
 
   /********** Initialize Discriminator **************/
 
-  setDiscriminatorValue('binding', false)
+  setDiscriminatorValue('binding', true)
   setDiscriminatorValue('hidePreviewFromWizard', undefined)
 
   setDiscriminatorValue('/enableMonitoring', false)
@@ -34,13 +34,17 @@ export const useFunc = (model) => {
   let autoscaleType = ''
   let dbDetails = {}
 
+  function isKubedb() {
+    return !!storeGet('/route/params/actions')
+  }
+
   function isConsole() {
     const isKube = isKubedb()
 
     if (isKube) {
       const dbName = storeGet('/route/params/name') || ''
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name',
+        path: '/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name',
         value: dbName,
         force: true,
       })
@@ -52,14 +56,14 @@ export const useFunc = (model) => {
       const date = Math.floor(Date.now() / 1000)
       const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/name',
+        path: '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/name',
         value: modifiedName,
         force: true,
       })
       const namespace = storeGet('/route/query/namespace') || ''
       if (namespace) {
         commit('wizard/model$update', {
-          path: '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace',
+          path: '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/namespace',
           value: namespace,
           force: true,
         })
@@ -74,17 +78,17 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster') || ''
     const namespace =
       storeGet('/route/query/namespace') ||
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace') ||
+      getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/namespace') ||
       ''
     const name =
       storeGet('/route/params/name') ||
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name') ||
+      getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name') ||
       ''
 
     if (namespace && name) {
       try {
         const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/ferretdbs/${name}`,
+          `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/kafkas/${name}`,
         )
         dbDetails = resp.data || {}
         setDiscriminatorValue('/dbDetails', true)
@@ -104,73 +108,20 @@ export const useFunc = (model) => {
       force: true,
     })
     commit('wizard/model$update', {
-      path: `/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name`,
+      path: `/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name`,
       value: name,
       force: true,
     })
     commit('wizard/model$update', {
-      path: `/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/labels`,
+      path: `/resources/autoscalingKubedbComKafkaAutoscaler/metadata/labels`,
       value: dbDetails.metadata.labels,
       force: true,
     })
   }
 
-  async function getNamespaces() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-      params: { filter: { items: { metadata: { name: null } } } },
-    })
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    return resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
-
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
-  }
-
-  async function getDbs() {
-    // watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace')
-    const namespace = getValue(
-      model,
-      '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace',
-    )
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
-      {
-        params: { filter: { items: { metadata: { name: null } } } },
-      },
-    )
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    return resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
-
   function initMetadata() {
     const dbName =
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name') ||
-      ''
+      getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name') || ''
     const type = getValue(discriminator, '/autoscalingType') || ''
     const date = Math.floor(Date.now() / 1000)
     const resource = storeGet('/route/params/resource')
@@ -178,22 +129,16 @@ export const useFunc = (model) => {
     const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
     if (modifiedName)
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/name',
+        path: '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/name',
         value: modifiedName,
         force: true,
       })
 
     // delete the other type object from model
     if (type === 'compute')
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/storage',
-      )
+      commit('wizard/model$delete', '/resources/autoscalingKubedbComKafkaAutoscaler/spec/storage')
     if (type === 'storage')
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute',
-      )
+      commit('wizard/model$delete', '/resources/autoscalingKubedbComKafkaAutoscaler/spec/compute')
   }
 
   async function fetchTopologyMachines() {
@@ -216,27 +161,60 @@ export const useFunc = (model) => {
     }
   }
 
+  function dbTypeEqualsTo(type) {
+    // watchDependency('discriminator#/dbDetails')
+
+    const { spec } = dbDetails || {}
+    const { topology } = spec || {}
+    let verd = ''
+    if (topology) verd = 'topology'
+    else {
+      verd = 'combined'
+    }
+    clearSpecModel(verd)
+    return type === verd && spec
+  }
+
+  function clearSpecModel(dbtype) {
+    if (dbtype === 'standalone') {
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComKafkaAutoscaler/spec/${autoscaleType}/cluster`,
+      )
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComKafkaAutoscaler/spec/${autoscaleType}/sentinel`,
+      )
+    } else if (dbtype === 'cluster') {
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComKafkaAutoscaler/spec/${autoscaleType}/standalone`,
+      )
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComKafkaAutoscaler/spec/${autoscaleType}/sentinel`,
+      )
+    } else if (dbtype === 'sentinel') {
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComKafkaAutoscaler/spec/${autoscaleType}/standalone`,
+      )
+      commit(
+        'wizard/model$delete',
+        `/resources/autoscalingKubedbComKafkaAutoscaler/spec/${autoscaleType}/cluster`,
+      )
+    }
+  }
+
   function setTrigger(path) {
     let value = getValue(model, `/resources/${path}`)
     if (value) return value
     return 'On'
   }
 
-  function onTriggerChange(type) {
-    const trigger = getValue(discriminator, `/${type}/trigger`)
-    const commitPath = `/resources/autoscalingKubedbComFerretDBAutoscaler/spec/${type}/trigger`
-
-    commit('wizard/model$update', {
-      path: commitPath,
-      value: trigger ? 'On' : 'Off',
-      force: true,
-    })
-  }
-
-  function hasAnnotations(type) {
+  function hasAnnotations() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations') ||
-      {}
+      getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations') || {}
     const instance = annotations['kubernetes.io/instance-type']
 
     return !!instance
@@ -244,8 +222,7 @@ export const useFunc = (model) => {
 
   function setAllowedMachine(type, minmax) {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations') ||
-      {}
+      getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations') || {}
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
     try {
@@ -289,7 +266,7 @@ export const useFunc = (model) => {
   }
 
   function onMachineChange(type) {
-    const annoPath = '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations'
+    const annoPath = '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations'
     const annotations = getValue(model, annoPath) || {}
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
@@ -313,7 +290,7 @@ export const useFunc = (model) => {
     const maxMachineObj = machines.find((item) => item.topologyValue === maxMachine)
     const minMachineAllocatable = minMachineObj?.allocatable
     const maxMachineAllocatable = maxMachineObj?.allocatable
-    const allowedPath = `/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/${type}`
+    const allowedPath = `/resources/autoscalingKubedbComKafkaAutoscaler/spec/compute/${type}`
 
     if (minMachine && maxMachine && instance !== instanceString) {
       commit('wizard/model$update', {
@@ -338,30 +315,9 @@ export const useFunc = (model) => {
     return !hasAnnotations()
   }
 
-  function setAllowedMachine(type, minmax) {
-    const annotations =
-      getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations') ||
-      {}
-    const instance = annotations['kubernetes.io/instance-type']
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
-
-    const machine = parsedInstance[type] || ''
-    const mx = machine?.includes(',') ? machine.split(',')[1] : ''
-    const mn = machine?.includes(',') ? machine.split(',')[0] : ''
-
-    if (minmax === 'min') return mn
-    else return mx
-  }
-
   function setControlledResources(type) {
     const list = ['cpu', 'memory']
-    const path = `/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/${type}/controlledResources`
+    const path = `/resources/autoscalingKubedbComKafkaAutoscaler/spec/compute/${type}/controlledResources`
     commit('wizard/model$update', {
       path: path,
       value: list,
@@ -370,64 +326,19 @@ export const useFunc = (model) => {
     return list
   }
 
-  function ferretTypeEqualsTo(param) {
-    const dbDetails = getValue(model, '/resources/kubedbComFerretDB')
-    const type = dbDetails.spec?.server?.secondary ? 'secondary' : 'primary'
-    return param === type
-  }
-
-  async function fetchNodeTopology() {
-    const owner = storeGet('/route/params/user') || ''
-    const cluster = storeGet('/route/params/cluster') || ''
-    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-    try {
-      const resp = await axios.get(url)
-      const list = (resp && resp.data?.items) || []
-      const mappedList = list.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        return name
-      })
-      return mappedList
-    } catch (e) {
-      console.log(e)
-    }
-    return []
-  }
-
-  function isNodeTopologySelected() {
-    // watchDependency(
-    //   'model#/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/nodeTopology/name',
-    // )
-    const nodeTopologyName =
-      getValue(
-        model,
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/compute/nodeTopology/name',
-      ) || ''
-    return !!nodeTopologyName.length
-  }
-
   function showOpsRequestOptions() {
-    console.log('isKubedb:')
     if (isKubedb() === true) return true
-    // watchDependency('model#/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name')
+    // watchDependency('model#/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name')
     // watchDependency('discriminator#/autoscalingType')
     return (
-      !!getValue(
-        model,
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name',
-      ) && !!getValue(discriminator, '/autoscalingType')
+      !!getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name') &&
+      !!getValue(discriminator, '/autoscalingType')
     )
   }
 
   function setApplyToIfReady() {
     return 'IfReady'
   }
-
-  function isKubedb() {
-    return !!storeGet('/route/params/actions')
-  }
-
-  /********** Monitoring ***********/
 
   function isEqualToModelPathValue(value, modelPath) {
     const modelPathValue = getValue(model, modelPath)
@@ -462,6 +373,82 @@ export const useFunc = (model) => {
     }
   }
 
+  async function getNamespaces() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+
+    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
+      params: { filter: { items: { metadata: { name: null } } } },
+    })
+
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    return resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
+    })
+  }
+
+  async function fetchNodeTopology() {
+    const owner = storeGet('/route/params/user') || ''
+    const cluster = storeGet('/route/params/cluster') || ''
+    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+    try {
+      const resp = await axios.get(url)
+      const list = (resp && resp.data?.items) || []
+      const mappedList = list.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        return name
+      })
+      return mappedList
+    } catch (e) {
+      console.log(e)
+    }
+    return []
+  }
+
+  function isNodeTopologySelected() {
+    // watchDependency(
+    //   'model#/resources/autoscalingKubedbComKafkaAutoscaler/spec/compute/nodeTopology/name',
+    // )
+    const nodeTopologyName =
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComKafkaAutoscaler/spec/compute/nodeTopology/name',
+      ) || ''
+    return !!nodeTopologyName.length
+  }
+
+  async function getDbs() {
+    // watchDependency('model#/resources/autoscalingKubedbComKafkaAutoscaler/metadata/namespace')
+    const namespace = getValue(
+      model,
+      '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/namespace',
+    )
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
+      {
+        params: { filter: { items: { metadata: { name: null } } } },
+      },
+    )
+
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    return resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
+    })
+  }
+
   async function getNamespacedResourceList(
     axios,
     storeGet,
@@ -489,32 +476,17 @@ export const useFunc = (model) => {
     return ans
   }
 
-  async function resourceNames(group, version, resource) {
-    const namespace = getValue(model, '/metadata/release/namespace')
-    // watchDependency('model#/metadata/release/namespace')
-
-    let resources = await getNamespacedResourceList(axios, storeGet, {
-      namespace,
-      group,
-      version,
-      resource,
-    })
-
-    if (resource === 'secrets') {
-      resources = resources.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
-        return validType.includes(item.type)
-      })
-    }
-
-    return resources.map((resource) => {
-      const name = (resource.metadata && resource.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
+  function removeCertificatesOfAliases(aliasesToRemove) {
+    const certificates = getValue(model, '/resources/kubedbComKafka/spec/tls/certificates') || []
+    const updatedCertificates = certificates.filter((item) => !aliasesToRemove.includes(item.alias))
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComKafka/spec/tls/certificates',
+      value: updatedCertificates,
+      force: true,
     })
   }
+
+  /************* Monitoring *************/
 
   function showMonitoringSection() {
     // watchDependency('discriminator#/enableMonitoring')
@@ -526,12 +498,12 @@ export const useFunc = (model) => {
     const configureStatus = getValue(discriminator, '/enableMonitoring')
     if (configureStatus) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComFerretDB/spec/monitor',
+        path: '/resources/kubedbComKafka/spec/monitor',
         value: {},
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/kubedbComFerretDB/spec/monitor')
+      commit('wizard/model$delete', '/resources/kubedbComKafka/spec/monitor')
     }
 
     // update alert value depend on monitoring profile
@@ -542,25 +514,6 @@ export const useFunc = (model) => {
     })
   }
 
-  function showCustomizeExporterSection() {
-    // watchDependency('discriminator#/customizeExporter')
-    const configureStatus = getValue(discriminator, '/customizeExporter')
-    return configureStatus
-  }
-
-  function onCustomizeExporterChange() {
-    const configureStatus = getValue(discriminator, '/customizeExporter')
-    if (configureStatus) {
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComFerretDB/spec/monitor/prometheus/exporter',
-        value: {},
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', '/resources/kubedbComFerretDB/spec/monitor/prometheus/exporter')
-    }
-  }
-
   function isValueExistInModel(path) {
     const modelValue = getValue(model, path) || null
     return !!modelValue
@@ -568,7 +521,7 @@ export const useFunc = (model) => {
 
   // function onNamespaceChange() {
   //   const namespace = getValue(model, '/metadata/release/namespace')
-  //   const agent = getValue(model, '/resources/kubedbComFerretDB/spec/monitor/agent')
+  //   const agent = getValue(model, '/resources/kubedbComKafka/spec/monitor/agent')
   //   if (agent === 'prometheus.io') {
   //     commit('wizard/model$update', {
   //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
@@ -579,9 +532,9 @@ export const useFunc = (model) => {
   // }
 
   function onLabelChange() {
-    const labels = getValue(model, '/resources/kubedbComFerretDB/spec/metadata/labels')
+    const labels = getValue(model, '/resources/kubedbComKafka/spec/metadata/labels')
 
-    const agent = getValue(model, '/resources/kubedbComFerretDB/spec/monitor/agent')
+    const agent = getValue(model, '/resources/kubedbComKafka/spec/monitor/agent')
 
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
@@ -593,7 +546,12 @@ export const useFunc = (model) => {
   }
 
   function onAgentChange() {
-    const agent = getValue(model, '/resources/kubedbComFerretDB/spec/monitor/agent')
+    const agent = getValue(model, '/resources/kubedbComKafka/spec/monitor/agent')
+
+    if (!agent) {
+      removeCertificatesOfAliases(['metrics-exporter'])
+    }
+
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
         path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
@@ -608,57 +566,9 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecrets() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = getValue(model, '/metadata/release/namespace')
-    // watchDependency('model#/metadata/release/namespace')
-
-    if (owner && cluster && namespace) {
-      try {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-          {
-            params: {
-              filter: {
-                items: {
-                  data: { username: null, password: null },
-                  metadata: { name: null },
-                  type: null,
-                },
-              },
-            },
-          },
-        )
-
-        const secrets = (resp && resp.data && resp.data.items) || []
-
-        const filteredSecrets = secrets.filter((item) => {
-          const validType = [
-            'kubernetes.io/service-account-token',
-            'Opaque',
-            'kubernetes.io/basic-auth',
-          ]
-          return validType.includes(item.type)
-        })
-
-        filteredSecrets.map((item) => {
-          const name = (item.metadata && item.metadata.name) || ''
-          item.text = name
-          item.value = name
-          return true
-        })
-        return filteredSecrets
-      } catch (e) {
-        console.log(e)
-      }
-    }
-    return []
-  }
-
   function getOpsRequestUrl(reqType) {
     const cluster = storeGet('/route/params/cluster')
-    const domain = storeGet('/domain')
+    const domain = storeGet('/domain') || ''
     const owner = storeGet('/route/params/user')
     const dbname = getValue(model, '/metadata/release/name')
     const group = getValue(model, '/metadata/resource/group')
@@ -676,19 +586,38 @@ export const useFunc = (model) => {
 
     if (isKube) return pathConstructedForKubedb
     else
-      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/ferretdbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
   }
 
   function onNamespaceChange() {
     const namespace = getValue(
       model,
-      '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/namespace',
+      '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/namespace',
     )
     if (!namespace) {
       commit(
         'wizard/model$delete',
-        '/resources/autoscalingKubedbComFerretDBAutoscaler/spec/databaseRef/name',
+        '/resources/autoscalingKubedbComKafkaAutoscaler/spec/databaseRef/name',
       )
+    }
+  }
+
+  function showCustomizeExporterSection() {
+    // watchDependency('discriminator#/customizeExporter')
+    const configureStatus = getValue(discriminator, '/customizeExporter')
+    return configureStatus
+  }
+
+  function onCustomizeExporterChange() {
+    const configureStatus = getValue(discriminator, '/customizeExporter')
+    if (configureStatus) {
+      commit('wizard/model$update', {
+        path: '/resources/kubedbComKafka/spec/monitor/prometheus/exporter',
+        value: {},
+        force: true,
+      })
+    } else {
+      commit('wizard/model$delete', '/resources/kubedbComKafka/spec/monitor/prometheus/exporter')
     }
   }
 
@@ -756,6 +685,33 @@ export const useFunc = (model) => {
     return valueFrom === value
   }
 
+  async function resourceNames(group, version, resource) {
+    const namespace = getValue(model, '/metadata/release/namespace')
+    // watchDependency('model#/metadata/release/namespace')
+
+    let resources = await getNamespacedResourceList(axios, storeGet, {
+      namespace,
+      group,
+      version,
+      resource,
+    })
+
+    if (resource === 'secrets') {
+      resources = resources.filter((item) => {
+        const validType = ['kubernetes.io/service-account-token', 'Opaque']
+        return validType.includes(item.type)
+      })
+    }
+
+    return resources.map((resource) => {
+      const name = (resource.metadata && resource.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
+    })
+  }
+
   async function getConfigMapKeys() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -763,7 +719,7 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     const configMapName = getValue(
       model,
-      '/resources/kubedbComFerretDB/spec/monitor/prometheus/exporter/env/items/valueFrom/configMapKeyRef/name',
+      '/resources/kubedbComKafka/spec/monitor/prometheus/exporter/env/items/valueFrom/configMapKeyRef/name',
     )
 
     // watchDependency('data#/namespace')
@@ -790,6 +746,42 @@ export const useFunc = (model) => {
     }
   }
 
+  async function getSecrets() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    // watchDependency('model#/metadata/release/namespace')
+
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+        {
+          params: {
+            filter: { items: { metadata: { name: null }, type: null } },
+          },
+        },
+      )
+
+      const secrets = (resp && resp.data && resp.data.items) || []
+
+      const filteredSecrets = secrets.filter((item) => {
+        const validType = ['kubernetes.io/service-account-token', 'Opaque']
+        return validType.includes(item.type)
+      })
+
+      filteredSecrets.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return filteredSecrets
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
   async function getSecretKeys() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -797,7 +789,7 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     const secretName = getValue(
       model,
-      '/resources/kubedbComFerretDB/spec/monitor/prometheus/exporter/env/items/valueFrom/secretKeyRef/name',
+      '/resources/kubedbComKafka/spec/monitor/prometheus/exporter/env/items/valueFrom/secretKeyRef/name',
     )
 
     // watchDependency('data#/namespace')
@@ -824,32 +816,117 @@ export const useFunc = (model) => {
     }
   }
 
+  function isBindingAlreadyOn() {
+    const value = getValue(model, '/resources')
+    const keys = Object.keys(value)
+    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComKafkaBinding')
+    return isExposeBinding
+  }
+
+  function addOrRemoveBinding() {
+    const value = getValue(discriminator, `/binding`)
+    const dbName = getValue(model, '/metadata/release/name')
+    const dbNamespace = getValue(model, '/metadata/release/namespace')
+    const labels = getValue(model, '/resources/kubedbComKafka/metadata/labels')
+    const bindingValues = {
+      apiVersion: 'catalog.appscode.com/v1alpha1',
+      kind: 'KafkaBinding',
+      metadata: {
+        labels,
+        name: dbName,
+        namespace: dbNamespace,
+      },
+      spec: {
+        sourceRef: {
+          name: dbName,
+          namespace: dbNamespace,
+        },
+      },
+    }
+
+    if (value) {
+      commit('wizard/model$update', {
+        path: '/resources/catalogAppscodeComKafkaBinding',
+        value: bindingValues,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$delete', '/resources/catalogAppscodeComKafkaBinding')
+    }
+  }
+
   function returnFalse() {
     return false
   }
 
+  function handleUnit(path, type = 'bound') {
+    let value = getValue(model, `/resources/${path}`)
+    if (type === 'scalingRules') {
+      const updatedValue = []
+      value?.forEach((ele) => {
+        let appliesUpto = ele['appliesUpto']
+        let threshold = ele['threshold']
+        if (appliesUpto && !isNaN(appliesUpto)) {
+          appliesUpto += 'Gi'
+        }
+        if (!isNaN(threshold)) {
+          threshold += 'pc'
+        }
+        updatedValue.push({ threshold, appliesUpto })
+      })
+      if (JSON.stringify(updatedValue) !== JSON.stringify(value)) {
+        commit('wizard/model$update', {
+          path: `/resources/${path}`,
+          value: updatedValue,
+          force: true,
+        })
+      }
+    } else {
+      if (!isNaN(value)) {
+        value += 'Gi'
+        commit('wizard/model$update', {
+          path: `/resources/${path}`,
+          value: value,
+          force: true,
+        })
+      }
+    }
+  }
+
+  function isRancherManaged() {
+    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+    const found = managers.find((item) => item === 'Rancher')
+    return !!found
+  }
+
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+
   return {
+    isKubedb,
     isConsole,
     getDbDetails,
-    getNamespaces,
-    isRancherManaged,
-    onNamespaceChange,
-    getDbs,
     initMetadata,
     fetchTopologyMachines,
+    dbTypeEqualsTo,
     setTrigger,
-    onTriggerChange,
     hasAnnotations,
     setAllowedMachine,
     getMachines,
     onMachineChange,
     hasNoAnnotations,
     setControlledResources,
-    ferretTypeEqualsTo,
-    fetchNodeTopology,
-    isNodeTopologySelected,
     showOpsRequestOptions,
     setApplyToIfReady,
+    getNamespaces,
+    fetchNodeTopology,
+    isNodeTopologySelected,
+    getDbs,
+
+    handleUnit,
+    isRancherManaged,
 
     getOpsRequestUrl,
     isValueExistInModel,
@@ -860,6 +937,7 @@ export const useFunc = (model) => {
     isEqualToModelPathValue,
     onCustomizeExporterChange,
     showCustomizeExporterSection,
+    onNamespaceChange,
     onLabelChange,
     setValueFrom,
     onValueFromChange,
@@ -871,6 +949,11 @@ export const useFunc = (model) => {
     isConfigMapTypeValueFrom,
     isSecretTypeValueFrom,
     getNamespacedResourceList,
+
+    isBindingAlreadyOn,
+    addOrRemoveBinding,
     returnFalse,
+
+    setValueFromDbDetails,
   }
 }

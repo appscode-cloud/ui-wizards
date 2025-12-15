@@ -60,32 +60,28 @@ step:
         loader: fetchTopologyMachines
         elements:
           # brokers mode
-          - type: switch
-            label: Trigger
-            fullwidth: true
-            init:
-              type: func
-              value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/brokers/trigger
-            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/trigger
-          - type: label-element
-            label: Pod lifetime threshold
-            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-          - type: input
-            label: Pod LifeTime Threshold (e.g., 10m 30s)
-            customClass: width-300
-            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/podLifeTimeThreshold
           - type: block-layout
             label: Brokers
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers
             elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/brokers/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: ResourceDiff Percentage
-                customClass: width-300
+                label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/resourceDiffPercentage
-              - type: label-element
-                label: Resource Configuration
-                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
@@ -116,12 +112,14 @@ step:
                         name: hasNoAnnotations
                       showLabels: true
                       elements:
-                        - type: input-compare
+                        - type: input
                           label: Cpu
                           schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/cpu
-                        - type: input-compare
+                        - type: input
                           label: Memory
                           schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/memory
+                  - type: horizontal-layout
+                    elements:
                     - type: machine-compare
                       label: Max Allowed Profile
                       schema: temp/properties/allowedMachine-brokers-max
@@ -160,32 +158,28 @@ step:
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/controlledResources
 
           # coordinators mode
-          - type: switch
-            label: Trigger
-            fullwidth: true
-            init:
-              type: func
-              value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/coordinators/trigger
-            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/trigger
-          - type: label-element
-            label: Pod lifetime threshold
-            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-          - type: input
-            label: Pod LifeTime Threshold (e.g., 10m 30s)
-            customClass: width-300
-            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/podLifeTimeThreshold
           - type: block-layout
             label: Coordinators
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators
             elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/coordinators/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: ResourceDiff Percentage
-                customClass: width-300
+                label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/resourceDiffPercentage
-              - type: label-element
-                label: Resource Configuration
-                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
@@ -260,32 +254,28 @@ step:
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/controlledResources
 
           # historicals mode
-          - type: switch
-            label: Trigger
-            fullwidth: true
-            init:
-              type: func
-              value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/historicals/trigger
-            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/trigger
-          - type: label-element
-            label: Pod lifetime threshold
-            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-          - type: input
-            label: Pod LifeTime Threshold (e.g., 10m 30s)
-            customClass: width-300
-            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/podLifeTimeThreshold
           - type: block-layout
             label: Historicals
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals
             elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/historicals/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: ResourceDiff Percentage
-                customClass: width-300
+                label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/resourceDiffPercentage
-              - type: label-element
-                label: Resource Configuration
-                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
@@ -358,35 +348,30 @@ step:
                 loader: setControlledResources|historicals
                 multiple: true
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/controlledResources
-             
 
           # middleManagers mode
-          - type: switch
-            label: Trigger
-            fullwidth: true
-            init:
-              type: func
-              value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/middleManagers/trigger
-            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/trigger
-          - type: label-element
-            label: Pod lifetime threshold
-            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-          - type: input
-            label: Pod LifeTime Threshold (e.g., 10m 30s)
-            customClass: width-300
-            schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/podLifeTimeThreshold
           - type: block-layout
             label: Middle Managers
             showLabels: true
             # schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers
             elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/middleManagers/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: ResourceDiff Percentage
-                customClass: width-300
+                label: Resource Diff Percentage
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/resourceDiffPercentage
-              - type: label-element
-                label: Resource Configuration
-                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
               - type: block-layout
                 showLabels: false
                 elements:
@@ -507,7 +492,6 @@ step:
                   - text: Always (OpsRequest will always be applied)
                     value: Always
                 schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-
   - type: single-step-form
     id: storage-autoscaler
     elements:
@@ -517,32 +501,31 @@ step:
         - type: block-layout
           showLabels: false
           elements:
-            - type: switch
-              label: Trigger
-              fullwidth: true
-              init:
-                type: func
-                value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/storage/historicals/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/trigger
-            - type: label-element
-              label: Expansion Mode (Online/Offline)
-              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-            - type: select
-              label: Mode
-              description: Select how the storage expansion should be handled.
-              options:
-                - text: Online
-                  value: Online
-                - text: Offline
-                  value: Offline
-              schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/expansionMode
             - type: block-layout
               label: Historicals
               showLabels: true
               elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/storage/historicals/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
-                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/usageThreshold
                 - type: scaling-rules
                   label: Scaling Rules
@@ -559,32 +542,31 @@ step:
                     func: handleUnit|autoscalingKubedbComDruidAutoscaler/spec/storage/historicals/upperBound
                     paths:
                       - schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/upperBound
-            - type: switch
-              label: Trigger
-              fullwidth: true
-              init:
-                type: func
-                value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/storage/middleManagers/trigger
-              schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/trigger
-            - type: label-element
-              label: Expansion Mode (Online/Offline)
-              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-            - type: select
-              label: Mode
-              description: Select how the storage expansion should be handled.
-              options:
-                - text: Online
-                  value: Online
-                - text: Offline
-                  value: Offline
-              schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/expansionMode
             - type: block-layout
               label: MiddleManagers
               showLabels: true
               elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/storage/middleManagers/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/expansionMode
                 - type: threshold-input
                   label: UsageThreshold (%)
-                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
                   schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/usageThreshold
                 - type: scaling-rules
                   label: Scaling Rules
@@ -622,7 +604,6 @@ step:
                 - text: Always (OpsRequest will always be applied)
                   value: Always
               schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-
   - type: single-step-form
     id: monitoring
     elements:
@@ -636,9 +617,8 @@ step:
         value: getOpsRequestUrl|VerticalScaling
     - type: switch
       label: Enable Monitoring
-      fullwidth: true
       schema: temp/properties/enableMonitoring
-      init:
+      init: 
         type: func
         value: isValueExistInModel|/resources/kubedbComDruid/spec/monitor
       watcher:
@@ -646,7 +626,7 @@ step:
         paths:
           - temp/properties/enableMonitoring
     - type: block-layout
-      label: Backup form
+      label: Backup form 
       showLabels: false
       if:
         type: function
@@ -674,15 +654,15 @@ step:
             paths:
               - schema/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/agent
         - type: block-layout
-          label: ServiceMonitor Configuration
-          showLabels: true
-          if:
+          label: ServiceMonitor Configuration  
+          showLabels: true 
+          if: 
             type: function
             name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComDruid/spec/monitor/agent
           elements:
             - label: Scrapping Interval
               schema: schema/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-              type: input
+              type: input 
         - type: block-layout
           label: Service Monitor
           showLabels: true
@@ -692,12 +672,10 @@ step:
           elements:
           - type: array-object-form
             label: Endpoints
-            buttonClass: is-light is-outlined
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
             elements:
             - type: switch
               label: Honor labels
-              fullwidth: true
               schema: honorLabels
             - type: input
               label: Interval
@@ -713,24 +691,22 @@ step:
             label: Match Namespaces
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
             loader: getResources|core|v1|namespaces
-            if:
+            if: 
               type: function
               name: returnFalse
           - type: block-layout
             showLabels: false
             # schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
-            if:
+            if: 
               type: function
               name: returnFalse
             elements:
               - type: object-item
                 label: Labels
-                buttonClass: is-light is-outlined
                 schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
         - type: object-item
           schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
           label : Labels
-          buttonClass: is-light is-outlined
           if:
             type: function
             name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComDruid/spec/monitor/agent
@@ -740,17 +716,16 @@ step:
           schema: ''
         - type: switch
           label: Customize Exporter Sidecar
-          fullwidth: true
           schema: temp/properties/customizeExporter
-          init:
+          init: 
             type: static
             value: true
           watcher:
             func: onCustomizeExporterChange
-            paths:
+            paths: 
               - temp/properties/customizeExporter
         - type: block-layout
-          label: Customer Exporter Section
+          label: Customer Exporter Section 
           showLabels: false
           if:
             type: function
@@ -759,7 +734,7 @@ step:
             - type: machine-compare
               label: Resources
               schema: schema/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
-              if:
+              if: 
                 type: function
                 name: returnFalse
             - type: label-element
@@ -776,9 +751,8 @@ step:
               label: Port
             - type: array-item-form
               label: Args
-              buttonClass: is-light is-outlined
               schema: schema/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-              init:
+              init: 
                 type: static
                 value: ['--compatible-mode']
               element:
@@ -788,7 +762,7 @@ step:
             - type: block-layout
               label: Metadata
               showLabels: false
-              elements:
+              elements: 
                   #remove: should be array-object-form after fixes
                 - type: block-layout
                   label: New Environment Variable
@@ -802,8 +776,8 @@ step:
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
-                    init:
-                      type: func
+                    init: 
+                      type: func 
                       value: setValueFrom
                     options:
                     - text: Input
@@ -816,8 +790,8 @@ step:
                       func: onValueFromChange
                       paths:
                         - temp/properties/valueFromType
-                  - type: input
-                    label: Value
+                  - type: input 
+                    label: Value 
                     schema: schema/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/value
                     if:
                       name: isEqualToValueFromType|input
@@ -868,7 +842,6 @@ step:
                         - schema/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/secretKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
-
   - type: single-step-form
     id: binding
     label: Gateway Binding

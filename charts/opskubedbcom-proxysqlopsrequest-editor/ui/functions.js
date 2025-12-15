@@ -348,7 +348,7 @@ export const useFunc = (model) => {
   }
 
   function returnFalse() {
-    return false
+    return true
   }
 
   function isRancherManaged() {
@@ -694,10 +694,13 @@ export const useFunc = (model) => {
   }
 
   // machine profile stuffs
-  function getMachines() {
+  function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {
+      cpu: '',
+      memory: '',
+    }
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -744,9 +747,12 @@ export const useFunc = (model) => {
     return arr
   }
 
-  function setMachine() {
+  function setMachine(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {
+      cpu: '',
+      memory: '',
+    }
     const annotations = dbDetails?.metadata?.annotations || {}
     const machine = annotations['kubernetes.io/instance-type'] || 'custom'
 

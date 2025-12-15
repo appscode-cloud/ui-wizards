@@ -101,7 +101,6 @@ step:
                   - temp/properties/schedule
             - type: switch
               label: Paused
-              fullwidth: true
               schema: schema/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
               if:
                 type: function
@@ -114,7 +113,6 @@ step:
           elements:
             - type: switch
               label: Enable Backup Blueprint
-              fullwidth: true
               schema: temp/properties/blueprintEnabled
               init:
                 type: func
@@ -131,7 +129,6 @@ step:
           elements:
             - type: switch
               label: Enable Archiver
-              fullwidth: true
               schema: temp/properties/archiverEnabled
               init:
                 type: func
@@ -143,6 +140,7 @@ step:
 
   - type: single-step-form
     id: compute-autoscaler
+    loader: getDbDetails
     elements:
       - type: block-layout
         if:
@@ -151,29 +149,29 @@ step:
         elements:
           - type: input
             label: Name
-            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/metadata/properties/name
+            schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/metadata/properties/name
           - type: select
             label: Select Namespace
             loader: getNamespaces
             if:
               type: function
               name: isRancherManaged
-            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/metadata/properties/namespace
+            schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/metadata/properties/namespace
             watcher:
               func: onNamespaceChange
               paths:
-                - schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/metadata/properties/namespace
+                - schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/metadata/properties/namespace
           - type: select
             label: Select Db
-            loader: getMysqlDbs
+            loader: getDbs
             validation:
               type: required
             refresh: true
-            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/databaseRef/properties/name
+            schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/databaseRef/properties/name
             watcher:
               func: initMetadata
               paths:
-                - schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/databaseRef/properties/name
+                - schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/databaseRef/properties/name
 
       - type: radio
         if:
@@ -199,114 +197,101 @@ step:
         showLabels: false
         loader: fetchTopologyMachines
         elements:
-          # mysql mode
-          - type: switch
-            label: Trigger
-            fullwidth: true
-            init:
-              type: func
-              value: setTrigger|autoscalingKubedbComMySQLAutoscaler/spec/compute/mysql/trigger
-            schema: temp/properties/compute/properties/mysql/properties/trigger
-            watcher:
-              func: onTriggerChange|compute/mysql
-              paths:
-                - temp/properties/compute/properties/mysql/properties/trigger
-          - type: label-element
-            label: Pod lifetime threshold
-            subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-          - type: input
-            label: Pod LifeTime Threshold (e.g., 10m 30s)
-            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/podLifeTimeThreshold
-            customClass: width-300
+          # mssqlserver mode
           - type: block-layout
-            label: Mysql
+            label: MSSQLServer
             showLabels: true
-            # schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql
+            # schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver
             elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComMSSQLServerAutoscaler/spec/compute/mssqlserver/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/podLifeTimeThreshold
               - type: threshold-input
-                label: ResourceDiff Percentage
-                schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/resourceDiffPercentage
-                customClass: width-300
-              - type: label-element
-                label: Resource Configuration
-                subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/resourceDiffPercentage
               - type: block-layout
                 showLabels: false
                 elements:
                   - type: horizontal-layout
                     elements:
-                      - type: machine-compare
-                        label:  Min Allowed Profile
-                        schema: temp/properties/allowedMachine-min
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        loader: 
-                          name: getMachines|min
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-max
-                      - type: block-layout
-                        label: Min Allowed
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/minAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/minAllowed/properties/memory
-                      - type: machine-compare
-                        label: Max Allowed Profile
-                        schema: temp/properties/allowedMachine-max
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        loader: 
-                          name: getMachines|max
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-min
-                      - type: block-layout
-                        label: Max Allowed
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/maxAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/maxAllowed/properties/memory
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      schema: temp/properties/allowedMachine-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|min
+                      loader:
+                        name: getMachines|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-max
+                      watcher:
+                        func: onMachineChange|mssqlserver
+                        paths:
+                          - temp/properties/allowedMachine-min
+                    - type: block-layout
+                      label: Min Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      schema: temp/properties/allowedMachine-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|max
+                      loader:
+                        name: getMachines|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-min
+                      watcher:
+                        func: onMachineChange|mssqlserver
+                        paths:
+                          - temp/properties/allowedMachine-max
+                    - type: block-layout
+                      label: Max Allowed
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
-                loader: setControlledResources|mysql
+                loader: setControlledResources|mssqlserver
                 multiple: true
-                schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/controlledResources
-              - type: select
-                label: Container Controlled Values
-                options:
-                  - text: Requests And Limits
-                    value: RequestsAndLimits
-                  - text: Requests Only
-                    value: RequestsOnly
-                schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/containerControlledValues
-              - type: block-layout
-                label: In Memory Storage
-                showLabels: true
-                # schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage
-                elements:
-                  - type: threshold-input
-                    label: Scaling Factor Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage/properties/scalingFactorPercentage
-                  - type: threshold-input
-                    label: Usage Threshold Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage/properties/usageThresholdPercentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/controlledResources
 
           - type: block-layout
             label: Node Topology
@@ -314,24 +299,24 @@ step:
               type: function
               name: hasNoAnnotations
             showLabels: true
-            # schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+            # schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology
             elements:
               - type: select
-                label: Select NodeTopology
+                label: Select Node Topology
                 loader: fetchNodeTopology
-                schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
               - type: threshold-input
                 label: ScaleUp Diff Percentage
                 if:
                   type: function
                   name: isNodeTopologySelected
-                schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
               - type: threshold-input
                 label: ScaleDown Diff Percentage
                 if:
                   type: function
                   name: isNodeTopologySelected
-                schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
 
           - type: block-layout
             label: Ops Request Options
@@ -339,11 +324,11 @@ step:
             if:
               type: function
               name: showOpsRequestOptions
-            # schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions
+            # schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions
             elements:
               - type: time-picker
                 label: Timeout
-                schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
               - type: radio
                 label: Apply
                 init:
@@ -354,7 +339,7 @@ step:
                     value: IfReady
                   - text: Always (OpsRequest will always be applied)
                     value: Always
-                schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+                schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
 
   - type: single-step-form
     id: storage-autoscaler
@@ -362,55 +347,50 @@ step:
     - type: block-layout
       showLabels: false
       elements:
-        - type: switch
-          label: Trigger
-          fullwidth: true
-          init:
-            type: func
-            value: setTrigger|autoscalingKubedbComMySQLAutoscaler/spec/storage/mysql/trigger
-          schema: temp/properties/storage/properties/mysql/properties/trigger
-          watcher:
-            func: onTriggerChange|storage/mysql
-            paths:
-              - temp/properties/storage/properties/mysql/properties/trigger
-        - type: label-element
-          label: Expansion Mode (Online/Offline)
-          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-        - type: select
-          label: Mode
-          description: Select how the storage expansion should be handled.
-          options:
-            - text: Online
-              value: Online
-            - text: Offline
-              value: Offline
-          schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/expansionMode
         - type: block-layout
-          label: Mysql
-          showLabels: true
+          showLabels: false
           elements:
-            - type: threshold-input
-              label: UsageThreshold (%)
-              subtitle: Set the threshold percentage of storage usage to trigger scaling.
-              schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/usageThreshold
-            - type: scaling-rules
-              label: Scaling Rules
-              schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingRules
-              loader: setValueFromDbDetails|resources/kubedbComMySQL/spec/storage/resources/requests/storage
-              watcher:
-                func: handleUnit|autoscalingKubedbComMySQLAutoscaler/spec/storage/mysql/scalingRules|scalingRules
-                paths:
-                  - schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingRules
-            - type: input
-              label: Scaling Threshold
-              schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingThreshold
-            - type: input
-              label: UpperBound
-              schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/upperBound
-              watcher:
-                func: handleUnit|autoscalingKubedbComMySQLAutoscaler/spec/storage/mysql/upperBound
-                paths:
-                  - schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/upperBound
+            - type: block-layout
+              label: MSSQLServer
+              showLabels: true
+              elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComMSSQLServerAutoscaler/spec/storage/mssqlserver/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/expansionMode
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComMSSQLServer/spec/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMSSQLServerAutoscaler/spec/storage/mssqlserver/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/scalingRules
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMSSQLServerAutoscaler/spec/storage/mssqlserver/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/storage/properties/mssqlserver/properties/upperBound
         - type: block-layout
           label: OpsRequest Options
           showLabels: true
@@ -420,7 +400,7 @@ step:
           elements:
             - type: time-picker
               label: Timeout
-              schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
             - type: radio
               label: Apply
               init:
@@ -431,8 +411,8 @@ step:
                   value: IfReady
                 - text: Always (OpsRequest will always be applied)
                   value: Always
-              schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-
+              schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+  
   - type: single-step-form
     id: monitoring
     elements:
@@ -446,11 +426,10 @@ step:
         value: getOpsRequestUrl|VerticalScaling
     - type: switch
       label: Enable Monitoring
-      fullwidth: true
       schema: temp/properties/enableMonitoring
       init: 
         type: func
-        value: isValueExistInModel|/resources/kubedbComMySQL/spec/monitor
+        value: isValueExistInModel|/resources/kubedbComMSSQLServer/spec/monitor
       watcher:
         func: onEnableMonitoringChange
         paths:
@@ -464,7 +443,7 @@ step:
       elements:
         - type: radio
           label: Select a Monitoring Method
-          schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/agent
+          schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/agent
           isHorizontal: true
           options:
           - text: Prometheus Operator
@@ -482,32 +461,30 @@ step:
           watcher:
             func: onAgentChange
             paths:
-              - schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/agent
+              - schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/agent
         - type: block-layout
           label: ServiceMonitor Configuration  
           showLabels: true 
           if: 
             type: function
-            name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMySQL/spec/monitor/agent
+            name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMSSQLServer/spec/monitor/agent
           elements:
             - label: Scrapping Interval
-              schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+              schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
               type: input 
         - type: block-layout
           label: Service Monitor
           showLabels: true
           if:
             type: function
-            name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMySQL/spec/monitor/agent
+            name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMSSQLServer/spec/monitor/agent
           elements:
           - type: array-object-form
             label: Endpoints
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
-            buttonClass: is-light is-outlined
             elements:
             - type: switch
               label: Honor labels
-              fullwidth: true
               schema: honorLabels
             - type: input
               label: Interval
@@ -539,17 +516,15 @@ step:
         - type: object-item
           schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
           label : Labels
-          buttonClass: is-light is-outlined
           if:
             type: function
-            name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMySQL/spec/monitor/agent
+            name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMSSQLServer/spec/monitor/agent
           # individualItemDisabilityCheck: disableLableChecker
         - type: label-element
           label: Exporter Configuration
           schema: ''
         - type: switch
           label: Customize Exporter Sidecar
-          fullwidth: true
           schema: temp/properties/customizeExporter
           init: 
             type: static
@@ -567,7 +542,7 @@ step:
           elements:
             - type: machine-compare
               label: Resources
-              schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+              schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
               if: 
                 type: function
                 name: returnFalse
@@ -575,18 +550,17 @@ step:
               label: Security Context
               schema: ''
             - type: input
-              schema:  schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+              schema:  schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
               label: Run as User
             - type: input
-              schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+              schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
               label: Run as Group
             - type: input
-              schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+              schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
               label: Port
             - type: array-item-form
               label: Args
-              schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-              buttonClass: is-light is-outlined
+              schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
               init: 
                 type: static
                 value: ['--compatible-mode']
@@ -603,11 +577,11 @@ step:
                   label: New Environment Variable
                   showLabels: true
                   hideBlock: true
-                  # schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+                  # schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
                   elements:
                   - type: input
                     label: Name
-                    schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/name
+                    schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/name
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
@@ -627,7 +601,7 @@ step:
                         - temp/properties/valueFromType
                   - type: input 
                     label: Value 
-                    schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/value
+                    schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/value
                     if:
                       name: isEqualToValueFromType|input
                       type: function
@@ -636,7 +610,7 @@ step:
                       type: function
                       name: isEqualToValueFromType|configMap
                     label: ConfigMap Name
-                    schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/name
+                    schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/name
                     loader:
                       name: resourceNames|core|v1|configmaps
                       watchPaths:
@@ -644,19 +618,19 @@ step:
                     # allowUserDefinedOption: true
                   - type: select
                     label: ConfigMap Key
-                    schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/key
+                    schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/key
                     if:
                       type: function
                       name: isEqualToValueFromType|configMap
                     loader:
                       name: getConfigMapKeys
                       watchPaths:
-                        - schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/configMapKeyRef/name
+                        - schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/configMapKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
                   - type: select
                     label: Secret Name
-                    schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/name
+                    schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/name
                     if:
                       type: function
                       name: isEqualToValueFromType|secret
@@ -667,29 +641,13 @@ step:
                     # allowUserDefinedOption: true
                   - type: select
                     label: Secret Key
-                    schema: schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/key
+                    schema: schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/key
                     if:
                       type: function
                       name: isEqualToValueFromType|secret
                     loader:
                       name: getSecretKeys
                       watchPaths:
-                        - schema/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/secretKeyRef/name
+                        - schema/properties/resources/properties/kubedbComMSSQLServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/secretKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
-
-  - type: single-step-form
-    id: binding
-    label: Gateway Binding
-    elements:
-    - type: switch
-      label: Expose Database
-      schema: temp/properties/binding
-      fullwidth: true
-      init:
-        type: func
-        value: isBindingAlreadyOn
-      watcher:
-        func: addOrRemoveBinding
-        paths:
-          - temp/properties/binding
