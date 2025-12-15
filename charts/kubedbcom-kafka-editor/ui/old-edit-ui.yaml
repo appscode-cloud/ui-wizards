@@ -69,36 +69,28 @@ step:
             # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute
             elements:
               # Broker section
-              - type: switch
-                label: Trigger
-                fullwidth: true
-                schema: temp/properties/compute/properties/broker/properties/trigger
-                watcher:
-                  func: onTriggerChange|compute/broker
-                  paths:
-                    - temp/properties/compute/properties/broker/properties/trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/broker/trigger
-              - type: label-element
-                label: Pod lifetime threshold
-                subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-              - type: input
-                label: Pod LifeTime Threshold (e.g., 10m 30s)
-                customClass: width-300
-                schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/podLifeTimeThreshold
               - type: block-layout
                 label: Broker
                 showLabels: true
                 # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker
                 elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/broker/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/podLifeTimeThreshold
                   - type: threshold-input
-                    label: ResourceDiff Percentage
-                    customClass: width-300
+                    label: Resource Diff Percentage
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/resourceDiffPercentage
-                  - type: label-element
-                    label: Resource Configuration
-                    subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
                   - type: block-layout
                     showLabels: false
                     elements:
@@ -168,49 +160,33 @@ step:
                               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/maxAllowed/properties/memory
                   - type: select
                     label: Controlled Resources
-                    loader: setControlledResources|compute/broker
+                    loader: setControlledResources|broker
                     multiple: true
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/controlledResources
-                  - type: select
-                    label: Container Controlled Values
-                    options:
-                      - text: Requests And Limits
-                        value: RequestsAndLimits
-                      - text: Requests Only
-                        value: RequestsOnly
-                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/containerControlledValues
 
               # Controller section
-              - type: switch
-                label: Trigger
-                fullwidth: true
-                schema: temp/properties/compute/properties/controller/properties/trigger
-                watcher:
-                  func: onTriggerChange|compute/controller
-                  paths:
-                    - temp/properties/compute/properties/controller/properties/trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/controller/trigger
-              - type: label-element
-                label: Pod lifetime threshold
-                subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-              - type: input
-                label: Pod LifeTime Threshold (e.g., 10m 30s)
-                customClass: width-300
-                schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/podLifeTimeThreshold
               - type: block-layout
                 label: Controller
                 showLabels: true
                 # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller
                 elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/controller/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/podLifeTimeThreshold
                   - type: threshold-input
-                    label: ResourceDiff Percentage
-                    customClass: width-300
+                    label: Resource Diff Percentage
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/resourceDiffPercentage
-                  - type: label-element
-                    label: Resource Configuration
-                    subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
                   - type: block-layout
                     showLabels: false
                     elements:
@@ -280,17 +256,9 @@ step:
                               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/maxAllowed/properties/memory
                   - type: select
                     label: Controlled Resources
-                    loader: setControlledResources|compute/controller
+                    loader: setControlledResources|controller
                     multiple: true
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/controlledResources
-                  - type: select
-                    label: Container Controlled Values
-                    options:
-                      - text: Requests And Limits
-                        value: RequestsAndLimits
-                      - text: Requests Only
-                        value: RequestsOnly
-                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/containerControlledValues
 
           # combined mode - node only
           - type: block-layout
@@ -302,36 +270,28 @@ step:
             # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute
             elements:
               # Node section
-              - type: switch
-                label: Trigger
-                fullwidth: true
-                schema: temp/properties/compute/properties/node/properties/trigger
-                watcher:
-                  func: onTriggerChange|compute/node
-                  paths:
-                    - temp/properties/compute/properties/node/properties/trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/node/trigger
-              - type: label-element
-                label: Pod lifetime threshold
-                subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
-              - type: input
-                label: Pod LifeTime Threshold (e.g., 10m 30s)
-                customClass: width-300
-                schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
               - type: block-layout
                 label: Node
                 showLabels: true
                 # schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node
                 elements:
+                  - type: select
+                    label: Trigger
+                    init:
+                      type: func
+                      value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/compute/node/trigger
+                    options:
+                      - text: 'On'
+                        value: 'On'
+                      - text: 'Off'
+                        value: 'Off'
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
+                  - type: input
+                    label: Pod LifeTime Threshold
+                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
                   - type: threshold-input
-                    label: ResourceDiff Percentage
-                    customClass: width-300
+                    label: Resource Diff Percentage
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
-                  - type: label-element
-                    label: Resource Configuration
-                    subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
                   - type: block-layout
                     showLabels: false
                     elements:
@@ -401,17 +361,9 @@ step:
                               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
                   - type: select
                     label: Controlled Resources
-                    loader: setControlledResources|compute/node
+                    loader: setControlledResources|node
                     multiple: true
                     schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
-                  - type: select
-                    label: Container Controlled Values
-                    options:
-                      - text: Requests And Limits
-                        value: RequestsAndLimits
-                      - text: Requests Only
-                        value: RequestsOnly
-                    schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/containerControlledValues
 
           - type: block-layout
             label: Node Topology
@@ -518,49 +470,34 @@ step:
             paths:
               - discriminator/properties/autoscalingType
         # Broker mode
-        - type: switch
-          label: Trigger
-          fullwidth: true
-          if:
-            type: function
-            name: dbTypeEqualsTo|topology
-          schema: temp/properties/storage/properties/broker/properties/trigger
-          watcher:
-            func: onTriggerChange|storage/broker
-            paths:
-              - temp/properties/storage/properties/broker/properties/trigger
-          init:
-            type: func
-            value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/storage/broker/trigger
-        - type: label-element
-          label: Expansion Mode (Online/Offline)
-          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-          if:
-            type: function
-            name: dbTypeEqualsTo|topology
-        - type: select
-          label: Mode
-          description: Select how the storage expansion should be handled.
-          if:
-            type: function
-            name: dbTypeEqualsTo|topology
-          options:
-            - text: Online
-              value: Online
-            - text: Offline
-              value: Offline
-          schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/expansionMode
         - type: block-layout
           label: Broker
           showLabels: true
-          loader: getDbDetails
           if:
             type: function
             name: dbTypeEqualsTo|topology
           elements:
+            - type: select
+              label: Trigger
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/storage/broker/trigger
+              options:
+                - text: 'On'
+                  value: 'On'
+                - text: 'Off'
+                  value: 'Off'
+              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/trigger
+            - type: select
+              label: Expansion Mode
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/expansionMode
             - type: threshold-input
               label: UsageThreshold (%)
-              subtitle: Set the storage usage percentage that triggers automatic expansion
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/usageThreshold
             - type: scaling-rules
               label: Scaling Rules
@@ -571,9 +508,6 @@ step:
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingRules
             - type: input
-              label: Scaling Threshold
-              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingThreshold      
-            - type: input
               label: UpperBound
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/upperBound
               watcher:
@@ -581,54 +515,35 @@ step:
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/upperBound
         # Controller mode
-        - type: switch
-          label: Trigger
-          fullwidth: true
-          schema: temp/properties/storage/properties/controller/properties/trigger
-          if:
-            type: function
-            name: dbTypeEqualsTo|topology
-          watcher:
-            func: onTriggerChange|storage/controller
-            paths:
-              - temp/properties/storage/properties/controller/properties/trigger
-          init:
-            type: func
-            value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/storage/controller/trigger
-        - type: label-element
-          label: Expansion Mode (Online/Offline)
-          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-          if:
-            type: function
-            name: dbTypeEqualsTo|topology
-        - type: select
-          label: Mode
-          description: Select how the storage expansion should be handled.
-          if:
-            type: function
-            name: dbTypeEqualsTo|topology
-          options:
-            - text: Online
-              value: Online
-            - text: Offline
-              value: Offline
-          schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/expansionMode
         - type: block-layout
           label: Controller
           showLabels: true
-          loader: getDbDetails
           if:
             type: function
             name: dbTypeEqualsTo|topology
           elements:
+            - type: select
+              label: Trigger
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/storage/controller/trigger
+              options:
+                - text: 'On'
+                  value: 'On'
+                - text: 'Off'
+                  value: 'Off'
+              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/trigger
+            - type: select
+              label: Expansion Mode
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/expansionMode
             - type: threshold-input
               label: UsageThreshold (%)
-              subtitle: Set the storage usage percentage that triggers automatic expansion
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/usageThreshold
-            - type: input
-              label: Scaling Threshold
-              customClass: width-300
-              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingThreshold
             - type: scaling-rules
               label: Scaling Rules
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules
@@ -638,9 +553,6 @@ step:
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules
             - type: input
-              label: Scaling Threshold
-              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingThreshold
-            - type: input
               label: UpperBound
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/upperBound
               watcher:
@@ -648,55 +560,35 @@ step:
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/upperBound
         # Node mode
-        - type: switch
-          label: Trigger
-          fullwidth: true
-          schema: temp/properties/storage/properties/node/properties/trigger
-          if:
-            type: function
-            name: dbTypeEqualsTo|combined
-          watcher:
-            func: onTriggerChange|storage/node
-            paths:
-              - temp/properties/storage/properties/node/properties/trigger
-          init:
-            type: func
-            value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/storage/node/trigger
-        - type: label-element
-          label: Expansion Mode (Online/Offline)
-          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
-          if:
-            type: function
-            name: dbTypeEqualsTo|combined
-        - type: select
-          label: Mode
-          description: Select how the storage expansion should be handled.
-          if:
-            type: function
-            name: dbTypeEqualsTo|combined
-          options:
-            - text: Online
-              value: Online
-            - text: Offline
-              value: Offline
-          schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
         - type: block-layout
           label: Node
           showLabels: true
-          loader: getDbDetails
           if:
             type: function
             name: dbTypeEqualsTo|combined
           elements:
+            - type: select
+              label: Trigger
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComKafkaAutoscaler/spec/storage/node/trigger
+              options:
+                - text: 'On'
+                  value: 'On'
+                - text: 'Off'
+                  value: 'Off'
+              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
+            - type: select
+              label: Expansion Mode
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
             - type: threshold-input
               label: Usage Threshold (%)
-              subtitle: Set the storage usage percentage that triggers automatic expansion
-              customClass: width-300
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-            - type: input
-              label: Scaling Threshold
-              customClass: width-300
-              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingThreshold
             - type: scaling-rules
               label: Scaling Rules
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
@@ -705,9 +597,6 @@ step:
                 func: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/node/scalingRules|scalingRules
                 paths:
                   - schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-            - type: input
-              label: Scaling Threshold
-              schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingThreshold
             - type: input
               label: UpperBound
               schema: schema/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
@@ -751,9 +640,8 @@ step:
         value: getOpsRequestUrl|VerticalScaling
     - type: switch
       label: Enable Monitoring
-      fullwidth: true
       schema: temp/properties/enableMonitoring
-      init:
+      init: 
         type: func
         value: isValueExistInModel|/resources/kubedbComKafka/spec/monitor
       watcher:
@@ -807,12 +695,10 @@ step:
           elements:
           - type: array-object-form
             label: Endpoints
-            buttonClass: is-light is-outlined
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
             elements:
             - type: switch
               label: Honor labels
-              fullwidth: true
               schema: honorLabels
             - type: input
               label: Interval
@@ -840,12 +726,10 @@ step:
             elements:
               - type: object-item
                 label: Labels
-                buttonClass: is-light is-outlined
                 schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
         - type: object-item
           schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
           label : Labels
-          buttonClass: is-light is-outlined
           if:
             type: function
             name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComKafka/spec/monitor/agent
@@ -855,14 +739,13 @@ step:
           schema: ''
         - type: switch
           label: Customize Exporter Sidecar
-          fullwidth: true
           schema: temp/properties/customizeExporter
-          init:
+          init: 
             type: static
             value: true
           watcher:
             func: onCustomizeExporterChange
-            paths:
+            paths: 
               - temp/properties/customizeExporter
         - type: block-layout
           label: Customer Exporter Section 
@@ -891,9 +774,8 @@ step:
               label: Port
             - type: array-item-form
               label: Args
-              buttonClass: is-light is-outlined
               schema: schema/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-              init:
+              init: 
                 type: static
                 value: ['--compatible-mode']
               element:

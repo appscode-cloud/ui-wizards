@@ -306,6 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
+let secretArray = []
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -882,6 +883,8 @@ export const useFunc = (model) => {
 
     const filteredSecrets = secrets
 
+    secretArray = secrets
+
     filteredSecrets.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
       item.text = name
@@ -889,6 +892,79 @@ export const useFunc = (model) => {
       return true
     })
     return filteredSecrets
+  }
+
+  function getSelectedConfigSecret(type) {
+    const path = `/spec/configuration/configSecret/name`
+    const selectedSecret = getValue(model, path)
+    return `You have selected ${selectedSecret} secret` || 'No secret selected'
+  }
+
+  function objectToYaml(obj, indent = 0) {
+    if (obj === null || obj === undefined) return 'null'
+    if (typeof obj !== 'object') return JSON.stringify(obj)
+
+    const spaces = '  '.repeat(indent)
+
+    if (Array.isArray(obj)) {
+      return obj
+        .map((item) => `${spaces}- ${objectToYaml(item, indent + 1).trimStart()}`)
+        .join('\n')
+    }
+
+    return Object.keys(obj)
+      .map((key) => {
+        const value = obj[key]
+        const keyLine = `${spaces}${key}:`
+
+        if (value === null || value === undefined) {
+          return `${keyLine} null`
+        }
+
+        if (typeof value === 'object') {
+          const nested = objectToYaml(value, indent + 1)
+          return `${keyLine}\n${nested}`
+        }
+
+        if (typeof value === 'string') {
+          return `${keyLine} "${value}"`
+        }
+
+        return `${keyLine} ${value}`
+      })
+      .join('\n')
+  }
+
+  function getSelectedConfigSecretValue(type) {
+    const path = `/spec/configuration/configSecret/name`
+    const selectedSecret = getValue(model, path)
+    let data
+    secretArray.forEach((item) => {
+      if (item.metadata?.name === selectedSecret) {
+        data = objectToYaml(item.data).trim() || 'No Data Found'
+      }
+    })
+    return data || 'No Data Found'
+  }
+
+  function isVerticalScaleTopologyRequired(type) {
+    const key = getValue(model, `/temp/topologyKey-${type}`)
+    const value = getValue(model, `/temp/topologyValue-${type}`)
+
+    if ((key && !value) || (!key && value)) {
+      return 'Both Key and Value are required for topology'
+    }
+
+    if (key && value) {
+      const topologyPath = `/spec/verticalScaling/${type}/topology`
+      commit('wizard/model$update', {
+        path: topologyPath,
+        value: { key, value },
+        force: true,
+      })
+    }
+
+    return undefined
   }
 
   function createSecretUrl() {
@@ -1332,5 +1408,8 @@ export const useFunc = (model) => {
     onMachineChange,
     isMachineCustom,
     checkVolume,
+    getSelectedConfigSecret,
+    getSelectedConfigSecretValue,
+    isVerticalScaleTopologyRequired,
   }
 }

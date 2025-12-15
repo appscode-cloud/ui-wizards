@@ -117,7 +117,7 @@ step:
             elements:
               - type: input-compare
                 label: Replicas
-                header: Replicas
+                header: Node Replicas
                 subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
                 if:
                   type: function
@@ -143,10 +143,12 @@ step:
                 label: Master Node horizontal Scaling
                 showLabels: false
                 elements:
+                  - type: label-element
+                    label: Master Node
                   - type: horizontal-layout
                     elements:
                       - type: input-compare
-                        label: Master Node
+                        label: Replicas
                         header: Master Replicas
                         subtitle: Define the total number of master node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
                         init:
@@ -160,10 +162,12 @@ step:
                 label: Data Node horizontal Scaling
                 showLabels: false
                 elements:
+                  - type: label-element
+                    label: Data Node
                   - type: horizontal-layout
                     elements:
                       - type: input-compare
-                        label: Data Node
+                        label: Replicas
                         header: Data Replicas
                         subtitle: Define the total number of data node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
                         init:
@@ -177,10 +181,12 @@ step:
                 label: Ingest Node horizontal Scaling
                 showLabels: false
                 elements:
+                  - type: label-element
+                    label: Ingest Node
                   - type: horizontal-layout
                     elements:
                       - type: input-compare
-                        label: Ingest Node
+                        label: Replicas
                         header: Ingest Replicas
                         subtitle: Define the total number of ingest node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
                         init:
@@ -190,6 +196,160 @@ step:
                       - type: info
                         hasIcon: true
                         label: Ingest nodes pre-process documents before they are indexed. They can apply transformations and enrichments to your data pipeline.
+              - type: block-layout
+                label: ML Node horizontal Scaling
+                showLabels: false
+                if:
+                  type: function
+                  name: isAuthPluginEqualTo|X-Pack
+                elements:
+                  - type: label-element
+                    label: ML Node
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        header: ML Replicas
+                        subtitle: Define the total number of ML node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/ml/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/ml
+                      - type: info
+                        hasIcon: true
+                        label: Machine Learning nodes handle ML jobs and anomaly detection tasks. These nodes are available with X-Pack features.
+              - type: block-layout
+                label: Transform Node horizontal Scaling
+                showLabels: false
+                if:
+                  type: function
+                  name: isAuthPluginEqualTo|X-Pack
+                elements:
+                  - type: label-element
+                    label: Transform Node
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        header: Transform Replicas
+                        subtitle: Define the total number of transform node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/transform/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/transform
+                      - type: info
+                        hasIcon: true
+                        label: Transform nodes handle continuous transformation operations. These nodes are available with X-Pack features.
+              - type: block-layout
+                label: Data Cold Node horizontal Scaling
+                showLabels: false
+                if:
+                  type: function
+                  name: isAuthPluginEqualTo|X-Pack
+                elements:
+                  - type: label-element
+                    label: Data Cold Node
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        header: Data Cold Replicas
+                        subtitle: Define the total number of data cold node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/dataCold/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/dataCold
+                      - type: info
+                        hasIcon: true
+                        label: Data cold tier nodes store infrequently accessed data with lower performance requirements. These nodes are available with X-Pack features.
+              - type: block-layout
+                label: Data Content Node horizontal Scaling
+                showLabels: false
+                if:
+                  type: function
+                  name: isAuthPluginEqualTo|X-Pack
+                elements:
+                  - type: label-element
+                    label: Data Content Node
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        header: Data Content Replicas
+                        subtitle: Define the total number of data content node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/dataContent/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/dataContent
+                      - type: info
+                        hasIcon: true
+                        label: Data content tier nodes store regular content with standard performance requirements. These nodes are available with X-Pack features.
+              - type: block-layout
+                label: Data Frozen Node horizontal Scaling
+                showLabels: false
+                if:
+                  type: function
+                  name: isAuthPluginEqualTo|X-Pack
+                elements:
+                  - type: label-element
+                    label: Data Frozen Node
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        header: Data Frozen Replicas
+                        subtitle: Define the total number of data frozen node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/dataFrozen/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/dataFrozen
+                      - type: info
+                        hasIcon: true
+                        label: Data frozen tier nodes store searchable snapshot data with minimal storage costs. These nodes are available with X-Pack features.
+              - type: block-layout
+                label: Data Hot Node horizontal Scaling
+                showLabels: false
+                if:
+                  type: function
+                  name: isAuthPluginNotEqualTo|SearchGuard
+                elements:
+                  - type: label-element
+                    label: Data Hot Node
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        header: Data Hot Replicas
+                        subtitle: Define the total number of data hot node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/dataHot/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/dataHot
+                      - type: info
+                        hasIcon: true
+                        label: Data hot tier nodes store frequently accessed and time-series data requiring fast indexing and query performance.
+              - type: block-layout
+                label: Data Warm Node horizontal Scaling
+                showLabels: false
+                if:
+                  type: function
+                  name: isAuthPluginNotEqualTo|SearchGuard
+                elements:
+                  - type: label-element
+                    label: Data Warm Node
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Replicas
+                        header: Data Warm Replicas
+                        subtitle: Define the total number of data warm node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/dataWarm/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/dataWarm
+                      - type: info
+                        hasIcon: true
+                        label: Data warm tier nodes store less frequently accessed data with moderate performance requirements.
 # vertical Scale
       - type: block-layout
         if:
@@ -197,69 +357,10 @@ step:
           name: ifRequestTypeEqualsTo|VerticalScaling
         elements:
           - type: block-layout
-            label: Node
-            showLabels: true
-            if:
-              type: function
-              name: ifDbTypeEqualsTo|Combined|verticalScaling
-            elements:
-              - type: machine-compare
-                label: Resources
-                subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
-                loader: getMachines|node
-                init:
-                  type: func
-                  value: setMachine|node
-                watcher:
-                  func: onMachineChange|node|/spec/podTemplate/spec/resources
-                  paths:
-                    - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
-                schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
-              - type: block-layout
-                label: Node Selection
-                showLabels: true
-                elements:
-                  - type: horizontal-layout
-                    elements:
-                    - type: block-layout
-                      showLabels: false
-                      hideBorder: true
-                      elements:
-                        - type: label-element
-                          label: Node Selection Policy
-                          subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
-                        - type: select
-                          label: Node Selection Policy
-                          schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
-                          options:
-                            - text: LabelSelector
-                              value: LabelSelector
-                            - text: Taint
-                              value: Taint
-                    - type: info
-                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
-                      customClass: mt-20
-                  - type: label-element
-                    label: Topology
-                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-                  - type: horizontal-layout
-                    elements:
-                      - type: input
-                        label: Key
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|node
-                        schema: temp/topologyKey-node
-                      - type: input
-                        label: Value
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|node
-                        schema: temp/topologyValue-node
-          - type: block-layout
             if:
               type: function
               name: ifDbTypeEqualsTo|Topology|verticalScaling
+            showLabels: false
             elements:
               - type: block-layout
                 label: Master Node
@@ -861,6 +962,66 @@ step:
                               type: custom
                               name: isVerticalScaleTopologyRequired|dataWarm
                             schema: temp/topologyValue-dataWarm
+          - type: block-layout
+            label: Node
+            showLabels: true
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|Combined|verticalScaling
+            elements:
+              - type: machine-compare
+                label: Resources
+                subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                loader: getMachines|node
+                init:
+                  type: func
+                  value: setMachine|node
+                watcher:
+                  func: onMachineChange|node|/spec/podTemplate/spec/resources
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+                schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/resources
+              - type: block-layout
+                label: Node Selection
+                showLabels: true
+                elements:
+                  - type: horizontal-layout
+                    elements:
+                    - type: block-layout
+                      showLabels: false
+                      hideBorder: true
+                      elements:
+                        - type: label-element
+                          label: Node Selection Policy
+                          subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                        - type: select
+                          label: Node Selection Policy
+                          schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+                          options:
+                            - text: LabelSelector
+                              value: LabelSelector
+                            - text: Taint
+                              value: Taint
+                    - type: info
+                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                      customClass: mt-20
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|node
+                        schema: temp/topologyKey-node
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|node
+                        schema: temp/topologyValue-node
           - type: horizontal-layout
             showLabels: true
             label: Exporter
@@ -1268,14 +1429,14 @@ step:
                 - temp/tlsOperation
             schema: temp/tlsOperation
           - type: switch
-            label: 'Remove TLS'
+            label: remove
             fullwidth: true
             if:
               type: function
               name: returnFalse
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
-            label: 'Rotate Certificates'
+            label: rotateCertificates
             fullwidth: true
             if:
               type: function
@@ -1383,7 +1544,7 @@ step:
                       label: Province
               - type: array-item-form
                 label: DNS Names
-                buttonClass: is-light is-outlined
+                buttonClass: is-light  is-outlined
                 schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames
                 element:
                   type: input

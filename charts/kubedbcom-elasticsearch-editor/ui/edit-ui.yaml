@@ -115,6 +115,7 @@ step:
             - type: switch
               label: Enable Backup Blueprint
               fullwidth: true
+              subtitle: Use a backup blueprint template to automatically configure backups for similar databases
               schema: temp/properties/blueprintEnabled
               init:
                 type: func
@@ -142,663 +143,6 @@ step:
                   - temp/properties/archiverEnabled
 
   - type: single-step-form
-    id: compute-autoscaler
-    loader: getDbDetails
-    elements:
-      - type: block-layout
-        if:
-          type: function
-          name: isConsole
-        elements:
-          - type: input
-            label: Name
-            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/name
-          - type: select
-            label: Select Namespace
-            loader: getNamespaces
-            if:
-              type: function
-              name: isRancherManaged
-            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/namespace
-            watcher:
-              func: onNamespaceChange
-              paths:
-                - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/namespace
-          - type: select
-            label: Select Db
-            validation:
-              type: required
-            refresh: true
-            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/databaseRef/properties/name
-            watcher:
-              func: initMetadata
-              paths:
-                - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/databaseRef/properties/name
-
-      - type: radio
-        if:
-          type: function
-          name: isConsole
-        label: Select Type
-        validation:
-          type: required
-        schema: temp/properties/autoscalingType
-        watcher:
-          func: initMetadata
-          paths:
-            - temp/properties/autoscalingType
-        options:
-          - text: Compute
-            value: compute
-            description: Scale your CPU Memory based on resource usage
-          - text: Storage
-            value: storage
-            description: Expand your database size based on volume usage
-
-      - type: block-layout
-        showLabels: false
-        loader: fetchTopologyMachines
-        elements:
-          # Node mode
-          - type: block-layout
-            label: Node
-            showLabels: true
-            if:
-              type: function
-              name: dbTypeEqualsTo|node
-            # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node
-            elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/node/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
-              - type: threshold-input
-                label: Resource Diff Percentage
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
-              - type: block-layout
-                showLabels: false
-                elements:
-                  - type: horizontal-layout
-                    elements:
-                    - type: machine-compare
-                      label: Min Allowed Profile
-                      schema: temp/properties/allowedMachine-min
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|min
-                      loader:
-                        name: getMachines|min
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-max
-                      watcher:
-                        func: onMachineChange|node
-                        paths:
-                          - temp/properties/allowedMachine-min
-                    - type: block-layout
-                      label: Min Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
-                    - type: machine-compare
-                      label: Max Allowed Profile
-                      schema: temp/properties/allowedMachine-max
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|max
-                      loader:
-                        name: getMachines|max
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-min
-                      watcher:
-                        func: onMachineChange|node
-                        paths:
-                          - temp/properties/allowedMachine-max
-                    - type: block-layout
-                      label: Max Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
-              - type: select
-                label: Controlled Resources
-                loader: setControlledResources|node
-                multiple: true
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
-              - type: select
-                label: Container Controlled Values
-                options:
-                  - text: Requests And Limits
-                    value: RequestsAndLimits
-                  - text: Requests Only
-                    value: RequestsOnly
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/containerControlledValues
-              - type: block-layout
-                label: In Memory Storage
-                showLabels: true
-                # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/inMemoryStorage
-                elements:
-                  - type: threshold-input
-                    label: Scaling Factor Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/inMemoryStorage/properties/scalingFactorPercentage
-                  - type: threshold-input
-                    label: Usage Threshold Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/inMemoryStorage/properties/usageThresholdPercentage
-
-          # Topology mode - Data
-          - type: block-layout
-            label: Data
-            showLabels: true
-            if:
-              type: function
-              name: dbTypeEqualsTo|topology
-            # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data
-            elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/data/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/podLifeTimeThreshold
-              - type: threshold-input
-                label: Resource Diff Percentage
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/resourceDiffPercentage
-              - type: block-layout
-                showLabels: false
-                elements:
-                  - type: horizontal-layout
-                    elements:
-                    - type: machine-compare
-                      label: Min Allowed Profile
-                      schema: temp/properties/allowedMachine-min
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|min
-                      loader:
-                        name: getMachines|min
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-max
-                      watcher:
-                        func: onMachineChange|data
-                        paths:
-                          - temp/properties/allowedMachine-min
-                    - type: block-layout
-                      label: Min Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
-                    - type: machine-compare
-                      label: Max Allowed Profile
-                      schema: temp/properties/allowedMachine-max
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|max
-                      loader:
-                        name: getMachines|max
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-min
-                      watcher:
-                        func: onMachineChange|data
-                        paths:
-                          - temp/properties/allowedMachine-max
-                    - type: block-layout
-                      label: Max Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
-              - type: select
-                label: Controlled Resources
-                loader: setControlledResources|data
-                multiple: true
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
-              - type: select
-                label: Container Controlled Values
-                options:
-                  - text: Requests And Limits
-                    value: RequestsAndLimits
-                  - text: Requests Only
-                    value: RequestsOnly
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/containerControlledValues
-              - type: block-layout
-                label: In Memory Storage
-                showLabels: true
-                # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/inMemoryStorage
-                elements:
-                  - type: threshold-input
-                    label: Scaling Factor Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/inMemoryStorage/properties/scalingFactorPercentage
-                  - type: threshold-input
-                    label: Usage Threshold Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/inMemoryStorage/properties/usageThresholdPercentage
-
-          # Topology mode - Ingest
-          - type: block-layout
-            label: Ingest
-            showLabels: true
-            if:
-              type: function
-              name: dbTypeEqualsTo|topology
-            # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest
-            elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/ingest/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/podLifeTimeThreshold
-              - type: threshold-input
-                label: Resource Diff Percentage
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/resourceDiffPercentage
-              - type: block-layout
-                showLabels: false
-                elements:
-                  - type: horizontal-layout
-                    elements:
-                    - type: machine-compare
-                      label: Min Allowed Profile
-                      schema: temp/properties/allowedMachine-min
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|min
-                      loader:
-                        name: getMachines|min
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-max
-                      watcher:
-                        func: onMachineChange|ingest
-                        paths:
-                          - temp/properties/allowedMachine-min
-                    - type: block-layout
-                      label: Min Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/memory
-                    - type: machine-compare
-                      label: Max Allowed Profile
-                      schema: temp/properties/allowedMachine-max
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|max
-                      loader:
-                        name: getMachines|max
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-min
-                      watcher:
-                        func: onMachineChange|ingest
-                        paths:
-                          - temp/properties/allowedMachine-max
-                    - type: block-layout
-                      label: Max Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/memory
-              - type: select
-                label: Controlled Resources
-                loader: setControlledResources|ingest
-                multiple: true
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/controlledResources
-              - type: select
-                label: Container Controlled Values
-                options:
-                  - text: Requests And Limits
-                    value: RequestsAndLimits
-                  - text: Requests Only
-                    value: RequestsOnly
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/containerControlledValues
-              - type: block-layout
-                label: In Memory Storage
-                showLabels: true
-                # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/inMemoryStorage
-                elements:
-                  - type: threshold-input
-                    label: Scaling Factor Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/inMemoryStorage/properties/scalingFactorPercentage
-                  - type: threshold-input
-                    label: Usage Threshold Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/inMemoryStorage/properties/usageThresholdPercentage
-
-          # Topology mode - Master
-          - type: block-layout
-            label: Master
-            showLabels: true
-            if:
-              type: function
-              name: dbTypeEqualsTo|topology
-            # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master
-            elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/master/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/podLifeTimeThreshold
-              - type: threshold-input
-                label: Resource Diff Percentage
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/resourceDiffPercentage
-              - type: block-layout
-                showLabels: false
-                elements:
-                  - type: horizontal-layout
-                    elements:
-                    - type: machine-compare
-                      label: Min Allowed Profile
-                      schema: temp/properties/allowedMachine-min
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|min
-                      loader:
-                        name: getMachines|min
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-max
-                      watcher:
-                        func: onMachineChange|master
-                        paths:
-                          - temp/properties/allowedMachine-min
-                    - type: block-layout
-                      label: Min Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/memory
-                    - type: machine-compare
-                      label: Max Allowed Profile
-                      schema: temp/properties/allowedMachine-max
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|max
-                      loader:
-                        name: getMachines|max
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-min
-                      watcher:
-                        func: onMachineChange|master
-                        paths:
-                          - temp/properties/allowedMachine-max
-                    - type: block-layout
-                      label: Max Allowed
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/memory
-              - type: select
-                label: Controlled Resources
-                loader: setControlledResources|master
-                multiple: true
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/controlledResources
-              - type: select
-                label: Container Controlled Values
-                options:
-                  - text: Requests And Limits
-                    value: RequestsAndLimits
-                  - text: Requests Only
-                    value: RequestsOnly
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/containerControlledValues
-              - type: block-layout
-                label: In Memory Storage
-                showLabels: true
-                # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/inMemoryStorage
-                elements:
-                  - type: threshold-input
-                    label: Scaling Factor Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/inMemoryStorage/properties/scalingFactorPercentage
-                  - type: threshold-input
-                    label: Usage Threshold Percentage
-                    schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/inMemoryStorage/properties/usageThresholdPercentage
-
-          - type: block-layout
-            label: Node Topology
-            if:
-              type: function
-              name: hasNoAnnotations
-            showLabels: true
-            # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology
-            elements:
-              - type: select
-                label: Select NodeTopology
-                loader: fetchNodeTopology
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-              - type: threshold-input
-                label: ScaleUp Diff Percentage
-                if:
-                  type: function
-                  name: isNodeTopologySelected
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-              - type: threshold-input
-                label: ScaleDown Diff Percentage
-                if:
-                  type: function
-                  name: isNodeTopologySelected
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
-
-          - type: block-layout
-            label: Ops Request Options
-            showLabels: true
-            if:
-              type: function
-              name: showOpsRequestOptions
-            # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions
-            elements:
-              - type: time-picker
-                label: Timeout
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-              - type: radio
-                label: Apply
-                init:
-                  type: func
-                  value: setApplyToIfReady
-                options:
-                  - text: IfReady (OpsRequest will be applied if database is ready)
-                    value: IfReady
-                  - text: Always (OpsRequest will always be applied)
-                    value: Always
-                schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-
-  - type: single-step-form
-    id: storage-autoscaler
-    elements:
-    - type: block-layout
-      showLabels: false
-      elements:
-        - type: block-layout
-          showLabels: false
-          elements:
-            - type: block-layout
-              label: Node
-              showLabels: true
-              elements:
-                - type: select
-                  label: Trigger
-                  init:
-                    type: func
-                    value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/trigger
-                  options:
-                    - text: 'On'
-                      value: 'On'
-                    - text: 'Off'
-                      value: 'Off'
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
-                - type: select
-                  label: Expansion Mode
-                  options:
-                    - text: Online
-                      value: Online
-                    - text: Offline
-                      value: Offline
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
-                - type: threshold-input
-                  label: UsageThreshold (%)
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-                - type: scaling-rules
-                  label: Scaling Rules
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                  loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/topology/data/storage/resources/requests/storage
-                  watcher:
-                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/scalingRules|scalingRules
-                    paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-                  # elements:
-                  #   - type: input
-                  #     label: AppliesUpto (In Storage units)
-                  #     schema: appliesUpto
-                  #   - type: input
-                  #     label: Threshold (In %, Or In Storage Units)
-                  #     schema: threshold
-                - type: input
-                  label: UpperBound
-                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
-                  watcher:
-                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/upperBound
-                    paths:
-                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
-        - type: block-layout
-          label: OpsRequest Options
-          showLabels: true
-          if:
-            type: function
-            name: showOpsRequestOptions
-          elements:
-            - type: time-picker
-              label: Timeout
-              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-            - type: radio
-              label: Apply
-              init:
-                type: func
-                value: setApplyToIfReady
-              options:
-                - text: IfReady (OpsRequest will be applied if database is ready)
-                  value: IfReady
-                - text: Always (OpsRequest will always be applied)
-                  value: Always
-              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-
-  - type: single-step-form
     id: monitoring
     elements:
     - type: label-element
@@ -813,7 +157,7 @@ step:
       label: Enable Monitoring
       fullwidth: true
       schema: temp/properties/enableMonitoring
-      init: 
+      init:
         type: func
         value: isValueExistInModel|/resources/kubedbComElasticsearch/spec/monitor
       watcher:
@@ -821,7 +165,7 @@ step:
         paths:
           - temp/properties/enableMonitoring
     - type: block-layout
-      label: Backup form 
+      label: Backup form
       showLabels: false
       if:
         type: function
@@ -849,15 +193,15 @@ step:
             paths:
               - schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/agent
         - type: block-layout
-          label: ServiceMonitor Configuration  
-          showLabels: true 
-          if: 
+          label: ServiceMonitor Configuration
+          showLabels: true
+          if:
             type: function
             name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComElasticsearch/spec/monitor/agent
           elements:
             - label: Scrapping Interval
               schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-              type: input 
+              type: input
         - type: block-layout
           label: Service Monitor
           showLabels: true
@@ -867,6 +211,7 @@ step:
           elements:
           - type: array-object-form
             label: Endpoints
+            buttonClass: is-light is-outlined
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
             elements:
             - type: switch
@@ -887,13 +232,13 @@ step:
             label: Match Namespaces
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
             loader: getResources|core|v1|namespaces
-            if: 
+            if:
               type: function
               name: returnFalse
           - type: block-layout
             showLabels: false
             # schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
-            if: 
+            if:
               type: function
               name: returnFalse
             elements:
@@ -903,6 +248,7 @@ step:
         - type: object-item
           schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
           label : Labels
+          buttonClass: is-light is-outlined
           if:
             type: function
             name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComElasticsearch/spec/monitor/agent
@@ -919,11 +265,12 @@ step:
             value: true
           watcher:
             func: onCustomizeExporterChange
-            paths: 
+            paths:
               - temp/properties/customizeExporter
         - type: block-layout
-          label: Customer Exporter Section 
+          label: Customer Exporter Section
           showLabels: false
+          loader: setMetadata
           if:
             type: function
             name: showCustomizeExporterSection
@@ -931,7 +278,7 @@ step:
             - type: machine-compare
               label: Resources
               schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
-              if: 
+              if:
                 type: function
                 name: returnFalse
             - type: label-element
@@ -948,8 +295,9 @@ step:
               label: Port
             - type: array-item-form
               label: Args
+              buttonClass: is-light is-outlined
               schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-              init: 
+              init:
                 type: static
                 value: ['--compatible-mode']
               element:
@@ -959,7 +307,7 @@ step:
             - type: block-layout
               label: Metadata
               showLabels: false
-              elements: 
+              elements:
                   #remove: should be array-object-form after fixes
                 - type: block-layout
                   label: New Environment Variable
@@ -973,8 +321,8 @@ step:
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
-                    init: 
-                      type: func 
+                    init:
+                      type: func
                       value: setValueFrom
                     options:
                     - text: Input
@@ -987,8 +335,8 @@ step:
                       func: onValueFromChange
                       paths:
                         - temp/properties/valueFromType
-                  - type: input 
-                    label: Value 
+                  - type: input
+                    label: Value
                     schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/value
                     if:
                       name: isEqualToValueFromType|input
@@ -1039,6 +387,739 @@ step:
                         - schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/secretKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
+
+  - type: single-step-form
+    id: compute-autoscaler
+    loader: getDbDetails
+    elements:
+    - type: block-layout
+      showLabels: false
+      loader: fetchTopologyMachines
+      elements:
+        # Node mode (Combined)
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/node/trigger
+          schema: temp/properties/compute/properties/node/properties/trigger
+          watcher:
+            func: onTriggerChange|compute/node
+            paths:
+              - temp/properties/compute/properties/node/properties/trigger
+        - type: label-element
+          label: Pod lifetime threshold
+          subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+        - type: input
+          label: Pod LifeTime Threshold (e.g., 10m 30s)
+          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+          customClass: width-300
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+        - type: block-layout
+          label: Node
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          showLabels: true
+          # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node
+          elements:
+            - type: threshold-input
+              label: ResourceDiff Percentage
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+              customClass: width-300
+            - type: label-element
+              label: Resource Configuration
+              subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+            - type: block-layout
+              showLabels: false
+              elements:
+                - type: horizontal-layout
+                  elements:
+                  - type: machine-compare
+                    label: Min Allowed Profile
+                    schema: temp/properties/allowedMachine-node-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|node|min
+                    loader:
+                      name: getMachines|node|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-node-max
+                    watcher:
+                      func: onMachineChange|node
+                      paths:
+                        - temp/properties/allowedMachine-node-min
+                  - type: block-layout
+                    label: Min Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+                  - type: machine-compare
+                    label: Max Allowed Profile
+                    schema: temp/properties/allowedMachine-node-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|node|max
+                    loader:
+                      name: getMachines|node|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-node-min
+                    watcher:
+                      func: onMachineChange|node
+                      paths:
+                        - temp/properties/allowedMachine-node-max
+                  - type: block-layout
+                    label: Max Allowed
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+            - type: select
+              label: Controlled Resources
+              loader: setControlledResources|compute/node
+              multiple: true
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+
+        # Topology mode
+        - type: block-layout
+          showLabels: false
+          if:
+            type: function
+            name: dbTypeEqualsTo|topology
+          elements:
+            # Data
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/data/trigger
+              schema: temp/properties/compute/properties/data/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/data
+                paths:
+                  - temp/properties/compute/properties/data/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s)
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/podLifeTimeThreshold
+              customClass: width-300
+            - type: block-layout
+              label: Data
+              showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data
+              elements:
+                - type: threshold-input
+                  label: ResourceDiff Percentage
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                - type: block-layout
+                  showLabels: false
+                  elements:
+                    - type: horizontal-layout
+                      elements:
+                      - type: machine-compare
+                        label: Min Allowed Profile
+                        schema: temp/properties/allowedMachine-data-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|data|min
+                        loader:
+                          name: getMachines|data|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-data-max
+                        watcher:
+                          func: onMachineChange|data
+                          paths:
+                            - temp/properties/allowedMachine-data-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
+                      - type: machine-compare
+                        label: Max Allowed Profile
+                        schema: temp/properties/allowedMachine-data-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|data|max
+                        loader:
+                          name: getMachines|data|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-data-min
+                        watcher:
+                          func: onMachineChange|data
+                          paths:
+                            - temp/properties/allowedMachine-data-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
+                - type: select
+                  label: Controlled Resources
+                  loader: setControlledResources|compute/data
+                  multiple: true
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
+
+            # Ingest
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/ingest/trigger
+              schema: temp/properties/compute/properties/ingest/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/ingest
+                paths:
+                  - temp/properties/compute/properties/ingest/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s)
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/podLifeTimeThreshold
+              customClass: width-300
+            - type: block-layout
+              label: Ingest
+              showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest
+              elements:
+                - type: threshold-input
+                  label: ResourceDiff Percentage
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                - type: block-layout
+                  showLabels: false
+                  elements:
+                    - type: horizontal-layout
+                      elements:
+                      - type: machine-compare
+                        label: Min Allowed Profile
+                        schema: temp/properties/allowedMachine-ingest-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|ingest|min
+                        loader:
+                          name: getMachines|ingest|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-ingest-max
+                        watcher:
+                          func: onMachineChange|ingest
+                          paths:
+                            - temp/properties/allowedMachine-ingest-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/memory
+                      - type: machine-compare
+                        label: Max Allowed Profile
+                        schema: temp/properties/allowedMachine-ingest-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|ingest|max
+                        loader:
+                          name: getMachines|ingest|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-ingest-min
+                        watcher:
+                          func: onMachineChange|ingest
+                          paths:
+                            - temp/properties/allowedMachine-ingest-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/memory
+                - type: select
+                  label: Controlled Resources
+                  loader: setControlledResources|compute/ingest
+                  multiple: true
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/controlledResources
+
+            # Master
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/master/trigger
+              schema: temp/properties/compute/properties/master/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/master
+                paths:
+                  - temp/properties/compute/properties/master/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s)
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/podLifeTimeThreshold
+              customClass: width-300
+            - type: block-layout
+              label: Master
+              showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master
+              elements:
+                - type: threshold-input
+                  label: ResourceDiff Percentage
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                - type: block-layout
+                  showLabels: false
+                  elements:
+                    - type: horizontal-layout
+                      elements:
+                      - type: machine-compare
+                        label: Min Allowed Profile
+                        schema: temp/properties/allowedMachine-master-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|master|min
+                        loader:
+                          name: getMachines|master|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-master-max
+                        watcher:
+                          func: onMachineChange|master
+                          paths:
+                            - temp/properties/allowedMachine-master-min
+                      - type: block-layout
+                        label: Min Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/memory
+                      - type: machine-compare
+                        label: Max Allowed Profile
+                        schema: temp/properties/allowedMachine-master-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|master|max
+                        loader:
+                          name: getMachines|master|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-master-min
+                        watcher:
+                          func: onMachineChange|master
+                          paths:
+                            - temp/properties/allowedMachine-master-max
+                      - type: block-layout
+                        label: Max Allowed
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/memory
+                - type: select
+                  label: Controlled Resources
+                  loader: setControlledResources|compute/master
+                  multiple: true
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/controlledResources
+
+        - type: block-layout
+          label: NodeTopology
+          if:
+            type: function
+            name: hasNoAnnotations
+          showLabels: true
+          # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+          elements:
+            - type: select
+              label: Select NodeTopology
+              loader: fetchNodeTopology
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+            - type: threshold-input
+              label: Scale Up DiffPercentage
+              if:
+                type: function
+                name: isNodeTopologySelected
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+            - type: threshold-input
+              label: Scale Down DiffPercentage
+              if:
+                type: function
+                name: isNodeTopologySelected
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+        - type: block-layout
+          label: Ops Request Options
+          showLabels: true
+          if:
+            type: function
+            name: showOpsRequestOptions
+          # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions
+          elements:
+            - type: time-picker
+              label: Timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+            - type: radio
+              label: Apply
+              init:
+                type: func
+                value: setApplyToIfReady
+              options:
+                - text: IfReady (OpsRequest will be applied if database is ready)
+                  value: IfReady
+                - text: Always (OpsRequest will always be applied)
+                  value: Always
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+
+  - type: single-step-form
+    id: storage-autoscaler
+    loader: getDbDetails
+    elements:
+    - type: block-layout
+      showLabels: false
+      elements:
+        # Node mode (Combined)
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/trigger
+          schema: temp/properties/storage/properties/node/properties/trigger
+          watcher:
+            func: onTriggerChange|storage/node
+            paths:
+              - temp/properties/storage/properties/node/properties/trigger
+        - type: label-element
+          label: Expansion Mode (Online/Offline)
+          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+        - type: select
+          label: Mode
+          description: Select how the storage expansion should be handled.
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          options:
+            - text: Online
+              value: Online
+            - text: Offline
+              value: Offline
+          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
+        - type: block-layout
+          label: Node
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          showLabels: true
+          elements:
+            - type: threshold-input
+              label: UsageThreshold (%)
+              subtitle: Set the threshold percentage of storage usage to trigger scaling.
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
+            - type: scaling-rules
+              label: Scaling Rules
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+              loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/storage/resources/requests/storage
+              watcher:
+                func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/scalingRules|scalingRules
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+          
+            - type: input
+              label: UpperBound
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+              watcher:
+                func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/upperBound
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+
+        # Topology mode
+        - type: block-layout
+          showLabels: false
+          if:
+            type: function
+            name: dbTypeEqualsTo|topology
+          elements:
+            # Data
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/trigger
+              schema: temp/properties/storage/properties/data/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/data
+                paths:
+                  - temp/properties/storage/properties/data/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/expansionMode
+            - type: block-layout
+              label: Data
+              showLabels: true
+              elements:
+                - type: threshold-input
+                  label: UsageThreshold (%) 
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/topology/data/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
+
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
+
+            # Ingest
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/trigger
+              schema: temp/properties/storage/properties/ingest/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/ingest
+                paths:
+                  - temp/properties/storage/properties/ingest/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/expansionMode
+            - type: block-layout
+              label: Ingest
+              showLabels: true
+              elements:
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/topology/ingest/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/upperBound
+
+            # Master
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/trigger
+              schema: temp/properties/storage/properties/master/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/master
+                paths:
+                  - temp/properties/storage/properties/master/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/expansionMode
+            - type: block-layout
+              label: Master
+              showLabels: true
+              elements:
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/topology/master/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
+
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
+
+        - type: block-layout
+          label: Ops Request Options
+          showLabels: true
+          if:
+            type: function
+            name: showOpsRequestOptions
+          elements:
+            - type: time-picker
+              label: Timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+            - type: radio
+              label: Apply
+              init:
+                type: func
+                value: setApplyToIfReady
+              options:
+                - text: IfReady (OpsRequest will be applied if database is ready)
+                  value: IfReady
+                - text: Always (OpsRequest will always be applied)
+                  value: Always
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
 
   - type: single-step-form
     id: binding
