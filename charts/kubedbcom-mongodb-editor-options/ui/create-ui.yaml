@@ -48,6 +48,7 @@ step:
         paths:
           - discriminator/enableHorizons
       schema: discriminator/enableHorizons
+      fullwidth: true
       type: switch
     - if: 
         type: function
@@ -76,6 +77,9 @@ step:
     type: block-layout
   - elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Configure Shard Nodes to define how MongoDB data is partitioned, replicated, and resourced across your Kubernetes cluster.
       - type: horizontal-layout
         showLabels: true
         elements:
@@ -130,6 +134,9 @@ step:
       showLabels: true
       type: block-layout
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Config Servers store metadata about the sharded cluster, including chunk distribution and shard configuration.They must run as a replica set to ensure cluster consistency and availability.
       - type: horizontal-layout
         showLabels: true
         elements:
@@ -181,11 +188,16 @@ step:
       showLabels: true
       type: block-layout
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Mongos acts as the query router for the sharded cluster, directing client requests to the appropriate shards based on metadata from Config Servers.
       - customClass: mt-10
         label: Replicaset number
         schema: schema/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
         type: input
-      - elements:
+      - type: horizontal-layout
+        showLabels: true 
+        elements:
         - init:
             type: func
             value: setMachineToCustom|shardTopology/mongos
@@ -219,8 +231,7 @@ step:
               -  schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/memory
           schema: schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
-        type: block-layout
-      label: mongos
+      label: Mongos
       showLabels: true
       type: block-layout
     if: 
@@ -334,6 +345,7 @@ step:
         paths:
           - temp/createAuthSecret
       schema: temp/createAuthSecret
+      fullwidth: true
       type: switch
     - if: 
         type: function
@@ -344,6 +356,7 @@ step:
         paths:
           - temp/referSecret
       schema: temp/referSecret
+      fullwidth: true
       type: switch
     - loader: getReferSecrets
       if: 
@@ -370,6 +383,7 @@ step:
         paths:
           - temp/configDatabase
       schema: temp/configDatabase
+      fullwidth: true
       type: switch
     - if:
         type: function
@@ -383,13 +397,15 @@ step:
         name: notEqualToDatabaseMode|Standalone
       label: Enable Arbiter?
       schema: schema/properties/spec/properties/arbiter/properties/enabled
+      fullwidth: true
       type: switch
     - elements:
-      - elements:
+      - type: horizontal-layout
+        showLabels: true
+        elements:
         - init:
             type: func
             value: setMachineToCustom|arbiter
-          customClass: mt-10
           loader: getMachineListForOptions
           label: Machine
           schema: schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
@@ -420,8 +436,6 @@ step:
               - schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/memory
           schema: schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
-        label: ''
-        type: block-layout
       if:
         type: function
         name: showArbiter
@@ -433,44 +447,50 @@ step:
         name: notEqualToDatabaseMode|Standalone
       label: Enable hidden?
       schema: schema/properties/spec/properties/hidden/properties/enabled
+      fullwidth: true
       type: switch
     - elements:
-      - customClass: mt-10
-        label: Replicas
-        schema: schema/properties/spec/properties/hidden/properties/replicas
-        type: input
-      - label: Persistence Size
-        schema: schema/properties/spec/properties/hidden/properties/persistence/properties/size
-        type: input
-      - init:
-          type: func
-          value: setMachineToCustom|hidden
-        loader: getMachineListForOptions
-        label: Machine
-        schema: schema/properties/spec/properties/hidden/properties/podResources/properties/machine
-        type: select
-      - init:
-          type: func
-          value: setLimits|cpu|hidden
-        if:
-          type: function
-          name: isMachineCustom|hidden
-        label: cpu
-        watcher:
-          func: setRequests|cpu|hidden
-          paths:
-            - schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
-        schema: schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
-        type: input
-      - init:
-          type: func
-          value: setLimits|memory|hidden
-        if: 
-          type: function
-          name: isMachineCustom|hidden
-        label: memory
-        schema: schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/memory
-        type: input
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+        - label: Replicas
+          schema: schema/properties/spec/properties/hidden/properties/replicas
+          type: input
+        - label: Persistence Size
+          schema: schema/properties/spec/properties/hidden/properties/persistence/properties/size
+          type: input
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+        - init:
+            type: func
+            value: setMachineToCustom|hidden
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/hidden/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu|hidden
+          if:
+            type: function
+            name: isMachineCustom|hidden
+          label: cpu
+          watcher:
+            func: setRequests|cpu|hidden
+            paths:
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
+          schema: schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory|hidden
+          if: 
+            type: function
+            name: isMachineCustom|hidden
+          label: memory
+          schema: schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
       if:
         type: function
         name: showHidden
@@ -485,9 +505,13 @@ step:
         name: isToggleOn|pointInTimeRecovery
       label: Point in-time Recovery?
       schema: temp/recovery
+      fullwidth: true
       type: switch
     - elements:
-      - label: Namespace
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+        - label: Namespace
         watcher:
           func: setPointInTimeRecovery
           paths:
@@ -573,6 +597,7 @@ step:
           paths:
             - temp/monitoring
         schema: temp/monitoring
+        fullwidth: true
         type: switch
       - customClass: mt-10
         if:
@@ -607,6 +632,7 @@ step:
         paths:
           - temp/backup
       schema: temp/backup
+      fullwidth: true
       type: switch
     - elements:
       - disable: showArchiverAlert
@@ -616,6 +642,7 @@ step:
           paths:
             - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
         schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+        fullwidth: true
         type: switch
       - if:
           type: function
@@ -639,6 +666,7 @@ step:
           paths:
             - schema/properties/spec/properties/admin/properties/tls/properties/default
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
+        fullwidth: true
         type: switch
       - loader: getAdminOptions|clusterIssuers
         if:
@@ -663,6 +691,7 @@ step:
           paths:
             - schema/properties/spec/properties/admin/properties/expose/properties/default
         schema: schema/properties/spec/properties/admin/properties/expose/properties/default
+        fullwidth: true
         type: switch
       type: block-layout
     if:
