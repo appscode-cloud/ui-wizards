@@ -48,7 +48,6 @@ step:
         paths:
           - discriminator/enableHorizons
       schema: discriminator/enableHorizons
-      fullwidth: true
       type: switch
     - if: 
         type: function
@@ -239,43 +238,45 @@ step:
       name: isEqualToModelPathValue|Sharded|/spec/mode
     type: block-layout
   - elements:
-    - init: 
-        type: func
-        value: setMachineToCustom
-      customClass: mt-10
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/podResources/properties/machine
-      type: select
-    - init: 
-        type: func
-        value: setLimits|cpu
-      disable: isMachineNotCustom
-      if: 
-        type: function
-        name: isMachineCustom
-      label: cpu
-      watcher:
-        func: setRequests|cpu
-        paths:
-          -  schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: Memory
-      watcher:
-        func: setRequests|memory
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
-    if: 
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom
+          if:
+            type: function
+            name: isMachineCustom
+          label: cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              -  schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          disable: isMachineNotCustom
+          if:
+            type: function
+            name: isMachineCustom
+          label: Memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+    if:
       type: function
       name: notEqualToDatabaseMode|Sharded
     label: Machine profile
@@ -345,7 +346,6 @@ step:
         paths:
           - temp/createAuthSecret
       schema: temp/createAuthSecret
-      fullwidth: true
       type: switch
     - if: 
         type: function
@@ -356,7 +356,6 @@ step:
         paths:
           - temp/referSecret
       schema: temp/referSecret
-      fullwidth: true
       type: switch
     - loader: getReferSecrets
       if: 
@@ -383,7 +382,6 @@ step:
         paths:
           - temp/configDatabase
       schema: temp/configDatabase
-      fullwidth: true
       type: switch
     - if:
         type: function
@@ -397,7 +395,6 @@ step:
         name: notEqualToDatabaseMode|Standalone
       label: Enable Arbiter?
       schema: schema/properties/spec/properties/arbiter/properties/enabled
-      fullwidth: true
       type: switch
     - elements:
       - type: horizontal-layout
@@ -447,7 +444,6 @@ step:
         name: notEqualToDatabaseMode|Standalone
       label: Enable hidden?
       schema: schema/properties/spec/properties/hidden/properties/enabled
-      fullwidth: true
       type: switch
     - elements:
       - type: horizontal-layout
@@ -505,13 +501,9 @@ step:
         name: isToggleOn|pointInTimeRecovery
       label: Point in-time Recovery?
       schema: temp/recovery
-      fullwidth: true
       type: switch
     - elements:
-      - type: horizontal-layout
-        showLabels: true
-        elements:
-        - label: Namespace
+      - label: Namespace
         watcher:
           func: setPointInTimeRecovery
           paths:
@@ -532,7 +524,7 @@ step:
       - customClass: mt-10
         label: Recovery Timestamp
         schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
-        type: input
+        type: date-time
       if: 
         type: function
         name: showRecovery
@@ -597,7 +589,6 @@ step:
           paths:
             - temp/monitoring
         schema: temp/monitoring
-        fullwidth: true
         type: switch
       - customClass: mt-10
         if:
@@ -632,7 +623,6 @@ step:
         paths:
           - temp/backup
       schema: temp/backup
-      fullwidth: true
       type: switch
     - elements:
       - disable: showArchiverAlert
@@ -642,7 +632,6 @@ step:
           paths:
             - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
         schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
-        fullwidth: true
         type: switch
       - if:
           type: function
@@ -666,7 +655,6 @@ step:
           paths:
             - schema/properties/spec/properties/admin/properties/tls/properties/default
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
-        fullwidth: true
         type: switch
       - loader: getAdminOptions|clusterIssuers
         if:
@@ -691,7 +679,6 @@ step:
           paths:
             - schema/properties/spec/properties/admin/properties/expose/properties/default
         schema: schema/properties/spec/properties/admin/properties/expose/properties/default
-        fullwidth: true
         type: switch
       type: block-layout
     if:
