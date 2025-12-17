@@ -466,13 +466,13 @@ export const useFunc = (model) => {
     const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
     const modelPathValue = getValue(model, fullpath)
     // watchDependency(`model#${fullpath}`)
+    
     return modelPathValue !== 'custom' && !!modelPathValue
   }
-
+  let array = []
   function getMachineListForOptions() {
     const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
     const available = getValue(model, '/spec/admin/machineProfiles/available')
-    let array = []
 
     if (available.length) {
       array = available.map((machine) => {
@@ -533,7 +533,6 @@ export const useFunc = (model) => {
         memory = machines[selectedMachine].resources.limits.memory
       }
     }
-
     if (resource === 'memory') {
       commit('wizard/model$update', {
         path: reqCommitPath,
@@ -569,6 +568,7 @@ export const useFunc = (model) => {
     const commitPath = type
       ? `/spec/${type}/podResources/resources/limits/${resource}`
       : `/spec/podResources/resources/limits/${resource}`
+
     commit('wizard/model$update', {
       path: commitPath,
       value: val,
