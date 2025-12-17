@@ -38,6 +38,9 @@ step:
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:
+    - type: label-element
+      label: ''
+      subtitle: Configure a remote replica to replicate data from an external PostgreSQL source. Select the source database binding for asynchronous replication across clusters or regions.
     - loader: getAppBindings
       label: RemoteReplica SourceRef
       validation:
@@ -49,63 +52,78 @@ step:
       name: EqualToDatabaseMode|RemoteReplica
     type: block-layout
   - elements:
-    - init:
-        type: func
-        value: setMachineToCustom
-      customClass: mt-10
-      loader: getMachineListForOptions
-      label: labels.machine
-      schema: schema/properties/spec/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: labels.cpu
-      watcher:
-        func: setRequests|cpu
-        paths:
-          -  schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: labels.memory
-      watcher:
-        func: setRequests|memory
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Select a machine profile to allocate CPU and memory resources for your database. Choose 'custom' to manually specify resource requirements or select a predefined profile.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          customClass: mt-10
+          loader: getMachineListForOptions
+          label: labels.machine
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom
+          label: labels.cpu
+          loader: setLimits|cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              -  schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          disable: isMachineNotCustom
+          label: labels.memory
+          loader: setLimits|memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     label: labels.machine_profile
     showLabels: true
     type: block-layout
-  - loader: getAdminOptions|storageClasses
-    if:
-      type: function
-      name: isToggleOn|storageClasses
-    label: labels.storage.class
-    validation:
-      type: required
-    schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-    type: select
-  - if:
-      type: function
-      name: showStorageSizeField
-    label: labels.storage.size
-    schema: schema/properties/spec/properties/persistence/properties/size
-    type: input
+  - elements:
+    - type: label-element
+      label: ''
+      subtitle: Configure persistent storage for your database by selecting a storage class and specifying the volume size to meet your data retention and performance needs.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - loader: getAdminOptions|storageClasses
+          if:
+            type: function
+            name: isToggleOn|storageClasses
+          label: labels.storage.class
+          validation:
+            type: required
+          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+          type: select
+        - if:
+            type: function
+            name: showStorageSizeField
+          label: labels.storage.size
+          schema: schema/properties/spec/properties/persistence/properties/size
+          type: input
+    type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
       - type: object-item
         label: Labels
         buttonClass: is-light is-outlined
@@ -207,28 +225,34 @@ step:
       schema: temp/recovery
       type: switch
     - elements:
-      - label: Namespace
-        watcher:
-          func: setPointInTimeRecovery
-          paths:
-            - temp/refNamespace
-        validation:
-          type: required
-        schema: temp/refNamespace
-        type: input
-      - label: Name
-        watcher:
-          func: setPointInTimeRecovery
-          paths:
-            - temp/refDBName
-        validation:
-          type: required
-        schema: temp/refDBName
-        type: input
-      - customClass: mt-10
-        label: Recovery Timestamp
-        schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
-        type: input
+      - type: label-element
+        label: ''
+        subtitle: Restore your database to a specific point in time by specifying the source database namespace, name, and the exact recovery timestamp for data restoration.
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+          - label: Namespace
+            watcher:
+              func: setPointInTimeRecovery
+              paths:
+                - temp/refNamespace
+            validation:
+              type: required
+            schema: temp/refNamespace
+            type: input
+          - label: Name
+            watcher:
+              func: setPointInTimeRecovery
+              paths:
+                - temp/refDBName
+            validation:
+              type: required
+            schema: temp/refDBName
+            type: input
+          - customClass: mt-10
+            label: Recovery Timestamp
+            schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
+            type: input
       if:
         type: function
         name: showRecovery
@@ -278,34 +302,42 @@ step:
       label: labels.nodeTopology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
-    - if:
+    - elements:
+      - type: label-element
+        label: ''
+        subtitle: Configure cluster replication behavior by selecting standby mode (Hot for immediate failover or Warm for delayed activation) and streaming mode (Synchronous for guaranteed consistency or Asynchronous for better performance).
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+          - label: Standby Mode
+            options:
+            - text: Hot
+              value: Hot
+            - text: Warm
+              value: Warm
+            schema: schema/properties/spec/properties/standbyMode
+            type: select
+          - label: Streaming Mode
+            options:
+            - text: Synchronous
+              value: Synchronous
+            - text: Asynchronous
+              value: Asynchronous
+            schema: schema/properties/spec/properties/streamingMode
+            type: select
+      if:
         type: function
         name: EqualToDatabaseMode|Cluster
-      label: Standby Mode
-      options:
-      - text: Hot
-        value: Hot
-      - text: Warm
-        value: Warm
-      schema: schema/properties/spec/properties/standbyMode
-      type: select
-    - if:
-        type: function
-        name: EqualToDatabaseMode|Cluster
-      label: Streaming Mode
-      options:
-      - text: Synchronous
-        value: Synchronous
-      - text: Asynchronous
-        value: Asynchronous
-      schema: schema/properties/spec/properties/streamingMode
-      type: select
+      type: block-layout
     label: Advanced Configuration
     showLabels: true
     type: block-layout
   - description: Enable Backup, Monitoring, TLS etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Enable monitoring to collect metrics and configure alert thresholds (Critical, Warning, Info) to receive notifications about your database health and performance.
       - init:
           type: func
           value: setMonitoring
@@ -352,6 +384,9 @@ step:
       schema: temp/backup
       type: switch
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Enable archiver to continuously archive write-ahead logs (WAL) for point-in-time recovery. Note that archiver requires a compatible storage class with volume snapshot support.
       - disable: showArchiverAlert
         label: Enable Archiver?
         watcher:
@@ -370,6 +405,9 @@ step:
         name: showArchiver
       type: block-layout
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Enable TLS to encrypt client-server and inter-node communications. Select a cluster issuer to automatically provision and manage TLS certificates for secure connections.
       - if:
           type: function
           name: isToggleOn|tls
@@ -387,6 +425,9 @@ step:
         type: select
       type: block-layout
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Enable Gateway exposure to make your database accessible from outside the Kubernetes cluster using an ingress gateway or load balancer for external connectivity.
       - if:
           type: function
           name: isToggleOn|expose
