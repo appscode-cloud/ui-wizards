@@ -580,15 +580,19 @@ export const useFunc = (model) => {
     if (modelPathValue === 'custom') {
       return
     }
-    let commitCpuMemory
+    let commitCpuMemory, ModelPathValue
     if (resource && type) {
+      const fullPath = `/spec/${type}/podResources/machine`
+      ModelPathValue = getValue(model, fullPath)
       commitCpuMemory = `spec/${type}/podResources/resources/requests/${resource}`
     } else {
+      const fullPath = `/spec/podResources/machine`
+      ModelPathValue = getValue(model, fullPath)
       commitCpuMemory = `spec/podResources/resources/requests/${resource}`
     }
     let cpuMemoryValue
     array.forEach((item) => {
-      if (item.value === modelPathValue) {
+      if (item.value === ModelPathValue) {
         // Parse subText like "CPU: 2, Memory: 2Gi"
         const subText = item.subText || ''
         if (resource === 'cpu') {
