@@ -108,27 +108,29 @@ step:
           - init: 
               type: func
               value: setLimits|cpu|shardTopology/shard
-            if: 
-              type: function
-              name: isMachineCustom|shardTopology/shard
+            # if: 
+            #   type: function
+            #   name: isMachineCustom|shardTopology/shard
             label: cpu
             watcher:
               func: setRequests|cpu|shardTopology/shard
               paths:
                 - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/cpu
+                - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
             schema: schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/cpu
             type: input
           - init: 
               type: func
               value: setLimits|memory|shardTopology/shard
-            if: 
-              type: function
-              name: isMachineCustom|shardTopology/shard
+            # if: 
+            #   type: function
+            #   name: isMachineCustom|shardTopology/shard
             label: memory
             watcher:
               func: setRequests|memory|shardTopology/shard
               paths:
                 - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/memory
+                - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
             schema: schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/memory
             type: input
         type: block-layout
@@ -162,27 +164,29 @@ step:
             - init: 
                 type: func
                 value: setLimits|cpu|shardTopology/configServer
-              if: 
-                type: function
-                name:  isMachineCustom|shardTopology/configServer
+              # if: 
+              #   type: function
+              #   name:  isMachineCustom|shardTopology/configServer
               label: cpu
               watcher: 
                 func: setRequests|cpu|shardTopology/configServer
                 paths:
                   - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/cpu
+                  - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
               schema: schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/cpu
               type: input
             - init: 
                 type: func
                 value: setLimits|memory|shardTopology/configServer
-              if: 
-                type: function
-                name: isMachineCustom|shardTopology/configServer
+              # if: 
+              #   type: function
+              #   name: isMachineCustom|shardTopology/configServer
               label: memory
               watcher:
                 func: setRequests|memory|shardTopology/configServer
                 paths:
                   - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/memory
+                  - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
               schema: schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/memory
               type: input
         type: block-layout
@@ -210,27 +214,29 @@ step:
         - init:
             type: func
             value: setLimits|cpu|shardTopology/mongos
-          if: 
-            type: function
-            name: isMachineCustom|shardTopology/mongos
+          # if: 
+          #   type: function
+          #   name: isMachineCustom|shardTopology/mongos
           label: Cpu
           watcher:
             func: setRequests|cpu|shardTopology/mongos
             paths:
               -  schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/cpu
+              -  schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
           schema: schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input
         - init:
             type: func
             value: setLimits|memory|shardTopology/mongos
-          if: 
-            type: function
-            name: isMachineCustom|shardTopology/mongos
+          # if: 
+          #   type: function
+          #   name: isMachineCustom|shardTopology/mongos
           label: Memory
           watcher:
             func: setRequests|memory|shardTopology/mongos
             paths:
               -  schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/memory
+              -  schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
           schema: schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
       label: Mongos
@@ -423,27 +429,29 @@ step:
         - init:
             type: func
             value: setLimits|cpu|arbiter
-          if:
-            type: function
-            name: isMachineCustom|arbiter
+          # if:
+          #   type: function
+          #   name: isMachineCustom|arbiter
           label: cpu
           watcher:
             func: setRequests|cpu|arbiter
             paths:
               - schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
           schema: schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input
         - init:
             type: func
             value: setLimits|memory|arbiter
-          if:
-            type: function
-            name: isMachineCustom|arbiter
+          # if:
+          #   type: function
+          #   name: isMachineCustom|arbiter
           label: memory
           watcher:
             func: setRequests|memory|arbiter
             paths:
               - schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
           schema: schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
       if:
@@ -484,23 +492,29 @@ step:
         - init:
             type: func
             value: setLimits|cpu|hidden
-          if:
-            type: function
-            name: isMachineCustom|hidden
+          # if:
+          #   type: function
+          #   name: isMachineCustom|hidden
           label: cpu
           watcher:
             func: setRequests|cpu|hidden
             paths:
               - schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/machine
           schema: schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input
         - init:
             type: func
             value: setLimits|memory|hidden
-          if: 
-            type: function
-            name: isMachineCustom|hidden
+          # if: 
+          #   type: function
+          #   name: isMachineCustom|hidden
           label: memory
+          watcher:
+            func: setRequests|memory|hidden
+            paths:
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/machine
           schema: schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
       if:

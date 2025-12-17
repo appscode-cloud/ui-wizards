@@ -580,8 +580,12 @@ export const useFunc = (model) => {
     if (modelPathValue === 'custom') {
       return
     }
-
-    const commitCpuMemory = `spec/podResources/resources/requests/${resource}`
+    let commitCpuMemory
+    if (resource && type) {
+      commitCpuMemory = `spec/${type}/podResources/resources/requests/${resource}`
+    } else {
+      commitCpuMemory = `spec/podResources/resources/requests/${resource}`
+    }
     let cpuMemoryValue
     array.forEach((item) => {
       if (item.value === modelPathValue) {
