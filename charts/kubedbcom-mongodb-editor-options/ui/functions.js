@@ -466,7 +466,6 @@ export const useFunc = (model) => {
     const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
     const modelPathValue = getValue(model, fullpath)
     // watchDependency(`model#${fullpath}`)
-    
     return modelPathValue !== 'custom' && !!modelPathValue
   }
   let array = []
@@ -569,11 +568,42 @@ export const useFunc = (model) => {
       ? `/spec/${type}/podResources/resources/limits/${resource}`
       : `/spec/podResources/resources/limits/${resource}`
 
+    const fullpath = `/spec/podResources/machine`
+    const modelPathValue = getValue(model, fullpath)
+
     commit('wizard/model$update', {
       path: commitPath,
       value: val,
       force: true,
     })
+
+    if (modelPathValue === 'custom') {
+      return
+    }
+
+    const commitCpuMemory = `spec/podResources/resources/requests/${resource}`
+    let cpuMemoryValue
+    array.forEach((item) => {
+      if (item.value === modelPathValue) {
+        // Parse subText like "CPU: 2, Memory: 2Gi"
+        const subText = item.subText || ''
+        if (resource === 'cpu') {
+          // Extract CPU value
+          const cpuMatch = subText.match(/CPU:\s*([^,]+)/)
+          cpuMemoryValue = cpuMatch ? cpuMatch[1].trim() : ''
+        } else if (resource === 'memory') {
+          // Extract Memory value
+          const memoryMatch = subText.match(/Memory:\s*(.+)/)
+          cpuMemoryValue = memoryMatch ? memoryMatch[1].trim() : ''
+        }
+      }
+    })
+    commit('wizard/model$update', {
+      path: commitCpuMemory,
+      value: cpuMemoryValue,
+      force: true,
+    })
+    return cpuMemoryValue
   }
 
   function setMachineToCustom(type) {

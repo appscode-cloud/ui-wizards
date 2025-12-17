@@ -251,35 +251,36 @@ step:
             type: func
             value: setMachineToCustom
           loader: getMachineListForOptions
-          label: Machine
+          label: Machine 
           schema: schema/properties/spec/properties/podResources/properties/machine
           type: select
         - init:
             type: func
             value: setLimits|cpu
-          disable: isMachineNotCustom
-          if:
-            type: function
-            name: isMachineCustom
+          disable: isMachineNotCustom|schema/properties/spec/properties/podResources/properties/machine
+          # if:
+          #   type: function
+          #   name: isMachineCustom
           label: cpu
           watcher:
             func: setRequests|cpu
             paths:
               -  schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              -  schema/properties/spec/properties/podResources/properties/machine
           schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input
         - init:
             type: func
             value: setLimits|memory
-          disable: isMachineNotCustom
-          if:
-            type: function
-            name: isMachineCustom
+          # if:
+          #   type: function
+          #   name: isMachineCustom
           label: Memory
           watcher:
             func: setRequests|memory
             paths:
               - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine 
           schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
     if:
