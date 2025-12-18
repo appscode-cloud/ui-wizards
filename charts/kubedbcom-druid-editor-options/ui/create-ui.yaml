@@ -211,22 +211,24 @@ step:
       showLabels: true
       type: block-layout
     type: block-layout
-  - customClass: mt-10
-    loader: getAdminOptions|storageClasses
-    if:
-      type: function
-      name: isToggleOn|storageClasses
-    label: Storage Class
-    schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-    type: select
-  - label: Deep Storage
-    options:
-    - s3
-    - google
-    - azure
-    - hdfs
-    schema: schema/properties/spec/properties/deepStorage/properties/type
-    type: select
+  - type: horizontal-layout
+    showLabels: true
+    elements:
+      - loader: getAdminOptions|storageClasses
+        if:
+          type: function
+          name: isToggleOn|storageClasses
+        label: Storage Class
+        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+        type: select
+      - label: Deep Storage
+        options:
+        - s3
+        - google
+        - azure
+        - hdfs
+        schema: schema/properties/spec/properties/deepStorage/properties/type
+        type: select
   - loader: getSecrets
     label: Config Secret
     refresh: true
