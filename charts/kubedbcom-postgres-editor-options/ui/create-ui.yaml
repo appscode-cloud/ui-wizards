@@ -9,12 +9,15 @@ step:
       name: returnFalse
     label: ''
     type: label-element
+  - type: label-element
+    label: ''
+    subtitle: Select the Postgres version you want to deploy on Kubernetes. The chosen version determines the Postgres engine features, compatibility, and runtime behavior of your database cluster.
   - disableUnselect: true
     loader: getAdminOptions|databases/Postgres/versions
     if:
       type: function
       name: isToggleOn|databases/Postgres/versions
-    label: labels.database.version
+    label: Database Version
     schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/default
     type: select
   - init:
@@ -24,7 +27,8 @@ step:
     if:
       type: function
       name: isToggleOn|databases/Postgres/mode
-    label: labels.database.mode
+    label: Database Mode
+    isHorizontal: true
     watcher:
       func: clearArbiterHidden
       paths:
@@ -34,7 +38,7 @@ step:
   - if:
       type: function
       name: EqualToDatabaseMode|Cluster
-    label: labels.replicas
+    label: Replicas
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:
@@ -61,16 +65,15 @@ step:
         - init:
             type: func
             value: setMachineToCustom
-          customClass: mt-10
           loader: getMachineListForOptions
-          label: labels.machine
+          label: Machine
           schema: schema/properties/spec/properties/podResources/properties/machine
           type: select
         - init:
             type: func
             value: setLimits|cpu
           disable: isMachineNotCustom
-          label: labels.cpu
+          label: CPU
           loader: setLimits|cpu
           watcher:
             func: setRequests|cpu
@@ -83,7 +86,7 @@ step:
             type: func
             value: setLimits|memory
           disable: isMachineNotCustom
-          label: labels.memory
+          label: Memory
           loader: setLimits|memory
           watcher:
             func: setRequests|memory
@@ -92,21 +95,19 @@ step:
               - schema/properties/spec/properties/podResources/properties/machine
           schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
-    label: labels.machine_profile
+    label: Machine Profile
     showLabels: true
     type: block-layout
   - elements:
-    - type: label-element
-      label: ''
-      subtitle: Configure persistent storage for your database by selecting a storage class and specifying the volume size to meet your data retention and performance needs.
     - type: horizontal-layout
       showLabels: true
+      customClass: mb-16
       elements:
         - loader: getAdminOptions|storageClasses
           if:
             type: function
             name: isToggleOn|storageClasses
-          label: labels.storage.class
+          label: Storage Class
           validation:
             type: required
           schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
@@ -114,7 +115,7 @@ step:
         - if:
             type: function
             name: showStorageSizeField
-          label: labels.storage.size
+          label: Storage Size
           schema: schema/properties/spec/properties/persistence/properties/size
           type: input
     type: block-layout
@@ -142,23 +143,23 @@ step:
       if:
         type: function
         name: isToggleOn|deletionPolicy
-      label: labels.deletionPolicy
+      label: Deletion Policy
       watcher:
         func: setStorageClass
         paths:
           - schema/properties/spec/properties/deletionPolicy
       options:
       - description: options.deletionPolicy.delete.description
-        text: options.deletionPolicy.delete.label
+        text: Delete
         value: Delete
       - description: options.deletionPolicy.halt.description
-        text: options.deletionPolicy.halt.label
+        text: Halt
         value: Halt
       - description: options.deletionPolicy.wipeOut.description
-        text: options.deletionPolicy.wipeOut.label
+        text: WipeOut
         value: WipeOut
       - description: options.deletionPolicy.doNotTerminate.description
-        text: options.deletionPolicy.doNotTerminate.label
+        text: DoNotTerminate
         value: DoNotTerminate
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
@@ -192,7 +193,7 @@ step:
     - if:
         type: function
         name: showReferSecret
-      label: labels.password
+      label: Password
       schema: schema/properties/spec/properties/authSecret/properties/password
       type: input
     - init:
@@ -262,7 +263,7 @@ step:
     - if:
         type: function
         name: isToggleOn|deployment
-      label: labels.deployment.name
+      label: Deployment
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -276,7 +277,7 @@ step:
         type: function
         name: isToggleOn|clusterTier
       isHorizontal: true
-      label: labels.clusterTier
+      label: Cluster Tier
       options:
       - text: General Purpose
         value: GeneralPurpose
@@ -291,7 +292,7 @@ step:
       if:
         type: function
         name: isToggleOn|clusterTier/placement
-      label: labels.placement
+      label: Placement
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
@@ -299,7 +300,7 @@ step:
       if:
         type: function
         name: isToggleOn|clusterTier/nodeTopology
-      label: labels.nodeTopology
+      label: Node Topology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     - elements:
@@ -341,7 +342,7 @@ step:
       - init:
           type: func
           value: setMonitoring
-        label: labels.enable_monitoring
+        label: Enable Monitoring?
         watcher:
           func: updateAlertValue
           paths:
@@ -352,7 +353,7 @@ step:
         if:
           type: function
           name: showAlerts
-        label: labels.alert.options
+        label: Alert Options
         options:
         - text: None
           value: none
@@ -363,7 +364,6 @@ step:
         - text: Info
           value: info
         schema: schema/properties/form/properties/alert/properties/enabled
-        # sortable: true
         type: select
       if:
         type: function
@@ -418,7 +418,7 @@ step:
         if:
           type: function
           name: showIssuer
-        label: labels.clusterIssuers
+        label: Cluster Issuers
         validation:
           type: required
         schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
