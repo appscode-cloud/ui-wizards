@@ -233,24 +233,8 @@ step:
         elements:
           - type: horizontal-layout
             elements:
-              - type: input-compare
-                header: Storage Size
-                label: Storage Size
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/postgres
-                schema: schema/properties/spec/properties/volumeExpansion/properties/postgres
-              - type: info
-                hasIcon: true
-                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
-          - type: horizontal-layout
-            elements:
               - type: block-layout
-                showLabels: false
+                showLabels: true
                 elements:
                   - type: label-element
                     label: Mode
@@ -265,10 +249,22 @@ step:
                     validation:
                       type: required
                     schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-              - type: block-layout
-                showLabels: true
-                hideBorder: true
-                elements: []
+          - type: horizontal-layout
+            elements:
+              - type: input-compare
+                header: Storage Size
+                label: Storage Size
+                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/postgres
+                schema: schema/properties/spec/properties/volumeExpansion/properties/postgres
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
