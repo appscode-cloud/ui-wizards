@@ -343,7 +343,6 @@ step:
           - type: horizontal-layout
             elements:
               - type: block-layout
-                showLabels: true
                 elements:
                   - type: label-element
                     label: Mode
@@ -358,46 +357,59 @@ step:
                     validation:
                       type: required
                     schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          - type: input-compare
-            header: Node
-            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-            label: Node
+          - type: block-layout
+            label: Combined volume expansion
+            showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|Combined|volumeExpansion
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-            validation:
-              type: custom
-              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
-            schema: schema/properties/spec/properties/volumeExpansion/properties/node
+            elements:
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Node
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    label: Node
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/node
           - type: block-layout
             label: Topology volume expansion
+            showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|Topology|volumeExpansion
             elements:
-              - type: input-compare
-                label: Broker
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/topology/broker/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/topology/broker/storage/requests/storage|/spec/volumeExpansion/broker
-                schema: schema/properties/spec/properties/volumeExpansion/properties/broker
-              - type: input-compare
-                label: Controller
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/topology/controller/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/topology/controller/storage/resources/requests/storage|/spec/volumeExpansion/controller
-                schema: schema/properties/spec/properties/volumeExpansion/properties/controller
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    label: Broker
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/broker/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/broker/storage/requests/storage|/spec/volumeExpansion/broker
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/broker
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    label: Controller
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/controller/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/controller/storage/resources/requests/storage|/spec/volumeExpansion/controller
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/controller
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form

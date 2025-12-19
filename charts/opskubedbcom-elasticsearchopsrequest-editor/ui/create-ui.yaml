@@ -142,7 +142,7 @@ step:
             elements:
               - type: block-layout
                 label: Master Node horizontal Scaling
-                showLabels: false
+                showLabels: true
                 elements:
                   - type: horizontal-layout
                     elements:
@@ -159,7 +159,7 @@ step:
                         label: Master nodes are responsible for cluster management operations. It's recommended to have an odd number of master nodes (e.g., 3, 5) for proper quorum.
               - type: block-layout
                 label: Data Node horizontal Scaling
-                showLabels: false
+                showLabels: true
                 elements:
                   - type: horizontal-layout
                     elements:
@@ -176,7 +176,7 @@ step:
                         label: Data nodes store the actual documents and handle data-related operations like search and aggregation. More data nodes provide better storage capacity and query performance.
               - type: block-layout
                 label: Ingest Node horizontal Scaling
-                showLabels: false
+                showLabels: true
                 elements:
                   - type: horizontal-layout
                     elements:
@@ -901,7 +901,6 @@ step:
           - type: horizontal-layout
             elements:
               - type: block-layout
-                showLabels: false
                 elements:
                   - type: label-element
                     label: Mode
@@ -916,27 +915,34 @@ step:
                     validation:
                       type: required
                     schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          - type: horizontal-layout
+          - type: block-layout
+            label: Combined volume expansion
+            showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|Combined|VolumeExpansion
             elements:
-              - type: input-compare
-                header: Node
-                subtitle: How much extra storage does your database need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-                label: Storage Size
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
-                schema: schema/properties/spec/properties/volumeExpansion/properties/node
-              - type: info
-                hasIcon: true
-                label: Volume expansion increases the storage capacity of your database. Ensure your storage class supports volume expansion before proceeding.
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Node
+                    subtitle: How much extra storage does your database need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    label: Storage Size
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/node
+                  - type: info
+                    hasIcon: true
+                    label: Volume expansion increases the storage capacity of your database. Ensure your storage class supports volume expansion before proceeding.
           - type: block-layout
             label: Topology volume expansion
+            showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|Topology|VolumeExpansion

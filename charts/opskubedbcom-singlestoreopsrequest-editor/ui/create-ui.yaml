@@ -357,7 +357,6 @@ step:
           - type: horizontal-layout
             elements:
               - type: block-layout
-                showLabels: true
                 elements:
                   - type: label-element
                     label: Mode
@@ -375,38 +374,45 @@ step:
           - type: block-layout
             label: Aggregator Volume Expansion
             showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|Topology|VolumeExpansion
             elements:
-              - type: input-compare
-                label: Storage Size
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/topology/aggregator/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/topology/aggregator/storage/resources/requests/storage|/spec/volumeExpansion/aggregator
-                schema: schema/properties/spec/properties/volumeExpansion/properties/aggregator
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    label: Storage Size
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/aggregator/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/aggregator/storage/resources/requests/storage|/spec/volumeExpansion/aggregator
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/aggregator
           - type: block-layout
             label: Leaf Volume Expansion
             showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|Topology|VolumeExpansion
             elements:
-              - type: input-compare
-                label: Storage Size
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/topology/leaf/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/topology/leaf/storage/resources/requests/storage|/spec/volumeExpansion/leaf
-                schema: schema/properties/spec/properties/volumeExpansion/properties/leaf
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    label: Storage Size
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/leaf/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/leaf/storage/resources/requests/storage|/spec/volumeExpansion/leaf
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/leaf
           - type: block-layout
             label: Node Volume Expansion
             showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|Combined|VolumeExpansion

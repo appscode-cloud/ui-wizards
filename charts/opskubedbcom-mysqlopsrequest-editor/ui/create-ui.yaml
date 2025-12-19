@@ -238,7 +238,6 @@ step:
           - type: horizontal-layout
             elements:
               - type: block-layout
-                showLabels: true
                 elements:
                   - type: label-element
                     label: Mode
@@ -253,17 +252,24 @@ step:
                     validation:
                       type: required
                     schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          - type: input-compare
-            label: Storage Size
-            header: MySQL
-            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-            validation:
-              type: custom
-              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/mysql
-            schema: schema/properties/spec/properties/volumeExpansion/properties/mysql
+          - type: block-layout
+            label: MySQL volume expansion
+            showLabels: true
+            fixedBlock: true
+            elements:
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    label: Storage Size
+                    header: MySQL
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/mysql
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/mysql
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form

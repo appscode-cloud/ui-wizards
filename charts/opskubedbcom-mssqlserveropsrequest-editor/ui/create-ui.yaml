@@ -256,7 +256,6 @@ step:
           - type: horizontal-layout
             elements:
               - type: block-layout
-                showLabels: false
                 elements:
                   - type: label-element
                     label: Mode
@@ -271,22 +270,27 @@ step:
                     validation:
                       type: required
                     schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          - type: horizontal-layout
+          - type: block-layout
+            label: MSSQLServer volume expansion
+            showLabels: true
+            fixedBlock: true
             elements:
-              - type: input-compare
-                header: MSSQLServer
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-                label: Storage Size
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/mssqlserver
-                schema: schema/properties/spec/properties/volumeExpansion/properties/mssqlserver
-              - type: info
-                hasIcon: true
-                label: Expanding storage allows your database to accommodate more data. Ensure the specified size is larger than the current storage capacity.
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: MSSQLServer
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    label: Storage Size
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/mssqlserver
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/mssqlserver
+                  - type: info
+                    hasIcon: true
+                    label: Expanding storage allows your database to accommodate more data. Ensure the specified size is larger than the current storage capacity.
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
