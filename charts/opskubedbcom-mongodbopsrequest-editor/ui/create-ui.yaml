@@ -95,14 +95,16 @@ step:
         schema: schema/properties/spec/properties/type
 # UpdateVersion
       - type: block-layout
-        showLabels: false
+        showLabels: true
+        label: Version
+        fixedBlock: true
         if:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
           - type: select-compare
             label: Target Version
-            header: Version
+            subtitle: Select the desired MongoDB version to which you want to update your database.
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -111,6 +113,8 @@ step:
 # Horizontal Scale
       - type: block-layout
         label: Horizontal Scaling Form
+        showLabels: true
+        fixedBlock: true
         if:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
@@ -142,7 +146,7 @@ step:
             elements:
               - type: block-layout
                 label: Config Server horizontal Scaling
-                showLabels: false
+                # showLabels: true
                 elements:
                   - type: label-element
                     label: Config Server
@@ -177,7 +181,7 @@ step:
                         label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
               - type: block-layout
                 label: Shard horizontal Scaling
-                showLabels: false
+                # showLabels: true
                 elements:
                   - type: label-element
                     label: Shard
@@ -518,7 +522,6 @@ step:
           - type: horizontal-layout
             elements:
               - type: block-layout
-                showLabels: false
                 elements:
                   - type: label-element
                     label: Mode
@@ -533,24 +536,31 @@ step:
                     validation:
                       type: required
                     schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          - type: horizontal-layout
+          - type: block-layout
+            label: Standalone volume expansion
+            showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|standalone|volumeExpansion
             elements:
-              - type: input-compare
-                header: Standalone
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-                label: Standalone
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
-                schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Standalone
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    label: Standalone
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
           - type: block-layout
             label: Sharded volume expansion
+            showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|sharded|volumeExpansion
@@ -587,25 +597,30 @@ step:
                   - type: info
                     hasIcon: true
                     label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
-          - type: horizontal-layout
+          - type: block-layout
+            label: ReplicaSet volume expansion
+            showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
             elements:
-              - type: input-compare
-                header: Replica Set
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-                label: ReplicaSet
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
-                schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
-              - type: info
-                hasIcon: true
-                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Replica Set
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    label: ReplicaSet
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
+                  - type: info
+                    hasIcon: true
+                    label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
