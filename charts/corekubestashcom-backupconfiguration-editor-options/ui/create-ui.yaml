@@ -41,12 +41,17 @@ step:
         schema: addons/properties/jobTemplate/properties/securityContext
       - type: select
         label: Addon Name
+        loader: getAddon
         schema: addons/properties/name
       - type: array-object-form
         label: Tasks
         elements:
         - type: select
           label: Task Name
+          loader: 
+            name: getTaskNames
+            watchPaths:
+              - schema/properties/spec/properties/sessions/dynamicIndex/properties/addons/properties/name
           schema: addons/properties/tasks/properties/name
         - type: input
           label: Params
