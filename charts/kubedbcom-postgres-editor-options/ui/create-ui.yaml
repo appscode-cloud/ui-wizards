@@ -1,18 +1,11 @@
 step:
 - type: single-step-form
+  loader: initBundle
   elements:
-  - init:
-     type: func
-     value: initBundle
-    if:
-      type: function
-      name: returnFalse
-    label: ''
-    type: label-element
   - type: label-element
     label: ''
     subtitle: Select the Postgres version you want to deploy on Kubernetes. The chosen version determines the Postgres engine features, compatibility, and runtime behavior of your database cluster.
-  - disableUnselect: true
+  - disableUnselect: false
     loader: getAdminOptions|databases/Postgres/versions
     if:
       type: function
@@ -250,10 +243,9 @@ step:
               type: required
             schema: temp/refDBName
             type: input
-          - customClass: mt-10
-            label: Recovery Timestamp
-            schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
-            type: input
+      - label: Recovery Timestamp
+        schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
+        type: date-time
       if:
         type: function
         name: showRecovery
@@ -304,9 +296,6 @@ step:
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Configure cluster replication behavior by selecting standby mode (Hot for immediate failover or Warm for delayed activation) and streaming mode (Synchronous for guaranteed consistency or Asynchronous for better performance).
       - type: horizontal-layout
         showLabels: true
         elements:
@@ -336,9 +325,6 @@ step:
   - description: Enable Backup, Monitoring, TLS etc.
     elements:
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Enable monitoring to collect metrics and configure alert thresholds (Critical, Warning, Info) to receive notifications about your database health and performance.
       - init:
           type: func
           value: setMonitoring
@@ -384,9 +370,6 @@ step:
       schema: temp/backup
       type: switch
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Enable archiver to continuously archive write-ahead logs (WAL) for point-in-time recovery. Note that archiver requires a compatible storage class with volume snapshot support.
       - disable: showArchiverAlert
         label: Enable Archiver?
         watcher:
@@ -405,9 +388,6 @@ step:
         name: showArchiver
       type: block-layout
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Enable TLS to encrypt client-server and inter-node communications. Select a cluster issuer to automatically provision and manage TLS certificates for secure connections.
       - if:
           type: function
           name: isToggleOn|tls
@@ -425,9 +405,6 @@ step:
         type: select
       type: block-layout
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Enable Gateway exposure to make your database accessible from outside the Kubernetes cluster using an ingress gateway or load balancer for external connectivity.
       - if:
           type: function
           name: isToggleOn|expose
