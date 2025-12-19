@@ -95,14 +95,16 @@ step:
         schema: schema/properties/spec/properties/type
 # UpdateVersion
       - type: block-layout
-        showLabels: false
+        showLabels: true
+        label: Version
+        fixedBlock: true
         if:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
           - type: select-compare
             label: Target Version
-            header: Version
+            subtitle: Select the desired Solr version to which you want to update your database.
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -111,6 +113,8 @@ step:
 # Horizontal Scale
       - type: block-layout
         label: Horizontal Scaling Form
+        showLabels: true
+        fixedBlock: true
         if:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
@@ -142,7 +146,7 @@ step:
             elements:
               - type: block-layout
                 label: Coordinator horizontal Scaling
-                showLabels: false
+                showLabels: true
                 elements:
                   - type: label-element
                     label: Coordinator
@@ -177,7 +181,7 @@ step:
                         label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
               - type: block-layout
                 label: Overseer horizontal Scaling
-                showLabels: false
+                showLabels: true
                 elements:
                   - type: label-element
                     label: Overseer
@@ -445,23 +449,47 @@ step:
           name: ifRequestTypeEqualsTo|VolumeExpansion
         elements:
           - type: horizontal-layout
+            elements:
+              - type: block-layout
+                elements:
+                  - type: label-element
+                    label: Mode
+                    subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose Offline Mode if you can afford a brief downtime for added reliability during the volume expansion.
+                  - type: select
+                    label: Mode
+                    options:
+                      - text: Offline
+                        value: Offline
+                      - text: Online
+                        value: Online
+                    validation:
+                      type: required
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+          - type: block-layout
+            label: Combined volume expansion
+            showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|Combined|volumeExpansion
             elements:
-              - type: input-compare
-                header: Combined
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-                label: Node
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
-                schema: schema/properties/spec/properties/volumeExpansion/properties/node
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Combined
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    label: Node
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/node
           - type: block-layout
             label: Topology volume expansion
+            showLabels: true
+            fixedBlock: true
             if:
               type: function
               name: ifDbTypeEqualsTo|Topology|volumeExpansion
@@ -514,28 +542,6 @@ step:
                   - type: info
                     hasIcon: true
                     label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
-              - type: horizontal-layout
-                elements:
-                  - type: block-layout
-                    showLabels: false
-                    elements:
-                      - type: label-element
-                        label: Mode
-                        subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose Offline Mode if you can afford a brief downtime for added reliability during the volume expansion.
-                      - type: select
-                        label: Mode
-                        options:
-                          - text: Offline
-                            value: Offline
-                          - text: Online
-                            value: Online
-                        validation:
-                          type: required
-                        schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-                  - type: block-layout
-                    showLabels: true
-                    hideBorder: true
-                    elements: []
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
