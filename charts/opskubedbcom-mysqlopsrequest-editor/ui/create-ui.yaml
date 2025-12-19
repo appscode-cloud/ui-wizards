@@ -95,14 +95,16 @@ step:
         schema: schema/properties/spec/properties/type
 # UpdateVersion
       - type: block-layout
-        showLabels: false
+        showLabels: true
+        label: Version
+        fixedBlock: true
         if:
           type: function
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
           - type: select-compare
             label: Target Version
-            header: Version
+            subtitle: Select the desired MySQL version to which you want to update your database.
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
@@ -111,6 +113,8 @@ step:
 # Horizontal Scale
       - type: block-layout
         label: Horizontal Scaling Form
+        showLabels: true
+        fixedBlock: true
         if:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
@@ -233,30 +237,41 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|VolumeExpansion
         elements:
-          - type: input-compare
-            label: Storage Size
-            header: MySQL
-            subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-            validation:
-              type: custom
-              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/mysql
-            schema: schema/properties/spec/properties/volumeExpansion/properties/mysql
-          - type: label-element
-            label: Mode
-            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose Offline Mode if you can afford a brief downtime for added reliability during the volume expansion.
-          - type: select
-            label: Mode
-            options:
-              - text: Offline
-                value: Offline
-              - text: Online
-                value: Online
-            validation:
-              type: required
-            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+          - type: horizontal-layout
+            elements:
+              - type: block-layout
+                elements:
+                  - type: label-element
+                    label: Mode
+                    subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose Offline Mode if you can afford a brief downtime for added reliability during the volume expansion.
+                  - type: select
+                    label: Mode
+                    options:
+                      - text: Offline
+                        value: Offline
+                      - text: Online
+                        value: Online
+                    validation:
+                      type: required
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+          - type: block-layout
+            label: MySQL volume expansion
+            showLabels: true
+            fixedBlock: true
+            elements:
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    label: Storage Size
+                    header: MySQL
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/mysql
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/mysql
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form

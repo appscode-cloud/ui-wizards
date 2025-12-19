@@ -93,6 +93,8 @@ step:
 # Horizontal Scale
       - type: block-layout
         label: Horizontal Scaling Form
+        showLabels: true
+        fixedBlock: true
         if:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
@@ -212,24 +214,7 @@ step:
         elements:
           - type: horizontal-layout
             elements:
-              - type: input-compare
-                header: PerconaXtraDB
-                subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
-                label: Storage Size
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-                validation:
-                  type: custom
-                  name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/perconaxtradb
-                schema: schema/properties/spec/properties/volumeExpansion/properties/perconaxtradb
-              - type: info
-                hasIcon: true
-                label: Volume expansion increases the available storage for your database. Make sure the new size is larger than the current size.
-          - type: horizontal-layout
-            elements:
               - type: block-layout
-                showLabels: false
                 elements:
                   - type: label-element
                     label: Mode (Required)
@@ -244,10 +229,27 @@ step:
                     validation:
                       type: required
                     schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-              - type: block-layout
-                showLabels: true
-                hideBorder: true
-                elements: []
+          - type: block-layout
+            label: PerconaXtraDB volume expansion
+            showLabels: true
+            fixedBlock: true
+            elements:
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: PerconaXtraDB
+                    subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+                    label: Storage Size
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/perconaxtradb
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/perconaxtradb
+                  - type: info
+                    hasIcon: true
+                    label: Volume expansion increases the available storage for your database. Make sure the new size is larger than the current size.
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
