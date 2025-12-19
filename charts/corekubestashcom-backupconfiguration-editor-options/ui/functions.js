@@ -1,18 +1,18 @@
 const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
 
-let namespaces = []
-let appKind = []
-let coreKind = []
-let kubedbKind = []
-let availableKinds = {}
-let kindToResourceMap = {}
-let version = ''
-
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
   )
+
+  let namespaces = []
+  let appKind = []
+  let coreKind = []
+  let kubedbKind = []
+  let availableKinds = {}
+  let kindToResourceMap = {}
+  let version = ''
 
   setDiscriminatorValue('/nameSpaceApi', false)
 
