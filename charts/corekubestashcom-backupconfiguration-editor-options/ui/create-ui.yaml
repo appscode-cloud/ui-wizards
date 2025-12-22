@@ -2,14 +2,6 @@ step:
 - type: single-step-form
   loader: initBundle
   elements:
-  - init:
-      type: func
-      value: returnFalse
-    if:
-      type: function
-      name: returnFalse
-    label: ''
-    type: label-element
   - loader: getNamespaces
     label: Namespace
     schema: schema/properties/metadata/properties/release/properties/namespace
@@ -36,9 +28,51 @@ step:
     showLabels: true
     hideBlock: true
     type: block-layout
-  - label: Sessions (JSON format)
+  - label: Sessions
+    elements:
+      - type: input
+        label: Session Name
+        schema: sessionName
+      - type: input
+        label: Schedule
+        schema: schedule
+      - type: input
+        label: Security Context
+        schema: addons/properties/jobTemplate/properties/securityContext
+      - type: select
+        label: Addon Name
+        loader: getAddon
+        schema: addons/properties/name
+      - type: array-object-form
+        label: Tasks
+        elements:
+        - type: select
+          label: Task Name
+          loader: 
+            name: getTaskNames
+            watchPaths:
+              - schema/properties/spec/properties/sessions/dynamicIndex/properties/addons/properties/name
+          schema: addons/properties/tasks/properties/name
+        - type: input
+          label: Params
+          schema: addons/properties/tasks/properties/name
+        schema: addons/properties/tasks
+      - type: select
+        label: Encryption Secret Namespace
+        loader: getNamespaces
+        schema: encryptionSecret/properties/namespace
+      - type: select
+        label: Encryption Secret Name
+        loader: 
+          watchPaths:
+            - encryptionSecret/properties/name
+          name: getEncryptionSecretNames
+        schema: encryptionSecret/properties/name
+      - type: input
+        label: Repo Name
+        schema: repoName
     schema: schema/properties/spec/properties/sessions
-    type: textarea
+    type: array-object-form
   - elements:
     - loader: getApiGroup
       label: Api Group
@@ -62,7 +96,10 @@ step:
         type: required
       schema: schema/properties/spec/properties/target/properties/namespace
       type: select
-    - loader: getTargetName
+    - loader: 
+        name: getTargetName
+        watchPaths:
+          - schema/properties/spec/properties/target/properties/namespace
       label: Name
       validation:
         type: required
