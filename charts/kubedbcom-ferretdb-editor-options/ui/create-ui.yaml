@@ -2,12 +2,15 @@ step:
 - type: single-step-form
   loader: initBundle
   elements:
+  - type: label-element
+    label: ''
+    subtitle: Select the FerretDB version you want to deploy on Kubernetes. The chosen version determines the FerretDB engine features, compatibility, and runtime behavior of your document database proxy.
   - disableUnselect: true
     loader: getAdminOptions|databases/FerretDB/versions
     if:
       type: function
       name: isToggleOn|databases/FerretDB/versions
-    label: Database version
+    label: Database Version
     schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/default
     type: select
   - init:
@@ -17,7 +20,7 @@ step:
     if:
       type: function
       name: isToggleOn|databases/FerretDB/mode
-    label: Database mode
+    label: Database Mode
     isHorizontal: true
     watcher:
       func: onModeChange
@@ -26,138 +29,162 @@ step:
     schema: schema/properties/spec/properties/mode
     type: radio
   - elements:
-    - label: Replicaset number
+    - type: label-element
+      label: ''
+      subtitle: Configure primary FerretDB server nodes that handle read and write operations. Select a machine profile to allocate CPU and memory resources, or choose 'custom' to manually specify requirements.
+    - label: Replicaset Number
       schema: schema/properties/spec/properties/server/properties/primary/properties/replicas
       type: input
-    - init:
-        type: func
-        value: setMachineToCustom
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu|server/primary
-      if:
-        type: function
-        name: isMachineCustom|server/primary
-      label: cpu
-      watcher:
-        func: setRequests|cpu|server/primary
-        paths:
-          - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory|server/primary
-      if:
-        type: function
-        name: isMachineCustom|server/primary
-      label: memory
-      watcher:
-        func: setRequests|memory|server/primary
-        paths:
-          - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu|server/primary
+          disable: isMachineNotCustom|server/primary
+          label: CPU
+          loader: setLimits|cpu|server/primary
+          watcher:
+            func: setRequests|cpu|server/primary
+            paths:
+              - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory|server/primary
+          disable: isMachineNotCustom|server/primary
+          label: Memory
+          loader: setLimits|memory|server/primary
+          watcher:
+            func: setRequests|memory|server/primary
+            paths:
+              - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     label: Primary
     showLabels: true
     type: block-layout
   - elements:
-    - label: Replicaset number
+    - type: label-element
+      label: ''
+      subtitle: Configure secondary FerretDB server nodes for read scaling and high availability. Select a machine profile to allocate CPU and memory resources, or choose 'custom' to manually specify requirements.
+    - label: Replicaset Number
       schema: schema/properties/spec/properties/server/properties/secondary/properties/replicas
       type: input
-    - init:
-        type: func
-        value: setMachineToCustom
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu|server/secondary
-      if:
-        type: function
-        name: isMachineCustom|server/secondary
-      label: cpu
-      watcher:
-        func: setRequests|cpu|server/secondary
-        paths:
-          - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory|server/secondary
-      if:
-        type: function
-        name: isMachineCustom|server/secondary
-      label: memory
-      watcher:
-        func: setRequests|memory|server/secondary
-        paths:
-          - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu|server/secondary
+          disable: isMachineNotCustom|server/secondary
+          label: CPU
+          loader: setLimits|cpu|server/secondary
+          watcher:
+            func: setRequests|cpu|server/secondary
+            paths:
+              - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory|server/secondary
+          disable: isMachineNotCustom|server/secondary
+          label: Memory
+          loader: setLimits|memory|server/secondary
+          watcher:
+            func: setRequests|memory|server/secondary
+            paths:
+              - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     if:
       type: function
       name: isEqualToModelPathValue|PrimaryAndSecondary|/spec/mode
     label: Secondary
     showLabels: true
     type: block-layout
-  - loader: getAdminOptions|storageClasses
-    label: Storage class
-    schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-    type: select
   - elements:
-    - label: Storage size
-      schema: schema/properties/spec/properties/backend/properties/persistence/properties/size
-      type: input
-    - label: Replicaset number
-      schema: schema/properties/spec/properties/backend/properties/replicas
-      type: input
-    - init:
-        type: func
-        value: setMachineToCustom
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/backend/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu|backend
-      if:
-        type: function
-        name: isMachineCustom|backend
-      label: cpu
-      watcher:
-        func: setRequests|cpu|backend
-        paths:
-          - schema/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory|backend
-      if:
-        type: function
-        name: isMachineCustom|backend
-      label: memory
-      watcher:
-        func: setRequests|memory|backend
-        paths:
-          - schema/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Configure the backend database that FerretDB uses for data storage. Specify storage class, persistent volume size, and replica count. Select a machine profile to allocate CPU and memory resources, or choose 'custom' to manually specify requirements.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - loader: getAdminOptions|storageClasses
+          label: Storage Class
+          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+          type: select
+        - label: Storage Size
+          schema: schema/properties/spec/properties/backend/properties/persistence/properties/size
+          type: input
+        - label: Replicaset Number
+          schema: schema/properties/spec/properties/backend/properties/replicas
+          type: input
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/backend/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu|backend
+          disable: isMachineNotCustom|backend
+          label: CPU
+          loader: setLimits|cpu|backend
+          watcher:
+            func: setRequests|cpu|backend
+            paths:
+              - schema/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/backend/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory|backend
+          disable: isMachineNotCustom|backend
+          label: Memory
+          loader: setLimits|memory|backend
+          watcher:
+            func: setRequests|memory|backend
+            paths:
+              - schema/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/backend/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     label: Backend
     showLabels: true
     type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
       - type: object-item
         label: Labels
         buttonClass: is-light is-outlined

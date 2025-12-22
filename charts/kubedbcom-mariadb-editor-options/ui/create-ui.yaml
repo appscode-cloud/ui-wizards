@@ -2,6 +2,9 @@ step:
 - type: single-step-form
   loader: initBundle
   elements:
+  - type: label-element
+    label: ''
+    subtitle: Select the MariaDB version you want to deploy on Kubernetes. The chosen version determines the MariaDB engine features, compatibility, and runtime behavior of your database cluster.
   - disableUnselect: true
     loader: getAdminOptions|databases/MariaDB/versions
     if:
@@ -28,55 +31,69 @@ step:
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:
-    - init:
-        type: func
-        value: setMachineToCustom
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu
-      if:
-        type: function
-        name: isMachineCustom
-      label: cpu
-      watcher:
-        func: setRequests|cpu
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory
-      if:
-        type: function
-        name: isMachineCustom
-      label: memory
-      watcher:
-        func: setRequests|memory
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
-    label: Machine_profile
+    - type: label-element
+      label: ''
+      subtitle: Select a machine profile to allocate CPU and memory resources for your database cluster. Choose 'custom' to manually specify resource requirements or select a predefined profile.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom
+          label: CPU
+          loader: setLimits|cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          disable: isMachineNotCustom
+          label: Memory
+          loader: setLimits|memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+    label: Machine Profile
     showLabels: true
     type: block-layout
-  - loader: getAdminOptions|storageClasses
-    if:
-      type: function
-      name: isToggleOn|storageClasses
-    label: Storage class
-    schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-    type: select
-  - label: Storage size
-    schema: schema/properties/spec/properties/persistence/properties/size
-    type: input
+  - elements:
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - loader: getAdminOptions|storageClasses
+          if:
+            type: function
+            name: isToggleOn|storageClasses
+          label: Storage Class
+          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+          type: select
+        - label: Storage Size
+          schema: schema/properties/spec/properties/persistence/properties/size
+          type: input
+    type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
       - type: object-item
         label: Labels
         buttonClass: is-light is-outlined
@@ -179,28 +196,34 @@ step:
       schema: temp/recovery
       type: switch
     - elements:
-      - label: Namespace
-        watcher:
-          func: setPointInTimeRecovery
-          paths:
-            - temp/refNamespace
-        validation:
-          type: required
-        schema: temp/refNamespace
-        type: input
-      - label: Name
-        watcher:
-          func: setPointInTimeRecovery
-          paths:
-            - temp/refDBName
-        validation:
-          type: required
-        schema: temp/refDBName
-        type: input
+      - type: label-element
+        label: ''
+        subtitle: Configure point-in-time recovery to restore your database to a specific moment. Specify the source database namespace, name, and the exact timestamp for recovery.
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+          - label: Namespace
+            watcher:
+              func: setPointInTimeRecovery
+              paths:
+                - temp/refNamespace
+            validation:
+              type: required
+            schema: temp/refNamespace
+            type: input
+          - label: Name
+            watcher:
+              func: setPointInTimeRecovery
+              paths:
+                - temp/refDBName
+            validation:
+              type: required
+            schema: temp/refDBName
+            type: input
       - customClass: mt-10
         label: Recovery Timestamp
         schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
-        type: input
+        type: date-time
       if:
         type: function
         name: showRecovery
