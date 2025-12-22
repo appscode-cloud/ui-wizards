@@ -2,6 +2,9 @@ step:
 - type: single-step-form
   loader: initBundle
   elements:
+  - type: label-element
+    label: ''
+    subtitle: Select the PgBouncer version you want to deploy on Kubernetes. The chosen version determines the PgBouncer engine features, compatibility, and runtime behavior of your connection pooler.
   - disableUnselect: true
     loader: getAdminOptions|databases/PgBouncer/versions
     if:
@@ -32,61 +35,73 @@ step:
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:
-    - init:
-        type: func
-        value: setMachineToCustom
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: CPU
-      watcher:
-        func: setRequests|cpu
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: Memory
-      watcher:
-        func: setRequests|memory
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Select a machine profile to allocate CPU and memory resources for your connection pooler. Choose 'custom' to manually specify resource requirements or select a predefined profile.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom
+          label: CPU
+          loader: setLimits|cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          disable: isMachineNotCustom
+          label: Memory
+          loader: setLimits|memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     label: Machine Profile
     showLabels: true
     type: block-layout
-  - label: Database Reference Name
-    schema: schema/properties/spec/properties/database/properties/databaseName
-    type: input
-  - loader: getAppBindings|postgres
-    label: Select Database Reference
-    watcher:
-      func: onRefChange
-      paths:
-        - temp/pgRef
-    refresh: true
-    validation:
-      type: required
-    schema: temp/pgRef
-    type: select
+  - elements:
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - label: Database Reference Name
+          schema: schema/properties/spec/properties/database/properties/databaseName
+          type: input
+        - loader: getAppBindings|postgres
+          label: Select Database Reference
+          watcher:
+            func: onRefChange
+            paths:
+              - temp/pgRef
+          refresh: true
+          validation:
+            type: required
+          schema: temp/pgRef
+          type: select
+    type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
       - type: object-item
         label: Labels
         buttonClass: is-light is-outlined
