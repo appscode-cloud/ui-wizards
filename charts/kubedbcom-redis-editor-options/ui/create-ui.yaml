@@ -2,6 +2,9 @@ step:
 - type: single-step-form
   loader: initBundle
   elements:
+  - type: label-element
+    label: ''
+    subtitle: Select the Redis version you want to deploy on Kubernetes. The chosen version determines the Redis engine features, compatibility, and runtime behavior of your in-memory data store.
   - disableUnselect: true
     loader: getAdminOptions|databases/Redis/versions
     if:
@@ -21,18 +24,21 @@ step:
     label: Database Mode
     schema: schema/properties/spec/properties/mode
     type: radio
-  - if:
+  - elements:
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - label: Shards
+          schema: schema/properties/spec/properties/cluster/properties/master
+          type: input
+        - label: Replica Number
+          schema: schema/properties/spec/properties/cluster/properties/replicas
+          customClass: mb-20
+          type: input
+    if:
       type: function
       name: isEqualToModelPathValue|Cluster|/spec/mode
-    label: Shards
-    schema: schema/properties/spec/properties/cluster/properties/master
-    type: input
-  - if:
-      type: function
-      name: isEqualToModelPathValue|Cluster|/spec/mode
-    label: Replica Number
-    schema: schema/properties/spec/properties/cluster/properties/replicas
-    type: input
+    type: block-layout
   - elements:
     - init:
         type: func
@@ -71,57 +77,66 @@ step:
       name: isEqualToModelPathValue|Sentinel|/spec/mode
     type: block-layout
   - elements:
-    - init:
-        type: func
-        value: setMachineToCustom
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: CPU
-      watcher:
-        func: setRequests|cpu
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: Memory
-      watcher:
-        func: setRequests|memory
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Select a machine profile to allocate CPU and memory resources for your in-memory data store. Choose 'custom' to manually specify resource requirements or select a predefined profile.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom
+          label: CPU
+          loader: setLimits|cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          disable: isMachineNotCustom
+          label: Memory
+          loader: setLimits|memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     if:
       type: function
       name: notEqualToDatabaseMode|Sharded
     label: Machine profile
     showLabels: true
     type: block-layout
-  - loader: getAdminOptions|storageClasses
-    label: Storage Class
-    schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-    type: select
-  - if:
-      type: function
-      name: isNotEqualToModelPathValue|Sentinel|/spec/mode
-    label: Storage Size
-    schema: schema/properties/spec/properties/persistence/properties/size
-    type: input
+  - elements:
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - loader: getAdminOptions|storageClasses
+          label: Storage Class
+          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+          type: select
+        - if:
+            type: function
+            name: isNotEqualToModelPathValue|Sentinel|/spec/mode
+          label: Storage Size
+          schema: schema/properties/spec/properties/persistence/properties/size
+          type: input
+    type: block-layout
   - init:
       type: func
       value: setAnnounce
@@ -133,6 +148,9 @@ step:
     schema: temp/announce
     type: switch
   - elements:
+    - type: label-element
+      label: ''
+      subtitle: Configure how Redis cluster endpoints are announced to clients. Specify the announcement type (IP or hostname) and define shard endpoints for cluster mode connectivity.
     - label: Type
       options:
       - text: ip
@@ -156,6 +174,9 @@ step:
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
       - type: object-item
         label: Labels
         buttonClass: is-light is-outlined

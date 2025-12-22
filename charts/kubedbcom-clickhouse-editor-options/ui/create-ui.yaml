@@ -2,12 +2,15 @@ step:
 - type: single-step-form
   loader: initBundle
   elements:
+  - type: label-element
+    label: ''
+    subtitle: Select the ClickHouse version you want to deploy on Kubernetes. The chosen version determines the ClickHouse engine features, compatibility, and runtime behavior of your analytical database.
   - disableUnselect: true
     loader: getAdminOptions|databases/ClickHouse/versions
     if:
       type: function
       name: isToggleOn|databases/ClickHouse/versions
-    label: Database version
+    label: Database Version
     schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/default
     type: select
   - init:
@@ -17,7 +20,7 @@ step:
     if:
       type: function
       name: isToggleOn|databases/ClickHouse/mode
-    label: Database mode
+    label: Database Mode
     isHorizontal: true
     watcher:
       func: clearArbiterHidden
@@ -27,12 +30,18 @@ step:
     type: radio
   - elements:
     - elements:
-      - label: Cluster replicas
-        schema: schema/properties/spec/properties/topology/properties/cluster/properties/replicas
-        type: input
-      - label: Cluster shards
-        schema: schema/properties/spec/properties/topology/properties/cluster/properties/shards
-        type: input
+      - type: label-element
+        label: ''
+        subtitle: Configure cluster topology for distributed ClickHouse deployment. Specify the number of replicas for high availability and shards for data partitioning and parallel query processing.
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+          - label: Cluster Replicas
+            schema: schema/properties/spec/properties/topology/properties/cluster/properties/replicas
+            type: input
+          - label: Cluster Shards
+            schema: schema/properties/spec/properties/topology/properties/cluster/properties/shards
+            type: input
       label: Cluster
       showLabels: true
       type: block-layout
@@ -41,67 +50,82 @@ step:
       name: isEqualToModelPathValue|Topology|/spec/mode
     type: block-layout
   - elements:
-    - init:
-        type: func
-        value: setMachineToCustom
-      customClass: mt-10
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu
-      if:
-        type: function
-        name: isMachineCustom
-      label: cpu
-      watcher:
-        func: setRequests|cpu
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory
-      if:
-        type: function
-        name: isMachineCustom
-      label: memory
-      watcher:
-        func: setRequests|memory
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
-    label: Machine profile
+    - type: label-element
+      label: ''
+      subtitle: Select a machine profile to allocate CPU and memory resources for your analytical database. Choose 'custom' to manually specify resource requirements or select a predefined profile.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom
+          label: CPU
+          loader: setLimits|cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          disable: isMachineNotCustom
+          label: Memory
+          loader: setLimits|memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+    label: Machine Profile
     showLabels: true
     type: block-layout
-  - loader: getAdminOptions|storageClasses
-    if:
-      type: function
-      name: isToggleOn|storageClasses
-    label: Storage class
-    schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-    type: select
-  - if:
-      type: function
-      name: showStorageSizeField
-    label: Storage size
-    schema: schema/properties/spec/properties/persistence/properties/size
-    type: input
+  - elements:
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - loader: getAdminOptions|storageClasses
+          if:
+            type: function
+            name: isToggleOn|storageClasses
+          label: Storage Class
+          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+          type: select
+        - if:
+            type: function
+            name: showStorageSizeField
+          label: Storage Size
+          schema: schema/properties/spec/properties/persistence/properties/size
+          type: input
+    type: block-layout
   - label: Externally Managed?
     schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/externallyManaged
     type: switch
   - elements:
-    - customClass: mt-10
-      label: Host
-      schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/host
-      type: input
-    - label: Port
-      schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/port
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Configure external ClickHouse Keeper node connection details. Specify the host address and port number for the externally managed keeper service.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - label: Host
+          schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/host
+          type: input
+        - label: Port
+          schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/port
+          type: input
     if:
       type: function
       name: isExternallyManaged|true
@@ -109,51 +133,54 @@ step:
     showLabels: true
     type: block-layout
   - elements:
-    - customClass: mt-10
-      label: Size
-      schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/persistence/properties/size
-      type: input
-    - label: Replicas
-      schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/replicas
-      type: input
-    - elements:
-      - init:
-          type: func
-          value: setMachineToCustom
-        customClass: mt-10
-        loader: getMachineListForOptions
-        label: Machine
-        schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/machine
-        type: select
-      - init:
-          type: func
-          value: setLimits|cpu|topology/clickHouseKeeper/spec
-        if:
-          type: function
-          name: isMachineCustom|topology/clickHouseKeeper/spec
-        label: cpu
-        watcher:
-          func: setRequests|cpu
-          paths:
-            - schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-        schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-        type: input
-      - init:
-          type: func
-          value: setLimits|memory|topology/clickHouseKeeper/spec
-        if:
-          type: function
-          name: isMachineCustom|topology/clickHouseKeeper/spec
-        label: memory
-        watcher:
-          func: setRequests|memory
-          paths:
-            - schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-        schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-        type: input
-      label: Machine profile
+    - type: label-element
+      label: ''
+      subtitle: Configure managed ClickHouse Keeper instance for cluster coordination. Specify storage size, replica count, and resource allocation for the keeper nodes.
+    - type: horizontal-layout
       showLabels: true
-      type: block-layout
+      elements:
+        - label: Storage Size
+          schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/persistence/properties/size
+          type: input
+        - label: Replicas
+          schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/replicas
+          type: input
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu|topology/clickHouseKeeper/spec
+          disable: isMachineNotCustom|topology/clickHouseKeeper/spec
+          label: CPU
+          loader: setLimits|cpu|topology/clickHouseKeeper/spec
+          watcher:
+            func: setRequests|cpu|topology/clickHouseKeeper/spec
+            paths:
+              - schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory|topology/clickHouseKeeper/spec
+          disable: isMachineNotCustom|topology/clickHouseKeeper/spec
+          label: Memory
+          loader: setLimits|memory|topology/clickHouseKeeper/spec
+          watcher:
+            func: setRequests|memory|topology/clickHouseKeeper/spec
+            paths:
+              - schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     if:
       type: function
       name: isExternallyManaged|false
@@ -163,6 +190,9 @@ step:
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
       - type: object-item
         label: Labels
         buttonClass: is-light is-outlined

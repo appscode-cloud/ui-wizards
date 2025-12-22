@@ -2,6 +2,9 @@ step:
 - type: single-step-form
   loader: initBundle
   elements:
+  - type: label-element
+    label: ''
+    subtitle: Select the MySQL version you want to deploy on Kubernetes. The chosen version determines the MongoDB engine features, compatibility, and runtime behavior of your database cluster.
   - disableUnselect: true
     loader: getAdminOptions|databases/MySQL/versions
     if:
@@ -22,36 +25,42 @@ step:
     schema: schema/properties/spec/properties/mode
     type: radio
   - elements:
-    - label: Replicaset Number
-      schema: schema/properties/spec/properties/replicas
-      type: input
-    - label: Mode
-      options:
-      - text: Single-Primary
-        value: Single-Primary
-      - text: Multi-Primary
-        value: Multi-Primary
-      schema: schema/properties/spec/properties/groupReplication/properties/mode
-      type: select
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - label: Replicaset Number
+          schema: schema/properties/spec/properties/replicas
+          type: input
+        - label: Mode
+          options:
+          - text: Single-Primary
+            value: Single-Primary
+          - text: Multi-Primary
+            value: Multi-Primary
+          schema: schema/properties/spec/properties/groupReplication/properties/mode
+          type: select
     if:
       type: function
       name: isEqualToModelPathValue|GroupReplication|/spec/mode
     type: block-layout
   - elements:
-    - label: Replicaset Number
-      schema: schema/properties/spec/properties/replicas
-      type: input
-    - label: Router Number
-      schema: schema/properties/spec/properties/innoDBCluster/properties/router/properties/replicas
-      type: input
-    - label: Mode
-      options:
-      - text: Single-Primary
-        value: Single-Primary
-      - text: Multi-Primary
-        value: Multi-Primary
-      schema: schema/properties/spec/properties/innoDBCluster/properties/mode
-      type: select
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - label: Replicaset Number
+          schema: schema/properties/spec/properties/replicas
+          type: input
+        - label: Router Number
+          schema: schema/properties/spec/properties/innoDBCluster/properties/router/properties/replicas
+          type: input
+        - label: Mode
+          options:
+          - text: Single-Primary
+            value: Single-Primary
+          - text: Multi-Primary
+            value: Multi-Primary
+          schema: schema/properties/spec/properties/innoDBCluster/properties/mode
+          type: select
     if:
       type: function
       name: isEqualToModelPathValue|InnoDBCluster|/spec/mode
@@ -68,76 +77,91 @@ step:
       name: isEqualToModelPathValue|RemoteReplica|/spec/mode
     type: block-layout
   - elements:
-    - loader: getAppBindings
-      label: RemoteReplica SourceRef
-      validation:
-        type: required
-      schema: schema/properties/spec/properties/remoteReplica/properties/sourceRef
-      type: select
-    - label: Errant Transaction Recovery Policy
-      options:
-      - text: Clone
-        value: Clone
-      - text: PseudoTransaction
-        value: PseudoTransaction
-      schema: schema/properties/spec/properties/semiSync/properties/errantTransactionRecoveryPolicy
-      type: select
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - loader: getAppBindings
+          label: RemoteReplica SourceRef
+          validation:
+            type: required
+          schema: schema/properties/spec/properties/remoteReplica/properties/sourceRef
+          type: select
+        - label: Errant Transaction Recovery Policy
+          options:
+          - text: Clone
+            value: Clone
+          - text: PseudoTransaction
+            value: PseudoTransaction
+          schema: schema/properties/spec/properties/semiSync/properties/errantTransactionRecoveryPolicy
+          type: select
     if:
       type: function
       name: isEqualToModelPathValue|SemiSync|/spec/mode
     type: block-layout
   - elements:
-    - init:
-        type: func
-        value: setMachineToCustom
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: Cpu
-      watcher:
-        func: setRequests|cpu
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: Memory
-      watcher:
-        func: setRequests|memory
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Select a machine profile to allocate CPU and memory resources for your database. Choose 'custom' to manually specify resource requirements or select a predefined profile.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom
+          label: Cpu
+          loader: setLimits|cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          disable: isMachineNotCustom
+          label: Memory
+          loader: setLimits|memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     label: Machine profile
     showLabels: true
     type: block-layout
-  - loader: getAdminOptions|storageClasses
-    if:
-      type: function
-      name: isToggleOn|storageClasses
-    label: Storage class
-    schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-    type: select
-  - label: Storage size
-    schema: schema/properties/spec/properties/persistence/properties/size
-    type: input
+  - elements:
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - loader: getAdminOptions|storageClasses
+          if:
+            type: function
+            name: isToggleOn|storageClasses
+          label: Storage class
+          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+          type: select
+        - label: Storage size
+          schema: schema/properties/spec/properties/persistence/properties/size
+          type: input
+    type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
       - type: object-item
         label: Labels
         buttonClass: is-light is-outlined
@@ -239,28 +263,33 @@ step:
       schema: temp/recovery
       type: switch
     - elements:
-      - label: Namespace
-        watcher:
-          func: setPointInTimeRecovery
-          paths:
-            - temp/refNamespace
-        validation:
-          type: required
-        schema: temp/refNamespace
-        type: input
-      - label: Name
-        watcher:
-          func: setPointInTimeRecovery
-          paths:
-            - temp/refDBName
-        validation:
-          type: required
-        schema: temp/refDBName
-        type: input
-      - customClass: mt-10
-        label: Recovery Timestamp
+      - type: label-element
+        label: ''
+        subtitle: Restore your database to a specific point in time by specifying the source database namespace, name, and the exact recovery timestamp for data restoration.
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+          - label: Namespace
+            watcher:
+              func: setPointInTimeRecovery
+              paths:
+                - temp/refNamespace
+            validation:
+              type: required
+            schema: temp/refNamespace
+            type: input
+          - label: Name
+            watcher:
+              func: setPointInTimeRecovery
+              paths:
+                - temp/refDBName
+            validation:
+              type: required
+            schema: temp/refDBName
+            type: input
+      - label: Recovery Timestamp
         schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
-        type: input
+        type: date-time
       if:
         type: function
         name: showRecovery
