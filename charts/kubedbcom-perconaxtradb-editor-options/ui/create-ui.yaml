@@ -2,70 +2,87 @@ step:
 - type: single-step-form
   loader: initBundle
   elements:
-  - disableUnselect: true
-    loader: getAdminOptions|databases/PerconaXtraDB/versions
-    if:
-      type: function
-      name: isToggleOn|databases/PerconaXtraDB/versions
-    label: Database Version
-    schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
-    type: select
-  - label: Replicaset Number
-    schema: schema/properties/spec/properties/replicas
-    type: input
+  - type: label-element
+    label: ''
+    subtitle: Select the PerconaXtraDB version you want to deploy on Kubernetes. The chosen version determines the PerconaXtraDB engine features, compatibility, and runtime behavior of your database cluster.
+  - type: horizontal-layout
+    showLabels: true
+    elements:
+      - disableUnselect: true
+        loader: getAdminOptions|databases/PerconaXtraDB/versions
+        if:
+          type: function
+          name: isToggleOn|databases/PerconaXtraDB/versions
+        label: Database Version
+        schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
+        type: select
+      - label: Replicaset Number
+        schema: schema/properties/spec/properties/replicas
+        type: input
   - elements:
-    - init:
-        type: func
-        value: setMachineToCustom
-      customClass: mt-10
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: CPU
-      watcher:
-        func: setRequests|cpu
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: Memory
-      watcher:
-        func: setRequests|memory
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Select a machine profile to allocate CPU and memory resources for your database cluster. Choose 'custom' to manually specify resource requirements or select a predefined profile.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom
+          label: CPU
+          loader: setLimits|cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          disable: isMachineNotCustom
+          label: Memory
+          loader: setLimits|memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     label: Machine profile
     showLabels: true
     type: block-layout
-  - loader: getAdminOptions|storageClasses
-    if:
-      type: function
-      name: isToggleOn|storageClasses
-    label: Storage select
-    schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-    type: select
-  - label: Storage size
-    schema: schema/properties/spec/properties/persistence/properties/size
-    type: input
+  - elements:
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - loader: getAdminOptions|storageClasses
+          if:
+            type: function
+            name: isToggleOn|storageClasses
+          label: Storage Class
+          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+          type: select
+        - label: Storage Size
+          schema: schema/properties/spec/properties/persistence/properties/size
+          type: input
+    type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
       - type: object-item
         label: Labels
         buttonClass: is-light is-outlined

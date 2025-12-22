@@ -10,6 +10,9 @@ step:
       value: initBundle
     label: ''
     type: label-element
+  - type: label-element
+    label: ''
+    subtitle: Select the SingleStore version you want to deploy on Kubernetes. The chosen version determines the SingleStore engine features, compatibility, and runtime behavior of your distributed SQL database.
   - disableUnselect: true
     loader: getAdminOptions|databases/Singlestore/versions
     if:
@@ -34,51 +37,57 @@ step:
     schema: schema/properties/spec/properties/mode
     type: radio
   - elements:
-    - label: Storage Size
-      schema: schema/properties/spec/properties/topology/properties/aggregator/properties/persistence/properties/size
-      type: input
-    - init:
-        type: func
-        value: setReplicaNumber
-      label: Replica number
-      schema: schema/properties/spec/properties/topology/properties/aggregator/properties/replicas
-      type: input
-    - init:
-        type: func
-        value: setMachineToCustom
-      customClass: mt-10
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu|topology/aggregator
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom|topology/aggregator
-      label: CPU
-      watcher:
-        func: setRequests|cpu|topology/aggregator
-        paths:
-          - schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory|topology/aggregator
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom|topology/aggregator
-      label: Memory
-      watcher:
-        func: setRequests|memory|topology/aggregator
-        paths:
-          - schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Aggregator nodes handle query processing and coordination. Configure replicas, storage, and resource allocation for efficient query execution and result aggregation.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setReplicaNumber
+          label: Replica number
+          schema: schema/properties/spec/properties/topology/properties/aggregator/properties/replicas
+          type: input
+        - label: Storage Size
+          schema: schema/properties/spec/properties/topology/properties/aggregator/properties/persistence/properties/size
+          type: input
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu|topology/aggregator
+          disable: isMachineNotCustom
+          label: CPU
+          loader: setLimits|cpu|topology/aggregator
+          watcher:
+            func: setRequests|cpu|topology/aggregator
+            paths:
+              - schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory|topology/aggregator
+          disable: isMachineNotCustom
+          label: Memory
+          loader: setLimits|memory|topology/aggregator
+          watcher:
+            func: setRequests|memory|topology/aggregator
+            paths:
+              - schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     if:
       type: function
       name: isEqualToModelPathValue|Topology|/spec/mode
@@ -86,51 +95,57 @@ step:
     showLabels: true
     type: block-layout
   - elements:
-    - label: Storage Size
-      schema: schema/properties/spec/properties/topology/properties/leaf/properties/persistence/properties/size
-      type: input
-    - init:
-        type: func
-        value: setReplicaNumber
-      label: Replica number
-      schema: schema/properties/spec/properties/topology/properties/leaf/properties/replicas
-      type: input
-    - init:
-        type: func
-        value: setMachineToCustom
-      customClass: mt-10
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu|topology/leaf
-      disable: isMachineNotCustom|topology/leaf
-      if:
-        type: function
-        name: isMachineCustom|topology/leaf
-      label: CPU
-      watcher:
-        func: setRequests|cpu|topology/leaf
-        paths:
-          - schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory|topology/leaf
-      disable: isMachineNotCustom|topology/leaf
-      if:
-        type: function
-        name: isMachineCustom|topology/leaf
-      label: Memory
-      watcher:
-        func: setRequests|memory|topology/leaf
-        paths:
-          - schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Leaf nodes store and manage data partitions. Configure replicas, storage, and resource allocation for optimal data storage and query performance.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setReplicaNumber
+          label: Replica number
+          schema: schema/properties/spec/properties/topology/properties/leaf/properties/replicas
+          type: input
+        - label: Storage Size
+          schema: schema/properties/spec/properties/topology/properties/leaf/properties/persistence/properties/size
+          type: input
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu|topology/leaf
+          disable: isMachineNotCustom|topology/leaf
+          label: CPU
+          loader: setLimits|cpu|topology/leaf
+          watcher:
+            func: setRequests|cpu|topology/leaf
+            paths:
+              - schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory|topology/leaf
+          disable: isMachineNotCustom|topology/leaf
+          label: Memory
+          loader: setLimits|memory|topology/leaf
+          watcher:
+            func: setRequests|memory|topology/leaf
+            paths:
+              - schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     if:
       type: function
       name: isEqualToModelPathValue|Topology|/spec/mode
@@ -138,61 +153,69 @@ step:
     showLabels: true
     type: block-layout
   - elements:
-    - init:
-        type: func
-        value: setMachineToCustom
-      customClass: mt-10
-      loader: getMachineListForOptions
-      label: Machine
-      schema: schema/properties/spec/properties/podResources/properties/machine
-      type: select
-    - init:
-        type: func
-        value: setLimits|cpu
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: CPU
-      watcher:
-        func: setRequests|cpu
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      type: input
-    - init:
-        type: func
-        value: setLimits|memory
-      disable: isMachineNotCustom
-      if:
-        type: function
-        name: isMachineCustom
-      label: Memory
-      watcher:
-        func: setRequests|memory
-        paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-      type: input
+    - type: label-element
+      label: ''
+      subtitle: Select a machine profile to allocate CPU and memory resources for your distributed SQL database. Choose 'custom' to manually specify resource requirements or select a predefined profile.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom
+          label: CPU
+          loader: setLimits|cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          disable: isMachineNotCustom
+          label: Memory
+          loader: setLimits|memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
     if:
       type: function
       name: isEqualToModelPathValue|Standalone|/spec/mode
     label: Machine Profile
     showLabels: true
     type: block-layout
-  - loader: getAdminOptions|storageClasses
+  - elements:
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - loader: getAdminOptions|storageClasses
+          if:
+            type: function
+            name: isToggleOn|storageClasses
+          label: Storage Class
+          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+          type: select
+        - label: Storage Size
+          schema: schema/properties/spec/properties/persistence/properties/size
+          type: input
     if:
       type: function
-      name: isToggleOn|storageClasses
-    label: Storage Class
-    schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-    type: select
-  - if:
-      type: function
       name: isEqualToModelPathValue|Standalone|/spec/mode
-    label: Storage Size
-    schema: schema/properties/spec/properties/persistence/properties/size
-    type: input
+    type: block-layout
   - loader: getSecrets
     label: License Secret
     refresh: true
@@ -201,6 +224,9 @@ step:
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
       - type: object-item
         label: Labels
         buttonClass: is-light is-outlined
