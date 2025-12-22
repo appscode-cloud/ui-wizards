@@ -76,6 +76,7 @@ export const useFunc = (model) => {
 
   async function getAddon() {
     const params = storeGet('/route/params')
+
     const { user, cluster } = params
     let url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons`
     try {
@@ -91,9 +92,11 @@ export const useFunc = (model) => {
     return []
   }
 
-  async function getTaskNames() {
+  async function getTaskNames(index) {
     // watchDependency('temporaryModel#/session/addon/name')
-    const addon = storeGet('/wizard/temporaryModel/session/addon/name')
+    const session = getValue(model, `/spec/sessions`)
+    const addon = session[index]?.addons?.name
+
     const params = storeGet('/route/params')
     const { user, cluster } = params
     let url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons/${addon}`
