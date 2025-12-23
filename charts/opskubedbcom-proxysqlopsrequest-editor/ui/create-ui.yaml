@@ -409,66 +409,67 @@ step:
               type: function
             loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
             elements:
-              - type: select
-                label: Alias
-                loader: fetchAliasOptions
-                disable: disableAlias
-                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/alias
-              - type: input
-                label: Secret Name
-                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/secretName
-              - type: input
-                label: Duration
-                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/duration
-              - type: input
-                label: Renew Before
-                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/renewBefore
-              - type: block-layout
-                label: Subject
-                showLabels: true
+              - type: array-object-form
+                label: Certificates
+                buttonClass: is-light is-outlined
+                schema: schema/properties/spec/properties/tls/properties/certificates
                 elements:
-                  - type: array-item-form
-                    label: Organizations
-                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations
-                    buttonClass: is-light is-outlined
-                    element:
-                      type: input
-                      label: Organization
-                  - type: array-item-form
-                    label: Countries
-                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries
-                    buttonClass: is-light is-outlined
-                    element:
-                      type: input
-                      label: Country
-                  - type: array-item-form
-                    label: Organizational Units
-                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits
-                    buttonClass: is-light is-outlined
-                    element:
-                      type: input
-                      label: Organizational Unit
-                  - type: array-item-form
-                    label: Provinces
-                    schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces
-                    buttonClass: is-light is-outlined
-                    element:
-                      type: input
-                      label: Province
-              - type: array-item-form
-                label: DNS Names
-                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames
-                buttonClass: is-light is-outlined
-                element:
-                  type: input
-                  label: DNS Name
-              - type: array-item-form
-                label: IP Addresses
-                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses
-                buttonClass: is-light is-outlined
-                element:
-                  type: input
-                  label: IP Address
+                - type: select
+                  label: Alias
+                  loader: fetchAliasOptions
+                  disable: disableAlias
+                  schema: alias
+                - type: input
+                  label: Secret Name
+                  schema: secretName
+                - type: input
+                  label: Duration
+                  schema: duration
+                - type: input
+                  label: Renew Before
+                  schema: renewBefore
+                - type: array-item-form
+                  label: Organizations
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/organizations
+                  element:
+                    type: input
+                    label: Organization
+                - type: array-item-form
+                  label: Countries
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/countries
+                  element:
+                    type: input
+                    label: Country
+                - type: array-item-form
+                  label: Organizational Units
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/organizationalUnits
+                  element:
+                    type: input
+                    label: Organizational Unit
+                - type: array-item-form
+                  label: Provinces
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/provinces
+                  element:
+                    type: input
+                    label: Province
+                - type: array-item-form
+                  label: DNS Names
+                  buttonClass: is-light  is-outlined
+                  schema: dnsNames
+                  element:
+                    type: input
+                    label: DNS Name
+                - type: array-item-form
+                  label: IP Addresses
+                  buttonClass: is-light is-outlined
+                  schema: ipAddresses
+                  element:
+                    type: input
+                    label: IP Address
 # common
       - type: block-layout
         label: OpsRequest Options
