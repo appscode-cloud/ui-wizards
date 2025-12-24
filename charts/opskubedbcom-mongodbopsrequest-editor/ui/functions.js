@@ -885,22 +885,51 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/namespace')
     // watchDependency('model#/metadata/namespace')
 
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-    )
+    const name = getValue(model, '/spec/databaseRef/name')
+    const dbGroup = getValue(model, '/route/params/group')
+    const dbKind = getValue(store.state, '/resource/definition/result/kind')
+    const dbName = getValue(model, '/route/params/name')
+    const dbVersion = getValue(model, '/route/params/version')
 
-    const secrets = (resp && resp.data && resp.data.items) || []
-    secretArray = secrets
+    try {
+      const resp = await axios.post(
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
+        {
+          apiVersion: 'ui.kubedb.com/v1alpha1',
+          kind: 'DatabaseInfo',
+          request: {
+            source: {
+              ref: {
+                name: name,
+                namespace: namespace,
+              },
+              resource: {
+                group: dbGroup,
+                kind: dbKind,
+                name: dbName,
+                version: dbVersion,
+              },
+            },
+            keys: ['mongod.conf'],
+          },
+        },
+      )
+      const secrets = resp?.data?.response?.configurations || []
+      secretArray = secrets
 
-    const filteredSecrets = secrets
+      const filteredSecrets = secrets
 
-    filteredSecrets.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      item.text = name
-      item.value = name
-      return true
-    })
-    return filteredSecrets
+      filteredSecrets.map((item) => {
+        const name = item?.secretName || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return filteredSecrets
+    } catch (e) {
+      console.log(e)
+    }
+    return []
   }
 
   function createSecretUrl() {
@@ -1034,8 +1063,8 @@ export const useFunc = (model) => {
 
     if (applyconfig) {
       applyconfig.forEach((item) => {
-        const { key, value } = item
-        configObj[key] = value
+        const { name, content } = item
+        configObj[name] = content
       })
     }
 
@@ -1367,6 +1396,51 @@ export const useFunc = (model) => {
     return data || 'No Data Found'
   }
 
+  async function setApplyConfig(type) {
+    const name = getValue(model, '/spec/databaseRef/name')
+    const dbNamespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+    const dbGroup = getValue(model, '/route/params/group')
+    const dbKind = getValue(store.state, '/resource/definition/result/kind')
+    const dbName = getValue(model, '/route/params/name')
+    const dbVersion = getValue(model, '/route/params/version')
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+
+    try {
+      const resp = await axios.post(
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
+        {
+          apiVersion: 'ui.kubedb.com/v1alpha1',
+          kind: 'DatabaseInfo',
+          request: {
+            source: {
+              ref: {
+                name: name,
+                namespace: dbNamespace,
+              },
+              resource: {
+                group: dbGroup,
+                kind: dbKind,
+                name: dbName,
+                version: dbVersion,
+              },
+            },
+          },
+        },
+      )
+      const result = resp?.data?.response?.configurations.map((item) => {
+        const [fileName, value] = Object.entries(item.data)[0]
+        return {
+          name: item.secretName,
+          content: `${fileName}: ${value}`,
+        }
+      })
+      return result
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   return {
     fetchAliasOptions,
     validateNewCertificates,
@@ -1426,5 +1500,6 @@ export const useFunc = (model) => {
     isMachineCustom,
     checkVolume,
     getSelectedConfigSecretValue,
+    setApplyConfig,
   }
 }
