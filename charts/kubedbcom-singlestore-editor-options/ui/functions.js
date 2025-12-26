@@ -1153,7 +1153,7 @@ export const useFunc = (model) => {
     return !validType.includes(modelPathValue)
   }
 
-  function toggleTls() {
+  function toggleTls(isTlsInit) {
     let modelPathValue = getValue(model, '/spec/mode')
     commit('wizard/model$update', {
       path: '/spec/admin/tls/default',
@@ -1165,6 +1165,7 @@ export const useFunc = (model) => {
       value: modelPathValue !== 'Standalone',
       force: true,
     })
+    if (isTlsInit) return isTlsInit
   }
 
   function updateAgentValue(val) {
@@ -1266,7 +1267,7 @@ export const useFunc = (model) => {
     return filteredList
   }
 
- let backupToolInitialValue = ''
+  let backupToolInitialValue = ''
   function checkIfFeatureOn(type) {
     let val = getValue(model, `/spec/admin/${type}/toggle`)
     if (type === 'backup' || type === 'archiver') {

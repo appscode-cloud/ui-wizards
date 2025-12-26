@@ -1088,7 +1088,7 @@ export const useFunc = (model) => {
     return features.length
   }
 
-  function toggleTls() {
+  function toggleTls(isTlsInit) {
     let modelPathValue = getValue(model, '/spec/mode')
     commit('wizard/model$update', {
       path: '/spec/admin/tls/default',
@@ -1100,6 +1100,7 @@ export const useFunc = (model) => {
       value: modelPathValue !== 'Standalone',
       force: true,
     })
+    if (isTlsInit) return isTlsInit
   }
 
   function getDefault(type) {
