@@ -1,4 +1,4 @@
-const { axios, useOperator, store } = window.vueHelpers || {}
+const { axios, useOperator, store, yaml } = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -1387,13 +1387,28 @@ export const useFunc = (model) => {
   function getSelectedConfigSecretValue(type) {
     const path = `/spec/configuration/${type}/configSecret/name`
     const selectedSecret = getValue(model, path)
-    let data
-    secretArray.forEach((item) => {
-      if (item.value === selectedSecret) {
-        data = objectToYaml(item.data).trim() || 'No Data Found'
+    let data = {}
+
+    if (!secretArray || secretArray.length === 0) {
+      return data
+    }
+
+    // Decode base64 and parse YAML for each key in the secret data
+    Object.keys(secretArray[0].data).forEach((item) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(secretArray[0].data[item])
+        // Parse YAML string to object
+        const parsedYaml = yaml.load(decodedString)
+        // Store the parsed object with the filename as key
+        data[item] = parsedYaml
+      } catch (e) {
+        console.error(`Error parsing ${item}:`, e)
+        data[item] = atob(secret.data[item]) // Fallback to decoded string
       }
     })
-    return data || 'No Data Found'
+    console.log('Decoded Secret Data:', data)
+    return data
   }
 
   async function setApplyConfig(type) {
