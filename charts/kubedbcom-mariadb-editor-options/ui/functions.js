@@ -1312,6 +1312,8 @@ export const useFunc = (model) => {
         force: true,
       })
     } catch (e) {
+      pointIntimeError =
+        e.response?.data?.message || 'Invalid name / namespace for recovery timestamp'
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
         value: '',
@@ -1329,6 +1331,12 @@ export const useFunc = (model) => {
       })
       console.log(e)
     }
+  }
+
+  let pointIntimeError = ''
+  function pointInTimeErrorCheck() {
+    if (pointIntimeError.length) return pointIntimeError
+    return
   }
 
   async function getReferSecrets() {
@@ -1388,6 +1396,7 @@ export const useFunc = (model) => {
     getReferSecrets,
     isConfigAvailable,
     setPointInTimeRecovery,
+    pointInTimeErrorCheck,
     isRancherManaged,
     getRecoveryNames,
     fetchNamespaces,
