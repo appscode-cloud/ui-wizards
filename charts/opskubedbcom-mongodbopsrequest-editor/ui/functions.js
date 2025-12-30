@@ -878,7 +878,7 @@ export const useFunc = (model) => {
   }
 
   // for config secret
-  let secretArray = []
+  let DatabaseInfos = []
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -914,18 +914,12 @@ export const useFunc = (model) => {
           },
         },
       )
-      const secrets = resp?.data?.response?.configurations || []
-      secretArray = secrets
-
-      const filteredSecrets = secrets
-
-      filteredSecrets.map((item) => {
-        const name = item?.secretName || ''
-        item.text = name
-        item.value = name
-        return true
+      console.log('DatabaseInfo response:', resp)
+      DatabaseInfos = resp?.data?.response
+      const secrets = resp?.data?.response?.availableSecrets || []
+      return secrets.map((item) => {
+        return { text: item, value: item }
       })
-      return filteredSecrets
     } catch (e) {
       console.log(e)
     }
@@ -1387,28 +1381,38 @@ export const useFunc = (model) => {
   function getSelectedConfigSecretValue(type) {
     const path = `/spec/configuration/${type}/configSecret/name`
     const selectedSecret = getValue(model, path)
-    let data = {}
-
-    if (!secretArray || secretArray.length === 0) {
-      return data
+    console.log('Selected Secret Name:', DatabaseInfos)
+    if (!DatabaseInfos) {
+      console.log('No secret data available')
+      return ''
     }
 
+    const configuration = DatabaseInfos.configurations.find(
+      (item) => item.secretName === selectedSecret,
+    )
+
+    if (!configuration) {
+      return ''
+    }
+
+    let data = {}
     // Decode base64 and parse YAML for each key in the secret data
-    Object.keys(secretArray[0].data).forEach((item) => {
+    Object.keys(configuration.data).forEach((item) => {
       try {
         // Decode base64 string
-        const decodedString = atob(secretArray[0].data[item])
+        const decodedString = atob(configuration.data[item])
         // Parse YAML string to object
         const parsedYaml = yaml.load(decodedString)
         // Store the parsed object with the filename as key
         data[item] = parsedYaml
       } catch (e) {
         console.error(`Error parsing ${item}:`, e)
-        data[item] = atob(secret.data[item]) // Fallback to decoded string
+        data[item] = atob(DatabaseInfos.configurations[0].data[item]) // Fallback to decoded string
       }
     })
-    console.log('Decoded Secret Data:', data)
-    return data
+
+    // Convert data object back to YAML string
+    return yaml.dump(data)
   }
 
   async function setApplyConfig(type) {
