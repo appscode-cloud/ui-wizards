@@ -694,7 +694,7 @@ step:
                         type: required
                       schema: temp/properties/configArray/items/properties/value
                 - type: block-layout
-                  showLabels: false
+                  showLabels: true
                   label: ApplyConfig
                   if:
                     name: ifReconfigurationTypeEqualsTo|applyConfig
@@ -704,6 +704,16 @@ step:
                       label: New Apply Config
                       subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
                       customClass: mb-10
+                    - type: select
+                      schema: temp/properties/standalone/selectedConfiguration
+                      validation:
+                        type: required
+                      refresh: true
+                      label: Configuration
+                      loader:
+                        name: getConfigSecretsforAppyConfig
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
                     - type: multi-file-editor
                       label: value
                       editorHeight: 500px

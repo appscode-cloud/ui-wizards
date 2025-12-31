@@ -926,6 +926,52 @@ export const useFunc = (model) => {
     return []
   }
 
+  async function getConfigSecretsforAppyConfig() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getValue(model, '/metadata/namespace')
+    // watchDependency('model#/metadata/namespace')
+
+    const name = getValue(model, '/spec/databaseRef/name')
+    const dbGroup = getValue(model, '/route/params/group')
+    const dbKind = getValue(store.state, '/resource/definition/result/kind')
+    const dbResource = getValue(model, '/route/params/resource')
+    const dbVersion = getValue(model, '/route/params/version')
+
+    try {
+      const resp = await axios.post(
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
+        {
+          apiVersion: 'ui.kubedb.com/v1alpha1',
+          kind: 'DatabaseInfo',
+          request: {
+            source: {
+              ref: {
+                name: name,
+                namespace: namespace,
+              },
+              resource: {
+                group: dbGroup,
+                kind: dbKind,
+                name: dbResource,
+                version: dbVersion,
+              },
+            },
+          },
+        },
+      )
+      console.log('DatabaseInfo response:', resp)
+      DatabaseInfos = resp?.data?.response
+      const secrets = resp?.data?.response?.availableSecrets || []
+      return secrets.map((item) => {
+        return { text: item, value: item }
+      })
+    } catch (e) {
+      console.log(e)
+    }
+    return []
+  }
+
   function createSecretUrl() {
     const user = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1396,7 +1442,7 @@ export const useFunc = (model) => {
       )
 
       const secretData = resp.data?.data || {}
-      console.log('Fetched secret data:', secretData,namespace,selectedSecret)
+      console.log('Fetched secret data:', secretData, namespace, selectedSecret)
 
       let data = {}
       Object.keys(secretData).forEach((item) => {
@@ -1426,7 +1472,7 @@ export const useFunc = (model) => {
     const dbNamespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const dbGroup = getValue(model, '/route/params/group')
     const dbKind = getValue(store.state, '/resource/definition/result/kind')
-    const dbName = getValue(model, '/route/params/name')
+    const dbResource = getValue(model, '/route/params/resource')
     const dbVersion = getValue(model, '/route/params/version')
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1446,7 +1492,7 @@ export const useFunc = (model) => {
               resource: {
                 group: dbGroup,
                 kind: dbKind,
-                name: dbName,
+                name: dbResource,
                 version: dbVersion,
               },
             },
@@ -1526,5 +1572,6 @@ export const useFunc = (model) => {
     checkVolume,
     getSelectedConfigSecretValue,
     setApplyConfig,
+    getConfigSecretsforAppyConfig,
   }
 }
