@@ -1378,41 +1378,47 @@ export const useFunc = (model) => {
       .join('\n')
   }
 
-  function getSelectedConfigSecretValue(type) {
+  async function getSelectedConfigSecretValue(type) {
     const path = `/spec/configuration/${type}/configSecret/name`
     const selectedSecret = getValue(model, path)
-    console.log('Selected Secret Name:', DatabaseInfos)
-    if (!DatabaseInfos) {
-      console.log('No secret data available')
+
+    if (!selectedSecret) {
       return ''
     }
 
-    const configuration = DatabaseInfos.configurations.find(
-      (item) => item.secretName === selectedSecret,
-    )
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
 
-    if (!configuration) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${selectedSecret}`,
+      )
+
+      const secretData = resp.data?.data || {}
+      console.log('Fetched secret data:', secretData,namespace,selectedSecret)
+
+      let data = {}
+      Object.keys(secretData).forEach((item) => {
+        try {
+          // Decode base64 string
+          const decodedString = atob(secretData[item])
+          // Parse YAML string to object
+          const parsedYaml = yaml.load(decodedString)
+          // Store the parsed object with the filename as key
+          data[item] = parsedYaml
+        } catch (e) {
+          console.error(`Error parsing ${item}:`, e)
+          data[item] = atob(secretData[item]) // Fallback to decoded string
+        }
+      })
+
+      // Convert data object back to YAML string
+      return yaml.dump(data)
+    } catch (e) {
+      console.error('Error fetching secret:', e)
       return ''
     }
-
-    let data = {}
-    // Decode base64 and parse YAML for each key in the secret data
-    Object.keys(configuration.data).forEach((item) => {
-      try {
-        // Decode base64 string
-        const decodedString = atob(configuration.data[item])
-        // Parse YAML string to object
-        const parsedYaml = yaml.load(decodedString)
-        // Store the parsed object with the filename as key
-        data[item] = parsedYaml
-      } catch (e) {
-        console.error(`Error parsing ${item}:`, e)
-        data[item] = atob(DatabaseInfos.configurations[0].data[item]) // Fallback to decoded string
-      }
-    })
-
-    // Convert data object back to YAML string
-    return yaml.dump(data)
   }
 
   async function setApplyConfig(type) {
