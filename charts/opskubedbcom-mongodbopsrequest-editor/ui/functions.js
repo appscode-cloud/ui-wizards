@@ -888,7 +888,7 @@ export const useFunc = (model) => {
     const name = getValue(model, '/spec/databaseRef/name')
     const dbGroup = getValue(model, '/route/params/group')
     const dbKind = getValue(store.state, '/resource/definition/result/kind')
-    const dbName = getValue(model, '/route/params/name')
+    const dbResource = getValue(model, '/route/params/resource')
     const dbVersion = getValue(model, '/route/params/version')
 
     try {
@@ -906,7 +906,7 @@ export const useFunc = (model) => {
               resource: {
                 group: dbGroup,
                 kind: dbKind,
-                name: dbName,
+                name: dbResource,
                 version: dbVersion,
               },
             },
