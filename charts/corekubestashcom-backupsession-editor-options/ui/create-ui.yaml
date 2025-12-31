@@ -24,7 +24,11 @@ step:
       value: BackupBlueprint
     schema: schema/properties/spec/properties/invoker/properties/kind
     type: select
-  - loader: fetchInvokerName
+  - loader:
+      name: fetchInvokerName
+      watchPaths:
+        - schema/properties/spec/properties/invoker/properties/kind
+        - schema/properties/metadata/properties/release/properties/namespace
     label: Invoker Name
     watcher:
       func: initName
@@ -32,7 +36,10 @@ step:
         - schema/properties/spec/properties/invoker/properties/name
     schema: schema/properties/spec/properties/invoker/properties/name
     type: select
-  - loader: fetchSessions
+  - loader:
+      name: fetchSessions
+      watchPaths:
+        - schema/properties/spec/properties/invoker/properties/name
     label: Session
     watcher:
       func: initName
