@@ -25,7 +25,7 @@ step:
     schema: schema/properties/spec/properties/invoker/properties/kind
     type: select
   - loader:
-      name: fetchInvokers
+      name: fetchInvokerName
       watchPaths:
         - schema/properties/spec/properties/invoker/properties/kind
         - schema/properties/metadata/properties/release/properties/namespace
@@ -36,7 +36,10 @@ step:
         - schema/properties/spec/properties/invoker/properties/name
     schema: schema/properties/spec/properties/invoker/properties/name
     type: select
-  - loader: fetchSessions
+  - loader:
+      name: fetchSessions
+      watchPaths:
+        - schema/properties/spec/properties/invoker/properties/name
     label: Session
     watcher:
       func: initName
