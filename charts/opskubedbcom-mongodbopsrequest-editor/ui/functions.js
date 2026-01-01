@@ -959,7 +959,6 @@ export const useFunc = (model) => {
           },
         },
       )
-      console.log('DatabaseInfo response:', resp)
       DatabaseInfos = resp?.data?.response
       ConfigurationsData = resp?.data?.response?.configurations || []
       const secrets = ConfigurationsData.map((item) => {
@@ -1141,34 +1140,16 @@ export const useFunc = (model) => {
   }
 
   function onApplyconfigChange(type) {
-    console.log('value change')
     const configPath = `/${type}/selectedConfiguration`
     const selectedConfig = getValue(discriminator, configPath)
-    console.log('selected config', selectedConfig)
     if (!selectedConfig) {
       return [{ name: '', content: '' }]
     }
-    // const applyconfig = getValue(discriminator, `${type}/applyConfig`)
-    console.log('selected config', selectedConfig)
     const applyconfig = applyConfigdbInfos.find((item) => {
       if (item.componentName === selectedConfig) {
         return item
       }
     })
-
-    console.log('applyconfig', applyconfig)
-    //let configObj = {}
-
-    // if (!applyconfig) {
-    //   setApplyConfig(type)
-    // }
-
-    // if (applyconfig) {
-    //   applyconfig.forEach((item) => {
-    //     const { secretName, data } = item
-    //     configObj[secretName] = data
-    //   })
-    // }
 
     const { secretName, data } = applyconfig
     const configObj = []
@@ -1196,8 +1177,6 @@ export const useFunc = (model) => {
       value: configObj,
       force: true,
     })
-    console.log('config obj -> ', configObj)
-    console.log('applyconfig -> ', applyconfig)
     return configObj
   }
 
@@ -1528,8 +1507,6 @@ export const useFunc = (model) => {
       )
 
       const secretData = resp.data?.data || {}
-      console.log('Fetched secret data:', secretData, namespace, selectedSecret)
-
       let data = {}
       Object.keys(secretData).forEach((item) => {
         try {
@@ -1587,14 +1564,14 @@ export const useFunc = (model) => {
       )
       applyConfigdbInfos = resp?.data?.response.configurations
       return [{name: '', content: ''}]
-      const result = resp?.data?.response?.configurations.map((item) => {
-        const [fileName, value] = Object.entries(item.data)[0]
-        return {
-          name: item.secretName,
-          content: `${fileName}: ${value}`,
-        }
-      })
-      return result
+      // const result = resp?.data?.response?.configurations.map((item) => {
+      //   const [fileName, value] = Object.entries(item.data)[0]
+      //   return {
+      //     name: item.secretName,
+      //     content: `${fileName}: ${value}`,
+      //   }
+      // })
+      // return result
     } catch (e) {
       console.log(e)
     }
