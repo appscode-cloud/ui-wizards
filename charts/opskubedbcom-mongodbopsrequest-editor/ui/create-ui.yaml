@@ -710,23 +710,20 @@ step:
                         type: required
                       refresh: true
                       label: Configuration
-                      loader:
-                        name: getConfigSecretsforAppyConfig
-                        watchPaths:
-                          - schema/properties/metadata/properties/namespace
+                      loader: getConfigSecretsforAppyConfig
                     - type: multi-file-editor
                       label: value
                       editorHeight: 500px
-                      init:
-                        type: func
-                        value: setApplyConfig|standalone
                       validation:
                         type: required
                       schema: temp/properties/standalone/applyConfig
+                      init:
+                        type: func
+                        value: setApplyConfig|standalone
                       watcher:
                         func: onApplyconfigChange|standalone
                         paths:
-                            - temp/properties/standalone/applyConfig
+                            - temp/properties/standalone/selectedConfiguration
                 - type: switch
                   schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
                   label: Remove CustomConfig

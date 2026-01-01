@@ -878,7 +878,6 @@ export const useFunc = (model) => {
   }
 
   // for config secret
-  let DatabaseInfos = []
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -914,8 +913,6 @@ export const useFunc = (model) => {
           },
         },
       )
-      console.log('DatabaseInfo response:', resp)
-      DatabaseInfos = resp?.data?.response
       const secrets = resp?.data?.response?.availableSecrets || []
       return secrets.map((item) => {
         return { text: item, value: item }
@@ -926,6 +923,8 @@ export const useFunc = (model) => {
     return []
   }
 
+  let ConfigurationsData = []
+  let DatabaseInfos = []
   async function getConfigSecretsforAppyConfig() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -962,14 +961,60 @@ export const useFunc = (model) => {
       )
       console.log('DatabaseInfo response:', resp)
       DatabaseInfos = resp?.data?.response
-      const secrets = resp?.data?.response?.availableSecrets || []
-      return secrets.map((item) => {
-        return { text: item, value: item }
+      ConfigurationsData = resp?.data?.response?.configurations || []
+      const secrets = ConfigurationsData.map((item) => {
+        return { text: item.componentName, value: item.componentName }
       })
+      return secrets
     } catch (e) {
       console.log(e)
     }
     return []
+  }
+
+  function getSelectedConfigurationData(type) {
+    const path = `/${type}/selectedConfiguration`
+    const selectedConfiguration = getValue(discriminator, path)
+
+    if (!selectedConfiguration) {
+      return []
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfiguration,
+    )
+
+    if (!configuration) {
+      return []
+    }
+
+    const result = []
+    // Decode base64 and format as array of objects with name and content
+    Object.keys(configuration.data).forEach((fileName) => {
+      try {
+        // Decode base64 string
+        const decodedContent = atob(configuration.data[fileName])
+        result.push({
+          name: fileName,
+          content: decodedContent,
+        })
+      } catch (e) {
+        console.error(`Error decoding ${fileName}:`, e)
+        result.push({
+          name: fileName,
+          content: configuration.data[fileName], // Fallback to original if decode fails
+        })
+      }
+    })
+
+    // Set the value to the model
+    commit('wizard/model$update', {
+      path: `/temp/${type}/applyConfig`,
+      value: result,
+      force: true,
+    })
+
+    return result
   }
 
   function createSecretUrl() {
@@ -1096,23 +1141,46 @@ export const useFunc = (model) => {
   }
 
   function onApplyconfigChange(type) {
-    const configPath = `/${type}/applyConfig`
-    const applyconfig = getValue(discriminator, configPath)
+    console.log('value change')
+    const configPath = `/${type}/selectedConfiguration`
+    const selectedConfig = getValue(discriminator, configPath)
+    // const applyconfig = getValue(discriminator, `${type}/applyConfig`)
+    console.log('selected config', selectedConfig)
+    const applyconfig = applyConfigdbInfos.find((item) => {
+      if (item.componentName === selectedConfig) {
+        return item
+      }
+    })
 
-    const configObj = {}
+    console.log('applyconfig', applyconfig)
+    //let configObj = {}
 
-    if (applyconfig) {
-      applyconfig.forEach((item) => {
-        const { name, content } = item
-        configObj[name] = content
-      })
-    }
+    // if (!applyconfig) {
+    //   setApplyConfig(type)
+    // }
+
+    // if (applyconfig) {
+    //   applyconfig.forEach((item) => {
+    //     const { secretName, data } = item
+    //     configObj[secretName] = data
+    //   })
+    // }
+
+    const { secretName, data } = applyconfig
+    const configObj = [
+      {
+        name: secretName,
+        content: data,
+      },
+    ]
 
     commit('wizard/model$update', {
       path: `/spec/configuration/${type}/applyConfig`,
       value: configObj,
       force: true,
     })
+    console.log('config obj -> ', configObj)
+    return configObj
   }
 
   function onReconfigurationTypeChange(property, isShard) {
@@ -1466,8 +1534,9 @@ export const useFunc = (model) => {
       return ''
     }
   }
-
+  let applyConfigdbInfos = []
   async function setApplyConfig(type) {
+    const selectedConfiguration = getValue(discriminator, `/${type}/selectedConfiguration`)
     const name = getValue(model, '/spec/databaseRef/name')
     const dbNamespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const dbGroup = getValue(model, '/route/params/group')
@@ -1499,6 +1568,7 @@ export const useFunc = (model) => {
           },
         },
       )
+      applyConfigdbInfos = resp?.data?.response.configurations
       const result = resp?.data?.response?.configurations.map((item) => {
         const [fileName, value] = Object.entries(item.data)[0]
         return {
