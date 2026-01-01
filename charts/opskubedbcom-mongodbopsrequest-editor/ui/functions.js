@@ -1144,6 +1144,10 @@ export const useFunc = (model) => {
     console.log('value change')
     const configPath = `/${type}/selectedConfiguration`
     const selectedConfig = getValue(discriminator, configPath)
+    console.log('selected config', selectedConfig)
+    if (!selectedConfig) {
+      return [{ name: '', content: '' }]
+    }
     // const applyconfig = getValue(discriminator, `${type}/applyConfig`)
     console.log('selected config', selectedConfig)
     const applyconfig = applyConfigdbInfos.find((item) => {
@@ -1167,12 +1171,25 @@ export const useFunc = (model) => {
     // }
 
     const { secretName, data } = applyconfig
-    const configObj = [
-      {
-        name: secretName,
-        content: data,
-      },
-    ]
+    const configObj = []
+
+    // Decode base64 and format as array of objects with name and content
+    Object.keys(data).forEach((fileName) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(data[fileName])
+        configObj.push({
+          name: fileName,
+          content: decodedString,
+        })
+      } catch (e) {
+        console.error(`Error decoding ${fileName}:`, e)
+        configObj.push({
+          name: fileName,
+          content: data[fileName], // Fallback to original if decode fails
+        })
+      }
+    })
 
     commit('wizard/model$update', {
       path: `/spec/configuration/${type}/applyConfig`,
@@ -1180,6 +1197,7 @@ export const useFunc = (model) => {
       force: true,
     })
     console.log('config obj -> ', configObj)
+    console.log('applyconfig -> ', applyconfig)
     return configObj
   }
 
@@ -1536,7 +1554,6 @@ export const useFunc = (model) => {
   }
   let applyConfigdbInfos = []
   async function setApplyConfig(type) {
-    const selectedConfiguration = getValue(discriminator, `/${type}/selectedConfiguration`)
     const name = getValue(model, '/spec/databaseRef/name')
     const dbNamespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const dbGroup = getValue(model, '/route/params/group')
@@ -1569,6 +1586,7 @@ export const useFunc = (model) => {
         },
       )
       applyConfigdbInfos = resp?.data?.response.configurations
+      return [{name: '', content: ''}]
       const result = resp?.data?.response?.configurations.map((item) => {
         const [fileName, value] = Object.entries(item.data)[0]
         return {
