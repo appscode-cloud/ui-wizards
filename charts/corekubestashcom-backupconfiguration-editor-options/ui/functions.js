@@ -121,9 +121,10 @@ export const useFunc = (model) => {
     })
   }
 
-  async function getEncryptionSecretNames() {
+  async function getEncryptionSecretNames(index) {
     // watchDependency('temporaryModel#/session/encryptionSecret/namespace')
-    const namespace = storeGet('/wizard/temporaryModel/session/encryptionSecret/namespace')
+    const session = getValue(model, `/spec/sessions`)
+    const namespace = session[index]?.encryptionSecret?.namespace
     const params = storeGet('/route/params')
     const { user, cluster } = params
     let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
