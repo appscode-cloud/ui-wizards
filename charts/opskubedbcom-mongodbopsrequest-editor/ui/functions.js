@@ -1235,6 +1235,52 @@ export const useFunc = (model) => {
     return configObj
   }
 
+  function onRemoveConfigChange(type) {
+    const configPath = `/${type}/selectedConfigurationRemove`
+    const selectedConfig = getValue(discriminator, configPath)
+
+    if (!selectedConfig) {
+      return ''
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfig,
+    )
+
+    if (!configuration) {
+      return ''
+    }
+
+    let data = {}
+    // Decode base64 and parse YAML for each key in the secret data
+    console.log('onRemoveConfigChange :', selectedConfig,configuration)
+    Object.keys(configuration.data).forEach((item) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(configuration.data[item])
+        // Parse YAML string to object
+        const parsedYaml = yaml.load(decodedString)
+        // Store the parsed object with the filename as key
+        data[item] = parsedYaml
+      } catch (e) {
+        console.error(`Error parsing ${item}:`, e)
+        data[item] = atob(configuration.data[item]) // Fallback to decoded string
+      }
+    })
+
+    // Convert data object back to YAML string
+    const yamlString = yaml.dump(data)
+    //console.log('onRemoveConfigChange :', selectedConfig , configuration , yamlString)
+
+    commit('wizard/model$update', {
+      path: `/temp/${type}/removeConfig`,
+      value: yamlString,
+      force: true,
+    })
+
+    return yamlString
+  }
+
   function onReconfigurationTypeChange(property, isShard) {
     setDiscriminatorValue(`/${property}/applyConfig`, [])
     let path = '/reconfigurationType'
@@ -1696,5 +1742,6 @@ export const useFunc = (model) => {
     getSelectedConfigurationData,
     getSelectedConfigurationName,
     getSelectedConfigurationValueForRemove,
+    onRemoveConfigChange,
   }
 }
