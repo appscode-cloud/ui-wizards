@@ -38,7 +38,10 @@ step:
         schema: schema/properties/spec/properties/storageRef/properties/namespace
         type: select
       - disableUnselect: true
-        loader: fetchNames|storageRef
+        loader: 
+          name: fetchNames|storageRef
+          watchPaths:
+            - schema/properties/spec/properties/storageRef/properties/namespace
         label: Name
         refresh: true
         schema: schema/properties/spec/properties/storageRef/properties/name
@@ -59,7 +62,10 @@ step:
         schema: schema/properties/spec/properties/encryptionSecret/properties/namespace
         type: select
       - disableUnselect: true
-        loader: fetchNames|encryptionSecret
+        loader:
+          name: fetchNames|encryptionSecret
+          watchPaths:
+            - schema/properties/spec/properties/encryptionSecret/properties/namespace
         label: Name
         refresh: true
         schema: schema/properties/spec/properties/encryptionSecret/properties/name
@@ -79,7 +85,10 @@ step:
             - schema/properties/spec/properties/appRef/properties/apiGroup
         schema: schema/properties/spec/properties/appRef/properties/apiGroup
         type: select
-      - loader: getKinds
+      - loader:
+          name: getKinds
+          watchPaths:
+            - schema/properties/spec/properties/appRef/properties/apiGroup
         label: Kind
         watcher:
           func: setVersion
@@ -96,7 +105,12 @@ step:
             - schema/properties/spec/properties/appRef/properties/namespace
         schema: schema/properties/spec/properties/appRef/properties/namespace
         type: select
-      - loader: getTargetName
+      - loader: 
+          name: getTargetName
+          watchPaths:
+            - schema/properties/spec/properties/appRef/properties/apiGroup
+            - schema/properties/spec/properties/appRef/properties/kind
+            - schema/properties/spec/properties/appRef/properties/namespace
         label: Name
         schema: schema/properties/spec/properties/appRef/properties/name
         type: select
