@@ -1,4 +1,4 @@
-const { axios, useOperator, store } = window.vueHelpers || {}
+const { axios, useOperator, store, yaml } = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -878,29 +878,197 @@ export const useFunc = (model) => {
   }
 
   // for config secret
-  let secretArray = []
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/namespace')
     // watchDependency('model#/metadata/namespace')
 
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+    const name = getValue(model, '/spec/databaseRef/name')
+    const dbGroup = getValue(model, '/route/params/group')
+    const dbKind = getValue(store.state, '/resource/definition/result/kind')
+    const dbResource = getValue(model, '/route/params/resource')
+    const dbVersion = getValue(model, '/route/params/version')
+
+    try {
+      const resp = await axios.post(
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
+        {
+          apiVersion: 'ui.kubedb.com/v1alpha1',
+          kind: 'DatabaseInfo',
+          request: {
+            source: {
+              ref: {
+                name: name,
+                namespace: namespace,
+              },
+              resource: {
+                group: dbGroup,
+                kind: dbKind,
+                name: dbResource,
+                version: dbVersion,
+              },
+            },
+            keys: ['mongod.conf'],
+          },
+        },
+      )
+      const secrets = resp?.data?.response?.availableSecrets || []
+      return secrets.map((item) => {
+        return { text: item, value: item }
+      })
+    } catch (e) {
+      console.log(e)
+    }
+    return []
+  }
+
+  let ConfigurationsData = []
+  let DatabaseInfos = []
+  async function getConfigSecretsforAppyConfig() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getValue(model, '/metadata/namespace')
+    // watchDependency('model#/metadata/namespace')
+
+    const name = getValue(model, '/spec/databaseRef/name')
+    const dbGroup = getValue(model, '/route/params/group')
+    const dbKind = getValue(store.state, '/resource/definition/result/kind')
+    const dbResource = getValue(model, '/route/params/resource')
+    const dbVersion = getValue(model, '/route/params/version')
+
+    try {
+      const resp = await axios.post(
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
+        {
+          apiVersion: 'ui.kubedb.com/v1alpha1',
+          kind: 'DatabaseInfo',
+          request: {
+            source: {
+              ref: {
+                name: name,
+                namespace: namespace,
+              },
+              resource: {
+                group: dbGroup,
+                kind: dbKind,
+                name: dbResource,
+                version: dbVersion,
+              },
+            },
+          },
+        },
+      )
+      DatabaseInfos = resp?.data?.response
+      ConfigurationsData = resp?.data?.response?.configurations || []
+      const secrets = ConfigurationsData.map((item) => {
+        return { text: item.componentName, value: item.componentName }
+      })
+      return secrets
+    } catch (e) {
+      console.log(e)
+    }
+    return []
+  }
+
+  function getSelectedConfigurationData(type) {
+    const path = `/${type}/selectedConfiguration`
+    const selectedConfiguration = getValue(discriminator, path)
+
+    if (!selectedConfiguration) {
+      return []
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfiguration,
     )
 
-    const secrets = (resp && resp.data && resp.data.items) || []
-    secretArray = secrets
+    if (!configuration) {
+      return []
+    }
 
-    const filteredSecrets = secrets
-
-    filteredSecrets.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      item.text = name
-      item.value = name
-      return true
+    const result = []
+    // Decode base64 and format as array of objects with name and content
+    Object.keys(configuration.data).forEach((fileName) => {
+      try {
+        // Decode base64 string
+        const decodedContent = atob(configuration.data[fileName])
+        result.push({
+          name: fileName,
+          content: decodedContent,
+        })
+      } catch (e) {
+        console.error(`Error decoding ${fileName}:`, e)
+        result.push({
+          name: fileName,
+          content: configuration.data[fileName], // Fallback to original if decode fails
+        })
+      }
     })
-    return filteredSecrets
+
+    // Set the value to the model
+    commit('wizard/model$update', {
+      path: `/temp/${type}/applyConfig`,
+      value: result,
+      force: true,
+    })
+
+    return result
+  }
+
+  function getSelectedConfigurationName(type) {
+    const path = `/${type}/selectedConfigurationRemove`
+    const selectedConfiguration = getValue(discriminator, path)
+
+    if (!selectedConfiguration) {
+      return ''
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfiguration,
+    )
+
+    if (!configuration) {
+      return ''
+    }
+
+    return `${configuration.componentName} secret`
+  }
+
+  function getSelectedConfigurationValueForRemove(type) {
+    const path = `/${type}/selectedConfigurationRemove`
+    const selectedConfiguration = getValue(discriminator, path)
+
+    if (!selectedConfiguration) {
+      return ''
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfiguration,
+    )
+
+    if (!configuration) {
+      return ''
+    }
+
+    let data = {}
+    // Decode base64 and parse YAML for each key in the secret data
+    Object.keys(configuration.data).forEach((item) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(configuration.data[item])
+        // Parse YAML string to object
+        const parsedYaml = yaml.load(decodedString)
+        // Store the parsed object with the filename as key
+        data[item] = parsedYaml
+      } catch (e) {
+        console.error(`Error parsing ${item}:`, e)
+        data[item] = atob(configuration.data[item]) // Fallback to decoded string
+      }
+    })
+
+    // Convert data object back to YAML string
+    return yaml.dump(data)
   }
 
   function createSecretUrl() {
@@ -1027,23 +1195,90 @@ export const useFunc = (model) => {
   }
 
   function onApplyconfigChange(type) {
-    const configPath = `/${type}/applyConfig`
-    const applyconfig = getValue(discriminator, configPath)
-
-    const configObj = {}
-
-    if (applyconfig) {
-      applyconfig.forEach((item) => {
-        const { key, value } = item
-        configObj[key] = value
-      })
+    const configPath = `/${type}/selectedConfiguration`
+    const selectedConfig = getValue(discriminator, configPath)
+    if (!selectedConfig) {
+      return [{ name: '', content: '' }]
     }
+    const applyconfig = applyConfigdbInfos.find((item) => {
+      if (item.componentName === selectedConfig) {
+        return item
+      }
+    })
+
+    const { secretName, data } = applyconfig
+    const configObj = []
+
+    // Decode base64 and format as array of objects with name and content
+    Object.keys(data).forEach((fileName) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(data[fileName])
+        configObj.push({
+          name: fileName,
+          content: decodedString,
+        })
+      } catch (e) {
+        console.error(`Error decoding ${fileName}:`, e)
+        configObj.push({
+          name: fileName,
+          content: data[fileName], // Fallback to original if decode fails
+        })
+      }
+    })
 
     commit('wizard/model$update', {
       path: `/spec/configuration/${type}/applyConfig`,
       value: configObj,
       force: true,
     })
+    return configObj
+  }
+
+  function onRemoveConfigChange(type) {
+    const configPath = `/${type}/selectedConfigurationRemove`
+    const selectedConfig = getValue(discriminator, configPath)
+
+    if (!selectedConfig) {
+      return ''
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfig,
+    )
+
+    if (!configuration) {
+      return ''
+    }
+
+    let data = {}
+    // Decode base64 and parse YAML for each key in the secret data
+    console.log('onRemoveConfigChange :', selectedConfig,configuration)
+    Object.keys(configuration.data).forEach((item) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(configuration.data[item])
+        // Parse YAML string to object
+        const parsedYaml = yaml.load(decodedString)
+        // Store the parsed object with the filename as key
+        data[item] = parsedYaml
+      } catch (e) {
+        console.error(`Error parsing ${item}:`, e)
+        data[item] = atob(configuration.data[item]) // Fallback to decoded string
+      }
+    })
+
+    // Convert data object back to YAML string
+    const yamlString = yaml.dump(data)
+    //console.log('onRemoveConfigChange :', selectedConfig , configuration , yamlString)
+
+    commit('wizard/model$update', {
+      path: `/temp/${type}/removeConfig`,
+      value: yamlString,
+      force: true,
+    })
+
+    return yamlString
   }
 
   function onReconfigurationTypeChange(property, isShard) {
@@ -1355,16 +1590,92 @@ export const useFunc = (model) => {
       .join('\n')
   }
 
-  function getSelectedConfigSecretValue(type) {
+  async function getSelectedConfigSecretValue(type) {
     const path = `/spec/configuration/${type}/configSecret/name`
     const selectedSecret = getValue(model, path)
-    let data
-    secretArray.forEach((item) => {
-      if (item.value === selectedSecret) {
-        data = objectToYaml(item.data).trim() || 'No Data Found'
-      }
-    })
-    return data || 'No Data Found'
+
+    if (!selectedSecret) {
+      return ''
+    }
+
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${selectedSecret}`,
+      )
+
+      const secretData = resp.data?.data || {}
+      let data = {}
+      Object.keys(secretData).forEach((item) => {
+        try {
+          // Decode base64 string
+          const decodedString = atob(secretData[item])
+          // Parse YAML string to object
+          const parsedYaml = yaml.load(decodedString)
+          // Store the parsed object with the filename as key
+          data[item] = parsedYaml
+        } catch (e) {
+          console.error(`Error parsing ${item}:`, e)
+          data[item] = atob(secretData[item]) // Fallback to decoded string
+        }
+      })
+
+      // Convert data object back to YAML string
+      return yaml.dump(data)
+    } catch (e) {
+      console.error('Error fetching secret:', e)
+      return ''
+    }
+  }
+  let applyConfigdbInfos = []
+  async function setApplyConfig(type) {
+    const name = getValue(model, '/spec/databaseRef/name')
+    const dbNamespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+    const dbGroup = getValue(model, '/route/params/group')
+    const dbKind = getValue(store.state, '/resource/definition/result/kind')
+    const dbResource = getValue(model, '/route/params/resource')
+    const dbVersion = getValue(model, '/route/params/version')
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+
+    try {
+      const resp = await axios.post(
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
+        {
+          apiVersion: 'ui.kubedb.com/v1alpha1',
+          kind: 'DatabaseInfo',
+          request: {
+            source: {
+              ref: {
+                name: name,
+                namespace: dbNamespace,
+              },
+              resource: {
+                group: dbGroup,
+                kind: dbKind,
+                name: dbResource,
+                version: dbVersion,
+              },
+            },
+          },
+        },
+      )
+      applyConfigdbInfos = resp?.data?.response.configurations
+      return [{name: '', content: ''}]
+      // const result = resp?.data?.response?.configurations.map((item) => {
+      //   const [fileName, value] = Object.entries(item.data)[0]
+      //   return {
+      //     name: item.secretName,
+      //     content: `${fileName}: ${value}`,
+      //   }
+      // })
+      // return result
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   return {
@@ -1426,5 +1737,11 @@ export const useFunc = (model) => {
     isMachineCustom,
     checkVolume,
     getSelectedConfigSecretValue,
+    setApplyConfig,
+    getConfigSecretsforAppyConfig,
+    getSelectedConfigurationData,
+    getSelectedConfigurationName,
+    getSelectedConfigurationValueForRemove,
+    onRemoveConfigChange,
   }
 }
