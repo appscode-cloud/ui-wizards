@@ -694,7 +694,7 @@ step:
                         type: required
                       schema: temp/properties/configArray/items/properties/value
                 - type: block-layout
-                  showLabels: false
+                  showLabels: true
                   label: ApplyConfig
                   if:
                     name: ifReconfigurationTypeEqualsTo|applyConfig
@@ -704,19 +704,65 @@ step:
                       label: New Apply Config
                       subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings. Enter the parameter you want to configure (e.g., max_connections).
                       customClass: mb-10
+                    - type: select
+                      schema: temp/properties/standalone/selectedConfiguration
+                      validation:
+                        type: required
+                      refresh: true
+                      label: Configuration
+                      loader: getConfigSecretsforAppyConfig
                     - type: multi-file-editor
                       label: value
                       editorHeight: 500px
-                      init:
-                        type: func
-                        value: setApplyConfig|standalone
                       validation:
                         type: required
                       schema: temp/properties/standalone/applyConfig
+                      init:
+                        type: func
+                        value: setApplyConfig|standalone
                       watcher:
                         func: onApplyconfigChange|standalone
                         paths:
-                            - temp/properties/standalone/applyConfig
+                            - temp/properties/standalone/selectedConfiguration
+                - type: block-layout
+                  showLabels: true
+                  label: Remove
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|remove
+                    type: function
+                  elements:
+                    - type: label-element
+                      label: Remove
+                      subtitle: Selected a configuration secret from the available list to update your database settings
+                      customClass: mb-10
+                    - type: select
+                      schema: temp/properties/standalone/selectedConfigurationRemove
+                      validation:
+                        type: required
+                      refresh: true
+                      label: Configuration
+                      loader:
+                        name: getConfigSecretsforAppyConfig
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                    - type: label-element
+                      label: You have selected
+                      loader: getSelectedConfigurationName|standalone
+                      watcher:
+                        func: getSelectedConfigurationName|standalone
+                        paths:
+                          - temp/properties/standalone/selectedConfigurationRemove
+                    - type: editor
+                      label: Value
+                      editorHeight: 400px
+                      readonly: true
+                      watcher:
+                        func: onRemoveConfigChange|standalone
+                        paths:
+                          - temp/properties/standalone/selectedConfigurationRemove
+                      validation:
+                        type: required
+                      schema: temp/properties/standalone/removeConfig
                 - type: switch
                   schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
                   label: Remove CustomConfig
