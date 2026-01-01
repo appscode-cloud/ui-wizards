@@ -467,8 +467,6 @@ export const useFunc = (model) => {
   function getKinds() {
     // watchDependency(`model#/spec/target/apiGroup`)
     const apiGroup = getValue(model, `/spec/target/apiGroup`)
-    console.log(apiGroup)
-    console.log(kubedbKind)
 
     if (apiGroup === 'core') return coreKind
     else if (apiGroup === 'apps') return appKind
