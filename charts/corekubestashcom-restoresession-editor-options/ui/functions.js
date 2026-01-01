@@ -402,9 +402,9 @@ export const useFunc = (model) => {
   let namespaces = []
   let version = ''
 
-  function init() {
-    getKindsApi()
-    namespaces = fetchNamespacesApi()
+  async function init() {
+    await getKindsApi()
+    namespaces = await fetchNamespacesApi()
   }
 
   function fetchNamespaces() {
@@ -467,6 +467,8 @@ export const useFunc = (model) => {
   function getKinds() {
     // watchDependency(`model#/spec/target/apiGroup`)
     const apiGroup = getValue(model, `/spec/target/apiGroup`)
+    console.log(apiGroup)
+    console.log(kubedbKind)
 
     if (apiGroup === 'core') return coreKind
     else if (apiGroup === 'apps') return appKind
