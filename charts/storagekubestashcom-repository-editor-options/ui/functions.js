@@ -1,4 +1,4 @@
-const { axios, store } = window.vueHelpers || {}
+const { axios, store, useOperator } = window.vueHelpers || {}
 
 let namespaces = []
 let appKind = []

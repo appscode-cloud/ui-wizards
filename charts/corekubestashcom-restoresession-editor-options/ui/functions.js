@@ -402,9 +402,9 @@ export const useFunc = (model) => {
   let namespaces = []
   let version = ''
 
-  function init() {
-    getKindsApi()
-    namespaces = fetchNamespacesApi()
+  async function init() {
+    await getKindsApi()
+    namespaces = await fetchNamespacesApi()
   }
 
   function fetchNamespaces() {
