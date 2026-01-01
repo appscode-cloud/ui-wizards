@@ -1016,6 +1016,61 @@ export const useFunc = (model) => {
     return result
   }
 
+  function getSelectedConfigurationName(type) {
+    const path = `/${type}/selectedConfigurationRemove`
+    const selectedConfiguration = getValue(discriminator, path)
+
+    if (!selectedConfiguration) {
+      return ''
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfiguration,
+    )
+
+    if (!configuration) {
+      return ''
+    }
+
+    return `${configuration.componentName} secret`
+  }
+
+  function getSelectedConfigurationValueForRemove(type) {
+    const path = `/${type}/selectedConfigurationRemove`
+    const selectedConfiguration = getValue(discriminator, path)
+
+    if (!selectedConfiguration) {
+      return ''
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfiguration,
+    )
+
+    if (!configuration) {
+      return ''
+    }
+
+    let data = {}
+    // Decode base64 and parse YAML for each key in the secret data
+    Object.keys(configuration.data).forEach((item) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(configuration.data[item])
+        // Parse YAML string to object
+        const parsedYaml = yaml.load(decodedString)
+        // Store the parsed object with the filename as key
+        data[item] = parsedYaml
+      } catch (e) {
+        console.error(`Error parsing ${item}:`, e)
+        data[item] = atob(configuration.data[item]) // Fallback to decoded string
+      }
+    })
+
+    // Convert data object back to YAML string
+    return yaml.dump(data)
+  }
+
   function createSecretUrl() {
     const user = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1638,5 +1693,8 @@ export const useFunc = (model) => {
     getSelectedConfigSecretValue,
     setApplyConfig,
     getConfigSecretsforAppyConfig,
+    getSelectedConfigurationData,
+    getSelectedConfigurationName,
+    getSelectedConfigurationValueForRemove,
   }
 }

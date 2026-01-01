@@ -724,6 +724,45 @@ step:
                         func: onApplyconfigChange|standalone
                         paths:
                             - temp/properties/standalone/selectedConfiguration
+                - type: block-layout
+                  showLabels: true
+                  label: Remove
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|remove
+                    type: function
+                  elements:
+                    - type: label-element
+                      label: Remove
+                      subtitle: Selected a configuration secret from the available list to update your database settings
+                      customClass: mb-10
+                    - type: select
+                      schema: temp/properties/standalone/selectedConfigurationRemove
+                      validation:
+                        type: required
+                      refresh: true
+                      label: Configuration
+                      loader:
+                        name: getConfigSecretsforAppyConfig
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                    - type: label-element
+                      label: You have selected
+                      loader: getSelectedConfigurationName|standalone
+                      watcher:
+                        func: getSelectedConfigurationName|standalone
+                        paths:
+                          - temp/properties/standalone/selectedConfigurationRemove
+                    - type: editor
+                      label: Value
+                      editorHeight: 400px
+                      readonly: true
+                      watcher:
+                        func: getSelectedConfigurationValueForRemove|standalone
+                        paths:
+                          - temp/properties/standalone/selectedConfigurationRemove
+                      validation:
+                        type: required
+                      schema: temp/properties/standalone/removeConfig
                 - type: switch
                   schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
                   label: Remove CustomConfig
