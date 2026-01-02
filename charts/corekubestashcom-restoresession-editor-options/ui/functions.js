@@ -234,6 +234,12 @@ export const useFunc = (model) => {
     })
   }
 
+  function onSnapChange() {
+    const snapshot = getValue(model, '/spec/dataSource/snapshot') || ''
+    snapshotObj = snapshotList.find((item) => item.metadata?.name === snapshot) || {}
+  }
+  let snapshotObj = {}
+  let snapshotList = []
   async function getSnapshots() {
     // watchDependency('discriminator#/repository')
     const user = storeGet('/route/params/user') || ''
@@ -250,6 +256,7 @@ export const useFunc = (model) => {
       if (namespace) {
         const resp = await axios.get(url)
         let snapshots = resp?.data?.items
+        snapshotList = snapshots
         snapshots.map((item) => {
           const name = item?.metadata?.name
           item.value = name
@@ -320,6 +327,14 @@ export const useFunc = (model) => {
             force: true,
           })
         }
+        if (Object.keys(snapshotObj).length) {
+          const filteredAddon = addons.find((item) => {
+            const snapkind = snapshotObj?.spec?.appRef?.kind.toLowerCase()
+            return item.includes(snapkind)
+          })
+          if (filteredAddon) return [filteredAddon]
+        }
+
         return addons
       } catch (e) {
         console.log(e)
@@ -538,6 +553,7 @@ export const useFunc = (model) => {
     getRepositories,
     onRepoChange,
     getSnapshots,
+    onSnapChange,
     getAddons,
     getTasks,
     databaseSelected,

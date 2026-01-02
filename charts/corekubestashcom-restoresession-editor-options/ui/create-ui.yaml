@@ -39,6 +39,10 @@ step:
           validation:
             type: required
           loader: getRepositories
+          watcher:
+            func: onRepoChange
+            paths:
+              - temp/properties/repository
         - type: select
           disableUnselect: true
           label: Snapshot
@@ -50,9 +54,9 @@ step:
             watchPaths:
               - temp/properties/repository
           watcher:
-            func: onRepoChange
+            func: onSnapChange
             paths:
-              - temp/properties/repository
+              - schema/properties/spec/properties/dataSource/properties/snapshot
         - type: select
           label: Addon Name
           subtitle: Select the restore addon to use
@@ -61,7 +65,10 @@ step:
           if:
             type: function
             name: isConsole
-          loader: getAddons
+          loader: 
+            name: getAddons
+            watchPaths:
+              - schema/properties/spec/properties/dataSource/properties/snapshot
         - type: textarea
           label: Additional Parameters
           schema: temp/properties/params
