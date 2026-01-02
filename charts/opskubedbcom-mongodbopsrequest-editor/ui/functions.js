@@ -1240,7 +1240,7 @@ export const useFunc = (model) => {
     const selectedConfig = getValue(discriminator, configPath)
 
     if (!selectedConfig) {
-      return ''
+      return [{ name: '', content: '' }]
     }
 
     const configuration = ConfigurationsData.find(
@@ -1248,37 +1248,35 @@ export const useFunc = (model) => {
     )
 
     if (!configuration) {
-      return ''
+      return [{ name: '', content: '' }]
     }
 
-    let data = {}
-    // Decode base64 and parse YAML for each key in the secret data
-    console.log('onRemoveConfigChange :', selectedConfig,configuration)
-    Object.keys(configuration.data).forEach((item) => {
+    const configObj = []
+    // Decode base64 and format as array of objects with name and content
+    Object.keys(configuration.data).forEach((fileName) => {
       try {
         // Decode base64 string
-        const decodedString = atob(configuration.data[item])
-        // Parse YAML string to object
-        const parsedYaml = yaml.load(decodedString)
-        // Store the parsed object with the filename as key
-        data[item] = parsedYaml
+        const decodedString = atob(configuration.data[fileName])
+        configObj.push({
+          name: fileName,
+          content: decodedString,
+        })
       } catch (e) {
-        console.error(`Error parsing ${item}:`, e)
-        data[item] = atob(configuration.data[item]) // Fallback to decoded string
+        console.error(`Error decoding ${fileName}:`, e)
+        configObj.push({
+          name: fileName,
+          content: configuration.data[fileName], // Fallback to original if decode fails
+        })
       }
     })
 
-    // Convert data object back to YAML string
-    const yamlString = yaml.dump(data)
-    //console.log('onRemoveConfigChange :', selectedConfig , configuration , yamlString)
-
     commit('wizard/model$update', {
-      path: `/temp/${type}/removeConfig`,
-      value: yamlString,
+      path: `/spec/configuration/${type}/removeConfig`,
+      value: configObj,
       force: true,
     })
 
-    return yamlString
+    return configObj
   }
 
   function onReconfigurationTypeChange(property, isShard) {
@@ -1593,9 +1591,10 @@ export const useFunc = (model) => {
   async function getSelectedConfigSecretValue(type) {
     const path = `/spec/configuration/${type}/configSecret/name`
     const selectedSecret = getValue(model, path)
-
+    console.log('selectedSecret', selectedSecret,type)
+    
     if (!selectedSecret) {
-      return ''
+      return [{ name: '', content: '' }]
     }
 
     const owner = storeGet('/route/params/user')
@@ -1608,28 +1607,44 @@ export const useFunc = (model) => {
       )
 
       const secretData = resp.data?.data || {}
-      let data = {}
-      Object.keys(secretData).forEach((item) => {
+      const configObj = []
+
+      // Decode base64 and format as array of objects with name and content
+      Object.keys(secretData).forEach((fileName) => {
         try {
           // Decode base64 string
-          const decodedString = atob(secretData[item])
-          // Parse YAML string to object
-          const parsedYaml = yaml.load(decodedString)
-          // Store the parsed object with the filename as key
-          data[item] = parsedYaml
+          const decodedString = atob(secretData[fileName])
+          configObj.push({
+            name: fileName,
+            content: decodedString,
+          })
         } catch (e) {
-          console.error(`Error parsing ${item}:`, e)
-          data[item] = atob(secretData[item]) // Fallback to decoded string
+          console.error(`Error decoding ${fileName}:`, e)
+          configObj.push({
+            name: fileName,
+            content: secretData[fileName], // Fallback to original if decode fails
+          })
         }
       })
 
-      // Convert data object back to YAML string
-      return yaml.dump(data)
+      // Commit to model
+      commit('wizard/model$update', {
+        path: `/spec/configuration/${type}/configSecret`,
+        value: configObj,
+        force: true,
+      })
+      console.log('configObj', configObj)
+      return configObj
     } catch (e) {
       console.error('Error fetching secret:', e)
-      return ''
+      return [{ name: '', content: '' }]
     }
   }
+
+  async function onConfigSecretChange(type) {
+    return await getSelectedConfigSecretValue(type)
+  }
+
   let applyConfigdbInfos = []
   async function setApplyConfig(type) {
     const name = getValue(model, '/spec/databaseRef/name')
@@ -1737,6 +1752,7 @@ export const useFunc = (model) => {
     isMachineCustom,
     checkVolume,
     getSelectedConfigSecretValue,
+    onConfigSecretChange,
     setApplyConfig,
     getConfigSecretsforAppyConfig,
     getSelectedConfigurationData,

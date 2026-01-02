@@ -17,9 +17,6 @@ step:
         if:
           type: function
           name: showAndInitNamespace
-        init:
-          type: func
-          value: initNamespace
         disable: isNamespaceDisabled
         loader: getNamespaces
         validation:
@@ -39,9 +36,6 @@ step:
           name: getDbs
           watchPaths:
             - schema/properties/metadata/properties/namespace
-        init:
-          type: func
-          value: initDatabaseRef
         validation:
           type: required
         disable: isDatabaseRefDisabled
@@ -83,9 +77,6 @@ step:
           - description: Reconfigure your database tls configuration
             text: Reconfigure TLS
             value: ReconfigureTLS
-        init:
-          type: func
-          value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
         watcher:
           func: onRequestTypeChange
@@ -105,9 +96,6 @@ step:
           - type: select-compare
             label: Target Version
             subtitle: Select the desired MongoDB version to which you want to update your database.
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/version
             loader: getDbVersions
             schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
 # Horizontal Scale
@@ -128,9 +116,6 @@ step:
                 if:
                   type: function
                   name: ifDbTypeEqualsTo|replicaSet|horizontalScaling
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/replicas
                 schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
               - type: info
                 hasIcon: true
@@ -156,9 +141,6 @@ step:
                         label: Replicas
                         subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
                         schema: schema/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
-                        init:
-                          type: func
-                          value: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
                       - type: info
                         hasIcon: true
                         label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 
@@ -172,9 +154,6 @@ step:
                       - type: input-compare
                         label: Replicas
                         subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
-                        init:
-                          type: func
-                          value: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
                         schema: schema/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
                       - type: info
                         hasIcon: true
@@ -190,18 +169,12 @@ step:
                       - type: input-compare
                         label: Replicas
                         subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution , while reducing replicas conserves resources
-                        init:
-                          type: func
-                          value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
                         schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
                       - type: info
                         hasIcon: true
                         label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability. 4
                   - type: input
                     label: Shards
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/shardTopology/shard/shards
                     schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
                   - type: label-element
                     label: ''
@@ -222,9 +195,6 @@ step:
                 label: Resources
                 subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                 loader: getMachines|standalone
-                init:
-                  type: func
-                  value: setMachine|standalone
                 watcher:
                   func: onMachineChange|standalone|/spec/podTemplate/spec/resources
                   paths:
@@ -281,9 +251,6 @@ step:
                 label: Resources
                 subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                 loader: getMachines|replicaSet
-                init:
-                  type: func
-                  value: setMachine|replicaSet
                 watcher:
                   func: onMachineChange|replicaSet|/spec/podTemplate/spec/resources
                   paths:
@@ -348,9 +315,6 @@ step:
                     label: Resources
                     subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                     loader: getMachines|configServer
-                    init:
-                      type: func
-                      value: setMachine|configServer
                     watcher:
                       func: onMachineChange|configServer|/spec/shardTopology/configServer/podTemplate/spec/resources
                       paths:
@@ -405,9 +369,6 @@ step:
                     label: Resources
                     subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                     loader: getMachines|mongos
-                    init:
-                      type: func
-                      value: setMachine|mongos
                     watcher:
                       func: onMachineChange|mongos|/spec/shardTopology/mongos/podTemplate/spec/resources
                       paths:
@@ -462,9 +423,6 @@ step:
                     label: Resources
                     subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
                     loader: getMachines|shard
-                    init:
-                      type: func
-                      value: setMachine|shard
                     watcher:
                       func: onMachineChange|shard|/spec/shardTopology/shard/podTemplate/spec/resources
                       paths:
@@ -550,9 +508,6 @@ step:
                     header: Standalone
                     subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
                     label: Standalone
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
                     validation:
                       type: custom
                       name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
@@ -571,9 +526,6 @@ step:
                     header: Config Server
                     label: Config Server
                     subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
                     validation:
                       type: custom
                       name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
@@ -587,9 +539,6 @@ step:
                     header: Shard
                     label: Shard
                     subtitle: How much extra storage does your database need? Specify the size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
                     validation:
                       type: custom
                       name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
@@ -611,9 +560,6 @@ step:
                     header: Replica Set
                     subtitle: How much extra storage does your database need? Specify the size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
                     label: ReplicaSet
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
                     validation:
                       type: custom
                       name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
@@ -672,9 +618,6 @@ step:
                         name: getConfigSecrets
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
-                      init:
-                        type: func
-                        value: setValueFromDbDetails|/spec/configSecret/name
                     - type: label-element
                       label: Selected Config Secret
                       loader: getSelectedConfigSecret|standalone
@@ -682,9 +625,9 @@ step:
                         func: getSelectedConfigSecret|standalone
                         paths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-                    - type: editor
-                      label: Value
-                      editorHeight: 400px
+                    - type: multi-file-editor
+                      label: value
+                      editorHeight: 500px
                       readonly: true
                       watcher:
                         func: getSelectedConfigSecretValue|standalone
@@ -692,7 +635,7 @@ step:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
                       validation:
                         type: required
-                      schema: temp/properties/configArray/items/properties/value
+                      schema: spec/properties/configuration/properties/standalone/properties/configSecret
                 - type: block-layout
                   showLabels: true
                   label: ApplyConfig
@@ -717,9 +660,6 @@ step:
                       validation:
                         type: required
                       schema: temp/properties/standalone/applyConfig
-                      init:
-                        type: func
-                        value: setApplyConfig|standalone
                       watcher:
                         func: onApplyconfigChange|standalone
                         paths:
@@ -752,9 +692,9 @@ step:
                         func: getSelectedConfigurationName|standalone
                         paths:
                           - temp/properties/standalone/selectedConfigurationRemove
-                    - type: editor
-                      label: Value
-                      editorHeight: 400px
+                    - type: multi-file-editor
+                      label: value
+                      editorHeight: 500px
                       readonly: true
                       watcher:
                         func: onRemoveConfigChange|standalone
@@ -762,7 +702,7 @@ step:
                           - temp/properties/standalone/selectedConfigurationRemove
                       validation:
                         type: required
-                      schema: temp/properties/standalone/removeConfig
+                      schema: spec/properties/configuration/properties/standalone/properties/removeConfig
                 - type: switch
                   schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
                   label: Remove CustomConfig
@@ -816,9 +756,6 @@ step:
                         name: getConfigSecrets
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
-                      init:
-                        type: func
-                        value: setValueFromDbDetails|/spec/configSecret/name
                     - type: label-element
                       label: Selected Config Secret
                       loader: getSelectedConfigSecret|replicaSet
@@ -826,16 +763,17 @@ step:
                         func: getSelectedConfigSecret|replicaSet
                         paths:
                           - schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
-                    - type: editor
-                      label: Value
+                    - type: multi-file-editor
+                      label: value
                       editorHeight: 500px
+                      readonly: true
                       watcher:
                         func: getSelectedConfigSecretValue|replicaSet
                         paths:
                           - schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
                       validation:
                         type: required
-                      schema: temp/properties/configArray/items/properties/value
+                      schema: spec/properties/configuration/properties/replicaSet/properties/configSecret
                 - type: block-layout
                   showLabels: true
                   label: ApplyConfig
@@ -857,9 +795,6 @@ step:
                     - type: multi-file-editor
                       label: value
                       editorHeight: 500px
-                      init:
-                        type: func
-                        value: setApplyConfig|replicaSet
                       validation:
                         type: required
                       schema: temp/properties/replicaSet/applyConfig
@@ -895,9 +830,9 @@ step:
                         func: getSelectedConfigurationName|replicaSet
                         paths:
                           - temp/properties/replicaSet/selectedConfigurationRemove
-                    - type: editor
-                      label: Value
-                      editorHeight: 400px
+                    - type: multi-file-editor
+                      label: value
+                      editorHeight: 500px
                       readonly: true
                       watcher:
                         func: onRemoveConfigChange|replicaSet
@@ -905,7 +840,7 @@ step:
                           - temp/properties/replicaSet/selectedConfigurationRemove
                       validation:
                         type: required
-                      schema: temp/properties/replicaSet/removeConfig
+                      schema: spec/properties/configuration/properties/replicaSet/properties/removeConfig
                 - type: switch
                   schema:  schema/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
                   label: Remove CustomConfig
@@ -958,9 +893,6 @@ step:
                           name: getConfigSecrets
                           watchPaths:
                             - schema/properties/metadata/properties/namespace
-                        init:
-                          type: func
-                          value: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
                       - type: label-element
                         label: Selected Config Secret
                         loader: getSelectedConfigSecret|configServer
@@ -968,16 +900,17 @@ step:
                           func: getSelectedConfigSecret|configServer
                           paths:
                             - schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
-                      - type: editor
-                        label: Value
+                      - type: multi-file-editor
+                        label: value
                         editorHeight: 500px
+                        readonly: true
                         watcher:
                           func: getSelectedConfigSecretValue|configServer
                           paths:
                             - schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
                         validation:
                           type: required
-                        schema: temp/properties/configArray/items/properties/value
+                        schema: spec/properties/configuration/properties/configServer/properties/configSecret
                   - type: block-layout
                     showLabels: true
                     label: ApplyConfig
@@ -999,9 +932,6 @@ step:
                       - type: multi-file-editor
                         label: value
                         editorHeight: 500px
-                        init:
-                          type: func
-                          value: setApplyConfig|configServer
                         validation:
                           type: required
                         schema: temp/properties/configServer/applyConfig
@@ -1037,9 +967,9 @@ step:
                           func: getSelectedConfigurationName|configServer
                           paths:
                             - temp/properties/configServer/selectedConfigurationRemove
-                      - type: editor
-                        label: Value
-                        editorHeight: 400px
+                      - type: multi-file-editor
+                        label: value
+                        editorHeight: 500px
                         readonly: true
                         watcher:
                           func: onRemoveConfigChange|configServer
@@ -1047,7 +977,7 @@ step:
                             - temp/properties/configServer/selectedConfigurationRemove
                         validation:
                           type: required
-                        schema: temp/properties/configServer/removeConfig
+                        schema: spec/properties/configuration/properties/configServer/properties/removeConfig
                   - type: switch
                     schema: schema/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
                     label: Remove CustomConfig
@@ -1098,9 +1028,6 @@ step:
                           name: getConfigSecrets
                           watchPaths:
                             - schema/properties/metadata/properties/namespace
-                        init:
-                          type: func
-                          value: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
                       - type: label-element
                         label: Selected Config Secret
                         loader: getSelectedConfigSecret|mongos
@@ -1108,16 +1035,17 @@ step:
                           func: getSelectedConfigSecret|mongos
                           paths:
                             - schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
-                      - type: editor
-                        label: Value
+                      - type: multi-file-editor
+                        label: value
                         editorHeight: 500px
+                        readonly: true
                         watcher:
                           func: getSelectedConfigSecretValue|mongos
                           paths:
                             - schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
                         validation:
                           type: required
-                        schema: temp/properties/configArray/items/properties/value
+                        schema: spec/properties/configuration/properties/mongos/properties/configSecret
                   - type: block-layout
                     showLabels: true
                     label: ApplyConfig
@@ -1139,9 +1067,6 @@ step:
                       - type: multi-file-editor
                         label: value
                         editorHeight: 500px
-                        init:
-                          type: func
-                          value: setApplyConfig|mongos
                         validation:
                           type: required
                         schema: temp/properties/mongos/applyConfig
@@ -1177,9 +1102,9 @@ step:
                           func: getSelectedConfigurationName|mongos
                           paths:
                             - temp/properties/mongos/selectedConfigurationRemove
-                      - type: editor
-                        label: Value
-                        editorHeight: 400px
+                      - type: multi-file-editor
+                        label: value
+                        editorHeight: 500px
                         readonly: true
                         watcher:
                           func: onRemoveConfigChange|mongos
@@ -1187,7 +1112,7 @@ step:
                             - temp/properties/mongos/selectedConfigurationRemove
                         validation:
                           type: required
-                        schema: temp/properties/mongos/removeConfig
+                        schema: spec/properties/configuration/properties/mongos/properties/removeConfig
                   - type: switch
                     schema: schema/properties/spec/properties/configuration/properties/mongos/properties/removeCustomConfig
                     label: Remove CustomConfig
@@ -1238,9 +1163,6 @@ step:
                           name: getConfigSecrets
                           watchPaths:
                             - schema/properties/metadata/properties/namespace
-                        init:
-                          type: func
-                          value: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
                       - type: label-element
                         label: Selected Config Secret
                         loader: getSelectedConfigSecret|shard
@@ -1248,16 +1170,17 @@ step:
                           func: getSelectedConfigSecret|shard
                           paths:
                             - schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
-                      - type: editor
-                        label: Value
+                      - type: multi-file-editor
+                        label: value
                         editorHeight: 500px
+                        readonly: true
                         watcher:
                           func: getSelectedConfigSecretValue|shard
                           paths:
                             - schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
                         validation:
                           type: required
-                        schema: temp/properties/configArray/items/properties/value
+                        schema: spec/properties/configuration/properties/shard/properties/configSecret
                   - type: block-layout
                     showLabels: true
                     label: ApplyConfig
@@ -1279,9 +1202,6 @@ step:
                       - type: multi-file-editor
                         label: value
                         editorHeight: 500px
-                        init:
-                          type: func
-                          value: setApplyConfig|shard
                         validation:
                           type: required
                         schema: temp/properties/shard/applyConfig
@@ -1317,9 +1237,9 @@ step:
                           func: getSelectedConfigurationName|shard
                           paths:
                             - temp/properties/shard/selectedConfigurationRemove
-                      - type: editor
-                        label: Value
-                        editorHeight: 400px
+                      - type: multi-file-editor
+                        label: value
+                        editorHeight: 500px
                         readonly: true
                         watcher:
                           func: onRemoveConfigChange|shard
@@ -1327,7 +1247,7 @@ step:
                             - temp/properties/shard/selectedConfigurationRemove
                         validation:
                           type: required
-                        schema: temp/properties/shard/removeConfig
+                        schema: spec/properties/configuration/properties/shard/properties/removeConfig
                   - type: switch
                     schema: schema/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
                     label: Remove CustomConfig
@@ -1360,9 +1280,6 @@ step:
                 value: rotate
               - text: Remove
                 value: remove
-            init:
-              type: func
-              value: initTlsOperation
             watcher:
               func: onTlsOperationChange
               paths:
@@ -1390,9 +1307,6 @@ step:
             elements:
               - type: input
                 label: API Group
-                init:
-                  type: func
-                  value: initIssuerRefApiGroup
                 watcher:
                   func: initIssuerRefApiGroup
                   paths:
@@ -1406,9 +1320,6 @@ step:
                     value: Issuer
                   - text: ClusterIssuer
                     value: ClusterIssuer
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/tls/issuerRef/kind
                 validation:
                   type: custom
                   name: isIssuerRefRequired
@@ -1420,9 +1331,6 @@ step:
                   watchPaths:
                     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                     - schema/properties/metadata/properties/namespace
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/tls/issuerRef/name
                 validation:
                   type: custom
                   name: isIssuerRefRequired
@@ -1508,9 +1416,6 @@ step:
           - type: radio
             label: Apply
             schema: 'schema/properties/spec/properties/apply'
-            init:
-              type: func
-              value: setApplyToIfReady
             options:
               - text: IfReady (OpsRequest will be applied if database is ready)
                 value: IfReady
