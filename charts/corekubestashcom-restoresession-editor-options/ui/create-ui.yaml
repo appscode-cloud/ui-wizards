@@ -39,6 +39,10 @@ step:
           validation:
             type: required
           loader: getRepositories
+          watcher:
+            func: onRepoChange
+            paths:
+              - temp/properties/repository
         - type: select
           disableUnselect: true
           label: Snapshot
@@ -50,9 +54,9 @@ step:
             watchPaths:
               - temp/properties/repository
           watcher:
-            func: onRepoChange
+            func: onSnapChange
             paths:
-              - temp/properties/repository
+              - schema/properties/spec/properties/dataSource/properties/snapshot
         - type: select
           label: Addon Name
           subtitle: Select the restore addon to use
@@ -61,7 +65,14 @@ step:
           if:
             type: function
             name: isConsole
-          loader: getAddons
+          loader: 
+            name: getAddons
+            watchPaths:
+              - schema/properties/spec/properties/dataSource/properties/snapshot
+          watcher:
+            func: clearAddon
+            paths:
+              - schema/properties/spec/properties/dataSource/properties/snapshot
         - type: textarea
           label: Additional Parameters
           schema: temp/properties/params
@@ -71,7 +82,6 @@ step:
               - temp/properties/params
     - type: block-layout
       showLabels: true
-      hideBlock: true
       label: Restore Target
       if:
         type: function
@@ -85,6 +95,9 @@ step:
         subtitle: Select the API group of the target resource (e.g., apps, kubedb.com)
         schema: schema/properties/spec/properties/target/properties/apiGroup
         loader: getApiGroup
+        if:
+          name: showGroupKind
+          type: function
       - type: select
         label: Kind
         subtitle: Select the resource type (e.g., Deployment, StatefulSet, MongoDB, PostgreSQL)
@@ -93,11 +106,15 @@ step:
           name: getKinds
           watchPaths:
             - schema/properties/spec/properties/target/properties/apiGroup
+            - schema/properties/spec/properties/dataSource/properties/snapshot
         watcher:
           func: setVersion
           paths:
             - schema/properties/spec/properties/target/properties/kind
             - schema/properties/spec/properties/target/properties/apiGroup
+        if:
+          name: showGroupKind
+          type: function
       - type: select
         label: Namespace
         subtitle: Select the namespace where the target resource exists

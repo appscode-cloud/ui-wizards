@@ -91,7 +91,13 @@ export const useFunc = (model) => {
         const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
         const resp = await axios.get(url)
         invokerData = resp.data.items
-        const names = resp.data.items.map((item) => {
+
+        const dbKind = storeGet('/resource/layout/result/resource/kind') || ''
+        const group = storeGet('/resource/layout/result/resource/group') || ''
+        if (group === 'kubedb.com')
+          invokerData = invokerData.filter((item) => item.spec?.target?.kind === dbKind)
+
+        const names = invokerData.map((item) => {
           const name = item.metadata?.name
           return name
         })
