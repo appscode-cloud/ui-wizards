@@ -956,6 +956,7 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
+            keys: ['mongod.conf'],
           },
         },
       )
@@ -1021,7 +1022,7 @@ export const useFunc = (model) => {
     const selectedConfiguration = getValue(discriminator, path)
 
     if (!selectedConfiguration) {
-      return ''
+      return { subtitle: 'No secret selected' }
     }
 
     const configuration = ConfigurationsData.find(
@@ -1029,10 +1030,12 @@ export const useFunc = (model) => {
     )
 
     if (!configuration) {
-      return ''
+      return { subtitle: 'No secret selected' }
     }
 
-    return `${configuration.componentName} secret`
+    if (configuration.componentName)
+      return { subtitle: ` You have selected <b>${configuration.componentName}</b> secret` }
+    else return { subtitle: 'No secret selected' }
   }
 
   function getSelectedConfigurationValueForRemove(type) {
@@ -1243,9 +1246,7 @@ export const useFunc = (model) => {
       return ''
     }
 
-    const configuration = ConfigurationsData.find(
-      (item) => item.componentName === selectedConfig,
-    )
+    const configuration = ConfigurationsData.find((item) => item.componentName === selectedConfig)
 
     if (!configuration) {
       return ''
@@ -1253,7 +1254,7 @@ export const useFunc = (model) => {
 
     let data = {}
     // Decode base64 and parse YAML for each key in the secret data
-    console.log('onRemoveConfigChange :', selectedConfig,configuration)
+    console.log('onRemoveConfigChange :', selectedConfig, configuration)
     Object.keys(configuration.data).forEach((item) => {
       try {
         // Decode base64 string
@@ -1552,7 +1553,8 @@ export const useFunc = (model) => {
     const path = `/spec/configuration/${type}/configSecret/name`
     const selectedSecret = getValue(model, path)
     // watchDependency(`model#${path}`)
-    return `You have selected ${selectedSecret} secret` || 'No secret selected'
+    if (selectedSecret) return { subtitle: `You have selected <b>${selectedSecret}</b> secret` }
+    return { subtitle: 'No secret selected' }
   }
 
   function objectToYaml(obj, indent = 0) {
@@ -1660,19 +1662,12 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
+            keys: ['mongod.conf'],
           },
         },
       )
       applyConfigdbInfos = resp?.data?.response.configurations
-      return [{name: '', content: ''}]
-      // const result = resp?.data?.response?.configurations.map((item) => {
-      //   const [fileName, value] = Object.entries(item.data)[0]
-      //   return {
-      //     name: item.secretName,
-      //     content: `${fileName}: ${value}`,
-      //   }
-      // })
-      // return result
+      return onApplyconfigChange(type)
     } catch (e) {
       console.log(e)
     }
