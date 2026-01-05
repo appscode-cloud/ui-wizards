@@ -924,6 +924,7 @@ export const useFunc = (model) => {
   }
 
   let ConfigurationsData = []
+
   async function getConfigSecretsforAppyConfig() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
