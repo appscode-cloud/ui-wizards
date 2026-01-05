@@ -683,17 +683,17 @@ step:
                         name: getSelectedConfigSecret|standalone
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-                    - type: editor
-                      label: Value
-                      editorHeight: 400px
+                    - type: multi-file-editor
+                      label: value
+                      editorHeight: 500px
                       readonly: true
                       watcher:
-                        func: getSelectedConfigSecretValue|standalone
+                        func: onConfigSecretChange|standalone
                         paths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
                       validation:
                         type: required
-                      schema: temp/properties/configArray/items/properties/value
+                      schema: spec/properties/configuration/properties/standalone/properties/configSecret
                 - type: block-layout
                   label: ApplyConfig
                   if:
@@ -825,17 +825,17 @@ step:
                         name: getSelectedConfigSecret|replicaSet
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
-                    - type: editor
-                      label: Value
-                      editorHeight: 400px
+                    - type: multi-file-editor
+                      label: value
+                      editorHeight: 500px
                       readonly: true
                       watcher:
-                        func: getSelectedConfigSecretValue|replicaSet
+                        func: onConfigSecretChange|replicaSet
                         paths:
                           - schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
                       validation:
                         type: required
-                      schema: temp/properties/configArray/items/properties/value
+                      schema: spec/properties/configuration/properties/replicaSet/properties/configSecret
                 - type: block-layout
                   label: ApplyConfig
                   if:
@@ -972,12 +972,12 @@ step:
                         editorHeight: 400px
                         readonly: true
                         watcher:
-                          func: getSelectedConfigSecretValue|configServer
+                          func: onConfigSecretChange|configServer
                           paths:
                             - schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
                         validation:
                           type: required
-                        schema: temp/properties/configArray/items/properties/value
+                        schema: spec/properties/configuration/properties/configServer/properties/configSecret
                   - type: block-layout
                     label: ApplyConfig
                     if:
@@ -1112,12 +1112,12 @@ step:
                         editorHeight: 400px
                         readonly: true
                         watcher:
-                          func: getSelectedConfigSecretValue|mongos
+                          func: onConfigSecretChange|mongos
                           paths:
                             - schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
                         validation:
                           type: required
-                        schema: temp/properties/configArray/items/properties/value
+                        schema: spec/properties/configuration/properties/mongos/properties/configSecret
                   - type: block-layout
                     label: ApplyConfig
                     if:
@@ -1252,12 +1252,12 @@ step:
                         editorHeight: 400px
                         readonly: true
                         watcher:
-                          func: getSelectedConfigSecretValue|shard
+                          func: onConfigSecretChange|shard
                           paths:
                             - schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
                         validation:
                           type: required
-                        schema: temp/properties/configArray/items/properties/value
+                        schema: spec/properties/configuration/properties/shard/properties/configSecret
                   - type: block-layout
                     label: ApplyConfig
                     if:

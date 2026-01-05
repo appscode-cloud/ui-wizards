@@ -925,6 +925,7 @@ export const useFunc = (model) => {
 
   let ConfigurationsData = []
   let DatabaseInfos = []
+
   async function getConfigSecretsforAppyConfig() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1229,7 +1230,7 @@ export const useFunc = (model) => {
         })
       }
     })
-
+    console.log('apply config :', selectedConfig, applyconfig, configObj)
     commit('wizard/model$update', {
       path: `/spec/configuration/${type}/applyConfig`,
       value: configObj,
@@ -1632,6 +1633,61 @@ export const useFunc = (model) => {
       return ''
     }
   }
+
+  async function onConfigSecretChange(type) {
+    const path = `/spec/configuration/${type}/configSecret/name`
+    const selectedSecret = getValue(model, path)
+
+    if (!selectedSecret) {
+      return [{ name: '', content: '' }]
+    }
+
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+
+    try {
+      // Fetch the secret data from API
+      const secretResp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${selectedSecret}`,
+      )
+
+      const secretData = secretResp.data?.data || {}
+      const configObj = []
+
+      // Decode base64 and format as array of objects with name and content
+      Object.keys(secretData).forEach((fileName) => {
+        try {
+          // Decode base64 string
+          const decodedString = atob(secretData[fileName])
+          configObj.push({
+            name: fileName,
+            content: decodedString,
+          })
+        } catch (e) {
+          console.error(`Error decoding ${fileName}:`, e)
+          configObj.push({
+            name: fileName,
+            content: secretData[fileName], // Fallback to original if decode fails
+          })
+        }
+      })
+
+      // Commit to model
+      console.log('onConfigSecretChange configObj :', configObj, selectedSecret)
+      commit('wizard/model$update', {
+        path: `/spec/configuration/${type}/configSecret`,
+        value: configObj,
+        force: true,
+      })
+
+      return configObj
+    } catch (e) {
+      console.error('Error fetching secret:', e)
+      return [{ name: '', content: '' }]
+    }
+  }
+
   let applyConfigdbInfos = []
   async function setApplyConfig(type) {
     const name = getValue(model, '/spec/databaseRef/name')
@@ -1732,6 +1788,7 @@ export const useFunc = (model) => {
     isMachineCustom,
     checkVolume,
     getSelectedConfigSecretValue,
+    onConfigSecretChange,
     setApplyConfig,
     getConfigSecretsforAppyConfig,
     getSelectedConfigurationData,
