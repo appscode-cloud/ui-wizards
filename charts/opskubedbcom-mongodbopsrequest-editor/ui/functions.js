@@ -1269,7 +1269,6 @@ export const useFunc = (model) => {
         })
       }
     })
-    console.log('onRemoveConfigChange', configObj, selectedConfig)
     commit('wizard/model$update', {
       path: `/temp/${type}/removeConfig`,
       value: configObj,
@@ -1319,7 +1318,6 @@ export const useFunc = (model) => {
       })
 
       // Commit to model
-      console.log('onNewConfigSecretChange', configObj, selectedSecret)
       commit('wizard/model$update', {
         path: `/temp/${type}/newConfigSecret`,
         value: configObj,
