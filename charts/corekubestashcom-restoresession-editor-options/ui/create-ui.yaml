@@ -69,6 +69,10 @@ step:
             name: getAddons
             watchPaths:
               - schema/properties/spec/properties/dataSource/properties/snapshot
+          watcher:
+            func: clearAddon
+            paths:
+              - schema/properties/spec/properties/dataSource/properties/snapshot
         - type: textarea
           label: Additional Parameters
           schema: temp/properties/params
@@ -78,7 +82,6 @@ step:
               - temp/properties/params
     - type: block-layout
       showLabels: true
-      hideBlock: true
       label: Restore Target
       if:
         type: function
@@ -92,6 +95,9 @@ step:
         subtitle: Select the API group of the target resource (e.g., apps, kubedb.com)
         schema: schema/properties/spec/properties/target/properties/apiGroup
         loader: getApiGroup
+        if:
+          name: showGroupKind
+          type: function
       - type: select
         label: Kind
         subtitle: Select the resource type (e.g., Deployment, StatefulSet, MongoDB, PostgreSQL)
@@ -100,11 +106,15 @@ step:
           name: getKinds
           watchPaths:
             - schema/properties/spec/properties/target/properties/apiGroup
+            - schema/properties/spec/properties/dataSource/properties/snapshot
         watcher:
           func: setVersion
           paths:
             - schema/properties/spec/properties/target/properties/kind
             - schema/properties/spec/properties/target/properties/apiGroup
+        if:
+          name: showGroupKind
+          type: function
       - type: select
         label: Namespace
         subtitle: Select the namespace where the target resource exists
