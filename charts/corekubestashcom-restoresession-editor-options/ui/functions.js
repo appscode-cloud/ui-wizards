@@ -234,6 +234,18 @@ export const useFunc = (model) => {
     })
   }
 
+  let snapshotObj = {}
+  let snapshotList = []
+  let snapshotGroup = ''
+  let snapshotKind = ''
+
+  function onSnapChange() {
+    const snapshot = getValue(model, '/spec/dataSource/snapshot') || ''
+    snapshotObj = snapshotList.find((item) => item.metadata?.name === snapshot) || {}
+    snapshotKind = snapshotObj?.spec?.appRef?.kind || ''
+    snapshotGroup = snapshotObj?.spec?.appRef?.apiGroup || ''
+  }
+
   async function getSnapshots() {
     // watchDependency('discriminator#/repository')
     const user = storeGet('/route/params/user') || ''
@@ -250,6 +262,7 @@ export const useFunc = (model) => {
       if (namespace) {
         const resp = await axios.get(url)
         let snapshots = resp?.data?.items
+        snapshotList = snapshots
         snapshots.map((item) => {
           const name = item?.metadata?.name
           item.value = name
@@ -299,6 +312,14 @@ export const useFunc = (model) => {
     return ` ${timeDiff} ago`
   }
 
+  function showGroupKind() {
+    const snapshot = getValue(model, '/spec/dataSource/snapshot') || ''
+    snapshotObj = snapshotList.find((item) => item.metadata?.name === snapshot) || {}
+    snapshotGroup = snapshotObj?.spec?.appRef?.apiGroup || ''
+    snapshotKind = snapshotObj?.spec?.appRef?.kind || ''
+    return !(snapshotGroup === 'kubedb.com')
+  }
+
   async function getAddons() {
     const user = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
@@ -320,6 +341,28 @@ export const useFunc = (model) => {
             force: true,
           })
         }
+        if (Object.keys(snapshotObj).length) {
+          const filteredAddon = addons.find((item) => {
+            return item.includes(snapshotKind.toLowerCase())
+          })
+
+          if (snapshotGroup === 'kubedb.com') {
+            commit('wizard/model$update', {
+              path: '/spec/target/kind',
+              value: snapshotKind,
+              force: true,
+            })
+            commit('wizard/model$update', {
+              path: '/spec/target/apiGroup',
+              value: snapshotGroup,
+              force: true,
+            })
+            setVersion()
+          }
+
+          if (filteredAddon) return [filteredAddon]
+        }
+
         return addons
       } catch (e) {
         console.log(e)
@@ -467,7 +510,6 @@ export const useFunc = (model) => {
   function getKinds() {
     // watchDependency(`model#/spec/target/apiGroup`)
     const apiGroup = getValue(model, `/spec/target/apiGroup`)
-
     if (apiGroup === 'core') return coreKind
     else if (apiGroup === 'apps') return appKind
     else return kubedbKind
@@ -520,6 +562,10 @@ export const useFunc = (model) => {
     })
   }
 
+  function clearAddon() {
+    return ''
+  }
+
   return {
     isRancherManaged,
     fetchNamespaces,
@@ -538,11 +584,14 @@ export const useFunc = (model) => {
     getRepositories,
     onRepoChange,
     getSnapshots,
+    onSnapChange,
     getAddons,
     getTasks,
     databaseSelected,
     returnFalse,
     onParameterChange,
     setSecurityContext,
+    showGroupKind,
+    clearAddon,
   }
 }
