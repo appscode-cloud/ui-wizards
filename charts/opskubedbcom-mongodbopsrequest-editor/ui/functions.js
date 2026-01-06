@@ -1210,6 +1210,7 @@ export const useFunc = (model) => {
 
     const { secretName, data } = applyconfig
     const configObj = []
+    const tempConfigObj = {}
 
     // Decode base64 and format as array of objects with name and content
     Object.keys(data).forEach((fileName) => {
@@ -1220,6 +1221,7 @@ export const useFunc = (model) => {
           name: fileName,
           content: decodedString,
         })
+        tempConfigObj[fileName] = data[fileName]
       } catch (e) {
         console.error(`Error decoding ${fileName}:`, e)
         configObj.push({
@@ -1231,7 +1233,7 @@ export const useFunc = (model) => {
 
     commit('wizard/model$update', {
       path: `/spec/configuration/${type}/applyConfig`,
-      value: configObj,
+      value: tempConfigObj,
       force: true,
     })
     return configObj
@@ -1318,11 +1320,11 @@ export const useFunc = (model) => {
       })
 
       // Commit to model
-      commit('wizard/model$update', {
-        path: `/temp/${type}/newConfigSecret`,
-        value: configObj,
-        force: true,
-      })
+      // commit('wizard/model$update', {
+      //   path: `/temp/${type}/newConfigSecret`,
+      //   value: configObj,
+      //   force: true,
+      // })
 
       return configObj
     } catch (e) {
