@@ -1037,6 +1037,27 @@ export const useFunc = (model) => {
     else return { subtitle: 'No secret selected' }
   }
 
+  function getSelectedApplyConfigName(type) {
+    const path = `/${type}/selectedConfiguration`
+    const selectedConfiguration = getValue(discriminator, path)
+
+    if (!selectedConfiguration) {
+      return { subtitle: 'No configuration selected' }
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfiguration,
+    )
+
+    if (!configuration) {
+      return { subtitle: 'No configuration selected' }
+    }
+    console.log('configuration', configuration.componentName, type)
+    if (configuration.componentName)
+      return { subtitle: ` You have selected <b>${configuration.componentName}</b> configuration` }
+    else return { subtitle: 'No configuration selected' }
+  }
+
   function getSelectedConfigurationValueForRemove(type) {
     const path = `/${type}/selectedConfigurationRemove`
     const selectedConfiguration = getValue(discriminator, path)
@@ -1753,5 +1774,6 @@ export const useFunc = (model) => {
     getSelectedConfigurationValueForRemove,
     onRemoveConfigChange,
     onNewConfigSecretChange,
+    getSelectedApplyConfigName,
   }
 }
