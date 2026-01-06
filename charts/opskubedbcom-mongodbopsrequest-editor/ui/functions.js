@@ -1292,11 +1292,6 @@ export const useFunc = (model) => {
         })
       }
     })
-    commit('wizard/model$update', {
-      path: `/temp/${type}/removeConfig`,
-      value: configObj,
-      force: true,
-    })
 
     return configObj
   }
@@ -1339,13 +1334,6 @@ export const useFunc = (model) => {
           })
         }
       })
-
-      // Commit to model
-      // commit('wizard/model$update', {
-      //   path: `/temp/${type}/newConfigSecret`,
-      //   value: configObj,
-      //   force: true,
-      // })
 
       return configObj
     } catch (e) {
