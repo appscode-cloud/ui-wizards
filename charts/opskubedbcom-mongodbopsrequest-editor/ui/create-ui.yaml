@@ -646,6 +646,10 @@ step:
                   value: applyConfig
                 - text: REMOVE
                   value: remove
+                watcher:
+                  func: onReconfigurationTypeChange|standalone
+                  paths:
+                    - temp/properties/reconfigurationType
                 elements:
                 - type: block-layout
                   label: Config Secret
@@ -683,17 +687,16 @@ step:
                         name: getSelectedConfigSecret|standalone
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-                    - type: editor
-                      label: Value
-                      editorHeight: 400px
+                    - type: multi-file-editor
+                      editorHeight: 500px
                       readonly: true
-                      watcher:
-                        func: getSelectedConfigSecretValue|standalone
-                        paths:
+                      loader:
+                        name: onNewConfigSecretChange|standalone
+                        watchPaths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
                       validation:
                         type: required
-                      schema: temp/properties/configArray/items/properties/value
+                      schema: temp/properties/standalone/newConfigSecret
                 - type: block-layout
                   label: ApplyConfig
                   if:
@@ -711,8 +714,13 @@ step:
                       refresh: true
                       label: Configuration
                       loader: getConfigSecretsforAppyConfig
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedApplyConfigName|standalone
+                        watchPaths:
+                          - temp/properties/standalone/selectedConfiguration
                     - type: multi-file-editor
-                      # label: value
                       editorHeight: 500px
                       validation:
                         type: required
@@ -751,10 +759,12 @@ step:
                         name: getSelectedConfigurationName|standalone
                         watchPaths:
                           - temp/properties/standalone/selectedConfigurationRemove
-                    - type: editor
-                      label: Value
-                      editorHeight: 400px
+                    - type: multi-file-editor
+                      editorHeight: 500px
                       readonly: true
+                      init:
+                        type: func
+                        value: onRemoveConfigChange|standalone
                       watcher:
                         func: onRemoveConfigChange|standalone
                         paths:
@@ -762,14 +772,6 @@ step:
                       validation:
                         type: required
                       schema: temp/properties/standalone/removeConfig
-                # - type: switch
-                #   schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
-                #   label: Remove CustomConfig
-                #   customClass: mt-16
-                #   fullwidth: true
-                #   if:
-                #     name: returnFalse
-                #     type: function
           - type: block-layout
             label: Replica Set
             if:
@@ -788,10 +790,13 @@ step:
                   value: applyConfig
                 - text: REMOVE
                   value: remove
+                watcher:
+                  func: onReconfigurationTypeChange|replicaSet
+                  paths:
+                    - temp/properties/reconfigurationType
                 elements:
                 - type: block-layout
                   label: Config Secret
-                  # showLabels: true
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                     type: function
@@ -825,17 +830,16 @@ step:
                         name: getSelectedConfigSecret|replicaSet
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
-                    - type: editor
-                      label: Value
-                      editorHeight: 400px
+                    - type: multi-file-editor
+                      editorHeight: 500px
                       readonly: true
-                      watcher:
-                        func: getSelectedConfigSecretValue|replicaSet
-                        paths:
+                      loader:
+                        name: onNewConfigSecretChange|replicaSet
+                        watchPaths:
                           - schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
                       validation:
                         type: required
-                      schema: temp/properties/configArray/items/properties/value
+                      schema: temp/properties/replicaSet/newConfigSecret
                 - type: block-layout
                   label: ApplyConfig
                   if:
@@ -853,8 +857,13 @@ step:
                       refresh: true
                       label: Configuration
                       loader: getConfigSecretsforAppyConfig
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedApplyConfigName|replicaSet
+                        watchPaths:
+                          - temp/properties/replicaSet/selectedConfiguration
                     - type: multi-file-editor
-                      # label: value
                       editorHeight: 500px
                       validation:
                         type: required
@@ -893,10 +902,12 @@ step:
                         name: getSelectedConfigurationName|replicaSet
                         watchPaths:
                           - temp/properties/replicaSet/selectedConfigurationRemove
-                    - type: editor
-                      label: Value
-                      editorHeight: 400px
+                    - type: multi-file-editor
+                      editorHeight: 500px
                       readonly: true
+                      init:
+                        type: func
+                        value: onRemoveConfigChange|replicaSet
                       watcher:
                         func: onRemoveConfigChange|replicaSet
                         paths:
@@ -904,14 +915,6 @@ step:
                       validation:
                         type: required
                       schema: temp/properties/replicaSet/removeConfig
-                # - type: switch
-                #   schema:  schema/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
-                #   label: Remove CustomConfig
-                #   customClass: mt-16
-                #   fullwidth: true
-                #   if:
-                #     name: returnFalse
-                #     type: function
           - type: block-layout
             elements:
             - type: block-layout
@@ -930,10 +933,13 @@ step:
                     value: applyConfig
                   - text: REMOVE
                     value: remove
+                  watcher:
+                    func: onReconfigurationTypeChange|configServer|true
+                    paths:
+                      - temp/properties/reconfigurationType
                   elements:
                   - type: block-layout
                     label: Config Secret
-                    # showLabels: true
                     if:
                       name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|configServer|true
                       type: function
@@ -967,17 +973,16 @@ step:
                           name: getSelectedConfigSecret|configServer
                           watchPaths:
                             - schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
-                      - type: editor
-                        label: Value
-                        editorHeight: 400px
+                      - type: multi-file-editor
+                        editorHeight: 500px
                         readonly: true
-                        watcher:
-                          func: getSelectedConfigSecretValue|configServer
-                          paths:
+                        loader:
+                          name: onNewConfigSecretChange|configServer
+                          watchPaths:
                             - schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
                         validation:
                           type: required
-                        schema: temp/properties/configArray/items/properties/value
+                        schema: temp/properties/configServer/newConfigSecret
                   - type: block-layout
                     label: ApplyConfig
                     if:
@@ -995,6 +1000,12 @@ step:
                         refresh: true
                         label: Configuration
                         loader: getConfigSecretsforAppyConfig
+                      - type: label-element
+                        label: ''
+                        loader:
+                          name: getSelectedApplyConfigName|configServer
+                          watchPaths:
+                            - temp/properties/configServer/selectedConfiguration
                       - type: multi-file-editor
                         # label: value
                         editorHeight: 500px
@@ -1035,10 +1046,12 @@ step:
                           name: getSelectedConfigurationName|configServer
                           watchPaths:
                             - temp/properties/configServer/selectedConfigurationRemove
-                      - type: editor
-                        label: Value
-                        editorHeight: 400px
+                      - type: multi-file-editor
+                        editorHeight: 500px
                         readonly: true
+                        init:
+                          type: func
+                          value: onRemoveConfigChange|configServer
                         watcher:
                           func: onRemoveConfigChange|configServer
                           paths:
@@ -1046,14 +1059,6 @@ step:
                         validation:
                           type: required
                         schema: temp/properties/configServer/removeConfig
-                  # - type: switch
-                  #   schema: schema/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
-                  #   label: Remove CustomConfig
-                  #   customClass: mt-16
-                  #   fullwidth: true
-                  #   if:
-                  #     name: returnFalse
-                  #     type: function
             - type: block-layout
               label: Mongos
               showLabels: true
@@ -1070,6 +1075,10 @@ step:
                     value: applyConfig
                   - text: REMOVE
                     value: remove
+                  watcher:
+                    func: onReconfigurationTypeChange|mongos|true
+                    paths:
+                      - temp/properties/reconfigurationType
                   elements:
                   - type: block-layout
                     label: Config Secret
@@ -1107,17 +1116,17 @@ step:
                           name: getSelectedConfigSecret|mongos
                           watchPaths:
                             - schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
-                      - type: editor
-                        label: Value
-                        editorHeight: 400px
+                      - type: multi-file-editor
+                        label: value
+                        editorHeight: 500px
                         readonly: true
-                        watcher:
-                          func: getSelectedConfigSecretValue|mongos
-                          paths:
+                        loader:
+                          name: onNewConfigSecretChange|mongos
+                          watchPaths:
                             - schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
                         validation:
                           type: required
-                        schema: temp/properties/configArray/items/properties/value
+                        schema: temp/properties/mongos/newConfigSecret
                   - type: block-layout
                     label: ApplyConfig
                     if:
@@ -1135,8 +1144,13 @@ step:
                         refresh: true
                         label: Configuration
                         loader: getConfigSecretsforAppyConfig
+                      - type: label-element
+                        label: ''
+                        loader:
+                          name: getSelectedApplyConfigName|mongos
+                          watchPaths:
+                            - temp/properties/mongos/selectedConfiguration
                       - type: multi-file-editor
-                        # label: value
                         editorHeight: 500px
                         validation:
                           type: required
@@ -1175,10 +1189,12 @@ step:
                           name: getSelectedConfigurationName|mongos
                           watchPaths:
                             - temp/properties/mongos/selectedConfigurationRemove
-                      - type: editor
-                        label: Value
-                        editorHeight: 400px
+                      - type: multi-file-editor
+                        editorHeight: 500px
                         readonly: true
+                        init:
+                          type: func
+                          value: onRemoveConfigChange|mongos
                         watcher:
                           func: onRemoveConfigChange|mongos
                           paths:
@@ -1186,14 +1202,6 @@ step:
                         validation:
                           type: required
                         schema: temp/properties/mongos/removeConfig
-                  # - type: switch
-                  #   schema: schema/properties/spec/properties/configuration/properties/mongos/properties/removeCustomConfig
-                  #   label: Remove CustomConfig
-                  #   customClass: mt-16
-                  #   fullwidth: true
-                  #   if:
-                  #     name: returnFalse
-                  #     type: function
             - type: block-layout
               label: Shard
               showLabels: true
@@ -1210,6 +1218,10 @@ step:
                     value: applyConfig
                   - text: REMOVE
                     value: remove
+                  watcher:
+                    func: onReconfigurationTypeChange|shard|true
+                    paths:
+                      - temp/properties/reconfigurationType
                   elements:
                   - type: block-layout
                     label: Config Secret
@@ -1247,17 +1259,17 @@ step:
                           name: getSelectedConfigSecret|shard
                           watchPaths:
                             - schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
-                      - type: editor
-                        label: Value
-                        editorHeight: 400px
+                      - type: multi-file-editor
+                        label: value
+                        editorHeight: 500px
                         readonly: true
-                        watcher:
-                          func: getSelectedConfigSecretValue|shard
-                          paths:
+                        loader:
+                          name: onNewConfigSecretChange|shard
+                          watchPaths:
                             - schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
                         validation:
                           type: required
-                        schema: temp/properties/configArray/items/properties/value
+                        schema: temp/properties/shard/newConfigSecret
                   - type: block-layout
                     label: ApplyConfig
                     if:
@@ -1275,6 +1287,12 @@ step:
                         refresh: true
                         label: Configuration
                         loader: getConfigSecretsforAppyConfig
+                      - type: label-element
+                        label: ''
+                        loader:
+                          name: getSelectedApplyConfigName|shard
+                          watchPaths:
+                            - temp/properties/shard/selectedConfiguration
                       - type: multi-file-editor
                         # label: value
                         editorHeight: 500px
@@ -1315,10 +1333,12 @@ step:
                           name: getSelectedConfigurationName|shard
                           watchPaths:
                             - temp/properties/shard/selectedConfigurationRemove
-                      - type: editor
-                        label: Value
-                        editorHeight: 400px
+                      - type: multi-file-editor
+                        editorHeight: 500px
                         readonly: true
+                        init:
+                          type: func
+                          value: onRemoveConfigChange|shard
                         watcher:
                           func: onRemoveConfigChange|shard
                           paths:
@@ -1326,14 +1346,6 @@ step:
                         validation:
                           type: required
                         schema: temp/properties/shard/removeConfig
-                  # - type: switch
-                  #   schema: schema/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
-                  #   label: Remove CustomConfig
-                  #   customClass: mt-16
-                  #   fullwidth: true
-                  #   if:
-                  #     name: returnFalse
-                  #     type: function
             label: Sharded Reconfigure form
             if:
               name: ifDbTypeEqualsTo|sharded|configuration
