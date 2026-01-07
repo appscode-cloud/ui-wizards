@@ -1242,7 +1242,7 @@ export const useFunc = (model) => {
           name: fileName,
           content: decodedString,
         })
-        tempConfigObj[fileName] = data[fileName]
+        tempConfigObj[fileName] = decodedString
       } catch (e) {
         console.error(`Error decoding ${fileName}:`, e)
         configObj.push({
