@@ -817,7 +817,10 @@ export const useFunc = (model) => {
       limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || { cpu: '', memory: '' }
     } else {
       // Topology mode - specific node type
-      limits = dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.resources?.requests || { cpu: '', memory: '' }
+      limits = dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.resources?.requests || {
+        cpu: '',
+        memory: '',
+      }
     }
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
@@ -872,7 +875,10 @@ export const useFunc = (model) => {
       limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || { cpu: '', memory: '' }
     } else {
       // Topology mode - specific node type
-      limits = dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.resources?.requests || { cpu: '', memory: '' }
+      limits = dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.resources?.requests || {
+        cpu: '',
+        memory: '',
+      }
     }
 
     const annotations = dbDetails?.metadata?.annotations || {}
@@ -894,17 +900,21 @@ export const useFunc = (model) => {
   }
 
   function onMachineChange(type, path) {
-    let selectedMachine = ''
+    let selectedMachine = {}
     selectedMachine = getValue(discriminator, `/machine-${type}`)
-    const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
+    const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
-    if (selectedMachine !== 'custom') {
+    if (selectedMachine.machine !== 'custom') {
       if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
-      else obj = machines[selectedMachine]?.resources
+      else obj = machines[selectedMachine.machine]?.resources
     } else {
-      const val = getValue(discriminator, `/dbDetails${path}`) || {}
-      obj = Array.isArray(val) ? val[0]?.resources : { ...val }
+      const cpu = selectedMachine.cpu || ''
+      const memory = selectedMachine.memory || ''
+      obj = {
+        limits: { cpu: cpu, memory: memory },
+        requests: { cpu: cpu, memory: memory },
+      }
     }
 
     const specPath = `/spec/verticalScaling/${type}/resources`
@@ -926,8 +936,8 @@ export const useFunc = (model) => {
       console.log(e)
       parsedInstance = {}
     }
-    if (selectedMachine === 'custom') delete parsedInstance[type]
-    else parsedInstance[type] = selectedMachine
+    if (selectedMachine.machine === 'custom') delete parsedInstance[type]
+    else parsedInstance[type] = selectedMachine.machine
     annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
 
     if (machinesFromPreset.length)
@@ -1098,7 +1108,9 @@ export const useFunc = (model) => {
    */
   function getSelectedConfigSecret(type) {
     // Druid doesn't use type-specific paths, just /spec/configuration/configSecret/name
-    const path = type ? `/spec/configuration/${type}/configSecret/name` : `/spec/configuration/configSecret/name`
+    const path = type
+      ? `/spec/configuration/${type}/configSecret/name`
+      : `/spec/configuration/configSecret/name`
     const selectedSecret = getValue(model, path)
     // watchDependency(`model#${path}`)
     return `You have selected ${selectedSecret} secret` || 'No secret selected'
@@ -1112,7 +1124,9 @@ export const useFunc = (model) => {
    */
   function getSelectedConfigSecretValue(type) {
     // Druid doesn't use type-specific paths, just /spec/configuration/configSecret/name
-    const path = type ? `/spec/configuration/${type}/configSecret/name` : `/spec/configuration/configSecret/name`
+    const path = type
+      ? `/spec/configuration/${type}/configSecret/name`
+      : `/spec/configuration/configSecret/name`
     // watchDependency(`model#${path}`)
     const selectedSecret = getValue(model, path)
     let data
@@ -1611,7 +1625,7 @@ export const useFunc = (model) => {
    */
   function hasTopologyType(topologyType) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    return !!(dbDetails?.spec?.topology?.[topologyType])
+    return !!dbDetails?.spec?.topology?.[topologyType]
   }
 
   /**
@@ -1623,9 +1637,16 @@ export const useFunc = (model) => {
   function getResourceConfig(type, resourceType = 'requests') {
     const dbDetails = getValue(discriminator, '/dbDetails')
     if (type === 'node' || !type) {
-      return dbDetails?.spec?.podTemplate?.spec?.resources?.[resourceType] || { cpu: '', memory: '' }
+      return (
+        dbDetails?.spec?.podTemplate?.spec?.resources?.[resourceType] || { cpu: '', memory: '' }
+      )
     } else {
-      return dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.resources?.[resourceType] || { cpu: '', memory: '' }
+      return (
+        dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.resources?.[resourceType] || {
+          cpu: '',
+          memory: '',
+        }
+      )
     }
   }
 
