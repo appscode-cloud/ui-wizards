@@ -664,11 +664,11 @@ step:
                       customClass: mb-10
                     - type: select
                       customClass: mb-2
-                      addNewButton:
-                        label: Create Secret
-                        target: _blank
-                        url:
-                          function: createSecretUrl
+                      # addNewButton:
+                      #   label: Create a new Secret
+                      #   target: _blank
+                      #   url:
+                      #     function: createSecretUrl
                       schema: schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
                       validation:
                         type: required
@@ -681,15 +681,45 @@ step:
                       init:
                         type: func
                         value: setValueFromDbDetails|/spec/configSecret/name
+                      watcher:
+                        func: onCreateSecretChange|standalone
+                        paths:
+                          - temp/properties/createSecret/properties/name
                     - type: label-element
                       label: ''
                       loader:
                         name: getSelectedConfigSecret|standalone
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+                    - type: block-layout
+                      label: Create a New Config Secret
+                      showLabels: true
+                      if:
+                        type: function
+                        name: isCreateSecret|standalone
+                      hasButton:
+                        text: Save
+                        hasCancel: cancelCreateSecret|standalone
+                        action: createNewConfigSecret|standalone
+                      elements:
+                        - type: input
+                          label: Secret Name
+                          schema: temp/properties/createSecret/properties/name
+                          validation:
+                            type: required
+                        - type: object-item
+                          label: String Data
+                          schema: temp/properties/createSecret/properties/data
+                          buttonClass: is-light is-outlined
+                          validation:
+                            type: required
+
                     - type: multi-file-editor
                       editorHeight: 500px
                       readonly: true
+                      if:
+                        type: function
+                        name: isNotCreateSecret|standalone
                       loader:
                         name: onNewConfigSecretChange|standalone
                         watchPaths:

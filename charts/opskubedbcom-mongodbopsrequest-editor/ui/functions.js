@@ -1,4 +1,5 @@
-const { axios, useOperator, store, yaml } = window.vueHelpers || {}
+const { axios, useOperator, store, yaml, useResourceInfo, resourceCreate$api, ref, useToast } =
+  window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -309,6 +310,7 @@ let machinesFromPreset = []
 
 export const useFunc = (model) => {
   const route = store.state?.route
+  const toast = useToast()
 
   const { getValue, storeGet, discriminator, setDiscriminatorValue, commit } = useOperator(
     model,
@@ -898,6 +900,7 @@ export const useFunc = (model) => {
     const dbKind = getValue(store.state, '/resource/definition/result/kind')
     const dbResource = getValue(model, '/route/params/resource')
     const dbVersion = getValue(model, '/route/params/version')
+    let secrets = []
 
     try {
       const resp = await axios.post(
@@ -922,14 +925,15 @@ export const useFunc = (model) => {
           },
         },
       )
-      const secrets = resp?.data?.response?.availableSecrets || []
-      return secrets.map((item) => {
-        return { text: item, value: item }
-      })
+      secrets = resp?.data?.response?.availableSecrets || []
     } catch (e) {
       console.log(e)
     }
-    return []
+    const mappedSecrets = secrets.map((item) => {
+      return { text: item, value: item }
+    })
+    mappedSecrets.push({ text: '+ Create a new Secret', value: 'Create' })
+    return mappedSecrets
   }
 
   let ConfigurationsData = []
@@ -1114,6 +1118,51 @@ export const useFunc = (model) => {
       const editedDomain = domain.replace('kubedb', 'console')
       return `${editedDomain}/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
     }
+  }
+
+  async function createNewConfigSecret(type) {
+    const { user, cluster } = route.params
+    const url = `/clusters/${user}/${cluster}/resources`
+    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+    const secretName = getValue(discriminator, 'createSecret/name')
+    const secretData = getValue(discriminator, 'createSecret/data')
+
+    try {
+      const res = await axios.post(url, {
+        apiVersion: 'v1',
+        data: secretData,
+        kind: 'Secret',
+        metadata: {
+          name: secretName,
+          namespace: namespace,
+        },
+        type: 'Opaque',
+      })
+      // console.log({ res })
+      toast.success('Secret created successfully')
+    } catch (error) {
+      toast.error(error?.message ?? 'Failed to create secret')
+    } finally {
+      cancelCreateSecret()
+    }
+  }
+
+  function isCreateSecret(type) {
+    const selectedSecret = getValue(model, `spec/configuration/${type}/configSecret/name`)
+    return selectedSecret === 'Create'
+  }
+
+  function isNotCreateSecret(type) {
+    return !isCreateSecret(type)
+  }
+
+  function onCreateSecretChange(type) {
+    const secretName = getValue(discriminator, 'createSecret')
+    if (secretName === undefined) return ''
+  }
+
+  function cancelCreateSecret() {
+    commit('wizard/temp$delete', 'createSecret')
   }
 
   function isEqualToValueFromType(value) {
@@ -1772,5 +1821,10 @@ export const useFunc = (model) => {
     onRemoveConfigChange,
     onNewConfigSecretChange,
     getSelectedApplyConfigName,
+    createNewConfigSecret,
+    isCreateSecret,
+    isNotCreateSecret,
+    onCreateSecretChange,
+    cancelCreateSecret,
   }
 }
