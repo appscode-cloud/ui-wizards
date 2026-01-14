@@ -924,7 +924,7 @@ export const useFunc = (model) => {
   }
 
   let ConfigurationsData = []
-  let DatabaseInfos = []
+
   async function getConfigSecretsforAppyConfig() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -960,7 +960,6 @@ export const useFunc = (model) => {
           },
         },
       )
-      DatabaseInfos = resp?.data?.response
       ConfigurationsData = resp?.data?.response?.configurations || []
       const secrets = ConfigurationsData.map((item) => {
         return { text: item.componentName, value: item.componentName }
@@ -1036,6 +1035,27 @@ export const useFunc = (model) => {
     if (configuration.componentName)
       return { subtitle: ` You have selected <b>${configuration.componentName}</b> secret` }
     else return { subtitle: 'No secret selected' }
+  }
+
+  function getSelectedApplyConfigName(type) {
+    const path = `/${type}/selectedConfiguration`
+    const selectedConfiguration = getValue(discriminator, path)
+
+    if (!selectedConfiguration) {
+      return { subtitle: 'No configuration selected' }
+    }
+
+    const configuration = ConfigurationsData.find(
+      (item) => item.componentName === selectedConfiguration,
+    )
+
+    if (!configuration) {
+      return { subtitle: 'No configuration selected' }
+    }
+    console.log('configuration', configuration.componentName, type)
+    if (configuration.componentName)
+      return { subtitle: ` You have selected <b>${configuration.componentName}</b> configuration` }
+    else return { subtitle: 'No configuration selected' }
   }
 
   function getSelectedConfigurationValueForRemove(type) {
@@ -1203,7 +1223,7 @@ export const useFunc = (model) => {
     if (!selectedConfig) {
       return [{ name: '', content: '' }]
     }
-    const applyconfig = applyConfigdbInfos.find((item) => {
+    const applyconfig = ConfigurationsData.find((item) => {
       if (item.componentName === selectedConfig) {
         return item
       }
@@ -1211,6 +1231,7 @@ export const useFunc = (model) => {
 
     const { secretName, data } = applyconfig
     const configObj = []
+    const tempConfigObj = {}
 
     // Decode base64 and format as array of objects with name and content
     Object.keys(data).forEach((fileName) => {
@@ -1221,6 +1242,7 @@ export const useFunc = (model) => {
           name: fileName,
           content: decodedString,
         })
+        tempConfigObj[fileName] = decodedString
       } catch (e) {
         console.error(`Error decoding ${fileName}:`, e)
         configObj.push({
@@ -1232,7 +1254,7 @@ export const useFunc = (model) => {
 
     commit('wizard/model$update', {
       path: `/spec/configuration/${type}/applyConfig`,
-      value: configObj,
+      value: tempConfigObj,
       force: true,
     })
     return configObj
@@ -1243,43 +1265,81 @@ export const useFunc = (model) => {
     const selectedConfig = getValue(discriminator, configPath)
 
     if (!selectedConfig) {
-      return ''
+      return [{ name: '', content: '' }]
     }
 
     const configuration = ConfigurationsData.find((item) => item.componentName === selectedConfig)
 
     if (!configuration) {
-      return ''
+      return [{ name: '', content: '' }]
     }
 
-    let data = {}
-    // Decode base64 and parse YAML for each key in the secret data
-    console.log('onRemoveConfigChange :', selectedConfig, configuration)
-    Object.keys(configuration.data).forEach((item) => {
+    const configObj = []
+    // Decode base64 and format as array of objects with name and content
+    Object.keys(configuration.data).forEach((fileName) => {
       try {
         // Decode base64 string
-        const decodedString = atob(configuration.data[item])
-        // Parse YAML string to object
-        const parsedYaml = yaml.load(decodedString)
-        // Store the parsed object with the filename as key
-        data[item] = parsedYaml
+        const decodedString = atob(configuration.data[fileName])
+        configObj.push({
+          name: fileName,
+          content: decodedString,
+        })
       } catch (e) {
-        console.error(`Error parsing ${item}:`, e)
-        data[item] = atob(configuration.data[item]) // Fallback to decoded string
+        console.error(`Error decoding ${fileName}:`, e)
+        configObj.push({
+          name: fileName,
+          content: configuration.data[fileName], // Fallback to original if decode fails
+        })
       }
     })
 
-    // Convert data object back to YAML string
-    const yamlString = yaml.dump(data)
-    //console.log('onRemoveConfigChange :', selectedConfig , configuration , yamlString)
+    return configObj
+  }
 
-    commit('wizard/model$update', {
-      path: `/temp/${type}/removeConfig`,
-      value: yamlString,
-      force: true,
-    })
+  async function onNewConfigSecretChange(type) {
+    const path = `/spec/configuration/${type}/configSecret/name`
+    const selectedSecret = getValue(model, path)
 
-    return yamlString
+    if (!selectedSecret) {
+      return [{ name: '', content: '' }]
+    }
+
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+
+    try {
+      // Fetch the secret data from API
+      const secretResp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${selectedSecret}`,
+      )
+
+      const secretData = secretResp.data?.data || {}
+      const configObj = []
+
+      // Decode base64 and format as array of objects with name and content
+      Object.keys(secretData).forEach((fileName) => {
+        try {
+          // Decode base64 string
+          const decodedString = atob(secretData[fileName])
+          configObj.push({
+            name: fileName,
+            content: decodedString,
+          })
+        } catch (e) {
+          console.error(`Error decoding ${fileName}:`, e)
+          configObj.push({
+            name: fileName,
+            content: secretData[fileName], // Fallback to original if decode fails
+          })
+        }
+      })
+
+      return configObj
+    } catch (e) {
+      console.error('Error fetching secret:', e)
+      return [{ name: '', content: '' }]
+    }
   }
 
   function onReconfigurationTypeChange(property, isShard) {
@@ -1632,45 +1692,8 @@ export const useFunc = (model) => {
       return ''
     }
   }
-  let applyConfigdbInfos = []
   async function setApplyConfig(type) {
-    const name = getValue(model, '/spec/databaseRef/name')
-    const dbNamespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
-    const dbGroup = getValue(model, '/route/params/group')
-    const dbKind = getValue(store.state, '/resource/definition/result/kind')
-    const dbResource = getValue(model, '/route/params/resource')
-    const dbVersion = getValue(model, '/route/params/version')
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    try {
-      const resp = await axios.post(
-        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
-        {
-          apiVersion: 'ui.kubedb.com/v1alpha1',
-          kind: 'DatabaseInfo',
-          request: {
-            source: {
-              ref: {
-                name: name,
-                namespace: dbNamespace,
-              },
-              resource: {
-                group: dbGroup,
-                kind: dbKind,
-                name: dbResource,
-                version: dbVersion,
-              },
-            },
-            keys: ['mongod.conf'],
-          },
-        },
-      )
-      applyConfigdbInfos = resp?.data?.response.configurations
-      return onApplyconfigChange(type)
-    } catch (e) {
-      console.log(e)
-    }
+    return onApplyconfigChange(type)
   }
 
   return {
@@ -1738,5 +1761,7 @@ export const useFunc = (model) => {
     getSelectedConfigurationName,
     getSelectedConfigurationValueForRemove,
     onRemoveConfigChange,
+    onNewConfigSecretChange,
+    getSelectedApplyConfigName,
   }
 }
