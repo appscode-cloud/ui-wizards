@@ -1,5 +1,14 @@
-const { axios, useOperator, store, yaml, useResourceInfo, resourceCreate$api, ref, useToast } =
-  window.vueHelpers || {}
+const {
+  axios,
+  useOperator,
+  store,
+  yaml,
+  useResourceInfo,
+  resourceCreate$api,
+  ref,
+  useToast,
+  axiosVue,
+} = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -889,6 +898,7 @@ export const useFunc = (model) => {
   }
 
   // for config secret
+  let newConfigSecrets = []
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -926,6 +936,7 @@ export const useFunc = (model) => {
         },
       )
       secrets = resp?.data?.response?.availableSecrets || []
+      newConfigSecrets = secrets
     } catch (e) {
       console.log(e)
     }
@@ -1138,18 +1149,45 @@ export const useFunc = (model) => {
         },
         type: 'Opaque',
       })
-      // console.log({ res })
+      commit('wizard/temp$update', {
+        path: 'createSecret/status',
+        value: 'success',
+      })
+      commit('wizard/temp$update', {
+        path: 'createSecret/lastCreatedSecret',
+        value: secretName,
+      })
       toast.success('Secret created successfully')
     } catch (error) {
-      toast.error(error?.message ?? 'Failed to create secret')
-    } finally {
+      const errMsg = decodeError(error, 'Failed to create secret')
+      toast.error(errMsg, { timeout: 5000 })
       cancelCreateSecret()
     }
   }
 
+  function decodeError(msg, defaultMsg) {
+    if (typeof msg === 'string') {
+      return msg || defaultMsg
+    }
+    return (
+      (msg.response && msg.response.data && msg.response.data.message) ||
+      (msg.response && msg.response.data) ||
+      (msg.status && msg.status.status) ||
+      defaultMsg
+    )
+  }
+
   function isCreateSecret(type) {
     const selectedSecret = getValue(model, `spec/configuration/${type}/configSecret/name`)
-    return selectedSecret === 'Create'
+    const res = selectedSecret === 'Create'
+
+    if (res === true) {
+      commit('wizard/temp$update', {
+        path: 'createSecret/status',
+        value: 'pending',
+      })
+    }
+    return res
   }
 
   function isNotCreateSecret(type) {
@@ -1157,12 +1195,23 @@ export const useFunc = (model) => {
   }
 
   function onCreateSecretChange(type) {
-    const secretName = getValue(discriminator, 'createSecret')
-    if (secretName === undefined) return ''
+    const secretStatus = getValue(discriminator, 'createSecret/status')
+    if (secretStatus === 'cancelled') return ''
+    else if (secretStatus === 'success') {
+      const name = getValue(discriminator, 'createSecret/lastCreatedSecret')
+
+      const configFound = newConfigSecrets.find((item) => item === name)
+      return configFound ? { text: name, value: name } : ''
+    }
   }
 
   function cancelCreateSecret() {
-    commit('wizard/temp$delete', 'createSecret')
+    commit('wizard/temp$delete', 'createSecret/name')
+    commit('wizard/temp$delete', 'createSecret/data')
+    commit('wizard/temp$update', {
+      path: 'createSecret/status',
+      value: 'cancelled',
+    })
   }
 
   function isEqualToValueFromType(value) {
