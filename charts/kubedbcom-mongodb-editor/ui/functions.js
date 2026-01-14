@@ -127,16 +127,15 @@ export const useFunc = (model) => {
   function onValueFromChange() {
     const valueFrom = getValue(discriminator, '/valueFromType')
     if (valueFrom === 'input') {
-      // if (isConfigMapTypeValueFrom())
-      //   commit('wizard/model$update', {
-      //     path: 'temp/valueFrom/configMapKeyRef',
-      //     value: true,
-      //   })
-      // if (isSecretTypeValueFrom())
-      //   commit('wizard/model$update', {
-      //     path: 'temp/valueFrom/secretKeyRef',
-      //     value: true,
-      //   })
+      if (isConfigMapTypeValueFrom())
+        commit('wizard/model$update', {
+          
+          value: true,
+        })
+      if (isSecretTypeValueFrom())
+        commit('wizard/model$update', {
+          value: true,
+        })
     } else if (valueFrom === 'secret') {
       if (!isSecretTypeValueFrom())
         commit('wizard/model$update', {
