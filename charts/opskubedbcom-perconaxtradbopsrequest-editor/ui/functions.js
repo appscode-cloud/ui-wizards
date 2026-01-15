@@ -773,17 +773,21 @@ export const useFunc = (model) => {
   }
 
   function onMachineChange(type, valPath) {
-    let selectedMachine = ''
+    let selectedMachine = {}
     selectedMachine = getValue(discriminator, `/machine`)
-    const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
+    const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
-    if (selectedMachine !== 'custom') {
+    if (selectedMachine.machine !== 'custom') {
       if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
-      else obj = machines[selectedMachine]?.resources
+      else obj = machines[selectedMachine.machine]?.resources
     } else {
-      const val = getValue(discriminator, `/dbDetails${valPath}`) || {}
-      obj = Array.isArray(val) ? val[0]?.resources : { ...val }
+      const cpu = selectedMachine.cpu || ''
+      const memory = selectedMachine.memory || ''
+      obj = {
+        limits: { cpu: cpu, memory: memory },
+        requests: { cpu: cpu, memory: memory },
+      }
     }
 
     const path = `/spec/verticalScaling/${type}/resources`
@@ -806,12 +810,12 @@ export const useFunc = (model) => {
       parsedInstance = {}
     }
 
-    if (selectedMachine === 'custom') {
+    if (selectedMachine.machine === 'custom') {
       // remove the instance-type annotation for custom machines
       delete annotations['kubernetes.io/instance-type']
       parsedInstance = {}
     } else {
-      parsedInstance = selectedMachine
+      parsedInstance = selectedMachine.machine
       annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
     }
 
