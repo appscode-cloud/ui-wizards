@@ -404,6 +404,8 @@ export const useFunc = (model) => {
   }
 
   async function getDbDetails() {
+    machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
+
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
@@ -759,9 +761,11 @@ export const useFunc = (model) => {
           return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
         else {
           const machineData = machinesFromPreset.find((val) => val.id === machine)
+          console.log('machineData', machineData)
           if (machineData) {
             // const subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
             const text = machineData.name ? machineData.name : machineData.id
+            //console.log('machinedataName', text)
             return {
               text,
               // subText,
@@ -793,6 +797,7 @@ export const useFunc = (model) => {
         })
         .filter((val) => !!val)
     }
+    console.log('getmachine arr', arr)
     return arr
   }
 
@@ -816,11 +821,14 @@ export const useFunc = (model) => {
     }
     const machine = parsedInstance[type] || 'custom'
 
-    machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
-
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
-    if (machinePresets) return machine
-    else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
+    if (machinePresets) {
+      return {
+        machine: machine,
+        cpu: machinePresets.limits.cpu,
+        memory: machinePresets.limits.memory,
+      }
+    } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
   function onMachineChange(type, valPath) {
