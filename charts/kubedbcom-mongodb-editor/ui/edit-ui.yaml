@@ -165,8 +165,6 @@ step:
         paths:
           - temp/properties/enableMonitoring
     - type: block-layout
-      label: Backup form 
-      showLabels: false
       if:
         type: function
         name: showMonitoringSection
@@ -268,7 +266,7 @@ step:
             paths:
               - temp/properties/customizeExporter
         - type: block-layout
-          label: Customer Exporter Section 
+          label: Customer Exporter Section
           showLabels: false
           loader: setMetadata
           if:
@@ -309,6 +307,35 @@ step:
               showLabels: false
               elements: 
                   #remove: should be array-object-form after fixes
+                - type: array-object-form
+                  label: Environment Variables
+                  buttonClass: is-light is-outlined
+                  watcher:
+                    func: onEnvArrayChange
+                    paths:
+                      - temp/properties/env
+                  schema: temp/properties/env
+                  elements:
+                  - type: input
+                    label: Name
+                    schema: name
+                  - type: radio
+                    label: Value From
+                    schema: temp/properties/valueFromType
+                    init: 
+                      type: func 
+                      value: setValueFrom
+                    options:
+                    - text: Input
+                      value: input
+                    - text: Secret
+                      value: secret
+                    - text: ConfigMap
+                      value: configMap
+                    watcher:
+                      func: onValueFromChange
+                      paths:
+                        - temp/properties/valueFromType
                 - type: block-layout
                   label: New Environment Variable
                   showLabels: true

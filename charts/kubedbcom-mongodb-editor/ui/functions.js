@@ -3238,7 +3238,23 @@ export const useFunc = (model) => {
     return !!value
   }
 
+  function onEnvArrayChange() {
+    const env = getValue(discriminator, '/env')
+    console.log(env)
+    const filteredEnv = env.map((item) => {
+      const { temp, ...rest } = item
+      return rest
+    })
+
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env',
+      value: filteredEnv,
+      force: true,
+    })
+  }
+
   return {
+    onEnvArrayChange,
     getOpsRequestUrl,
     handleUnit,
     setMetadata,
