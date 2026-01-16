@@ -1,4 +1,14 @@
-const { axios, useOperator, store, yaml } = window.vueHelpers || {}
+const {
+  axios,
+  useOperator,
+  store,
+  yaml,
+  useResourceInfo,
+  resourceCreate$api,
+  ref,
+  useToast,
+  axiosVue,
+} = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -305,10 +315,13 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
+const configSecretKeys = ['mongod.conf', 'errord.conf', 'customd.conf']
+
 let machinesFromPreset = []
 
 export const useFunc = (model) => {
   const route = store.state?.route
+  const toast = useToast()
 
   const { getValue, storeGet, discriminator, setDiscriminatorValue, commit } = useOperator(
     model,
@@ -887,6 +900,7 @@ export const useFunc = (model) => {
   }
 
   // for config secret
+  let newConfigSecrets = []
   async function getConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -898,6 +912,7 @@ export const useFunc = (model) => {
     const dbKind = getValue(store.state, '/resource/definition/result/kind')
     const dbResource = getValue(model, '/route/params/resource')
     const dbVersion = getValue(model, '/route/params/version')
+    let secrets = []
 
     try {
       const resp = await axios.post(
@@ -922,14 +937,16 @@ export const useFunc = (model) => {
           },
         },
       )
-      const secrets = resp?.data?.response?.availableSecrets || []
-      return secrets.map((item) => {
-        return { text: item, value: item }
-      })
+      secrets = resp?.data?.response?.availableSecrets || []
+      newConfigSecrets = secrets
     } catch (e) {
       console.log(e)
     }
-    return []
+    const mappedSecrets = secrets.map((item) => {
+      return { text: item, value: item }
+    })
+    mappedSecrets.push({ text: '+ Create a new Secret', value: 'Create' })
+    return mappedSecrets
   }
 
   let ConfigurationsData = []
@@ -1061,7 +1078,6 @@ export const useFunc = (model) => {
     if (!configuration) {
       return { subtitle: 'No configuration selected' }
     }
-    console.log('configuration', configuration.componentName, type)
     if (configuration.componentName)
       return { subtitle: ` You have selected <b>${configuration.componentName}</b> configuration` }
     else return { subtitle: 'No configuration selected' }
@@ -1114,6 +1130,90 @@ export const useFunc = (model) => {
       const editedDomain = domain.replace('kubedb', 'console')
       return `${editedDomain}/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
     }
+  }
+
+  async function createNewConfigSecret(type) {
+    const { user, cluster } = route.params
+    const url = `/clusters/${user}/${cluster}/resources`
+    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+    const secretName = getValue(discriminator, 'createSecret/name')
+    const secretData = getValue(discriminator, 'createSecret/data')
+    const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
+
+    try {
+      const res = await axios.post(url, {
+        apiVersion: 'v1',
+        stringData: secretDataObj,
+        kind: 'Secret',
+        metadata: {
+          name: secretName,
+          namespace: namespace,
+        },
+        type: 'Opaque',
+      })
+      commit('wizard/temp$update', {
+        path: 'createSecret/status',
+        value: 'success',
+      })
+      commit('wizard/temp$update', {
+        path: 'createSecret/lastCreatedSecret',
+        value: secretName,
+      })
+      toast.success('Secret created successfully')
+    } catch (error) {
+      const errMsg = decodeError(error, 'Failed to create secret')
+      toast.error(errMsg, { timeout: 5000 })
+      cancelCreateSecret()
+    }
+  }
+
+  function decodeError(msg, defaultMsg) {
+    if (typeof msg === 'string') {
+      return msg || defaultMsg
+    }
+    return (
+      (msg.response && msg.response.data && msg.response.data.message) ||
+      (msg.response && msg.response.data) ||
+      (msg.status && msg.status.status) ||
+      defaultMsg
+    )
+  }
+
+  function isCreateSecret(type) {
+    const selectedSecret = getValue(model, `spec/configuration/${type}/configSecret/name`)
+    const res = selectedSecret === 'Create'
+
+    if (res === true) {
+      commit('wizard/temp$update', {
+        path: 'createSecret/status',
+        value: 'pending',
+      })
+    }
+    return res
+  }
+
+  function isNotCreateSecret(type) {
+    return !isCreateSecret(type)
+  }
+
+  function onCreateSecretChange(type) {
+    const secretStatus = getValue(discriminator, 'createSecret/status')
+    if (secretStatus === 'cancelled') return ''
+    else if (secretStatus === 'success') {
+      const name = getValue(discriminator, 'createSecret/lastCreatedSecret')
+
+      const configFound = newConfigSecrets.find((item) => item === name)
+      return configFound ? { text: name, value: name } : ''
+    }
+  }
+
+  function cancelCreateSecret() {
+    commit('wizard/temp$delete', 'createSecret/name')
+    commit('wizard/temp$delete', 'createSecret/data')
+    commit('wizard/temp$update', {
+      path: 'createSecret/status',
+      value: 'cancelled',
+    })
   }
 
   function isEqualToValueFromType(value) {
@@ -1230,6 +1330,7 @@ export const useFunc = (model) => {
     const configPath = `/${type}/selectedConfiguration`
     const selectedConfig = getValue(discriminator, configPath)
     if (!selectedConfig) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/applyConfig`)
       return [{ name: '', content: '' }]
     }
     const applyconfig = ConfigurationsData.find((item) => {
@@ -1274,12 +1375,14 @@ export const useFunc = (model) => {
     const selectedConfig = getValue(discriminator, configPath)
 
     if (!selectedConfig) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/removeCustomConfig`)
       return [{ name: '', content: '' }]
     }
 
     const configuration = ConfigurationsData.find((item) => item.componentName === selectedConfig)
 
     if (!configuration) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/removeCustomConfig`)
       return [{ name: '', content: '' }]
     }
 
@@ -1301,6 +1404,10 @@ export const useFunc = (model) => {
         })
       }
     })
+    commit('wizard/model$update', {
+      path: `/spec/configuration/${type}/removeCustomConfig`,
+      value: true,
+    })
 
     return configObj
   }
@@ -1310,6 +1417,7 @@ export const useFunc = (model) => {
     const selectedSecret = getValue(model, path)
 
     if (!selectedSecret) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/configSecret`)
       return [{ name: '', content: '' }]
     }
 
@@ -1368,6 +1476,54 @@ export const useFunc = (model) => {
       commit('wizard/model$delete', `/spec/configuration/${property}/configSecret`)
       commit('wizard/model$delete', `/spec/configuration/${property}/applyConfig`)
       commit('wizard/model$delete', `/spec/configuration/${property}/removeCustomConfig`)
+    }
+  }
+
+  let currentSecretIndex = -1
+
+  function onSecretKeyChange(type, index) {
+    console.log({ type }, { index })
+    // console.log({ type })
+    let currentSecrets = []
+    currentSecretIndex = index
+    const secretData = getValue(discriminator, `createSecret/data`) || []
+    const selectedSecrets = getValue(discriminator, 'createSecret/selectedSecrets') || []
+
+    secretData.forEach((item, index) => {
+      if (item.key) {
+        const exists = currentSecrets.some((val) => val.key === item.key)
+        if (!exists) {
+          currentSecrets.push({ key: item.key, index: index })
+        }
+      }
+    })
+    const isSame =
+      currentSecrets.length === selectedSecrets.length &&
+      currentSecrets.every((v, i) => v.key === selectedSecrets[i].key)
+
+    if (!isSame) {
+      // window.console.log({ currentSecrets }, { selectedSecrets })
+      commit('wizard/temp$update', {
+        path: 'createSecret/selectedSecrets',
+        value: currentSecrets,
+      })
+    }
+  }
+
+  function onSelectedSecretChange(type, index) {
+    console.log({ currentSecretIndex }, { index })
+    if (currentSecretIndex !== index) {
+      const currentSecrets = getValue(discriminator, 'createSecret/selectedSecrets') || []
+      const remainingSecrets = configSecretKeys.filter(
+        (item) => !currentSecrets.some((s) => s.key === item && s.index !== index),
+      )
+      // console.log({ remainingSecrets })
+      const resSecret = remainingSecrets.map((item) => {
+        return { text: item, value: item }
+      })
+      console.log({ resSecret }, { currentSecrets }, { index })
+
+      return resSecret
     }
   }
 
@@ -1772,5 +1928,12 @@ export const useFunc = (model) => {
     onRemoveConfigChange,
     onNewConfigSecretChange,
     getSelectedApplyConfigName,
+    createNewConfigSecret,
+    isCreateSecret,
+    isNotCreateSecret,
+    onCreateSecretChange,
+    cancelCreateSecret,
+    onSecretKeyChange,
+    onSelectedSecretChange,
   }
 }

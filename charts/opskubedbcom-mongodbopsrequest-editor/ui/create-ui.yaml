@@ -646,10 +646,10 @@ step:
                   value: applyConfig
                 - text: REMOVE
                   value: remove
-                watcher:
-                  func: onReconfigurationTypeChange|standalone
-                  paths:
-                    - temp/properties/reconfigurationType
+                # watcher:
+                #   func: onReconfigurationTypeChange|standalone
+                #   paths:
+                #     - temp/properties/reconfigurationType
                 elements:
                 - type: block-layout
                   label: Config Secret
@@ -664,38 +664,93 @@ step:
                       customClass: mb-10
                     - type: select
                       customClass: mb-2
-                      addNewButton:
-                        label: Create Secret
-                        target: _blank
-                        url:
-                          function: createSecretUrl
+                      # addNewButton:
+                      #   label: Create a new Secret
+                      #   target: _blank
+                      #   url:
+                      #     function: createSecretUrl
                       schema: schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-                      validation:
-                        type: required
+                      # validation:
+                      #   type: required
                       refresh: true
                       label: Config Secret
                       loader:
                         name: getConfigSecrets
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
+                          - temp/properties/createSecret/properties/status
                       init:
                         type: func
                         value: setValueFromDbDetails|/spec/configSecret/name
+                      watcher:
+                        func: onCreateSecretChange|standalone
+                        paths:
+                          - temp/properties/createSecret/properties/status
                     - type: label-element
                       label: ''
                       loader:
                         name: getSelectedConfigSecret|standalone
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+                    - type: block-layout
+                      label: Create a New Config Secret
+                      showLabels: true
+                      if:
+                        type: function
+                        name: isCreateSecret|standalone
+                      hasButton:
+                        text: Save
+                        hasCancel: cancelCreateSecret|standalone
+                        action: createNewConfigSecret|standalone
+                      elements:
+                        - type: input
+                          label: Secret Name
+                          schema: temp/properties/createSecret/properties/name
+                          validation:
+                            type: required
+
+                        # New Config Secret Object: starts here
+                        - type: array-object-form
+                          label: String Data
+                          schema: temp/properties/createSecret/properties/data
+                          buttonClass: is-light is-outlined
+                          # watcher:
+                          #   func: onSecretDataChange|standalone
+                          #   paths:
+                          #     - temp/properties/createSecret/properties/data
+                          elements:
+                            - type: select
+                              label: Key
+                              schema: key
+                              # options:
+                              #   - text: mongod.conf
+                              #     value: mongod.conf
+                              #   - text: errord.conf
+                              #     value: errord.conf
+                              #   - text: customd.conf
+                              #     value: customd.conf
+                              watcher:
+                                func: onSecretKeyChange|standalone
+                                paths:
+                                  - temp/properties/createSecret/properties/data/dynamicIndex/key
+                              loader:
+                                name: onSelectedSecretChange|standalone
+                                watchPaths:
+                                  - temp/properties/createSecret/properties/selectedSecrets
+                            - type: textarea
+                              label: Value
+                              schema: value
+
                     - type: multi-file-editor
                       editorHeight: 500px
                       readonly: true
+                      if:
+                        type: function
+                        name: isNotCreateSecret|standalone
                       loader:
                         name: onNewConfigSecretChange|standalone
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-                      validation:
-                        type: required
                       schema: temp/properties/standalone/newConfigSecret
                 - type: block-layout
                   label: ApplyConfig
@@ -709,8 +764,8 @@ step:
                       customClass: mb-10
                     - type: select
                       schema: temp/properties/standalone/selectedConfiguration
-                      validation:
-                        type: required
+                      # validation:
+                      #   type: required
                       refresh: true
                       label: Configuration
                       loader: getConfigSecretsforAppyConfig
@@ -722,8 +777,8 @@ step:
                           - temp/properties/standalone/selectedConfiguration
                     - type: multi-file-editor
                       editorHeight: 500px
-                      validation:
-                        type: required
+                      # validation:
+                      #   type: required
                       schema: temp/properties/standalone/applyConfig
                       init:
                         type: func
@@ -745,8 +800,8 @@ step:
                     - type: select
                       customClass: mb-2
                       schema: temp/properties/standalone/selectedConfigurationRemove
-                      validation:
-                        type: required
+                      # validation:
+                      #   type: required
                       refresh: true
                       label: Configuration
                       loader:
@@ -769,8 +824,8 @@ step:
                         func: onRemoveConfigChange|standalone
                         paths:
                           - temp/properties/standalone/selectedConfigurationRemove
-                      validation:
-                        type: required
+                      # validation:
+                      #   type: required
                       schema: temp/properties/standalone/removeConfig
           - type: block-layout
             label: Replica Set
