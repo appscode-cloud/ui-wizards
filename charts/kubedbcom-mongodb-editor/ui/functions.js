@@ -2734,8 +2734,13 @@ export const useFunc = (model) => {
       !!getValue(model, '/spec/databaseRef/name') && !!getValue(discriminator, '/autoscalingType')
     )
   }
-
+  let instance = {}
   async function getDbDetails() {
+    const annotations = getValue(
+      model,
+      '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
+    )
+    instance = annotations?.['kubernetes.io/instance-type']
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
 
@@ -3082,11 +3087,6 @@ export const useFunc = (model) => {
   }
 
   function setAllowedMachine(type, minmax) {
-    const annotations = getValue(
-      model,
-      '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
-    )
-    const instance = annotations?.['kubernetes.io/instance-type']
     let parsedInstance = {}
     try {
       if (instance) parsedInstance = JSON.parse(instance)
@@ -3150,8 +3150,6 @@ export const useFunc = (model) => {
       minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
     )
 
-    console.log('getMachines', type, minmax, 'dependantMachine:', dependantMachine, 'machines:', machines?.length)
-
     return dependantIndex === -1 ? machines : filteredMachine
   }
 
@@ -3193,11 +3191,13 @@ export const useFunc = (model) => {
     annotations['kubernetes.io/instance-type'] = instanceString
 
     // Use cpu/memory directly from the machine objects
-    const minMachineAllocatable = minMachineObj ? { cpu: minMachineObj.cpu, memory: minMachineObj.memory } : null
-    const maxMachineAllocatable = maxMachineObj ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory } : null
+    const minMachineAllocatable = minMachineObj
+      ? { cpu: minMachineObj.cpu, memory: minMachineObj.memory }
+      : null
+    const maxMachineAllocatable = maxMachineObj
+      ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory }
+      : null
     const allowedPath = `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/compute/${type}`
-
-    console.log('onMachineChange', type, 'min:', minMachine, 'max:', maxMachine)
 
     if (minMachine && maxMachine && instance !== instanceString) {
       commit('wizard/model$update', {
