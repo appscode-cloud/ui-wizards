@@ -761,11 +761,9 @@ export const useFunc = (model) => {
           return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
         else {
           const machineData = machinesFromPreset.find((val) => val.id === machine)
-          console.log('machineData', machineData)
           if (machineData) {
             // const subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
             const text = machineData.name ? machineData.name : machineData.id
-            //console.log('machinedataName', text)
             return {
               text,
               // subText,
@@ -797,7 +795,6 @@ export const useFunc = (model) => {
         })
         .filter((val) => !!val)
     }
-    console.log('getmachine arr', arr)
     return arr
   }
 
