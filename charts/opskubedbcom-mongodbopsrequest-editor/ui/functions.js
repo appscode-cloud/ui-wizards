@@ -315,6 +315,8 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
+const configSecretKeys = ['mongod.conf', 'errord.conf', 'customd.conf']
+
 let machinesFromPreset = []
 
 export const useFunc = (model) => {
@@ -1067,7 +1069,6 @@ export const useFunc = (model) => {
     if (!configuration) {
       return { subtitle: 'No configuration selected' }
     }
-    console.log('configuration', configuration.componentName, type)
     if (configuration.componentName)
       return { subtitle: ` You have selected <b>${configuration.componentName}</b> configuration` }
     else return { subtitle: 'No configuration selected' }
@@ -1128,11 +1129,12 @@ export const useFunc = (model) => {
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const secretName = getValue(discriminator, 'createSecret/name')
     const secretData = getValue(discriminator, 'createSecret/data')
+    const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
 
     try {
       const res = await axios.post(url, {
         apiVersion: 'v1',
-        data: secretData,
+        stringData: secretDataObj,
         kind: 'Secret',
         metadata: {
           name: secretName,
@@ -1319,6 +1321,7 @@ export const useFunc = (model) => {
     const configPath = `/${type}/selectedConfiguration`
     const selectedConfig = getValue(discriminator, configPath)
     if (!selectedConfig) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/applyConfig`)
       return [{ name: '', content: '' }]
     }
     const applyconfig = ConfigurationsData.find((item) => {
@@ -1363,12 +1366,14 @@ export const useFunc = (model) => {
     const selectedConfig = getValue(discriminator, configPath)
 
     if (!selectedConfig) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/removeCustomConfig`)
       return [{ name: '', content: '' }]
     }
 
     const configuration = ConfigurationsData.find((item) => item.componentName === selectedConfig)
 
     if (!configuration) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/removeCustomConfig`)
       return [{ name: '', content: '' }]
     }
 
@@ -1390,6 +1395,10 @@ export const useFunc = (model) => {
         })
       }
     })
+    commit('wizard/model$update', {
+      path: `/spec/configuration/${type}/removeCustomConfig`,
+      value: true,
+    })
 
     return configObj
   }
@@ -1399,6 +1408,7 @@ export const useFunc = (model) => {
     const selectedSecret = getValue(model, path)
 
     if (!selectedSecret) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/configSecret`)
       return [{ name: '', content: '' }]
     }
 
@@ -1457,6 +1467,54 @@ export const useFunc = (model) => {
       commit('wizard/model$delete', `/spec/configuration/${property}/configSecret`)
       commit('wizard/model$delete', `/spec/configuration/${property}/applyConfig`)
       commit('wizard/model$delete', `/spec/configuration/${property}/removeCustomConfig`)
+    }
+  }
+
+  let currentSecretIndex = -1
+
+  function onSecretKeyChange(type, index) {
+    console.log({ type }, { index })
+    // console.log({ type })
+    let currentSecrets = []
+    currentSecretIndex = index
+    const secretData = getValue(discriminator, `createSecret/data`) || []
+    const selectedSecrets = getValue(discriminator, 'createSecret/selectedSecrets') || []
+
+    secretData.forEach((item, index) => {
+      if (item.key) {
+        const exists = currentSecrets.some((val) => val.key === item.key)
+        if (!exists) {
+          currentSecrets.push({ key: item.key, index: index })
+        }
+      }
+    })
+    const isSame =
+      currentSecrets.length === selectedSecrets.length &&
+      currentSecrets.every((v, i) => v.key === selectedSecrets[i].key)
+
+    if (!isSame) {
+      // window.console.log({ currentSecrets }, { selectedSecrets })
+      commit('wizard/temp$update', {
+        path: 'createSecret/selectedSecrets',
+        value: currentSecrets,
+      })
+    }
+  }
+
+  function onSelectedSecretChange(type, index) {
+    console.log({ currentSecretIndex }, { index })
+    if (currentSecretIndex !== index) {
+      const currentSecrets = getValue(discriminator, 'createSecret/selectedSecrets') || []
+      const remainingSecrets = configSecretKeys.filter(
+        (item) => !currentSecrets.some((s) => s.key === item && s.index !== index),
+      )
+      // console.log({ remainingSecrets })
+      const resSecret = remainingSecrets.map((item) => {
+        return { text: item, value: item }
+      })
+      console.log({ resSecret }, { currentSecrets }, { index })
+
+      return resSecret
     }
   }
 
@@ -1866,5 +1924,7 @@ export const useFunc = (model) => {
     isNotCreateSecret,
     onCreateSecretChange,
     cancelCreateSecret,
+    onSecretKeyChange,
+    onSelectedSecretChange,
   }
 }
