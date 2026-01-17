@@ -144,6 +144,7 @@ step:
 
   - type: single-step-form
     id: monitoring
+    loader: initMonitoring
     elements:
     - type: label-element
       label: To update Exporter Resource section click on Create OpsRequest
@@ -308,6 +309,9 @@ step:
               elements: 
                   #remove: should be array-object-form after fixes
                 - type: array-object-form
+                  init:
+                    type: func
+                    value: initEnvArray
                   label: Environment Variables
                   buttonClass: is-light is-outlined
                   watcher:
@@ -319,32 +323,8 @@ step:
                   - type: input
                     label: Name
                     schema: name
-                  - type: radio
-                    label: Value From
-                    schema: temp/properties/valueFromType
-                    init: 
-                      type: func 
-                      value: setValueFrom
-                    options:
-                    - text: Input
-                      value: input
-                    - text: Secret
-                      value: secret
-                    - text: ConfigMap
-                      value: configMap
-                    watcher:
-                      func: onValueFromChange
-                      paths:
-                        - temp/properties/valueFromType
-                - type: block-layout
-                  label: New Environment Variable
-                  showLabels: true
-                  hideBlock: true
-                  # schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
-                  elements:
-                  - type: input
-                    label: Name
-                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/name
+                    validation:
+                      type: required
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
@@ -364,56 +344,52 @@ step:
                         - temp/properties/valueFromType
                   - type: input 
                     label: Value 
-                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/value
+                    schema: value
                     if:
-                      name: isEqualToValueFromType|input
+                      name: isEqualToTemp|input
                       type: function
                   - type: select
                     if:
                       type: function
-                      name: isEqualToValueFromType|configMap
+                      name: isEqualToTemp|configMap
                     label: ConfigMap Name
-                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/name
+                    schema: valueFrom/properties/configMapKeyRef/properties/name
                     loader:
                       name: resourceNames|core|v1|configmaps
                       watchPaths:
                         - schema/metadata/release/namespace
-                    # allowUserDefinedOption: true
                   - type: select
                     label: ConfigMap Key
-                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/key
+                    schema: valueFrom/properties/configMapKeyRef/properties/key
                     if:
                       type: function
-                      name: isEqualToValueFromType|configMap
+                      name: isEqualToTemp|configMap
                     loader:
                       name: getConfigMapKeys
                       watchPaths:
-                        - schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/configMapKeyRef/name
+                        - schema/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/configMapKeyRef/name
                         - schema/metadata/release/namespace
-                    # allowUserDefinedOption: true
                   - type: select
                     label: Secret Name
-                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/name
+                    schema: valueFrom/properties/secretKeyRef/properties/name
                     if:
                       type: function
-                      name: isEqualToValueFromType|secret
+                      name: isEqualToTemp|secret
                     loader:
                       name: getSecrets
                       watchPaths:
                         - schema/metadata/release/namespace
-                    # allowUserDefinedOption: true
                   - type: select
                     label: Secret Key
-                    schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/key
+                    schema: valueFrom/properties/secretKeyRef/properties/key
                     if:
                       type: function
-                      name: isEqualToValueFromType|secret
+                      name: isEqualToTemp|secret
                     loader:
                       name: getSecretKeys
                       watchPaths:
-                        - schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/secretKeyRef/name
+                        - schema/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/secretKeyRef/name
                         - schema/metadata/release/namespace
-                    # allowUserDefinedOption: true
 
   - type: single-step-form
     id: compute-autoscaler
