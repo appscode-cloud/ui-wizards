@@ -666,14 +666,14 @@ step:
                         name: getConfigSecrets
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
-                          - temp/properties/createSecret/properties/status
+                          - temp/properties/standalone/properties/createSecret/properties/status
                       init:
                         type: func
                         value: setValueFromDbDetails|/spec/configSecret/name
                       watcher:
                         func: onCreateSecretChange|standalone
                         paths:
-                          - temp/properties/createSecret/properties/status
+                          - temp/properties/standalone/properties/createSecret/properties/status
                     - type: label-element
                       label: ''
                       loader:
@@ -693,12 +693,12 @@ step:
                       elements:
                         - type: input
                           label: Secret Name
-                          schema: temp/properties/createSecret/properties/name
+                          schema: temp/properties/standalone/properties/createSecret/properties/name
                           validation:
                             type: required
                         - type: array-object-form
                           label: String Data
-                          schema: temp/properties/createSecret/properties/data
+                          schema: temp/properties/standalone/properties/createSecret/properties/data
                           buttonClass: is-light is-outlined
                           elements:
                             - type: select
@@ -707,7 +707,7 @@ step:
                               loader:
                                 name: onSelectedSecretChange|standalone
                                 watchPaths:
-                                  - temp/properties/createSecret/properties/data
+                                  - temp/properties/standalone/properties/createSecret/properties/data
                               validation:
                                 type: required
                             - type: textarea

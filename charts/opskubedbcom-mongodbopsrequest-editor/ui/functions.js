@@ -1136,8 +1136,8 @@ export const useFunc = (model) => {
     const { user, cluster } = route.params
     const url = `/clusters/${user}/${cluster}/resources`
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
-    const secretName = getValue(discriminator, 'createSecret/name')
-    const secretData = getValue(discriminator, 'createSecret/data')
+    const secretName = getValue(discriminator, `${type}/createSecret/name`)
+    const secretData = getValue(discriminator, `${type}/createSecret/data`)
     const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
 
     try {
@@ -1152,11 +1152,11 @@ export const useFunc = (model) => {
         type: 'Opaque',
       })
       commit('wizard/temp$update', {
-        path: 'createSecret/status',
+        path: `${type}/createSecret/status`,
         value: 'success',
       })
       commit('wizard/temp$update', {
-        path: 'createSecret/lastCreatedSecret',
+        path: `${type}/createSecret/lastCreatedSecret`,
         value: secretName,
       })
       toast.success('Secret created successfully')
@@ -1185,7 +1185,7 @@ export const useFunc = (model) => {
 
     if (res === true) {
       commit('wizard/temp$update', {
-        path: 'createSecret/status',
+        path: `${type}/createSecret/status`,
         value: 'pending',
       })
     }
@@ -1197,21 +1197,21 @@ export const useFunc = (model) => {
   }
 
   function onCreateSecretChange(type) {
-    const secretStatus = getValue(discriminator, 'createSecret/status')
+    const secretStatus = getValue(discriminator, `${type}/createSecret/status`)
     if (secretStatus === 'cancelled') return ''
     else if (secretStatus === 'success') {
-      const name = getValue(discriminator, 'createSecret/lastCreatedSecret')
+      const name = getValue(discriminator, `${type}/createSecret/lastCreatedSecret`)
 
       const configFound = newConfigSecrets.find((item) => item === name)
       return configFound ? { text: name, value: name } : ''
     }
   }
 
-  function cancelCreateSecret() {
-    commit('wizard/temp$delete', 'createSecret/name')
-    commit('wizard/temp$delete', 'createSecret/data')
+  function cancelCreateSecret(type) {
+    commit('wizard/temp$delete', `${type}/createSecret/name`)
+    commit('wizard/temp$delete', `${type}/createSecret/data`)
     commit('wizard/temp$update', {
-      path: 'createSecret/status',
+      path: `${type}/createSecret/status`,
       value: 'cancelled',
     })
   }
@@ -1405,7 +1405,7 @@ export const useFunc = (model) => {
 
     const configuration = ConfigurationsData.find((item) => item.componentName === selectedConfig)
 
-    if (!configuration) {
+    if (!configuration.data) {
       return [{ name: '', content: '' }]
     }
 
@@ -1478,12 +1478,12 @@ export const useFunc = (model) => {
   }
 
   function onSelectedSecretChange(type, index) {
-    const secretData = getValue(discriminator, `createSecret/data`) || []
+    const secretData = getValue(discriminator, `${type}/createSecret/data`) || []
     const selfSecrets = secretData.map((item) => item.key)
 
     const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
 
-    const selfKey = getValue(discriminator, `createSecret/data/${index}/key`)
+    const selfKey = getValue(discriminator, `${type}/createSecret/data/${index}/key`)
     if (selfKey) {
       remainingSecrets.push(selfKey)
     }
