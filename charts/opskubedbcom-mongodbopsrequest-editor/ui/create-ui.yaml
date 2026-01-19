@@ -646,14 +646,9 @@ step:
                   value: applyConfig
                 - text: REMOVE
                   value: remove
-                watcher:
-                  func: onReconfigurationTypeChange|standalone
-                  paths:
-                    - temp/properties/reconfigurationType
                 elements:
                 - type: block-layout
                   label: Config Secret
-                  # showLabels: true
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                     type: function
@@ -664,14 +659,7 @@ step:
                       customClass: mb-10
                     - type: select
                       customClass: mb-2
-                      # addNewButton:
-                      #   label: Create a new Secret
-                      #   target: _blank
-                      #   url:
-                      #     function: createSecretUrl
                       schema: schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-                      validation:
-                        type: required
                       refresh: true
                       label: Config Secret
                       loader:
@@ -708,12 +696,23 @@ step:
                           schema: temp/properties/createSecret/properties/name
                           validation:
                             type: required
-                        - type: object-item
+                        - type: array-object-form
                           label: String Data
                           schema: temp/properties/createSecret/properties/data
                           buttonClass: is-light is-outlined
-                          validation:
-                            type: required
+                          elements:
+                            - type: select
+                              label: Key
+                              schema: key
+                              loader:
+                                name: onSelectedSecretChange|standalone
+                                watchPaths:
+                                  - temp/properties/createSecret/properties/data
+                              validation:
+                                type: required
+                            - type: textarea
+                              label: Value
+                              schema: value
 
                     - type: multi-file-editor
                       editorHeight: 500px
@@ -725,8 +724,6 @@ step:
                         name: onNewConfigSecretChange|standalone
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-                      validation:
-                        type: required
                       schema: temp/properties/standalone/newConfigSecret
                 - type: block-layout
                   label: ApplyConfig
@@ -739,9 +736,8 @@ step:
                       subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Enter the parameter you want to configure (e.g., max_connections).
                       customClass: mb-10
                     - type: select
+                      customClass: mb-2
                       schema: temp/properties/standalone/selectedConfiguration
-                      validation:
-                        type: required
                       refresh: true
                       label: Configuration
                       loader: getConfigSecretsforAppyConfig
@@ -753,16 +749,15 @@ step:
                           - temp/properties/standalone/selectedConfiguration
                     - type: multi-file-editor
                       editorHeight: 500px
-                      validation:
-                        type: required
                       schema: temp/properties/standalone/applyConfig
-                      init:
-                        type: func
-                        value: setApplyConfig|standalone
-                      watcher:
-                        func: onApplyconfigChange|standalone
-                        paths:
+                      loader:
+                        name: setApplyConfig|standalone
+                        watchPaths:
                             - temp/properties/standalone/selectedConfiguration
+                      watcher:
+                       func: onApplyconfigChange|standalone
+                       paths:
+                        - temp/properties/standalone/applyConfig
                 - type: block-layout
                   label: Remove
                   if:
@@ -776,8 +771,6 @@ step:
                     - type: select
                       customClass: mb-2
                       schema: temp/properties/standalone/selectedConfigurationRemove
-                      validation:
-                        type: required
                       refresh: true
                       label: Configuration
                       loader:
@@ -800,8 +793,6 @@ step:
                         func: onRemoveConfigChange|standalone
                         paths:
                           - temp/properties/standalone/selectedConfigurationRemove
-                      validation:
-                        type: required
                       schema: temp/properties/standalone/removeConfig
           - type: block-layout
             label: Replica Set

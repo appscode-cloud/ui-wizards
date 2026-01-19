@@ -315,6 +315,8 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
+const configSecretKeys = ['mongod.conf']
+
 let machinesFromPreset = []
 
 export const useFunc = (model) => {
@@ -1076,7 +1078,6 @@ export const useFunc = (model) => {
     if (!configuration) {
       return { subtitle: 'No configuration selected' }
     }
-    console.log('configuration', configuration.componentName, type)
     if (configuration.componentName)
       return { subtitle: ` You have selected <b>${configuration.componentName}</b> configuration` }
     else return { subtitle: 'No configuration selected' }
@@ -1137,11 +1138,12 @@ export const useFunc = (model) => {
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const secretName = getValue(discriminator, 'createSecret/name')
     const secretData = getValue(discriminator, 'createSecret/data')
+    const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
 
     try {
       const res = await axios.post(url, {
         apiVersion: 'v1',
-        data: secretData,
+        stringData: secretDataObj,
         kind: 'Secret',
         metadata: {
           name: secretName,
@@ -1324,7 +1326,30 @@ export const useFunc = (model) => {
     return reconfigurationType === value
   }
 
-  function onApplyconfigChange(type) {
+  async function onApplyconfigChange(type) {
+    const configValue = getValue(discriminator, `/${type}/applyConfig`)
+
+    if (!configValue) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/applyConfig`)
+      return
+    }
+    const tempConfigObj = {}
+    configValue.forEach((item) => {
+      if (item.name) {
+        tempConfigObj[item.name] = item.content
+      }
+    })
+    if (Object.keys(tempConfigObj).length === 0) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/applyConfig`)
+      return
+    }
+    commit('wizard/model$update', {
+      path: `/spec/configuration/${type}/applyConfig`,
+      value: tempConfigObj,
+    })
+  }
+
+  function setApplyConfig(type) {
     const configPath = `/${type}/selectedConfiguration`
     const selectedConfig = getValue(discriminator, configPath)
     if (!selectedConfig) {
@@ -1340,30 +1365,28 @@ export const useFunc = (model) => {
     const configObj = []
     const tempConfigObj = {}
 
-    // Decode base64 and format as array of objects with name and content
-    Object.keys(data).forEach((fileName) => {
-      try {
-        // Decode base64 string
-        const decodedString = atob(data[fileName])
-        configObj.push({
-          name: fileName,
-          content: decodedString,
-        })
-        tempConfigObj[fileName] = decodedString
-      } catch (e) {
-        console.error(`Error decoding ${fileName}:`, e)
-        configObj.push({
-          name: fileName,
-          content: data[fileName], // Fallback to original if decode fails
-        })
-      }
-    })
-
-    commit('wizard/model$update', {
-      path: `/spec/configuration/${type}/applyConfig`,
-      value: tempConfigObj,
-      force: true,
-    })
+    if (data) {
+      // Decode base64 and format as array of objects with name and content
+      Object.keys(data).forEach((fileName) => {
+        try {
+          // Decode base64 string
+          const decodedString = atob(data[fileName])
+          configObj.push({
+            name: fileName,
+            content: decodedString,
+          })
+          tempConfigObj[fileName] = decodedString
+        } catch (e) {
+          console.error(`Error decoding ${fileName}:`, e)
+          configObj.push({
+            name: fileName,
+            content: data[fileName], // Fallback to original if decode fails
+          })
+        }
+      })
+    } else {
+      configObj.push({ name: selectedConfig, content: '' })
+    }
     return configObj
   }
 
@@ -1372,8 +1395,13 @@ export const useFunc = (model) => {
     const selectedConfig = getValue(discriminator, configPath)
 
     if (!selectedConfig) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/removeCustomConfig`)
       return [{ name: '', content: '' }]
     }
+    commit('wizard/model$update', {
+      path: `/spec/configuration/${type}/removeCustomConfig`,
+      value: true,
+    })
 
     const configuration = ConfigurationsData.find((item) => item.componentName === selectedConfig)
 
@@ -1399,7 +1427,6 @@ export const useFunc = (model) => {
         })
       }
     })
-
     return configObj
   }
 
@@ -1408,6 +1435,7 @@ export const useFunc = (model) => {
     const selectedSecret = getValue(model, path)
 
     if (!selectedSecret) {
+      commit('wizard/model$delete', `/spec/configuration/${type}/configSecret`)
       return [{ name: '', content: '' }]
     }
 
@@ -1447,6 +1475,22 @@ export const useFunc = (model) => {
       console.error('Error fetching secret:', e)
       return [{ name: '', content: '' }]
     }
+  }
+
+  function onSelectedSecretChange(type, index) {
+    const secretData = getValue(discriminator, `createSecret/data`) || []
+    const selfSecrets = secretData.map((item) => item.key)
+
+    const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
+
+    const selfKey = getValue(discriminator, `createSecret/data/${index}/key`)
+    if (selfKey) {
+      remainingSecrets.push(selfKey)
+    }
+    const resSecret = remainingSecrets.map((item) => {
+      return { text: item, value: item }
+    })
+    return resSecret
   }
 
   function onReconfigurationTypeChange(property, isShard) {
@@ -1799,9 +1843,6 @@ export const useFunc = (model) => {
       return ''
     }
   }
-  async function setApplyConfig(type) {
-    return onApplyconfigChange(type)
-  }
 
   return {
     fetchAliasOptions,
@@ -1875,5 +1916,6 @@ export const useFunc = (model) => {
     isNotCreateSecret,
     onCreateSecretChange,
     cancelCreateSecret,
+    onSelectedSecretChange,
   }
 }
