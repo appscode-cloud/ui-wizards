@@ -1384,6 +1384,26 @@ export const useFunc = (model) => {
     return date.toString()
   }
 
+  function convertToUTC() {
+    const localTime = getValue(model, '/spec/init/archiver/recoveryTimestamp')
+    if (!localTime) return
+
+    const date = new Date(localTime)
+    if (isNaN(date.getTime())) return
+
+    const utcString = date.toISOString()
+    window.console.log('convertToUTC', localTime, '->', utcString)
+
+    // Only update if the value is not already in UTC format
+    if (localTime !== utcString) {
+      commit('wizard/model$update', {
+        path: '/spec/init/archiver/recoveryTimestamp',
+        value: utcString,
+        force: true,
+      })
+    }
+  }
+
   function getComponentLogStats(snapshot) {
     if (!snapshot || !snapshot.status || !snapshot.status.components) {
       return null
@@ -1587,6 +1607,7 @@ export const useFunc = (model) => {
     getReferSecrets,
     isConfigAvailable,
     setPointInTimeRecovery,
+    convertToUTC,
     pointInTimeErrorCheck,
     checkHostnameOrIP,
     isRancherManaged,
