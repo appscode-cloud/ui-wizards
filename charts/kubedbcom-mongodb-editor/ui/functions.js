@@ -24,6 +24,7 @@ export const useFunc = (model) => {
 
   setDiscriminatorValue('/enableMonitoring', false)
   setDiscriminatorValue('/customizeExporter', true)
+  setDiscriminatorValue('/env', [])
   setDiscriminatorValue('/valueFromType', 'input')
 
   // Compute Autoscaler Discriminators
@@ -70,6 +71,21 @@ export const useFunc = (model) => {
       language: language.data || {},
       functions,
     }
+  }
+
+  function initMonitoring() {
+    const env =
+      getValue(model, '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env') || []
+    setDiscriminatorValue('/env', env)
+    let tempEnv = []
+    env.forEach((item) => {
+      let radio = ''
+      if (item.value) radio = 'input'
+      else if (item.valueFrom && item.valueFrom.configMapKeyRef) radio = 'configMap'
+      else if (item.valueFrom && item.valueFrom.secretKeyRef) radio = 'secret'
+      tempEnv.push({ ...item, temp: { valueFromType: radio } })
+    })
+    setDiscriminatorValue('/env', tempEnv)
   }
 
   function disableLableChecker({ itemCtx }) {
@@ -176,9 +192,9 @@ export const useFunc = (model) => {
     return getValue(model, path)
   }
 
-  function isEqualToValueFromType(value) {
+  function isEqualToTemp(value, index) {
     //watchDependency('discriminator#/valueFromType')
-    const valueFrom = getValue(discriminator, '/valueFromType')
+    const valueFrom = getValue(discriminator, `/env/${index}/temp/valueFromType`)
     return valueFrom === value
   }
 
@@ -496,8 +512,8 @@ export const useFunc = (model) => {
         const found = defaultRetainList.length
           ? defaultRetainList[0].value
           : storageClassList.length
-          ? storageClassList[0].value
-          : ''
+            ? storageClassList[0].value
+            : ''
         storageClass = found
       }
     } else {
@@ -510,8 +526,8 @@ export const useFunc = (model) => {
         const found = defaultSimpleList.length
           ? defaultSimpleList[0].value
           : storageClassList.length
-          ? storageClassList[0].value
-          : ''
+            ? storageClassList[0].value
+            : ''
         storageClass = found
       }
     }
@@ -2283,14 +2299,14 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecretKeys() {
+  async function getSecretKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
     const secretName = getValue(
       model,
-      '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env/items/valueFrom/secretKeyRef/name',
+      `/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env/${index}/valueFrom/secretKeyRef/name`,
     )
 
     // watchDependency('data#/namespace')
@@ -2848,14 +2864,14 @@ export const useFunc = (model) => {
       )
     }
   }
-  async function getConfigMapKeys() {
+  async function getConfigMapKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
     const configMapName = getValue(
       model,
-      '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env/items/valueFrom/configMapKeyRef/name',
+      `/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env/${index}/valueFrom/configMapKeyRef/name`,
     )
 
     // watchDependency('data#/namespace')
@@ -3238,7 +3254,46 @@ export const useFunc = (model) => {
     return !!value
   }
 
+  function onEnvArrayChange() {
+    const env = getValue(discriminator, '/env') || []
+    let ret = {}
+    const filteredEnv = env?.map((item) => {
+      const { temp, ...rest } = item
+      if (temp.valueFromType === 'input') {
+        const { value } = rest
+        ret = { value }
+      } else if (temp.valueFromType === 'configMap') {
+        const { configMapKeyRef } = rest.valueFrom
+        ret = { valueFrom: { configMapKeyRef } }
+      } else if (temp.valueFromType === 'secret') {
+        const { secretKeyRef } = rest.valueFrom
+        ret = { valueFrom: { secretKeyRef } }
+      }
+      return ret
+    })
+    const value = getValue(
+      model,
+      '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env',
+    )
+
+    if (env.length)
+      commit('wizard/model$update', {
+        path: '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env',
+        value: filteredEnv,
+        force: true,
+      })
+  }
+
+  function initEnvArray() {
+    const env = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env')
+
+    return env || []
+  }
   return {
+    isEqualToTemp,
+    initEnvArray,
+    initMonitoring,
+    onEnvArrayChange,
     getOpsRequestUrl,
     handleUnit,
     setMetadata,
@@ -3411,7 +3466,6 @@ export const useFunc = (model) => {
     hasNoAnnotations,
     fetchTopologyMachines,
     onMachineChange,
-    isEqualToValueFromType,
     onValueFromChange,
     getConfigMapKeys,
     setValueFrom,
