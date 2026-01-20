@@ -65,7 +65,6 @@ export const useFunc = (model) => {
     // watchDependency('model#/spec/secretEngineRef/name')
     const engineName = getValue(model, '/spec/secretEngineRef/name') || ''
     const timestamp = `${Math.floor(Date.now() / 1000)}`
-    console.log(engineName, timestamp)
 
     return engineName ? `${engineName}-role-${timestamp}` : engineName
   }
