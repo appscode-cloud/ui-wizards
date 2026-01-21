@@ -37,33 +37,35 @@ step:
         label: Schedule
         schema: schedule
       - type: input
-        label: Security Context
-        schema: addons/properties/jobTemplate/properties/securityContext
+        label: Security Context (runAsUser)
+        schema: addon/properties/jobTemplate/properties/securityContext
       - type: select
         label: Addon Name
         loader: getAddon
-        schema: addons/properties/name
+        schema: addon/properties/name
       - type: array-object-form
         label: Tasks
+        validation: 
+          type: required
         elements:
         - type: select
           label: Task Name
-          loader: 
+          loader:
             name: getTaskNames
             watchPaths:
-              - schema/properties/spec/properties/sessions/dynamicIndex/properties/addons/properties/name
-          schema: addons/properties/tasks/properties/name
+              - schema/properties/spec/properties/sessions/dynamicIndex/properties/addon/properties/name
+          schema: name
         - type: input
           label: Params
-          schema: addons/properties/tasks/properties/name
-        schema: addons/properties/tasks
+          schema: params
+        schema: addon/properties/tasks
       - type: select
         label: Encryption Secret Namespace
         loader: getNamespaces
         schema: encryptionSecret/properties/namespace
       - type: select
         label: Encryption Secret Name
-        loader: 
+        loader:
           watchPaths:
             - schema/properties/spec/properties/sessions/dynamicIndex/properties/encryptionSecret/properties/namespace
           name: getEncryptionSecretNames
