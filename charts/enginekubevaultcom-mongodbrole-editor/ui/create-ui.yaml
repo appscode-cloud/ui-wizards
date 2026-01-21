@@ -1,73 +1,62 @@
-steps:
-- form:
-    elements:
-    - fetch: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
-      if: isConsole
-      label:
-        text: labels.selectDb
-      refresh: true
-      required: true
-      schema:
-        $ref: discriminator#/properties/database
-      sortable: true
-      type: select
-    - computed: setRoleName
-      label:
-        text: metadata.name
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/name
+step:
+- type: single-step-form
+  elements:
+  - loader: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
+    if: 
+      name: isConsole
+      type: function
+    label: Select Database
+    refresh: true
+    validation:
+      type: required
+    schema: temp/properties/database
+    sortable: true
+    type: select
+  - watcher:
+      func: setRoleName
+      paths:
+        - schema/properties/spec/properties/secretEngineRef/properties/name
+    label: Name
+    validation:
+      type: required
+    schema: schema/properties/metadata/properties/name
+    type: input
+  - init:
+      value: getDbNamespace
+      type: func
+    disable: true
+    if:
+      name: isDbSelected
+      type: function
+    label: Namespace
+    schema: schema/properties/metadata/properties/namespace
+    type: input
+  - loader: getEngines|engine.kubevault.com|v1alpha1|secretengines
+    if:
+      name: isDbSelected
+      type: function
+    label: Select SecretEngine
+    refresh: true
+    validation:
+      type: required
+    schema: schema/properties/spec/properties/secretEngineRef/properties/name
+    type: select
+  - label: Default TTL
+    schema: schema/properties/spec/properties/defaultTTL
+    type: input
+  - label: Max TTL
+    schema: schema/properties/spec/properties/maxTTL
+    type: input
+  - type: array-item-form
+    element:
+      label: Statement
       type: input
-    - computed: getDbNamespace
-      disabled: true
-      if: isDbSelected
-      label:
-        text: metadata.namespace
-      schema:
-        $ref: schema#/properties/metadata/properties/namespace
+    label: Creation Statement
+    schema: schema/properties/spec/properties/creationStatements
+  - type: array-item-form
+    element:
+      label: Statement
       type: input
-    - fetch: getEngines|engine.kubevault.com|v1alpha1|secretengines
-      if: isDbSelected
-      label:
-        text: labels.selectEngine
-      refresh: true
-      required: true
-      schema:
-        $ref: schema#/properties/spec/properties/secretEngineRef/properties/name
-      type: select
-    - label:
-        text: spec.defaultTTL
-      schema:
-        $ref: schema#/properties/spec/properties/defaultTTL
-      type: input
-    - label:
-        text: spec.maxTTL
-      schema:
-        $ref: schema#/properties/spec/properties/maxTTL
-      type: input
-    - element:
-        label:
-          text: labels.statement
-        schema:
-          $ref: schema#/properties/spec/properties/creationStatements/items
-        type: input
-      label:
-        text: spec.creation
-      schema:
-        $ref: schema#/properties/spec/properties/creationStatements
-      type: list-input-form
-    - element:
-        label:
-          text: labels.statement
-        schema:
-          $ref: schema#/properties/spec/properties/revocationStatements/items
-        type: input
-      label:
-        text: spec.revocation
-      schema:
-        $ref: schema#/properties/spec/properties/revocationStatements
-      type: list-input-form
-    type: single-step-form
-  id: basic
-  title: Create MongoDBRole
+    label: Revocation Statement
+    schema: schema/properties/spec/properties/revocationStatements
 type: multi-step-form
