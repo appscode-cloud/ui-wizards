@@ -470,6 +470,16 @@ export const useFunc = (model) => {
     return !!configName && contex === 'Modify'
   }
 
+  function setPausedValue() {
+    const backupConfig = storeGet('backup/backupConfigurations') || []
+    const selectedConfigName = getValue(discriminator, '/config')
+    const namespace = storeGet('/route/query/namespace')
+    const selectedConfig = backupConfig.find(
+      (item) => item.metadata.name === selectedConfigName && item.metadata.namespace === namespace,
+    )
+    return !!selectedConfig?.spec?.paused
+  }
+
   function showConfigList() {
     // watchDependency('discriminator#/backupConfigContext')
     const contex = getValue(discriminator, '/backupConfigContext')
@@ -741,7 +751,7 @@ export const useFunc = (model) => {
     let value = getValue(model, `/resources/${path}`)
     console.log('setTrigger', value, path)
 
-    return value === 'On'  // Returns boolean instead of string
+    return value === 'On' // Returns boolean instead of string
   }
 
   function onTriggerChange(type) {
@@ -1436,6 +1446,7 @@ export const useFunc = (model) => {
     showScheduleBackup,
     getDefaultSchedule,
     onInputChangeSchedule,
+    setPausedValue,
 
     getDbDetails,
     isKubedb,

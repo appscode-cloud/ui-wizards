@@ -488,6 +488,16 @@ export const useFunc = (model) => {
     return !!configName && contex === 'Modify'
   }
 
+  function setPausedValue() {
+    const backupConfig = storeGet('backup/backupConfigurations') || []
+    const selectedConfigName = getValue(discriminator, '/config')
+    const namespace = storeGet('/route/query/namespace')
+    const selectedConfig = backupConfig.find(
+      (item) => item.metadata.name === selectedConfigName && item.metadata.namespace === namespace,
+    )
+    return !!selectedConfig?.spec?.paused
+  }
+
   function showConfigList() {
     // watchDependency('discriminator#/backupConfigContext')
     const contex = getValue(discriminator, '/backupConfigContext')
@@ -1537,6 +1547,7 @@ export const useFunc = (model) => {
     showScheduleBackup,
     getDefaultSchedule,
     onInputChangeSchedule,
+    setPausedValue,
 
     isConsole,
     isKubedb,
