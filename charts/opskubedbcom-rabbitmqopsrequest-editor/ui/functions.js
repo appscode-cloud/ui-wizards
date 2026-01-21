@@ -686,12 +686,14 @@ export const useFunc = (model) => {
     if (ver) {
       const operation = route.params.actions
       const match = /^(.*)-opsrequest-(.*)$/.exec(operation)
-      const opstype = match[2]
-      commit('wizard/model$update', {
-        path: '/spec/type',
-        value: opMap[opstype],
-        force: true,
-      })
+      if (match) {
+        const opstype = match[2]
+        commit('wizard/model$update', {
+          path: '/spec/type',
+          value: opMap[opstype],
+          force: true,
+        })
+      }
     }
 
     return !ver
