@@ -55,7 +55,7 @@ step:
             watchPaths:
               - schema/properties/spec/properties/sessions/dynamicIndex/properties/addon/properties/name
           schema: name
-        - type: input
+        - type: editor
           label: Params
           schema: params
         schema: addon/properties/tasks
@@ -82,7 +82,10 @@ step:
         type: required
       schema: schema/properties/spec/properties/target/properties/apiGroup
       type: select
-    - loader: getKinds
+    - loader:
+        name: getKinds
+        watchPaths:
+          - schema/properties/spec/properties/target/properties/apiGroup
       label: Kind
       watcher:
         func: setVersion
@@ -112,7 +115,6 @@ step:
       name: showTarget
     label: Target
     showLabels: true
-    hideBlock: true
     type: block-layout
   id: options
 type: multi-step-form

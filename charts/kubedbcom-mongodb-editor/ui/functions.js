@@ -3260,23 +3260,21 @@ export const useFunc = (model) => {
     const filteredEnv = env?.map((item) => {
       const { temp, ...rest } = item
       if (temp.valueFromType === 'input') {
-        const { value } = rest
-        ret = { value }
+        const { name, value } = rest
+        ret = { name, value }
       } else if (temp.valueFromType === 'configMap') {
+        const { name } = rest
         const { configMapKeyRef } = rest.valueFrom
-        ret = { valueFrom: { configMapKeyRef } }
+        ret = { name, valueFrom: { configMapKeyRef } }
       } else if (temp.valueFromType === 'secret') {
+        const { name } = rest
         const { secretKeyRef } = rest.valueFrom
-        ret = { valueFrom: { secretKeyRef } }
+        ret = { name, valueFrom: { secretKeyRef } }
       }
       return ret
     })
-    const value = getValue(
-      model,
-      '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env',
-    )
 
-    if (env.length)
+    if (filteredEnv.length)
       commit('wizard/model$update', {
         path: '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env',
         value: filteredEnv,
