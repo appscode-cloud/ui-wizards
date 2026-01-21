@@ -549,8 +549,7 @@ step:
                 - temp/refNamespace
             forceRequired: true
             validation:
-              type: custom
-              name: pointInTimeErrorCheck
+              type: required
             schema: temp/refNamespace
             type: input
           - label: Name
@@ -565,6 +564,10 @@ step:
       - label: Recovery Timestamp
         schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
         type: date-time
+        watcher:
+          func: onTimestampChange
+          paths:
+            - schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
       if:
         type: function
         name: showRecovery
