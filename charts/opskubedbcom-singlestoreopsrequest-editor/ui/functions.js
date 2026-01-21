@@ -684,14 +684,16 @@ export const useFunc = (model) => {
       reconfigure: 'Reconfigure',
     }
     if (ver) {
-      const operation = route.params.actions
+      const operation = storeGet('/resource/activeActionItem/result/operationId') || ''
       const match = /^(.*)-opsrequest-(.*)$/.exec(operation)
-      const opstype = match[2]
-      commit('wizard/model$update', {
-        path: '/spec/type',
-        value: opMap[opstype],
-        force: true,
-      })
+      if (match) {
+        const opstype = match[2]
+        commit('wizard/model$update', {
+          path: '/spec/type',
+          value: opMap[opstype],
+          force: true,
+        })
+      }
     }
 
     return !ver
@@ -780,8 +782,13 @@ export const useFunc = (model) => {
     machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
-    if (machinePresets) return machine
-    else {
+    if (machinePresets) {
+      return {
+        machine: machine,
+        cpu: machinePresets.limits.cpu,
+        memory: machinePresets.limits.memory,
+      }
+    } else {
       // For coordinator, get limits from containers
       if (type === 'coordinator') {
         const containers =
