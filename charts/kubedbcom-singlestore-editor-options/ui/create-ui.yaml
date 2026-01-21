@@ -65,7 +65,10 @@ step:
         - init:
             type: func
             value: setLimits|cpu|topology/aggregator
-          disable: isMachineNotCustom
+          disable: isMachineNotCustom|topology/aggregator
+          if:
+            type: function
+            name: isMachineCustom|topology/aggregator
           label: CPU
           loader: setLimits|cpu|topology/aggregator
           watcher:
@@ -78,7 +81,10 @@ step:
         - init:
             type: func
             value: setLimits|memory|topology/aggregator
-          disable: isMachineNotCustom
+          disable: isMachineNotCustom|topology/aggregator
+          if:
+            type: function
+            name: isMachineCustom|topology/aggregator
           label: Memory
           loader: setLimits|memory|topology/aggregator
           watcher:
@@ -124,6 +130,9 @@ step:
             type: func
             value: setLimits|cpu|topology/leaf
           disable: isMachineNotCustom|topology/leaf
+          if:
+            type: function
+            name: isMachineCustom|topology/leaf
           label: CPU
           loader: setLimits|cpu|topology/leaf
           watcher:
@@ -137,6 +146,9 @@ step:
             type: func
             value: setLimits|memory|topology/leaf
           disable: isMachineNotCustom|topology/leaf
+          if:
+            type: function
+            name: isMachineCustom|topology/leaf
           label: Memory
           loader: setLimits|memory|topology/leaf
           watcher:
@@ -170,6 +182,9 @@ step:
             type: func
             value: setLimits|cpu
           disable: isMachineNotCustom
+          if:
+            type: function
+            name: isMachineCustom
           label: CPU
           loader: setLimits|cpu
           watcher:
@@ -183,6 +198,9 @@ step:
             type: func
             value: setLimits|memory
           disable: isMachineNotCustom
+          if:
+            type: function
+            name: isMachineCustom
           label: Memory
           loader: setLimits|memory
           watcher:

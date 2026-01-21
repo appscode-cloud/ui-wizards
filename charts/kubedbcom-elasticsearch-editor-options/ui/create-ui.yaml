@@ -60,7 +60,10 @@ step:
           - init:
               type: func
               value: setLimits|cpu|topology/master
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/master
+            if:
+              type: function
+              name: isMachineCustom|topology/master
             label: cpu
             loader: setLimits|cpu|topology/master
             watcher:
@@ -73,7 +76,10 @@ step:
           - init:
               type: func
               value: setLimits|memory|topology/master
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/master
+            if:
+              type: function
+              name: isMachineCustom|topology/master
             label: memory
             loader: setLimits|memory|topology/master
             watcher:
@@ -112,7 +118,10 @@ step:
           - init:
               type: func
               value: setLimits|cpu|topology/data
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/data
+            if:
+              type: function
+              name: isMachineCustom|topology/data
             label: cpu
             loader: setLimits|cpu|topology/data
             watcher:
@@ -125,7 +134,10 @@ step:
           - init:
               type: func
               value: setLimits|memory|topology/data
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/data
+            if:
+              type: function
+              name: isMachineCustom|topology/data
             label: memory
             loader: setLimits|memory|topology/data
             watcher:
@@ -164,7 +176,10 @@ step:
           - init:
               type: func
               value: setLimits|cpu|topology/ingest
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/ingest
+            if:
+              type: function
+              name: isMachineCustom|topology/ingest
             label: cpu
             loader: setLimits|cpu|topology/ingest
             watcher:
@@ -177,7 +192,10 @@ step:
           - init:
               type: func
               value: setLimits|memory|topology/ingest
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/ingest
+            if:
+              type: function
+              name: isMachineCustom|topology/ingest
             label: memory
             loader: setLimits|memory|topology/ingest
             watcher:
@@ -211,7 +229,10 @@ step:
         - init:
             type: func
             value: setLimits|cpu
-          disable: isMachineNotCustom|schema/properties/spec/properties/podResources/properties/machine
+          disable: isMachineNotCustom
+          if:
+            type: function
+            name: isMachineCustom
           label: cpu
           loader: setLimits|cpu
           watcher:

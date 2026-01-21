@@ -60,7 +60,10 @@ step:
           - init:
               type: func
               value: setLimits|cpu|topology/controller
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/controller/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/controller
+            if:
+              type: function
+              name: isMachineCustom|topology/controller
             label: cpu
             loader: setLimits|cpu|topology/controller
             watcher:
@@ -73,7 +76,10 @@ step:
           - init:
               type: func
               value: setLimits|memory|topology/controller
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/controller/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/controller
+            if:
+              type: function
+              name: isMachineCustom|topology/controller
             label: memory
             loader: setLimits|memory|topology/controller
             watcher:
@@ -112,7 +118,10 @@ step:
           - init:
               type: func
               value: setLimits|cpu|topology/broker
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/broker/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/broker
+            if:
+              type: function
+              name: isMachineCustom|topology/broker
             label: cpu
             loader: setLimits|cpu|topology/broker
             watcher:
@@ -125,7 +134,10 @@ step:
           - init:
               type: func
               value: setLimits|memory|topology/broker
-            disable: isMachineNotCustom|schema/properties/spec/properties/topology/properties/broker/properties/podResources/properties/machine
+            disable: isMachineNotCustom|topology/broker
+            if:
+              type: function
+              name: isMachineCustom|topology/broker
             label: memory
             loader: setLimits|memory|topology/broker
             watcher:
@@ -159,7 +171,10 @@ step:
         - init:
             type: func
             value: setLimits|cpu
-          disable: isMachineNotCustom|schema/properties/spec/properties/podResources/properties/machine
+          disable: isMachineNotCustom
+          if:
+            type: function
+            name: isMachineCustom
           label: cpu
           loader: setLimits|cpu
           watcher:
@@ -172,7 +187,10 @@ step:
         - init:
             type: func
             value: setLimits|memory
-          disable: isMachineNotCustom|schema/properties/spec/properties/podResources/properties/machine
+          disable: isMachineNotCustom
+          if:
+            type: function
+            name: isMachineCustom
           label: memory
           loader: setLimits|memory
           watcher:
