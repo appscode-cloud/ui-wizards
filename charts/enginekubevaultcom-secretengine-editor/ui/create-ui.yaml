@@ -1,66 +1,80 @@
-steps:
-- form:
-    elements:
-    - fetch: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
-      if: isConsole
-      label:
-        text: labels.selectDb
-      onChange: getSpecRef
-      refresh: true
-      required: true
-      schema:
-        $ref: discriminator#/properties/database
-      sortable: true
-      type: select
-    - computed: getEngineName
-      label:
-        text: metadata.name
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/name
-      type: input
-    - computed: getDbNamespace
-      disabled: true
-      if: isDbSelected
-      label:
-        text: metadata.namespace
-      schema:
-        $ref: schema#/properties/metadata/properties/namespace
-      type: input
-    - fetch: getVaultservers|kubevault.com|v1alpha2|vaultservers
-      label:
-        text: labels.selectVault
-      refresh: true
-      required: true
-      schema:
-        $ref: discriminator#/properties/vaultserver
-      type: select
-    - computed: vaultRefName
-      disabled: true
-      if: isVaultSelected
-      label:
-        text: spec.vaultRef.name
-      onChange: getSpecRef
-      schema:
-        $ref: schema#/properties/spec/properties/vaultRef/properties/name
-      type: input
-    - computed: vaultRefNamespace
-      disabled: true
-      if: isVaultSelected
-      label:
-        text: spec.vaultRef.namespace
-      schema:
-        $ref: schema#/properties/spec/properties/vaultRef/properties/namespace
-      type: input
-    - computed: getPluginName
-      disabled: true
-      if: isDbSelected
-      label:
-        text: labels.plugin
-      schema:
-        $ref: discriminator#/properties/plugin-name
-      type: input
-    type: single-step-form
-  id: basic
-  title: Create SecretEngine
+step:
+- type: single-step-form
+  elements:
+  - loader: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
+    if:
+      name: isConsole
+      type: function
+    label: Select Database
+    watcher:
+      func: getSpecRef
+      paths:
+        - schema/properties/spec/properties/database
+    refresh: true
+    validation:
+      type: required
+    schema: temp/properties/database
+    sortable: true
+    type: select
+  - init:
+      type: func
+      value: getEngineName
+    label: Name
+    validation:
+      type: required  
+    schema: schema/properties/metadata/properties/name
+    type: input
+  - init:
+      type: func
+      value: getDbNamespace
+    disable: true
+    if:
+      name: isDbSelected
+      type: function
+    label: Namespace
+    schema: schema/properties/metadata/properties/namespace
+    type: input
+  - loader: getVaultservers|kubevault.com|v1alpha2|vaultservers
+    label: Select VaultServer
+    refresh: true
+    validation:
+      type: required
+    schema: temp/properties/vaultserver
+    watcher:
+      func: getSpecRef
+      paths:
+        - temp/properties/vaultserver
+    type: select
+  - init:
+      value: vaultRefName
+      type: func
+    disable: true
+    if:
+      name: isVaultSelected
+      type: function
+    label: Vaultref Name
+    
+    schema: schema/properties/spec/properties/vaultRef/properties/name
+    type: input
+  - init:
+      value: vaultRefNamespace
+      type: func
+    disable: true
+    if:
+      name: isVaultSelected
+      type: function
+    label: Vaultref Namespace
+    schema: schema/properties/spec/properties/vaultRef/properties/namespace
+    type: input
+  - watcher:
+      func: getPluginName
+      paths:
+        - schema/properties/spec/properties/database
+    disable: true
+    if:
+      name: isDbSelected
+      type: function
+    label: Plugin Name
+    schema: discriminator/properties/plugin-name
+    type: input
 type: multi-step-form
