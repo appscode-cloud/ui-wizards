@@ -895,8 +895,13 @@ export const useFunc = (model) => {
     machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
-    if (machinePresets) return machine
-    else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
+    if (machinePresets) {
+      return {
+        machine: machine,
+        cpu: machinePresets.limits.cpu,
+        memory: machinePresets.limits.memory,
+      }
+    } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
   function onMachineChange(type, path) {
