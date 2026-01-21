@@ -548,6 +548,16 @@ export const useFunc = (model) => {
     return !!configName && contex === 'Modify'
   }
 
+  function setPausedValue() {
+    const backupConfig = storeGet('backup/backupConfigurations') || []
+    const selectedConfigName = getValue(discriminator, '/config')
+    const namespace = storeGet('/route/query/namespace')
+    const selectedConfig = backupConfig.find(
+      (item) => item.metadata.name === selectedConfigName && item.metadata.namespace === namespace,
+    )
+    return !!selectedConfig?.spec?.paused
+  }
+
   function showConfigList() {
     const contex = getValue(discriminator, '/backupConfigContext')
     return contex === 'Modify' || contex === 'Delete'
@@ -1358,6 +1368,7 @@ export const useFunc = (model) => {
     showPause,
     showConfigList,
     showSchedule,
+    setPausedValue,
 
     // Gateway binding
     addOrRemoveBinding,
