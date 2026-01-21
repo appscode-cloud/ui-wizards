@@ -1226,6 +1226,30 @@ export const useFunc = (model) => {
     return date.toString()
   }
 
+  function convertToUTC(localTime) {
+    const date = new Date(localTime)
+    if (isNaN(date.getTime())) return
+
+    const utcString = date.toISOString()
+    return utcString
+  }
+
+  function onTimestampChange() {
+    const localTime = getValue(model, '/spec/init/archiver/recoveryTimestamp')
+    if (!localTime) return
+
+    const utcString = convertToUTC(localTime)
+
+    // Only update if the value is valid & not already in UTC format
+    if (utcString && localTime !== utcString) {
+      commit('wizard/model$update', {
+        path: '/spec/init/archiver/recoveryTimestamp',
+        value: utcString,
+        force: true,
+      })
+    }
+  }
+
   function getComponentLogStats(snapshot) {
     if (!snapshot || !snapshot.status || !snapshot.status.components) {
       return null
@@ -1295,17 +1319,17 @@ export const useFunc = (model) => {
 
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
-        value: convertToLocal(resp?.end),
+        value: convertToUTC(resp?.end),
         force: true,
       })
       commit('wizard/model$update', {
         path: `/minDate`,
-        value: convertToLocal(resp?.start),
+        value: convertToUTC(resp?.start),
         force: true,
       })
       commit('wizard/model$update', {
         path: `/maxDate`,
-        value: convertToLocal(resp?.end),
+        value: convertToUTC(resp?.end),
         force: true,
       })
     } catch (e) {
@@ -1326,6 +1350,9 @@ export const useFunc = (model) => {
         value: '',
         force: true,
       })
+      commit('wizard/model$delete', '/spec/init/archiver/encryptionSecret')
+      commit('wizard/model$delete', '/spec/init/archiver/fullDBRepository')
+      commit('wizard/model$delete', '/spec/init/archiver/manifestRepository')
       console.log(e)
     }
   }
@@ -1497,5 +1524,6 @@ export const useFunc = (model) => {
     showArchiverAlert,
     showArchiver,
     getAppBindings,
+    onTimestampChange,
   }
 }
