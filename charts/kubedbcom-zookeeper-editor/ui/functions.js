@@ -380,6 +380,16 @@ export const useFunc = (model) => {
     return !!configName && contex === 'Modify'
   }
 
+  function setPausedValue() {
+    const backupConfig = storeGet('backup/backupConfigurations') || []
+    const selectedConfigName = getValue(discriminator, '/config')
+    const namespace = storeGet('/route/query/namespace')
+    const selectedConfig = backupConfig.find(
+      (item) => item.metadata.name === selectedConfigName && item.metadata.namespace === namespace,
+    )
+    return !!selectedConfig?.spec?.paused
+  }
+
   function showConfigList() {
     // watchDependency('discriminator#/backupConfigContext')
     const contex = getValue(discriminator, '/backupConfigContext')
@@ -813,7 +823,6 @@ export const useFunc = (model) => {
     }
   }
 
-
   // Autoscaler functions
 
   let autoscaleType = ''
@@ -860,7 +869,10 @@ export const useFunc = (model) => {
 
   function showOpsRequestOptions() {
     if (isKubedb() === true) return true
-    const dbRefName = getValue(model, '/resources/autoscalingKubedbComZooKeeperAutoscaler/spec/databaseRef/name')
+    const dbRefName = getValue(
+      model,
+      '/resources/autoscalingKubedbComZooKeeperAutoscaler/spec/databaseRef/name',
+    )
     const autoscalingType = getValue(discriminator, '/autoscalingType')
     return !!dbRefName && !!autoscalingType
   }
@@ -953,7 +965,8 @@ export const useFunc = (model) => {
 
   function initMetadata() {
     const dbName =
-      getValue(model, '/resources/autoscalingKubedbComZooKeeperAutoscaler/spec/databaseRef/name') || ''
+      getValue(model, '/resources/autoscalingKubedbComZooKeeperAutoscaler/spec/databaseRef/name') ||
+      ''
     const type = getValue(discriminator, '/autoscalingType') || ''
     const date = Math.floor(Date.now() / 1000)
     const resource = storeGet('/route/params/resource')
@@ -968,9 +981,15 @@ export const useFunc = (model) => {
 
     // delete the other type object from model
     if (type === 'compute')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComZooKeeperAutoscaler/spec/storage')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComZooKeeperAutoscaler/spec/storage',
+      )
     if (type === 'storage')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComZooKeeperAutoscaler/spec/compute')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComZooKeeperAutoscaler/spec/compute',
+      )
   }
 
   async function fetchNodeTopology() {
@@ -1206,8 +1225,6 @@ export const useFunc = (model) => {
     return false
   }
 
-
-
   return {
     returnFalse,
     initScheduleBackup,
@@ -1228,6 +1245,7 @@ export const useFunc = (model) => {
     getConfigList,
     onConfigChange,
     showPause,
+    setPausedValue,
     showConfigList,
     showSchedule,
     showScheduleBackup,
@@ -1278,5 +1296,4 @@ export const useFunc = (model) => {
     isRancherManaged,
     onTriggerChange,
   }
-
 }
