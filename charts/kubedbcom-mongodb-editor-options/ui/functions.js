@@ -616,8 +616,7 @@ export const useFunc = (model) => {
 
   function setMachineToCustom(type) {
     let path = ''
-    if (type) path = `/spec/${type}/podResources/machine`
-    else path = '/spec/admin/machineProfiles/default'
+    path = '/spec/admin/machineProfiles/default'
     const machine = getValue(model, path)
     return machine || 'custom'
   }
