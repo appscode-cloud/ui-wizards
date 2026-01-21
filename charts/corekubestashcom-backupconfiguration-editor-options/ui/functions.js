@@ -95,7 +95,7 @@ export const useFunc = (model) => {
   async function getTaskNames(index) {
     // watchDependency('temporaryModel#/session/addon/name')
     const session = getValue(model, `/spec/sessions`)
-    const addon = session[index]?.addons?.name
+    const addon = session[index]?.addon?.name
 
     const params = storeGet('/route/params')
     const { user, cluster } = params
