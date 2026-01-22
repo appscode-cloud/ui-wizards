@@ -651,6 +651,10 @@ step:
         if:
           name: ifRequestTypeEqualsTo|Reconfigure
           type: function
+        loader:
+          name: fetchConfigSecrets
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         elements:
           - type: block-layout
             label: Standalone
@@ -687,7 +691,7 @@ step:
                       refresh: true
                       label: Config Secret
                       loader:
-                        name: getConfigSecrets
+                        name: getConfigSecrets|standalone
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
                           - temp/properties/standalone/properties/createSecret/properties/status
