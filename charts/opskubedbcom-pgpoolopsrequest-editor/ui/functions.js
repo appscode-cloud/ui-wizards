@@ -825,8 +825,7 @@ export const useFunc = (model) => {
       console.log(e)
       parsedInstance = {}
     }
-    if (selectedMachine.machine === 'custom') parsedInstance = {}
-    else parsedInstance = selectedMachine.machine
+    parsedInstance = selectedMachine.machine
     annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
 
     if (machinesFromPreset.length)

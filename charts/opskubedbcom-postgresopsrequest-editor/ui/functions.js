@@ -815,8 +815,7 @@ export const useFunc = (model) => {
 
     // update metadata.annotations
     const annotations = getValue(model, '/metadata/annotations') || {}
-    if (selectedMachine.machine === 'custom') delete annotations['kubernetes.io/instance-type']
-    else annotations['kubernetes.io/instance-type'] = selectedMachine.machine
+    annotations['kubernetes.io/instance-type'] = selectedMachine.machine
 
     if (machinesFromPreset.length)
       commit('wizard/model$update', {
