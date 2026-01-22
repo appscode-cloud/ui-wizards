@@ -19,7 +19,7 @@ export const useFunc = (model) => {
 
   // **************** common functions ****************
 
-  async function init() {
+  async function getOptions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace')
@@ -37,14 +37,11 @@ export const useFunc = (model) => {
           options.push({ text: tx, value: ele.metadata.name })
         }
       })
+      return options
     } catch (e) {
       console.log(e)
     }
     setDiscriminatorValue('/initApi', true)
-  }
-
-  function getOptions() {
-    return options
   }
 
   function getSessionOptions() {
@@ -105,7 +102,6 @@ export const useFunc = (model) => {
     buildCommand,
     isApiResolved,
     getOptions,
-    init,
     returnFalse,
   }
 }
