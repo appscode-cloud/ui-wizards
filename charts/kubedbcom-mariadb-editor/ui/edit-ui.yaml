@@ -241,19 +241,18 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: horizontal-layout
-                    elements:
                     - type: machine-compare
                       label: Min Allowed Profile
+                      header: Minimum Resource Limit
                       schema: temp/properties/allowedMachine-min
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|min
+                        value: setAllowedMachine|mariadb|min
                       loader:
-                        name: getMachines|min
+                        name: getMachines|mariadb|min
                         watchPaths:
                           - temp/properties/topologyMachines
                           - temp/properties/allowedMachine-max
@@ -277,15 +276,16 @@ step:
                           schema: schema/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
                     - type: machine-compare
                       label: Max Allowed Profile
+                      header: Maximum Resource Limit
                       schema: temp/properties/allowedMachine-max
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|max
+                        value: setAllowedMachine|mariadb|max
                       loader:
-                        name: getMachines|max
+                        name: getMachines|mariadb|max
                         watchPaths:
                           - temp/properties/topologyMachines
                           - temp/properties/allowedMachine-min
