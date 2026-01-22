@@ -315,7 +315,7 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
-const configSecretKeys = ['mongod.conf']
+const configSecretKeys = ['mongod.conf', 'replicaset.json', 'configuration.js']
 
 let machinesFromPreset = []
 
@@ -901,9 +901,12 @@ export const useFunc = (model) => {
     return machine === 'custom'
   }
 
-  // for config secret
-  let newConfigSecrets = []
-  async function getConfigSecrets() {
+  // Fetch and store database Infos
+  // for secret configurations in reconfigure
+  let configSecrets = []
+  let secretConfigData = []
+
+  async function fetchConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/namespace')
@@ -914,7 +917,6 @@ export const useFunc = (model) => {
     const dbKind = getValue(store.state, '/resource/definition/result/kind')
     const dbResource = getValue(model, '/route/params/resource')
     const dbVersion = getValue(model, '/route/params/version')
-    let secrets = []
 
     try {
       const resp = await axios.post(
@@ -935,68 +937,34 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
-            keys: ['mongod.conf'],
+            keys: ['mongod.conf', 'replicaset.json', 'configuration.js'],
           },
         },
       )
-      secrets = resp?.data?.response?.availableSecrets || []
-      newConfigSecrets = secrets
+      configSecrets = resp?.data?.response?.availableSecrets || []
+      secretConfigData = resp?.data?.response?.configurations || []
     } catch (e) {
       console.log(e)
     }
-    const mappedSecrets = secrets.map((item) => {
+  }
+
+  async function getConfigSecrets(type) {
+    const secretStatus = getValue(discriminator, `${type}/createSecret/status`)
+    if (secretStatus === 'success') {
+      await fetchConfigSecrets()
+    }
+    const mappedSecrets = configSecrets.map((item) => {
       return { text: item, value: item }
     })
     mappedSecrets.push({ text: '+ Create a new Secret', value: 'Create' })
     return mappedSecrets
   }
 
-  let ConfigurationsData = []
-
   async function getConfigSecretsforAppyConfig() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = getValue(model, '/metadata/namespace')
-    // watchDependency('model#/metadata/namespace')
-
-    const name = getValue(model, '/spec/databaseRef/name')
-    const dbGroup = getValue(model, '/route/params/group')
-    const dbKind = getValue(store.state, '/resource/definition/result/kind')
-    const dbResource = getValue(model, '/route/params/resource')
-    const dbVersion = getValue(model, '/route/params/version')
-
-    try {
-      const resp = await axios.post(
-        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
-        {
-          apiVersion: 'ui.kubedb.com/v1alpha1',
-          kind: 'DatabaseInfo',
-          request: {
-            source: {
-              ref: {
-                name: name,
-                namespace: namespace,
-              },
-              resource: {
-                group: dbGroup,
-                kind: dbKind,
-                name: dbResource,
-                version: dbVersion,
-              },
-            },
-            keys: ['mongod.conf'],
-          },
-        },
-      )
-      ConfigurationsData = resp?.data?.response?.configurations || []
-      const secrets = ConfigurationsData.map((item) => {
-        return { text: item.componentName, value: item.componentName }
-      })
-      return secrets
-    } catch (e) {
-      console.log(e)
-    }
-    return []
+    const secrets = secretConfigData.map((item) => {
+      return { text: item.componentName, value: item.componentName }
+    })
+    return secrets
   }
 
   function getSelectedConfigurationData(type) {
@@ -1007,7 +975,7 @@ export const useFunc = (model) => {
       return []
     }
 
-    const configuration = ConfigurationsData.find(
+    const configuration = secretConfigData.find(
       (item) => item.componentName === selectedConfiguration,
     )
 
@@ -1052,7 +1020,7 @@ export const useFunc = (model) => {
       return { subtitle: 'No secret selected' }
     }
 
-    const configuration = ConfigurationsData.find(
+    const configuration = secretConfigData.find(
       (item) => item.componentName === selectedConfiguration,
     )
 
@@ -1073,7 +1041,7 @@ export const useFunc = (model) => {
       return { subtitle: 'No configuration selected' }
     }
 
-    const configuration = ConfigurationsData.find(
+    const configuration = secretConfigData.find(
       (item) => item.componentName === selectedConfiguration,
     )
 
@@ -1093,7 +1061,7 @@ export const useFunc = (model) => {
       return ''
     }
 
-    const configuration = ConfigurationsData.find(
+    const configuration = secretConfigData.find(
       (item) => item.componentName === selectedConfiguration,
     )
 
@@ -1204,7 +1172,7 @@ export const useFunc = (model) => {
     else if (secretStatus === 'success') {
       const name = getValue(discriminator, `${type}/createSecret/lastCreatedSecret`)
 
-      const configFound = newConfigSecrets.find((item) => item === name)
+      const configFound = configSecrets.find((item) => item === name)
       return configFound ? { text: name, value: name } : ''
     }
   }
@@ -1357,37 +1325,23 @@ export const useFunc = (model) => {
     if (!selectedConfig) {
       return [{ name: '', content: '' }]
     }
-    const applyconfig = ConfigurationsData.find((item) => {
+    const applyconfigData = secretConfigData.find((item) => {
       if (item.componentName === selectedConfig) {
         return item
       }
     })
-
-    const { secretName, data } = applyconfig
+    const { applyConfig } = applyconfigData
     const configObj = []
-    const tempConfigObj = {}
 
-    if (data) {
-      // Decode base64 and format as array of objects with name and content
-      Object.keys(data).forEach((fileName) => {
-        try {
-          // Decode base64 string
-          const decodedString = atob(data[fileName])
-          configObj.push({
-            name: fileName,
-            content: decodedString,
-          })
-          tempConfigObj[fileName] = decodedString
-        } catch (e) {
-          console.error(`Error decoding ${fileName}:`, e)
-          configObj.push({
-            name: fileName,
-            content: data[fileName], // Fallback to original if decode fails
-          })
-        }
+    if (applyConfig) {
+      Object.keys(applyConfig).forEach((fileName) => {
+        configObj.push({
+          name: fileName,
+          content: applyConfig[fileName],
+        })
       })
     } else {
-      configObj.push({ name: selectedConfig, content: '' })
+      configObj.push({ name: '', content: '' })
     }
     return configObj
   }
@@ -1405,7 +1359,7 @@ export const useFunc = (model) => {
       value: true,
     })
 
-    const configuration = ConfigurationsData.find((item) => item.componentName === selectedConfig)
+    const configuration = secretConfigData.find((item) => item.componentName === selectedConfig)
 
     if (!configuration.data) {
       return [{ name: '', content: '' }]
@@ -1440,6 +1394,7 @@ export const useFunc = (model) => {
       commit('wizard/model$delete', `/spec/configuration/${type}/configSecret`)
       return [{ name: '', content: '' }]
     }
+    if (selectedSecret === 'Create') return [{ name: '', content: '' }]
 
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1872,6 +1827,7 @@ export const useFunc = (model) => {
     showAndInitOpsRequestType,
     ifDbTypeEqualsTo,
     getConfigSecrets,
+    fetchConfigSecrets,
     getSelectedConfigSecret,
     createSecretUrl,
     isEqualToValueFromType,
