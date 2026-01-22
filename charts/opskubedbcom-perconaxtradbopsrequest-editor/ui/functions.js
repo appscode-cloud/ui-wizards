@@ -817,14 +817,8 @@ export const useFunc = (model) => {
       parsedInstance = {}
     }
 
-    if (selectedMachine.machine === 'custom') {
-      // remove the instance-type annotation for custom machines
-      delete annotations['kubernetes.io/instance-type']
-      parsedInstance = {}
-    } else {
-      parsedInstance = selectedMachine.machine
-      annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
-    }
+    parsedInstance = selectedMachine.machine
+    annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
 
     if (machinesFromPreset.length)
       commit('wizard/model$update', {
