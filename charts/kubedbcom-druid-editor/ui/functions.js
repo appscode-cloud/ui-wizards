@@ -1442,7 +1442,7 @@ export const useFunc = (model) => {
   async function getDbDetails() {
     const annotations = getValue(
       model,
-      '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
+      '/resources/autoscalingKubedbComDruidAutoscaler/metadata/annotations',
     )
     instance = annotations?.['kubernetes.io/instance-type']
     const owner = storeGet('/route/params/user') || ''
@@ -1638,7 +1638,7 @@ export const useFunc = (model) => {
     const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
 
     // Return object with machine, cpu, memory (expected format for machine-compare init)
-    console.log('setAllowedMachine name',machineName,instance)
+    console.log('setAllowedMachine name',instance)
     if (machineData) {
       return {
         machine: machineName,
