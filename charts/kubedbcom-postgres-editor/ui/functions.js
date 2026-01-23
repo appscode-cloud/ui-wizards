@@ -163,6 +163,7 @@ export const useFunc = (model) => {
   let initialArchiver = {}
   let isArchiverAvailable = false
   let archiverObjectToCommit = {}
+  let showStoragememory = false
 
   async function initBackupData() {
     // set initial model for further usage
@@ -608,6 +609,8 @@ export const useFunc = (model) => {
           `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses/${name}`,
         )
         dbDetails = resp.data || {}
+        showStoragememory = dbDetails?.spec?.storageEngine === 'inMemory'
+        console.log('showStoragememory', showStoragememory)
 
         setDiscriminatorValue('/dbDetails', true)
       } catch (e) {
@@ -1428,6 +1431,10 @@ export const useFunc = (model) => {
     }
   }
 
+  function showStorageMemoryOption() {
+    return showStoragememory
+  }
+
   return {
     initScheduleBackup,
     initScheduleBackupForEdit,
@@ -1511,5 +1518,6 @@ export const useFunc = (model) => {
 
     isBindingAlreadyOn,
     addOrRemoveBinding,
+    showStorageMemoryOption
   }
 }

@@ -41,6 +41,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/allowedMachine-configServer-max', '')
   setDiscriminatorValue('/allowedMachine-mongos-min', '')
   setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  let showStoragememory = false
 
   function initScheduleBackupForEdit() {
     const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
@@ -627,7 +628,8 @@ export const useFunc = (model) => {
     )
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-
+    const storageEngine = getValue(model, '/resources/kubedbComMySQL/spec/storageEngine')
+    showStoragememory = storageEngine === 'inMemory'
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mysqls`,
       {
@@ -671,7 +673,6 @@ export const useFunc = (model) => {
     const annotations =
       getValue(model, '/resources/autoscalingKubedbComMySQLAutoscaler/metadata/annotations') || {}
     instance = annotations['kubernetes.io/instance-type']
-
     const user = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     if (instance) {
@@ -1339,6 +1340,9 @@ export const useFunc = (model) => {
     const value = getValue(model, path)
     return value
   }
+  function showStorageMemoryOption() {
+    return showStoragememory
+  }
 
   return {
     initScheduleBackup,
@@ -1416,5 +1420,6 @@ export const useFunc = (model) => {
     addOrRemoveBinding,
 
     setValueFromDbDetails,
+    showStorageMemoryOption,
   }
 }
