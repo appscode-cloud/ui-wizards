@@ -2782,8 +2782,6 @@ export const useFunc = (model) => {
         )
         dbDetails = resp.data || {}
         showStoragememory = dbDetails?.spec?.storageEngine === 'inMemory'
-        console.log('dbDetails', dbDetails?.spec?.storageEngine)
-
         setDiscriminatorValue('/dbDetails', true)
       } catch (e) {
         console.log(e)
@@ -3133,9 +3131,6 @@ export const useFunc = (model) => {
     const mx = machine?.includes(',') ? machine.split(',')[1] : ''
     const mn = machine?.includes(',') ? machine.split(',')[0] : ''
     const machineName = minmax === 'min' ? mn : mx
-    console.log('parsedInstance', parsedInstance)
-    console.log('mx',mx,type)
-    console.log('mn',mn,type)
     // Find the machine details from topologyMachines
     const nodeGroups = getValue(discriminator, '/topologyMachines') || []
     const machineData = nodeGroups.find((item) => item.topologyValue === machineName)

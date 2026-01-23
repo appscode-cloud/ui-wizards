@@ -1395,7 +1395,6 @@ export const useFunc = (model) => {
    * @param {string} type - Type of value ('bound' or 'scalingRules')
    */
   function handleUnit(path, type = 'bound') {
-    console.log('handleUnit')
     let value = getValue(model, `/resources/${path}`)
     if (type === 'scalingRules') {
       const updatedValue = []
@@ -1638,7 +1637,6 @@ export const useFunc = (model) => {
     const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
 
     // Return object with machine, cpu, memory (expected format for machine-compare init)
-    console.log('setAllowedMachine name',instance)
     if (machineData) {
       return {
         machine: machineName,
