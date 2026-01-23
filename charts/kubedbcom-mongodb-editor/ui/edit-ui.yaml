@@ -452,72 +452,72 @@ step:
             - type: block-layout
               showLabels: false
               elements:
-                - type: horizontal-layout
+                - type: machine-compare
+                  label: Min Allowed Profile
+                  header: Minimum Resource Limit
+                  schema: temp/properties/allowedMachine-standalone-min
+                  if:
+                    type: function
+                    name: hasAnnotations
+                  init:
+                    type: func
+                    value: setAllowedMachine|standalone|min
+                  loader:
+                    name: getMachines|standalone|min
+                    watchPaths:
+                      - temp/properties/topologyMachines
+                      - temp/properties/allowedMachine-standalone-max
+                  watcher:
+                    func: onMachineChange|standalone
+                    paths:
+                      - temp/properties/allowedMachine-standalone-min
+                - type: block-layout
+                  label: Min Allowed
+                  fixedBlock: true
+                  if:
+                    type: function
+                    name: hasNoAnnotations
+                  showLabels: true
                   elements:
-                  - type: machine-compare
-                    label: Min Allowed Profile
-                    schema: temp/properties/allowedMachine-standalone-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|standalone|min
-                    loader:
-                      name: getMachines|standalone|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-standalone-max
-                    watcher:
-                      func: onMachineChange|standalone
-                      paths:
-                        - temp/properties/allowedMachine-standalone-min
-                  - type: block-layout
-                    label: Min Allowed
-                    fixedBlock: true
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input-compare
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/cpu
-                      - type: input-compare
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/memory
-                  - type: machine-compare
-                    label: Max Allowed Profile
-                    schema: temp/properties/allowedMachine-standalone-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|standalone|max
-                    loader:
-                      name: getMachines|standalone|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-standalone-min
-                    watcher:
-                      func: onMachineChange|standalone
-                      paths:
-                        - temp/properties/allowedMachine-standalone-max
-                  - type: block-layout
-                    label: Max Allowed
-                    fixedBlock: true
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input-compare
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/cpu
-                      - type: input-compare
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/memory
+                    - type: input-compare
+                      label: Cpu
+                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/cpu
+                    - type: input-compare
+                      label: Memory
+                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/memory
+                - type: machine-compare
+                  label: Max Allowed Profile
+                  header: Maximum Resource Limit
+                  schema: temp/properties/allowedMachine-standalone-max
+                  if:
+                    type: function
+                    name: hasAnnotations
+                  init:
+                    type: func
+                    value: setAllowedMachine|standalone|max
+                  loader:
+                    name: getMachines|standalone|max
+                    watchPaths:
+                      - temp/properties/topologyMachines
+                      - temp/properties/allowedMachine-standalone-min
+                  watcher:
+                    func: onMachineChange|standalone
+                    paths:
+                      - temp/properties/allowedMachine-standalone-max
+                - type: block-layout
+                  label: Max Allowed
+                  fixedBlock: true
+                  if:
+                    type: function
+                    name: hasNoAnnotations
+                  showLabels: true
+                  elements:
+                    - type: input-compare
+                      label: Cpu
+                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/cpu
+                    - type: input-compare
+                      label: Memory
+                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/memory
             - type: select
               label: Controlled Resources
               loader: setControlledResources|compute/standalone
@@ -534,6 +534,9 @@ step:
             - type: block-layout
               label: In Memory Storage
               showLabels: true
+              if:
+                type: function
+                name: showStorageMemoryOption
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage
               elements:
                 - type: threshold-input
@@ -588,72 +591,72 @@ step:
             - type: block-layout
               showLabels: false
               elements:
-                - type: horizontal-layout
+                - type: machine-compare
+                  label: Min Allowed Profile
+                  header: Minimum Resource Limit
+                  schema: temp/properties/allowedMachine-replicaSet-min
+                  if:
+                    type: function
+                    name: hasAnnotations
+                  init:
+                    type: func
+                    value: setAllowedMachine|replicaSet|min
+                  loader:
+                    name: getMachines|replicaSet|min
+                    watchPaths:
+                      - temp/properties/topologyMachines
+                      - temp/properties/allowedMachine-replicaSet-max
+                  watcher:
+                    func: onMachineChange|replicaSet
+                    paths:
+                      - temp/properties/allowedMachine-replicaSet-min
+                - type: block-layout
+                  label: Min Allowed
+                  fixedBlock: true
+                  if:
+                    type: function
+                    name: hasNoAnnotations
+                  showLabels: true
                   elements:
-                  - type: machine-compare
-                    label: Min Allowed Profile
-                    schema: temp/properties/allowedMachine-replicaSet-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|replicaSet|min
-                    loader:
-                      name: getMachines|replicaSet|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-replicaSet-max
-                    watcher:
-                      func: onMachineChange|replicaSet
-                      paths:
-                        - temp/properties/allowedMachine-replicaSet-min
-                  - type: block-layout
-                    label: Min Allowed
-                    fixedBlock: true
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input-compare
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/cpu
-                      - type: input-compare
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/memory
-                  - type: machine-compare
-                    label: Max Allowed Profile
-                    schema: temp/properties/allowedMachine-replicaSet-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|replicaSet|max
-                    loader:
-                      name: getMachines|replicaSet|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-replicaSet-min
-                    watcher:
-                      func: onMachineChange|replicaSet
-                      paths:
-                        - temp/properties/allowedMachine-replicaSet-max
-                  - type: block-layout
-                    label: Max Allowed
-                    fixedBlock: true
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input-compare
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/cpu
-                      - type: input-compare
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/memory
+                    - type: input-compare
+                      label: Cpu
+                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/cpu
+                    - type: input-compare
+                      label: Memory
+                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/memory
+                - type: machine-compare
+                  label: Max Allowed Profile
+                  header: Maximum Resource Limit
+                  schema: temp/properties/allowedMachine-replicaSet-max
+                  if:
+                    type: function
+                    name: hasAnnotations
+                  init:
+                    type: func
+                    value: setAllowedMachine|replicaSet|max
+                  loader:
+                    name: getMachines|replicaSet|max
+                    watchPaths:
+                      - temp/properties/topologyMachines
+                      - temp/properties/allowedMachine-replicaSet-min
+                  watcher:
+                    func: onMachineChange|replicaSet
+                    paths:
+                      - temp/properties/allowedMachine-replicaSet-max
+                - type: block-layout
+                  label: Max Allowed
+                  fixedBlock: true
+                  if:
+                    type: function
+                    name: hasNoAnnotations
+                  showLabels: true
+                  elements:
+                    - type: input-compare
+                      label: Cpu
+                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/cpu
+                    - type: input-compare
+                      label: Memory
+                      schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/memory
             - type: select
               label: Controlled Resources
               loader: setControlledResources|compute/replicaSet
@@ -669,6 +672,9 @@ step:
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/containerControlledValues
             - type: block-layout
               label: In Memory Storage
+              if:
+                type: function
+                name: showStorageMemoryOption
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage
               elements:
@@ -718,72 +724,72 @@ step:
                 - type: block-layout
                   showLabels: false
                   elements:
-                    - type: horizontal-layout
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      header: Minimum Resource Limit
+                      schema: temp/properties/allowedMachine-shard-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|shard|min
+                      loader:
+                        name: getMachines|shard|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-shard-max
+                      watcher:
+                        func: onMachineChange|shard
+                        paths:
+                          - temp/properties/allowedMachine-shard-min
+                    - type: block-layout
+                      label: Min Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
                       elements:
-                      - type: machine-compare
-                        label: Min Allowed Profile
-                        schema: temp/properties/allowedMachine-shard-min
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|shard|min
-                        loader:
-                          name: getMachines|shard|min
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-shard-max
-                        watcher:
-                          func: onMachineChange|shard
-                          paths:
-                            - temp/properties/allowedMachine-shard-min
-                      - type: block-layout
-                        label: Min Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/memory
-                      - type: machine-compare
-                        label: Max Allowed Profile
-                        schema: temp/properties/allowedMachine-shard-max
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|shard|max
-                        loader:
-                          name: getMachines|shard|max
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-shard-min
-                        watcher:
-                          func: onMachineChange|shard
-                          paths:
-                            - temp/properties/allowedMachine-shard-max
-                      - type: block-layout
-                        label: Max Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/memory
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      header: Maximum Resource Limit
+                      schema: temp/properties/allowedMachine-shard-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|shard|max
+                      loader:
+                        name: getMachines|shard|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-shard-min
+                      watcher:
+                        func: onMachineChange|shard
+                        paths:
+                          - temp/properties/allowedMachine-shard-max
+                    - type: block-layout
+                      label: Max Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/memory
                 - type: select
                   label: Controlled Resources
                   loader: setControlledResources|compute/shard
@@ -799,6 +805,9 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/containerControlledValues
                 - type: block-layout
                   label: In Memory Storage
+                  if:
+                    type: function
+                    name: showStorageMemoryOption
                   showLabels: true
                   # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage
                   elements:
@@ -842,72 +851,72 @@ step:
                 - type: block-layout
                   showLabels: false
                   elements:
-                    - type: horizontal-layout
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      header: Minimum Resource Limit
+                      schema: temp/properties/allowedMachine-configServer-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|configServer|min
+                      loader:
+                        name: getMachines|configServer|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-configServer-max
+                      watcher:
+                        func: onMachineChange|configServer
+                        paths:
+                          - temp/properties/allowedMachine-configServer-min
+                    - type: block-layout
+                      label: Min Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
                       elements:
-                      - type: machine-compare
-                        label: Min Allowed Profile
-                        schema: temp/properties/allowedMachine-configServer-min
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|configServer|min
-                        loader:
-                          name: getMachines|configServer|min
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-configServer-max
-                        watcher:
-                          func: onMachineChange|configServer
-                          paths:
-                            - temp/properties/allowedMachine-configServer-min
-                      - type: block-layout
-                        label: Min Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/memory
-                      - type: machine-compare
-                        label: Max Allowed Profile
-                        schema: temp/properties/allowedMachine-configServer-max
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|configServer|max
-                        loader:
-                          name: getMachines|configServer|max
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-configServer-min
-                        watcher:
-                          func: onMachineChange|configServer
-                          paths:
-                            - temp/properties/allowedMachine-configServer-max
-                      - type: block-layout
-                        label: Max Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/memory
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      header: Maximum Resource Limit
+                      schema: temp/properties/allowedMachine-configServer-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|configServer|max
+                      loader:
+                        name: getMachines|configServer|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-configServer-min
+                      watcher:
+                        func: onMachineChange|configServer
+                        paths:
+                          - temp/properties/allowedMachine-configServer-max
+                    - type: block-layout
+                      label: Max Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/memory
                 - type: select
                   label: Controlled Resources
                   loader: setControlledResources|compute/configServer
@@ -923,6 +932,9 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/containerControlledValues
                 - type: block-layout
                   label: In Memory Storage
+                  if:
+                    type: function
+                    name: showStorageMemoryOption
                   showLabels: true
                   # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage
                   elements:
@@ -966,72 +978,72 @@ step:
                 - type: block-layout
                   showLabels: false
                   elements:
-                    - type: horizontal-layout
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      header: Minimum Resource Limit
+                      schema: temp/properties/allowedMachine-arbiter-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|arbiter|min
+                      loader:
+                        name: getMachines|arbiter|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-arbiter-max
+                      watcher:
+                        func: onMachineChange|arbiter
+                        paths:
+                          - temp/properties/allowedMachine-arbiter-min
+                    - type: block-layout
+                      label: Min Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
                       elements:
-                      - type: machine-compare
-                        label: Min Allowed Profile
-                        schema: temp/properties/allowedMachine-arbiter-min
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|arbiter|min
-                        loader:
-                          name: getMachines|arbiter|min
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-arbiter-max
-                        watcher:
-                          func: onMachineChange|arbiter
-                          paths:
-                            - temp/properties/allowedMachine-arbiter-min
-                      - type: block-layout
-                        label: Min Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/memory
-                      - type: machine-compare
-                        label: Max Allowed Profile
-                        schema: temp/properties/allowedMachine-arbiter-max
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|arbiter|max
-                        loader:
-                          name: getMachines|arbiter|max
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-arbiter-min
-                        watcher:
-                          func: onMachineChange|arbiter
-                          paths:
-                            - temp/properties/allowedMachine-arbiter-max
-                      - type: block-layout
-                        label: Max Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/memory
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      header: Maximum Resource Limit
+                      schema: temp/properties/allowedMachine-arbiter-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|arbiter|max
+                      loader:
+                        name: getMachines|arbiter|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-arbiter-min
+                      watcher:
+                        func: onMachineChange|arbiter
+                        paths:
+                          - temp/properties/allowedMachine-arbiter-max
+                    - type: block-layout
+                      label: Max Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/memory
                 - type: select
                   label: Controlled Resources
                   loader: setControlledResources|compute/arbiter
@@ -1047,6 +1059,9 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/containerControlledValues
                 - type: block-layout
                   label: In Memory Storage
+                  if:
+                    type: function
+                    name: showStorageMemoryOption
                   showLabels: true
                   # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage
                   elements:
@@ -1090,72 +1105,72 @@ step:
                 - type: block-layout
                   showLabels: false
                   elements:
-                    - type: horizontal-layout
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      header: Minimum Resource Limit
+                      schema: temp/properties/allowedMachine-hidden-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|hidden|min
+                      loader:
+                        name: getMachines|hidden|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-hidden-max
+                      watcher:
+                        func: onMachineChange|hidden
+                        paths:
+                          - temp/properties/allowedMachine-hidden-min
+                    - type: block-layout
+                      label: Min Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
                       elements:
-                      - type: machine-compare
-                        label: Min Allowed Profile
-                        schema: temp/properties/allowedMachine-hidden-min
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|hidden|min
-                        loader:
-                          name: getMachines|hidden|min
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-hidden-max
-                        watcher:
-                          func: onMachineChange|hidden
-                          paths:
-                            - temp/properties/allowedMachine-hidden-min
-                      - type: block-layout
-                        label: Min Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/memory
-                      - type: machine-compare
-                        label: Max Allowed Profile
-                        schema: temp/properties/allowedMachine-hidden-max
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|hidden|max
-                        loader:
-                          name: getMachines|hidden|max
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-hidden-min
-                        watcher:
-                          func: onMachineChange|hidden
-                          paths:
-                            - temp/properties/allowedMachine-hidden-max
-                      - type: block-layout
-                        label: Max Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/memory
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      header: Maximum Resource Limit
+                      schema: temp/properties/allowedMachine-hidden-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|hidden|max
+                      loader:
+                        name: getMachines|hidden|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-hidden-min
+                      watcher:
+                        func: onMachineChange|hidden
+                        paths:
+                          - temp/properties/allowedMachine-hidden-max
+                    - type: block-layout
+                      label: Max Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/memory
                 - type: select
                   label: Controlled Resources
                   loader: setControlledResources|compute/hidden
@@ -1171,6 +1186,9 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/containerControlledValues
                 - type: block-layout
                   label: In Memory Storage
+                  if:
+                    type: function
+                    name: showStorageMemoryOption
                   showLabels: true
                   # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage
                   elements:
@@ -1213,72 +1231,72 @@ step:
                 - type: block-layout
                   showLabels: false
                   elements:
-                    - type: horizontal-layout
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      header: Minimum Resource Limit
+                      schema: temp/properties/allowedMachine-mongos-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|mongos|min
+                      loader:
+                        name: getMachines|mongos|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-mongos-max
+                      watcher:
+                        func: onMachineChange|mongos
+                        paths:
+                          - temp/properties/allowedMachine-mongos-min
+                    - type: block-layout
+                      label: Min Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
                       elements:
-                      - type: machine-compare
-                        label: Min Allowed Profile
-                        schema: temp/properties/allowedMachine-mongos-min
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|mongos|min
-                        loader:
-                          name: getMachines|mongos|min
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-mongos-max
-                        watcher:
-                          func: onMachineChange|mongos
-                          paths:
-                            - temp/properties/allowedMachine-mongos-min
-                      - type: block-layout
-                        label: Min Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/memory
-                      - type: machine-compare
-                        label: Max Allowed Profile
-                        schema: temp/properties/allowedMachine-mongos-max
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|mongos|max
-                        loader:
-                          name: getMachines|mongos|max
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-mongos-min
-                        watcher:
-                          func: onMachineChange|mongos
-                          paths:
-                            - temp/properties/allowedMachine-mongos-max
-                      - type: block-layout
-                        label: Max Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/memory
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      header: Maximum Resource Limit
+                      schema: temp/properties/allowedMachine-mongos-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|mongos|max
+                      loader:
+                        name: getMachines|mongos|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-mongos-min
+                      watcher:
+                        func: onMachineChange|mongos
+                        paths:
+                          - temp/properties/allowedMachine-mongos-max
+                    - type: block-layout
+                      label: Max Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/memory
                 - type: select
                   label: Controlled Resources
                   loader: setControlledResources|compute/mongos
@@ -1294,6 +1312,9 @@ step:
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/containerControlledValues
                 - type: block-layout
                   label: In Memory Storage
+                  if:
+                    type: function
+                    name: showStorageMemoryOption
                   showLabels: true
                   # schema:  schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage
                   elements:

@@ -2761,6 +2761,7 @@ export const useFunc = (model) => {
     )
   }
   let instance = {}
+  let showStoragememory = false
   async function getDbDetails() {
     const annotations = getValue(
       model,
@@ -2780,7 +2781,7 @@ export const useFunc = (model) => {
           `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`,
         )
         dbDetails = resp.data || {}
-
+        showStoragememory = dbDetails?.spec?.storageEngine === 'inMemory'
         setDiscriminatorValue('/dbDetails', true)
       } catch (e) {
         console.log(e)
@@ -2808,6 +2809,11 @@ export const useFunc = (model) => {
       force: true,
     })
   }
+
+  function showStorageMemoryOption() {
+    return showStoragememory
+  }
+
 
   function mongoTypeEqualsTo(mongoType, type) {
     // watchDependency('discriminator#/dbDetails')
@@ -3125,7 +3131,6 @@ export const useFunc = (model) => {
     const mx = machine?.includes(',') ? machine.split(',')[1] : ''
     const mn = machine?.includes(',') ? machine.split(',')[0] : ''
     const machineName = minmax === 'min' ? mn : mx
-
     // Find the machine details from topologyMachines
     const nodeGroups = getValue(discriminator, '/topologyMachines') || []
     const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
@@ -3482,5 +3487,6 @@ export const useFunc = (model) => {
     setValueFromDbDetails,
     isHidden,
     setPausedValue,
+    showStorageMemoryOption
   }
 }

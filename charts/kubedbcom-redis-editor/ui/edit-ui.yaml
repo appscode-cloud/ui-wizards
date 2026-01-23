@@ -251,19 +251,18 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: horizontal-layout
-                    elements:
                     - type: machine-compare
                       label: Min Allowed Profile
+                      header: Minimum Resource Limit
                       schema: temp/properties/allowedMachine-min
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|min
+                        value: setAllowedMachine|standalone|min
                       loader:
-                        name: getMachines|min
+                        name: getMachines|standalone|min
                         watchPaths:
                           - temp/properties/topologyMachines
                           - temp/properties/allowedMachine-max
@@ -287,15 +286,16 @@ step:
                           schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/memory
                     - type: machine-compare
                       label: Max Allowed Profile
+                      header: Maximum Resource Limit
                       schema: temp/properties/allowedMachine-max
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|max
+                        value: setAllowedMachine|standalone|max
                       loader:
-                        name: getMachines|max
+                        name: getMachines|standalone|max
                         watchPaths:
                           - temp/properties/topologyMachines
                           - temp/properties/allowedMachine-min
@@ -368,19 +368,18 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: horizontal-layout
-                    elements:
                     - type: machine-compare
                       label: Min Allowed Profile
+                      header: Minimum Resource Limit
                       schema: temp/properties/allowedMachine-min
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|min
+                        value: setAllowedMachine|cluster|min
                       loader:
-                        name: getMachines|min
+                        name: getMachines|cluster|min
                         watchPaths:
                           - temp/properties/topologyMachines
                           - temp/properties/allowedMachine-max
@@ -404,15 +403,16 @@ step:
                           schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/cluster/properties/minAllowed/properties/memory
                     - type: machine-compare
                       label: Max Allowed Profile
+                      header: Maximum Resource Limit
                       schema: temp/properties/allowedMachine-max
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|max
+                        value: setAllowedMachine|cluster|max
                       loader:
-                        name: getMachines|max
+                        name: getMachines|cluster|max
                         watchPaths:
                           - temp/properties/topologyMachines
                           - temp/properties/allowedMachine-min
@@ -469,10 +469,9 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: horizontal-layout
-                    elements:
                     - type: machine-compare
                       label: Min Allowed Profile
+                      header: Minimum Resource Limit
                       schema: temp/properties/allowedMachine-min
                       if:
                         type: function
@@ -505,6 +504,7 @@ step:
                           schema: schema/properties/resources/properties/autoscalingKubedbComRedisAutoscaler/properties/spec/properties/compute/properties/sentinel/properties/minAllowed/properties/memory
                     - type: machine-compare
                       label: Max Allowed Profile
+                      header: Maximum Resource Limit
                       schema: temp/properties/allowedMachine-max
                       if:
                         type: function

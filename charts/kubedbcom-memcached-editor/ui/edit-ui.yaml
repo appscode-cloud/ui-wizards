@@ -326,72 +326,72 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: horizontal-layout
+                  - type: machine-compare
+                    label: Min Allowed Profile
+                    header: Minimum Resource Limit
+                    schema: temp/properties/allowedMachine-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|min
+                    loader:
+                      name: getMachines|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-max
+                    watcher:
+                      func: onMachineChange|memcached
+                      paths:
+                        - temp/properties/allowedMachine-min
+                  - type: block-layout
+                    label: Min Allowed
+                    fixedBlock: true
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
                     elements:
-                    - type: machine-compare
-                      label: Min Allowed Profile
-                      schema: temp/properties/allowedMachine-min
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|min
-                      loader:
-                        name: getMachines|min
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-max
-                      watcher:
-                        func: onMachineChange|memcached
-                        paths:
-                          - temp/properties/allowedMachine-min
-                    - type: block-layout
-                      label: Min Allowed
-                      fixedBlock: true
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/minAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/minAllowed/properties/memory
-                    - type: machine-compare
-                      label: Max Allowed Profile
-                      schema: temp/properties/allowedMachine-max
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|max
-                      loader:
-                        name: getMachines|max
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-min
-                      watcher:
-                        func: onMachineChange|memcached
-                        paths:
-                          - temp/properties/allowedMachine-max
-                    - type: block-layout
-                      label: Max Allowed
-                      fixedBlock: true
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/maxAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/maxAllowed/properties/memory
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/minAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/minAllowed/properties/memory
+                  - type: machine-compare
+                    label: Max Allowed Profile
+                    header: Maximum Resource Limit
+                    schema: temp/properties/allowedMachine-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|max
+                    loader:
+                      name: getMachines|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-min
+                    watcher:
+                      func: onMachineChange|memcached
+                      paths:
+                        - temp/properties/allowedMachine-max
+                  - type: block-layout
+                    label: Max Allowed
+                    fixedBlock: true
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/maxAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|memcached

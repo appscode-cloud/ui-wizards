@@ -449,72 +449,72 @@ step:
             - type: block-layout
               showLabels: false
               elements:
-                - type: horizontal-layout
+                - type: machine-compare
+                  label: Min Allowed Profile
+                  header: Minimum Resource Limit
+                  schema: temp/properties/allowedMachine-node-min
+                  if:
+                    type: function
+                    name: hasAnnotations
+                  init:
+                    type: func
+                    value: setAllowedMachine|node|min
+                  loader:
+                    name: getMachines|node|min
+                    watchPaths:
+                      - temp/properties/topologyMachines
+                      - temp/properties/allowedMachine-node-max
+                  watcher:
+                    func: onMachineChange|node
+                    paths:
+                      - temp/properties/allowedMachine-node-min
+                - type: block-layout
+                  label: Min Allowed
+                  fixedBlock: true
+                  if:
+                    type: function
+                    name: hasNoAnnotations
+                  showLabels: true
                   elements:
-                  - type: machine-compare
-                    label: Min Allowed Profile
-                    schema: temp/properties/allowedMachine-node-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|node|min
-                    loader:
-                      name: getMachines|node|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-node-max
-                    watcher:
-                      func: onMachineChange|node
-                      paths:
-                        - temp/properties/allowedMachine-node-min
-                  - type: block-layout
-                    label: Min Allowed
-                    fixedBlock: true
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input-compare
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
-                      - type: input-compare
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
-                  - type: machine-compare
-                    label: Max Allowed Profile
-                    schema: temp/properties/allowedMachine-node-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|node|max
-                    loader:
-                      name: getMachines|node|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-node-min
-                    watcher:
-                      func: onMachineChange|node
-                      paths:
-                        - temp/properties/allowedMachine-node-max
-                  - type: block-layout
-                    label: Max Allowed
-                    fixedBlock: true
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input-compare
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
-                      - type: input-compare
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+                    - type: input-compare
+                      label: Cpu
+                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+                    - type: input-compare
+                      label: Memory
+                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+                - type: machine-compare
+                  label: Max Allowed Profile
+                  header: Maximum Resource Limit
+                  schema: temp/properties/allowedMachine-node-max
+                  if:
+                    type: function
+                    name: hasAnnotations
+                  init:
+                    type: func
+                    value: setAllowedMachine|node|max
+                  loader:
+                    name: getMachines|node|max
+                    watchPaths:
+                      - temp/properties/topologyMachines
+                      - temp/properties/allowedMachine-node-min
+                  watcher:
+                    func: onMachineChange|node
+                    paths:
+                      - temp/properties/allowedMachine-node-max
+                - type: block-layout
+                  label: Max Allowed
+                  fixedBlock: true
+                  if:
+                    type: function
+                    name: hasNoAnnotations
+                  showLabels: true
+                  elements:
+                    - type: input-compare
+                      label: Cpu
+                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+                    - type: input-compare
+                      label: Memory
+                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
             - type: select
               label: Controlled Resources
               loader: setControlledResources|compute/node
@@ -562,72 +562,72 @@ step:
                 - type: block-layout
                   showLabels: false
                   elements:
-                    - type: horizontal-layout
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      header: Minimum Resource Limit
+                      schema: temp/properties/allowedMachine-data-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|data|min
+                      loader:
+                        name: getMachines|data|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-data-max
+                      watcher:
+                        func: onMachineChange|data
+                        paths:
+                          - temp/properties/allowedMachine-data-min
+                    - type: block-layout
+                      label: Min Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
                       elements:
-                      - type: machine-compare
-                        label: Min Allowed Profile
-                        schema: temp/properties/allowedMachine-data-min
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|data|min
-                        loader:
-                          name: getMachines|data|min
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-data-max
-                        watcher:
-                          func: onMachineChange|data
-                          paths:
-                            - temp/properties/allowedMachine-data-min
-                      - type: block-layout
-                        label: Min Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
-                      - type: machine-compare
-                        label: Max Allowed Profile
-                        schema: temp/properties/allowedMachine-data-max
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        init:
-                          type: func
-                          value: setAllowedMachine|data|max
-                        loader:
-                          name: getMachines|data|max
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-data-min
-                        watcher:
-                          func: onMachineChange|data
-                          paths:
-                            - temp/properties/allowedMachine-data-max
-                      - type: block-layout
-                        label: Max Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      header: Maximum Resource Limit
+                      schema: temp/properties/allowedMachine-data-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|data|max
+                      loader:
+                        name: getMachines|data|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-data-min
+                      watcher:
+                        func: onMachineChange|data
+                        paths:
+                          - temp/properties/allowedMachine-data-max
+                    - type: block-layout
+                      label: Max Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
                 - type: select
                   label: Controlled Resources
                   loader: setControlledResources|compute/data
@@ -668,10 +668,9 @@ step:
                 - type: block-layout
                   showLabels: false
                   elements:
-                    - type: horizontal-layout
-                      elements:
                       - type: machine-compare
                         label: Min Allowed Profile
+                        header: Minimum Resource Limit
                         schema: temp/properties/allowedMachine-ingest-min
                         if:
                           type: function
@@ -704,6 +703,7 @@ step:
                             schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/memory
                       - type: machine-compare
                         label: Max Allowed Profile
+                        header: Maximum Resource Limit
                         schema: temp/properties/allowedMachine-ingest-max
                         if:
                           type: function
@@ -774,10 +774,9 @@ step:
                 - type: block-layout
                   showLabels: false
                   elements:
-                    - type: horizontal-layout
-                      elements:
                       - type: machine-compare
                         label: Min Allowed Profile
+                        header: Minimum Resource Limit
                         schema: temp/properties/allowedMachine-master-min
                         if:
                           type: function
@@ -810,6 +809,7 @@ step:
                             schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/memory
                       - type: machine-compare
                         label: Max Allowed Profile
+                        header: Maximum Resource Limit
                         schema: temp/properties/allowedMachine-master-max
                         if:
                           type: function
