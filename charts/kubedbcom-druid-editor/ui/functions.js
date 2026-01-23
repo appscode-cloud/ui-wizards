@@ -1638,6 +1638,7 @@ export const useFunc = (model) => {
     const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
 
     // Return object with machine, cpu, memory (expected format for machine-compare init)
+    console.log('setAllowedMachine name',machineName,instance)
     if (machineData) {
       return {
         machine: machineName,
