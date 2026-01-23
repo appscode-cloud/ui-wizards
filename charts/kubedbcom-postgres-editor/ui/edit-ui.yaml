@@ -241,19 +241,18 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: horizontal-layout
-                    elements:
                     - type: machine-compare
                       label: Min Allowed Profile
+                      header: Minimum Resource Limit
                       schema: temp/properties/allowedMachine-min
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|min
+                        value: setAllowedMachine|postgres|min
                       loader:
-                        name: getMachines|min
+                        name: getMachines|postgres|min
                         watchPaths:
                           - temp/properties/topologyMachines
                           - temp/properties/allowedMachine-max
@@ -277,15 +276,16 @@ step:
                           schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/minAllowed/properties/memory
                     - type: machine-compare
                       label: Max Allowed Profile
+                      header: Maximum Resource Limit
                       schema: temp/properties/allowedMachine-max
                       if:
                         type: function
                         name: hasAnnotations
                       init:
                         type: func
-                        value: setAllowedMachine|max
+                        value: setAllowedMachine|postgres|max
                       loader:
-                        name: getMachines|max
+                        name: getMachines|postgres|max
                         watchPaths:
                           - temp/properties/topologyMachines
                           - temp/properties/allowedMachine-min
@@ -323,6 +323,9 @@ step:
               - type: block-layout
                 label: In Memory Storage
                 showLabels: true
+                if:
+                  type: function
+                  name: showStorageMemoryOption
                 # schema: schema/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/inMemoryStorage
                 elements:
                   - type: threshold-input

@@ -150,6 +150,7 @@ step:
 
   - type: single-step-form
     id: compute-autoscaler
+    loader: getMysqlDbs
     elements:
       - type: block-layout
         if:
@@ -240,58 +241,72 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: horizontal-layout
+                  - type: machine-compare
+                    label:  Min Allowed Profile
+                    header: Minimum Resource Limit
+                    schema: temp/properties/allowedMachine-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|mysql|min
+                    loader: 
+                      name: getMachines|mysql|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-max
+                    watcher:
+                      func: onMachineChange|mysql
+                      paths:
+                        - temp/properties/allowedMachine-min
+                  - type: block-layout
+                    label: Min Allowed
+                    fixedBlock: true
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
                     elements:
-                      - type: machine-compare
-                        label:  Min Allowed Profile
-                        schema: temp/properties/allowedMachine-min
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        loader: 
-                          name: getMachines|min
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-max
-                      - type: block-layout
-                        label: Min Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/minAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/minAllowed/properties/memory
-                      - type: machine-compare
-                        label: Max Allowed Profile
-                        schema: temp/properties/allowedMachine-max
-                        if:
-                          type: function
-                          name: hasAnnotations
-                        loader: 
-                          name: getMachines|max
-                          watchPaths:
-                            - temp/properties/topologyMachines
-                            - temp/properties/allowedMachine-min
-                      - type: block-layout
-                        label: Max Allowed
-                        fixedBlock: true
-                        if:
-                          type: function
-                          name: hasNoAnnotations
-                        showLabels: true
-                        elements:
-                          - type: input-compare
-                            label: Cpu
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/maxAllowed/properties/cpu
-                          - type: input-compare
-                            label: Memory
-                            schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/maxAllowed/properties/memory
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/minAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/minAllowed/properties/memory
+                  - type: machine-compare
+                    label: Max Allowed Profile
+                    header: Maximum Resource Limit
+                    schema: temp/properties/allowedMachine-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|mysql|max
+                    loader: 
+                      name: getMachines|mysql|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-min
+                    watcher:
+                      func: onMachineChange|mysql
+                      paths:
+                        - temp/properties/allowedMachine-max
+                  - type: block-layout
+                    label: Max Allowed
+                    fixedBlock: true
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/maxAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|mysql
@@ -308,6 +323,9 @@ step:
               - type: block-layout
                 label: In Memory Storage
                 showLabels: true
+                if:
+                    type: function
+                    name: showStorageMemoryOption
                 # schema: schema/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage
                 elements:
                   - type: threshold-input
