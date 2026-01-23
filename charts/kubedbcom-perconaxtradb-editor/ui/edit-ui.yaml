@@ -93,72 +93,72 @@ step:
               - type: block-layout
                 showLabels: false
                 elements:
-                  - type: horizontal-layout
+                  - type: machine-compare
+                    label: Min Allowed Profile
+                    header: Minimum Resource Limit
+                    schema: temp/properties/allowedMachine-perconaxtradb-min
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|perconaxtradb|min
+                    loader:
+                      name: getMachines|perconaxtradb|min
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-perconaxtradb-max
+                    watcher:
+                      func: onMachineChange|perconaxtradb
+                      paths:
+                        - temp/properties/allowedMachine-perconaxtradb-min
+                  - type: block-layout
+                    label: Min Allowed
+                    fixedBlock: true
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
                     elements:
-                    - type: machine-compare
-                      label: Min Allowed Profile
-                      schema: temp/properties/allowedMachine-perconaxtradb-min
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|perconaxtradb|min
-                      loader:
-                        name: getMachines|perconaxtradb|min
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-perconaxtradb-max
-                      watcher:
-                        func: onMachineChange|perconaxtradb
-                        paths:
-                          - temp/properties/allowedMachine-perconaxtradb-min
-                    - type: block-layout
-                      label: Min Allowed
-                      fixedBlock: true
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/minAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/minAllowed/properties/memory
-                    - type: machine-compare
-                      label: Max Allowed Profile
-                      schema: temp/properties/allowedMachine-perconaxtradb-max
-                      if:
-                        type: function
-                        name: hasAnnotations
-                      init:
-                        type: func
-                        value: setAllowedMachine|perconaxtradb|max
-                      loader:
-                        name: getMachines|perconaxtradb|max
-                        watchPaths:
-                          - temp/properties/topologyMachines
-                          - temp/properties/allowedMachine-perconaxtradb-min
-                      watcher:
-                        func: onMachineChange|perconaxtradb
-                        paths:
-                          - temp/properties/allowedMachine-perconaxtradb-max
-                    - type: block-layout
-                      label: Max Allowed
-                      fixedBlock: true
-                      if:
-                        type: function
-                        name: hasNoAnnotations
-                      showLabels: true
-                      elements:
-                        - type: input-compare
-                          label: Cpu
-                          schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/maxAllowed/properties/cpu
-                        - type: input-compare
-                          label: Memory
-                          schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/maxAllowed/properties/memory
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/minAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/minAllowed/properties/memory
+                  - type: machine-compare
+                    label: Max Allowed Profile
+                    header: Maximum Resource Limit
+                    schema: temp/properties/allowedMachine-perconaxtradb-max
+                    if:
+                      type: function
+                      name: hasAnnotations
+                    init:
+                      type: func
+                      value: setAllowedMachine|perconaxtradb|max
+                    loader:
+                      name: getMachines|perconaxtradb|max
+                      watchPaths:
+                        - temp/properties/topologyMachines
+                        - temp/properties/allowedMachine-perconaxtradb-min
+                    watcher:
+                      func: onMachineChange|perconaxtradb
+                      paths:
+                        - temp/properties/allowedMachine-perconaxtradb-max
+                  - type: block-layout
+                    label: Max Allowed
+                    fixedBlock: true
+                    if:
+                      type: function
+                      name: hasNoAnnotations
+                    showLabels: true
+                    elements:
+                      - type: input-compare
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/maxAllowed/properties/cpu
+                      - type: input-compare
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/maxAllowed/properties/memory
               - type: select
                 label: Controlled Resources
                 loader: setControlledResources|compute/perconaxtradb

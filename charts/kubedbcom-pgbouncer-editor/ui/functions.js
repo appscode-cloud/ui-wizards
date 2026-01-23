@@ -30,6 +30,7 @@ export const useFunc = (model) => {
 
   let autoscaleType = ''
   let dbDetails = {}
+  let instance = ''
 
   function isConsole() {
     const isKube = isKubedb()
@@ -71,6 +72,12 @@ export const useFunc = (model) => {
   }
 
   async function getDbDetails() {
+    const annotations = getValue(
+      model,
+      '/resources/autoscalingKubedbComPgBouncerAutoscaler/metadata/annotations',
+    )
+    instance = annotations?.['kubernetes.io/instance-type']
+
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
     const namespace =
@@ -253,15 +260,20 @@ export const useFunc = (model) => {
     return !hasAnnotations()
   }
   function setAllowedMachine(minmax) {
-    const annotations =
-      getValue(model, '/resources/autoscalingKubedbComPgBouncerAutoscaler/metadata/annotations') ||
-      {}
-    const instance = annotations['kubernetes.io/instance-type']
     const mx = instance?.includes(',') ? instance.split(',')[1] : ''
     const mn = instance?.includes(',') ? instance.split(',')[0] : ''
+    const machineName = minmax === 'min' ? mn : mx
 
-    if (minmax === 'min') return mn
-    else return mx
+    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+    const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
+    if (machineData) {
+      return {
+        machine: machineName,
+        cpu: machineData.allocatable?.cpu,
+        memory: machineData.allocatable?.memory,
+      }
+    }
+    return { machine: machineName || '', cpu: '', memory: '' }
   }
 
   async function getMachines(minmax) {
@@ -270,16 +282,23 @@ export const useFunc = (model) => {
     const dependantPath = `/allowedMachine-${depends}`
 
     // watchDependency(`discriminator#${dependantPath}`)
-    const dependantMachine = getValue(discriminator, dependantPath)
+    const dependantMachineObj = getValue(discriminator, dependantPath)
+    const dependantMachine = dependantMachineObj?.machine || ''
 
     const nodeGroups = getValue(discriminator, '/topologyMachines') || []
 
     const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
 
     const machines = nodeGroups?.map((item) => {
-      const subText = `CPU: ${item.allocatable.cpu}, Memory: ${item.allocatable.memory}`
       const text = item.topologyValue
-      return { text, subText, value: item.topologyValue }
+      return {
+        text,
+        value: {
+          machine: item.topologyValue,
+          cpu: item.allocatable?.cpu,
+          memory: item.allocatable?.memory,
+        },
+      }
     })
 
     const filteredMachine = machines?.filter((item, ind) =>
@@ -294,16 +313,19 @@ export const useFunc = (model) => {
     const annotations = getValue(model, annoPath) || {}
     const instance = annotations['kubernetes.io/instance-type']
 
-    const minMachine = getValue(discriminator, '/allowedMachine-min')
-    const maxMachine = getValue(discriminator, '/allowedMachine-max')
+    const minMachineObj = getValue(discriminator, '/allowedMachine-min')
+    const maxMachineObj = getValue(discriminator, '/allowedMachine-max')
+    const minMachine = minMachineObj?.machine || ''
+    const maxMachine = maxMachineObj?.machine || ''
     const minMaxMachine = `${minMachine},${maxMachine}`
     annotations['kubernetes.io/instance-type'] = minMaxMachine
 
-    const machines = getValue(discriminator, `/topologyMachines`) || []
-    const minMachineObj = machines.find((item) => item.topologyValue === minMachine)
-    const maxMachineObj = machines.find((item) => item.topologyValue === maxMachine)
-    const minMachineAllocatable = minMachineObj?.allocatable
-    const maxMachineAllocatable = maxMachineObj?.allocatable
+    const minMachineAllocatable = minMachineObj
+      ? { cpu: minMachineObj.cpu, memory: minMachineObj.memory }
+      : null
+    const maxMachineAllocatable = maxMachineObj
+      ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory }
+      : null
     const allowedPath = `/resources/autoscalingKubedbComPgBouncerAutoscaler/spec/compute/${type}`
 
     if (minMachine && maxMachine && instance !== minMaxMachine) {
