@@ -769,7 +769,7 @@ export const useFunc = (model) => {
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
     try {
-      if (instance) parsedInstance = JSON.parse(instance)
+      if (instance) parsedInstance = instance
     } catch (e) {
       console.log(e)
       parsedInstance = {}
@@ -820,7 +820,7 @@ export const useFunc = (model) => {
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
     try {
-      if (instance) parsedInstance = JSON.parse(instance)
+      if (instance) parsedInstance = instance
     } catch (e) {
       console.log(e)
       parsedInstance = {}

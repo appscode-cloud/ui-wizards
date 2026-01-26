@@ -832,6 +832,7 @@ export const useFunc = (model) => {
     hasAnnotations,
     hasNoAnnotations,
     onMachineChange,
+    onTriggerChange,
 
     getOpsRequestUrl,
     isValueExistInModel,
