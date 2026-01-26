@@ -723,11 +723,6 @@ export const useFunc = (model) => {
     setDiscriminatorValue('/bundleApiLoaded', true)
   }
 
-  function isConfigAvailable() {
-    const val = getValue(model, '/spec/configuration')
-    return val !== ''
-  }
-
   function isConfigDatabaseOn() {
     // watchDependency('discriminator#/configDatabase')
     return getValue(discriminator, '/configDatabase')
@@ -1167,7 +1162,6 @@ export const useFunc = (model) => {
     getResources,
     getSecrets,
     initBundle,
-    isConfigAvailable,
     isConfigDatabaseOn,
     isEqualToModelPathValue,
     isMachineCustom,
