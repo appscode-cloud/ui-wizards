@@ -364,12 +364,11 @@ export const useFunc = (model) => {
     return true
   }
 
-  function isTlsEnabled() {
+   function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const sslMode = dbDetails?.spec?.sslMode
-    return sslMode !== 'disabled'
+    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled') || dbDetails?.spec?.tls
   }
-
+  
   function isRancherManaged() {
     const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
     const found = managers.find((item) => item === 'Rancher')

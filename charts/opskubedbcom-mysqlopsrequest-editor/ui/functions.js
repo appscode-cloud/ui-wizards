@@ -353,6 +353,11 @@ export const useFunc = (model) => {
     return false
   }
 
+  function isTlsEnabled() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled') || dbDetails?.spec?.tls
+  }
+
   function isRancherManaged() {
     const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
     const found = managers.find((item) => item === 'Rancher')
@@ -1830,5 +1835,6 @@ export const useFunc = (model) => {
     onRemoveConfigChange,
     onNewConfigSecretChange,
     onSelectedSecretChange,
+    isTlsEnabled,
   }
 }

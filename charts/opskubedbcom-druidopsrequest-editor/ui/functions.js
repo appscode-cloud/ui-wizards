@@ -455,10 +455,9 @@ export const useFunc = (model) => {
     } else return {}
   }
 
-    function isTlsEnabled() {
+   function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const sslMode = dbDetails?.spec?.sslMode
-    return sslMode !== 'disabled'
+    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled') || dbDetails?.spec?.tls
   }
 
   async function getDbVersions() {

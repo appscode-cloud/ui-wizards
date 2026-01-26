@@ -478,6 +478,11 @@ export const useFunc = (model) => {
     } else return {}
   }
 
+  function isTlsEnabled() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled') || dbDetails?.spec?.tls
+  }
+
   function initDatabaseRef() {
     // watchDependency('model#/metadata/namespace')
     const { name } = route.params || {}
@@ -2073,5 +2078,6 @@ export const useFunc = (model) => {
     setApplyToIfReady,
     hasResourceValue,
     hasVolumeExpansion,
+    isTlsEnabled
   }
 }

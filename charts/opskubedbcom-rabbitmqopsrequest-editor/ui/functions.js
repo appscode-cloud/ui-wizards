@@ -353,6 +353,11 @@ export const useFunc = (model) => {
     return false
   }
 
+  function isTlsEnabled() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled') || dbDetails?.spec?.tls
+  }
+
   async function getNamespaces() {
     if (storeGet('/route/params/actions')) return []
     const owner = storeGet('/route/params/user')
@@ -1799,5 +1804,6 @@ export const useFunc = (model) => {
     onRemoveConfigChange,
     onNewConfigSecretChange,
     onSelectedSecretChange,
+    isTlsEnabled,
   }
 }
