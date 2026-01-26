@@ -768,7 +768,7 @@ export const useFunc = (model) => {
     const instance = annotations['kubernetes.io/instance-type']
     let machine = 'custom'
     try {
-      if (instance) machine = JSON.parse(instance) || 'custom'
+      if (instance) machine = instance || 'custom'
     } catch (e) {
       console.log(e)
       machine = 'custom'

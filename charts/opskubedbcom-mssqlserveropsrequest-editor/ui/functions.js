@@ -765,7 +765,7 @@ export const useFunc = (model) => {
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
     try {
-      if (instance) parsedInstance = JSON.parse(instance)
+      if (instance) parsedInstance = instance
     } catch (e) {
       console.log(e)
       parsedInstance = {}
@@ -1144,7 +1144,6 @@ export const useFunc = (model) => {
 
       // direct model update required for reusable element.
       // computed property is not applicable for reusable element
-      console.log('Setting value from dbDetails:', commitPath, retValue)
       commit('wizard/model$update', {
         path: commitPath,
         value: retValue,
