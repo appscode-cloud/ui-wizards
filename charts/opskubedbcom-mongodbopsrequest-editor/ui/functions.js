@@ -1013,47 +1013,19 @@ export const useFunc = (model) => {
     return result
   }
 
-  function getSelectedConfigurationName(type) {
+  function getSelectedConfigurationName(configType, type) {
     type = type ? type + '/' : ''
-    const path = `/${type}selectedConfigurationRemove`
-    const selectedConfiguration = getValue(discriminator, path)
+    let path = ''
+    if (configType === 'create') path = `/spec/configuration/${type}/configSecret/name`
+    else if (configType === 'apply') path = `/${type}selectedConfiguration`
+    else if (configType === 'remove') path = `/${type}selectedConfigurationRemove`
 
-    if (!selectedConfiguration) {
-      return { subtitle: 'No secret selected' }
-    }
+    const selectedConfiguration =
+      configType === 'create' ? getValue(model, path) : getValue(discriminator, path)
 
-    const configuration = secretConfigData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return { subtitle: 'No secret selected' }
-    }
-
-    if (configuration.componentName)
-      return { subtitle: ` You have selected <b>${configuration.componentName}</b> secret` }
+    if (selectedConfiguration)
+      return { subtitle: ` You have selected <b>${selectedConfiguration}</b> secret` }
     else return { subtitle: 'No secret selected' }
-  }
-
-  function getSelectedApplyConfigName(type) {
-    type = type ? type + '/' : ''
-    const path = `/${type}selectedConfiguration`
-    const selectedConfiguration = getValue(discriminator, path)
-
-    if (!selectedConfiguration) {
-      return { subtitle: 'No configuration selected' }
-    }
-
-    const configuration = secretConfigData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return { subtitle: 'No configuration selected' }
-    }
-    if (configuration.componentName)
-      return { subtitle: ` You have selected <b>${configuration.componentName}</b> configuration` }
-    else return { subtitle: 'No configuration selected' }
   }
 
   function getSelectedConfigurationValueForRemove(type) {
@@ -1732,14 +1704,6 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  function getSelectedConfigSecret(type) {
-    const path = `/spec/configuration/${type}/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    // watchDependency(`model#${path}`)
-    if (selectedSecret) return { subtitle: `You have selected <b>${selectedSecret}</b> secret` }
-    return { subtitle: 'No secret selected' }
-  }
-
   function objectToYaml(obj, indent = 0) {
     if (obj === null || obj === undefined) return 'null'
     if (typeof obj !== 'object') return JSON.stringify(obj)
@@ -1870,7 +1834,6 @@ export const useFunc = (model) => {
     ifDbTypeEqualsTo,
     getConfigSecrets,
     fetchConfigSecrets,
-    getSelectedConfigSecret,
     createSecretUrl,
     isEqualToValueFromType,
     getNamespacedResourceList,
@@ -1910,7 +1873,6 @@ export const useFunc = (model) => {
     getSelectedConfigurationValueForRemove,
     onRemoveConfigChange,
     onNewConfigSecretChange,
-    getSelectedApplyConfigName,
     createNewConfigSecret,
     isCreateSecret,
     isNotCreateSecret,
