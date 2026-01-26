@@ -883,9 +883,11 @@ export const useFunc = (model) => {
         else {
           const machineData = machinesFromPreset.find((val) => val.id === machine)
           if (machineData) {
+            const subtext = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
             const text = machineData.name ? machineData.name : machineData.id
             return {
               text,
+              subtext,
               value: {
                 machine: text,
                 cpu: machineData.limits.cpu,
@@ -900,9 +902,11 @@ export const useFunc = (model) => {
         .map((machine) => {
           if (machine === 'custom')
             return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
+          const subtext = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
           const text = machine
           return {
             text,
+            subtext,
             value: {
               machine: text,
               cpu: machines[machine].resources.limits.cpu,
