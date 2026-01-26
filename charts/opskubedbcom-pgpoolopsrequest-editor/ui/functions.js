@@ -1296,7 +1296,34 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
+  function setExporter(type) {
+    let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
+    const limitVal = getValue(discriminator, path)
+
+    if (!limitVal) {
+      path = `/dbDetails/spec/monitor/prometheus/exporter/resources/requests/${type}`
+      const reqVal = getValue(discriminator, path)
+
+      if (reqVal) return reqVal
+    }
+    return limitVal
+  }
+
+  function onExporterResourceChange(type) {
+    const commitPath = `/spec/verticalScaling/exporter/resources/requests/${type}`
+    const valPath = `/spec/verticalScaling/exporter/resources/limits/${type}`
+    const val = getValue(model, valPath)
+    if (val)
+      commit('wizard/model$update', {
+        path: commitPath,
+        value: val,
+        force: true,
+      })
+  }
+
   return {
+    setExporter,
+    onExporterResourceChange,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,
