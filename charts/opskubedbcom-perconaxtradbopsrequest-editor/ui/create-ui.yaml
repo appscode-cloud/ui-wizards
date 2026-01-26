@@ -205,6 +205,30 @@ step:
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/coordinator/resources/limits/memory|/spec/verticalScaling/coordinator/resources/limits/memory
+          - type: block-layout
+            label: Exporter
+            showLabels: true
+            hideBlock: true
+            elements:
+              - type: horizontal-layout
+                showLabels: true
+                elements:
+                  - init:
+                      type: func
+                      value: setExporter|cpu
+                    type: input
+                    label: CPU
+                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
+                  - type: input
+                    init:
+                      type: func
+                      value: setExporter|memory
+                    label: Memory
+                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+                    watcher:
+                      func: onExporterResourceChange|memory
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form
