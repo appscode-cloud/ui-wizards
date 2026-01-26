@@ -364,6 +364,12 @@ export const useFunc = (model) => {
     return true
   }
 
+  function isTlsEnabled() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const sslMode = dbDetails?.spec?.sslMode
+    return sslMode !== 'disabled'
+  }
+
   function isRancherManaged() {
     const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
     const found = managers.find((item) => item === 'Rancher')
@@ -427,6 +433,7 @@ export const useFunc = (model) => {
     if (namespace && name) {
       const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`
       const resp = await axios.get(url)
+      console.log('MongoDB details response:', resp.data.spec.sslMode)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
 
@@ -1879,5 +1886,6 @@ export const useFunc = (model) => {
     onCreateSecretChange,
     cancelCreateSecret,
     onSelectedSecretChange,
+    isTlsEnabled,
   }
 }
