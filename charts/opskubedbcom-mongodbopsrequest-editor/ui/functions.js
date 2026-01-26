@@ -433,7 +433,6 @@ export const useFunc = (model) => {
     if (namespace && name) {
       const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`
       const resp = await axios.get(url)
-      console.log('MongoDB details response:', resp.data.spec.sslMode)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
 
@@ -1507,6 +1506,9 @@ export const useFunc = (model) => {
         return getIssuer(url)
       }
       return clusterIssuers
+    } else if (!kind) {
+      commit('wizard/model$delete', '/spec/tls/issuerRef/name')
+      return []
     }
 
     async function getIssuer(url) {

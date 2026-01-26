@@ -1549,6 +1549,9 @@ export const useFunc = (model) => {
         return getIssuer(url)
       }
       return clusterIssuers
+    } else if (!kind) {
+      commit('wizard/model$delete', '/spec/tls/issuerRef/name')
+      return []
     }
 
     async function getIssuer(url) {

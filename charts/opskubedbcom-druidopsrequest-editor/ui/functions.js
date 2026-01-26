@@ -455,6 +455,12 @@ export const useFunc = (model) => {
     } else return {}
   }
 
+    function isTlsEnabled() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const sslMode = dbDetails?.spec?.sslMode
+    return sslMode !== 'disabled'
+  }
+
   async function getDbVersions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1741,6 +1747,9 @@ export const useFunc = (model) => {
         return getIssuer(url)
       }
       return clusterIssuers
+    }else if (!kind) {
+      commit('wizard/model$delete', '/spec/tls/issuerRef/name')
+      return []
     }
 
     async function getIssuer(url) {
@@ -2163,5 +2172,6 @@ export const useFunc = (model) => {
     getNestedValue,
     hasTopologyType,
     getResourceConfig,
+    isTlsEnabled
   }
 }
