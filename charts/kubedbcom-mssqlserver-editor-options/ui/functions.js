@@ -1396,11 +1396,6 @@ export const useFunc = (model) => {
     return
   }
 
-  function isConfigAvailable() {
-    const val = getValue(model, '/spec/configuration')
-    return val !== ''
-  }
-
   async function getReferSecrets() {
     const referSecret = getValue(discriminator, '/referSecret')
     if (!referSecret) {
@@ -1470,7 +1465,6 @@ export const useFunc = (model) => {
     showSecretDropdown,
     showReferSecret,
     getReferSecrets,
-    isConfigAvailable,
     setPointInTimeRecovery,
     pointInTimeErrorCheck,
     getRecoveryNames,

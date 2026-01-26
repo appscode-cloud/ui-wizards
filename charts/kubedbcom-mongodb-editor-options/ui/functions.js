@@ -854,11 +854,6 @@ export const useFunc = (model) => {
     return getValue(discriminator, '/configDatabase')
   }
 
-  function isConfigAvailable() {
-    const val = getValue(model, '/spec/configuration')
-    return val !== ''
-  }
-
   function clearConfiguration() {
     const configOn = getValue(discriminator, '/configDatabase')
 
@@ -1611,7 +1606,6 @@ export const useFunc = (model) => {
     showSecretDropdown,
     showReferSecret,
     getReferSecrets,
-    isConfigAvailable,
     setPointInTimeRecovery,
     pointInTimeErrorCheck,
     checkHostnameOrIP,
