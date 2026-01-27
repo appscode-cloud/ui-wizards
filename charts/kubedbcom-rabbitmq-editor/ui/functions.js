@@ -208,8 +208,7 @@ export const useFunc = (model) => {
     const routeRootPath = storeGet('/route/path')
     const pathPrefix = `${domain}/db${routeRootPath}`
     const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
-    const pathConstructedForKubedb =
-      pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
+    const pathConstructedForKubedb = pathSplit + `/${reqType.toLowerCase()}?namespace=${namespace}`
 
     const isKube = !!storeGet('/route/params/actions')
 
@@ -722,7 +721,8 @@ export const useFunc = (model) => {
 
   async function fetchTopologyMachines() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComRabbitMQAutoscaler/metadata/annotations') || {}
+      getValue(model, '/resources/autoscalingKubedbComRabbitMQAutoscaler/metadata/annotations') ||
+      {}
     instance = annotations['kubernetes.io/instance-type']
 
     const user = storeGet('/route/params/user')

@@ -69,7 +69,7 @@ export const useFunc = (model) => {
 
     return !isKube
   }
-  
+
   async function getDbDetails() {
     const annotations =
       getValue(model, '/resources/autoscalingKubedbComFerretDBAutoscaler/metadata/annotations') ||
@@ -678,8 +678,7 @@ export const useFunc = (model) => {
     const routeRootPath = storeGet('/route/path')
     const pathPrefix = `${domain}/db${routeRootPath}`
     const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
-    const pathConstructedForKubedb =
-      pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
+    const pathConstructedForKubedb = pathSplit + `/${reqType.toLowerCase()}?namespace=${namespace}`
 
     const isKube = !!storeGet('/route/params/actions')
 
