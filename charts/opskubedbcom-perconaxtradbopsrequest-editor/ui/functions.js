@@ -356,7 +356,12 @@ export const useFunc = (model) => {
 
   function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled' && dbDetails?.spec?.sslMode !== 'disable') || dbDetails?.spec?.tls
+    return (
+      (dbDetails?.spec?.sslMode &&
+        dbDetails?.spec?.sslMode !== 'disabled' &&
+        dbDetails?.spec?.sslMode !== 'disable') ||
+      dbDetails?.spec?.tls
+    )
   }
 
   function isRancherManaged() {
@@ -737,7 +742,8 @@ export const useFunc = (model) => {
                 memory: machineData.limits.memory,
               },
             }
-          } else return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
+          } else
+            return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
         }
       })
     } else {
@@ -769,10 +775,10 @@ export const useFunc = (model) => {
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
     try {
-      if (instance) parsedInstance = instance
+      if (instance) parsedInstance = JSON.parse(instance)
     } catch (e) {
       console.log(e)
-      parsedInstance = {}
+      parsedInstance = instance || {}
     }
     const machine = parsedInstance || 'custom'
 
