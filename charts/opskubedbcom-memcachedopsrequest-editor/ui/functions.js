@@ -745,7 +745,8 @@ export const useFunc = (model) => {
     } else {
       arr = machineList
         .map((machine) => {
-          if (machine === 'custom') return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
+          if (machine === 'custom')
+            return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
           const subtext = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
           const text = machine
           return {
@@ -770,7 +771,7 @@ export const useFunc = (model) => {
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
     try {
-      if (instance) parsedInstance = instance
+      if (instance) parsedInstance = JSON.parse(instance)
     } catch (e) {
       console.log(e)
       parsedInstance = instance || {}
