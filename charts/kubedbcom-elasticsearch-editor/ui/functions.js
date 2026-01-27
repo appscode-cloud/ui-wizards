@@ -25,6 +25,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/enableMonitoring', true)
   setDiscriminatorValue('/customizeExporter', true)
   setDiscriminatorValue('/valueFromType', 'input')
+  setDiscriminatorValue('/env', [])
 
   // Compute Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
@@ -1206,10 +1207,10 @@ export const useFunc = (model) => {
     }
   }
 
-  function isEqualToValueFromType(value) {
-    const valueFrom = getValue(discriminator, '/valueFromType')
-    return valueFrom === value
-  }
+  // function isEqualToValueFromType(value) {
+  //   const valueFrom = getValue(discriminator, '/valueFromType')
+  //   return valueFrom === value
+  // }
 
   async function getNamespacedResourceList(
     axios,
@@ -1264,13 +1265,13 @@ export const useFunc = (model) => {
     })
   }
 
-  async function getConfigMapKeys() {
+  async function getConfigMapKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/release/namespace')
     const configMapName = getValue(
       model,
-      '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env/items/valueFrom/configMapKeyRef/name',
+      `/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env/${index}/valueFrom/configMapKeyRef/name`,
     )
 
     if (!configMapName) return []
@@ -1329,13 +1330,13 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecretKeys() {
+  async function getSecretKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/release/namespace')
     const secretName = getValue(
       model,
-      '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env/items/valueFrom/secretKeyRef/name',
+      `/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env/${index}/valueFrom/secretKeyRef/name`,
     )
 
     if (!secretName) return []
@@ -1359,7 +1360,65 @@ export const useFunc = (model) => {
     }
   }
 
-  // *************************      Export All Functions ********************************************
+  function onEnvArrayChange() {
+    const env = getValue(discriminator, '/env') || []
+    let ret = {}
+    // filter out temp values
+    const filteredEnv = env?.map((item) => {
+      const { temp, ...rest } = item
+      if (temp?.valueFromType === 'input') {
+        const { name, value } = rest
+        ret = { name, value }
+      } else if (temp?.valueFromType === 'configMap') {
+        const { name } = rest
+        const { configMapKeyRef } = rest?.valueFrom || {}
+        ret = { name, valueFrom: { configMapKeyRef } }
+      } else if (temp?.valueFromType === 'secret') {
+        const { name } = rest
+        const { secretKeyRef } = rest?.valueFrom || {}
+        ret = { name, valueFrom: { secretKeyRef } }
+      }
+      return ret
+    })
+
+    if (filteredEnv.length)
+      commit('wizard/model$update', {
+        path: '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env',
+        value: filteredEnv,
+        force: true,
+      })
+  }
+
+  function initEnvArray() {
+    const env = getValue(
+      model,
+      '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env',
+    )
+
+    return env || []
+  }
+
+  function isEqualToTemp(value, index) {
+    //watchDependency('discriminator#/valueFromType')
+    const valueFrom = getValue(discriminator, `/env/${index}/temp/valueFromType`)
+    return valueFrom === value
+  }
+
+  function initMonitoring() {
+    const env =
+      getValue(model, '/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env') ||
+      []
+    setDiscriminatorValue('/env', env)
+    let tempEnv = []
+    env.forEach((item) => {
+      let radio = ''
+      if (item.value) radio = 'input'
+      else if (item.valueFrom && item.valueFrom.configMapKeyRef) radio = 'configMap'
+      else if (item.valueFrom && item.valueFrom.secretKeyRef) radio = 'secret'
+      tempEnv.push({ ...item, temp: { valueFromType: radio } })
+    })
+    setDiscriminatorValue('/env', tempEnv)
+  }
 
   return {
     // Common helpers
@@ -1444,11 +1503,14 @@ export const useFunc = (model) => {
     isConfigMapTypeValueFrom,
     isSecretTypeValueFrom,
     onValueFromChange,
-    isEqualToValueFromType,
     getNamespacedResourceList,
     resourceNames,
     getConfigMapKeys,
     getSecrets,
     getSecretKeys,
+    onEnvArrayChange,
+    initEnvArray,
+    isEqualToTemp,
+    initMonitoring,
   }
 }

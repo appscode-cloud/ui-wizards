@@ -3278,11 +3278,11 @@ export const useFunc = (model) => {
         ret = { name, value }
       } else if (temp?.valueFromType === 'configMap') {
         const { name } = rest
-        const { configMapKeyRef } = rest.valueFrom
+        const { configMapKeyRef } = rest?.valueFrom || {}
         ret = { name, valueFrom: { configMapKeyRef } }
       } else if (temp?.valueFromType === 'secret') {
         const { name } = rest
-        const { secretKeyRef } = rest.valueFrom
+        const { secretKeyRef } = rest?.valueFrom || {}
         ret = { name, valueFrom: { secretKeyRef } }
       }
       return ret
