@@ -273,114 +273,176 @@ step:
         if:
           name: ifRequestTypeEqualsTo|Reconfigure
           type: function
+        loader:
+          name: fetchConfigSecrets
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         elements:
           - type: block-layout
             label: Configuration
-            showLabels: false
             elements:
-              - type: radio
-                label: Reconfigure Type
-                options:
-                - text: New Config Secret
-                  value: selectNewConfigSecret
-                - text: Apply Config
-                  value: applyConfig
-                - text: Remove
-                  value: remove
-                watcher:
-                  func: onReconfigurationTypeChange
-                  paths:
-                    - temp/properties/reconfigurationType
-                validation:
-                  type: required
+              - type: label-element
+                label: ''
+                subtitle: Select a new configuration secret, apply a custom configuration, or remove an existing setup to update your database settings
+              - type: tab-layout
+                label: New Config Secret
                 schema: temp/properties/reconfigurationType
-              - type: block-layout
-                label: Config Secret
-                showLabels: true
-                if:
-                  name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-                  type: function
+                options:
+                - text: NEW CONFIG SECRET
+                  value: selectNewConfigSecret
+                - text: APPLY CONFIG
+                  value: applyConfig
+                - text: REMOVE
+                  value: remove
                 elements:
-                  - type: label-element
-                    label: Select a configuration secret from the available list to update your database settings
-                    customClass: mb-10
-                  - type: select
-                    addNewButton:
-                      label: Create a new Secret
-                      target: _blank
-                      url:
-                        function: createSecretUrl
-                    label: Config Secret
-                    if:
-                      name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-                      type: function
-                    loader:
-                      name: getConfigSecrets
-                      watchPaths:
-                        - schema/properties/metadata/properties/namespace
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/configSecret/name
-                    refresh: true
-                    validation:
-                      type: required
-                    schema:  schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                  - type: label-element
-                    label: Selected Config Secret
-                    loader: getSelectedConfigSecret
-                    if:
-                      name: isConfigSelected
-                      type: function
-                    watcher:
-                      func: getSelectedConfigSecret
-                      paths:
-                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                  - type: editor
-                    label: Value
-                    readonly: true
-                    hasCopy: false
-                    if:
-                      name: isConfigSelected
-                      type: function
-                    loader:
-                      name: getSelectedConfigSecretValue
-                      watchPaths:
-                        - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                    validation:
-                      type: required
-                    schema: temp/properties/configArray/items/properties/value
-              - type: array-object-form
-                label: Apply Config
-                buttonClass: is-light is-outlined
-                if:
-                  name: ifReconfigurationTypeEqualsTo|applyConfig
-                  type: function
-                validation:
-                  type: required
-                watcher:
-                  func: onApplyconfigChange
-                  paths:
-                    - temp/properties/applyConfig
-                schema: temp/properties/applyConfig
-                elements:
-                  - type: input
-                    label: key
-                    validation:
-                      type: required
-                    schema: key
-                  - type: editor
-                    hasCopy: false
-                    label: value
-                    validation:
-                      type: required
-                    schema: value
-              - type: switch
-                schema:  schema/properties/spec/properties/configuration/properties/removeCustomConfig
-                label: Remove CustomConfig
-                fullwidth: true
-                if:
-                  name: returnFalse
-                  type: function
+                - type: block-layout
+                  label: Config Secret
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                    type: function
+                  elements:
+                    - type:  label-element
+                      label: Config Secret
+                      subtitle: Select a configuration secret from the available list to update your database settings
+                      customClass: mb-10
+                    - type: select
+                      customClass: mb-2
+                      schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                      refresh: true
+                      label: Config Secret
+                      loader:
+                        name: getConfigSecrets
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                          - temp/properties/createSecret/properties/status
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/configSecret/name
+                      watcher:
+                        func: onCreateSecretChange
+                        paths:
+                          - temp/properties/createSecret/properties/status
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedConfigurationName|create
+                        watchPaths:
+                          - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                    - type: block-layout
+                      label: Create a New Config Secret
+                      showLabels: true
+                      if:
+                        type: function
+                        name: isCreateSecret
+                      hasButton:
+                        text: Save
+                        hasCancel: cancelCreateSecret
+                        action: createNewConfigSecret
+                      elements:
+                        - type: input
+                          label: Secret Name
+                          schema: temp/properties/createSecret/properties/name
+                          validation:
+                            type: required
+                        - type: array-object-form
+                          label: String Data
+                          schema: temp/properties/createSecret/properties/data
+                          buttonClass: is-light is-outlined
+                          validation:
+                            type: required
+                          elements:
+                            - type: select
+                              label: Key
+                              schema: key
+                              loader:
+                                name: onSelectedSecretChange
+                                watchPaths:
+                                  - temp/properties/createSecret/properties/data
+                              validation:
+                                type: required
+                            - type: textarea
+                              label: Value
+                              schema: value
+                    - type: multi-file-editor
+                      editorHeight: 500px
+                      readonly: true
+                      if:
+                        type: function
+                        name: isNotCreateSecret
+                      loader:
+                        name: onNewConfigSecretChange
+                        watchPaths:
+                          - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                      schema: temp/properties/newConfigSecret
+                - type: block-layout
+                  label: ApplyConfig
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|applyConfig
+                    type: function
+                  elements:
+                    - type: label-element
+                      label: New Apply Config
+                      subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Enter the parameter you want to configure (e.g., max_connections).
+                      customClass: mb-10
+                    - type: select
+                      customClass: mb-2
+                      schema: temp/properties/selectedConfiguration
+                      refresh: true
+                      label: Configuration
+                      loader: getConfigSecretsforAppyConfig
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedConfigurationName|apply
+                        watchPaths:
+                          - temp/properties/selectedConfiguration
+                    - type: multi-file-editor
+                      editorHeight: 500px
+                      schema: temp/properties/applyConfig
+                      loader:
+                        name: setApplyConfig
+                        watchPaths:
+                            - temp/properties/selectedConfiguration
+                      watcher:
+                       func: onApplyconfigChange
+                       paths:
+                        - temp/properties/applyConfig
+                - type: block-layout
+                  label: Remove
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|remove
+                    type: function
+                  elements:
+                    - type: label-element
+                      label: Remove
+                      subtitle: Selected a configuration secret from the available list to update your database settings
+                      customClass: mb-10
+                    - type: select
+                      customClass: mb-2
+                      schema: temp/properties/selectedConfigurationRemove
+                      refresh: true
+                      label: Configuration
+                      loader:
+                        name: getConfigSecretsforAppyConfig
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedConfigurationName|remove
+                        watchPaths:
+                          - temp/properties/selectedConfigurationRemove
+                    - type: multi-file-editor
+                      editorHeight: 500px
+                      readonly: true
+                      init:
+                        type: func
+                        value: onRemoveConfigChange
+                      watcher:
+                        func: onRemoveConfigChange
+                        paths:
+                          - temp/properties/selectedConfigurationRemove
+                      schema: temp/properties/removeConfig
 # Reconfigure TLS
       - type: block-layout
         label: TLS
