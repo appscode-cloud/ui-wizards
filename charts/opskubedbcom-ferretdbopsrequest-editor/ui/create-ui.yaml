@@ -307,7 +307,7 @@ step:
             label: Remove TLS
             fullwidth: true
             if:
-              name: returnFalse
+              name: isTlsEnabled
               type: function
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
@@ -315,7 +315,7 @@ step:
             fullwidth: true
             schema: schema/properties/spec/properties/tls/properties/rotateCertificates
             if:
-              name: returnFalse
+              name: isTlsEnabled
               type: function
           - type: block-layout
             label: Issuer Reference
@@ -365,7 +365,7 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
           - type: block-layout
             label: Certificates
-            showLabels: true
+            showLabels: false
             if:
               name: showIssuerRefAndCertificates
               type: function
@@ -381,6 +381,8 @@ step:
                   loader: fetchAliasOptions
                   disable: disableAlias
                   schema: alias
+                  validation:
+                    type: required
                 - type: input
                   label: Secret Name
                   schema: secretName
