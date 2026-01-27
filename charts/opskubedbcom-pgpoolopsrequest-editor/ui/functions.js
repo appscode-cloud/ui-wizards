@@ -305,7 +305,7 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
-const configSecretKeys = ['*.conf']
+const configSecretKeys = ['kubedb-user.conf']
 let machinesFromPreset = []
 let secretArray = []
 
@@ -887,7 +887,7 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
-            keys: ['*.conf'],
+            keys: ['kubedb-user.conf'],
           },
         },
       )
