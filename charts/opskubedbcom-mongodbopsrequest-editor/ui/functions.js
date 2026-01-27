@@ -315,7 +315,7 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
-const configSecretKeys = ['mongod.conf']
+const configSecretKeys = ['mongod.conf', 'replicaset.json', 'configuration.js']
 
 let machinesFromPreset = []
 
@@ -900,9 +900,12 @@ export const useFunc = (model) => {
     return machine === 'custom'
   }
 
-  // for config secret
-  let newConfigSecrets = []
-  async function getConfigSecrets() {
+  // Fetch and store database Infos
+  // for secret configurations in reconfigure
+  let configSecrets = []
+  let secretConfigData = []
+
+  async function fetchConfigSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/namespace')
@@ -913,7 +916,6 @@ export const useFunc = (model) => {
     const dbKind = getValue(store.state, '/resource/definition/result/kind')
     const dbResource = getValue(model, '/route/params/resource')
     const dbVersion = getValue(model, '/route/params/version')
-    let secrets = []
 
     try {
       const resp = await axios.post(
@@ -934,79 +936,47 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
-            keys: ['mongod.conf'],
+            keys: ['mongod.conf', 'replicaset.json', 'configuration.js'],
           },
         },
       )
-      secrets = resp?.data?.response?.availableSecrets || []
-      newConfigSecrets = secrets
+      configSecrets = resp?.data?.response?.availableSecrets || []
+      secretConfigData = resp?.data?.response?.configurations || []
     } catch (e) {
       console.log(e)
     }
-    const mappedSecrets = secrets.map((item) => {
+  }
+
+  async function getConfigSecrets(type) {
+    type = type ? type + '/' : ''
+    const secretStatus = getValue(discriminator, `${type}createSecret/status`)
+    if (secretStatus === 'success') {
+      await fetchConfigSecrets()
+    }
+    const mappedSecrets = configSecrets.map((item) => {
       return { text: item, value: item }
     })
     mappedSecrets.push({ text: '+ Create a new Secret', value: 'Create' })
     return mappedSecrets
   }
 
-  let ConfigurationsData = []
-
   async function getConfigSecretsforAppyConfig() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = getValue(model, '/metadata/namespace')
-    // watchDependency('model#/metadata/namespace')
-
-    const name = getValue(model, '/spec/databaseRef/name')
-    const dbGroup = getValue(model, '/route/params/group')
-    const dbKind = getValue(store.state, '/resource/definition/result/kind')
-    const dbResource = getValue(model, '/route/params/resource')
-    const dbVersion = getValue(model, '/route/params/version')
-
-    try {
-      const resp = await axios.post(
-        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
-        {
-          apiVersion: 'ui.kubedb.com/v1alpha1',
-          kind: 'DatabaseInfo',
-          request: {
-            source: {
-              ref: {
-                name: name,
-                namespace: namespace,
-              },
-              resource: {
-                group: dbGroup,
-                kind: dbKind,
-                name: dbResource,
-                version: dbVersion,
-              },
-            },
-            keys: ['mongod.conf'],
-          },
-        },
-      )
-      ConfigurationsData = resp?.data?.response?.configurations || []
-      const secrets = ConfigurationsData.map((item) => {
-        return { text: item.componentName, value: item.componentName }
-      })
-      return secrets
-    } catch (e) {
-      console.log(e)
-    }
-    return []
+    const secrets = secretConfigData.map((item) => {
+      return { text: item.componentName, value: item.componentName }
+    })
+    return secrets
   }
 
   function getSelectedConfigurationData(type) {
-    const path = `/${type}/selectedConfiguration`
+    type = type ? type + '/' : ''
+    const path = `/${type}selectedConfiguration`
     const selectedConfiguration = getValue(discriminator, path)
 
     if (!selectedConfiguration) {
       return []
     }
 
-    const configuration = ConfigurationsData.find(
+    const configuration = secretConfigData.find(
       (item) => item.componentName === selectedConfiguration,
     )
 
@@ -1035,7 +1005,7 @@ export const useFunc = (model) => {
 
     // Set the value to the model
     commit('wizard/model$update', {
-      path: `/temp/${type}/applyConfig`,
+      path: `/temp/${type}applyConfig`,
       value: result,
       force: true,
     })
@@ -1043,56 +1013,31 @@ export const useFunc = (model) => {
     return result
   }
 
-  function getSelectedConfigurationName(type) {
-    const path = `/${type}/selectedConfigurationRemove`
-    const selectedConfiguration = getValue(discriminator, path)
+  function getSelectedConfigurationName(configType, type) {
+    type = type ? type + '/' : ''
+    let path = ''
+    if (configType === 'create') path = `/spec/configuration/${type}/configSecret/name`
+    else if (configType === 'apply') path = `/${type}selectedConfiguration`
+    else if (configType === 'remove') path = `/${type}selectedConfigurationRemove`
 
-    if (!selectedConfiguration) {
-      return { subtitle: 'No secret selected' }
-    }
+    const selectedConfiguration =
+      configType === 'create' ? getValue(model, path) : getValue(discriminator, path)
 
-    const configuration = ConfigurationsData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return { subtitle: 'No secret selected' }
-    }
-
-    if (configuration.componentName)
-      return { subtitle: ` You have selected <b>${configuration.componentName}</b> secret` }
+    if (selectedConfiguration)
+      return { subtitle: ` You have selected <b>${selectedConfiguration}</b> secret` }
     else return { subtitle: 'No secret selected' }
   }
 
-  function getSelectedApplyConfigName(type) {
-    const path = `/${type}/selectedConfiguration`
-    const selectedConfiguration = getValue(discriminator, path)
-
-    if (!selectedConfiguration) {
-      return { subtitle: 'No configuration selected' }
-    }
-
-    const configuration = ConfigurationsData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return { subtitle: 'No configuration selected' }
-    }
-    if (configuration.componentName)
-      return { subtitle: ` You have selected <b>${configuration.componentName}</b> configuration` }
-    else return { subtitle: 'No configuration selected' }
-  }
-
   function getSelectedConfigurationValueForRemove(type) {
-    const path = `/${type}/selectedConfigurationRemove`
+    type = type ? type + '/' : ''
+    const path = `/${type}selectedConfigurationRemove`
     const selectedConfiguration = getValue(discriminator, path)
 
     if (!selectedConfiguration) {
       return ''
     }
 
-    const configuration = ConfigurationsData.find(
+    const configuration = secretConfigData.find(
       (item) => item.componentName === selectedConfiguration,
     )
 
@@ -1134,11 +1079,12 @@ export const useFunc = (model) => {
   }
 
   async function createNewConfigSecret(type) {
+    type = type ? type + '/' : ''
     const { user, cluster } = route.params
     const url = `/clusters/${user}/${cluster}/resources`
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
-    const secretName = getValue(discriminator, `${type}/createSecret/name`)
-    const secretData = getValue(discriminator, `${type}/createSecret/data`)
+    const secretName = getValue(discriminator, `${type}createSecret/name`)
+    const secretData = getValue(discriminator, `${type}createSecret/data`)
     const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
 
     try {
@@ -1153,11 +1099,11 @@ export const useFunc = (model) => {
         type: 'Opaque',
       })
       commit('wizard/temp$update', {
-        path: `${type}/createSecret/status`,
+        path: `${type}createSecret/status`,
         value: 'success',
       })
       commit('wizard/temp$update', {
-        path: `${type}/createSecret/lastCreatedSecret`,
+        path: `${type}createSecret/lastCreatedSecret`,
         value: secretName,
       })
       toast.success('Secret created successfully')
@@ -1181,12 +1127,13 @@ export const useFunc = (model) => {
   }
 
   function isCreateSecret(type) {
-    const selectedSecret = getValue(model, `spec/configuration/${type}/configSecret/name`)
+    type = type ? type + '/' : ''
+    const selectedSecret = getValue(model, `spec/configuration/${type}configSecret/name`)
     const res = selectedSecret === 'Create'
 
     if (res === true) {
       commit('wizard/temp$update', {
-        path: `${type}/createSecret/status`,
+        path: `${type}createSecret/status`,
         value: 'pending',
       })
     }
@@ -1198,23 +1145,214 @@ export const useFunc = (model) => {
   }
 
   function onCreateSecretChange(type) {
-    const secretStatus = getValue(discriminator, `${type}/createSecret/status`)
+    type = type ? type + '/' : ''
+    const secretStatus = getValue(discriminator, `${type}createSecret/status`)
     if (secretStatus === 'cancelled') return ''
     else if (secretStatus === 'success') {
-      const name = getValue(discriminator, `${type}/createSecret/lastCreatedSecret`)
+      const name = getValue(discriminator, `${type}createSecret/lastCreatedSecret`)
 
-      const configFound = newConfigSecrets.find((item) => item === name)
+      const configFound = configSecrets.find((item) => item === name)
       return configFound ? { text: name, value: name } : ''
     }
   }
 
   function cancelCreateSecret(type) {
-    commit('wizard/temp$delete', `${type}/createSecret/name`)
-    commit('wizard/temp$delete', `${type}/createSecret/data`)
+    type = type ? type + '/' : ''
+    commit('wizard/temp$delete', `${type}createSecret/name`)
+    commit('wizard/temp$delete', `${type}createSecret/data`)
     commit('wizard/temp$update', {
-      path: `${type}/createSecret/status`,
+      path: `${type}createSecret/status`,
       value: 'cancelled',
     })
+  }
+
+  async function onApplyconfigChange(type) {
+    type = type ? type + '/' : ''
+    const configValue = getValue(discriminator, `${type}applyConfig`)
+
+    if (!configValue) {
+      commit('wizard/model$delete', `/spec/configuration/${type}applyConfig`)
+      return
+    }
+    const tempConfigObj = {}
+    configValue.forEach((item) => {
+      if (item.name) {
+        tempConfigObj[item.name] = item.content
+      }
+    })
+    if (Object.keys(tempConfigObj).length === 0) {
+      commit('wizard/model$delete', `/spec/configuration/${type}applyConfig`)
+      return
+    }
+    commit('wizard/model$update', {
+      path: `/spec/configuration/${type}applyConfig`,
+      value: tempConfigObj,
+    })
+  }
+
+  function setApplyConfig(type) {
+    type = type ? type + '/' : ''
+    const configPath = `/${type}selectedConfiguration`
+    const selectedConfig = getValue(discriminator, configPath)
+    if (!selectedConfig) {
+      return [{ name: '', content: '' }]
+    }
+    const applyconfigData = secretConfigData.find((item) => {
+      if (item.componentName === selectedConfig) {
+        return item
+      }
+    })
+    const { applyConfig } = applyconfigData
+    const configObj = []
+
+    if (applyConfig) {
+      Object.keys(applyConfig).forEach((fileName) => {
+        configObj.push({
+          name: fileName,
+          content: applyConfig[fileName],
+        })
+      })
+    } else {
+      configObj.push({ name: '', content: '' })
+    }
+    return configObj
+  }
+
+  function onRemoveConfigChange(type) {
+    type = type ? type + '/' : ''
+    const configPath = `/${type}selectedConfigurationRemove`
+    const selectedConfig = getValue(discriminator, configPath)
+
+    if (!selectedConfig) {
+      commit('wizard/model$delete', `/spec/configuration/${type}removeCustomConfig`)
+      return [{ name: '', content: '' }]
+    }
+    commit('wizard/model$update', {
+      path: `/spec/configuration/${type}removeCustomConfig`,
+      value: true,
+    })
+
+    const configuration = secretConfigData.find((item) => item.componentName === selectedConfig)
+
+    if (!configuration.data) {
+      return [{ name: '', content: '' }]
+    }
+
+    const configObj = []
+    // Decode base64 and format as array of objects with name and content
+    Object.keys(configuration.data).forEach((fileName) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(configuration.data[fileName])
+        configObj.push({
+          name: fileName,
+          content: decodedString,
+        })
+      } catch (e) {
+        console.error(`Error decoding ${fileName}:`, e)
+        configObj.push({
+          name: fileName,
+          content: configuration.data[fileName], // Fallback to original if decode fails
+        })
+      }
+    })
+    return configObj
+  }
+
+  async function onNewConfigSecretChange(type) {
+    type = type ? type + '/' : ''
+    const path = `/spec/configuration/${type}configSecret/name`
+    const selectedSecret = getValue(model, path)
+
+    if (!selectedSecret) {
+      commit('wizard/model$delete', `/spec/configuration/${type}configSecret`)
+      return [{ name: '', content: '' }]
+    }
+    if (selectedSecret === 'Create') return [{ name: '', content: '' }]
+
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+
+    try {
+      // Fetch the secret data from API
+      const secretResp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${selectedSecret}`,
+      )
+
+      const secretData = secretResp.data?.data || {}
+      const configObj = []
+
+      // Decode base64 and format as array of objects with name and content
+      Object.keys(secretData).forEach((fileName) => {
+        try {
+          // Decode base64 string
+          const decodedString = atob(secretData[fileName])
+          configObj.push({
+            name: fileName,
+            content: decodedString,
+          })
+        } catch (e) {
+          console.error(`Error decoding ${fileName}:`, e)
+          configObj.push({
+            name: fileName,
+            content: secretData[fileName], // Fallback to original if decode fails
+          })
+        }
+      })
+
+      return configObj
+    } catch (e) {
+      console.error('Error fetching secret:', e)
+      return [{ name: '', content: '' }]
+    }
+  }
+
+  function onSelectedSecretChange(type, index) {
+    type = type ? type + '/' : ''
+    const secretData = getValue(discriminator, `${type}createSecret/data`) || []
+    const selfSecrets = secretData.map((item) => item.key)
+
+    const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
+
+    const selfKey = getValue(discriminator, `${type}createSecret/data/${index}/key`)
+    if (selfKey) {
+      remainingSecrets.push(selfKey)
+    }
+    const resSecret = remainingSecrets.map((item) => {
+      return { text: item, value: item }
+    })
+    return resSecret
+  }
+
+  function ifReconfigurationTypeEqualsTo(value, property, isShard) {
+    let path = '/reconfigurationType'
+    if (isShard) path += `-${property}`
+    const reconfigurationType = getValue(discriminator, path)
+
+    const watchPath = `discriminator#${path}`
+    // watchDependency(watchPath)
+    return reconfigurationType === value
+  }
+
+  function onReconfigurationTypeChange(property, isShard) {
+    setDiscriminatorValue(`/${property}/applyConfig`, [])
+    let path = '/reconfigurationType'
+    if (isShard) path += `-${property}`
+    const reconfigurationType = getValue(discriminator, path)
+    if (reconfigurationType === 'remove') {
+      commit('wizard/model$delete', `/spec/configuration/${property}`)
+
+      commit('wizard/model$update', {
+        path: `/spec/configuration/${property}/removeCustomConfig`,
+        value: true,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$delete', `/spec/configuration/${property}/configSecret`)
+      commit('wizard/model$delete', `/spec/configuration/${property}/applyConfig`)
+      commit('wizard/model$delete', `/spec/configuration/${property}/removeCustomConfig`)
+    }
   }
 
   function isEqualToValueFromType(value) {
@@ -1314,204 +1452,6 @@ export const useFunc = (model) => {
         value: name,
       }
     })
-  }
-
-  // reconfiguration type
-  function ifReconfigurationTypeEqualsTo(value, property, isShard) {
-    let path = '/reconfigurationType'
-    if (isShard) path += `-${property}`
-    const reconfigurationType = getValue(discriminator, path)
-
-    const watchPath = `discriminator#${path}`
-    // watchDependency(watchPath)
-    return reconfigurationType === value
-  }
-
-  async function onApplyconfigChange(type) {
-    const configValue = getValue(discriminator, `/${type}/applyConfig`)
-
-    if (!configValue) {
-      commit('wizard/model$delete', `/spec/configuration/${type}/applyConfig`)
-      return
-    }
-    const tempConfigObj = {}
-    configValue.forEach((item) => {
-      if (item.name) {
-        tempConfigObj[item.name] = item.content
-      }
-    })
-    if (Object.keys(tempConfigObj).length === 0) {
-      commit('wizard/model$delete', `/spec/configuration/${type}/applyConfig`)
-      return
-    }
-    commit('wizard/model$update', {
-      path: `/spec/configuration/${type}/applyConfig`,
-      value: tempConfigObj,
-    })
-  }
-
-  function setApplyConfig(type) {
-    const configPath = `/${type}/selectedConfiguration`
-    const selectedConfig = getValue(discriminator, configPath)
-    if (!selectedConfig) {
-      return [{ name: '', content: '' }]
-    }
-    const applyconfig = ConfigurationsData.find((item) => {
-      if (item.componentName === selectedConfig) {
-        return item
-      }
-    })
-
-    const { secretName, data } = applyconfig
-    const configObj = []
-    const tempConfigObj = {}
-
-    if (data) {
-      // Decode base64 and format as array of objects with name and content
-      Object.keys(data).forEach((fileName) => {
-        try {
-          // Decode base64 string
-          const decodedString = atob(data[fileName])
-          configObj.push({
-            name: fileName,
-            content: decodedString,
-          })
-          tempConfigObj[fileName] = decodedString
-        } catch (e) {
-          console.error(`Error decoding ${fileName}:`, e)
-          configObj.push({
-            name: fileName,
-            content: data[fileName], // Fallback to original if decode fails
-          })
-        }
-      })
-    } else {
-      configObj.push({ name: selectedConfig, content: '' })
-    }
-    return configObj
-  }
-
-  function onRemoveConfigChange(type) {
-    const configPath = `/${type}/selectedConfigurationRemove`
-    const selectedConfig = getValue(discriminator, configPath)
-
-    if (!selectedConfig) {
-      commit('wizard/model$delete', `/spec/configuration/${type}/removeCustomConfig`)
-      return [{ name: '', content: '' }]
-    }
-    commit('wizard/model$update', {
-      path: `/spec/configuration/${type}/removeCustomConfig`,
-      value: true,
-    })
-
-    const configuration = ConfigurationsData.find((item) => item.componentName === selectedConfig)
-
-    if (!configuration.data) {
-      return [{ name: '', content: '' }]
-    }
-
-    const configObj = []
-    // Decode base64 and format as array of objects with name and content
-    Object.keys(configuration.data).forEach((fileName) => {
-      try {
-        // Decode base64 string
-        const decodedString = atob(configuration.data[fileName])
-        configObj.push({
-          name: fileName,
-          content: decodedString,
-        })
-      } catch (e) {
-        console.error(`Error decoding ${fileName}:`, e)
-        configObj.push({
-          name: fileName,
-          content: configuration.data[fileName], // Fallback to original if decode fails
-        })
-      }
-    })
-    return configObj
-  }
-
-  async function onNewConfigSecretChange(type) {
-    const path = `/spec/configuration/${type}/configSecret/name`
-    const selectedSecret = getValue(model, path)
-
-    if (!selectedSecret) {
-      commit('wizard/model$delete', `/spec/configuration/${type}/configSecret`)
-      return [{ name: '', content: '' }]
-    }
-
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
-
-    try {
-      // Fetch the secret data from API
-      const secretResp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${selectedSecret}`,
-      )
-
-      const secretData = secretResp.data?.data || {}
-      const configObj = []
-
-      // Decode base64 and format as array of objects with name and content
-      Object.keys(secretData).forEach((fileName) => {
-        try {
-          // Decode base64 string
-          const decodedString = atob(secretData[fileName])
-          configObj.push({
-            name: fileName,
-            content: decodedString,
-          })
-        } catch (e) {
-          console.error(`Error decoding ${fileName}:`, e)
-          configObj.push({
-            name: fileName,
-            content: secretData[fileName], // Fallback to original if decode fails
-          })
-        }
-      })
-
-      return configObj
-    } catch (e) {
-      console.error('Error fetching secret:', e)
-      return [{ name: '', content: '' }]
-    }
-  }
-
-  function onSelectedSecretChange(type, index) {
-    const secretData = getValue(discriminator, `${type}/createSecret/data`) || []
-    const selfSecrets = secretData.map((item) => item.key)
-
-    const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
-
-    const selfKey = getValue(discriminator, `${type}/createSecret/data/${index}/key`)
-    if (selfKey) {
-      remainingSecrets.push(selfKey)
-    }
-    const resSecret = remainingSecrets.map((item) => {
-      return { text: item, value: item }
-    })
-    return resSecret
-  }
-
-  function onReconfigurationTypeChange(property, isShard) {
-    setDiscriminatorValue(`/${property}/applyConfig`, [])
-    let path = '/reconfigurationType'
-    if (isShard) path += `-${property}`
-    const reconfigurationType = getValue(discriminator, path)
-    if (reconfigurationType === 'remove') {
-      commit('wizard/model$delete', `/spec/configuration/${property}`)
-
-      commit('wizard/model$update', {
-        path: `/spec/configuration/${property}/removeCustomConfig`,
-        value: true,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', `/spec/configuration/${property}/configSecret`)
-      commit('wizard/model$delete', `/spec/configuration/${property}/applyConfig`)
-      commit('wizard/model$delete', `/spec/configuration/${property}/removeCustomConfig`)
-    }
   }
 
   // for tls
@@ -1764,14 +1704,6 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  function getSelectedConfigSecret(type) {
-    const path = `/spec/configuration/${type}/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    // watchDependency(`model#${path}`)
-    if (selectedSecret) return { subtitle: `You have selected <b>${selectedSecret}</b> secret` }
-    return { subtitle: 'No secret selected' }
-  }
-
   function objectToYaml(obj, indent = 0) {
     if (obj === null || obj === undefined) return 'null'
     if (typeof obj !== 'object') return JSON.stringify(obj)
@@ -1901,7 +1833,7 @@ export const useFunc = (model) => {
     showAndInitOpsRequestType,
     ifDbTypeEqualsTo,
     getConfigSecrets,
-    getSelectedConfigSecret,
+    fetchConfigSecrets,
     createSecretUrl,
     isEqualToValueFromType,
     getNamespacedResourceList,
@@ -1941,7 +1873,6 @@ export const useFunc = (model) => {
     getSelectedConfigurationValueForRemove,
     onRemoveConfigChange,
     onNewConfigSecretChange,
-    getSelectedApplyConfigName,
     createNewConfigSecret,
     isCreateSecret,
     isNotCreateSecret,

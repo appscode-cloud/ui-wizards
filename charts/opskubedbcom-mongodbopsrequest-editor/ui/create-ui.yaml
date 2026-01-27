@@ -651,15 +651,20 @@ step:
         if:
           name: ifRequestTypeEqualsTo|Reconfigure
           type: function
+        loader:
+          name: fetchConfigSecrets
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
         elements:
+          - type: label-element
+            label: ''
+            subtitle: Select a new configuration secret, apply a custom configuration, or remove an existing setup to update your database settings
           - type: block-layout
             label: Standalone
             if:
               name: ifDbTypeEqualsTo|standalone|configuration
               type: function
             elements:
-              - type: label-element
-                label: ''
               - type: tab-layout
                 label: New Config Secret
                 schema: temp/properties/reconfigurationType
@@ -687,7 +692,7 @@ step:
                       refresh: true
                       label: Config Secret
                       loader:
-                        name: getConfigSecrets
+                        name: getConfigSecrets|standalone
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
                           - temp/properties/standalone/properties/createSecret/properties/status
@@ -701,7 +706,7 @@ step:
                     - type: label-element
                       label: ''
                       loader:
-                        name: getSelectedConfigSecret|standalone
+                        name: getSelectedConfigurationName|create|standalone
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
                     - type: block-layout
@@ -724,6 +729,8 @@ step:
                           label: String Data
                           schema: temp/properties/standalone/properties/createSecret/properties/data
                           buttonClass: is-light is-outlined
+                          validation:
+                            type: required
                           elements:
                             - type: select
                               label: Key
@@ -767,7 +774,7 @@ step:
                     - type: label-element
                       label: ''
                       loader:
-                        name: getSelectedApplyConfigName|standalone
+                        name: getSelectedConfigurationName|apply|standalone
                         watchPaths:
                           - temp/properties/standalone/selectedConfiguration
                     - type: multi-file-editor
@@ -803,7 +810,7 @@ step:
                     - type: label-element
                       label: ''
                       loader:
-                        name: getSelectedConfigurationName|standalone
+                        name: getSelectedConfigurationName|remove|standalone
                         watchPaths:
                           - temp/properties/standalone/selectedConfigurationRemove
                     - type: multi-file-editor
@@ -823,8 +830,6 @@ step:
               name: ifDbTypeEqualsTo|replicaSet|configuration
               type: function
             elements:
-              - type: label-element
-                label: ''
               - type: tab-layout
                 label: New Config Secret
                 schema: temp/properties/reconfigurationType
@@ -852,7 +857,7 @@ step:
                       refresh: true
                       label: Config Secret
                       loader:
-                        name: getConfigSecrets
+                        name: getConfigSecrets|replicaSet
                         watchPaths:
                           - schema/properties/metadata/properties/namespace
                           - temp/properties/replicaSet/properties/createSecret/properties/status
@@ -866,7 +871,7 @@ step:
                     - type: label-element
                       label: ''
                       loader:
-                        name: getSelectedConfigSecret|replicaSet
+                        name: getSelectedConfigurationName|create|replicaSet
                         watchPaths:
                           - schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
                     - type: block-layout
@@ -889,6 +894,8 @@ step:
                           label: String Data
                           schema: temp/properties/replicaSet/properties/createSecret/properties/data
                           buttonClass: is-light is-outlined
+                          validation:
+                            type: required
                           elements:
                             - type: select
                               label: Key
@@ -932,7 +939,7 @@ step:
                     - type: label-element
                       label: ''
                       loader:
-                        name: getSelectedApplyConfigName|replicaSet
+                        name: getSelectedConfigurationName|apply|replicaSet
                         watchPaths:
                           - temp/properties/replicaSet/selectedConfiguration
                     - type: multi-file-editor
@@ -968,7 +975,7 @@ step:
                     - type: label-element
                       label: ''
                       loader:
-                        name: getSelectedConfigurationName|replicaSet
+                        name: getSelectedConfigurationName|remove|replicaSet
                         watchPaths:
                           - temp/properties/replicaSet/selectedConfigurationRemove
                     - type: multi-file-editor
@@ -989,8 +996,6 @@ step:
               showLabels: true
               customClass: mt-10
               elements:
-                - type: label-element
-                  label: ''
                 - type: tab-layout
                   label: New Config Secret
                   schema: temp/properties/reconfigurationType-configServer
@@ -1018,7 +1023,7 @@ step:
                         refresh: true
                         label: Config Secret
                         loader:
-                          name: getConfigSecrets
+                          name: getConfigSecrets|configServer
                           watchPaths:
                             - schema/properties/metadata/properties/namespace
                             - temp/properties/configServer/properties/createSecret/properties/status
@@ -1032,7 +1037,7 @@ step:
                       - type: label-element
                         label: ''
                         loader:
-                          name: getSelectedConfigSecret|configServer
+                          name: getSelectedConfigurationName|create|configServer
                           watchPaths:
                             - schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
                       - type: block-layout
@@ -1055,6 +1060,8 @@ step:
                             label: String Data
                             schema: temp/properties/configServer/properties/createSecret/properties/data
                             buttonClass: is-light is-outlined
+                            validation:
+                              type: required
                             elements:
                               - type: select
                                 label: Key
@@ -1098,7 +1105,7 @@ step:
                       - type: label-element
                         label: ''
                         loader:
-                          name: getSelectedApplyConfigName|configServer
+                          name: getSelectedConfigurationName|apply|configServer
                           watchPaths:
                             - temp/properties/configServer/selectedConfiguration
                       - type: multi-file-editor
@@ -1134,7 +1141,7 @@ step:
                       - type: label-element
                         label: ''
                         loader:
-                          name: getSelectedConfigurationName|configServer
+                          name: getSelectedConfigurationName|remove|configServer
                           watchPaths:
                             - temp/properties/configServer/selectedConfigurationRemove
                       - type: multi-file-editor
@@ -1152,8 +1159,6 @@ step:
               label: Mongos
               showLabels: true
               elements:
-                - type: label-element
-                  label: ''
                 - type: tab-layout
                   label: New Config Secret
                   schema: temp/properties/reconfigurationType-mongos
@@ -1181,7 +1186,7 @@ step:
                         refresh: true
                         label: Config Secret
                         loader:
-                          name: getConfigSecrets
+                          name: getConfigSecrets|mongos
                           watchPaths:
                             - schema/properties/metadata/properties/namespace
                             - temp/properties/mongos/properties/createSecret/properties/status
@@ -1195,7 +1200,7 @@ step:
                       - type: label-element
                         label: ''
                         loader:
-                          name: getSelectedConfigSecret|mongos
+                          name: getSelectedConfigurationName|create|mongos
                           watchPaths:
                             - schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
                       - type: block-layout
@@ -1218,6 +1223,8 @@ step:
                             label: String Data
                             schema: temp/properties/mongos/properties/createSecret/properties/data
                             buttonClass: is-light is-outlined
+                            validation:
+                              type: required
                             elements:
                               - type: select
                                 label: Key
@@ -1261,7 +1268,7 @@ step:
                       - type: label-element
                         label: ''
                         loader:
-                          name: getSelectedApplyConfigName|mongos
+                          name: getSelectedConfigurationName|apply|mongos
                           watchPaths:
                             - temp/properties/mongos/selectedConfiguration
                       - type: multi-file-editor
@@ -1297,7 +1304,7 @@ step:
                       - type: label-element
                         label: ''
                         loader:
-                          name: getSelectedConfigurationName|mongos
+                          name: getSelectedConfigurationName|remove|mongos
                           watchPaths:
                             - temp/properties/mongos/selectedConfigurationRemove
                       - type: multi-file-editor
@@ -1315,8 +1322,6 @@ step:
               label: Shard
               showLabels: true
               elements:
-                - type: label-element
-                  label: ''
                 - type: tab-layout
                   label: New Config Secret
                   schema: temp/properties/reconfigurationType-shard
@@ -1344,7 +1349,7 @@ step:
                         refresh: true
                         label: Config Secret
                         loader:
-                          name: getConfigSecrets
+                          name: getConfigSecrets|shard
                           watchPaths:
                             - schema/properties/metadata/properties/namespace
                             - temp/properties/shard/properties/createSecret/properties/status
@@ -1358,7 +1363,7 @@ step:
                       - type: label-element
                         label: ''
                         loader:
-                          name: getSelectedConfigSecret|shard
+                          name: getSelectedConfigurationName|create|shard
                           watchPaths:
                             - schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
                       - type: block-layout
@@ -1381,6 +1386,8 @@ step:
                             label: String Data
                             schema: temp/properties/shard/properties/createSecret/properties/data
                             buttonClass: is-light is-outlined
+                            validation:
+                              type: required
                             elements:
                               - type: select
                                 label: Key
@@ -1424,7 +1431,7 @@ step:
                       - type: label-element
                         label: ''
                         loader:
-                          name: getSelectedApplyConfigName|shard
+                          name: getSelectedConfigurationName|apply|shard
                           watchPaths:
                             - temp/properties/shard/selectedConfiguration
                       - type: multi-file-editor
@@ -1460,7 +1467,7 @@ step:
                       - type: label-element
                         label: ''
                         loader:
-                          name: getSelectedConfigurationName|shard
+                          name: getSelectedConfigurationName|remove|shard
                           watchPaths:
                             - temp/properties/shard/selectedConfigurationRemove
                       - type: multi-file-editor
