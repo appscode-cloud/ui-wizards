@@ -459,6 +459,7 @@ step:
   
   - type: single-step-form
     id: monitoring
+    loader: initMonitoring
     elements:
     - type: label-element
       label: To update Exporter Resource section click on Create OpsRequest
@@ -467,7 +468,7 @@ step:
       schema: temp/properties/opsRequestUrl
       init:
         type: func
-        value: getOpsRequestUrl|VerticalScaling
+        value: getOpsRequestUrl|scale-vertically
     - type: switch
       label: Enable Monitoring
       fullwidth: true
@@ -480,8 +481,6 @@ step:
         paths:
           - temp/properties/enableMonitoring
     - type: block-layout
-      label: Backup form 
-      showLabels: false
       if:
         type: function
         name: showMonitoringSection
@@ -536,12 +535,18 @@ step:
             - type: input
               label: Interval
               schema: interval
+              validation:
+                type: required
             - type: input
               label: Path
               schema: path
+              validation:
+                type: required
             - type: input
               label: Port
               schema: port
+              validation:
+                type: required
           - type: select
             multiple: true
             label: Match Namespaces
@@ -622,19 +627,28 @@ step:
               label: Metadata
               showLabels: false
               elements: 
-                  #remove: should be array-object-form after fixes
-                - type: block-layout
-                  label: New Environment Variable
-                  showLabels: true
-                  hideBlock: true
-                  # schema: schema/properties/resources/properties/kubedbComPostgres/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+                - type: array-object-form
+                  init:
+                    type: func
+                    value: initEnvArray
+                  label: Environment Variables
+                  buttonClass: is-light is-outlined
+                  watcher:
+                    func: onEnvArrayChange
+                    paths:
+                      - temp/properties/env
+                  schema: temp/properties/env
                   elements:
                   - type: input
                     label: Name
-                    schema: schema/properties/resources/properties/kubedbComPostgres/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/name
+                    schema: name
+                    validation:
+                      type: required
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
+                    validation:
+                      type: required
                     init: 
                       type: func 
                       value: setValueFrom
@@ -651,56 +665,58 @@ step:
                         - temp/properties/valueFromType
                   - type: input 
                     label: Value 
-                    schema: schema/properties/resources/properties/kubedbComPostgres/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/value
+                    schema: value
+                    validation:
+                      type: required
                     if:
-                      name: isEqualToValueFromType|input
+                      name: isEqualToTemp|input
                       type: function
                   - type: select
                     if:
                       type: function
-                      name: isEqualToValueFromType|configMap
+                      name: isEqualToTemp|configMap
                     label: ConfigMap Name
-                    schema: schema/properties/resources/properties/kubedbComPostgres/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/name
+                    schema: valueFrom/properties/configMapKeyRef/properties/name
                     loader:
                       name: resourceNames|core|v1|configmaps
                       watchPaths:
                         - schema/metadata/release/namespace
-                    # allowUserDefinedOption: true
+                    validation:
+                      type: required
                   - type: select
                     label: ConfigMap Key
-                    schema: schema/properties/resources/properties/kubedbComPostgres/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/configMapKeyRef/properties/key
+                    schema: valueFrom/properties/configMapKeyRef/properties/key
                     if:
                       type: function
-                      name: isEqualToValueFromType|configMap
+                      name: isEqualToTemp|configMap
                     loader:
                       name: getConfigMapKeys
                       watchPaths:
-                        - schema/properties/resources/properties/kubedbComPostgres/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/configMapKeyRef/name
+                        - schema/resources/kubedbComPostgres/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/configMapKeyRef/name
                         - schema/metadata/release/namespace
-                    # allowUserDefinedOption: true
                   - type: select
                     label: Secret Name
-                    schema: schema/properties/resources/properties/kubedbComPostgres/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/name
+                    schema: valueFrom/properties/secretKeyRef/properties/name
                     if:
                       type: function
-                      name: isEqualToValueFromType|secret
+                      name: isEqualToTemp|secret
                     loader:
                       name: getSecrets
                       watchPaths:
                         - schema/metadata/release/namespace
-                    # allowUserDefinedOption: true
+                    validation:
+                      type: required
                   - type: select
                     label: Secret Key
-                    schema: schema/properties/resources/properties/kubedbComPostgres/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/properties/valueFrom/properties/secretKeyRef/properties/key
+                    schema: valueFrom/properties/secretKeyRef/properties/key
                     if:
                       type: function
-                      name: isEqualToValueFromType|secret
+                      name: isEqualToTemp|secret
                     loader:
                       name: getSecretKeys
                       watchPaths:
-                        - schema/properties/resources/properties/kubedbComPostgres/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/properties/items/valueFrom/secretKeyRef/name
+                        - schema/resources/kubedbComPostgres/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/secretKeyRef/name
                         - schema/metadata/release/namespace
-                    # allowUserDefinedOption: true
 
   - type: single-step-form
     id: binding
