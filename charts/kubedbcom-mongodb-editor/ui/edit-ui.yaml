@@ -160,7 +160,7 @@ step:
       schema: temp/properties/opsRequestUrl
       init:
         type: func
-        value: getOpsRequestUrl|VerticalScaling
+        value: getOpsRequestUrl|scale-vertically
     - type: switch
       label: Enable Monitoring
       fullwidth: true
@@ -227,12 +227,18 @@ step:
             - type: input
               label: Interval
               schema: interval
+              validation:
+                type: required
             - type: input
               label: Path
               schema: path
+              validation:
+                type: required
             - type: input
               label: Port
               schema: port
+              validation:
+                type: required
           - type: select
             multiple: true
             label: Match Namespaces
@@ -314,7 +320,6 @@ step:
               label: Metadata
               showLabels: false
               elements: 
-                  #remove: should be array-object-form after fixes
                 - type: array-object-form
                   init:
                     type: func
@@ -335,6 +340,8 @@ step:
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
+                    validation:
+                      type: required
                     init: 
                       type: func 
                       value: setValueFrom
@@ -352,6 +359,8 @@ step:
                   - type: input 
                     label: Value 
                     schema: value
+                    validation:
+                      type: required
                     if:
                       name: isEqualToTemp|input
                       type: function
@@ -365,6 +374,8 @@ step:
                       name: resourceNames|core|v1|configmaps
                       watchPaths:
                         - schema/metadata/release/namespace
+                    validation:
+                      type: required
                   - type: select
                     label: ConfigMap Key
                     schema: valueFrom/properties/configMapKeyRef/properties/key
@@ -386,6 +397,8 @@ step:
                       name: getSecrets
                       watchPaths:
                         - schema/metadata/release/namespace
+                    validation:
+                      type: required
                   - type: select
                     label: Secret Key
                     schema: valueFrom/properties/secretKeyRef/properties/key

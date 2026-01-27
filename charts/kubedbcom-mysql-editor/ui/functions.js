@@ -27,6 +27,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/enableMonitoring', false)
   setDiscriminatorValue('/customizeExporter', true)
   setDiscriminatorValue('/valueFromType', 'input')
+  setDiscriminatorValue('/env', [])
 
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
@@ -1039,8 +1040,7 @@ export const useFunc = (model) => {
     const routeRootPath = storeGet('/route/path')
     const pathPrefix = `${domain}/db${routeRootPath}`
     const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
-    const pathConstructedForKubedb =
-      pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
+    const pathConstructedForKubedb = pathSplit + `/${reqType.toLowerCase()}?namespace=${namespace}`
 
     const isKube = !!storeGet('/route/params/actions')
 
@@ -1120,11 +1120,11 @@ export const useFunc = (model) => {
     }
   }
 
-  function isEqualToValueFromType(value) {
-    //watchDependency('discriminator#/valueFromType')
-    const valueFrom = getValue(discriminator, '/valueFromType')
-    return valueFrom === value
-  }
+  // function isEqualToValueFromType(value) {
+  //   //watchDependency('discriminator#/valueFromType')
+  //   const valueFrom = getValue(discriminator, '/valueFromType')
+  //   return valueFrom === value
+  // }
 
   async function resourceNames(group, version, resource) {
     const namespace = getValue(model, '/metadata/release/namespace')
@@ -1153,14 +1153,14 @@ export const useFunc = (model) => {
     })
   }
 
-  async function getConfigMapKeys() {
+  async function getConfigMapKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
     const configMapName = getValue(
       model,
-      '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env/items/valueFrom/configMapKeyRef/name',
+      `/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env/${index}/valueFrom/configMapKeyRef/name`,
     )
 
     // watchDependency('data#/namespace')
@@ -1223,14 +1223,14 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecretKeys() {
+  async function getSecretKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
     const secretName = getValue(
       model,
-      '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env/items/valueFrom/secretKeyRef/name',
+      `/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env/${index}/valueFrom/secretKeyRef/name`,
     )
 
     // watchDependency('data#/namespace')
@@ -1344,6 +1344,62 @@ export const useFunc = (model) => {
     return showStoragememory
   }
 
+  function onEnvArrayChange() {
+    const env = getValue(discriminator, '/env') || []
+    let ret = {}
+    // filter out temp values
+    const filteredEnv = env?.map((item) => {
+      const { temp, ...rest } = item
+      if (temp?.valueFromType === 'input') {
+        const { name, value } = rest
+        ret = { name, value }
+      } else if (temp?.valueFromType === 'configMap') {
+        const { name } = rest
+        const { configMapKeyRef } = rest?.valueFrom || {}
+        ret = { name, valueFrom: { configMapKeyRef } }
+      } else if (temp?.valueFromType === 'secret') {
+        const { name } = rest
+        const { secretKeyRef } = rest?.valueFrom || {}
+        ret = { name, valueFrom: { secretKeyRef } }
+      }
+      return ret
+    })
+
+    if (filteredEnv.length)
+      commit('wizard/model$update', {
+        path: '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env',
+        value: filteredEnv,
+        force: true,
+      })
+  }
+
+  function initEnvArray() {
+    const env = getValue(model, '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env')
+
+    return env || []
+  }
+
+  function isEqualToTemp(value, index) {
+    //watchDependency('discriminator#/valueFromType')
+    const valueFrom = getValue(discriminator, `/env/${index}/temp/valueFromType`)
+    return valueFrom === value
+  }
+
+  function initMonitoring() {
+    const env =
+      getValue(model, '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env') || []
+    setDiscriminatorValue('/env', env)
+    let tempEnv = []
+    env.forEach((item) => {
+      let radio = ''
+      if (item.value) radio = 'input'
+      else if (item.valueFrom && item.valueFrom.configMapKeyRef) radio = 'configMap'
+      else if (item.valueFrom && item.valueFrom.secretKeyRef) radio = 'secret'
+      tempEnv.push({ ...item, temp: { valueFromType: radio } })
+    })
+    setDiscriminatorValue('/env', tempEnv)
+  }
+
   return {
     initScheduleBackup,
     initScheduleBackupForEdit,
@@ -1406,7 +1462,6 @@ export const useFunc = (model) => {
     onLabelChange,
     setValueFrom,
     onValueFromChange,
-    isEqualToValueFromType,
     resourceNames,
     getConfigMapKeys,
     getSecrets,
@@ -1415,6 +1470,10 @@ export const useFunc = (model) => {
     isSecretTypeValueFrom,
     getNamespacedResourceList,
     returnFalse,
+    onEnvArrayChange,
+    initEnvArray,
+    isEqualToTemp,
+    initMonitoring,
 
     isBindingAlreadyOn,
     addOrRemoveBinding,
