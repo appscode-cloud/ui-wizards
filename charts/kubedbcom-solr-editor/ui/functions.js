@@ -333,11 +333,11 @@ export const useFunc = (model) => {
   }
 
   function getMachines(type, minmax) {
-    watchDependency('discriminator#/topologyMachines')
+   // watchDependency('discriminator#/topologyMachines')
     const depends = minmax === 'min' ? 'max' : 'min'
     const dependantPath = `/allowedMachine-${type}-${depends}`
 
-    watchDependency(`discriminator#${dependantPath}`)
+    //watchDependency(`discriminator#${dependantPath}`)
     const dependantMachineObj = getValue(discriminator, dependantPath)
     const dependantMachine = dependantMachineObj?.machine || ''
 
