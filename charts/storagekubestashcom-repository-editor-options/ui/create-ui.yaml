@@ -2,16 +2,14 @@ step:
 - type: single-step-form
   loader: init
   elements:
-  - elements:
-    - loader: getNamespacesApi
-      hasGroup: isRancherManaged
-      label: Namespace
-      schema: schema/properties/metadata/properties/release/properties/namespace
-      type: select
-    - label: Repository Name
-      schema: schema/properties/metadata/properties/release/properties/name
-      type: input
-    type: block-layout
+  - loader: getNamespacesApi
+    hasGroup: isRancherManaged
+    label: Namespace
+    schema: schema/properties/metadata/properties/release/properties/namespace
+    type: select
+  - label: Repository Name
+    schema: schema/properties/metadata/properties/release/properties/name
+    type: input
   - elements:
     - type: object-item
       label: Labels
@@ -19,104 +17,107 @@ step:
     - type: object-item
       label: Annotations
       schema: schema/properties/spec/properties/annotations
-    - label: Deletion Policy
-      options:
-      - Delete
-      - WipeOut
-      schema: schema/properties/spec/properties/deletionPolicy
+    label: Labels & Annotations
+    showLabels: true
+    hideBlock: true
+    type: block-layout
+  - label: Deletion Policy
+    customClass: mt-10
+    options:
+    - Delete
+    - WipeOut
+    schema: schema/properties/spec/properties/deletionPolicy
+    type: select
+  - elements:
+    - disableUnselect: true
+      loader: fetchNamespaces
+      hasGroup: isRancherManaged
+      label: Namespace
+      refresh: true
+      watcher:
+        func: onStorageRefNamespaceChange
+        paths:
+          - schema/properties/spec/properties/storageRef/properties/namespace
+      schema: schema/properties/spec/properties/storageRef/properties/namespace
       type: select
-    - elements:
-      - disableUnselect: true
-        loader: fetchNamespaces
-        hasGroup: isRancherManaged
-        label: Namespace
-        refresh: true
-        watcher:
-          func: onStorageRefNamespaceChange
-          paths:
-            - schema/properties/spec/properties/storageRef/properties/namespace
-        schema: schema/properties/spec/properties/storageRef/properties/namespace
-        type: select
-      - disableUnselect: true
-        loader: 
-          name: fetchNames|storageRef
-          watchPaths:
-            - schema/properties/spec/properties/storageRef/properties/namespace
-        label: Name
-        refresh: true
-        schema: schema/properties/spec/properties/storageRef/properties/name
-        type: select
-      label: Storage Ref
-      showLabels: true
-      type: block-layout
-    - elements:
-      - disableUnselect: true
-        loader: fetchNamespaces
-        hasGroup: isRancherManaged
-        label: Namespace
-        refresh: true
-        watcher:
-          func: onEncryptionSecretNamespaceChange
-          paths:
-            - schema/properties/spec/properties/encryptionSecret/properties/namespace
-        schema: schema/properties/spec/properties/encryptionSecret/properties/namespace
-        type: select
-      - disableUnselect: true
-        loader:
-          name: fetchNames|encryptionSecret
-          watchPaths:
-            - schema/properties/spec/properties/encryptionSecret/properties/namespace
-        label: Name
-        refresh: true
-        schema: schema/properties/spec/properties/encryptionSecret/properties/name
-        type: select
-      label: Encryption Secret
-      showLabels: true
-      type: block-layout
-    - label: Path
-      schema: schema/properties/spec/properties/path
-      type: input
-    - elements:
-      - loader: getApiGroup
-        label: Api Group
-        watcher:
-          func: onApiGroupChange
-          paths:
-            - schema/properties/spec/properties/appRef/properties/apiGroup
-        schema: schema/properties/spec/properties/appRef/properties/apiGroup
-        type: select
-      - loader:
-          name: getKinds
-          watchPaths:
-            - schema/properties/spec/properties/appRef/properties/apiGroup
-        label: Kind
-        watcher:
-          func: setVersion
-          paths:
-            - schema/properties/spec/properties/appRef/properties/kind
-        schema: schema/properties/spec/properties/appRef/properties/kind
-        type: select
-      - loader: fetchNamespaces
-        hasGroup: isRancherManaged
-        label: Namespace
-        watcher:
-          func: onAppRefNamespaceChange
-          paths:
-            - schema/properties/spec/properties/appRef/properties/namespace
-        schema: schema/properties/spec/properties/appRef/properties/namespace
-        type: select
-      - loader: 
-          name: getTargetName
-          watchPaths:
-            - schema/properties/spec/properties/appRef/properties/apiGroup
-            - schema/properties/spec/properties/appRef/properties/kind
-            - schema/properties/spec/properties/appRef/properties/namespace
-        label: Name
-        schema: schema/properties/spec/properties/appRef/properties/name
-        type: select
-      label: App Ref
-      showLabels: true
-      type: block-layout
+    - disableUnselect: true
+      loader: 
+        name: fetchNames|storageRef
+        watchPaths:
+          - schema/properties/spec/properties/storageRef/properties/namespace
+      label: Name
+      refresh: true
+      schema: schema/properties/spec/properties/storageRef/properties/name
+      type: select
+    label: Storage Ref
+    showLabels: true
+    type: block-layout
+  - elements:
+    - disableUnselect: true
+      loader: fetchNamespaces
+      hasGroup: isRancherManaged
+      label: Namespace
+      refresh: true
+      watcher:
+        func: onEncryptionSecretNamespaceChange
+        paths:
+          - schema/properties/spec/properties/encryptionSecret/properties/namespace
+      schema: schema/properties/spec/properties/encryptionSecret/properties/namespace
+      type: select
+    - disableUnselect: true
+      loader:
+        name: fetchNames|encryptionSecret
+        watchPaths:
+          - schema/properties/spec/properties/encryptionSecret/properties/namespace
+      label: Name
+      refresh: true
+      schema: schema/properties/spec/properties/encryptionSecret/properties/name
+      type: select
+    label: Encryption Secret
+    showLabels: true
+    type: block-layout
+  - label: Path
+    schema: schema/properties/spec/properties/path
+    type: input
+  - elements:
+    - loader: getApiGroup
+      label: Api Group
+      watcher:
+        func: onApiGroupChange
+        paths:
+          - schema/properties/spec/properties/appRef/properties/apiGroup
+      schema: schema/properties/spec/properties/appRef/properties/apiGroup
+      type: select
+    - loader:
+        name: getKinds
+        watchPaths:
+          - schema/properties/spec/properties/appRef/properties/apiGroup
+      label: Kind
+      watcher:
+        func: setVersion
+        paths:
+          - schema/properties/spec/properties/appRef/properties/kind
+      schema: schema/properties/spec/properties/appRef/properties/kind
+      type: select
+    - loader: fetchNamespaces
+      hasGroup: isRancherManaged
+      label: Namespace
+      watcher:
+        func: onAppRefNamespaceChange
+        paths:
+          - schema/properties/spec/properties/appRef/properties/namespace
+      schema: schema/properties/spec/properties/appRef/properties/namespace
+      type: select
+    - loader: 
+        name: getTargetName
+        watchPaths:
+          - schema/properties/spec/properties/appRef/properties/kind
+          - schema/properties/spec/properties/appRef/properties/namespace
+      label: Name
+      schema: schema/properties/spec/properties/appRef/properties/name
+      type: select
+    label: App Ref
+    showLabels: true
     type: block-layout
   id: options
 type: multi-step-form
