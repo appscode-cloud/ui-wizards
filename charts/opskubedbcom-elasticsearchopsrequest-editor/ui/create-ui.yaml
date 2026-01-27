@@ -1335,18 +1335,18 @@ step:
                 - temp/tlsOperation
             schema: temp/tlsOperation
           - type: switch
-            label: 'Remove TLS'
+            label: Remove TLS
             fullwidth: true
             if:
               type: function
-              name: returnFalse
+              name: isTlsEnabled
             schema: schema/properties/spec/properties/tls/properties/remove
           - type: switch
-            label: 'Rotate Certificates'
+            label: Rotate Certificates
             fullwidth: true
             if:
               type: function
-              name: returnFalse
+              name: isTlsEnabled
             schema: schema/properties/spec/properties/tls/properties/rotateCertificates
           - type: block-layout
             label: Issuer Reference
@@ -1396,7 +1396,7 @@ step:
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
           - type: block-layout
             label: Certificates
-            showLabels: true
+            showLabels: false
             if:
               type: function
               name: showIssuerRefAndCertificates
@@ -1412,6 +1412,8 @@ step:
                   loader: fetchAliasOptions
                   disable: disableAlias
                   schema: alias
+                  validation:
+                    type: required
                 - type: input
                   label: Secret Name
                   schema: secretName
