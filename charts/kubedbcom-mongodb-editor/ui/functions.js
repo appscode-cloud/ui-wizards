@@ -3270,16 +3270,17 @@ export const useFunc = (model) => {
   function onEnvArrayChange() {
     const env = getValue(discriminator, '/env') || []
     let ret = {}
+    // filter out temp values
     const filteredEnv = env?.map((item) => {
       const { temp, ...rest } = item
-      if (temp.valueFromType === 'input') {
+      if (temp?.valueFromType === 'input') {
         const { name, value } = rest
         ret = { name, value }
-      } else if (temp.valueFromType === 'configMap') {
+      } else if (temp?.valueFromType === 'configMap') {
         const { name } = rest
         const { configMapKeyRef } = rest.valueFrom
         ret = { name, valueFrom: { configMapKeyRef } }
-      } else if (temp.valueFromType === 'secret') {
+      } else if (temp?.valueFromType === 'secret') {
         const { name } = rest
         const { secretKeyRef } = rest.valueFrom
         ret = { name, valueFrom: { secretKeyRef } }
