@@ -364,11 +364,16 @@ export const useFunc = (model) => {
     return true
   }
 
-   function isTlsEnabled() {
+  function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled' && dbDetails?.spec?.sslMode !== 'disable') || dbDetails?.spec?.tls
+    return (
+      (dbDetails?.spec?.sslMode &&
+        dbDetails?.spec?.sslMode !== 'disabled' &&
+        dbDetails?.spec?.sslMode !== 'disable') ||
+      dbDetails?.spec?.tls
+    )
   }
-  
+
   function isRancherManaged() {
     const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
     const found = managers.find((item) => item === 'Rancher')
@@ -793,7 +798,8 @@ export const useFunc = (model) => {
                 memory: machineData.limits.memory,
               },
             }
-          } else return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
+          } else
+            return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
         }
       })
     } else {
@@ -834,7 +840,7 @@ export const useFunc = (model) => {
       if (instance) parsedInstance = JSON.parse(instance)
     } catch (e) {
       console.log(e)
-      parsedInstance = {}
+      parsedInstance = instance || {}
     }
     const machine = parsedInstance[type] || 'custom'
 
@@ -1583,10 +1589,6 @@ export const useFunc = (model) => {
 
   function setValueFromDbDetails(path, commitPath) {
     const retValue = getValue(discriminator, `/dbDetails${path}`)
-    console.log(getValue(discriminator, '/dbDetails'))
-
-    console.log(path)
-
     if (commitPath) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
       // computed called when tls fields is not visible
