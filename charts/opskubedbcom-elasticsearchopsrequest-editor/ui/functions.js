@@ -446,6 +446,8 @@ export const useFunc = (model) => {
   }
 
   async function getDbDetails() {
+    machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
+
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
@@ -476,6 +478,11 @@ export const useFunc = (model) => {
         return {}
       }
     } else return {}
+  }
+
+  function isTlsEnabled() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled' && dbDetails?.spec?.sslMode !== 'disable') || dbDetails?.spec?.tls
   }
 
   function initDatabaseRef() {
@@ -896,7 +903,7 @@ export const useFunc = (model) => {
                 memory: machineData.limits.memory,
               },
             }
-          } else return { text: machine, value: { machine } }
+          } else return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
         }
       })
     } else {
@@ -944,8 +951,6 @@ export const useFunc = (model) => {
       parsedInstance = {}
     }
     const machine = parsedInstance[type] || 'custom'
-
-    machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) {
@@ -1664,6 +1669,9 @@ export const useFunc = (model) => {
         return getIssuer(url)
       }
       return clusterIssuers
+    } else if (!kind) {
+      commit('wizard/model$delete', '/spec/tls/issuerRef/name')
+      return []
     }
 
     async function getIssuer(url) {
@@ -2070,5 +2078,6 @@ export const useFunc = (model) => {
     setApplyToIfReady,
     hasResourceValue,
     hasVolumeExpansion,
+    isTlsEnabled
   }
 }
