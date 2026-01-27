@@ -2814,7 +2814,6 @@ export const useFunc = (model) => {
     return showStoragememory
   }
 
-
   function mongoTypeEqualsTo(mongoType, type) {
     // watchDependency('discriminator#/dbDetails')
     autoscaleType = type
@@ -3083,8 +3082,7 @@ export const useFunc = (model) => {
     const routeRootPath = storeGet('/route/path')
     const pathPrefix = `${domain}/db${routeRootPath}`
     const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
-    const pathConstructedForKubedb =
-      pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
+    const pathConstructedForKubedb = pathSplit + `/${reqType.toLowerCase()}?namespace=${namespace}`
 
     const isKube = !!storeGet('/route/params/actions')
 
@@ -3272,18 +3270,19 @@ export const useFunc = (model) => {
   function onEnvArrayChange() {
     const env = getValue(discriminator, '/env') || []
     let ret = {}
+    // filter out temp values
     const filteredEnv = env?.map((item) => {
       const { temp, ...rest } = item
-      if (temp.valueFromType === 'input') {
+      if (temp?.valueFromType === 'input') {
         const { name, value } = rest
         ret = { name, value }
-      } else if (temp.valueFromType === 'configMap') {
+      } else if (temp?.valueFromType === 'configMap') {
         const { name } = rest
-        const { configMapKeyRef } = rest.valueFrom
+        const { configMapKeyRef } = rest?.valueFrom || {}
         ret = { name, valueFrom: { configMapKeyRef } }
-      } else if (temp.valueFromType === 'secret') {
+      } else if (temp?.valueFromType === 'secret') {
         const { name } = rest
-        const { secretKeyRef } = rest.valueFrom
+        const { secretKeyRef } = rest?.valueFrom || {}
         ret = { name, valueFrom: { secretKeyRef } }
       }
       return ret
@@ -3487,6 +3486,6 @@ export const useFunc = (model) => {
     setValueFromDbDetails,
     isHidden,
     setPausedValue,
-    showStorageMemoryOption
+    showStorageMemoryOption,
   }
 }
