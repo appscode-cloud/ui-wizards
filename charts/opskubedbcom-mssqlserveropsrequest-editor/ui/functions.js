@@ -735,7 +735,8 @@ export const useFunc = (model) => {
                 memory: machineData.limits.memory,
               },
             }
-          } else return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
+          } else
+            return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
         }
       })
     } else {
@@ -767,13 +768,15 @@ export const useFunc = (model) => {
     const limits = mssqlContainer?.resources?.requests || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
+
     let parsedInstance = {}
     try {
-      if (instance) parsedInstance = instance
+      if (instance) parsedInstance = JSON.parse(instance)
     } catch (e) {
       console.log(e)
-      parsedInstance = {}
+      parsedInstance = instance || {}
     }
+
     const machine = parsedInstance || 'custom'
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
