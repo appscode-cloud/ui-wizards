@@ -326,7 +326,6 @@ export const useFunc = (model) => {
   )
 
   // Initialize on load
-  getDbDetails()
   showAndInitOpsRequestType()
 
   // =====================================================
@@ -482,7 +481,12 @@ export const useFunc = (model) => {
 
   function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled' && dbDetails?.spec?.sslMode !== 'disable') || dbDetails?.spec?.tls
+    return (
+      (dbDetails?.spec?.sslMode &&
+        dbDetails?.spec?.sslMode !== 'disabled' &&
+        dbDetails?.spec?.sslMode !== 'disable') ||
+      dbDetails?.spec?.tls
+    )
   }
 
   function initDatabaseRef() {
@@ -903,7 +907,8 @@ export const useFunc = (model) => {
                 memory: machineData.limits.memory,
               },
             }
-          } else return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
+          } else
+            return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
         }
       })
     } else {
@@ -2078,6 +2083,6 @@ export const useFunc = (model) => {
     setApplyToIfReady,
     hasResourceValue,
     hasVolumeExpansion,
-    isTlsEnabled
+    isTlsEnabled,
   }
 }

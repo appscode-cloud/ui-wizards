@@ -328,7 +328,6 @@ export const useFunc = (model) => {
     store.state,
   )
 
-  getDbDetails()
   showAndInitOpsRequestType()
   async function fetchJsons({ axios, itemCtx }) {
     let ui = {}

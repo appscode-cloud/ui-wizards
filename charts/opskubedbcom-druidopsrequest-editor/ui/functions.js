@@ -335,7 +335,6 @@ export const useFunc = (model) => {
   )
 
   // Initialize on load
-  getDbDetails()
   showAndInitOpsRequestType()
 
   // ============================================================
@@ -457,9 +456,14 @@ export const useFunc = (model) => {
     } else return {}
   }
 
-   function isTlsEnabled() {
+  function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled' && dbDetails?.spec?.sslMode !== 'disable') || dbDetails?.spec?.tls
+    return (
+      (dbDetails?.spec?.sslMode &&
+        dbDetails?.spec?.sslMode !== 'disabled' &&
+        dbDetails?.spec?.sslMode !== 'disable') ||
+      dbDetails?.spec?.tls
+    )
   }
 
   async function getDbVersions() {
@@ -851,7 +855,8 @@ export const useFunc = (model) => {
                 memory: machineData.limits.memory,
               },
             }
-          } else return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
+          } else
+            return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
         }
       })
     } else {
@@ -1746,7 +1751,7 @@ export const useFunc = (model) => {
         return getIssuer(url)
       }
       return clusterIssuers
-    }else if (!kind) {
+    } else if (!kind) {
       commit('wizard/model$delete', '/spec/tls/issuerRef/name')
       return []
     }
@@ -2171,6 +2176,6 @@ export const useFunc = (model) => {
     getNestedValue,
     hasTopologyType,
     getResourceConfig,
-    isTlsEnabled
+    isTlsEnabled,
   }
 }
