@@ -1316,7 +1316,6 @@ export const useFunc = (model) => {
     // watchDependency'discriminator#/dbDetails')
 
     const retValue = getValue(discriminator, `/dbDetails${path}`)
-    console.log(retValue)
 
     if (commitPath && retValue) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
@@ -1453,7 +1452,7 @@ export const useFunc = (model) => {
       console.log(e)
       parsedInstance = instance || {}
     }
-    const machine = parsedInstance[type] || 'custom'
+    const machine = parsedInstance || 'custom'
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) {
