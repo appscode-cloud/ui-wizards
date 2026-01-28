@@ -317,7 +317,6 @@ export const useFunc = (model) => {
     store.state,
   )
 
-  getDbDetails()
   showAndInitOpsRequestType()
 
   // for config secret
@@ -359,7 +358,12 @@ export const useFunc = (model) => {
 
   function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    return (dbDetails?.spec?.sslMode && dbDetails?.spec?.sslMode !== 'disabled' && dbDetails?.spec?.sslMode !== 'disable') || dbDetails?.spec?.tls
+    return (
+      (dbDetails?.spec?.sslMode &&
+        dbDetails?.spec?.sslMode !== 'disabled' &&
+        dbDetails?.spec?.sslMode !== 'disable') ||
+      dbDetails?.spec?.tls
+    )
   }
 
   function isRancherManaged() {
