@@ -1092,6 +1092,15 @@ export const useFunc = (model) => {
       value: null,
       force: true,
     })
+    return false
+  }
+
+  function commitAnnounceChanges() {
+    commit('wizard/model$update', {
+      path: '/spec/cluster/announce',
+      value: null,
+      force: true,
+    })
   }
 
   function setBackup() {
@@ -1378,7 +1387,10 @@ export const useFunc = (model) => {
     const endpointsObject = Object.values(endpoints)
     const length = Object.keys(endpointsObject?.[0])?.length
     if (length !== replicas)
-      return { isInvalid: true, message: `Endpoints length should be equal to replicas(${replicas})` }
+      return {
+        isInvalid: true,
+        message: `Endpoints length should be equal to replicas(${replicas})`,
+      }
     else {
       return {}
     }
@@ -1457,5 +1469,6 @@ export const useFunc = (model) => {
     updateAlertValue,
     validateEndpoints,
     zonesOnChange,
+    commitAnnounceChanges,
   }
 }
