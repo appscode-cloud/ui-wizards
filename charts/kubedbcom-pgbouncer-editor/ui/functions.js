@@ -292,8 +292,10 @@ export const useFunc = (model) => {
 
     const machines = nodeGroups?.map((item) => {
       const text = item.topologyValue
+      const subtext = `CPU: ${item.allocatable?.cpu}, Memory: ${item.allocatable?.memory}`
       return {
         text,
+        subtext,
         value: {
           machine: item.topologyValue,
           cpu: item.allocatable?.cpu,
