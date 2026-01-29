@@ -1,659 +1,732 @@
-steps:
-- form:
-    discriminator:
-      bundleApiLoaded:
-        default: false
-        type: boolean
+step:
+- type: single-step-form
+  loader: initBundle
+  elements:
+  - type: label-element
+    label: ''
+    subtitle: Select the MongoDB version you want to deploy on Kubernetes. The chosen version determines the MongoDB engine features, compatibility, and runtime behavior of your database cluster.
+  - disableUnselect: true
+    loader: getAdminOptions|databases/MongoDB/versions
+    if:
+      type: function
+      name: isToggleOn|databases/MongoDB/versions
+    label: Database Version
+    schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
+    type: select
+  - init:
+     type: func
+     value: getDefault|databases/MongoDB/mode
+    loader: getAdminOptions|databases/MongoDB/mode
+    isHorizontal: true
+    if:
+      type: function
+      name: isToggleOn|databases/MongoDB/mode
+    label:  Database Mode
+    watcher: 
+      func: clearArbiterHidden
+      paths:
+        - schema/properties/spec/properties/mode
+    schema: schema/properties/spec/properties/mode
+    type: radio
+  - elements:
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - label: Replicaset Name
+          schema: schema/properties/spec/properties/replicaSet/properties/name
+          type: input
+        - label: Replicaset Number
+          watcher:
+            func: updateSuffix
+            paths:
+              - schema/properties/spec/properties/replicaSet/properties/replicas
+          schema: schema/properties/spec/properties/replicaSet/properties/replicas
+          type: input
+    - if:
+       type: function
+       name: isTlsOn
+      label: Do you want to access mongodb+srv style DNS?
+      watcher: 
+        func: onHorizonsChange
+        paths:
+          - discriminator/enableHorizons
+      schema: discriminator/enableHorizons
+      type: switch
+    - if: 
+        type: function
+        name: isHorizonsOn
+      label: Horizons count should be equal to Replica Number.
+      type: alert
+    - type: array-item-form
+      element:
+        label: Add a new horizon dns for pod
+        type: input
+      if:
+        type: function
+        name: isHorizonsOn
+      label: Horizons
+      watcher:
+        func: updateSuffix
+        paths:
+          - schema/properties/spec/properties/replicaSet/properties/horizons
+      schema: schema/properties/spec/properties/replicaSet/properties/horizons
+      validation: 
+        type: custom
+        name: isHorizonsValid
+    if:
+      type: function
+      name: isEqualToModelPathValue|Replicaset|/spec/mode
+    type: block-layout
+  - elements:
+    - elements:
+      - type: label-element
+        label: ''
+        subtitle: Configure Shard Nodes to define how MongoDB data is partitioned, replicated, and resourced across your Kubernetes cluster.
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+        - label: Shards
+          schema: schema/properties/spec/properties/shardTopology/properties/shard/properties/shards
+          type: input
+        - label: Replicaset Number
+          schema: schema/properties/spec/properties/shardTopology/properties/shard/properties/replicas
+          type: input
+        - label: Storage size
+          schema: schema/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
+          type: input
+      - elements:
+        - type : horizontal-layout
+          showLabels: true
+          elements:
+          - init: 
+              type: func
+              value: setMachineToCustom|shardTopology/shard
+            loader: getMachineListForOptions
+            label: Machine
+            schema: schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
+            type: select
+          - init: 
+              type: func
+              value: setLimits|cpu|shardTopology/shard
+            if: 
+              type: function
+              name: isMachineCustom|shardTopology/shard
+            label: cpu
+            watcher:
+              func: setRequests|cpu|shardTopology/shard
+              paths:
+                - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/cpu
+                - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
+            schema: schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/cpu
+            type: input
+          - init: 
+              type: func
+              value: setLimits|memory|shardTopology/shard
+            if: 
+              type: function
+              name: isMachineCustom|shardTopology/shard
+            label: memory
+            watcher:
+              func: setRequests|memory|shardTopology/shard
+              paths:
+                - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/memory
+                - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
+            schema: schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/memory
+            type: input
+        type: block-layout
+      label: Shard Nodes 
+      showLabels: true
+      type: block-layout
+    - elements:
+      - type: label-element
+        label: ''
+        subtitle: Config Servers store metadata about the sharded cluster, including chunk distribution and shard configuration.They must run as a replica set to ensure cluster consistency and availability.
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+        - label: Replicaset Number
+          schema: schema/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
+          type: input
+        - label: Storage size
+          schema: schema/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
+          type: input
+      - elements:
+        - type : horizontal-layout
+          showLabels: true
+          elements:
+            - init: 
+                type: func
+                value: setMachineToCustom|shardTopology/configServer
+              loader: getMachineListForOptions
+              label: Machine
+              schema: schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
+              type: select
+            - init: 
+                type: func
+                value: setLimits|cpu|shardTopology/configServer
+              if: 
+                type: function
+                name:  isMachineCustom|shardTopology/configServer
+              label: cpu
+              watcher: 
+                func: setRequests|cpu|shardTopology/configServer
+                paths:
+                  - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/cpu
+                  - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
+              schema: schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/cpu
+              type: input
+            - init: 
+                type: func
+                value: setLimits|memory|shardTopology/configServer
+              if: 
+                type: function
+                name: isMachineCustom|shardTopology/configServer
+              label: memory
+              watcher:
+                func: setRequests|memory|shardTopology/configServer
+                paths:
+                  - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/memory
+                  - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
+              schema: schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/memory
+              type: input
+        type: block-layout
+      label: Config Server
+      showLabels: true
+      type: block-layout
+    - elements:
+      - type: label-element
+        label: ''
+        subtitle: Mongos acts as the query router for the sharded cluster, directing client requests to the appropriate shards based on metadata from Config Servers.
+      - customClass: mt-10
+        label: Replicaset number
+        schema: schema/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
+        type: input
+      - type: horizontal-layout
+        showLabels: true 
+        elements:
+        - init:
+            type: func
+            value: setMachineToCustom|shardTopology/mongos
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu|shardTopology/mongos
+          if: 
+            type: function
+            name: isMachineCustom|shardTopology/mongos
+          label: Cpu
+          watcher:
+            func: setRequests|cpu|shardTopology/mongos
+            paths:
+              -  schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/cpu
+              -  schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory|shardTopology/mongos
+          if: 
+            type: function
+            name: isMachineCustom|shardTopology/mongos
+          label: Memory
+          watcher:
+            func: setRequests|memory|shardTopology/mongos
+            paths:
+              -  schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/memory
+              -  schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+      label: Mongos
+      showLabels: true
+      type: block-layout
+    if: 
+      type: function
+      name: isEqualToModelPathValue|Sharded|/spec/mode
+    type: block-layout
+  - elements:
+    - type: label-element
+      label: ''
+      subtitle: Select a machine profile to allocate CPU and memory resources for your database. Choose 'custom' to manually specify resource requirements or select a predefined profile.
+    - type: horizontal-layout
+      showLabels: true
+      elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          loader: getMachineListForOptions
+          label: Machine 
+          schema: schema/properties/spec/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu
+          disable: isMachineNotCustom|schema/properties/spec/properties/podResources/properties/machine
+          if:
+            type: function
+            name: isMachineCustom
+          label: cpu
+          watcher:
+            func: setRequests|cpu
+            paths:
+              -  schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+              -  schema/properties/spec/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory
+          if:
+            type: function
+            name: isMachineCustom
+          label: Memory
+          watcher:
+            func: setRequests|memory
+            paths:
+              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/podResources/properties/machine 
+          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+    if:
+      type: function
+      name: notEqualToDatabaseMode|Sharded
+    label: Machine profile
+    showLabels: true
+    type: block-layout
+  - type: horizontal-layout
+    showLabels: true
     elements:
-    - computed: initBundle
-      if: returnFalse
-      type: label-element
-    - disableUnselect: true
-      fetch: getAdminOptions|databases/MongoDB/versions
-      if: isToggleOn|databases/MongoDB/versions
-      label:
-        text: labels.database.version
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
-      type: select
-    - computed: getDefault|databases/MongoDB/mode
-      fetch: getAdminOptions|databases/MongoDB/mode
-      hasDescription: true
-      if: isToggleOn|databases/MongoDB/mode
-      label:
-        text: labels.database.mode
-      onChange: clearArbiterHidden
-      schema:
-        $ref: schema#/properties/spec/properties/mode
-      type: radio
-    - discriminator:
-        enableHorizons:
-          default: false
-          type: boolean
-      elements:
-      - label:
-          text: labels.replicaset.name
-        schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/name
-        type: input
-      - label:
-          text: labels.replicaset.number
-        onChange: updateSuffix
-        schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/replicas
-        type: input
-      - if: isTlsOn
-        label:
-          text: Do you want to access mongodb+srv style dns?
-        onChange: onHorizonsChange
-        schema:
-          $ref: discriminator#/enableHorizons
-        type: switch
-      - alertInfo:
-          show: true
-          type: neutral
-        if: isHorizonsOn
-        label:
-          text: Horizons count should be equal to Replica Number.
-        type: label-element
-      - element:
-          label:
-            text: Add a new horizon dns for pod
-          schema:
-            $ref: schema#/properties/spec/properties/replicaSet/properties/horizons/items
-          type: input
-        if: isHorizonsOn
-        label:
-          text: Horizons
-        onChange: updateSuffix
-        schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/horizons
-        type: list-input-form
-        validationRuleObject:
-          func: isHorizonsValid
-      if: isEqualToModelPathValue|Replicaset|/spec/mode
-      schema:
-        $ref: schema#/properties/spec/properties/replicaSet
-      type: single-step-form
-    - elements:
-      - elements:
-        - customClass: mt-10
-          label:
-            text: labels.shards
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
-          type: input
-        - label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/replicas
-          type: input
-        - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
-          type: input
-        - elements:
-          - computed: setMachineToCustom|shardTopology/shard
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
-            type: select
-          - computed: setLimits|cpu|shardTopology/shard
-            disabled: isMachineNotCustom|shardTopology/shard
-            if: isMachineCustom|shardTopology/shard
-            label:
-              text: labels.cpu
-            onChange: setRequests|cpu|shardTopology/shard
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - computed: setLimits|memory|shardTopology/shard
-            disabled: isMachineNotCustom|shardTopology/shard
-            if: isMachineCustom|shardTopology/shard
-            label:
-              text: labels.memory
-            onChange: setRequests|memory|shardTopology/shard
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources
-          type: single-step-form
-        label:
-          text: labels.shardNodes
-        show_label: true
-        type: single-step-form
-      - elements:
-        - customClass: mt-10
-          label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
-          type: input
-        - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
-          type: input
-        - elements:
-          - computed: setMachineToCustom|shardTopology/configServer
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
-            type: select
-          - computed: setLimits|cpu|shardTopology/configServer
-            disabled: isMachineNotCustom|shardTopology/configServer
-            if: isMachineCustom|shardTopology/configServer
-            label:
-              text: labels.cpu
-            onChange: setRequests|cpu|shardTopology/configServer
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - computed: setLimits|memory|shardTopology/configServer
-            disabled: isMachineNotCustom|shardTopology/configServer
-            if: isMachineCustom|shardTopology/configServer
-            label:
-              text: labels.memory
-            onChange: setRequests|memory|shardTopology/configServer
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources
-          type: single-step-form
-        label:
-          text: labels.configServer
-        show_label: true
-        type: single-step-form
-      - elements:
-        - customClass: mt-10
-          label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
-          type: input
-        - elements:
-          - computed: setMachineToCustom|shardTopology/mongos
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
-            type: select
-          - computed: setLimits|cpu|shardTopology/mongos
-            disabled: isMachineNotCustom|shardTopology/mongos
-            if: isMachineCustom|shardTopology/mongos
-            label:
-              text: labels.cpu
-            onChange: setRequests|cpu|shardTopology/mongos
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - computed: setLimits|memory|shardTopology/mongos
-            disabled: isMachineNotCustom|shardTopology/mongos
-            if: isMachineCustom|shardTopology/mongos
-            label:
-              text: labels.memory
-            onChange: setRequests|memory|shardTopology/mongos
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources
-          type: single-step-form
-        label:
-          text: labels.mongos
-        show_label: true
-        type: single-step-form
-      if: isEqualToModelPathValue|Sharded|/spec/mode
-      type: single-step-form
-    - elements:
-      - computed: setMachineToCustom
-        customClass: mt-10
-        fetch: getMachineListForOptions
-        label:
-          text: labels.machine
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/machine
+      - loader: getAdminOptions|storageClasses
+        if:
+          type: function
+          name: isToggleOn|storageClasses
+        label: Storage select
+        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
         type: select
-      - computed: setLimits|cpu
-        disabled: isMachineNotCustom
-        if: isMachineCustom
-        label:
-          text: labels.cpu
-        onChange: setRequests|cpu
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+      - if:
+          type: function
+          name: showStorageSizeField
+        label: Storage size
+        schema: schema/properties/spec/properties/persistence/properties/size
         type: input
-      - computed: setLimits|memory
-        disabled: isMachineNotCustom
-        if: isMachineCustom
-        label:
-          text: labels.memory
-        onChange: setRequests|memory
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-        type: input
-      if: notEqualToDatabaseMode|Sharded
-      label:
-        text: labels.machine_profile
-      show_label: true
-      type: single-step-form
-    - fetch: getAdminOptions|storageClasses
-      if: isToggleOn|storageClasses
-      label:
-        text: labels.storage.select
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
+  - description: Configure Credentials, Deployment Mode etc.
+    elements:
+    - elements:
+      - type: label-element
+        label: ''
+        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
+      - type: object-item
+        label: Labels
+        buttonClass: is-light is-outlined
+        schema: schema/properties/spec/properties/labels
+      - type: object-item
+        label: Annotations
+        buttonClass: is-light is-outlined
+        schema: schema/properties/spec/properties/annotations
+      label: Labels & Annotations
+      showLabels: true
+      hideBlock: true
+      type: block-layout
+    - init: 
+        type: func
+        value: getDefault|deletionPolicy
+      customClass: mt-20
+      if:
+        type: function
+        name: isToggleOn|deletionPolicy
+      label: Deletion Policy
+      watcher:
+        func: setStorageClass
+        paths:
+          - schema/properties/spec/properties/deletionPolicy
+      options:
+      - description: options.deletionPolicy.delete.description
+        text: Delete
+        value: Delete
+      - description: options.deletionPolicy.halt.description
+        text: Halt
+        value: Halt
+      - description: options.deletionPolicy.wipeOut.description
+        text: WipeOut
+        value: WipeOut
+      - description: options.deletionPolicy.doNotTerminate.description
+        text: DoNotTerminate
+        value: DoNotTerminate
+      schema: schema/properties/spec/properties/deletionPolicy
       type: select
-    - if: showStorageSizeField
-      label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
+    - if: 
+        type: function
+        name: getDefaultValue|spec/admin/authCredential/customize
+      label: Provide Authentication Credentials?
+      watcher:
+        func: onAuthChange
+        paths:
+          - temp/createAuthSecret
+      schema: temp/createAuthSecret
+      type: switch
+    - if: 
+        type: function
+        name:  showReferSecretSwitch
+      label: Refer existing Secret?
+      watcher:
+        func: onReferSecretChange
+        paths:
+          - temp/referSecret
+      schema: temp/referSecret
+      type: switch
+    - loader: getReferSecrets
+      if: 
+        type: function
+        name:  showSecretDropdown
+      label: Secret
+      schema: schema/properties/spec/properties/authSecret/properties/name
+      type: select
+    - if:
+        type: function
+        name: showReferSecret
+      label: Password
+      schema: schema/properties/spec/properties/authSecret/properties/password
       type: input
-    - accordion: true
-      description:
-        text: Configure Credentials, Deployment Mode etc.
-      discriminator:
-        configDatabase:
-          default: false
-          type: boolean
-        createAuthSecret:
-          default: false
-          type: boolean
-        recovery:
-          default: false
-          type: boolean
-        referSecret:
-          default: false
-          type: boolean
-      elements:
-      - elements:
-        - isArray: true
-          keys:
-            label:
-              text: labels.labels.key
-          label:
-            text: labels.labels.label
-          schema:
-            $ref: schema#/properties/spec/properties/labels
-          type: key-value-input-form
-          values:
-            label:
-              text: labels.labels.value
-            schema:
-              $ref: schema#/properties/spec/properties/labels/additionalProperties
-            type: input
-        - isArray: true
-          keys:
-            label:
-              text: labels.annotations.key
-          label:
-            text: labels.annotations.label
-          schema:
-            $ref: schema#/properties/spec/properties/annotations
-          type: key-value-input-form
-          values:
-            label:
-              text: labels.annotations.value
-            schema:
-              $ref: schema#/properties/spec/properties/annotations/additionalProperties
-            type: input
-        hideForm: true
-        label:
-          text: Labels & Annotations
-        show_label: true
-        type: single-step-form
-      - computed: getDefault|deletionPolicy
-        customClass: mt-20
-        if: isToggleOn|deletionPolicy
-        label:
-          text: labels.deletionPolicy
-        onChange: setStorageClass
-        options:
-        - description: options.deletionPolicy.delete.description
-          text: options.deletionPolicy.delete.label
-          value: Delete
-        - description: options.deletionPolicy.halt.description
-          text: options.deletionPolicy.halt.label
-          value: Halt
-        - description: options.deletionPolicy.wipeOut.description
-          text: options.deletionPolicy.wipeOut.label
-          value: WipeOut
-        - description: options.deletionPolicy.doNotTerminate.description
-          text: options.deletionPolicy.doNotTerminate.label
-          value: DoNotTerminate
-        schema:
-          $ref: schema#/properties/spec/properties/deletionPolicy
-        type: select
-      - if: getDefaultValue|spec/admin/authCredential/customize
-        label:
-          text: Provide Authentication Credentials?
-        onChange: onAuthChange
-        schema:
-          $ref: discriminator#/createAuthSecret
-        type: switch
-      - if: showReferSecretSwitch
-        label:
-          text: Refer existing Secret?
-        onChange: onReferSecretChange
-        schema:
-          $ref: discriminator#/referSecret
-        type: switch
-      - fetch: getReferSecrets
-        if: showSecretDropdown
-        label:
-          text: Secret
-        schema:
-          $ref: schema#/properties/spec/properties/authSecret/properties/name
-        type: select
-      - if: showReferSecret
-        label:
-          text: labels.password
-        schema:
-          $ref: schema#/properties/spec/properties/authSecret/properties/password
-        type: input
-      - computed: isConfigAvailable
-        if: getDefaultValue|spec/admin/customConfiguration
-        label:
-          text: Configure Database?
-        onChange: clearConfiguration
-        schema:
-          $ref: discriminator#/configDatabase
-        type: switch
-      - if: isConfigDatabaseOn
-        label:
-          text: Configuration
-        schema:
-          $ref: schema#/properties/spec/properties/configuration
-        type: editor
-      - if: notEqualToDatabaseMode|Standalone
-        label:
-          text: Enable Arbiter?
-        schema:
-          $ref: schema#/properties/spec/properties/arbiter/properties/enabled
-        type: switch
-      - elements:
-        - elements:
-          - computed: setMachineToCustom|arbiter
-            customClass: mt-10
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            schema:
-              $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/machine
-            type: select
-          - computed: setLimits|cpu|arbiter
-            disabled: isMachineNotCustom|arbiter
-            if: isMachineCustom|arbiter
-            label:
-              text: labels.cpu
-            onChange: setRequests|cpu|arbiter
-            schema:
-              $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - computed: setLimits|memory|arbiter
-            disabled: isMachineNotCustom|arbiter
-            if: isMachineCustom|arbiter
-            label:
-              text: labels.memory
-            onChange: setRequests|memory|arbiter
-            schema:
-              $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
-          schema:
-            $ref: schema#/properties/spec/properties/arbiter/properties/podResources
-          type: single-step-form
-        if: showArbiter
-        label:
-          text: Arbiter
-        schema:
-          $ref: schema#/properties/spec/properties/arbiter
-        show_label: true
-        type: single-step-form
-      - if: notEqualToDatabaseMode|Standalone
-        label:
-          text: Enable hidden?
-        schema:
-          $ref: schema#/properties/spec/properties/hidden/properties/enabled
-        type: switch
-      - elements:
-        - customClass: mt-10
-          label:
-            text: Replicas
-          schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/replicas
-          type: input
-        - label:
-            text: Persistence Size
-          schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/persistence/properties/size
-          type: input
-        - computed: setMachineToCustom|hidden
-          fetch: getMachineListForOptions
-          label:
-            text: labels.machine
-          schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/machine
-          type: select
-        - computed: setLimits|cpu|hidden
-          disabled: isMachineNotCustom|hidden
-          if: isMachineCustom|hidden
-          label:
-            text: labels.cpu
-          onChange: setRequests|cpu|hidden
-          schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
-          type: input
-        - computed: setLimits|memory|hidden
-          disabled: isMachineNotCustom|hidden
-          if: isMachineCustom|hidden
-          label:
-            text: labels.memory
-          schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/memory
-          type: input
-        if: showHidden
-        label:
-          text: Hidden
-        schema:
-          $ref: schema#/properties/spec/properties/hidden/properties/podResources
-        show_label: true
-        type: single-step-form
-      - computed: getDefault|pointInTimeRecovery
-        if: isToggleOn|pointInTimeRecovery
-        label:
-          text: Point in-time Recovery?
-        schema:
-          $ref: discriminator#/recovery
-        type: switch
-      - discriminator:
-          refDBName:
-            type: string
-          refNamespace:
-            type: string
+    - if:
+        type: function
+        name: getDefaultValue|spec/admin/customConfiguration
+      label: Configure Database?
+      watcher:
+        func: clearConfiguration
+        paths:
+          - temp/configDatabase
+      schema: temp/configDatabase
+      type: switch
+    - if:
+        type: function
+        name: isConfigDatabaseOn
+      label: Configuration
+      # hasCopy: true
+      schema: schema/properties/spec/properties/configuration
+      type: textarea
+    - if:
+        type: function
+        name: notEqualToDatabaseMode|Standalone
+      label: Enable Arbiter?
+      schema: schema/properties/spec/properties/arbiter/properties/enabled
+      type: switch
+    - elements:
+      - type: label-element
+        label: ''
+        subtitle: Configure resource allocation for arbiter nodes, which participate in elections but do not store data. Arbiters help maintain quorum in replica sets with minimal resource overhead.
+      - type: horizontal-layout
+        showLabels: true
         elements:
-        - label:
-            text: Namespace
-          onChange: setPointInTimeRecovery
-          required: true
-          schema:
-            $ref: discriminator#/refNamespace
+        - init:
+            type: func
+            value: setMachineToCustom|arbiter
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
+          type: select
+        - init:
+            type: func
+            value: setLimits|cpu|arbiter
+          if:
+            type: function
+            name: isMachineCustom|arbiter
+          label: cpu
+          watcher:
+            func: setRequests|cpu|arbiter
+            paths:
+              - schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input
-        - label:
-            text: Name
-          onChange: setPointInTimeRecovery
-          required: true
-          schema:
-            $ref: discriminator#/refDBName
+        - init:
+            type: func
+            value: setLimits|memory|arbiter
+          if:
+            type: function
+            name: isMachineCustom|arbiter
+          label: memory
+          watcher:
+            func: setRequests|memory|arbiter
+            paths:
+              - schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/memory
           type: input
-        - customClass: mt-10
-          label:
-            text: Recovery Timestamp
-          schema:
-            $ref: schema#/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
-          type: input
-        if: showRecovery
-        label:
-          text: Point in-time Recovery
-        schema:
-          $ref: schema#/properties/spec/properties/init/properties/archiver
-        show_label: true
-        type: single-step-form
-      - hasDescription: true
-        if: isToggleOn|deployment
-        label:
-          text: labels.deployment.name
-        options:
-        - description: labels.deployment.shared
-          text: Shared
-          value: Shared
-        - description: labels.deployment.dedicated
-          text: Dedicated
-          value: Dedicated
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
-        type: radio
-      - if: isToggleOn|clusterTier
-        isHorizontal: true
-        label:
-          text: labels.clusterTier
-        options:
-        - text: General Purpose
-          value: GeneralPurpose
-        - text: Memory Optimized
-          value: MemoryOptimized
-        - text: CPU Optimized
-          value: CPUOptimized
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
-        type: radio
-      - disableUnselect: true
-        fetch: getAdminOptions|clusterTier/placement
-        if: isToggleOn|clusterTier/placement
-        label:
-          text: labels.placement
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
-        type: select
-      - disableUnselect: true
-        fetch: getNodeTopology
-        if: isToggleOn|clusterTier/nodeTopology
-        label:
-          text: labels.nodeTopology
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
-        type: select
-      hideForm: true
-      label:
-        text: Advanced Configuration
-      show_label: true
-      type: single-step-form
-    - accordion: true
-      description:
-        text: Enable Backup, Monitoring, TLS etc.
-      discriminator:
-        backup:
-          default: false
-          type: boolean
-      elements:
-      - discriminator:
-          monitoring:
-            default: false
-            type: boolean
+      if:
+        type: function
+        name: showArbiter
+      label: Arbiter
+      showLabels: true
+      type: block-layout
+    - if:
+        type: function
+        name: notEqualToDatabaseMode|Standalone
+      label: Enable hidden?
+      schema: schema/properties/spec/properties/hidden/properties/enabled
+      type: switch
+    - elements:
+      - type: label-element
+        label: ''
+        subtitle: Configure hidden members that replicate data invisibly to clients. Define replicas, storage, and resource allocation for dedicated backup, analytics, or reporting operations.
+      - type: horizontal-layout
+        showLabels: true
         elements:
-        - computed: setMonitoring
-          label:
-            text: labels.enable_monitoring
-          onChange: updateAlertValue
-          schema:
-            $ref: discriminator#/monitoring
-          type: switch
-        - customClass: mt-10
-          if: showAlerts
-          label:
-            text: labels.alert.options
-          options:
-          - text: None
-            value: none
-          - text: Critical
-            value: critical
-          - text: Warning
-            value: warning
-          - text: Info
-            value: info
-          schema:
-            $ref: schema#/properties/form/properties/alert/properties/enabled
-          sortable: true
+        - label: Replicas
+          schema: schema/properties/spec/properties/hidden/properties/replicas
+          type: input
+        - label: Persistence Size
+          schema: schema/properties/spec/properties/hidden/properties/persistence/properties/size
+          type: input
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+        - init:
+            type: func
+            value: setMachineToCustom|hidden
+          loader: getMachineListForOptions
+          label: Machine
+          schema: schema/properties/spec/properties/hidden/properties/podResources/properties/machine
           type: select
-        if: isToggleOn|monitoring
-        type: single-step-form
-      - computed: setBackup
-        if: isToggleOn|backup
-        label:
-          text: Enable Backup?
-        onChange: onBackupSwitch
-        schema:
-          $ref: discriminator#/backup
+        - init:
+            type: func
+            value: setLimits|cpu|hidden
+          if:
+            type: function
+            name: isMachineCustom|hidden
+          label: cpu
+          watcher:
+            func: setRequests|cpu|hidden
+            paths:
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setLimits|memory|hidden
+          if: 
+            type: function
+            name: isMachineCustom|hidden
+          label: memory
+          watcher:
+            func: setRequests|memory|hidden
+            paths:
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/memory
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/machine
+          schema: schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+      if:
+        type: function
+        name: showHidden
+      label: Hidden
+      showLabels: true
+      type: block-layout
+    - init:
+        type: func
+        value: getDefault|pointInTimeRecovery
+      if:
+        type: function
+        name: isToggleOn|pointInTimeRecovery
+      label: Point in-time Recovery?
+      schema: temp/recovery
+      type: switch
+    - elements:
+      - type: label-element
+        label: ''
+        subtitle: Restore your database to a specific point in time by selecting the source backup namespace, database name, and the exact timestamp for recovery.
+      - type: horizontal-layout
+        showLabels: true
+        elements:
+          - label: Namespace
+            watcher:
+              func: setPointInTimeRecovery
+              paths:
+                - temp/refNamespace
+            forceRequired: true
+            validation:
+              type: required
+            schema: temp/refNamespace
+            type: input
+          - label: Name
+            watcher:
+              func: setPointInTimeRecovery
+              paths:
+                - temp/refDBName
+            validation:
+              type: required
+            schema: temp/refDBName
+            type: input
+      - label: Recovery Timestamp
+        schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
+        type: date-time
+        watcher:
+          func: onTimestampChange
+          paths:
+            - schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
+      if:
+        type: function
+        name: showRecovery
+      label: Point in-time Recovery
+      showLabels: true
+      type: block-layout
+    - if:
+        type: function
+        name: isToggleOn|deployment
+      label: Deployment
+      options:
+      - description: shared
+        text: Shared
+        value: Shared
+      - description: Dedicated
+        text: Dedicated
+        value: Dedicated
+      schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
+      type: radio
+    - if:
+        type: function
+        name: isToggleOn|clusterTier
+      isHorizontal: true
+      label: ClusterTier
+      options:
+      - text: General Purpose
+        value: GeneralPurpose
+      - text: Memory Optimized
+        value: MemoryOptimized
+      - text: CPU Optimized
+        value: CPUOptimized
+      schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
+      type: radio
+    - disableUnselect: true
+      loader: getAdminOptions|clusterTier/placement
+      if:
+        type: function
+        name: isToggleOn|clusterTier/placement
+      label: labels.placement
+      schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
+    - disableUnselect: true
+      loader: getNodeTopology
+      if:
+        type: function
+        name: isToggleOn|clusterTier/nodeTopology
+      label: NodeTopology
+      schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    label: Advanced Configuration
+    showLabels: true
+    type: block-layout
+  - description: Enable Backup, Monitoring, TLS etc.
+    elements:
+    - elements:
+      - init:
+          type: func
+          value: setMonitoring
+        label: Enable Monitoring
+        watcher:
+          func: updateAlertValue
+          paths:
+            - temp/monitoring
+        schema: temp/monitoring
         type: switch
-      - elements:
-        - disabled: showArchiverAlert
-          label:
-            text: Enable Archiver?
-          onChange: onArchiverChange
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
-          type: switch
-        - alertInfo:
-            show: true
-            type: neutral
-          if: showArchiverAlert
-          label:
-            text: The selected StorageClass does not support Archiver
-          type: label-element
-        if: showArchiver
-        type: single-step-form
-      - elements:
-        - computed: checkHostnameOrIP
-          if: isToggleOn|tls
-          label:
-            text: Enable TLS?
-          onChange: checkHostnameOrIP
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-          type: switch
-        - fetch: getAdminOptions|clusterIssuers
-          if: showIssuer
-          label:
-            text: labels.clusterIssuers
-          required: true
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-          type: select
-        type: single-step-form
-      - elements:
-        - computed: checkHostnameOrIP
-          if: isToggleOn|expose
-          label:
-            text: Expose via Gateway?
-          onChange: checkHostnameOrIP
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
-          type: switch
-        type: single-step-form
-      if: showAdditionalSettings
-      label:
-        text: Additional Options
-      show_label: true
-      type: single-step-form
-    type: single-step-form
+      - customClass: mt-10
+        if:
+          type: function
+          name: showAlerts
+        label: Alert Options
+        options:
+        - text: None
+          value: none
+        - text: Critical
+          value: critical
+        - text: Warning
+          value: warning
+        - text: Info
+          value: info
+        schema: schema/properties/form/properties/alert/properties/enabled
+        type: select
+      if:
+        type: function
+        name: isToggleOn|monitoring
+      type: block-layout
+    - init: 
+        type: func
+        value: setBackup
+      if: 
+        type: function
+        name: isToggleOn|backup
+
+      label: Enable Backup?
+      watcher:
+        func: onBackupSwitch
+        paths:
+          - temp/backup
+      schema: temp/backup
+      type: switch
+    - elements:
+      - disable: showArchiverAlert
+        label: Enable Archiver?
+        watcher:
+          func: onArchiverChange
+          paths:
+            - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+        schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+        type: switch
+      - if:
+          type: function
+          name: showArchiverAlert
+        label: The selected StorageClass does not support Archiver
+        type: warning
+      if:
+        type: function
+        name: showArchiver
+      type: block-layout
+    - elements:
+      - init:
+          type: func
+          value: checkHostnameOrIP
+        if:
+          type: function
+          name: isToggleOn|tls
+        label: Enable TLS?
+        watcher:
+          func: checkHostnameOrIP
+          paths:
+            - schema/properties/spec/properties/admin/properties/tls/properties/default
+        schema: schema/properties/spec/properties/admin/properties/tls/properties/default
+        type: switch
+      - loader: getAdminOptions|clusterIssuers
+        if:
+          type: function
+          name: showIssuer
+        label: Cluster Issuers
+        validation: 
+          type: required
+        schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+        type: select
+      type: block-layout
+    - elements:
+      - init: 
+          type: func
+          value: checkHostnameOrIP
+        if: 
+          type: function
+          name: isToggleOn|expose
+        label: Expose via Gateway?
+        watcher:
+          func: checkHostnameOrIP
+          paths:
+            - schema/properties/spec/properties/admin/properties/expose/properties/default
+        schema: schema/properties/spec/properties/admin/properties/expose/properties/default
+        type: switch
+      type: block-layout
+    if:
+      type: function
+      name: showAdditionalSettings
+    label: Additional Options
+    showLabels: true
+    type: block-layout
   id: options
-  title: steps.0.label
+  # title: steps.0.label
 type: multi-step-form

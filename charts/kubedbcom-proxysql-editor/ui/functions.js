@@ -1,54 +1,123 @@
+const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
-async function fetchJsons({ axios, itemCtx }) {
-  let ui = {}
-  let language = {}
-  let functions = {}
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+export const useFunc = (model) => {
+  const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
+    model,
+    store.state,
+  )
 
-  try {
-    ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-    )
-    language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-    )
-    const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-    )
-    // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || '')
-    functions = evalFunc()
-  } catch (e) {
-    console.log(e)
+  setDiscriminatorValue('/enableMonitoring', false)
+  setDiscriminatorValue('/customizeExporter', true)
+  setDiscriminatorValue('/valueFromType', 'input')
+  setDiscriminatorValue('/env', [])
+
+  // Autoscaler Discriminators
+  setDiscriminatorValue('/dbDetails', false)
+  setDiscriminatorValue('/topologyMachines', [])
+  setDiscriminatorValue('/allowedMachine-standalone-min', '')
+  setDiscriminatorValue('/allowedMachine-standalone-max', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
+  setDiscriminatorValue('/allowedMachine-shard-min', '')
+  setDiscriminatorValue('/allowedMachine-shard-max', '')
+  setDiscriminatorValue('/allowedMachine-configServer-min', '')
+  setDiscriminatorValue('/allowedMachine-configServer-max', '')
+  setDiscriminatorValue('/allowedMachine-mongos-min', '')
+  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+
+  let autoscaleType = ''
+  let dbDetails = {}
+  let instance = ''
+
+  function isConsole() {
+    const isKube = isKubedb()
+
+    if (isKube) {
+      const dbName = storeGet('/route/params/name') || ''
+      commit('wizard/model$update', {
+        path: '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name',
+        value: dbName,
+        force: true,
+      })
+      const operation = storeGet('/route/params/actions') || ''
+      if (operation.length) {
+        const splitOp = operation.split('-')
+        if (splitOp.length > 2) autoscaleType = splitOp[2]
+      }
+      const date = Math.floor(Date.now() / 1000)
+      const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
+      commit('wizard/model$update', {
+        path: '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/name',
+        value: modifiedName,
+        force: true,
+      })
+      const namespace = storeGet('/route/query/namespace') || ''
+      if (namespace) {
+        commit('wizard/model$update', {
+          path: '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace',
+          value: namespace,
+          force: true,
+        })
+      }
+    }
+
+    return !isKube
   }
 
-  return {
-    ui: ui.data || {},
-    language: language.data || {},
-    functions,
+  function isKubedb() {
+    return !!storeGet('/route/params/actions')
   }
-}
 
-function disableLableChecker({ itemCtx }) {
-  const { key } = itemCtx
-  if (key.startsWith('app.kubernetes.io') || key.includes('helm')) return true
-  else return false
-}
+  function isRancherManaged() {
+    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+    const found = managers.find((item) => item === 'Rancher')
+    return !!found
+  }
 
-function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
-  const modelPathValue = getValue(model, modelPath)
-  watchDependency('model#' + modelPath)
-  return modelPathValue === value
-}
+  function showOpsRequestOptions() {
+    if (isKubedb() === true) return true
+    // watchDependency('model#/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name')
+    // watchDependency('discriminator#/autoscalingType')
+    return (
+      !!getValue(
+        model,
+        '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name',
+      ) && !!getValue(discriminator, '/autoscalingType')
+    )
+  }
 
-async function getResources({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
+  async function getNamespaces() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
 
-  try {
+    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
+      params: { filter: { items: { metadata: { name: null } } } },
+    })
+
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    return resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
+    })
+  }
+
+  async function getDbs() {
+    // watchDependency('model#/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace')
+    const namespace = getValue(
+      model,
+      '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace',
+    )
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -56,530 +125,606 @@ async function getResources({ axios, storeGet }, group, version, resource) {
 
     const resources = (resp && resp.data && resp.data.items) || []
 
-    resources.map((item) => {
+    return resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
-      item.text = name
-      item.value = name
-      return true
-    })
-    return resources
-  } catch (e) {
-    console.log(e)
-    return []
-  }
-}
-
-function isEqualToDiscriminatorPath(
-  { discriminator, getValue, watchDependency },
-  value,
-  discriminatorPath,
-) {
-  watchDependency('discriminator#' + discriminatorPath)
-  const discriminatorValue = getValue(discriminator, discriminatorPath)
-  return discriminatorValue === value
-}
-
-function setValueFromModel({ getValue, model }, path) {
-  return getValue(model, path)
-}
-
-async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
-
-  let ans = []
-  try {
-    const resp = await axios.get(url, {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
-    })
-
-    const items = (resp && resp.data && resp.data.items) || []
-    ans = items
-  } catch (e) {
-    console.log(e)
-  }
-
-  return ans
-}
-
-async function getResourceList(axios, storeGet, { group, version, resource }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`
-
-  let ans = []
-  try {
-    const resp = await axios.get(url, {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
-    })
-
-    const items = (resp && resp.data && resp.data.items) || []
-    ans = items
-  } catch (e) {
-    console.log(e)
-  }
-
-  return ans
-}
-
-async function resourceNames(
-  { axios, getValue, model, watchDependency, storeGet },
-  group,
-  version,
-  resource,
-) {
-  const namespace = getValue(model, '/metadata/release/namespace')
-  watchDependency('model#/metadata/release/namespace')
-
-  let resources = await getNamespacedResourceList(axios, storeGet, {
-    namespace,
-    group,
-    version,
-    resource,
-  })
-
-  if (resource === 'secrets') {
-    resources = resources.filter((item) => {
-      const validType = ['kubernetes.io/service-account-token', 'Opaque']
-      return validType.includes(item.type)
+      return {
+        text: name,
+        value: name,
+      }
     })
   }
 
-  return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || ''
-    return {
-      text: name,
-      value: name,
+  async function getDbDetails() {
+    const owner = storeGet('/route/params/user') || ''
+    const cluster = storeGet('/route/params/cluster') || ''
+    const namespace =
+      storeGet('/route/query/namespace') ||
+      getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace') ||
+      ''
+    const name =
+      storeGet('/route/params/name') ||
+      getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name') ||
+      ''
+
+    if (namespace && name) {
+      try {
+        const resp = await axios.get(
+          `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/proxysqls/${name}`,
+        )
+        dbDetails = resp.data || {}
+        setDiscriminatorValue('/dbDetails', true)
+      } catch (e) {
+        console.log(e)
+      }
     }
-  })
-}
 
-async function unNamespacedResourceNames({ axios, storeGet }, group, version, resource) {
-  let resources = await getResourceList(axios, storeGet, {
-    group,
-    version,
-    resource,
-  })
-
-  if (resource === 'secrets') {
-    resources = resources.filter((item) => {
-      const validType = ['kubernetes.io/service-account-token', 'Opaque']
-      return validType.includes(item.type)
-    })
-  }
-
-  return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || ''
-    return {
-      text: name,
+    commit('wizard/model$update', {
+      path: `/metadata/release/name`,
       value: name,
-    }
-  })
-}
-
-function returnTrue() {
-  return true
-}
-
-function returnFalse() {
-  return false
-}
-
-function returnStringYes() {
-  return 'yes'
-}
-
-// ************************* Basic Info **********************************************
-async function getProxySQLVersions({ axios, storeGet }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null },
-      },
-    },
-  }
-
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/proxysqlversions`,
-      {
-        params: queryParams,
-      },
-    )
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    // keep only non deprecated versions
-    const filteredDbVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
-
-    filteredDbVersions.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      const specVersion = (item.spec && item.spec.version) || ''
-      item.text = `${name} (${specVersion})`
-      item.value = name
-      return true
+      force: true,
     })
-    return filteredDbVersions
-  } catch (e) {
-    console.log(e)
-    return []
-  }
-}
-
-async function getAppBindings({ axios, storeGet }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { type: null },
-      },
-    },
+    commit('wizard/model$update', {
+      path: `/metadata/release/namespace`,
+      value: namespace,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name`,
+      value: name,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/labels`,
+      value: dbDetails.metadata.labels,
+      force: true,
+    })
   }
 
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
-      {
-        params: queryParams,
-      },
-    )
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    const fileredResources = resources
-      .filter(
-        (item) =>
-          item.spec?.type === 'kubedb.com/mysql' || item.spec?.type === 'kubedb.com/mariadb',
-      )
-      .map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        return {
-          text: name,
-          value: name,
-        }
+  function initMetadata() {
+    const dbName =
+      getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name') ||
+      ''
+    const type = getValue(discriminator, '/autoscalingType') || ''
+    const date = Math.floor(Date.now() / 1000)
+    const resource = storeGet('/route/params/resource')
+    const scalingName = dbName ? dbName : resource
+    const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
+    if (modifiedName)
+      commit('wizard/model$update', {
+        path: '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/name',
+        value: modifiedName,
+        force: true,
       })
-    return fileredResources
-  } catch (e) {
-    console.log(e)
+
+    // delete the other type object from model
+    if (type === 'compute')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/storage',
+      )
+    if (type === 'storage')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute',
+      )
+  }
+
+  async function fetchNodeTopology() {
+    const owner = storeGet('/route/params/user') || ''
+    const cluster = storeGet('/route/params/cluster') || ''
+    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+    try {
+      const resp = await axios.get(url)
+      const list = (resp && resp.data?.items) || []
+      const mappedList = list.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        return name
+      })
+      return mappedList
+    } catch (e) {
+      console.log(e)
+    }
     return []
   }
-}
 
-// ************************** TLS ******************************88
-
-function setApiGroup() {
-  return 'cert-manager.io'
-}
-
-async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  watchDependency('model#/resources/kubedbComProxySQL/spec/tls/issuerRef/apiGroup')
-  watchDependency('model#/resources/kubedbComProxySQL/spec/tls/issuerRef/kind')
-  watchDependency('model#/metadata/release/namespace')
-  const apiGroup = getValue(model, '/resources/kubedbComProxySQL/spec/tls/issuerRef/apiGroup')
-  const kind = getValue(model, '/resources/kubedbComProxySQL/spec/tls/issuerRef/kind')
-  const namespace = getValue(model, '/metadata/release/namespace')
-
-  let url
-  if (kind === 'Issuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`
-  } else if (kind === 'ClusterIssuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`
+  function isNodeTopologySelected() {
+    // watchDependency(
+    //   'model#/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute/nodeTopology/name',
+    // )
+    const nodeTopologyName =
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute/nodeTopology/name',
+      ) || ''
+    return !!nodeTopologyName.length
   }
 
-  if (!url) return []
-
-  try {
-    const resp = await axios.get(url)
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      item.text = name
-      item.value = name
-      return true
+  function setControlledResources(type) {
+    const list = ['cpu', 'memory']
+    const path = `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute/${type}/controlledResources`
+    commit('wizard/model$update', {
+      path: path,
+      value: list,
+      force: true,
     })
-    return resources
-  } catch (e) {
-    console.log(e)
-    return []
+    return list
   }
-}
 
-async function hasIssuerRefName({ axios, storeGet, getValue, model, watchDependency }) {
-  const resp = await getIssuerRefsName({
+  function setTrigger(path) {
+    let value = getValue(model, `/resources/${path}`)
+    if (value) return value
+    return 'On'
+  }
+
+  function setApplyToIfReady() {
+    return 'IfReady'
+  }
+
+  async function fetchTopologyMachines() {
+    const annotations =
+      getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/annotations') ||
+      {}
+    instance = annotations['kubernetes.io/instance-type']
+
+    const user = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    if (instance) {
+      try {
+        const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
+        const resp = await axios.get(url)
+
+        const nodeGroups = resp.data?.spec?.nodeGroups || []
+        setDiscriminatorValue('/topologyMachines', nodeGroups)
+        return nodeGroups
+      } catch (e) {
+        console.log(e)
+        return []
+      }
+    }
+  }
+
+  function setAllowedMachine(minmax) {
+    const mx = instance?.includes(',') ? instance.split(',')[1] : ''
+    const mn = instance?.includes(',') ? instance.split(',')[0] : ''
+    const machineName = minmax === 'min' ? mn : mx
+
+    // Find the machine details from topologyMachines
+    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+    const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
+
+    // Return object with machine, cpu, memory (expected format for machine-compare init)
+    if (machineData) {
+      return {
+        machine: machineName,
+        cpu: machineData.allocatable?.cpu,
+        memory: machineData.allocatable?.memory,
+      }
+    }
+    // Return empty object if no machine found
+    return {
+      machine: machineName || '',
+      cpu: '',
+      memory: '',
+    }
+  }
+
+  function getMachines(minmax) {
+    // watchDependency('discriminator#/topologyMachines')
+    const depends = minmax === 'min' ? 'max' : 'min'
+    const dependantPath = `/allowedMachine-${depends}`
+
+    // watchDependency(`discriminator#${dependantPath}`)
+    const dependantMachineObj = getValue(discriminator, dependantPath)
+    const dependantMachine = dependantMachineObj?.machine || ''
+
+    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+
+    const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
+
+    // Return array with text and value object (expected format for machine-compare loader)
+    const machines = nodeGroups?.map((item) => {
+      const text = item.topologyValue
+      const subtext = `CPU: ${item.allocatable?.cpu}, Memory: ${item.allocatable?.memory}`
+      return {
+        text,
+        subtext,
+        value: {
+          machine: item.topologyValue,
+          cpu: item.allocatable?.cpu,
+          memory: item.allocatable?.memory,
+        },
+      }
+    })
+
+    const filteredMachine = machines?.filter((item, ind) =>
+      minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
+    )
+
+    return dependantIndex === -1 ? machines : filteredMachine
+  }
+
+  function hasAnnotations() {
+    const annotations =
+      getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/annotations') ||
+      {}
+    const instance = annotations['kubernetes.io/instance-type']
+
+    return !!instance
+  }
+
+  function hasNoAnnotations() {
+    return !hasAnnotations()
+  }
+
+  function onMachineChange(type) {
+    const annoPath = '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/annotations'
+    const annotations = getValue(model, annoPath) || {}
+    const instance = annotations['kubernetes.io/instance-type']
+
+    // Now discriminator values are objects with { machine, cpu, memory }
+    const minMachineObj = getValue(discriminator, '/allowedMachine-min')
+    const maxMachineObj = getValue(discriminator, '/allowedMachine-max')
+    const minMachine = minMachineObj?.machine || ''
+    const maxMachine = maxMachineObj?.machine || ''
+    const minMaxMachine = `${minMachine},${maxMachine}`
+    annotations['kubernetes.io/instance-type'] = minMaxMachine
+
+    // Use cpu/memory directly from the machine objects
+    const minMachineAllocatable = minMachineObj
+      ? { cpu: minMachineObj.cpu, memory: minMachineObj.memory }
+      : null
+    const maxMachineAllocatable = maxMachineObj
+      ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory }
+      : null
+    const allowedPath = `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute/${type}`
+
+    if (minMachine && maxMachine && instance !== minMaxMachine) {
+      commit('wizard/model$update', {
+        path: `${allowedPath}/maxAllowed`,
+        value: maxMachineAllocatable,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `${allowedPath}/minAllowed`,
+        value: minMachineAllocatable,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: annoPath,
+        value: { ...annotations },
+        force: true,
+      })
+    }
+  }
+
+  /************ Monitoring ************/
+
+  function isEqualToModelPathValue(value, modelPath) {
+    const modelPathValue = getValue(model, modelPath)
+    // watchDependency('model#' + modelPath)
+    return modelPathValue === value
+  }
+
+  async function getResources(group, version, resource) {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+        {
+          params: { filter: { items: { metadata: { name: null } } } },
+        },
+      )
+
+      const resources = (resp && resp.data && resp.data.items) || []
+
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return resources
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
+  async function getNamespacedResourceList(
     axios,
     storeGet,
-    getValue,
-    model,
-    watchDependency,
-  })
+    { namespace, group, version, resource },
+  ) {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
 
-  return !!(resp && resp.length)
-}
+    const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
 
-async function hasNoIssuerRefName({ axios, storeGet, getValue, model, watchDependency }) {
-  const resp = await hasIssuerRefName({
-    axios,
-    storeGet,
-    getValue,
-    model,
-    watchDependency,
-  })
+    let ans = []
+    try {
+      const resp = await axios.get(url, {
+        params: {
+          filter: { items: { metadata: { name: null }, type: null } },
+        },
+      })
 
-  return !resp
-}
+      const items = (resp && resp.data && resp.data.items) || []
+      ans = items
+    } catch (e) {
+      console.log(e)
+    }
 
-function showTlsConfigureSection({ watchDependency, discriminator, getValue }) {
-  watchDependency('discriminator#/configureTLS')
-  const configureStatus = getValue(discriminator, '/configureTLS')
-  return configureStatus
-}
-
-function onTlsConfigureChange({ discriminator, getValue, commit }) {
-  const configureStatus = getValue(discriminator, '/configureTLS')
-  if (configureStatus) {
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComProxySQL/spec/tls',
-      value: { issuerRef: {}, certificates: [] },
-      force: true,
-    })
-  } else {
-    commit('wizard/model$delete', '/resources/kubedbComProxySQL/spec/tls')
-    commit('wizard/model$delete', '/resources/kubedbComProxySQL/spec/sslMode')
-  }
-}
-
-function getAliasOptions() {
-  return ['server', 'client', 'metrics-exporter']
-}
-
-/****** Monitoring *********/
-
-function showMonitoringSection({ watchDependency, discriminator, getValue }) {
-  watchDependency('discriminator#/enableMonitoring')
-  const configureStatus = getValue(discriminator, '/enableMonitoring')
-  return configureStatus
-}
-
-function onEnableMonitoringChange({ discriminator, getValue, commit }) {
-  const configureStatus = getValue(discriminator, '/enableMonitoring')
-  if (configureStatus) {
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComProxySQL/spec/monitor',
-      value: {},
-      force: true,
-    })
-  } else {
-    commit('wizard/model$delete', '/resources/kubedbComProxySQL/spec/monitor')
+    return ans
   }
 
-  // update alert value depend on monitoring profile
-  commit('wizard/model$update', {
-    path: '/form/alert/enabled',
-    value: configureStatus ? 'warning' : 'none',
-    force: true,
-  })
-}
-
-function showCustomizeExporterSection({ watchDependency, discriminator, getValue }) {
-  watchDependency('discriminator#/customizeExporter')
-  const configureStatus = getValue(discriminator, '/customizeExporter')
-  return configureStatus
-}
-
-function onCustomizeExporterChange({ discriminator, getValue, commit }) {
-  const configureStatus = getValue(discriminator, '/customizeExporter')
-  if (configureStatus) {
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter',
-      value: {},
-      force: true,
-    })
-  } else {
-    commit('wizard/model$delete', '/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter')
+  function showMonitoringSection() {
+    // watchDependency('discriminator#/enableMonitoring')
+    const configureStatus = getValue(discriminator, '/enableMonitoring')
+    return configureStatus
   }
-}
 
-function isValueExistInModel({ model, getValue }, path) {
-  const modelValue = getValue(model, path)
-  return !!modelValue
-}
+  function onEnableMonitoringChange() {
+    const configureStatus = getValue(discriminator, '/enableMonitoring')
+    if (configureStatus) {
+      commit('wizard/model$update', {
+        path: '/resources/kubedbComProxySQL/spec/monitor',
+        value: {},
+        force: true,
+      })
+    } else {
+      commit('wizard/model$delete', '/resources/kubedbComProxySQL/spec/monitor')
+    }
 
-function onNamespaceChange({ commit, model, getValue }) {
-  const namespace = getValue(model, '/metadata/release/namespace')
-  const agent = getValue(model, '/resources/kubedbComProxySQL/spec/monitor/agent')
-  if (agent === 'prometheus.io') {
+    // update alert value depend on monitoring profile
     commit('wizard/model$update', {
-      path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-      value: [namespace],
-      force: true,
-    })
-  }
-}
-
-function onLabelChange({ commit, model, getValue }) {
-  const labels = getValue(model, '/resources/kubedbComProxySQL/spec/metadata/labels')
-
-  const agent = getValue(model, '/resources/kubedbComProxySQL/spec/monitor/agent')
-
-  if (agent === 'prometheus.io') {
-    commit('wizard/model$update', {
-      path: '/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels',
-      value: labels,
-      force: true,
-    })
-  }
-}
-
-function onNameChange({ commit, model, getValue }) {
-  const dbName = getValue(model, '/metadata/release/name')
-
-  const agent = getValue(model, '/resources/kubedbComProxySQL/spec/monitor/agent')
-
-  const labels = getValue(model, '/resources/kubedbComProxySQL/spec/metadata/labels')
-
-  if (agent === 'prometheus.io') {
-    commit('wizard/model$update', {
-      path: '/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels',
-      value: labels,
+      path: '/form/alert/enabled',
+      value: configureStatus ? 'warning' : 'none',
       force: true,
     })
   }
 
-  // to reset configSecret name field
-  const hasSecretConfig = getValue(model, '/resources/secret_config')
-  if (hasSecretConfig) {
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComProxySQL/spec/configSecret/name',
-      value: `${dbName}-config`,
-      force: true,
+  function showCustomizeExporterSection() {
+    // watchDependency('discriminator#/customizeExporter')
+    const configureStatus = getValue(discriminator, '/customizeExporter')
+    return configureStatus
+  }
+
+  function onCustomizeExporterChange() {
+    const configureStatus = getValue(discriminator, '/customizeExporter')
+    if (configureStatus) {
+      commit('wizard/model$update', {
+        path: '/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter',
+        value: {},
+        force: true,
+      })
+    } else {
+      commit('wizard/model$delete', '/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter')
+    }
+  }
+
+  function isValueExistInModel(path) {
+    const modelValue = getValue(model, path) || null
+    return !!modelValue
+  }
+
+  // function onNamespaceChange() {
+  //   const namespace = getValue(model, '/metadata/release/namespace')
+  //   const agent = getValue(model, '/resources/kubedbComProxySQL/spec/monitor/agent')
+  //   if (agent === 'prometheus.io') {
+  //     commit('wizard/model$update', {
+  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
+  //       value: [namespace],
+  //       force: true,
+  //     })
+  //   }
+  // }
+
+  function onLabelChange() {
+    const labels = getValue(model, '/resources/kubedbComProxySQL/spec/metadata/labels')
+
+    const agent = getValue(model, '/resources/kubedbComProxySQL/spec/monitor/agent')
+
+    if (agent === 'prometheus.io') {
+      commit('wizard/model$update', {
+        path: '/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels',
+        value: labels,
+        force: true,
+      })
+    }
+  }
+
+  function onAgentChange() {
+    const agent = getValue(model, '/resources/kubedbComProxySQL/spec/monitor/agent')
+    if (agent === 'prometheus.io') {
+      commit('wizard/model$update', {
+        path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
+        value: [],
+        force: true,
+      })
+
+      onNamespaceChange()
+      onLabelChange()
+    } else {
+      commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
+    }
+  }
+
+  function getOpsRequestUrl(reqType) {
+    const cluster = storeGet('/route/params/cluster')
+    const domain = storeGet('/domain') || ''
+    const owner = storeGet('/route/params/user')
+    const dbname = getValue(model, '/metadata/release/name')
+    const group = getValue(model, '/metadata/resource/group')
+    const kind = getValue(model, '/metadata/resource/kind')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const resource = getValue(model, '/metadata/resource/name')
+    const version = getValue(model, '/metadata/resource/version')
+    const routeRootPath = storeGet('/route/path')
+    const pathPrefix = `${domain}/db${routeRootPath}`
+    const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
+    const pathConstructedForKubedb = pathSplit + `/${reqType.toLowerCase()}?namespace=${namespace}`
+
+    const isKube = !!storeGet('/route/params/actions')
+
+    if (isKube) return pathConstructedForKubedb
+    else
+      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/proxysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations${
+        reqType ? '&requestType=' + reqType : ''
+      }`
+  }
+
+  function onNamespaceChange() {
+    const namespace = getValue(
+      model,
+      '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace',
+    )
+    if (!namespace) {
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name',
+      )
+    }
+  }
+
+  function setValueFrom() {
+    if (isConfigMapTypeValueFrom()) {
+      return 'configMap'
+    } else if (isSecretTypeValueFrom()) {
+      return 'secret'
+    } else {
+      return 'input'
+    }
+  }
+
+  function isConfigMapTypeValueFrom() {
+    const valueFrom = getValue(discriminator, '/valueFrom')
+    return !!(valueFrom && valueFrom.configMapKeyRef)
+  }
+
+  function isSecretTypeValueFrom() {
+    const valueFrom = getValue(discriminator, '/valueFrom')
+    return !!(valueFrom && valueFrom.secretKeyRef)
+  }
+
+  function onValueFromChange() {
+    const valueFrom = getValue(discriminator, '/valueFromType')
+    if (valueFrom === 'input') {
+      if (isConfigMapTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/configMapKeyRef',
+          value: true,
+        })
+      if (isSecretTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/secretKeyRef',
+          value: true,
+        })
+    } else if (valueFrom === 'secret') {
+      if (!isSecretTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/secretKeyRef',
+          value: false,
+        })
+      if (isConfigMapTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/configMapKeyRef',
+          value: true,
+        })
+    } else if (valueFrom === 'configMap') {
+      if (!isConfigMapTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/configMapKeyRef',
+          value: false,
+        })
+      if (isSecretTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/secretKeyRef',
+          value: true,
+        })
+    }
+  }
+
+  // function isEqualToValueFromType(value) {
+  //   //watchDependency('discriminator#/valueFromType')
+  //   const valueFrom = getValue(discriminator, '/valueFromType')
+  //   return valueFrom === value
+  // }
+
+  async function resourceNames(group, version, resource) {
+    const namespace = getValue(model, '/metadata/release/namespace')
+    // watchDependency('model#/metadata/release/namespace')
+
+    let resources = await getNamespacedResourceList(axios, storeGet, {
+      namespace,
+      group,
+      version,
+      resource,
+    })
+
+    if (resource === 'secrets') {
+      resources = resources.filter((item) => {
+        const validType = ['kubernetes.io/service-account-token', 'Opaque']
+        return validType.includes(item.type)
+      })
+    }
+
+    return resources.map((resource) => {
+      const name = (resource.metadata && resource.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
     })
   }
-}
 
-function onAgentChange({ commit, model, getValue }) {
-  const agent = getValue(model, '/resources/kubedbComProxySQL/spec/monitor/agent')
-  if (agent === 'prometheus.io') {
-    commit('wizard/model$update', {
-      path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
-      value: [],
-      force: true,
-    })
+  async function getConfigMapKeys(index) {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const configMapName = getValue(
+      model,
+      `/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter/env/${index}/valueFrom/configMapKeyRef/name`,
+    )
 
-    onNamespaceChange({ commit, model, getValue })
-    onLabelChange({ commit, model, getValue })
-  } else {
-    commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
+    // watchDependency('data#/namespace')
+    // watchDependency('rootModel#/valueFrom/configMapKeyRef/name')
+
+    if (!configMapName) return []
+
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/configmaps/${configMapName}`,
+      )
+
+      const configMaps = (resp && resp.data && resp.data.data) || {}
+
+      const configMapKeys = Object.keys(configMaps).map((item) => ({
+        text: item,
+        value: item,
+      }))
+
+      return configMapKeys
+    } catch (e) {
+      console.log(e)
+      return []
+    }
   }
-}
 
-/*************************************  Database Secret Section ********************************************/
+  async function getSecrets() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    // watchDependency('model#/metadata/release/namespace')
 
-function getCreateAuthSecret({ model, getValue }) {
-  const authSecret = getValue(model, '/resources/kubedbComProxySQL/spec/authSecret')
-
-  return !authSecret
-}
-
-function showExistingSecretSection({ getValue, watchDependency, discriminator }) {
-  watchDependency('discriminator#/createAuthSecret')
-  const hasAuthSecretName = getValue(discriminator, '/createAuthSecret')
-  return !hasAuthSecretName
-}
-
-function showPasswordSection({ getValue, watchDependency, discriminator }) {
-  return !showExistingSecretSection({
-    getValue,
-    watchDependency,
-    discriminator,
-  })
-}
-
-function setAuthSecretPassword({ model, getValue }) {
-  const encodedPassword = getValue(model, '/resources/secret_auth/data/password')
-  return encodedPassword ? decodePassword({}, encodedPassword) : ''
-}
-
-function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
-  const stringPassword = getValue(discriminator, '/password')
-
-  if (stringPassword) {
-    commit('wizard/model$update', {
-      path: '/resources/secret_auth/data/password',
-      value: encodePassword({}, stringPassword),
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/resources/secret_auth/data/username',
-      value: encodePassword({}, 'root'),
-      force: true,
-    })
-  } else {
-    commit('wizard/model$delete', '/resources/secret_auth')
-  }
-}
-
-function disableInitializationSection({ model, getValue, watchDependency }) {
-  const initialized = getValue(model, '/resources/kubedbComProxySQL/spec/init/initialized')
-  watchDependency('model#/resources/kubedbComProxySQL/spec/init/initialized')
-  return !!initialized
-}
-
-// eslint-disable-next-line no-empty-pattern
-function encodePassword({}, value) {
-  return btoa(value)
-}
-
-// eslint-disable-next-line no-empty-pattern
-function decodePassword({}, value) {
-  return atob(value)
-}
-
-function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
-  const createAuthSecret = getValue(discriminator, '/createAuthSecret')
-  if (createAuthSecret) {
-    commit('wizard/model$delete', '/resources/kubedbComProxySQL/spec/authSecret')
-  } else if (createAuthSecret === false) {
-    commit('wizard/model$delete', '/resources/secret_auth')
-  }
-}
-
-async function getSecrets({ storeGet, axios, model, getValue, watchDependency }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const namespace = getValue(model, '/metadata/release/namespace')
-  watchDependency('model#/metadata/release/namespace')
-
-  if (owner && cluster && namespace) {
     try {
       const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
         {
           params: {
-            filter: {
-              items: {
-                data: { username: null, password: null },
-                metadata: { name: null },
-                type: null,
-              },
-            },
+            filter: { items: { metadata: { name: null }, type: null } },
           },
         },
       )
@@ -587,11 +732,7 @@ async function getSecrets({ storeGet, axios, model, getValue, watchDependency })
       const secrets = (resp && resp.data && resp.data.items) || []
 
       const filteredSecrets = secrets.filter((item) => {
-        const validType = [
-          'kubernetes.io/service-account-token',
-          'Opaque',
-          'kubernetes.io/basic-auth',
-        ]
+        const validType = ['kubernetes.io/service-account-token', 'Opaque']
         return validType.includes(item.type)
       })
 
@@ -604,661 +745,149 @@ async function getSecrets({ storeGet, axios, model, getValue, watchDependency })
       return filteredSecrets
     } catch (e) {
       console.log(e)
-    }
-  }
-  return []
-}
-
-//////////////////// custom config /////////////////
-function onConfigurationSourceChange({ getValue, discriminator, commit, model }) {
-  const configurationSource = getValue(discriminator, '/configurationSource')
-  if (configurationSource === 'use-existing-config') {
-    commit('wizard/model$delete', '/resources/secret_config')
-  } else {
-    const value = getValue(model, '/resources/secret_config')
-    if (!value) {
-      commit('wizard/model$update', {
-        path: '/resources/secret_config',
-        value: {},
-        force: true,
-      })
-    }
-    const configSecretName = `${getValue(model, '/metadata/release/name')}-config`
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComProxySQL/spec/configSecret/name',
-      value: configSecretName,
-      force: true,
-    })
-  }
-}
-
-function onConfigurationChange({ getValue, commit, discriminator, model }) {
-  const value = getValue(discriminator, '/configuration')
-  commit('wizard/model$update', {
-    path: '/resources/secret_config/stringData/md-config.cnf',
-    value: value,
-    force: true,
-  })
-  const configSecretName = `${getValue(model, '/metadata/release/name')}-config`
-  commit('wizard/model$update', {
-    path: '/resources/kubedbComProxySQL/spec/configSecret/name',
-    value: configSecretName,
-    force: true,
-  })
-}
-
-function setConfigurationSource({ model, getValue }) {
-  const modelValue = getValue(model, '/resources/secret_config')
-  if (modelValue) {
-    return 'create-new-config'
-  }
-  return 'use-existing-config'
-}
-
-function onConfigurationValueChange({ discriminator, getValue, commit }, path) {
-  const value = getValue(discriminator, `/${path}`)
-  commit('wizard/model$update', {
-    path: `/resources/secret_config/stringData/${path}.cnf`,
-    value,
-    force: true,
-  })
-}
-
-function setCustomConfigConfigureChoice({ model, getValue }) {
-  const customConfig = getValue(model, '/resources/kubedbComProxySQL/spec/configSecret')
-  return customConfig ? 'yes' : 'no'
-}
-
-function onSetCustomConfigChange({ discriminator, getValue, commit }) {
-  const value = getValue(discriminator, '/setCustomConfig')
-
-  if (value === 'no') {
-    commit('wizard/model$delete', '/resources/kubedbComProxySQL/spec/configSecret')
-    commit('wizard/model$delete', '/resources/secret_config')
-  }
-}
-
-function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
-  const cluster = storeGet('/route/params/cluster')
-  const domain = storeGet('/domain') || ''
-  const owner = storeGet('/route/params/user')
-  const dbname = getValue(model, '/metadata/release/name')
-  const group = getValue(model, '/metadata/resource/group')
-  const kind = getValue(model, '/metadata/resource/kind')
-  const namespace = getValue(model, '/metadata/release/namespace')
-  const resource = getValue(model, '/metadata/resource/name')
-  const version = getValue(model, '/metadata/resource/version')
-  const routeRootPath = storeGet('/route/path')
-  const pathPrefix = `${domain}/db${routeRootPath}`
-  const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
-  const pathConstructedForKubedb =
-    pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
-
-  if (mode === 'standalone-step') return pathConstructedForKubedb
-  else
-    return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/proxysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations${
-      reqType ? '&requestType=' + reqType : ''
-    }`
-}
-
-function onMySQLRulesChange({ discriminator, getValue, commit }) {
-  const rules = getValue(discriminator, '/mysqlQueryRules')
-  const modifiedRules = rules?.map((item) => item.rules)
-
-  commit('wizard/model$update', {
-    path: '/resources/kubedbComProxySQL/spec/initConfig/mysqlQueryRules',
-    value: modifiedRules,
-    force: true,
-  })
-}
-
-function setMySQLRules({ model, getValue, setDiscriminatorValue }) {
-  const rules = getValue(model, '/resources/kubedbComProxySQL/spec/initConfig/mysqlQueryRules')
-  const modifiedRules = rules?.map((item) => ({ rules: item }))
-
-  setDiscriminatorValue('/mysqlQueryRules', modifiedRules)
-
-  return modifiedRules
-}
-
-function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
-  const user = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const domain = storeGet('/domain') || ''
-  if (domain.includes('bb.test')) {
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  } else {
-    const editedDomain = domain.replace('kubedb', 'console')
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }
-}
-
-function isVariantAvailable({ storeGet }) {
-  const variant = storeGet('/route/query/variant')
-  return variant ? true : false
-}
-
-///////////////////////// Autoscaler ///////////////////
-let autoscaleType = ''
-let dbDetails = {}
-
-function isConsole({ storeGet, commit }) {
-  const isKube = isKubedb({ storeGet })
-
-  if (isKube) {
-    const dbName = storeGet('/route/params/name') || ''
-    commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name',
-      value: dbName,
-      force: true,
-    })
-    const operation = storeGet('/route/params/actions') || ''
-    if (operation.length) {
-      const splitOp = operation.split('-')
-      if (splitOp.length > 2) autoscaleType = splitOp[2]
-    }
-    const date = Math.floor(Date.now() / 1000)
-    const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
-    commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/name',
-      value: modifiedName,
-      force: true,
-    })
-    const namespace = storeGet('/route/query/namespace') || ''
-    if (namespace) {
-      commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace',
-        value: namespace,
-        force: true,
-      })
+      return []
     }
   }
 
-  return !isKube
-}
+  async function getSecretKeys(index) {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const secretName = getValue(
+      model,
+      `/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter/env/${index}/valueFrom/secretKeyRef/name`,
+    )
 
-function isKubedb({ storeGet }) {
-  return !!storeGet('/route/params/actions')
-}
+    // watchDependency('data#/namespace')
+    // watchDependency('rootModel#/valueFrom/secretKeyRef/name')
 
-function isRancherManaged({ storeGet }) {
-  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-  const found = managers.find((item) => item === 'Rancher')
-  return !!found
-}
+    if (!secretName) return []
 
-function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
-  if (isKubedb({ storeGet }) === true) return true
-  watchDependency('model#/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name')
-  watchDependency('discriminator#/autoscalingType')
-  return (
-    !!getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name') &&
-    !!getValue(discriminator, '/autoscalingType')
-  )
-}
-
-async function getNamespaces({ axios, storeGet }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-    params: { filter: { items: { metadata: { name: null } } } },
-  })
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  return resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    return {
-      text: name,
-      value: name,
-    }
-  })
-}
-
-async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
-  watchDependency('model#/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace')
-  const namespace = getValue(
-    model,
-    '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace',
-  )
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
-    {
-      params: { filter: { items: { metadata: { name: null } } } },
-    },
-  )
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  return resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    return {
-      text: name,
-      value: name,
-    }
-  })
-}
-
-async function getDbDetails({ commit, setDiscriminatorValue, axios, storeGet, getValue, model }) {
-  const owner = storeGet('/route/params/user') || ''
-  const cluster = storeGet('/route/params/cluster') || ''
-  const namespace =
-    storeGet('/route/query/namespace') ||
-    getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace') ||
-    ''
-  const name =
-    storeGet('/route/params/name') ||
-    getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name') ||
-    ''
-
-  if (namespace && name) {
     try {
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/proxysqls/${name}`,
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${secretName}`,
       )
-      dbDetails = resp.data || {}
-      setDiscriminatorValue('/dbDetails', true)
-    } catch (e) {
-      console.log(e)
-    }
-  }
 
-  commit('wizard/model$update', {
-    path: `/metadata/release/name`,
-    value: name,
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: `/metadata/release/namespace`,
-    value: namespace,
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name`,
-    value: name,
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: `/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/labels`,
-    value: dbDetails.metadata.labels,
-    force: true,
-  })
-}
+      const secret = (resp && resp.data && resp.data.data) || {}
 
-async function dbTypeEqualsTo({ watchDependency, commit }, type) {
-  watchDependency('discriminator#/dbDetails')
+      const secretKeys = Object.keys(secret).map((item) => ({
+        text: item,
+        value: item,
+      }))
 
-  const { spec } = dbDetails || {}
-  const { topology } = spec || {}
-  let verd = ''
-  if (topology) verd = 'topology'
-  else {
-    verd = 'combined'
-  }
-  clearSpecModel({ commit }, verd)
-  return type === verd && spec
-}
-
-function clearSpecModel({ commit }, dbtype) {
-  if (dbtype === 'standalone') {
-    commit(
-      'wizard/model$delete',
-      `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/${autoscaleType}/cluster`,
-    )
-    commit(
-      'wizard/model$delete',
-      `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/${autoscaleType}/sentinel`,
-    )
-  } else if (dbtype === 'cluster') {
-    commit(
-      'wizard/model$delete',
-      `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/${autoscaleType}/standalone`,
-    )
-    commit(
-      'wizard/model$delete',
-      `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/${autoscaleType}/sentinel`,
-    )
-  } else if (dbtype === 'sentinel') {
-    commit(
-      'wizard/model$delete',
-      `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/${autoscaleType}/standalone`,
-    )
-    commit(
-      'wizard/model$delete',
-      `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/${autoscaleType}/cluster`,
-    )
-  }
-}
-
-function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
-  const dbName =
-    getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name') || ''
-  const type = getValue(discriminator, '/autoscalingType') || ''
-  const date = Math.floor(Date.now() / 1000)
-  const resource = storeGet('/route/params/resource')
-  const scalingName = dbName ? dbName : resource
-  const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
-  if (modifiedName)
-    commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/name',
-      value: modifiedName,
-      force: true,
-    })
-
-  // delete the other type object from model
-  if (type === 'compute')
-    commit('wizard/model$delete', '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/storage')
-  if (type === 'storage')
-    commit('wizard/model$delete', '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute')
-}
-
-function onNamespaceChange({ model, getValue, commit }) {
-  const namespace = getValue(
-    model,
-    '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace',
-  )
-  if (!namespace) {
-    commit(
-      'wizard/model$delete',
-      '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name',
-    )
-  }
-}
-
-function ifScalingTypeEqualsTo(
-  { storeGet, watchDependency, getValue, discriminator, model },
-  type,
-) {
-  watchDependency('discriminator#/autoscalingType')
-  watchDependency('model#/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name')
-
-  const operation = storeGet('/route/params/actions') || ''
-  if (operation.length) {
-    const splitOp = operation.split('-')
-    if (splitOp.length > 2) autoscaleType = splitOp[2]
-  } else autoscaleType = getValue(discriminator, '/autoscalingType') || ''
-  const isDatabaseSelected = !!getValue(
-    model,
-    '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name',
-  )
-  return autoscaleType === type && isDatabaseSelected
-}
-
-async function fetchNodeTopology({ axios, storeGet }) {
-  const owner = storeGet('/route/params/user') || ''
-  const cluster = storeGet('/route/params/cluster') || ''
-  const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-  try {
-    const resp = await axios.get(url)
-    const list = (resp && resp.data?.items) || []
-    const mappedList = list.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-    return mappedList
-  } catch (e) {
-    console.log(e)
-  }
-  return []
-}
-
-function isNodeTopologySelected({ watchDependency, model, getValue }) {
-  watchDependency(
-    'model#/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute/nodeTopology/name',
-  )
-  const nodeTopologyName =
-    getValue(
-      model,
-      '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute/nodeTopology/name',
-    ) || ''
-  return !!nodeTopologyName.length
-}
-
-function setControlledResources({ commit }, type) {
-  const list = ['cpu', 'memory']
-  const path = `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute/${type}/controlledResources`
-  commit('wizard/model$update', {
-    path: path,
-    value: list,
-    force: true,
-  })
-  return list
-}
-
-function setTrigger({ model, getValue }, path) {
-  let value = getValue(model, `/resources/${path}`)
-  if (value) return value
-  return 'On'
-}
-
-function setApplyToIfReady() {
-  return 'IfReady'
-}
-
-function handleUnit({ commit, model, getValue }, path, type = 'bound') {
-  let value = getValue(model, `/resources/${path}`)
-  if (type === 'scalingRules') {
-    const updatedValue = []
-    value?.forEach((ele) => {
-      let appliesUpto = ele['appliesUpto']
-      let threshold = ele['threshold']
-      if (appliesUpto && !isNaN(appliesUpto)) {
-        appliesUpto += 'Gi'
-      }
-      if (!isNaN(threshold)) {
-        threshold += 'pc'
-      }
-      updatedValue.push({ threshold, appliesUpto })
-    })
-    if (JSON.stringify(updatedValue) !== JSON.stringify(value)) {
-      commit('wizard/model$update', {
-        path: `/resources/${path}`,
-        value: updatedValue,
-        force: true,
-      })
-    }
-  } else {
-    if (!isNaN(value)) {
-      value += 'Gi'
-      commit('wizard/model$update', {
-        path: `/resources/${path}`,
-        value: value,
-        force: true,
-      })
-    }
-  }
-}
-
-async function fetchTopologyMachines({ axios, getValue, storeGet, model, setDiscriminatorValue }) {
-  const instance = hasAnnotations({ model, getValue })
-
-  const user = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  if (instance) {
-    try {
-      const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
-      const resp = await axios.get(url)
-
-      const nodeGroups = resp.data?.spec?.nodeGroups || []
-      setDiscriminatorValue('/topologyMachines', nodeGroups)
-      return nodeGroups
+      return secretKeys
     } catch (e) {
       console.log(e)
       return []
     }
   }
-}
 
-function setAllowedMachine({ model, getValue }, minmax) {
-  const annotations = getValue(
-    model,
-    '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/annotations',
-  )
-  const instance = annotations['kubernetes.io/instance-type']
-  const mx = instance?.includes(',') ? instance.split(',')[1] : ''
-  const mn = instance?.includes(',') ? instance.split(',')[0] : ''
-
-  if (minmax === 'min') return mn
-  else return mx
-}
-
-async function getMachines({ getValue, watchDependency, discriminator }, minmax) {
-  watchDependency('discriminator#/topologyMachines')
-  watchDependency('discriminator#/topologyMachines')
-  const depends = minmax === 'min' ? 'max' : 'min'
-  const dependantPath = `/allowedMachine-${depends}`
-
-  watchDependency(`discriminator#${dependantPath}`)
-  const dependantMachine = getValue(discriminator, dependantPath)
-
-  const nodeGroups = getValue(discriminator, '/topologyMachines') || []
-  console.log(nodeGroups)
-
-  const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
-
-  const machines = nodeGroups?.map((item) => {
-    const subText = `CPU: ${item.allocatable.cpu}, Memory: ${item.allocatable.memory}`
-    const text = item.topologyValue
-    return { text, subText, value: item.topologyValue }
-  })
-
-  const filteredMachine = machines?.filter((item, ind) =>
-    minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
-  )
-
-  return dependantIndex === -1 ? machines : filteredMachine
-}
-
-function hasAnnotations({ model, getValue }) {
-  const annotations = getValue(
-    model,
-    '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/annotations',
-  )
-  const instance = annotations['kubernetes.io/instance-type']
-
-  return !!instance
-}
-
-function hasNoAnnotations({ model, getValue }) {
-  return !hasAnnotations({ model, getValue })
-}
-
-function onMachineChange({ model, getValue, discriminator, commit }, type) {
-  const annoPath = '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/annotations'
-  const annotations = getValue(model, annoPath)
-  const instance = annotations['kubernetes.io/instance-type']
-
-  const minMachine = getValue(discriminator, '/allowedMachine-min')
-  const maxMachine = getValue(discriminator, '/allowedMachine-max')
-  const minMaxMachine = `${minMachine},${maxMachine}`
-  annotations['kubernetes.io/instance-type'] = minMaxMachine
-
-  const machines = getValue(discriminator, `/topologyMachines`) || []
-  const minMachineObj = machines.find((item) => item.topologyValue === minMachine)
-  const maxMachineObj = machines.find((item) => item.topologyValue === maxMachine)
-  const minMachineAllocatable = minMachineObj?.allocatable
-  const maxMachineAllocatable = maxMachineObj?.allocatable
-  const allowedPath = `/resources/autoscalingKubedbComProxySQLAutoscaler/spec/compute/${type}`
-
-  if (minMachine && maxMachine && instance !== minMaxMachine) {
-    commit('wizard/model$update', {
-      path: `${allowedPath}/maxAllowed`,
-      value: maxMachineAllocatable,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: `${allowedPath}/minAllowed`,
-      value: minMachineAllocatable,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: annoPath,
-      value: { ...annotations },
-      force: true,
-    })
+  function returnFalse() {
+    return false
   }
-}
 
-return {
-  isRancherManaged,
-  handleUnit,
-  isConsole,
-  getNamespaces,
-  getDbs,
-  isKubedb,
-  getDbDetails,
-  dbTypeEqualsTo,
-  clearSpecModel,
-  initMetadata,
-  onNamespaceChange,
-  ifScalingTypeEqualsTo,
-  fetchNodeTopology,
-  isNodeTopologySelected,
-  setControlledResources,
-  setTrigger,
-  setApplyToIfReady,
-  showOpsRequestOptions,
-  isVariantAvailable,
-  fetchJsons,
-  disableLableChecker,
-  isEqualToModelPathValue,
-  getResources,
-  isEqualToDiscriminatorPath,
-  setValueFromModel,
-  getNamespacedResourceList,
-  getResourceList,
-  resourceNames,
-  unNamespacedResourceNames,
-  returnTrue,
-  returnStringYes,
-  getProxySQLVersions,
-  getAppBindings,
-  setApiGroup,
-  getIssuerRefsName,
-  hasIssuerRefName,
-  hasNoIssuerRefName,
-  showTlsConfigureSection,
-  onTlsConfigureChange,
-  getAliasOptions,
-  showMonitoringSection,
-  onEnableMonitoringChange,
-  showCustomizeExporterSection,
-  onCustomizeExporterChange,
-  isValueExistInModel,
-  onNamespaceChange,
-  onLabelChange,
-  onNameChange,
-  returnFalse,
-  onAgentChange,
-  getCreateAuthSecret,
-  showExistingSecretSection,
-  showPasswordSection,
-  setAuthSecretPassword,
-  onAuthSecretPasswordChange,
-  disableInitializationSection,
-  encodePassword,
-  decodePassword,
-  onCreateAuthSecretChange,
-  getSecrets,
-  onConfigurationSourceChange,
-  onConfigurationChange,
-  setConfigurationSource,
-  onConfigurationValueChange,
-  onSetCustomConfigChange,
-  setCustomConfigConfigureChoice,
-  getOpsRequestUrl,
-  onMySQLRulesChange,
-  setMySQLRules,
-  getCreateNameSpaceUrl,
-  getMachines,
-  setAllowedMachine,
-  hasAnnotations,
-  hasNoAnnotations,
-  fetchTopologyMachines,
-  onMachineChange,
+  function onEnvArrayChange() {
+    const env = getValue(discriminator, '/env') || []
+    let ret = {}
+    // filter out temp values
+    const filteredEnv = env?.map((item) => {
+      const { temp, ...rest } = item
+      if (temp?.valueFromType === 'input') {
+        const { name, value } = rest
+        ret = { name, value }
+      } else if (temp?.valueFromType === 'configMap') {
+        const { name } = rest
+        const { configMapKeyRef } = rest?.valueFrom || {}
+        ret = { name, valueFrom: { configMapKeyRef } }
+      } else if (temp?.valueFromType === 'secret') {
+        const { name } = rest
+        const { secretKeyRef } = rest?.valueFrom || {}
+        ret = { name, valueFrom: { secretKeyRef } }
+      }
+      return ret
+    })
+
+    if (filteredEnv.length)
+      commit('wizard/model$update', {
+        path: '/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter/env',
+        value: filteredEnv,
+        force: true,
+      })
+  }
+
+  function initEnvArray() {
+    const env = getValue(model, '/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter/env')
+
+    return env || []
+  }
+
+  function isEqualToTemp(value, index) {
+    //watchDependency('discriminator#/valueFromType')
+    const valueFrom = getValue(discriminator, `/env/${index}/temp/valueFromType`)
+    return valueFrom === value
+  }
+
+  function initMonitoring() {
+    const env =
+      getValue(model, '/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter/env') || []
+    setDiscriminatorValue('/env', env)
+    let tempEnv = []
+    env.forEach((item) => {
+      let radio = ''
+      if (item.value) radio = 'input'
+      else if (item.valueFrom && item.valueFrom.configMapKeyRef) radio = 'configMap'
+      else if (item.valueFrom && item.valueFrom.secretKeyRef) radio = 'secret'
+      tempEnv.push({ ...item, temp: { valueFromType: radio } })
+    })
+    setDiscriminatorValue('/env', tempEnv)
+  }
+
+  return {
+    isConsole,
+    isKubedb,
+    isRancherManaged,
+    showOpsRequestOptions,
+    getNamespaces,
+    getDbs,
+    getDbDetails,
+    initMetadata,
+    onNamespaceChange,
+    fetchNodeTopology,
+    isNodeTopologySelected,
+    setControlledResources,
+    setTrigger,
+    setApplyToIfReady,
+    fetchTopologyMachines,
+    setAllowedMachine,
+    getMachines,
+    hasAnnotations,
+    hasNoAnnotations,
+    onMachineChange,
+
+    getOpsRequestUrl,
+    isValueExistInModel,
+    onEnableMonitoringChange,
+    showMonitoringSection,
+    onAgentChange,
+    getResources,
+    isEqualToModelPathValue,
+    onCustomizeExporterChange,
+    showCustomizeExporterSection,
+    onLabelChange,
+    setValueFrom,
+    onValueFromChange,
+    resourceNames,
+    getConfigMapKeys,
+    getSecrets,
+    getSecretKeys,
+    isConfigMapTypeValueFrom,
+    isSecretTypeValueFrom,
+    getNamespacedResourceList,
+    returnFalse,
+    onEnvArrayChange,
+    initEnvArray,
+    isEqualToTemp,
+    initMonitoring,
+  }
 }

@@ -1,1160 +1,974 @@
-steps:
-- form:
-    discriminator:
-      dbDetails:
-        default: false
-        type: boolean
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      type: input
-    - elements:
-      - label:
-          text: Name
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/name
-        type: input
-      - fetch: getNamespaces
-        hasGroup: isRancherManaged
-        label:
-          text: SelectNamespace
-        onChange: onNamespaceChange
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
-        type: select
-      - fetch: getDbs
-        label:
-          text: SelectDb
-        onChange: initMetadata
-        refresh: true
-        required: true
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
-        type: select
-      if: isConsole
-      type: single-step-form
-    - hasDescription: true
-      if: isConsole
-      label:
-        text: SelectType
-      onChange: initMetadata
-      options:
-      - description: Scale your CPU Memory based on resource usage
-        text: Compute
-        value: compute
-      - description: Expand your database size based on volume usage
-        text: Storage
-        value: storage
-      required: true
-      schema:
-        $ref: discriminator#/properties/autoscalingType
-      type: radio
-    - elements:
-      - discriminator:
-          topologyMachines:
-            default: []
-            type: array
-        elements:
-        - fetch: fetchTopologyMachines
-          if: returnFalse
-          schema:
-            $ref: discriminator#/topologyMachines
-          type: input
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/coordinator/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/trigger
-            type: select
-          - label:
-              text: PodLifeTimeThreshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: Resource Diff Percentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/resourceDiffPercentage
-            type: input
-          - discriminator:
-              allowedMachine-coordinator-max:
-                type: string
-              allowedMachine-coordinator-min:
-                type: string
-            elements:
-            - computed: setAllowedMachine|coordinator|min
-              disableUnselect: true
-              fetch: getMachines|coordinator|min
-              if: hasAnnotations
-              label:
-                text: Min Allowed Profile
-              onChange: onMachineChange|coordinator
-              schema:
-                $ref: discriminator#/properties/allowedMachine-coordinator-min
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Min Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed
-              show_label: true
-              type: single-step-form
-            - computed: setAllowedMachine|coordinator|max
-              disableUnselect: true
-              fetch: getMachines|coordinator|max
-              if: hasAnnotations
-              label:
-                text: Max Allowed Profile
-              onChange: onMachineChange|coordinator
-              schema:
-                $ref: discriminator#/properties/allowedMachine-coordinator-max
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Max Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed
-              show_label: true
-              type: single-step-form
-            type: single-step-form
-          - fetch: setControlledResources|coordinator
-            label:
-              text: Controlled Resources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/controlledResources
-            type: multiselect
-          if: isTopology
-          label:
-            text: Coordinator
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/data/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/trigger
-            type: select
-          - label:
-              text: PodLifeTimeThreshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: Resource Diff Percentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/resourceDiffPercentage
-            type: input
-          - discriminator:
-              allowedMachine-data-max:
-                type: string
-              allowedMachine-data-min:
-                type: string
-            elements:
-            - computed: setAllowedMachine|data|min
-              disableUnselect: true
-              fetch: getMachines|data|min
-              if: hasAnnotations
-              label:
-                text: Min Allowed Profile
-              onChange: onMachineChange|data
-              schema:
-                $ref: discriminator#/properties/allowedMachine-data-min
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Min Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed
-              show_label: true
-              type: single-step-form
-            - computed: setAllowedMachine|data|max
-              disableUnselect: true
-              fetch: getMachines|data|max
-              if: hasAnnotations
-              label:
-                text: Max Allowed Profile
-              onChange: onMachineChange|data
-              schema:
-                $ref: discriminator#/properties/allowedMachine-data-max
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Max Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed
-              show_label: true
-              type: single-step-form
-            type: single-step-form
-          - fetch: setControlledResources|data
-            label:
-              text: Controlled Resources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
-            type: multiselect
-          if: isTopology
-          label:
-            text: Data
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/node/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
-            type: select
-          - label:
-              text: PodLifeTimeThreshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: Resource Diff Percentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
-            type: input
-          - discriminator:
-              allowedMachine-node-max:
-                type: string
-              allowedMachine-node-min:
-                type: string
-            elements:
-            - computed: setAllowedMachine|node|min
-              disableUnselect: true
-              fetch: getMachines|node|min
-              if: hasAnnotations
-              label:
-                text: Min Allowed Profile
-              onChange: onMachineChange|node
-              schema:
-                $ref: discriminator#/properties/allowedMachine-node-min
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Min Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed
-              show_label: true
-              type: single-step-form
-            - computed: setAllowedMachine|node|max
-              disableUnselect: true
-              fetch: getMachines|node|max
-              if: hasAnnotations
-              label:
-                text: Max Allowed Profile
-              onChange: onMachineChange|node
-              schema:
-                $ref: discriminator#/properties/allowedMachine-node-max
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Max Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed
-              show_label: true
-              type: single-step-form
-            type: single-step-form
-          - fetch: setControlledResources|node
-            label:
-              text: Controlled Resources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
-            type: multiselect
-          if: isNotTopology
-          label:
-            text: Node
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/overseer/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/trigger
-            type: select
-          - label:
-              text: PodLifeTimeThreshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: Resource Diff Percentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/resourceDiffPercentage
-            type: input
-          - discriminator:
-              allowedMachine-overseer-max:
-                type: string
-              allowedMachine-overseer-min:
-                type: string
-            elements:
-            - computed: setAllowedMachine|overseer|min
-              disableUnselect: true
-              fetch: getMachines|overseer|min
-              if: hasAnnotations
-              label:
-                text: Min Allowed Profile
-              onChange: onMachineChange|overseer
-              schema:
-                $ref: discriminator#/properties/allowedMachine-overseer-min
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Min Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed
-              show_label: true
-              type: single-step-form
-            - computed: setAllowedMachine|overseer|max
-              disableUnselect: true
-              fetch: getMachines|overseer|max
-              if: hasAnnotations
-              label:
-                text: Max Allowed Profile
-              onChange: onMachineChange|overseer
-              schema:
-                $ref: discriminator#/properties/allowedMachine-overseer-max
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Max Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed
-              show_label: true
-              type: single-step-form
-            type: single-step-form
-          - fetch: setControlledResources|overseer
-            label:
-              text: Controlled Resources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/controlledResources
-            type: multiselect
-          if: isTopology
-          label:
-            text: Overseer
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer
-          show_label: true
-          type: single-step-form
-        type: single-step-form
-      - elements:
-        - fetch: fetchNodeTopology
-          label:
-            text: Select NodeTopology
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-          type: select
-        - if: isNodeTopologySelected|compute
-          label:
-            text: ScaleUp Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-          type: input
-        - if: isNodeTopologySelected|compute
-          label:
-            text: ScaleDown Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
-          type: input
-        if: hasNoAnnotations
-        label:
-          text: NodeTopology
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology
-        show_label: true
-        type: single-step-form
-      type: single-step-form
-    - elements:
-      - label:
-          text: Timeout
-        options:
-        - text: 5 minutes
-          value: 5m0s
-        - text: 10 minutes
-          value: 10m0s
-        - text: 30 minutes
-          value: 30m0s
-        - text: 1 hour
-          value: 1h0m
-        - text: 2 hours
-          value: 2h0m
-        - text: 5 hours
-          value: 5h0m
-        - text: 10 hours
-          value: 10h0m
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-        type: select
-      - computed: setApplyToIfReady
-        label:
-          text: Apply
-        options:
-        - text: IfReady (OpsRequest will be applied if database is ready)
-          value: IfReady
-        - text: Always (OpsRequest will always be applied)
-          value: Always
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-        type: radio
-      if: showOpsRequestOptions
-      label:
-        text: Ops Request Options
-      schema:
-        $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions
-      show_label: true
-      type: single-step-form
-    type: single-step-form
-  id: compute-autoscaler
-  title: steps.0.label
-- form:
-    discriminator:
-      dbDetails:
-        default: false
-        type: boolean
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      type: input
-    - elements:
-      - label:
-          text: Name
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/name
-        type: input
-      - fetch: getNamespaces
-        hasGroup: isRancherManaged
-        label:
-          text: SelectNamespace
-        onChange: onNamespaceChange
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
-        type: select
-      - fetch: getDbs
-        label:
-          text: SelectDb
-        onChange: initMetadata
-        refresh: true
-        required: true
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
-        type: select
-      if: isConsole
-      type: single-step-form
-    - hasDescription: true
-      if: isConsole
-      label:
-        text: SelectType
-      onChange: initMetadata
-      options:
-      - description: Scale your CPU Memory based on resource usage
-        text: Compute
-        value: compute
-      - description: Expand your database size based on volume usage
-        text: Storage
-        value: storage
-      required: true
-      schema:
-        $ref: discriminator#/properties/autoscalingType
-      type: radio
-    - elements:
-      - elements:
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/storage/coordinator/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/trigger
-            type: select
-          - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/usageThreshold
-            type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
-            label:
-              text: ScalingRules
-            onChange: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/coordinator/scalingRules|scalingRules
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/coordinator/upperBound
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/upperBound
-            type: input
-          label:
-            text: Coordinator
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/storage/data/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/trigger
-            type: select
-          - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/usageThreshold
-            type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
-            label:
-              text: ScalingRules
-            onChange: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/data/scalingRules|scalingRules
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/data/upperBound
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
-            type: input
-          label:
-            text: Data
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/storage/node/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
-            type: select
-          - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-            type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
-            label:
-              text: ScalingRules
-            onChange: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/node/scalingRules|scalingRules
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/node/upperBound
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
-            type: input
-          label:
-            text: Node
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/storage/overseer/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/trigger
-            type: select
-          - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/usageThreshold
-            type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
-            label:
-              text: ScalingRules
-            onChange: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/overseer/scalingRules|scalingRules
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/overseer/upperBound
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/upperBound
-            type: input
-          label:
-            text: Overseer
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer
-          show_label: true
-          type: single-step-form
-        type: single-step-form
-      - elements:
-        - fetch: fetchNodeTopology
-          label:
-            text: Select NodeTopology
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology/properties/name
-          type: select
-        - if: isNodeTopologySelected|storage
-          label:
-            text: ScaleUp Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology/properties/scaleUpDiffPercentage
-          type: input
-        - if: isNodeTopologySelected|storage
-          label:
-            text: ScaleDown Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology/properties/scaleDownDiffPercentage
-          type: input
-        label:
-          text: NodeTopology
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology
-        show_label: true
-        type: single-step-form
-      type: single-step-form
-    - elements:
-      - label:
-          text: Timeout
-        options:
-        - text: 5 minutes
-          value: 5m0s
-        - text: 10 minutes
-          value: 10m0s
-        - text: 30 minutes
-          value: 30m0s
-        - text: 1 hour
-          value: 1h0m
-        - text: 2 hours
-          value: 2h0m
-        - text: 5 hours
-          value: 5h0m
-        - text: 10 hours
-          value: 10h0m
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-        type: select
-      - computed: setApplyToIfReady
-        label:
-          text: Apply
-        options:
-        - text: IfReady (OpsRequest will be applied if database is ready)
-          value: IfReady
-        - text: Always (OpsRequest will always be applied)
-          value: Always
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-        type: radio
-      if: showOpsRequestOptions
-      label:
-        text: OpsRequest Options
-      schema:
-        $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions
-      show_label: true
-      type: single-step-form
-    type: single-step-form
-  id: storage-autoscaler
-  title: steps.1.label
-- form:
-    discriminator:
-      binding:
-        default: false
-        type: boolean
-    elements:
-    - computed: isBindingAlreadyOn
-      label:
-        text: Expose Database
-      onChange: addOrRemoveBinding
-      schema:
-        $ref: discriminator#/properties/binding
-      type: switch
-    type: single-step-form
-  id: binding
-  title: Gateway Binding
-- form:
-    discriminator:
-      enableMonitoring:
-        default: true
-        type: boolean
-    elements:
-    - label:
-        text: labels.to_update_exporter_resources
-      type: label-element
-    - customClass: mb-20
-      label:
-        text: labels.create_opsrequest
-      type: anchor
-      url:
-        function: getOpsRequestUrl|VerticalScaling
-    - computed: isValueExistInModel|/resources/kubedbComSolr/spec/monitor
-      label:
-        text: labels.enable_monitoring
-      onChange: onEnableMonitoringChange
-      schema:
-        $ref: discriminator#/enableMonitoring
-      type: switch
-    - discriminator:
-        customizeExporter:
-          default: true
-          type: boolean
-      elements:
-      - hasDescription: true
-        label:
-          text: labels.agent
-        onChange: onAgentChange
-        options:
-        - description: options.agent.prometheus_operator.description
-          text: options.agent.prometheus_operator.label
-          value: prometheus.io/operator
-        - description: options.agent.prometheus.description
-          text: options.agent.prometheus.label
-          value: prometheus.io
-        - description: options.agent.prometheus_builtin.description
-          text: options.agent.prometheus_builtin.label
-          value: prometheus.io/builtin
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/agent
-        type: radio
-      - elements:
-        - label:
-            text: labels.scrapping_interval
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-          type: input
-        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComSolr/spec/monitor/agent
-        label:
-          text: labels.service_monitor_configuration
-        show_label: true
-        type: single-step-form
-      - elements:
-        - elements:
-          - addFormLabel: labels.endpoint
-            element:
-              elements:
-              - label:
-                  text: labels.honor_labels
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/honorLabels
-                type: switch
-              - label:
-                  text: labels.interval
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/interval
-                type: input
-              - label:
-                  text: labels.path
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/path
-                type: input
-              - label:
-                  text: labels.port
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/port
-                type: input
-              type: single-step-form
-            label:
-              text: labels.endpoints
-            schema:
-              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: labels.honor_labels
-              path: honorLabels
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.interval
-              path: interval
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.path
-              path: path
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.port
-              path: port
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - elements:
-            - fetch: getResources|core|v1|namespaces
-              label:
-                text: labels.matchNames
-              schema:
-                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
-              type: multiselect
-            if: returnFalse
-            schema:
-              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector
-            type: single-step-form
-          - elements:
-            - isArray: true
-              keys:
-                label:
-                  text: labels.labels.key
-              label:
-                text: labels.labels.label
-              schema:
-                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
-              type: key-value-input-form
-              values:
-                label:
-                  text: labels.labels.value
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels/additionalProperties
-                type: input
-            if: returnFalse
-            schema:
-              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
-            type: single-step-form
-          schema:
-            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
-          type: single-step-form
-        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComSolr/spec/monitor/agent
-        label:
-          text: labels.service_monitor
-        schema:
-          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor
-        show_label: true
-        type: single-step-form
-      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComSolr/spec/monitor/agent
-        individualItemDisabilityCheck: disableLableChecker
-        isArray: true
-        keys:
-          label:
-            text: labels.labels.key
-        label:
-          text: labels.labels.label
-        schema:
-          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.labels.value
-          schema:
-            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
-          type: input
-      - label:
-          text: labels.exporter_configuration
-        type: label-element
-      - label:
-          text: labels.customize_exporter
-        onChange: onCustomizeExporterChange
-        schema:
-          $ref: discriminator#/customizeExporter
-        type: switch
-      - elements:
-        - if: returnFalse
-          label:
-            text: labels.resources
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
-          type: resource-input-form
-        - label:
-            text: labels.security_context
-          type: label-element
-        - label:
-            text: labels.run_as_user
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
-          type: input
-        - customClass: mb-0
-          label:
-            text: labels.run_as_group
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
-          type: input
-        - label:
-            text: labels.port
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
-          type: input
-        - element:
-            label:
-              isSubsection: true
-              text: labels.args
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
-            type: input
-          label:
-            text: labels.args
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-          type: list-input-form
-        - alias: reusable_env
-          chart:
-            name: uibytebuildersdev-component-env
-            version: v0.29.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/release/properties/namespace
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
-          type: reusable-element
-        if: showCustomizeExporterSection
-        type: single-step-form
-      if: showMonitoringSection
-      type: single-step-form
-    type: single-step-form
-  id: monitoring
-  title: steps.5.label
 type: multi-step-form
+step:
+  - type: single-step-form
+    id: storage-autoscaler
+    loader: getDbDetails
+    elements:
+      - type: block-layout
+        if:
+         type: function
+         name: isConsole
+        elements:
+          - type: input
+            label: Name
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/name
+          - type: select
+            label: Select Namespace
+            loader: getNamespaces
+            if:
+              type: function
+              name: isRancherManaged
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
+            watcher:
+              func: onNamespaceChange
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
+          - type: select
+            label: Select Db
+            loader: getDbs
+            validation:
+              type: required
+            refresh: true
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
+            watcher:
+              func: initMetadata
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
+
+      - type: radio
+        if:
+          type: function
+          name: isConsole
+        label: Select Type
+        validation:
+          type: required
+        schema: temp/properties/autoscalingType
+        watcher:
+          func: initMetadata
+          paths:
+            - temp/properties/autoscalingType
+        options:
+          - text: Compute
+            value: compute
+            description: Scale your CPU Memory based on resource usage
+          - text: Storage
+            value: storage
+            description: Expand your database size based on volume usage
+
+      - type: block-layout
+        showLabels: false
+        elements:
+          # Storage sections for different node types
+          - type: block-layout
+            showLabels: false
+            elements:
+              # Coordinator - Topology Mode
+              - type: switch
+                label: Trigger
+                fullwidth: true
+                if:
+                  type: function
+                  name: isTopology
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/storage/coordinator/trigger
+                schema: temp/properties/storage/properties/coordinator/properties/trigger
+                watcher:
+                  func: onTriggerChange|storage/coordinator
+                  paths:
+                    - temp/properties/storage/properties/coordinator/properties/trigger
+              - type: label-element
+                label: Expansion Mode (Online/Offline)
+                subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+                if:
+                  type: function
+                  name: isTopology
+              - type: select
+                label: Mode
+                description: Select how the storage expansion should be handled.
+                if:
+                  type: function
+                  name: isTopology
+                options:
+                  - text: Online
+                    value: Online
+                  - text: Offline
+                    value: Offline
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/expansionMode
+              - type: block-layout
+                label: Coordinator
+                showLabels: true
+                if:
+                  type: function
+                  name: isTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator
+                elements:
+                  - type: threshold-input
+                    label: Usage Threshold (%)
+                    subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                    customClass: width-300
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/usageThreshold
+                  - type: scaling-rules
+                    label: Scaling Rules
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/scalingRules
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/topology/coordinator/storage/resources/requests/storage
+                    watcher:
+                      func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/coordinator/scalingRules|scalingRules
+                      paths:
+                        - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/scalingRules
+                  - type: input
+                    label: Upper Bound
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/upperBound
+                    watcher:
+                      func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/coordinator/upperBound
+                      paths:
+                        - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/coordinator/properties/upperBound
+
+              # Data - Topology Mode
+              - type: switch
+                label: Trigger
+                fullwidth: true
+                if:
+                  type: function
+                  name: isTopology
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/storage/data/trigger
+                schema: temp/properties/storage/properties/data/properties/trigger
+                watcher:
+                  func: onTriggerChange|storage/data
+                  paths:
+                    - temp/properties/storage/properties/data/properties/trigger
+              - type: label-element
+                label: Expansion Mode (Online/Offline)
+                subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+                if:
+                  type: function
+                  name: isTopology
+              - type: select
+                label: Mode
+                description: Select how the storage expansion should be handled.
+                if:
+                  type: function
+                  name: isTopology
+                options:
+                  - text: Online
+                    value: Online
+                  - text: Offline
+                    value: Offline
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/expansionMode
+              - type: block-layout
+                label: Data
+                showLabels: true
+                if:
+                  type: function
+                  name: isTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data
+                elements:
+                  - type: threshold-input
+                    label: Usage Threshold (%)
+                    subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                    customClass: width-300
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/usageThreshold
+                  - type: scaling-rules
+                    label: Scaling Rules
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/topology/data/storage/resources/requests/storage
+                    watcher:
+                      func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/data/scalingRules|scalingRules
+                      paths:
+                        - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
+                  - type: input
+                    label: Upper Bound
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
+                    watcher:
+                      func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/data/upperBound
+                      paths:
+                        - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
+
+              # Overseer - Topology Mode
+              - type: switch
+                label: Trigger
+                fullwidth: true
+                if:
+                  type: function
+                  name: isTopology
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/storage/overseer/trigger
+                schema: temp/properties/storage/properties/overseer/properties/trigger
+                watcher:
+                  func: onTriggerChange|storage/overseer
+                  paths:
+                    - temp/properties/storage/properties/overseer/properties/trigger
+              - type: label-element
+                label: Expansion Mode (Online/Offline)
+                subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+                if:
+                  type: function
+                  name: isTopology
+              - type: select
+                label: Mode
+                description: Select how the storage expansion should be handled.
+                if:
+                  type: function
+                  name: isTopology
+                options:
+                  - text: Online
+                    value: Online
+                  - text: Offline
+                    value: Offline
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/expansionMode
+              - type: block-layout
+                label: Overseer
+                showLabels: true
+                if:
+                  type: function
+                  name: isTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer
+                elements:
+                  - type: threshold-input
+                    label: Usage Threshold (%)
+                    subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                    customClass: width-300
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/usageThreshold
+                  - type: scaling-rules
+                    label: Scaling Rules
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/scalingRules
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/topology/overseer/storage/resources/requests/storage
+                    watcher:
+                      func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/overseer/scalingRules|scalingRules
+                      paths:
+                        - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/scalingRules
+                  - type: input
+                    label: Upper Bound
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/upperBound
+                    watcher:
+                      func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/overseer/upperBound
+                      paths:
+                        - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/overseer/properties/upperBound
+
+              # Node - Combined/Standalone Mode
+              - type: switch
+                label: Trigger
+                fullwidth: true
+                if:
+                  type: function
+                  name: isNotTopology
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/storage/node/trigger
+                schema: temp/properties/storage/properties/node/properties/trigger
+                watcher:
+                  func: onTriggerChange|storage/node
+                  paths:
+                    - temp/properties/storage/properties/node/properties/trigger
+              - type: label-element
+                label: Expansion Mode (Online/Offline)
+                subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+                if:
+                  type: function
+                  name: isNotTopology
+              - type: select
+                label: Mode
+                description: Select how the storage expansion should be handled.
+                if:
+                  type: function
+                  name: isNotTopology
+                options:
+                  - text: Online
+                    value: Online
+                  - text: Offline
+                    value: Offline
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
+              - type: block-layout
+                label: Node
+                showLabels: true
+                if:
+                  type: function
+                  name: isNotTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node
+                elements:
+                  - type: threshold-input
+                    label: Usage Threshold (%)
+                    subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                    customClass: width-300
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
+                  - type: scaling-rules
+                    label: Scaling Rules
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+                    loader: setValueFromDbDetails|resources/kubedbComSolr/spec/storage/resources/requests/storage
+                    watcher:
+                      func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/node/scalingRules|scalingRules
+                      paths:
+                        - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+                  - type: input
+                    label: Upper Bound
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+                    watcher:
+                      func: handleUnit|autoscalingKubedbComSolrAutoscaler/spec/storage/node/upperBound
+                      paths:
+                        - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+
+          # Node Topology
+          - type: block-layout
+            label: Node Topology
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology
+            elements:
+              - type: select
+                label: Select NodeTopology
+                loader: fetchNodeTopology
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology/properties/name
+              - type: threshold-input
+                label: ScaleUp Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected|storage
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology/properties/scaleUpDiffPercentage
+              - type: threshold-input
+                label: ScaleDown Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected|storage
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/nodeTopology/properties/scaleDownDiffPercentage
+
+          # Ops Request Options
+          - type: block-layout
+            label: Ops Request Options
+            showLabels: true
+            if:
+              type: function
+              name: showOpsRequestOptions
+            # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions
+            elements:
+              - type: time-picker
+                label: Timeout
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+              - type: radio
+                label: Apply
+                init:
+                  type: func
+                  value: setApplyToIfReady
+                options:
+                  - text: IfReady (OpsRequest will be applied if database is ready)
+                    value: IfReady
+                  - text: Always (OpsRequest will always be applied)
+                    value: Always
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+
+  - type: single-step-form
+    id: compute-autoscaler
+    loader: getDbDetails
+    elements:
+      - type: block-layout
+        if:
+          type: function
+          name: isConsole
+        elements:
+          - type: input
+            label: Name
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/name
+          - type: select
+            label: Select Namespace
+            loader: getNamespaces
+            if:
+              type: function
+              name: isRancherManaged
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
+            watcher:
+              func: onNamespaceChange
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
+          - type: select
+            label: Select Db
+            loader: getDbs
+            validation:
+              type: required
+            refresh: true
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
+            watcher:
+              func: initMetadata
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
+
+      - type: radio
+        if:
+          type: function
+          name: isConsole
+        label: Select Type
+        validation:
+          type: required
+        schema: temp/properties/autoscalingType
+        watcher:
+          func: initMetadata
+          paths:
+            - temp/properties/autoscalingType
+        options:
+          - text: Compute
+            value: compute
+            description: Scale your CPU Memory based on resource usage
+          - text: Storage
+            value: storage
+            description: Expand your database size based on volume usage
+
+      - type: block-layout
+        showLabels: false
+        elements:
+          - type: block-layout
+            showLabels: false
+            loader: fetchTopologyMachines
+            elements:
+              # Coordinator - Topology Mode
+              - type: switch
+                label: Trigger
+                fullwidth: true
+                if:
+                  type: function
+                  name: isTopology
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/coordinator/trigger
+                schema: temp/properties/compute/properties/coordinator/properties/trigger
+                watcher:
+                  func: onTriggerChange|compute/coordinator
+                  paths:
+                    - temp/properties/compute/properties/coordinator/properties/trigger
+              - type: label-element
+                label: Pod lifetime threshold
+                subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+                if:
+                  type: function
+                  name: isTopology
+              - type: input
+                label: Pod LifeTime Threshold (e.g., 10m 30s)
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/podLifeTimeThreshold
+                customClass: width-300
+                if:
+                  type: function
+                  name: isTopology
+              - type: block-layout
+                label: Coordinator
+                showLabels: true
+                if:
+                  type: function
+                  name: isTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator
+                elements:
+                  - type: threshold-input
+                    label: ResourceDiff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/resourceDiffPercentage
+                    customClass: width-300
+                  - type: label-element
+                    label: Resource Configuration
+                    subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                        - type: machine-compare
+                          label: Min Allowed Profile
+                          header: Minimum Resource Limit
+                          schema: temp/properties/allowedMachine-coordinator-min
+                          if:
+                            type: function
+                            name: hasAnnotations
+                          init:
+                            type: func
+                            value: setAllowedMachine|coordinator|min
+                          loader:
+                            name: getMachines|coordinator|min
+                            watchPaths:
+                              - temp/properties/topologyMachines
+                              - temp/properties/allowedMachine-coordinator-max
+                          watcher:
+                            func: onMachineChange|coordinator
+                            paths:
+                              - temp/properties/allowedMachine-coordinator-min
+                        - type: block-layout
+                          label: Min Allowed
+                          fixedBlock: true
+                          if:
+                            type: function
+                            name: hasNoAnnotations
+                          showLabels: true
+                          elements:
+                            - type: input-compare
+                              label: Cpu
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed/properties/cpu
+                            - type: input-compare
+                              label: Memory
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed/properties/memory
+                        - type: machine-compare
+                          label: Max Allowed Profile
+                          header: Maximum Resource Limit
+                          schema: temp/properties/allowedMachine-coordinator-max
+                          if:
+                            type: function
+                            name: hasAnnotations
+                          init:
+                            type: func
+                            value: setAllowedMachine|coordinator|max
+                          loader:
+                            name: getMachines|coordinator|max
+                            watchPaths:
+                              - temp/properties/topologyMachines
+                              - temp/properties/allowedMachine-coordinator-min
+                          watcher:
+                            func: onMachineChange|coordinator
+                            paths:
+                              - temp/properties/allowedMachine-coordinator-max
+                        - type: block-layout
+                          label: Max Allowed
+                          fixedBlock: true
+                          if:
+                            type: function
+                            name: hasNoAnnotations
+                          showLabels: true
+                          elements:
+                            - type: input-compare
+                              label: Cpu
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed/properties/cpu
+                            - type: input-compare
+                              label: Memory
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|coordinator
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/controlledResources
+                  - type: select
+                    label: Container Controlled Values
+                    options:
+                      - text: Requests And Limits
+                        value: RequestsAndLimits
+                      - text: Requests Only
+                        value: RequestsOnly
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/containerControlledValues
+
+              # Data - Topology Mode
+              - type: switch
+                label: Trigger
+                fullwidth: true
+                if:
+                  type: function
+                  name: isTopology
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/data/trigger
+                schema: temp/properties/compute/properties/data/properties/trigger
+                watcher:
+                  func: onTriggerChange|compute/data
+                  paths:
+                    - temp/properties/compute/properties/data/properties/trigger
+              - type: label-element
+                label: Pod lifetime threshold
+                subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+                if:
+                  type: function
+                  name: isTopology
+              - type: input
+                label: Pod LifeTime Threshold (e.g., 10m 30s)
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/podLifeTimeThreshold
+                customClass: width-300
+                if:
+                  type: function
+                  name: isTopology
+              - type: block-layout
+                label: Data
+                showLabels: true
+                if:
+                  type: function
+                  name: isTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data
+                elements:
+                  - type: threshold-input
+                    label: ResourceDiff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/resourceDiffPercentage
+                    customClass: width-300
+                  - type: label-element
+                    label: Resource Configuration
+                    subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                        - type: machine-compare
+                          label: Min Allowed Profile
+                          header: Minimum Resource Limit
+                          schema: temp/properties/allowedMachine-data-min
+                          if:
+                            type: function
+                            name: hasAnnotations
+                          init:
+                            type: func
+                            value: setAllowedMachine|data|min
+                          loader:
+                            name: getMachines|data|min
+                            watchPaths:
+                              - temp/properties/topologyMachines
+                              - temp/properties/allowedMachine-data-max
+                          watcher:
+                            func: onMachineChange|data
+                            paths:
+                              - temp/properties/allowedMachine-data-min
+                        - type: block-layout
+                          label: Min Allowed
+                          fixedBlock: true
+                          if:
+                            type: function
+                            name: hasNoAnnotations
+                          showLabels: true
+                          elements:
+                            - type: input-compare
+                              label: Cpu
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
+                            - type: input-compare
+                              label: Memory
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
+                        - type: machine-compare
+                          label: Max Allowed Profile
+                          header: Maximum Resource Limit
+                          schema: temp/properties/allowedMachine-data-max
+                          if:
+                            type: function
+                            name: hasAnnotations
+                          init:
+                            type: func
+                            value: setAllowedMachine|data|max
+                          loader:
+                            name: getMachines|data|max
+                            watchPaths:
+                              - temp/properties/topologyMachines
+                              - temp/properties/allowedMachine-data-min
+                          watcher:
+                            func: onMachineChange|data
+                            paths:
+                              - temp/properties/allowedMachine-data-max
+                        - type: block-layout
+                          label: Max Allowed
+                          fixedBlock: true
+                          if:
+                            type: function
+                            name: hasNoAnnotations
+                          showLabels: true
+                          elements:
+                            - type: input-compare
+                              label: Cpu
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
+                            - type: input-compare
+                              label: Memory
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|data
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
+                  - type: select
+                    label: Container Controlled Values
+                    options:
+                      - text: Requests And Limits
+                        value: RequestsAndLimits
+                      - text: Requests Only
+                        value: RequestsOnly
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/containerControlledValues
+
+              # Overseer - Topology Mode
+              - type: switch
+                label: Trigger
+                fullwidth: true
+                if:
+                  type: function
+                  name: isTopology
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/overseer/trigger
+                schema: temp/properties/compute/properties/overseer/properties/trigger
+                watcher:
+                  func: onTriggerChange|compute/overseer
+                  paths:
+                    - temp/properties/compute/properties/overseer/properties/trigger
+              - type: label-element
+                label: Pod lifetime threshold
+                subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+                if:
+                  type: function
+                  name: isTopology
+              - type: input
+                label: Pod LifeTime Threshold (e.g., 10m 30s)
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/podLifeTimeThreshold
+                customClass: width-300
+                if:
+                  type: function
+                  name: isTopology
+              - type: block-layout
+                label: Overseer
+                showLabels: true
+                if:
+                  type: function
+                  name: isTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer
+                elements:
+                  - type: threshold-input
+                    label: ResourceDiff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/resourceDiffPercentage
+                    customClass: width-300
+                  - type: label-element
+                    label: Resource Configuration
+                    subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                        - type: machine-compare
+                          label: Min Allowed Profile
+                          header: Minimum Resource Limit
+                          schema: temp/properties/allowedMachine-overseer-min
+                          if:
+                            type: function
+                            name: hasAnnotations
+                          init:
+                            type: func
+                            value: setAllowedMachine|overseer|min
+                          loader:
+                            name: getMachines|overseer|min
+                            watchPaths:
+                              - temp/properties/topologyMachines
+                              - temp/properties/allowedMachine-overseer-max
+                          watcher:
+                            func: onMachineChange|overseer
+                            paths:
+                              - temp/properties/allowedMachine-overseer-min
+                        - type: block-layout
+                          label: Min Allowed
+                          fixedBlock: true
+                          if:
+                            type: function
+                            name: hasNoAnnotations
+                          showLabels: true
+                          elements:
+                            - type: input-compare
+                              label: Cpu
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed/properties/cpu
+                            - type: input-compare
+                              label: Memory
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed/properties/memory
+                        - type: machine-compare
+                          label: Max Allowed Profile
+                          header: Maximum Resource Limit
+                          schema: temp/properties/allowedMachine-overseer-max
+                          if:
+                            type: function
+                            name: hasAnnotations
+                          init:
+                            type: func
+                            value: setAllowedMachine|overseer|max
+                          loader:
+                            name: getMachines|overseer|max
+                            watchPaths:
+                              - temp/properties/topologyMachines
+                              - temp/properties/allowedMachine-overseer-min
+                          watcher:
+                            func: onMachineChange|overseer
+                            paths:
+                              - temp/properties/allowedMachine-overseer-max
+                        - type: block-layout
+                          label: Max Allowed
+                          fixedBlock: true
+                          if:
+                            type: function
+                            name: hasNoAnnotations
+                          showLabels: true
+                          elements:
+                            - type: input-compare
+                              label: Cpu
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed/properties/cpu
+                            - type: input-compare
+                              label: Memory
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|overseer
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/controlledResources
+                  - type: select
+                    label: Container Controlled Values
+                    options:
+                      - text: Requests And Limits
+                        value: RequestsAndLimits
+                      - text: Requests Only
+                        value: RequestsOnly
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/containerControlledValues
+
+              # Node - Combined/Standalone Mode
+              - type: switch
+                label: Trigger
+                fullwidth: true
+                if:
+                  type: function
+                  name: isNotTopology
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComSolrAutoscaler/spec/compute/node/trigger
+                schema: temp/properties/compute/properties/node/properties/trigger
+                watcher:
+                  func: onTriggerChange|compute/node
+                  paths:
+                    - temp/properties/compute/properties/node/properties/trigger
+              - type: label-element
+                label: Pod lifetime threshold
+                subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+                if:
+                  type: function
+                  name: isNotTopology
+              - type: input
+                label: Pod LifeTime Threshold (e.g., 10m 30s)
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+                customClass: width-300
+                if:
+                  type: function
+                  name: isNotTopology
+              - type: block-layout
+                label: Node
+                showLabels: true
+                if:
+                  type: function
+                  name: isNotTopology
+                # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node
+                elements:
+                  - type: threshold-input
+                    label: ResourceDiff Percentage
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+                    customClass: width-300
+                  - type: label-element
+                    label: Resource Configuration
+                    subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                  - type: block-layout
+                    showLabels: false
+                    elements:
+                        - type: machine-compare
+                          label: Min Allowed Profile
+                          header: Minimum Resource Limit
+                          schema: temp/properties/allowedMachine-node-min
+                          if:
+                            type: function
+                            name: hasAnnotations
+                          init:
+                            type: func
+                            value: setAllowedMachine|node|min
+                          loader:
+                            name: getMachines|node|min
+                            watchPaths:
+                              - temp/properties/topologyMachines
+                              - temp/properties/allowedMachine-node-max
+                          watcher:
+                            func: onMachineChange|node
+                            paths:
+                              - temp/properties/allowedMachine-node-min
+                        - type: block-layout
+                          label: Min Allowed
+                          fixedBlock: true
+                          if:
+                            type: function
+                            name: hasNoAnnotations
+                          showLabels: true
+                          elements:
+                            - type: input-compare
+                              label: Cpu
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+                            - type: input-compare
+                              label: Memory
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+                        - type: machine-compare
+                          label: Max Allowed Profile
+                          header: Maximum Resource Limit
+                          schema: temp/properties/allowedMachine-node-max
+                          if:
+                            type: function
+                            name: hasAnnotations
+                          init:
+                            type: func
+                            value: setAllowedMachine|node|max
+                          loader:
+                            name: getMachines|node|max
+                            watchPaths:
+                              - temp/properties/topologyMachines
+                              - temp/properties/allowedMachine-node-min
+                          watcher:
+                            func: onMachineChange|node
+                            paths:
+                              - temp/properties/allowedMachine-node-max
+                        - type: block-layout
+                          label: Max Allowed
+                          fixedBlock: true
+                          if:
+                            type: function
+                            name: hasNoAnnotations
+                          showLabels: true
+                          elements:
+                            - type: input-compare
+                              label: Cpu
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+                            - type: input-compare
+                              label: Memory
+                              schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+                  - type: select
+                    label: Controlled Resources
+                    loader: setControlledResources|node
+                    multiple: true
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+                  - type: select
+                    label: Container Controlled Values
+                    options:
+                      - text: Requests And Limits
+                        value: RequestsAndLimits
+                      - text: Requests Only
+                        value: RequestsOnly
+                    schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/containerControlledValues
+
+          # Node Topology
+          - type: block-layout
+            label: NodeTopology
+            if:
+              type: function
+              name: hasNoAnnotations
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+            elements:
+              - type: select
+                label: Select NodeTopology
+                loader: fetchNodeTopology
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+              - type: threshold-input
+                label: Scale Up DiffPercentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected|compute
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+              - type: threshold-input
+                label: Scale Down DiffPercentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected|compute
+                schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+
+      # Ops Request Options
+      - type: block-layout
+        label: Ops Request Options
+        showLabels: true
+        if:
+          type: function
+          name: showOpsRequestOptions
+        # schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions
+        elements:
+          - type: time-picker
+            label: Timeout
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+          - type: radio
+            label: Apply
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always
+            schema: schema/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply

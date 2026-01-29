@@ -1,125 +1,137 @@
-steps:
-- form:
-    elements:
-    - discriminator:
-        database:
-          default: {}
-          type: object
-        nameSpaceApi:
-          default: false
-          type: boolean
-      elements:
-      - fetch: fetchNamespaces
-        hasGroup: isRancherManaged
-        if: isConsole
-        label:
-          text: Select Namespace
-        schema:
-          $ref: schema#/properties/metadata/properties/release/properties/namespace
-        type: select
-      - computed: init
-        if: returnFalse
-        type: input
-      - if: isConsole
-        label:
-          text: labels.name
-        schema:
-          $ref: schema#/properties/metadata/properties/release/properties/name
-        type: input
-      - elements:
-        - computed: initMetadata
-          if: returnFalse
-          type: input
-        - discriminator:
-            repository:
-              type: object
-          elements:
-          - disableUnselect: true
-            fetch: getRepositories
-            label:
-              text: Repository
-            onChange: onRepoChange
-            refresh: true
-            required: true
-            schema:
-              $ref: discriminator#/properties/repository
-            type: select
-          - disableUnselect: true
-            fetch: getSnapshots
-            label:
-              text: labels.dataSource.snapshot
-            refresh: true
-            schema:
-              $ref: schema#/properties/spec/properties/dataSource/properties/snapshot
-            type: select
-          schema:
-            $ref: schema#/properties/spec/properties/dataSource
-          type: single-step-form
-        - discriminator:
-            params:
-              default: ""
-              type: string
-          elements:
-          - fetch: getAddons
-            if: isConsole
-            label:
-              text: labels.name
-            refresh: true
-            schema:
-              $ref: schema#/properties/spec/properties/addon/properties/name
-            type: select
-          - label:
-              text: Additional Parameters
-            onChange: onParameterChange
-            schema:
-              $ref: discriminator#/properties/params
-            type: textarea
-          - computed: setSecurityContext
-            if: returnFalse
-            type: input
-          schema:
-            $ref: schema#/properties/spec/properties/addon
-          type: single-step-form
-        - elements:
-          - fetch: getApiGroup
-            label:
-              text: Api Group
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/apiGroup
-            type: select
-          - fetch: getKinds
-            label:
-              text: Kind
-            onChange: setVersion
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/kind
-            type: select
-          - fetch: fetchNamespaces
-            hasGroup: isRancherManaged
-            label:
-              text: Namespace
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/namespace
-            type: select
-          - fetch: getTargetName
-            label:
-              text: Name
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/name
-            type: select
-          hideForm: true
-          if: isConsole
-          label:
-            text: Target
-          schema:
-            $ref: schema#/properties/spec/properties/target
-          show_label: true
-          type: single-step-form
-        schema:
-          $ref: schema#/properties/spec
-        type: single-step-form
-      type: single-step-form
-    type: single-step-form
-  id: options
-  title: steps.0.label
 type: multi-step-form
+step:
+- type: single-step-form
+  id: options
+  loader: init
+  elements:
+    - type: select
+      label: Select Namespace
+      schema: schema/properties/metadata/properties/release/properties/namespace
+      hasGroup: isRancherManaged
+      if:
+        type: function
+        name: isConsole
+      loader:
+        name: fetchNamespaces
+        watchPaths:
+          - temp/properties/nameSpaceApi
+    - type: input
+      label: Name
+      schema: schema/properties/metadata/properties/release/properties/name
+      if:
+        type: function
+        name: isConsole
+    - type: block-layout
+      showLabels: true
+      fixedBlock: true
+      label: Restore Configuration
+      loader: initMetadata
+      elements:
+        - type: label-element
+          label: ''
+          subtitle: Configure the backup repository and snapshot to restore your data from
+        - type: select
+          label: Repository
+          subtitle: Select the repository where your backup snapshots are stored
+          disableUnselect: true
+          schema: temp/properties/repository
+          refresh: true
+          validation:
+            type: required
+          loader: getRepositories
+          watcher:
+            func: onRepoChange
+            paths:
+              - temp/properties/repository
+        - type: select
+          disableUnselect: true
+          label: Snapshot
+          subtitle: Choose a point-in-time backup snapshot to restore from
+          refresh: true
+          schema: schema/properties/spec/properties/dataSource/properties/snapshot
+          loader:
+            name: getSnapshots
+            watchPaths:
+              - temp/properties/repository
+          watcher:
+            func: onSnapChange
+            paths:
+              - schema/properties/spec/properties/dataSource/properties/snapshot
+        - type: select
+          label: Addon Name
+          subtitle: Select the restore addon to use
+          refresh: true
+          schema: schema/properties/spec/properties/addon/properties/name
+          if:
+            type: function
+            name: isConsole
+          loader: 
+            name: getAddons
+            watchPaths:
+              - schema/properties/spec/properties/dataSource/properties/snapshot
+          watcher:
+            func: clearAddon
+            paths:
+              - schema/properties/spec/properties/dataSource/properties/snapshot
+        - type: textarea
+          label: Additional Parameters
+          schema: temp/properties/params
+          watcher:
+            func: onParameterChange
+            paths:
+              - temp/properties/params
+    - type: block-layout
+      showLabels: true
+      label: Restore Target
+      if:
+        type: function
+        name: isConsole
+      elements:
+      - type: label-element
+        label: Target Resource Configuration
+        subtitle: Specify the Kubernetes resource where you want to restore the data
+      - type: select
+        label: Api Group
+        subtitle: Select the API group of the target resource (e.g., apps, kubedb.com)
+        schema: schema/properties/spec/properties/target/properties/apiGroup
+        loader: getApiGroup
+        if:
+          name: showGroupKind
+          type: function
+      - type: select
+        label: Kind
+        subtitle: Select the resource type (e.g., Deployment, StatefulSet, MongoDB, PostgreSQL)
+        schema: schema/properties/spec/properties/target/properties/kind
+        loader:
+          name: getKinds
+          watchPaths:
+            - schema/properties/spec/properties/target/properties/apiGroup
+            - schema/properties/spec/properties/dataSource/properties/snapshot
+        watcher:
+          func: setVersion
+          paths:
+            - schema/properties/spec/properties/target/properties/kind
+            - schema/properties/spec/properties/target/properties/apiGroup
+        if:
+          name: showGroupKind
+          type: function
+      - type: select
+        label: Namespace
+        subtitle: Select the namespace where the target resource exists
+        schema: schema/properties/spec/properties/target/properties/namespace
+        loader: fetchNamespaces
+        hasGroup: isRancherManaged
+        watcher:
+          func: fetchNamespaces
+          paths:
+            - temp/properties/nameSpaceApi
+      - type: select
+        label: Resource Name
+        subtitle: Select the specific resource to restore to
+        schema: schema/properties/spec/properties/target/properties/name
+        loader:
+          name: getTargetName
+          watchPaths:
+            - schema/properties/spec/properties/target/properties/apiGroup
+            - schema/properties/spec/properties/target/properties/namespace
+            - schema/properties/spec/properties/target/properties/kind

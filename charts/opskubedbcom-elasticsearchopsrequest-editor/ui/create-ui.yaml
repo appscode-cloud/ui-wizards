@@ -1,1203 +1,1496 @@
-steps:
-- form:
-    discriminator:
-      dbDetails:
-        type: object
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      schema:
-        $ref: discriminator#/properties/dbDetails
-      type: input
-    - if: showAndInitName
-      label:
-        text: labels.op_req_name
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/name
-      type: input
-    - computed: initNamespace
-      disabled: isNamespaceDisabled
-      fetch: getNamespaces
-      hasGroup: isRancherManaged
-      if: showAndInitNamespace
-      label:
-        text: labels.namespace
-      onChange: onNamespaceChange
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/namespace
-      type: select
-    - computed: initDatabaseRef
-      disabled: isDatabaseRefDisabled
-      fetch: getDbs
-      if: showAndInitDatabaseRef
-      label:
-        text: labels.databaseRef
-      onChange: onDbChange
-      refresh: true
-      required: true
-      schema:
-        $ref: schema#/properties/spec/properties/databaseRef/properties/name
-      type: select
-    - if: showConfigureOpsrequestLabel
-      label:
-        text: labels.config_ops_request
-      type: label-element
-    - disabled: isDbDetailsLoading
-      hasDescription: true
-      if: showAndInitOpsRequestType
-      individualItemDisabilityCheck: disableOpsRequest
-      label:
-        text: labels.ops_request_type
-      onChange: onRequestTypeChange
-      options:
-      - description: options.UpdateVersion.description
-        text: options.UpdateVersion.text
-        value: UpdateVersion
-      - description: options.HorizontalScaling.description
-        text: options.HorizontalScaling.text
-        value: HorizontalScaling
-      - description: options.VerticalScaling.description
-        text: options.VerticalScaling.text
-        value: VerticalScaling
-      - description: options.VolumeExpansion.description
-        text: options.VolumeExpansion.text
-        value: VolumeExpansion
-      - description: options.Restart.description
-        text: options.Restart.text
-        value: Restart
-      - description: options.ReconfigureTLS.description
-        text: options.ReconfigureTLS.text
-        value: ReconfigureTLS
-      schema:
-        $ref: schema#/properties/spec/properties/type
-      type: radio
-    - elements:
-      - computed: setValueFromDbDetails|/spec/version
-        fetch: getDbVersions
-        label:
-          text: labels.targetVersion
-        schema:
-          $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
-        type: select
-      if: ifRequestTypeEqualsTo|UpdateVersion
-      type: single-step-form
-    - elements:
-      - computed: setValueFromDbDetails|/spec/replicas
-        if: ifDbTypeEqualsTo|combined|horizontalScaling
-        label:
-          text: labels.replicas
-        schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/node
-        type: input
-      - elements:
-        - computed: setValueFromDbDetails|/spec/topology/master/replicas
-          label:
-            text: labels.master_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/master
-          type: input
-        - computed: setValueFromDbDetails|/spec/topology/data/replicas
-          label:
-            text: labels.data_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/data
-          type: input
-        - computed: setValueFromDbDetails|/spec/topology/ingest/replicas
-          label:
-            text: labels.ingest_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/ingest
-          type: input
-        - computed: setValueFromDbDetails|/spec/topology/ml/replicas
-          if: isAuthPluginEqualTo|X-Pack
-          label:
-            text: labels.ml_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/ml
-          type: input
-        - computed: setValueFromDbDetails|/spec/topology/transform/replicas
-          if: isAuthPluginEqualTo|X-Pack
-          label:
-            text: labels.transform_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/transform
-          type: input
-        - computed: setValueFromDbDetails|/spec/topology/dataCold/replicas
-          if: isAuthPluginEqualTo|X-Pack
-          label:
-            text: labels.data_cold_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataCold
-          type: input
-        - computed: setValueFromDbDetails|/spec/topology/dataContent/replicas
-          if: isAuthPluginEqualTo|X-Pack
-          label:
-            text: labels.data_content_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataContent
-          type: input
-        - computed: setValueFromDbDetails|/spec/topology/dataFrozen/replicas
-          if: isAuthPluginEqualTo|X-Pack
-          label:
-            text: labels.data_frozen_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataFrozen
-          type: input
-        - computed: setValueFromDbDetails|/spec/topology/dataHot/replicas
-          if: isAuthPluginNotEqualTo|SearchGuard
-          label:
-            text: labels.data_hot_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataHot
-          type: input
-        - computed: setValueFromDbDetails|/spec/topology/dataWarm/replicas
-          if: isAuthPluginNotEqualTo|SearchGuard
-          label:
-            text: labels.data_warm_node
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataWarm
-          type: input
-        if: ifDbTypeEqualsTo|topology|horizontalScaling
-        label:
-          text: labels.replicas
-        schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology
-        show_label: true
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|HorizontalScaling
-      label:
-        text: Horizontal Scaling Form
-      type: single-step-form
-    - elements:
-      - elements:
-        - discriminator:
-            machine-master:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|master
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|master|/spec/topology/master/resources
-            schema:
-              $ref: discriminator#/machine-master
-            type: select
-          - if: isMachineCustom|/machine-master
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/master/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/master/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-master:
-                default: ""
-                type: string
-              topologyValue-master:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|master
-              schema:
-                $ref: discriminator#/topologyKey-master
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|master
-              schema:
-                $ref: discriminator#/topologyValue-master
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|master
-          label:
-            text: labels.master_node
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/master
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            machine-data:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|data
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|data|/spec/topology/data/resources
-            schema:
-              $ref: discriminator#/machine-data
-            type: select
-          - if: isMachineCustom|/machine-data
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/data/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/data/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-data:
-                default: ""
-                type: string
-              topologyValue-data:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|data
-              schema:
-                $ref: discriminator#/topologyKey-data
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|data
-              schema:
-                $ref: discriminator#/topologyValue-data
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|data
-          label:
-            text: labels.data_node
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/data
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            machine-ingest:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|ingest
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|ingest|/spec/topology/ingest/resources
-            schema:
-              $ref: discriminator#/machine-ingest
-            type: select
-          - if: isMachineCustom|/machine-ingest
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-ingest:
-                default: ""
-                type: string
-              topologyValue-ingest:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|ingest
-              schema:
-                $ref: discriminator#/topologyKey-ingest
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|ingest
-              schema:
-                $ref: discriminator#/topologyValue-ingest
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|ingest
-          label:
-            text: labels.ingest_node
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            machine-ml:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|ml
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|ml|/spec/topology/ml/resources
-            schema:
-              $ref: discriminator#/machine-ml
-            type: select
-          - if: isMachineCustom|/machine-ml
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/ml/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/ml/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-ml:
-                default: ""
-                type: string
-              topologyValue-ml:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|ml
-              schema:
-                $ref: discriminator#/topologyKey-ml
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|ml
-              schema:
-                $ref: discriminator#/topologyValue-ml
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|ml
-          label:
-            text: labels.ml_mode
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/ml
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            machine-transform:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|transform
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|transform|/spec/topology/transform/resources
-            schema:
-              $ref: discriminator#/machine-transform
-            type: select
-          - if: isMachineCustom|/machine-transform
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/transform/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/transform/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-transform:
-                default: ""
-                type: string
-              topologyValue-transform:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|transform
-              schema:
-                $ref: discriminator#/topologyKey-transform
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|transform
-              schema:
-                $ref: discriminator#/topologyValue-transform
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|transform
-          label:
-            text: labels.transform_node
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/transform
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            machine-dataCold:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|dataCold
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|dataCold|/spec/topology/dataCold/resources
-            schema:
-              $ref: discriminator#/machine-dataCold
-            type: select
-          - if: isMachineCustom|/machine-dataCold
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-dataCold:
-                default: ""
-                type: string
-              topologyValue-dataCold:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|dataCold
-              schema:
-                $ref: discriminator#/topologyKey-dataCold
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|dataCold
-              schema:
-                $ref: discriminator#/topologyValue-dataCold
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|dataCold
-          label:
-            text: labels.data_cold_node
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            machine-dataContent:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|dataContent
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|dataContent|/spec/topology/dataContent/resources
-            schema:
-              $ref: discriminator#/machine-dataContent
-            type: select
-          - if: isMachineCustom|/machine-dataContent
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataContent/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataContent/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-dataContent:
-                default: ""
-                type: string
-              topologyValue-dataContent:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|dataContent
-              schema:
-                $ref: discriminator#/topologyKey-dataContent
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|dataContent
-              schema:
-                $ref: discriminator#/topologyValue-dataContent
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|dataContent
-          label:
-            text: labels.data_content_node
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            machine-dataFrozen:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|dataFrozen
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|dataFrozen|/spec/topology/dataFrozen/resources
-            schema:
-              $ref: discriminator#/machine-dataFrozen
-            type: select
-          - if: isMachineCustom|/machine-dataFrozen
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-dataFrozen:
-                default: ""
-                type: string
-              topologyValue-dataFrozen:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|dataFrozen
-              schema:
-                $ref: discriminator#/topologyKey-dataFrozen
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|dataFrozen
-              schema:
-                $ref: discriminator#/topologyValue-dataFrozen
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|dataFrozen
-          label:
-            text: labels.data_frozen_node
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            machine-dataHot:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|dataHot
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|dataHot|/spec/topology/dataHot/resources
-            schema:
-              $ref: discriminator#/machine-dataHot
-            type: select
-          - if: isMachineCustom|/machine-dataHot
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-dataHot:
-                default: ""
-                type: string
-              topologyValue-dataHot:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|dataHot
-              schema:
-                $ref: discriminator#/topologyKey-dataHot
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|dataHot
-              schema:
-                $ref: discriminator#/topologyValue-dataHot
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|dataHot
-          label:
-            text: labels.dataHot_node
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            machine-dataWarm:
-              default: ""
-              type: string
-          elements:
-          - computed: setMachine|dataWarm
-            customClass: mt-20
-            disableUnselect: true
-            fetch: getMachines
-            label:
-              text: Machine Profile
-            onChange: onMachineChange|dataWarm|/spec/topology/dataWarm/resources
-            schema:
-              $ref: discriminator#/machine-dataWarm
-            type: select
-          - if: isMachineCustom|/machine-dataWarm
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataWarm/properties/resources
-            type: resource-input-form
-          - label:
-              text: labels.node_selection_policy
-            options:
-            - text: LabelSelector
-              value: LabelSelector
-            - text: Taint
-              value: Taint
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataWarm/properties/nodeSelectionPolicy
-            type: select
-          - discriminator:
-              topologyKey-dataWarm:
-                default: ""
-                type: string
-              topologyValue-dataWarm:
-                default: ""
-                type: string
-            elements:
-            - label:
-                text: labels.key
-              required: isVerticalScaleTopologyRequired|dataWarm
-              schema:
-                $ref: discriminator#/topologyKey-dataWarm
-              type: input
-            - label:
-                text: labels.value
-              required: isVerticalScaleTopologyRequired|dataWarm
-              schema:
-                $ref: discriminator#/topologyValue-dataWarm
-              type: input
-            label:
-              text: labels.topology
-            show_label: true
-            type: single-step-form
-          if: hasResourceValue|dataWarm
-          label:
-            text: labels.data_warm_node
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataWarm
-          show_label: true
-          type: single-step-form
-        if: ifDbTypeEqualsTo|topology|verticalScaling
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling
-        type: single-step-form
-      - discriminator:
-          machine-node:
-            default: ""
-            type: string
-        elements:
-        - computed: setMachine|node
-          customClass: mt-20
-          disableUnselect: true
-          fetch: getMachines
-          label:
-            text: Machine Profile
-          onChange: onMachineChange|node|/spec/podTemplate/spec/resources
-          schema:
-            $ref: discriminator#/machine-node
-          type: select
-        - if: isMachineCustom|/machine-node
-          label:
-            text: labels.resources
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/resources
-          type: resource-input-form
-        - label:
-            text: labels.node_selection_policy
-          options:
-          - text: LabelSelector
-            value: LabelSelector
-          - text: Taint
-            value: Taint
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
-          type: select
-        - discriminator:
-            topologyKey-node:
-              default: ""
-              type: string
-            topologyValue-node:
-              default: ""
-              type: string
-          elements:
-          - label:
-              text: labels.key
-            required: isVerticalScaleTopologyRequired|node
-            schema:
-              $ref: discriminator#/topologyKey-node
-            type: input
-          - label:
-              text: labels.value
-            required: isVerticalScaleTopologyRequired|node
-            schema:
-              $ref: discriminator#/topologyValue-node
-            type: input
-          label:
-            text: labels.topology
-          show_label: true
-          type: single-step-form
-        if: ifDbTypeEqualsTo|combined|verticalScaling
-        label:
-          text: labels.node
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/node
-        show_label: true
-        type: single-step-form
-      - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter/resources
-        label:
-          text: labels.exporter
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
-        type: resource-input-form
-      if: ifRequestTypeEqualsTo|VerticalScaling
-      type: single-step-form
-    - elements:
-      - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
-        if: ifDbTypeEqualsTo|combined|VolumeExpansion
-        label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion/properties/node
-        type: input
-        validationRuleObject:
-          func: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
-      - label:
-          text: Mode
-        options:
-        - text: Offline
-          value: Offline
-        - text: Online
-          value: Online
-        required: true
-        schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion/properties/mode
-        type: select
-      - elements:
-        - computed: setValueFromDbDetails|/spec/topology/master/storage/resources/requests/storage
-          if: hasVolumeExpansion|master
-          label:
-            text: labels.storage.master_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/master
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/master/storage/resources/requests/storage|/spec/volumeExpansion/master
-        - computed: setValueFromDbDetails|/spec/topology/data/storage/resources/requests/storage
-          if: hasVolumeExpansion|data
-          label:
-            text: labels.storage.data_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/data
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/data/storage/resources/requests/storage|/spec/volumeExpansion/data
-        - computed: setValueFromDbDetails|/spec/topology/ingest/storage/resources/requests/storage
-          if: hasVolumeExpansion|ingest
-          label:
-            text: labels.storage.ingest_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/ingest
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/ingest/storage/resources/requests/storage|/spec/volumeExpansion/ingest
-        - computed: setValueFromDbDetails|/spec/topology/ml/storage/resources/requests/storage
-          if: hasVolumeExpansion|ml
-          label:
-            text: labels.storage.ml_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/ml
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/ml/storage/resources/requests/storage|/spec/volumeExpansion/ml
-        - computed: setValueFromDbDetails|/spec/topology/transform/storage/resources/requests/storage
-          if: hasVolumeExpansion|transform
-          label:
-            text: labels.storage.transform_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/transform
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/transform/storage/resources/requests/storage|/spec/volumeExpansion/transform
-        - computed: setValueFromDbDetails|/spec/topology/dataCold/storage/resources/requests/storage
-          if: hasVolumeExpansion|dataCold
-          label:
-            text: labels.storage.data_cold_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataCold
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/dataCold/storage/resources/requests/storage|/spec/volumeExpansion/dataCold
-        - computed: setValueFromDbDetails|/spec/topology/dataContent/storage/resources/requests/storage
-          if: hasVolumeExpansion|dataContent
-          label:
-            text: labels.storage.data_content_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataContent
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/dataContent/storage/resources/requests/storage|/spec/volumeExpansion/dataContent
-        - computed: setValueFromDbDetails|/spec/topology/dataFrozen/storage/resources/requests/storage
-          if: hasVolumeExpansion|dataFrozen
-          label:
-            text: labels.storage.data_frozen_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataFrozen
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/dataFrozen/storage/resources/requests/storage|/spec/volumeExpansion/dataFrozen
-        - computed: setValueFromDbDetails|/spec/topology/dataHot/storage/resources/requests/storage
-          if: hasVolumeExpansion|dataHot
-          label:
-            text: labels.storage.data_hot_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataHot
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/dataHot/storage/resources/requests/storage|/spec/volumeExpansion/dataHot
-        - computed: setValueFromDbDetails|/spec/topology/dataWarm/storage/resources/requests/storage
-          if: hasVolumeExpansion|dataWarm
-          label:
-            text: labels.storage.data_warm_size
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataWarm
-          type: input
-          validationRuleObject:
-            func: checkVolume|/spec/topology/dataWarm/storage/resources/requests/storage|/spec/volumeExpansion/dataWarm
-        if: ifDbTypeEqualsTo|topology|VolumeExpansion
-        label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion
-        show_label: true
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|VolumeExpansion
-      label:
-        text: Volume Expansion Form
-      type: single-step-form
-    - elements:
-      - discriminator:
-          reconfigurationType:
-            type: string
-        elements:
-        - label:
-            text: labels.reconfigurationType
-          onChange: onReconfigurationTypeChange
-          options:
-          - text: Select New Config Secret
-            value: selectNewConfigSecret
-          - text: Apply Config
-            value: applyConfig
-          - text: Remove
-            value: remove
-          required: true
-          schema:
-            $ref: discriminator#/properties/reconfigurationType
-          type: radio
-        - elements:
-          - add_new_button:
-              label: labels.createConfig
-              target: _blank
-              url:
-                function: createSecretUrl
-            computed: setValueFromDbDetails|/spec/configSecret/name
-            fetch: getConfigSecrets
-            label:
-              text: labels.configSecret
-            refresh: true
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/configSecret/properties/name
-            type: select
-          if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-          label:
-            text: Configuration config secret
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/configSecret
-          type: single-step-form
-        - addFormLabel: labels.applyConfig.label
-          element:
-            discriminator:
-              configArray:
-                emitAs: applyConfig
-                type: array
-            elements:
-            - label:
-                text: labels.applyConfig.key
-              required: true
-              schema:
-                $ref: discriminator#/properties/configArray/items/properties/key
-              type: input
-            - label:
-                text: labels.applyConfig.value
-              required: true
-              schema:
-                $ref: discriminator#/properties/configArray/items/properties/value
-              type: editor
-            type: single-step-form
-          if: ifReconfigurationTypeEqualsTo|applyConfig
-          label:
-            text: labels.applyConfig.label
-          onChange: onApplyconfigChange
-          required: true
-          schema:
-            $ref: discriminator#/properties/applyConfig
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.applyConfig.key
-            path: key
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: labels.applyConfig.value
-            path: value
-            type: value
-            typeOfValue: code
-          type: single-step-form-array
-        - if: returnFalse
-          label:
-            text: labels.removeCustomConfig
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/removeCustomConfig
-          type: switch
-        label:
-          text: labels.configuration
-        schema:
-          $ref: schema#/properties/spec/properties/configuration
-        show_label: true
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|Reconfigure
-      label:
-        text: Reconfigure Form
-      type: single-step-form
-    - discriminator:
-        tlsOperation:
-          default: update
-          type: string
-      elements:
-      - computed: initTlsOperation
-        if: hasTlsField
-        label:
-          text: labels.tlsOperation
-        onChange: onTlsOperationChange
-        options:
-        - text: Update
-          value: update
-        - text: Rotate
-          value: rotate
-        - text: Remove
-          value: remove
-        schema:
-          $ref: discriminator#/properties/tlsOperation
-        type: radio
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/remove
-        type: switch
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
-        type: switch
-      - elements:
-        - computed: initIssuerRefApiGroup
-          disabled: true
-          label:
-            text: labels.api_group
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-          type: input
-        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
-          label:
-            text: labels.kind
-          options:
-          - text: Issuer
-            value: Issuer
-          - text: ClusterIssuer
-            value: ClusterIssuer
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
-          type: select
-        - allowUserDefinedOption: true
-          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
-          fetch: getIssuerRefsName
-          label:
-            text: labels.name
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
-          type: select
-        if: showIssuerRefAndCertificates
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
-        type: single-step-form
-      - alias: reusable_certificates
-        chart:
-          name: uibytebuildersdev-component-certificates
-          version: v0.29.0
-        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
-        functionCallbacks:
-          getAliasOptions:
-            $ref: functions#/getAliasOptions
-        if: showIssuerRefAndCertificates
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/certificates
-        type: reusable-element
-      if: ifRequestTypeEqualsTo|ReconfigureTLS
-      label:
-        text: labels.tls
-      schema:
-        $ref: schema#/properties/spec/properties/tls
-      type: single-step-form
-    - label:
-        text: labels.timeout
-      options:
-      - text: 5 minutes
-        value: 5m
-      - text: 10 minutes
-        value: 10m
-      - text: 30 minutes
-        value: 30m
-      - text: 1 hour
-        value: 1h
-      - text: 2 hours
-        value: 2h
-      - text: 5 hours
-        value: 5h
-      - text: 10 hours
-        value: 10h
-      schema:
-        $ref: schema#/properties/spec/properties/timeout
-      type: select
-    - computed: setApplyToIfReady
-      label:
-        text: labels.apply
-      options:
-      - text: IfReady (OpsRequest will be applied if database is ready)
-        value: IfReady
-      - text: Always (OpsRequest will always be applied)
-        value: Always
-      schema:
-        $ref: schema#/properties/spec/properties/apply
-      type: radio
-    type: single-step-form
-  id: basic
-  title: steps.0.label
 type: multi-step-form
+step:
+  - type: single-step-form
+    loader: getDbDetails
+    elements:
+# common
+      - type: input
+        label: op_req_name
+        if:
+          type: function
+          name: showAndInitName
+        validation:
+          type: required
+        schema: schema/properties/metadata/properties/name
+      - type: select
+        label: Namespace
+        if:
+          type: function
+          name: showAndInitNamespace
+        init:
+          type: func
+          value: initNamespace
+        disable: isNamespaceDisabled
+        loader: getNamespaces
+        validation:
+          type: required
+        hasGroup: isRancherManaged
+        schema: schema/properties/metadata/properties/namespace
+        watcher:
+          func: onNamespaceChange
+          paths:
+            - schema/properties/metadata/properties/namespace
+      - type: select
+        label: Database Ref
+        if:
+          type: function
+          name: showAndInitDatabaseRef
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
+        init:
+          type: func
+          value: initDatabaseRef
+        validation:
+          type: required
+        disable: isDatabaseRefDisabled
+        refresh: true
+        watcher:
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
+          func: onDbChange
+        schema: schema/properties/spec/properties/databaseRef/properties/name
+      - type: label-element
+        label: config_ops_request
+        if:
+          type: function
+          name: showConfigureOpsrequestLabel
+      - type: radio
+        label: Type of Ops Request
+        if:
+          type: function
+          name: showAndInitOpsRequestType
+        options:
+          - description: Update your database to any version
+            text: Update Version
+            value: UpdateVersion
+          - description: Scale up or down pod count
+            text: Horizontal Scaling
+            value: HorizontalScaling
+          - description: Manage your CPU resources
+            text: Vertical Scaling
+            value: VerticalScaling
+          - description: Manage your database size
+            text: Volume Expansion
+            value: VolumeExpansion
+          - description: Restart your database
+            text: Restart
+            value: Restart
+          - description: Reconfigure your database tls configuration
+            text: Reconfigure TLS
+            value: ReconfigureTLS
+        init:
+          type: func
+          value: getRequestTypeFromRoute
+        disable: isDbDetailsLoading
+        watcher:
+          func: onRequestTypeChange
+          paths:
+            - schema/properties/spec/properties/type
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
+# UpdateVersion
+      - type: block-layout
+        showLabels: true
+        label: Version
+        fixedBlock: true
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|UpdateVersion
+        elements:
+          - type: select-compare
+            label: Target Version
+            subtitle: Select the desired Elasticsearch version to which you want to update your database.
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/version
+            loader: getDbVersions
+            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+          - type: info
+            label: ''
+            loader:
+              name: getVersionInfo
+              watchPaths:
+                - temp/properties/filteredVersion
+            if:
+              type: function
+              name: isVersionEmpty
+# Horizontal Scale
+      - type: block-layout
+        label: Horizontal Scaling Form
+        showLabels: true
+        fixedBlock: true
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|HorizontalScaling
+        elements:
+          - type: horizontal-layout
+            elements:
+              - type: input-compare
+                label: Replicas
+                header: Replicas
+                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                if:
+                  type: function
+                  name: ifDbTypeEqualsTo|Combined|horizontalScaling
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/node
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database node. For example, setting this to 3 creates three copies of the database for better availability.
+                if:
+                  type: function
+                  name: ifDbTypeEqualsTo|Combined|horizontalScaling
+          - type: block-layout
+            label: Topology horizontal scaling
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|Topology|horizontalScaling
+            elements:
+              - type: block-layout
+                label: Master Node horizontal Scaling
+                elements:
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Master Node
+                        header: Master Replicas
+                        subtitle: Define the total number of master node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/master/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/master
+                      - type: info
+                        hasIcon: true
+                        label: Master nodes are responsible for cluster management operations. It's recommended to have an odd number of master nodes (e.g., 3, 5) for proper quorum.
+              - type: block-layout
+                label: Data Node horizontal Scaling
+                elements:
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Data Node
+                        header: Data Replicas
+                        subtitle: Define the total number of data node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/data/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/data
+                      - type: info
+                        hasIcon: true
+                        label: Data nodes store the actual documents and handle data-related operations like search and aggregation. More data nodes provide better storage capacity and query performance.
+              - type: block-layout
+                label: Ingest Node horizontal Scaling
+                elements:
+                  - type: horizontal-layout
+                    elements:
+                      - type: input-compare
+                        label: Ingest Node
+                        header: Ingest Replicas
+                        subtitle: Define the total number of ingest node replicas. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                        init:
+                          type: func
+                          value: setValueFromDbDetails|/spec/topology/ingest/replicas
+                        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/ingest
+                      - type: info
+                        hasIcon: true
+                        label: Ingest nodes pre-process documents before they are indexed. They can apply transformations and enrichments to your data pipeline.
+# vertical Scale
+      - type: block-layout
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VerticalScaling
+        elements:
+          - type: block-layout
+            label: Node
+            showLabels: true
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|Combined|verticalScaling
+            elements:
+              - type: machine-compare
+                label: Resources
+                subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                loader: getMachines|node
+                init:
+                  type: func
+                  value: setMachine|node
+                watcher:
+                  func: onMachineChange|node|/spec/podTemplate/spec/resources
+                  paths:
+                    - temp/properties/machine-node
+                schema: temp/properties/machine-node
+              - type: block-layout
+                label: Node Selection
+                showLabels: true
+                elements:
+                  - type: horizontal-layout
+                    elements:
+                    - type: block-layout
+                      showLabels: false
+                      hideBorder: true
+                      elements:
+                        - type: label-element
+                          label: Node Selection Policy
+                          subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                        - type: select
+                          label: Node Selection Policy
+                          schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+                          options:
+                            - text: LabelSelector
+                              value: LabelSelector
+                            - text: Taint
+                              value: Taint
+                    - type: info
+                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                      customClass: mt-20
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|node
+                        schema: temp/topologyKey-node
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired|node
+                        schema: temp/topologyValue-node
+          - type: block-layout
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|Topology|verticalScaling
+            elements:
+              - type: block-layout
+                label: Master Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|master
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|master
+                    init:
+                      type: func
+                      value: setMachine|master
+                    watcher:
+                      func: onMachineChange|master|/spec/topology/master/resources
+                      paths:
+                        - temp/properties/machine-master
+                    schema: temp/properties/machine-master
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/master/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|master
+                            schema: temp/topologyKey-master
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|master
+                            schema: temp/topologyValue-master
+              - type: block-layout
+                label: Data Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|data
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|data
+                    init:
+                      type: func
+                      value: setMachine|data
+                    watcher:
+                      func: onMachineChange|data|/spec/topology/data/resources
+                      paths:
+                        - temp/properties/machine-data
+                    schema: temp/properties/machine-data
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/data/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|data
+                            schema: temp/topologyKey-data
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|data
+                            schema: temp/topologyValue-data
+              - type: block-layout
+                label: Ingest Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|ingest
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|ingest
+                    init:
+                      type: func
+                      value: setMachine|ingest
+                    watcher:
+                      func: onMachineChange|ingest|/spec/topology/ingest/resources
+                      paths:
+                        - temp/properties/machine-ingest
+                    schema: temp/properties/machine-ingest
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/ingest/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|ingest
+                            schema: temp/topologyKey-ingest
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|ingest
+                            schema: temp/topologyValue-ingest
+              - type: block-layout
+                label: ML Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|ml
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|ml
+                    init:
+                      type: func
+                      value: setMachine|ml
+                    watcher:
+                      func: onMachineChange|ml|/spec/topology/ml/resources
+                      paths:
+                        - temp/properties/machine-ml
+                    schema: temp/properties/machine-ml
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/ml/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|ml
+                            schema: temp/topologyKey-ml
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|ml
+                            schema: temp/topologyValue-ml
+              - type: block-layout
+                label: Transform Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|transform
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|transform
+                    init:
+                      type: func
+                      value: setMachine|transform
+                    watcher:
+                      func: onMachineChange|transform|/spec/topology/transform/resources
+                      paths:
+                        - temp/properties/machine-transform
+                    schema: temp/properties/machine-transform
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/transform/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|transform
+                            schema: temp/topologyKey-transform
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|transform
+                            schema: temp/topologyValue-transform
+              - type: block-layout
+                label: Data Cold Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|dataCold
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|dataCold
+                    init:
+                      type: func
+                      value: setMachine|dataCold
+                    watcher:
+                      func: onMachineChange|dataCold|/spec/topology/dataCold/resources
+                      paths:
+                        - temp/properties/machine-dataCold
+                    schema: temp/properties/machine-dataCold
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/dataCold/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataCold
+                            schema: temp/topologyKey-dataCold
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataCold
+                            schema: temp/topologyValue-dataCold
+              - type: block-layout
+                label: Data Content Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|dataContent
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|dataContent
+                    init:
+                      type: func
+                      value: setMachine|dataContent
+                    watcher:
+                      func: onMachineChange|dataContent|/spec/topology/dataContent/resources
+                      paths:
+                        - temp/properties/machine-dataContent
+                    schema: temp/properties/machine-dataContent
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/dataContent/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataContent
+                            schema: temp/topologyKey-dataContent
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataContent
+                            schema: temp/topologyValue-dataContent
+              - type: block-layout
+                label: Data Frozen Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|dataFrozen
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|dataFrozen
+                    init:
+                      type: func
+                      value: setMachine|dataFrozen
+                    watcher:
+                      func: onMachineChange|dataFrozen|/spec/topology/dataFrozen/resources
+                      paths:
+                        - temp/properties/machine-dataFrozen
+                    schema: temp/properties/machine-dataFrozen
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataFrozen
+                            schema: temp/topologyKey-dataFrozen
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataFrozen
+                            schema: temp/topologyValue-dataFrozen
+              - type: block-layout
+                label: Data Hot Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|dataHot
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|dataHot
+                    init:
+                      type: func
+                      value: setMachine|dataHot
+                    watcher:
+                      func: onMachineChange|dataHot|/spec/topology/dataHot/resources
+                      paths:
+                        - temp/properties/machine-dataHot
+                    schema: temp/properties/machine-dataHot
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/dataHot/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataHot
+                            schema: temp/topologyKey-dataHot
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataHot
+                            schema: temp/topologyValue-dataHot
+              - type: block-layout
+                label: Data Warm Node
+                showLabels: true
+                if:
+                  type: function
+                  name: hasResourceValue|dataWarm
+                elements:
+                  - type: machine-compare
+                    label: Resources
+                    subtitle: Compare your current machine configuration with the proposed resource adjustments and make informed decisions for your database setup
+                    loader: getMachines|dataWarm
+                    init:
+                      type: func
+                      value: setMachine|dataWarm
+                    watcher:
+                      func: onMachineChange|dataWarm|/spec/topology/dataWarm/resources
+                      paths:
+                        - temp/properties/machine-dataWarm
+                    schema: temp/properties/machine-dataWarm
+                  - type: block-layout
+                    label: Node Selection
+                    showLabels: true
+                    elements:
+                      - type: horizontal-layout
+                        elements:
+                        - type: block-layout
+                          showLabels: false
+                          hideBorder: true
+                          elements:
+                            - type: label-element
+                              label: Node Selection Policy
+                              subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                            - type: select
+                              label: Node Selection Policy
+                              schema: schema/properties/spec/properties/verticalScaling/properties/dataWarm/properties/nodeSelectionPolicy
+                              options:
+                                - text: LabelSelector
+                                  value: LabelSelector
+                                - text: Taint
+                                  value: Taint
+                        - type: info
+                          label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                          customClass: mt-20
+                      - type: label-element
+                        label: Topology
+                        subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                      - type: horizontal-layout
+                        elements:
+                          - type: input
+                            label: Key
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataWarm
+                            schema: temp/topologyKey-dataWarm
+                          - type: input
+                            label: Value
+                            validation:
+                              type: custom
+                              name: isVerticalScaleTopologyRequired|dataWarm
+                            schema: temp/topologyValue-dataWarm
+          - type: block-layout
+            label: Exporter
+            showLabels: true
+            hideBlock: true
+            elements:
+              - type: horizontal-layout
+                showLabels: true
+                elements:
+                  - init:
+                      type: func
+                      value: setExporter|cpu
+                    type: input
+                    label: CPU
+                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
+                  - type: input
+                    init:
+                      type: func
+                      value: setExporter|memory
+                    label: Memory
+                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+                    watcher:
+                      func: onExporterResourceChange|memory
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+# Volume Expansion
+
+      - type: block-layout
+        label: Volume Expansion Form
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VolumeExpansion
+        elements:
+          - type: horizontal-layout
+            elements:
+              - type: block-layout
+                elements:
+                  - type: label-element
+                    label: Mode
+                    subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose Offline Mode if you can afford a brief downtime for added reliability during the volume expansion.
+                  - type: select
+                    label: Mode
+                    options:
+                      - text: Offline
+                        value: Offline
+                      - text: Online
+                        value: Online
+                    validation:
+                      type: required
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+          - type: block-layout
+            label: Combined volume expansion
+            showLabels: true
+            fixedBlock: true
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|Combined|VolumeExpansion
+            elements:
+              - type: horizontal-layout
+                elements:
+                  - type: input-compare
+                    header: Node
+                    subtitle: How much extra storage does your database need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    label: Storage Size
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/node
+                  - type: info
+                    hasIcon: true
+                    label: Volume expansion increases the storage capacity of your database. Ensure your storage class supports volume expansion before proceeding.
+          - type: block-layout
+            label: Topology volume expansion
+            showLabels: true
+            fixedBlock: true
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|Topology|VolumeExpansion
+            elements:
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|master
+                elements:
+                  - type: input-compare
+                    header: Master
+                    label: Master Size
+                    subtitle: How much extra storage does your master nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/master/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/master/storage/resources/requests/storage|/spec/volumeExpansion/master
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/master
+                  - type: info
+                    hasIcon: true
+                    label: Master nodes store cluster metadata and configuration. Proper storage allocation ensures reliable cluster management operations.
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|data
+                elements:
+                  - type: input-compare
+                    header: Data
+                    label: Data Size
+                    subtitle: How much extra storage does your data nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/data/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/data/storage/resources/requests/storage|/spec/volumeExpansion/data
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/data
+                  - type: info
+                    hasIcon: true
+                    label: Data nodes store your actual documents and indices. Adequate storage ensures smooth data operations and prevents disk space issues.
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|ingest
+                elements:
+                  - type: input-compare
+                    header: Ingest
+                    label: Ingest Size
+                    subtitle: How much extra storage does your ingest nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/ingest/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/ingest/storage/resources/requests/storage|/spec/volumeExpansion/ingest
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/ingest
+                  - type: info
+                    hasIcon: true
+                    label: Ingest nodes handle data pre-processing tasks. Sufficient storage ensures smooth pipeline operations.
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|ml
+                elements:
+                  - type: input-compare
+                    header: ML
+                    label: ML Size
+                    subtitle: How much extra storage does your ML nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/ml/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/ml/storage/resources/requests/storage|/spec/volumeExpansion/ml
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/ml
+                  - type: info
+                    hasIcon: true
+                    label: ML nodes store machine learning models and job data. Adequate storage supports complex ML operations.
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|transform
+                elements:
+                  - type: input-compare
+                    header: Transform
+                    label: Transform Size
+                    subtitle: How much extra storage does your transform nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/transform/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/transform/storage/resources/requests/storage|/spec/volumeExpansion/transform
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/transform
+                  - type: info
+                    hasIcon: true
+                    label: Transform nodes handle continuous data transformation operations. Sufficient storage ensures smooth processing.
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|dataCold
+                elements:
+                  - type: input-compare
+                    header: Data Cold
+                    label: Data Cold Size
+                    subtitle: How much extra storage does your data cold nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/dataCold/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/dataCold/storage/resources/requests/storage|/spec/volumeExpansion/dataCold
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/dataCold
+                  - type: info
+                    hasIcon: true
+                    label: Data cold tier stores infrequently accessed data. Cost-effective storage allocation is important for this tier.
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|dataContent
+                elements:
+                  - type: input-compare
+                    header: Data Content
+                    label: Data Content Size
+                    subtitle: How much extra storage does your data content nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/dataContent/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/dataContent/storage/resources/requests/storage|/spec/volumeExpansion/dataContent
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/dataContent
+                  - type: info
+                    hasIcon: true
+                    label: Data content tier stores regular content data. Proper storage allocation ensures optimal performance for standard workloads.
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|dataFrozen
+                elements:
+                  - type: input-compare
+                    header: Data Frozen
+                    label: Data Frozen Size
+                    subtitle: How much extra storage does your data frozen nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/dataFrozen/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/dataFrozen/storage/resources/requests/storage|/spec/volumeExpansion/dataFrozen
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/dataFrozen
+                  - type: info
+                    hasIcon: true
+                    label: Data frozen tier stores searchable snapshot data with minimal storage costs. This tier optimizes long-term data retention.
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|dataHot
+                elements:
+                  - type: input-compare
+                    header: Data Hot
+                    label: Data Hot Size
+                    subtitle: How much extra storage does your data hot nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/dataHot/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/dataHot/storage/resources/requests/storage|/spec/volumeExpansion/dataHot
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/dataHot
+                  - type: info
+                    hasIcon: true
+                    label: Data hot tier stores frequently accessed data requiring fast performance. Adequate storage and fast I/O are crucial for this tier.
+              - type: horizontal-layout
+                if:
+                  type: function
+                  name: hasVolumeExpansion|dataWarm
+                elements:
+                  - type: input-compare
+                    header: Data Warm
+                    label: Data Warm Size
+                    subtitle: How much extra storage does your data warm nodes need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/topology/dataWarm/storage/resources/requests/storage
+                    validation:
+                      type: custom
+                      name: checkVolume|/spec/topology/dataWarm/storage/resources/requests/storage|/spec/volumeExpansion/dataWarm
+                    schema: schema/properties/spec/properties/volumeExpansion/properties/dataWarm
+                  - type: info
+                    hasIcon: true
+                    label: Data warm tier stores less frequently accessed data. Balanced storage allocation provides cost-effective performance.
+# Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        loader:
+          name: fetchConfigSecrets
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
+        elements:
+          - type: block-layout
+            label: Configuration
+            elements:
+              - type: label-element
+                label: ''
+                subtitle: Select a new configuration secret, apply a custom configuration, or remove an existing setup to update your database settings
+              - type: tab-layout
+                label: New Config Secret
+                schema: temp/properties/reconfigurationType
+                options:
+                - text: NEW CONFIG SECRET
+                  value: selectNewConfigSecret
+                - text: APPLY CONFIG
+                  value: applyConfig
+                - text: REMOVE
+                  value: remove
+                elements:
+                - type: block-layout
+                  label: Config Secret
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                    type: function
+                  elements:
+                    - type:  label-element
+                      label: Config Secret
+                      subtitle: Select a configuration secret from the available list to update your database settings
+                      customClass: mb-10
+                    - type: select
+                      customClass: mb-2
+                      schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                      refresh: true
+                      label: Config Secret
+                      loader:
+                        name: getConfigSecrets
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                          - temp/properties/createSecret/properties/status
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/configSecret/name
+                      watcher:
+                        func: onCreateSecretChange
+                        paths:
+                          - temp/properties/createSecret/properties/status
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedConfigurationName|create
+                        watchPaths:
+                          - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                    - type: block-layout
+                      label: Create a New Config Secret
+                      showLabels: true
+                      if:
+                        type: function
+                        name: isCreateSecret
+                      hasButton:
+                        text: Save
+                        hasCancel: cancelCreateSecret
+                        action: createNewConfigSecret
+                      elements:
+                        - type: input
+                          label: Secret Name
+                          schema: temp/properties/createSecret/properties/name
+                          validation:
+                            type: required
+                        - type: array-object-form
+                          label: String Data
+                          schema: temp/properties/createSecret/properties/data
+                          buttonClass: is-light is-outlined
+                          validation:
+                            type: required
+                          elements:
+                            - type: select
+                              label: Key
+                              schema: key
+                              loader:
+                                name: onSelectedSecretChange
+                                watchPaths:
+                                  - temp/properties/createSecret/properties/data
+                              validation:
+                                type: required
+                            - type: textarea
+                              label: Value
+                              schema: value
+                    - type: multi-file-editor
+                      editorHeight: 500px
+                      readonly: true
+                      if:
+                        type: function
+                        name: isNotCreateSecret
+                      loader:
+                        name: onNewConfigSecretChange
+                        watchPaths:
+                          - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                      schema: temp/properties/newConfigSecret
+                - type: block-layout
+                  label: ApplyConfig
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|applyConfig
+                    type: function
+                  elements:
+                    - type: label-element
+                      label: New Apply Config
+                      subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Enter the parameter you want to configure (e.g., max_connections).
+                      customClass: mb-10
+                    - type: select
+                      customClass: mb-2
+                      schema: temp/properties/selectedConfiguration
+                      refresh: true
+                      label: Configuration
+                      loader: getConfigSecretsforAppyConfig
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedConfigurationName|apply
+                        watchPaths:
+                          - temp/properties/selectedConfiguration
+                    - type: multi-file-editor
+                      editorHeight: 500px
+                      schema: temp/properties/applyConfig
+                      loader:
+                        name: setApplyConfig
+                        watchPaths:
+                            - temp/properties/selectedConfiguration
+                      watcher:
+                       func: onApplyconfigChange
+                       paths:
+                        - temp/properties/applyConfig
+                - type: block-layout
+                  label: Remove
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|remove
+                    type: function
+                  elements:
+                    - type: label-element
+                      label: Remove
+                      subtitle: Selected a configuration secret from the available list to update your database settings
+                      customClass: mb-10
+                    - type: select
+                      customClass: mb-2
+                      schema: temp/properties/selectedConfigurationRemove
+                      refresh: true
+                      label: Configuration
+                      loader:
+                        name: getConfigSecretsforAppyConfig
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedConfigurationName|remove
+                        watchPaths:
+                          - temp/properties/selectedConfigurationRemove
+                    - type: multi-file-editor
+                      editorHeight: 500px
+                      readonly: true
+                      init:
+                        type: func
+                        value: onRemoveConfigChange
+                      watcher:
+                        func: onRemoveConfigChange
+                        paths:
+                          - temp/properties/selectedConfigurationRemove
+                      schema: temp/properties/removeConfig
+# Reconfigure TLS
+      - type: block-layout
+        label: TLS
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|ReconfigureTLS
+        elements:
+          - type: radio
+            label: TLS Operation
+            if:
+              type: function
+              name: hasTlsField
+            init:
+              type: func
+              value: initTlsOperation
+            options:
+              - text: Update
+                value: update
+              - text: Rotate
+                value: rotate
+              - text: Remove
+                value: remove
+            watcher:
+              func: onTlsOperationChange
+              paths:
+                - temp/tlsOperation
+            schema: temp/tlsOperation
+          - type: switch
+            label: Remove TLS
+            fullwidth: true
+            if:
+              type: function
+              name: isTlsEnabled
+            schema: schema/properties/spec/properties/tls/properties/remove
+          - type: switch
+            label: Rotate Certificates
+            fullwidth: true
+            if:
+              type: function
+              name: isTlsEnabled
+            schema: schema/properties/spec/properties/tls/properties/rotateCertificates
+          - type: block-layout
+            label: Issuer Reference
+            showLabels: true
+            if:
+              type: function
+              name: showIssuerRefAndCertificates
+            elements:
+              - type: input
+                label: API Group
+                init:
+                  type: func
+                  value: initIssuerRefApiGroup
+                watcher:
+                  func: initIssuerRefApiGroup
+                  paths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                disable: true
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+              - type: select
+                label: Kind
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/kind
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                options:
+                  - text: Issuer
+                    value: Issuer
+                  - text: ClusterIssuer
+                    value: ClusterIssuer
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+              - type: select
+                label: Name
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/name
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                    - schema/properties/metadata/properties/namespace
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
+          - type: block-layout
+            label: Certificates
+            showLabels: false
+            if:
+              type: function
+              name: showIssuerRefAndCertificates
+            loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+            elements:
+              - type: array-object-form
+                label: Certificates
+                buttonClass: is-light is-outlined
+                schema: schema/properties/spec/properties/tls/properties/certificates
+                elements:
+                - type: select
+                  label: Alias
+                  loader: fetchAliasOptions
+                  disable: disableAlias
+                  schema: alias
+                  validation:
+                    type: required
+                - type: input
+                  label: Secret Name
+                  schema: secretName
+                - type: input
+                  label: Duration
+                  schema: duration
+                - type: input
+                  label: Renew Before
+                  schema: renewBefore
+                - type: array-item-form
+                  label: Organizations
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/organizations
+                  element:
+                    type: input
+                    label: Organization
+                - type: array-item-form
+                  label: Countries
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/countries
+                  element:
+                    type: input
+                    label: Country
+                - type: array-item-form
+                  label: Organizational Units
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/organizationalUnits
+                  element:
+                    type: input
+                    label: Organizational Unit
+                - type: array-item-form
+                  label: Provinces
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/provinces
+                  element:
+                    type: input
+                    label: Province
+                - type: array-item-form
+                  label: DNS Names
+                  buttonClass: is-light  is-outlined
+                  schema: dnsNames
+                  element:
+                    type: input
+                    label: DNS Name
+                - type: array-item-form
+                  label: IP Addresses
+                  buttonClass: is-light is-outlined
+                  schema: ipAddresses
+                  element:
+                    type: input
+                    label: IP Address
+# common
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            schema: 'schema/properties/spec/properties/timeout'
+            subtitle: Specify the maximum time allowed for the operation to complete. Use formats like 30sec, 1min (1 minute) or 2h (2 hours).
+          - type: radio
+            label: Apply
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always

@@ -1,560 +1,527 @@
-steps:
-- form:
-    discriminator:
-      dbDetails:
-        type: object
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      schema:
-        $ref: discriminator#/properties/dbDetails
-      type: input
-    - if: showAndInitName
-      label:
-        text: labels.op_req_name
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/name
-      type: input
-    - computed: initNamespace
-      disabled: isNamespaceDisabled
-      fetch: getNamespaces
-      hasGroup: isRancherManaged
-      if: showAndInitNamespace
-      label:
-        text: labels.namespace
-      onChange: onNamespaceChange
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/namespace
-      type: select
-    - computed: initDatabaseRef
-      disabled: isDatabaseRefDisabled
-      fetch: getDbs
-      if: showAndInitDatabaseRef
-      label:
-        text: labels.databaseRef
-      onChange: onDbChange
-      refresh: true
-      required: true
-      schema:
-        $ref: schema#/properties/spec/properties/proxyRef/properties/name
-      type: select
-    - if: showConfigureOpsrequestLabel
-      label:
-        text: labels.config_ops_request
-      type: label-element
-    - computed: getRequestTypeFromRoute
-      disabled: isDbDetailsLoading
-      hasDescription: true
-      if: showAndInitOpsRequestType
-      label:
-        text: labels.ops_request_type
-      onChange: onRequestTypeChange
-      options:
-      - description: options.UpdateVersion.description
-        text: options.UpdateVersion.text
-        value: UpdateVersion
-      - description: options.HorizontalScaling.description
-        text: options.HorizontalScaling.text
-        value: HorizontalScaling
-      - description: options.VerticalScaling.description
-        text: options.VerticalScaling.text
-        value: VerticalScaling
-      - description: options.Restart.description
-        text: options.Restart.text
-        value: Restart
-      - description: options.Reconfigure.description
-        text: options.Reconfigure.text
-        value: Reconfigure
-      - description: options.ReconfigureTLS.description
-        text: options.ReconfigureTLS.text
-        value: ReconfigureTLS
-      schema:
-        $ref: schema#/properties/spec/properties/type
-      type: radio
-    - elements:
-      - computed: setValueFromDbDetails|/spec/version
-        fetch: getDbVersions
-        label:
-          text: labels.targetVersion
-        schema:
-          $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
-        type: select
-      if: ifRequestTypeEqualsTo|UpdateVersion
-      type: single-step-form
-    - elements:
-      - computed: setValueFromDbDetails|/spec/replicas
-        label:
-          text: labels.replicas
-        schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/member
-        type: input
-      if: ifRequestTypeEqualsTo|HorizontalScaling
-      label:
-        text: Horizontal Scaling Form
-      schema:
-        $ref: schema#/properties/spec/properties/horizontalScaling
-      type: single-step-form
-    - discriminator:
-        machine:
-          default: ""
-          type: string
-      elements:
-      - computed: setMachine
-        customClass: mt-20
-        disableUnselect: true
-        fetch: getMachines
-        label:
-          text: Machine Profile
-        onChange: onMachineChange|proxysql|/spec/podTemplate/spec/resources
-        schema:
-          $ref: discriminator#/machine
-        type: select
-      - if: isMachineCustom
-        label:
-          text: labels.resources
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/proxysql/properties/resources
-        type: resource-input-form
-      - label:
-          text: labels.node_selection_policy
-        options:
-        - text: LabelSelector
-          value: LabelSelector
-        - text: Taint
-          value: Taint
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/proxysql/properties/nodeSelectionPolicy
-        type: select
-      - discriminator:
-          topologyKey:
-            default: ""
-            type: string
-          topologyValue:
-            default: ""
-            type: string
-        elements:
-        - label:
-            text: labels.key
-          required: isVerticalScaleTopologyRequired
-          schema:
-            $ref: discriminator#/topologyKey
-          type: input
-        - label:
-            text: labels.value
-          required: isVerticalScaleTopologyRequired
-          schema:
-            $ref: discriminator#/topologyValue
-          type: input
-        label:
-          text: labels.topology
-        show_label: true
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|VerticalScaling
-      label:
-        text: labels.proxysql
-      schema:
-        $ref: schema#/properties/spec/properties/verticalScaling/properties/proxysql
-      show_label: true
-      type: single-step-form
-    - elements:
-      - computed: setValueFromDbDetails|/spec/initConfig/adminVariables|/spec/configuration/adminVariables
-        isArray: true
-        keys:
-          label:
-            text: labels.annotations.key
-        label:
-          text: labels.configuration.adminVariables
-        schema:
-          $ref: schema#/properties/spec/properties/configuration/properties/adminVariables
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.annotations.value
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/adminVariables
-          type: input
-      - computed: setValueFromDbDetails|/spec/initConfig/mysqlVariables|/spec/configuration/mysqlVariables
-        isArray: true
-        keys:
-          label:
-            text: labels.annotations.key
-        label:
-          text: labels.configuration.mysqlVariables
-        schema:
-          $ref: schema#/properties/spec/properties/configuration/properties/mysqlVariables
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.annotations.value
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/mysqlVariables
-          type: input
-      - elements:
-        - label:
-            text: labels.configuration.reqType
-          onChange: onMySQLUserReqTypeChange
-          options:
-          - add
-          - update
-          - delete
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/mysqlQueryRules/properties/reqType
-          type: select
-        - addFormLabel: labels.configuration.queryRule
-          computed: setMySQLRules
-          element:
-            discriminator:
-              mysqlQueryRules:
-                emitAs: mysqlQueryRules
-                type: array
-            elements:
-            - isArray: true
-              keys:
-                label:
-                  text: labels.annotations.key
-              label:
-                text: labels.configuration.rules
-              schema:
-                $ref: discriminator#/properties/mysqlQueryRules/items/properties/rules
-              type: key-value-input-form
-              values:
-                label:
-                  text: labels.annotations.value
-                schema:
-                  $ref: discriminator#/properties/mysqlQueryRules/items/properties/rules/additionalProperties
-                type: input
-            schema:
-              $ref: discriminator#/properties/mysqlQueryRules/items
-            type: single-step-form
-          label:
-            text: labels.configuration.queryRules
-          onChange: onMySQLRulesChange
-          schema:
-            $ref: discriminator#/properties/mysqlQueryRules
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.configuration.rules
-            path: rules
-            type: value
-            typeOfValue: key-value
-          type: single-step-form-array
-        label:
-          text: labels.configuration.mysqlQueryRules
-        schema:
-          $ref: schema#/properties/spec/properties/configuration/properties/mysqlQueryRules
-        show_label: true
-        type: single-step-form
-      - customClass: mt-10
-        elements:
-        - label:
-            text: labels.configuration.reqType
-          onChange: onMySQLUserReqTypeChange
-          options:
-          - add
-          - update
-          - delete
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/reqType
-          type: select
-        - addFormLabel: labels.configuration.user
-          customClass: mt-20
-          element:
-            elements:
-            - label:
-                text: labels.configuration.username
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/username
-              type: input
-            - label:
-                text: labels.configuration.active
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/active
-              type: input
-            - label:
-                text: labels.configuration.default_schema
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/default_schema
-              type: input
-            - label:
-                text: labels.configuration.use_ssl
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/use_ssl
-              type: input
-            - label:
-                text: labels.configuration.attributes
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/attributes
-              type: input
-            - label:
-                text: labels.configuration.backend
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/backend
-              type: input
-            - label:
-                text: labels.configuration.comment
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/comment
-              type: input
-            - label:
-                text: labels.configuration.default_hostgroup
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/default_hostgroup
-              type: input
-            - label:
-                text: labels.configuration.fast_forward
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/fast_forward
-              type: input
-            - label:
-                text: labels.configuration.frontend
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/frontend
-              type: input
-            - label:
-                text: labels.configuration.max_connections
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/max_connections
-              type: input
-            - label:
-                text: labels.configuration.schema_locked
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/schema_locked
-              type: input
-            - label:
-                text: labels.configuration.transaction_persistent
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/transaction_persistent
-              type: input
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items
-            type: single-step-form
-          if: showUserCreationField
-          label:
-            text: labels.configuration.users
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.configuration.username
-            path: username
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: labels.configuration.active
-            path: active
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: labels.configuration.default_schema
-            path: default_schema
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: labels.configuration.use_ssl
-            path: use_ssl
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.configuration.attributes
-            path: attributes
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.configuration.backend
-            path: backend
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.configuration.comment
-            path: comment
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.configuration.default_hostgroup
-            path: default_hostgroup
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.configuration.fast_forward
-            path: fast_forward
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.configuration.frontend
-            path: frontend
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.configuration.max_connections
-            path: max_connections
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.configuration.schema_locked
-            path: schema_locked
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.configuration.transaction_persistent
-            path: transaction_persistent
-            type: value
-            typeOfValue: string
-          type: single-step-form-array
-        - addFormLabel: labels.configuration.user
-          customClass: mt-20
-          element:
-            elements:
-            - label:
-                text: labels.configuration.username
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items/properties/username
-              type: input
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/items
-            type: single-step-form
-          if: showUserDeletionField
-          label:
-            text: labels.configuration.users
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers/properties/users
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.configuration.username
-            path: username
-            type: value
-            typeOfValue: string
-          type: single-step-form-array
-        label:
-          text: labels.configuration.mysqlUsers
-        schema:
-          $ref: schema#/properties/spec/properties/configuration/properties/mysqlUsers
-        show_label: true
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|Reconfigure
-      schema:
-        $ref: schema#/properties/spec/properties/configuration
-      type: single-step-form
-    - discriminator:
-        tlsOperation:
-          default: update
-          type: string
-      elements:
-      - computed: initTlsOperation
-        if: hasTlsField
-        label:
-          text: labels.tlsOperation
-        onChange: onTlsOperationChange
-        options:
-        - text: Update
-          value: update
-        - text: Rotate
-          value: rotate
-        - text: Remove
-          value: remove
-        schema:
-          $ref: discriminator#/properties/tlsOperation
-        type: radio
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/remove
-        type: switch
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
-        type: switch
-      - elements:
-        - computed: initIssuerRefApiGroup
-          disabled: true
-          label:
-            text: labels.api_group
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-          type: input
-        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
-          label:
-            text: labels.kind
-          options:
-          - text: Issuer
-            value: Issuer
-          - text: ClusterIssuer
-            value: ClusterIssuer
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
-          type: select
-        - allowUserDefinedOption: true
-          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
-          fetch: getIssuerRefsName
-          label:
-            text: labels.name
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
-          type: select
-        if: showIssuerRefAndCertificates
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
-        type: single-step-form
-      - alias: reusable_certificates
-        chart:
-          name: uibytebuildersdev-component-certificates
-          version: v0.29.0
-        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
-        functionCallbacks:
-          getAliasOptions:
-            $ref: functions#/getAliasOptions
-        if: showIssuerRefAndCertificates
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/certificates
-        type: reusable-element
-      if: ifRequestTypeEqualsTo|ReconfigureTLS
-      label:
-        text: labels.tls
-      schema:
-        $ref: schema#/properties/spec/properties/tls
-      type: single-step-form
-    - customClass: mt-10
-      label:
-        text: labels.timeout
-      options:
-      - text: 5 minutes
-        value: 5m
-      - text: 10 minutes
-        value: 10m
-      - text: 30 minutes
-        value: 30m
-      - text: 1 hour
-        value: 1h
-      - text: 2 hours
-        value: 2h
-      - text: 5 hours
-        value: 5h
-      - text: 10 hours
-        value: 10h
-      schema:
-        $ref: schema#/properties/spec/properties/timeout
-      type: select
-    - computed: setApplyToIfReady
-      label:
-        text: labels.apply
-      options:
-      - text: IfReady (OpsRequest will be applied if database is ready)
-        value: IfReady
-      - text: Always (OpsRequest will always be applied)
-        value: Always
-      schema:
-        $ref: schema#/properties/spec/properties/apply
-      type: radio
-    type: single-step-form
-  id: basic
-  title: steps.0.label
 type: multi-step-form
+step:
+  - type: single-step-form
+    loader: getDbDetails
+    elements:
+# common
+      - type: input
+        label: op_req_name
+        if:
+          type: function
+          name: showAndInitName
+        validation:
+          type: required
+        schema: schema/properties/metadata/properties/name
+      - type: select
+        label: Namespace
+        if:
+          type: function
+          name: showAndInitNamespace
+        init:
+          type: func
+          value: initNamespace
+        disable: isNamespaceDisabled
+        loader: getNamespaces
+        validation:
+          type: required
+        hasGroup: isRancherManaged
+        schema: schema/properties/metadata/properties/namespace
+        watcher:
+          func: onNamespaceChange
+          paths:
+            - schema/properties/metadata/properties/namespace
+      - type: select
+        label: Database Ref
+        if:
+          type: function
+          name: showAndInitDatabaseRef
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
+        init:
+          type: func
+          value: initDatabaseRef
+        validation:
+          type: required
+        disable: isDatabaseRefDisabled
+        refresh: true
+        watcher:
+          func: onDbChange
+          paths:
+            - schema/properties/spec/properties/proxyRef/properties/name
+        schema: schema/properties/spec/properties/proxyRef/properties/name
+      - type: label-element
+        label: config_ops_request
+        if:
+          type: function
+          name: showConfigureOpsrequestLabel
+      - type: radio
+        label: Type of Ops Request
+        if:
+          type: function
+          name: showAndInitOpsRequestType
+        options:
+          - description: Update your database to any version
+            text: Update Version
+            value: UpdateVersion
+          - description: Scale up or down pod count
+            text: Horizontal Scaling
+            value: HorizontalScaling
+          - description: Manage your CPU resources
+            text: Vertical Scaling
+            value: VerticalScaling
+          - description: Restart your database
+            text: Restart
+            value: Restart
+          - description: Reconfigure your database
+            text: Reconfigure
+            value: Reconfigure
+          - description: Reconfigure your database tls configuration
+            text: Reconfigure TLS
+            value: ReconfigureTLS
+        init:
+          type: func
+          value: getRequestTypeFromRoute
+        disable: isDbDetailsLoading
+        watcher:
+          func: onRequestTypeChange
+          paths:
+            - schema/properties/spec/properties/type
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
+# UpdateVersion
+      - type: block-layout
+        showLabels: true
+        label: Version
+        fixedBlock: true
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|UpdateVersion
+        elements:
+          - type: select-compare
+            label: Target Version
+            subtitle: Select the desired ProxySQL version to which you want to update your database.
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/version
+            loader: getDbVersions
+            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+          - type: info
+            label: ''
+            loader:
+              name: getVersionInfo
+              watchPaths:
+                - temp/properties/filteredVersion
+            if:
+              type: function
+              name: isVersionEmpty
+# Horizontal Scale
+      - type: block-layout
+        label: Horizontal Scaling Form
+        showLabels: true
+        fixedBlock: true
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|HorizontalScaling
+        elements:
+          - type: horizontal-layout
+            elements:
+              - type: input-compare
+                label: Replicas
+                header: Replica
+                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/member
+              - type: info
+                hasIcon: true
+                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
+# vertical Scale
+      - type: block-layout
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VerticalScaling
+        elements:
+          - type: machine-compare
+            label: Resources
+            subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
+            loader: getMachines|proxysql
+            init:
+              type: func
+              value: setMachine|proxysql
+            watcher:
+              func: onMachineChange|proxysql|/spec/podTemplate/spec/resources
+              paths:
+                - temp/properties/machine
+            schema: temp/properties/machine
+          - type: block-layout
+            label: Node Selection
+            showLabels: true
+            elements:
+              - type: horizontal-layout
+                elements:
+                - type: block-layout
+                  showLabels: false
+                  hideBorder: true
+                  elements:
+                    - type: label-element
+                      label: Node Selection Policy
+                      subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                    - type: select
+                      label: Node Selection Policy
+                      schema: schema/properties/spec/properties/verticalScaling/properties/proxysql/properties/nodeSelectionPolicy
+                      options:
+                        - text: LabelSelector
+                          value: LabelSelector
+                        - text: Taint
+                          value: Taint
+                - type: info
+                  label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                  customClass: mt-20
+              - type: label-element
+                label: Topology
+                subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+              - type: horizontal-layout
+                elements:
+                  - type: input
+                    label: Key
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired|proxysql
+                    schema: temp/topologyKey-proxysql
+                  - type: input
+                    label: Value
+                    validation:
+                      type: custom
+                      name: isVerticalScaleTopologyRequired|proxysql
+                    schema: temp/topologyValue-proxysql
+          - type: block-layout
+            label: Exporter
+            showLabels: true
+            hideBlock: true
+            elements:
+              - type: horizontal-layout
+                showLabels: true
+                elements:
+                  - init:
+                      type: func
+                      value: setExporter|cpu
+                    type: input
+                    label: CPU
+                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
+                  - type: input
+                    init:
+                      type: func
+                      value: setExporter|memory
+                    label: Memory
+                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+                    watcher:
+                      func: onExporterResourceChange|memory
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+# Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        elements:
+          - type: input-compare
+            label: Admin Variables
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/initConfig/adminVariables|/spec/configuration/adminVariables
+            schema: schema/properties/spec/properties/configuration/properties/adminVariables
+          - type: input-compare
+            label: MySQL Variables
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/initConfig/mysqlVariables|/spec/configuration/mysqlVariables
+            schema: schema/properties/spec/properties/configuration/properties/mysqlVariables
+          - type: block-layout
+            label: MySQL Query Rules
+            showLabels: true
+            elements:
+              - type: select
+                label: Request Type
+                options:
+                  - text: Add
+                    value: add
+                  - text: Update
+                    value: update
+                  - text: Delete
+                    value: delete
+                watcher:
+                  func: onMySQLUserReqTypeChange
+                  paths:
+                    - schema/properties/spec/properties/configuration/properties/mysqlQueryRules/properties/reqType
+                schema: schema/properties/spec/properties/configuration/properties/mysqlQueryRules/properties/reqType
+              - type: array-item-form
+                label: Query Rules
+                buttonClass: is-light is-outlined
+                init:
+                  type: func
+                  value: setMySQLRules
+                watcher:
+                  func: onMySQLRulesChange
+                  paths:
+                    - temp/mysqlQueryRules
+                schema: temp/mysqlQueryRules/properties/rules
+                element:
+                  type: input
+                  label: Rules
+          - type: block-layout
+            label: MySQL Users
+            showLabels: true
+            elements:
+              - type: select
+                label: Request Type
+                options:
+                  - text: Add
+                    value: add
+                  - text: Update
+                    value: update
+                  - text: Delete
+                    value: delete
+                watcher:
+                  func: onMySQLUserReqTypeChange
+                  paths:
+                    - schema/properties/spec/properties/configuration/properties/mysqlUsers/properties/reqType
+                schema: schema/properties/spec/properties/configuration/properties/mysqlUsers/properties/reqType
+              - type: array-object-form
+                label: Users
+                buttonClass: is-light is-outlined
+                if:
+                  name: showUserCreationField
+                  type: function
+                schema: schema/properties/spec/properties/configuration/properties/mysqlUsers/properties/users
+                elements:
+                  - type: input
+                    label: Username
+                    validation:
+                      type: required
+                    schema: items/properties/username
+                  - type: input
+                    label: Active
+                    schema: items/properties/active
+                  - type: input
+                    label: Default Schema
+                    schema: items/properties/default_schema
+                  - type: input
+                    label: Use SSL
+                    schema: items/properties/use_ssl
+                  - type: input
+                    label: Attributes
+                    schema: items/properties/attributes
+                  - type: input
+                    label: Backend
+                    schema: items/properties/backend
+                  - type: input
+                    label: Comment
+                    schema: items/properties/comment
+                  - type: input
+                    label: Default Hostgroup
+                    schema: items/properties/default_hostgroup
+                  - type: input
+                    label: Fast Forward
+                    schema: items/properties/fast_forward
+                  - type: input
+                    label: Frontend
+                    schema: items/properties/frontend
+                  - type: input
+                    label: Max Connections
+                    schema: items/properties/max_connections
+                  - type: input
+                    label: Schema Locked
+                    schema: items/properties/schema_locked
+                  - type: input
+                    label: Transaction Persistent
+                    schema: items/properties/transaction_persistent
+              - type: array-item-form
+                label: Users
+                buttonClass: is-light is-outlined
+                if:
+                  name: showUserDeletionField
+                  type: function
+                schema: schema/properties/spec/properties/configuration/properties/mysqlUsers/properties/users/properties/username
+                element:
+                  type: input
+                  label: Username
+                  validation:
+                    type: required
+# Reconfigure TLS
+      - type: block-layout
+        label: TLS
+        if:
+          name: ifRequestTypeEqualsTo|ReconfigureTLS
+          type: function
+        elements:
+          - type: radio
+            label: TLS Operation
+            if:
+              name: hasTlsField
+              type: function
+            options:
+              - text: Update
+                value: update
+              - text: Rotate
+                value: rotate
+              - text: Remove
+                value: remove
+            init:
+              type: func
+              value: initTlsOperation
+            schema: temp/properties/tlsOperation
+          - type: switch
+            label: Remove TLS
+            fullwidth: true
+            if:
+              name: isTlsEnabled
+              type: function
+            schema: schema/properties/spec/properties/tls/properties/remove
+          - type: switch
+            label: Rotate Certificates
+            fullwidth: true
+            schema: schema/properties/spec/properties/tls/properties/rotateCertificates
+            if:
+              name: isTlsEnabled
+              type: function
+          - type: block-layout
+            label: Issuer Reference
+            showLabels: true
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            elements:
+              - type: input
+                label: API Group
+                init:
+                  type: func
+                  value: initIssuerRefApiGroup
+                watcher:
+                  func: initIssuerRefApiGroup
+                  paths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                disable: true
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+              - type: select
+                label: Kind
+                options:
+                  - text: Issuer
+                    value: Issuer
+                  - text: ClusterIssuer
+                    value: ClusterIssuer
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/kind
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+              - type: select
+                label: Name
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                    - schema/properties/metadata/properties/namespace
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/name
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
+          - type: block-layout
+            label: Certificates
+            showLabels: false
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+            elements:
+              - type: array-object-form
+                label: Certificates
+                buttonClass: is-light is-outlined
+                schema: schema/properties/spec/properties/tls/properties/certificates
+                elements:
+                - type: select
+                  label: Alias
+                  loader: fetchAliasOptions
+                  disable: disableAlias
+                  schema: alias
+                  validation:
+                    type: required
+                - type: input
+                  label: Secret Name
+                  schema: secretName
+                - type: input
+                  label: Duration
+                  schema: duration
+                - type: input
+                  label: Renew Before
+                  schema: renewBefore
+                - type: array-item-form
+                  label: Organizations
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/organizations
+                  element:
+                    type: input
+                    label: Organization
+                - type: array-item-form
+                  label: Countries
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/countries
+                  element:
+                    type: input
+                    label: Country
+                - type: array-item-form
+                  label: Organizational Units
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/organizationalUnits
+                  element:
+                    type: input
+                    label: Organizational Unit
+                - type: array-item-form
+                  label: Provinces
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/provinces
+                  element:
+                    type: input
+                    label: Province
+                - type: array-item-form
+                  label: DNS Names
+                  buttonClass: is-light  is-outlined
+                  schema: dnsNames
+                  element:
+                    type: input
+                    label: DNS Name
+                - type: array-item-form
+                  label: IP Addresses
+                  buttonClass: is-light is-outlined
+                  schema: ipAddresses
+                  element:
+                    type: input
+                    label: IP Address
+# common
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            subtitle: Specify the maximum time allowed for the operation to complete before it times out
+            schema: 'schema/properties/spec/properties/timeout'
+          - type: radio
+            label: Apply
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always

@@ -1,2349 +1,1169 @@
-steps:
-- form:
-    discriminator:
-      createAuthSecret:
-        type: boolean
-    elements:
-    - disabled: true
-      label:
-        text: labels.database.name
-      onChange: onNameChange
-      schema:
-        $ref: schema#/properties/metadata/properties/release/properties/name
-      type: input
-    - disabled: true
-      fetch: getResources|core|v1|namespaces
-      label:
-        text: labels.namespace
-      onChange: onNamespaceChange
-      schema:
-        $ref: schema#/properties/metadata/properties/release/properties/namespace
-      type: select
-    - disableUnselect: true
-      disabled: true
-      fetch: getElasticSearchVersions|catalog.kubedb.com|v1alpha1|elasticsearchversions
-      label:
-        text: labels.database.version
-      onChange: onVersionChange
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/version
-      type: select
-    - individualItemDisabilityCheck: disableLableChecker
-      isArray: true
-      keys:
-        label:
-          text: labels.labels.key
-      label:
-        text: labels.labels.label
-      onChange: onLabelChange
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/metadata/properties/labels
-      type: key-value-input-form
-      values:
-        label:
-          text: labels.labels.value
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/metadata/properties/labels/additionalProperties
-        type: input
-    - isArray: true
-      keys:
-        label:
-          text: labels.annotations.key
-      label:
-        text: labels.annotations.label
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/metadata/properties/annotations
-      type: key-value-input-form
-      values:
-        label:
-          text: labels.annotations.value
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/metadata/properties/annotations/additionalProperties
-        type: input
-    - hasDescription: true
-      label:
-        text: labels.deletionPolicy
-      options:
-      - description: options.deletionPolicy.delete.description
-        text: options.deletionPolicy.delete.label
-        value: Delete
-      - description: options.deletionPolicy.halt.description
-        text: options.deletionPolicy.halt.label
-        value: Halt
-      - description: options.deletionPolicy.wipeOut.description
-        text: options.deletionPolicy.wipeOut.label
-        value: WipeOut
-      - description: options.deletionPolicy.doNotTerminate.description
-        text: options.deletionPolicy.doNotTerminate.label
-        value: DoNotTerminate
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/deletionPolicy
-      type: radio
-    - disabled: true
-      label:
-        text: labels.disable_security_question
-      onChange: onDisableSecurityChange
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/disableSecurity
-      type: switch
-    - elements:
-      - label:
-          text: labels.database.admin_secret
-        type: label-element
-      - disabled: true
-        label:
-          text: labels.secret
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/authSecret/properties/name
-        type: input
-      if: isSecurityEnabled
-      type: single-step-form
-    type: single-step-form
-  id: basic
-  title: steps.0.label
-- form:
-    elements:
-    - alias: reusable_alert
-      chart:
-        name: uibytebuildersdev-component-alert
-        version: v0.29.0
-      moduleResolver: fetchJsons
-      schema:
-        $ref: schema#/properties/form/properties/alert
-      type: reusable-element
-    type: single-step-form
-  id: alert
-  title: labels.alert
-- form:
-    discriminator:
-      activeDatabaseMode:
-        type: string
-    elements:
-    - label:
-        text: labels.to_update_disabled_section
-      type: label-element
-    - customClass: mb-20
-      label:
-        text: labels.create_opsrequest
-      type: anchor
-      url:
-        params:
-          cluster:
-            $ref: store#/route/params/cluster
-          dbname:
-            $ref: model#/metadata/release/name
-          domain:
-            $ref: store#/domain
-          group:
-            $ref: model#/metadata/resource/group
-          kind:
-            $ref: model#/metadata/resource/kind
-          namespace:
-            $ref: model#/metadata/release/namespace
-          owner:
-            $ref: store#/route/params/user
-          resource:
-            $ref: model#/metadata/resource/name
-          version:
-            $ref: model#/metadata/resource/version
-        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
-    - computed: setDatabaseMode
-      disabled: true
-      hasDescription: true
-      label:
-        text: labels.database.mode
-      onChange: deleteDatabaseModePath
-      options:
-      - description: options.database.mode.Combined.description
-        text: options.database.mode.Combined.label
-        value: Combined
-      - description: options.database.mode.Dedicated.description
-        text: options.database.mode.Dedicated.label
-        value: Dedicated
-      schema:
-        $ref: discriminator#/activeDatabaseMode
-      type: radio
-    - elements:
-      - disabled: true
-        label:
-          text: labels.replicaset.number
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/replicas
-        type: input
-      - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec
-        label:
-          text: labels.max_unavailable
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/maxUnavailable
-        type: select
-      - disabled: true
-        label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
-        type: input
-      - disabled: true
-        label:
-          text: labels.storage.class
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/storage/properties/storageClassName
-        type: input
-      if: isEqualToDatabaseMode|Combined
-      type: single-step-form
-    - element:
-        elements:
-        - disabled: true
-          label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/replicas
-          type: input
-        - fetch: getMaxUnavailableOptions
-          label:
-            text: labels.max_unavailable
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/maxUnavailable
-          type: select
-        - disabled: true
-          elements:
-          - elements:
-            - elements:
-              - label:
-                  text: labels.storage.size
-                schema:
-                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests/properties/storage
-                type: input
-              schema:
-                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests
-              type: single-step-form
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources
-            type: single-step-form
-          - label:
-              text: labels.storage.class
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/storageClassName
-            type: input
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage
-          type: single-step-form
-        - disabled: true
-          label:
-            text: labels.suffix
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/suffix
-          type: input
-        - disabled: true
-          label:
-            text: labels.resources
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/resources
-          type: resource-input-form
-        hideForm: true
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn
-        show_label: true
-        type: single-step-form
-      individualItemVisibilityCheck: hasTopologyNode
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology
-      type: array-input-form
-    type: single-step-form
-  id: topology
-  title: steps.1.label
-- form:
-    discriminator:
-      internalUsers:
-        type: array
-    elements:
-    - addFormLabel: labels.user
-      computed: setInternalUsers
-      disabled: true
-      element:
-        discriminator:
-          users:
-            emitAs: internalUsers
-            type: array
-        elements:
-        - disabled: disableUsername
-          label:
-            text: labels.username
-          required: true
-          schema:
-            $ref: discriminator#/properties/users/items/properties/username
-          type: input
-        - isArray: true
-          keys:
-            label:
-              text: labels.annotations.key
-          label:
-            text: labels.attributes
-          schema:
-            $ref: discriminator#/properties/users/items/properties/attributes
-          type: key-value-input-form
-          values:
-            label:
-              text: labels.annotations.value
-            schema:
-              $ref: discriminator#/properties/users/items/properties/attributes/additionalProperties
-            type: input
-        - element:
-            label:
-              text: labels.role
-            schema:
-              $ref: discriminator#/properties/users/items/properties/backendRoles/items
-            type: input
-          label:
-            text: labels.backendRoles
-          schema:
-            $ref: discriminator#/properties/users/items/properties/backendRoles
-          type: list-input-form
-        - label:
-            text: labels.description
-          schema:
-            $ref: discriminator#/properties/users/items/properties/description
-          type: textarea
-        - label:
-            text: labels.hidden
-          schema:
-            $ref: discriminator#/properties/users/items/properties/hidden
-          type: switch
-        - element:
-            label:
-              text: labels.role
-            schema:
-              $ref: discriminator#/properties/users/items/properties/opendistroSecurityRoles/items
-            type: input
-          if: isAuthPluginEqualTo|OpenDistro
-          label:
-            text: labels.opendistro_security_roles
-          schema:
-            $ref: discriminator#/properties/users/items/properties/opendistroSecurityRoles
-          type: list-input-form
-        - label:
-            text: labels.reserved
-          schema:
-            $ref: discriminator#/properties/users/items/properties/reserved
-          type: switch
-        - element:
-            label:
-              text: labels.role
-            schema:
-              $ref: discriminator#/properties/users/items/properties/searchGuardRoles/items
-            type: input
-          if: isAuthPluginEqualTo|SearchGuard
-          label:
-            text: labels.search_guard_roles
-          schema:
-            $ref: discriminator#/properties/users/items/properties/searchGuardRoles
-          type: list-input-form
-        - allowUserDefinedOption: true
-          fetch: getSecrets
-          label:
-            text: labels.secret_name
-          schema:
-            $ref: discriminator#/properties/users/items/properties/secretName
-          type: select
-        type: single-step-form
-      individualItemDisabilityCheck: disableUserEdit
-      label:
-        text: labels.internal_users
-      newItemValidator: validateNewUser
-      onChange: onInternalUsersChange
-      schema:
-        $ref: discriminator#/properties/internalUsers
-      tableContents:
-      - inTableColumn: true
-        label:
-          text: labels.username
-        path: username
-        type: value
-        typeOfValue: string
-      - label:
-          text: labels.attributes
-        path: attributes
-        type: value
-        typeOfValue: key-value
-      - inTableColumn: true
-        label:
-          isSubsection: true
-          text: labels.backendRoles
-        path: backendRoles
-        type: value
-        typeOfValue: array
-      - label:
-          text: labels.description
-        path: description
-        type: value
-        typeOfValue: string
-      - label:
-          text: labels.hidden
-        path: hidden
-        type: value
-        typeOfValue: string
-      - label:
-          isSubsection: true
-          text: labels.opendistro_security_roles
-        path: opendistroSecurityRoles
-        type: value
-        typeOfValue: array
-      - inTableColumn: true
-        label:
-          text: labels.reserved
-        path: reserved
-        type: value
-        typeOfValue: string
-      - label:
-          isSubsection: true
-          text: labels.search_guard_roles
-        path: searchGuardRoles
-        type: value
-        typeOfValue: array
-      - inTableColumn: true
-        label:
-          text: labels.secret_name
-        path: secretName
-        type: value
-        typeOfValue: string
-      type: single-step-form-array
-    type: single-step-form
-  id: internal-users
-  if: showInternalUsersAndRolesMapping
-  title: steps.2.label
-- form:
-    discriminator:
-      rolesMapping:
-        type: array
-    elements:
-    - addFormLabel: labels.role
-      computed: setRolesMapping
-      disabled: true
-      element:
-        discriminator:
-          roles:
-            emitAs: rolesMapping
-            type: array
-        elements:
-        - label:
-            text: labels.role_name
-          required: true
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/roleName
-          type: input
-        - element:
-            label:
-              text: labels.role
-            schema:
-              $ref: discriminator#/properties/roles/items/properties/andBackendRoles/items
-            type: input
-          label:
-            text: labels.andBackendRoles
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/andBackendRoles
-          type: list-input-form
-        - element:
-            label:
-              text: labels.role
-            schema:
-              $ref: discriminator#/properties/roles/items/properties/backendRoles/items
-            type: input
-          label:
-            text: labels.backendRoles
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/backendRoles
-          type: list-input-form
-        - label:
-            text: labels.hidden
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/hidden
-          type: switch
-        - element:
-            label:
-              text: labels.host
-            schema:
-              $ref: discriminator#/properties/roles/items/properties/hosts/items
-            type: input
-          label:
-            text: labels.hosts
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/hosts
-          type: list-input-form
-        - label:
-            text: labels.reserved
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/reserved
-          type: switch
-        - allowUserDefinedOption: true
-          fetch: getInternalUsers
-          label:
-            text: labels.users
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/users
-          type: multiselect
-        type: single-step-form
-      label:
-        text: labels.roles_mapping
-      onChange: onRolesMappingChange
-      schema:
-        $ref: discriminator#/properties/rolesMapping
-      tableContents:
-      - inTableColumn: true
-        label:
-          text: labels.role_name
-        path: roleName
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
-        label:
-          isSubsection: true
-          text: labels.backendRoles
-        path: backendRoles
-        type: value
-        typeOfValue: array
-      - inTableColumn: true
-        label:
-          text: labels.hidden
-        path: hidden
-        type: value
-        typeOfValue: string
-      - label:
-          isSubsection: true
-          text: labels.andBackendRoles
-        path: andBackendRoles
-        type: value
-        typeOfValue: array
-      - label:
-          isSubsection: true
-          text: labels.hosts
-        path: hosts
-        type: value
-        typeOfValue: array
-      - inTableColumn: true
-        label:
-          isSubsection: true
-          text: labels.users
-        path: users
-        type: value
-        typeOfValue: array
-      - label:
-          text: labels.reserved
-        path: reserved
-        type: value
-        typeOfValue: string
-      type: single-step-form-array
-    type: single-step-form
-  id: roles-mapping
-  if: showInternalUsersAndRolesMapping
-  title: steps.11.label
-- form:
-    elements:
-    - discriminator:
-        customizeKernelSettings:
-          type: string
-      elements:
-      - computed: returnStringYes
-        label:
-          text: labels.customizeKernelSettings
-        onChange: onCustomizeKernelSettingChange
-        options:
-        - text: options.yesOrNo.yes.text
-          value: "yes"
-        - text: options.kernelSettings.no
-          value: "no"
-        - text: options.kernelSettings.disable
-          value: disable
-        schema:
-          $ref: discriminator#/properties/customizeKernelSettings
-        type: radio
-      - if: isDiscriminatorEqualTo|/customizeKernelSettings|yes
-        label:
-          text: labels.privileged_question
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/privileged
-        type: switch
-      - addFormLabel: labels.sysctl
-        element:
-          elements:
-          - label:
-              text: labels.name
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/name
-            type: input
-          - label:
-              text: labels.value
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/value
-            type: input
-          type: single-step-form
-        if: isDiscriminatorEqualTo|/customizeKernelSettings|yes
-        label:
-          text: labels.sysctls
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls
-        tableContents:
-        - inTableColumn: true
-          label:
-            text: labels.name
-          path: name
-          type: value
-          typeOfValue: string
-        - inTableColumn: true
-          label:
-            text: labels.value
-          path: value
-          type: value
-          typeOfValue: string
-        type: single-step-form-array
-      keepEmpty: true
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings
-      type: single-step-form
-    type: single-step-form
-  id: kernel-settings
-  title: steps.10.label
-- form:
-    discriminator:
-      configureTLS:
-        default: true
-        type: boolean
-    elements:
-    - if: showTlsRecommendation
-      label:
-        text: labels.tls_recommended_text
-      type: label-element
-    - label:
-        text: labels.to_update_tls
-      type: label-element
-    - customClass: mb-20
-      label:
-        text: labels.create_opsrequest
-      type: anchor
-      url:
-        params:
-          cluster:
-            $ref: store#/route/params/cluster
-          dbname:
-            $ref: model#/metadata/release/name
-          domain:
-            $ref: store#/domain
-          group:
-            $ref: model#/metadata/resource/group
-          kind:
-            $ref: model#/metadata/resource/kind
-          namespace:
-            $ref: model#/metadata/release/namespace
-          owner:
-            $ref: store#/route/params/user
-          resource:
-            $ref: model#/metadata/resource/name
-          version:
-            $ref: model#/metadata/resource/version
-        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
-    - computed: isValueExistInModel|/resources/kubedbComMariaDB/spec/tls
-      disabled: true
-      label:
-        text: labels.enable_tls
-      onChange: onTlsConfigureChange
-      schema:
-        $ref: discriminator#/configureTLS
-      type: switch
-    - disabled: true
-      elements:
-      - label:
-          text: labels.enable_ssl_question
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/enableSSL
-        type: switch
-      - elements:
-        - computed: setApiGroupEdit
-          disabled: true
-          label:
-            text: labels.api_group
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-          type: input
-        - label:
-            text: labels.kind
-          options:
-          - text: Issuer
-            value: Issuer
-          - text: ClusterIssuer
-            value: ClusterIssuer
-          required: returnFalse
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/issuerRef/properties/kind
-          type: select
-        - allowUserDefinedOption: true
-          fetch: getIssuerRefsName
-          label:
-            text: labels.name
-          required: returnFalse
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/issuerRef/properties/name
-          type: select
-        label:
-          text: labels.issuer_ref
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/issuerRef
-        type: single-step-form
-      - alias: reusable_certificates
-        chart:
-          name: uibytebuildersdev-component-certificates
-          version: v0.29.0
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/certificates
-        type: reusable-element
-      if: showTlsConfigureSection
-      type: single-step-form
-    type: single-step-form
-  id: tls
-  if: isSecurityEnabled
-  title: steps.3.label
-- form:
-    elements:
-    - disabled: disableInitializationSection
-      discriminator:
-        prePopulateDatabase:
-          type: string
-      elements:
-      - computed: initPrePopulateDatabase
-        label:
-          text: labels.prePopulateDatabase
-        onChange: onPrePopulateDatabaseChange
-        options:
-        - text: options.yesOrNo.yes.text
-          value: "yes"
-        - text: options.yesOrNo.no.text
-          value: "no"
-        schema:
-          $ref: discriminator#/properties/prePopulateDatabase
-        type: radio
-      - discriminator:
-          dataSource:
-            type: string
-        elements:
-        - computed: initDataSource
-          label:
-            text: labels.dataSource
-          onChange: onDataSourceChange
-          options:
-          - text: options.dataSource.script.text
-            value: script
-          - text: options.dataSource.stashBackup.text
-            value: stashBackup
-          schema:
-            $ref: discriminator#/properties/dataSource
-          type: select
-        - discriminator:
-            sourceVolumeType:
-              type: string
-          elements:
-          - label:
-              text: labels.script.path
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/init/properties/script/properties/scriptPath
-            type: input
-          - label:
-              text: labels.script.volume
-            type: label-element
-          - computed: initVolumeType
-            label:
-              text: labels.script.volumeType
-            onChange: onVolumeTypeChange
-            options:
-            - text: options.scriptSourceVolumeType.configMap.text
-              value: configMap
-            - text: options.scriptSourceVolumeType.secret.text
-              value: secret
-            schema:
-              $ref: discriminator#/properties/sourceVolumeType
-            type: select
-          - allowUserDefinedOption: true
-            fetch: resourceNames|core|v1|configmaps
-            if: showConfigMapOrSecretName|configMap
-            label:
-              text: labels.script.volumeName
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/init/properties/script/properties/configMap/properties/name
-            type: select
-          - allowUserDefinedOption: true
-            fetch: resourceNames|core|v1|secrets
-            if: showConfigMapOrSecretName|secret
-            label:
-              text: labels.script.volumeName
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
-            type: select
-          if: showScriptOrStashForm|script
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.restoreSession.snapshot
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0
-            type: input
-          - discriminator:
-              repositoryChoise:
-                type: string
-            elements:
-            - label:
-                text: labels.repositories.title
-              type: label-element
-            - computed: setInitialRestoreSessionRepo
-              onChange: onInitRepositoryChoiseChange
-              options:
-              - text: options.createOrSelect.select.text
-                value: select
-              - text: options.createOrSelect.create.text
-                value: create
-              schema:
-                $ref: discriminator#/properties/repositoryChoise
-              type: radio
-            - allowUserDefinedOption: true
-              fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
-              if: showRepositorySelectOrCreate|select
-              label:
-                text: labels.repositories.name
-              schema:
-                $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/repository/properties/name
-              type: select
-            - alias: repository_create_init
-              chart:
-                name: uibytebuildersdev-component-repository-create
-                version: v0.29.0
-              dataContext:
-                namespace:
-                  $ref: schema#/properties/metadata/properties/release/properties/namespace
-              if: showRepositorySelectOrCreate|create
-              moduleResolver: fetchJsons
-              schema:
-                $ref: schema#/properties/resources/properties/stashAppscodeComRepository_init_repo/properties/spec/properties/backend
-              type: reusable-element
-            type: single-step-form
-          - if: returnFalse
-            label:
-              text: labels.backupConfiguration.targetReference.name
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/target/properties/ref/properties/name
-            type: input
-          - discriminator:
-              customizeRestoreJobRuntimeSettings:
-                type: string
-            elements:
-            - computed: initCustomizeRestoreJobRuntimeSettings
-              label:
-                isSubsection: true
-                text: labels.runtimeSettings.choise
-              onChange: onCustomizeRestoreJobRuntimeSettingsChange
-              options:
-              - text: options.yesOrNo.yes.text
-                value: "yes"
-              - text: options.yesOrNo.no.text
-                value: "no"
-              schema:
-                $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
-              type: radio
-            - alias: runtime_settings_init
-              chart:
-                name: uibytebuildersdev-component-runtime-settings
-                version: v0.29.0
-              dataContext:
-                namespace:
-                  $ref: schema#/properties/metadata/properties/release/properties/namespace
-              if: showRuntimeForm|yes
-              moduleResolver: fetchJsons
-              schema:
-                $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/runtimeSettings
-              type: reusable-element
-            type: single-step-form
-          if: showScriptOrStashForm|stashBackup
-          type: single-step-form
-        - if: returnFalse
-          label:
-            text: labels.waitForInitialRestore
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/init/properties/waitForInitialRestore
-          type: switch
-        if: showInitializationForm
-        type: single-step-form
-      type: single-step-form
-    type: single-step-form
-  id: initialization
-  title: steps.4.label
-- form:
-    discriminator:
-      repoInitialSelectionStatus:
-        type: string
-      scheduleBackup:
-        default: "yes"
-        type: string
-    elements:
-    - computed: initScheduleBackupForEdit
-      if: showScheduleBackup
-      label:
-        text: labels.backup.title
-      onChange: onScheduleBackupChange
-      options:
-      - text: options.yesOrNo.yes.text
-        value: "yes"
-      - text: options.yesOrNo.no.text
-        value: "no"
-      schema:
-        $ref: discriminator#/properties/scheduleBackup
-      type: radio
-    - discriminator:
-        backupType:
-          type: string
-        isBackupDataLoaded:
-          default: false
-          type: boolean
-      elements:
-      - computed: initBackupData
-        if: returnFalse
-        type: input
-      - computed: setBackupType
-        fetch: getTypes
-        hasDescription: true
-        if: isBackupDataLoadedTrue
-        label:
-          text: Select Backup Type
-        onChange: onBackupTypeChange
-        schema:
-          $ref: discriminator#/backupType
-        type: radio
-      - discriminator:
-          backupConfigContext:
-            type: string
-          config:
-            type: string
-          paused:
-            default: false
-            type: boolean
-          schedule:
-            type: string
-        elements:
-        - fetch: getContext
-          label:
-            text: Select Context
-          onChange: onContextChange
-          required: true
-          schema:
-            $ref: discriminator#/backupConfigContext
-          type: select
-        - fetch: getConfigList
-          if: showConfigList
-          label:
-            text: Select BackupConfig
-          onChange: onConfigChange
-          required: true
-          schema:
-            $ref: discriminator#/config
-          type: select
-        - computed: getDefaultSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions
-          if: showSchedule
-          label:
-            text: Schedule
-          onChange: onInputChangeSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions|schedule
-          required: true
-          schema:
-            $ref: discriminator#/schedule
-          type: input
-        - if: showPause
-          label:
-            text: Paused
-          schema:
-            $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
-          type: switch
-        if: isBackupType|BackupConfig
-        type: single-step-form
-      - discriminator:
-          blueprintEnabled:
-            default: false
-            type: boolean
-        elements:
-        - computed: setBlueprintSwitch
-          label:
-            text: Enable Backup Blueprint
-          onChange: onBlueprintChange
-          schema:
-            $ref: discriminator#/blueprintEnabled
-          type: switch
-        if: isBackupType|BackupBlueprint
-        type: single-step-form
-      - discriminator:
-          archiverEnabled:
-            default: false
-            type: boolean
-        elements:
-        - computed: setArchiverSwitch
-          label:
-            text: Enable Archiver
-          onChange: onArchiverChange
-          schema:
-            $ref: discriminator#/archiverEnabled
-          type: switch
-        if: isBackupType|Archiver
-        type: single-step-form
-      if: showBackupForm
-      label:
-        text: Backup Form
-      type: single-step-form
-    type: single-step-form
-  id: backupconfiguration
-  title: steps.5.label
-- form:
-    discriminator:
-      enableMonitoring:
-        default: true
-        type: boolean
-    elements:
-    - label:
-        text: labels.to_update_exporter_resources
-      type: label-element
-    - customClass: mb-20
-      label:
-        text: labels.create_opsrequest
-      type: anchor
-      url:
-        function: getOpsRequestUrl|VerticalScaling
-    - computed: isValueExistInModel|/resources/kubedbComElasticsearch/spec/monitor
-      label:
-        text: labels.enable_monitoring
-      onChange: onEnableMonitoringChange
-      schema:
-        $ref: discriminator#/enableMonitoring
-      type: switch
-    - discriminator:
-        customizeExporter:
-          default: true
-          type: boolean
-      elements:
-      - hasDescription: true
-        label:
-          text: labels.agent
-        onChange: onAgentChange
-        options:
-        - description: options.agent.prometheus_operator.description
-          text: options.agent.prometheus_operator.label
-          value: prometheus.io/operator
-        - description: options.agent.prometheus.description
-          text: options.agent.prometheus.label
-          value: prometheus.io
-        - description: options.agent.prometheus_builtin.description
-          text: options.agent.prometheus_builtin.label
-          value: prometheus.io/builtin
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/agent
-        type: radio
-      - elements:
-        - label:
-            text: labels.scrapping_interval
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-          type: input
-        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComElasticsearch/spec/monitor/agent
-        label:
-          text: labels.service_monitor_configuration
-        show_label: true
-        type: single-step-form
-      - elements:
-        - elements:
-          - addFormLabel: labels.endpoint
-            element:
-              elements:
-              - label:
-                  text: labels.honor_labels
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/honorLabels
-                type: switch
-              - label:
-                  text: labels.interval
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/interval
-                type: input
-              - label:
-                  text: labels.path
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/path
-                type: input
-              - label:
-                  text: labels.port
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/port
-                type: input
-              type: single-step-form
-            label:
-              text: labels.endpoints
-            schema:
-              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: labels.honor_labels
-              path: honorLabels
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.interval
-              path: interval
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.path
-              path: path
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.port
-              path: port
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - elements:
-            - fetch: getResources|core|v1|namespaces
-              label:
-                text: labels.matchNames
-              schema:
-                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
-              type: multiselect
-            if: returnFalse
-            schema:
-              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector
-            type: single-step-form
-          - elements:
-            - isArray: true
-              keys:
-                label:
-                  text: labels.labels.key
-              label:
-                text: labels.labels.label
-              schema:
-                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
-              type: key-value-input-form
-              values:
-                label:
-                  text: labels.labels.value
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels/additionalProperties
-                type: input
-            if: returnFalse
-            schema:
-              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
-            type: single-step-form
-          schema:
-            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
-          type: single-step-form
-        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComElasticsearch/spec/monitor/agent
-        label:
-          text: labels.service_monitor
-        schema:
-          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor
-        show_label: true
-        type: single-step-form
-      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComElasticsearch/spec/monitor/agent
-        individualItemDisabilityCheck: disableLableChecker
-        isArray: true
-        keys:
-          label:
-            text: labels.labels.key
-        label:
-          text: labels.labels.label
-        schema:
-          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.labels.value
-          schema:
-            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
-          type: input
-      - label:
-          text: labels.exporter_configuration
-        type: label-element
-      - label:
-          text: labels.customize_exporter
-        onChange: onCustomizeExporterChange
-        schema:
-          $ref: discriminator#/customizeExporter
-        type: switch
-      - elements:
-        - if: returnFalse
-          label:
-            text: labels.resources
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
-          type: resource-input-form
-        - label:
-            text: labels.security_context
-          type: label-element
-        - label:
-            text: labels.run_as_user
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
-          type: input
-        - customClass: mb-0
-          label:
-            text: labels.run_as_group
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
-          type: input
-        - label:
-            text: labels.port
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
-          type: input
-        - element:
-            label:
-              isSubsection: true
-              text: labels.args
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
-            type: input
-          label:
-            text: labels.args
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-          type: list-input-form
-        - alias: reusable_env
-          chart:
-            name: uibytebuildersdev-component-env
-            version: v0.29.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/release/properties/namespace
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
-          type: reusable-element
-        if: showCustomizeExporterSection
-        type: single-step-form
-      if: showMonitoringSection
-      type: single-step-form
-    type: single-step-form
-  id: monitoring
-  title: steps.6.label
-- form:
-    elements:
-    - alias: pod_template_standalone
-      chart:
-        name: uibytebuildersdev-component-pod-template
-        version: v0.29.0
-      dataContext:
-        namespace:
-          $ref: schema#/properties/metadata/properties/release/properties/namespace
-        topology:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology
-      functionCallbacks:
-        isEditWizard:
-          $ref: functions#/returnTrue
-      moduleResolver: fetchJsons
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/podTemplate
-      type: reusable-element
-    type: single-step-form
-  id: pod-template
-  title: steps.7.label
-- form:
-    elements:
-    - alias: reusable_service_templates
-      chart:
-        name: uibytebuildersdev-component-service-templates
-        version: v0.29.0
-      moduleResolver: fetchJsons
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/serviceTemplates
-      type: reusable-element
-    type: single-step-form
-  id: networking
-  title: steps.8.label
-- form:
-    elements:
-    - discriminator:
-        setCustomConfig:
-          type: string
-      elements:
-      - computed: initSetCustomConfig
-        label:
-          text: labels.setCustomConfig
-        onChange: onSetCustomConfigChange
-        options:
-        - text: options.yesOrNo.yes.text
-          value: "yes"
-        - text: options.yesOrNo.no.text
-          value: "no"
-        schema:
-          $ref: discriminator#/properties/setCustomConfig
-        type: radio
-      - discriminator:
-          configFiles:
-            type: string
-          configurationSource:
-            default: use-existing-config
-            type: string
-        elements:
-        - computed: setConfigurationSource
-          label:
-            text: labels.custom_config_type
-          onChange: onConfigurationSourceChange
-          options:
-          - text: options.configuration_source.use_existing_config.label
-            value: use-existing-config
-          - text: options.configuration_source.create_new_config.label
-            value: create-new-config
-          schema:
-            $ref: discriminator#/configurationSource
-          type: radio
-        - allowUserDefinedOption: true
-          fetch: getSecrets
-          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
-          label:
-            text: labels.name
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/configSecret/properties/name
-          type: select
-        - addFormLabel: labels.config_file
-          computed: setConfigFiles
-          element:
-            discriminator:
-              files:
-                emitAs: configFiles
-                type: array
-            elements:
-            - label:
-                text: labels.filename
-              required: true
-              schema:
-                $ref: discriminator#/properties/files/items/properties/key
-              type: input
-            - label:
-                text: labels.labels.value
-              required: true
-              schema:
-                $ref: discriminator#/properties/files/items/properties/value
-              type: editor
-            type: single-step-form
-          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-          label:
-            text: labels.config_files
-          onChange: onConfigFilesChange
-          schema:
-            $ref: discriminator#/properties/configFiles
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.filename
-            path: key
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.labels.value
-            path: value
-            type: value
-            typeOfValue: code
-          type: single-step-form-array
-        if: isDiscriminatorEqualTo|/setCustomConfig|yes
-        type: single-step-form
-      type: single-step-form
-    type: single-step-form
-  id: custom-config
-  title: steps.9.label
-- form:
-    elements:
-    - discriminator:
-        setSecretCustomConfig:
-          type: string
-      elements:
-      - computed: initSetSecureCustomConfig
-        label:
-          text: labels.setSecretCustomConfig
-        onChange: onSetSecretCustomConfigChange
-        options:
-        - text: options.yesOrNo.yes.text
-          value: "yes"
-        - text: options.yesOrNo.no.text
-          value: "no"
-        schema:
-          $ref: discriminator#/properties/setSecretCustomConfig
-        type: radio
-      - discriminator:
-          configFiles:
-            type: string
-          configurationSource:
-            default: use-existing-config
-            type: string
-        elements:
-        - computed: setSecretConfigurationSource
-          label:
-            text: labels.secret_custom_config_type
-          onChange: onSecretConfigurationSourceChange
-          options:
-          - text: options.configuration_source.use_existing_config.label
-            value: use-existing-config
-          - text: options.configuration_source.create_new_config.label
-            value: create-new-config
-          schema:
-            $ref: discriminator#/configurationSource
-          type: radio
-        - allowUserDefinedOption: true
-          fetch: getSecrets
-          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
-          label:
-            text: labels.name
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/secureConfigSecret/properties/name
-          type: select
-        - addFormLabel: labels.config_file
-          computed: setSecretConfigFiles
-          element:
-            discriminator:
-              files:
-                emitAs: configFiles
-                type: array
-            elements:
-            - label:
-                text: labels.settings_key
-              required: true
-              schema:
-                $ref: discriminator#/properties/files/items/properties/key
-              type: input
-            - label:
-                text: labels.settings_value
-              required: true
-              schema:
-                $ref: discriminator#/properties/files/items/properties/value
-              type: editor
-            type: single-step-form
-          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-          label:
-            text: labels.config_files
-          onChange: onSecretConfigFilesChange
-          schema:
-            $ref: discriminator#/properties/configFiles
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.settings_key
-            path: key
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.settings_value
-            path: value
-            type: value
-            typeOfValue: code
-          type: single-step-form-array
-        if: isDiscriminatorEqualTo|/setSecretCustomConfig|yes
-        type: single-step-form
-      type: single-step-form
-    type: single-step-form
-  id: secure-custom-config
-  if: showSecureCustomConfig
-  title: steps.12.label
-- form:
-    discriminator:
-      dbDetails:
-        default: false
-        type: boolean
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      type: input
-    - elements:
-      - label:
-          text: Name
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/name
-        type: input
-      - fetch: getNamespaces
-        hasGroup: isRancherManaged
-        label:
-          text: SelectNamespace
-        onChange: onNamespaceChange
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/namespace
-        type: select
-      - fetch: getDbs
-        label:
-          text: SelectDb
-        onChange: initMetadata
-        refresh: true
-        required: true
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/databaseRef/properties/name
-        type: select
-      if: isConsole
-      type: single-step-form
-    - hasDescription: true
-      if: isConsole
-      label:
-        text: SelectType
-      onChange: initMetadata
-      options:
-      - description: Scale your CPU Memory based on resource usage
-        text: Compute
-        value: compute
-      - description: Expand your database size based on volume usage
-        text: Storage
-        value: storage
-      required: true
-      schema:
-        $ref: discriminator#/properties/autoscalingType
-      type: radio
-    - discriminator:
-        topologyMachines:
-          default: []
-          type: array
-      elements:
-      - fetch: fetchTopologyMachines
-        if: returnFalse
-        schema:
-          $ref: discriminator#/topologyMachines
-        type: input
-      - elements:
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/node/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
-            type: select
-          - label:
-              text: PodLifeTimeThreshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: Resource Diff Percentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
-            type: input
-          - discriminator:
-              allowedMachine-node-max:
-                type: string
-              allowedMachine-node-min:
-                type: string
-            elements:
-            - computed: setAllowedMachine|node|min
-              disableUnselect: true
-              fetch: getMachines|node|min
-              if: hasAnnotations
-              label:
-                text: Min Allowed Profile
-              onChange: onMachineChange|node
-              schema:
-                $ref: discriminator#/properties/allowedMachine-node-min
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Min Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed
-              show_label: true
-              type: single-step-form
-            - computed: setAllowedMachine|node|max
-              disableUnselect: true
-              fetch: getMachines|node|max
-              if: hasAnnotations
-              label:
-                text: Max Allowed Profile
-              onChange: onMachineChange|node
-              schema:
-                $ref: discriminator#/properties/allowedMachine-node-max
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Max Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed
-              show_label: true
-              type: single-step-form
-            type: single-step-form
-          - fetch: setControlledResources|node
-            label:
-              text: controlledResources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
-            type: multiselect
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node
-          type: single-step-form
-        if: dbTypeEqualsTo|node
-        label:
-          text: Node
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node
-        show_label: true
-        type: single-step-form
-      - elements:
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/data/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/trigger
-            type: select
-          - label:
-              text: PodLifeTimeThreshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: Resource Diff Percentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/resourceDiffPercentage
-            type: input
-          - discriminator:
-              allowedMachine-data-max:
-                type: string
-              allowedMachine-data-min:
-                type: string
-            elements:
-            - computed: setAllowedMachine|data|min
-              disableUnselect: true
-              fetch: getMachines|data|min
-              if: hasAnnotations
-              label:
-                text: Min Allowed Profile
-              onChange: onMachineChange|data
-              schema:
-                $ref: discriminator#/properties/allowedMachine-data-min
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Min Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed
-              show_label: true
-              type: single-step-form
-            - computed: setAllowedMachine|data|max
-              disableUnselect: true
-              fetch: getMachines|data|max
-              if: hasAnnotations
-              label:
-                text: Max Allowed Profile
-              onChange: onMachineChange|data
-              schema:
-                $ref: discriminator#/properties/allowedMachine-data-max
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Max Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed
-              show_label: true
-              type: single-step-form
-            type: single-step-form
-          - fetch: setControlledResources|data
-            label:
-              text: Controlled Resources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
-            type: multiselect
-          label:
-            text: Data
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/ingest/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/trigger
-            type: select
-          - label:
-              text: Pod LifeTime Threshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: ResourceDiffPercentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/resourceDiffPercentage
-            type: input
-          - discriminator:
-              allowedMachine-ingest-max:
-                type: string
-              allowedMachine-ingest-min:
-                type: string
-            elements:
-            - computed: setAllowedMachine|ingest|min
-              disableUnselect: true
-              fetch: getMachines|ingest|min
-              if: hasAnnotations
-              label:
-                text: Min Allowed Profile
-              onChange: onMachineChange|ingest
-              schema:
-                $ref: discriminator#/properties/allowedMachine-ingest-min
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Min Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed
-              show_label: true
-              type: single-step-form
-            - computed: setAllowedMachine|ingest|max
-              disableUnselect: true
-              fetch: getMachines|ingest|max
-              if: hasAnnotations
-              label:
-                text: Max Allowed Profile
-              onChange: onMachineChange|ingest
-              schema:
-                $ref: discriminator#/properties/allowedMachine-ingest-max
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Max Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed
-              show_label: true
-              type: single-step-form
-            type: single-step-form
-          - fetch: setControlledResources|ingest
-            label:
-              text: Controlled Resources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/controlledResources
-            type: multiselect
-          label:
-            text: Ingest
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/master/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/trigger
-            type: select
-          - label:
-              text: Pod LifeTime Threshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: Resource Diff Percentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/resourceDiffPercentage
-            type: input
-          - discriminator:
-              allowedMachine-master-max:
-                type: string
-              allowedMachine-master-min:
-                type: string
-            elements:
-            - computed: setAllowedMachine|master|min
-              disableUnselect: true
-              fetch: getMachines|master|min
-              if: hasAnnotations
-              label:
-                text: Min Allowed Profile
-              onChange: onMachineChange|master
-              schema:
-                $ref: discriminator#/properties/allowedMachine-master-min
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Min Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed
-              show_label: true
-              type: single-step-form
-            - computed: setAllowedMachine|master|max
-              disableUnselect: true
-              fetch: getMachines|master|max
-              if: hasAnnotations
-              label:
-                text: Max Allowed Profile
-              onChange: onMachineChange|master
-              schema:
-                $ref: discriminator#/properties/allowedMachine-master-max
-              type: select
-            - elements:
-              - label:
-                  text: cpu
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/cpu
-                type: input
-              - label:
-                  text: memory
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/memory
-                type: input
-              if: hasNoAnnotations
-              label:
-                text: Max Allowed
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed
-              show_label: true
-              type: single-step-form
-            type: single-step-form
-          - fetch: setControlledResources|master
-            label:
-              text: Controlled Resources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/controlledResources
-            type: multiselect
-          label:
-            text: Master
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master
-          show_label: true
-          type: single-step-form
-        if: dbTypeEqualsTo|topology
-        type: single-step-form
-      - elements:
-        - fetch: fetchNodeTopology
-          label:
-            text: Select NodeTopology
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-          type: select
-        - if: isNodeTopologySelected
-          label:
-            text: ScaleUp Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-          type: input
-        - if: isNodeTopologySelected
-          label:
-            text: ScaleDown Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
-          type: input
-        if: hasNoAnnotations
-        label:
-          text: nodeTopology
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology
-        show_label: true
-        type: single-step-form
-      type: single-step-form
-    - elements:
-      - label:
-          text: Timeout
-        options:
-        - text: 5 minutes
-          value: 5m0s
-        - text: 10 minutes
-          value: 10m0s
-        - text: 30 minutes
-          value: 30m0s
-        - text: 1 hour
-          value: 1h0m
-        - text: 2 hours
-          value: 2h0m
-        - text: 5 hours
-          value: 5h0m
-        - text: 10 hours
-          value: 10h0m
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-        type: select
-      - computed: setApplyToIfReady
-        label:
-          text: Apply
-        options:
-        - text: IfReady (OpsRequest will be applied if database is ready)
-          value: IfReady
-        - text: Always (OpsRequest will always be applied)
-          value: Always
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-        type: radio
-      if: showOpsRequestOptions
-      label:
-        text: OpsRequest Options
-      schema:
-        $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions
-      show_label: true
-      type: single-step-form
-    type: single-step-form
-  id: compute-autoscaler
-  title: steps.13.label
-- form:
-    discriminator:
-      dbDetails:
-        default: false
-        type: boolean
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      type: input
-    - elements:
-      - label:
-          text: Name
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/name
-        type: input
-      - fetch: getNamespaces
-        hasGroup: isRancherManaged
-        label:
-          text: SelectNamespace
-        onChange: onNamespaceChange
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/namespace
-        type: select
-      - fetch: getDbs
-        label:
-          text: SelectDb
-        onChange: initMetadata
-        refresh: true
-        required: true
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/databaseRef/properties/name
-        type: select
-      if: isConsole
-      type: single-step-form
-    - hasDescription: true
-      if: isConsole
-      label:
-        text: SelectType
-      onChange: initMetadata
-      options:
-      - description: Scale your CPU Memory based on resource usage
-        text: Compute
-        value: compute
-      - description: Expand your database size based on volume usage
-        text: Storage
-        value: storage
-      required: true
-      schema:
-        $ref: discriminator#/properties/autoscalingType
-      type: radio
-    - elements:
-      - elements:
-        - computed: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/trigger
-          label:
-            text: Trigger
-          options:
-          - "On"
-          - "Off"
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
-          type: select
-        - label:
-            text: Expansion Mode
-          options:
-          - Online
-          - Offline
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
-          type: select
-        - label:
-            text: UsageThreshold (%)
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-          type: input
-        - addFormLabel: ScalingRules
-          element:
-            elements:
-            - label:
-                text: AppliesUpto (In Storage units)
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/appliesUpto
-              type: input
-            - label:
-                text: Threshold (In %, Or In Storage Units)
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/threshold
-              type: input
-            type: single-step-form
-          label:
-            text: ScalingRules
-          onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/scalingRules|scalingRules
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: AppliesUpto (In Storage units)
-            path: appliesUpto
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: Threshold (In %, Or In Storage Units)
-            path: threshold
-            type: value
-            typeOfValue: string
-          type: single-step-form-array
-        - label:
-            text: UpperBound
-          onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/upperBound
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
-          type: input
-        if: dbTypeEqualsTo|node
-        label:
-          text: Node
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node
-        show_label: true
-        type: single-step-form
-      - elements:
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/trigger
-            label:
-              text: trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/trigger
-            type: select
-          - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/usageThreshold
-            type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
-            label:
-              text: ScalingRules
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/scalingRules|scalingRules
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/upperBound
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
-            type: input
-          label:
-            text: Data
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/trigger
-            type: select
-          - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/usageThreshold
-            type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
-            label:
-              text: ScalingRules
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/scalingRules|scalingRules
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/upperBound
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/upperBound
-            type: input
-          label:
-            text: Ingest
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest
-          show_label: true
-          type: single-step-form
-        - elements:
-          - computed: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/trigger
-            type: select
-          - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/usageThreshold
-            type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
-            label:
-              text: ScalingRules
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/scalingRules|scalingRules
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/upperBound
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
-            type: input
-          label:
-            text: Master
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master
-          show_label: true
-          type: single-step-form
-        if: dbTypeEqualsTo|topology
-        type: single-step-form
-      type: single-step-form
-    - elements:
-      - label:
-          text: Timeout
-        options:
-        - text: 5 minutes
-          value: 5m0s
-        - text: 10 minutes
-          value: 10m0s
-        - text: 30 minutes
-          value: 30m0s
-        - text: 1 hour
-          value: 1h0m
-        - text: 2 hours
-          value: 2h0m
-        - text: 5 hours
-          value: 5h0m
-        - text: 10 hours
-          value: 10h0m
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-        type: select
-      - computed: setApplyToIfReady
-        label:
-          text: Apply
-        options:
-        - text: IfReady (OpsRequest will be applied if database is ready)
-          value: IfReady
-        - text: Always (OpsRequest will always be applied)
-          value: Always
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-        type: radio
-      if: showOpsRequestOptions
-      label:
-        text: OpsRequest Options
-      schema:
-        $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions
-      show_label: true
-      type: single-step-form
-    type: single-step-form
-  id: storage-autoscaler
-  title: steps.0.label
-- form:
-    discriminator:
-      binding:
-        default: false
-        type: boolean
-    elements:
-    - computed: isBindingAlreadyOn
-      label:
-        text: Expose Database
-      onChange: addOrRemoveBinding
-      schema:
-        $ref: discriminator#/properties/binding
-      type: switch
-    type: single-step-form
-  id: binding
-  title: Gateway Binding
 type: multi-step-form
+step:
+  - type: single-step-form
+    id: backupconfiguration
+    # label: Backup
+    schema: schema/
+    elements:
+    - type: radio
+      label: Schedule a Backup?
+      schema: temp/properties/scheduleBackup
+      isHorizontal: true
+      options:
+        - text: 'Yes'
+          value: 'yes'
+        - text: 'No'
+          value: 'no'
+      if:
+        type: function
+        name: showScheduleBackup
+      init:
+        type: func
+        value: initScheduleBackupForEdit
+      watcher:
+        func: onScheduleBackupChange
+        paths:
+          - temp/properties/scheduleBackup
+    - type: block-layout
+      label: Backup Form
+      showLabels: false
+      loader: initBackupData
+      if:
+        type: function
+        name: showBackupForm
+      elements:
+        - type: radio
+          label: Select Backup Type
+          schema: temp/properties/backupType
+          isHorizontal: true
+          options:
+            - text: BackupConfig
+              value: BackupConfig
+              description: 'Create, Delete or Modify BackupConfig'
+            - text: BackupBlueprint
+              value: BackupBlueprint
+              description: Enable/Disable BackupBlueprint
+          if:
+            type: function
+            name: isBackupDataLoadedTrue
+          init:
+            type: func
+            value: setBackupType
+          loader: getTypes
+          watcher:
+            func: onBackupTypeChange
+            paths:
+              - temp/properties/backupType
+        - type: block-layout
+          label: Config
+          if:
+            type: function
+            name: isBackupType|BackupConfig
+          elements:
+            - type: select
+              label: Select Context
+              schema: temp/properties/backupConfigContext
+              validation:
+                type: required
+              loader: getContext
+              watcher:
+                func: onContextChange
+                paths:
+                  - temp/properties/backupConfigContext
+            - type: select
+              label: Select BackupConfig
+              schema: temp/properties/config
+              validation:
+                type: required
+              if:
+                type: function
+                name: showConfigList
+              loader: getConfigList
+              watcher:
+                func: onConfigChange
+                paths:
+                  - temp/properties/config
+            - type: input
+              label: Schedule
+              schema: temp/properties/schedule
+              validation:
+                type: required
+              if:
+                type: function
+                name: showSchedule
+              loader:
+                name: getDefaultSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions
+                watchPaths:
+                  - temp/properties/config
+              watcher:
+                func: onInputChangeSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions|schedule
+                paths:
+                  - temp/properties/schedule
+            - type: switch
+              label: Paused
+              fullwidth: true
+              schema: schema/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
+              if:
+                type: function
+                name: showPause
+              watcher:
+                  func: setPausedValue
+                  paths:
+                    - temp/properties/config
+              init:
+                type: func
+                value: setPausedValue
+        - type: block-layout
+          label: Blueprint
+          if:
+            type: function
+            name: isBackupType|BackupBlueprint
+          elements:
+            - type: switch
+              label: Enable Backup Blueprint
+              fullwidth: true
+              subtitle: Use a backup blueprint template to automatically configure backups for similar databases
+              schema: temp/properties/blueprintEnabled
+              init:
+                type: func
+                value: setBlueprintSwitch
+              watcher:
+                func: onBlueprintChange
+                paths:
+                  - temp/properties/blueprintEnabled
+        - type: block-layout
+          label: Archiver
+          if:
+            type: function
+            name: isBackupType|Archiver
+          elements:
+            - type: switch
+              label: Enable Archiver
+              fullwidth: true
+              schema: temp/properties/archiverEnabled
+              init:
+                type: func
+                value: setArchiverSwitch
+              watcher:
+                func: onArchiverChange
+                paths:
+                  - temp/properties/archiverEnabled
+
+  - type: single-step-form
+    id: monitoring
+    loader: initMonitoring
+    elements:
+    - type: label-element
+      label: To update Exporter Resource section click on Create OpsRequest
+    - type: anchor
+      label: Create OpsRequest
+      schema: temp/properties/opsRequestUrl
+      init:
+        type: func
+        value: getOpsRequestUrl|scale-vertically
+    - type: switch
+      label: Enable Monitoring
+      fullwidth: true
+      schema: temp/properties/enableMonitoring
+      init:
+        type: func
+        value: isValueExistInModel|/resources/kubedbComElasticsearch/spec/monitor
+      watcher:
+        func: onEnableMonitoringChange
+        paths:
+          - temp/properties/enableMonitoring
+    - type: block-layout
+      if:
+        type: function
+        name: showMonitoringSection
+      elements:
+        - type: radio
+          label: Select a Monitoring Method
+          schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/agent
+          isHorizontal: true
+          options:
+          - text: Prometheus Operator
+            value: prometheus.io/operator
+            description: Inject metric exporter sidecar and creates a ServiceMonitor
+          - text: Custom ServiceMonitor
+            value: prometheus.io
+            description: Injects the metric exporter sidecar and let you customize ServiceMonitor
+          - text: Custom Scrapper
+            value: prometheus.io/builtin
+            description: Inject metric exporter sidecar and add Prometheus annotations to the stats Service
+          init:
+            type: static
+            value: prometheus.io/operator
+          watcher:
+            func: onAgentChange
+            paths:
+              - schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/agent
+        - type: block-layout
+          label: ServiceMonitor Configuration
+          showLabels: true
+          if:
+            type: function
+            name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComElasticsearch/spec/monitor/agent
+          elements:
+            - label: Scrapping Interval
+              schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+              type: input
+        - type: block-layout
+          label: Service Monitor
+          showLabels: true
+          if:
+            type: function
+            name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComElasticsearch/spec/monitor/agent
+          elements:
+          - type: array-object-form
+            label: Endpoints
+            buttonClass: is-light is-outlined
+            schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
+            elements:
+            - type: switch
+              label: Honor labels
+              fullwidth: true
+              schema: honorLabels
+            - type: input
+              label: Interval
+              schema: interval
+              validation:
+                type: required
+            - type: input
+              label: Path
+              schema: path
+              validation:
+                type: required
+            - type: input
+              label: Port
+              schema: port
+              validation:
+                type: required
+          - type: select
+            multiple: true
+            label: Match Namespaces
+            schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
+            loader: getResources|core|v1|namespaces
+            if:
+              type: function
+              name: returnFalse
+          - type: block-layout
+            showLabels: false
+            # schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
+            if:
+              type: function
+              name: returnFalse
+            elements:
+              - type: object-item
+                label: Labels
+                schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
+        - type: object-item
+          schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
+          label : Labels
+          buttonClass: is-light is-outlined
+          if:
+            type: function
+            name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComElasticsearch/spec/monitor/agent
+          # individualItemDisabilityCheck: disableLableChecker
+        - type: label-element
+          label: Exporter Configuration
+          schema: ''
+        - type: switch
+          label: Customize Exporter Sidecar
+          fullwidth: true
+          schema: temp/properties/customizeExporter
+          init:
+            type: static
+            value: true
+          watcher:
+            func: onCustomizeExporterChange
+            paths:
+              - temp/properties/customizeExporter
+        - type: block-layout
+          label: Customer Exporter Section
+          showLabels: false
+          loader: setMetadata
+          if:
+            type: function
+            name: showCustomizeExporterSection
+          elements:
+            - type: machine-compare
+              label: Resources
+              schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+              if:
+                type: function
+                name: returnFalse
+            - type: label-element
+              label: Security Context
+              schema: ''
+            - type: input
+              schema:  schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+              label: Run as User
+            - type: input
+              schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+              label: Run as Group
+            - type: input
+              schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+              label: Port
+            - type: array-item-form
+              label: Args
+              buttonClass: is-light is-outlined
+              schema: schema/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+              init:
+                type: static
+                value: ['--compatible-mode']
+              element:
+                type: input
+                label: Args
+                # isSubsection: true
+            - type: block-layout
+              label: Metadata
+              showLabels: false
+              elements:
+                - type: array-object-form
+                  init:
+                    type: func
+                    value: initEnvArray
+                  label: Environment Variables
+                  buttonClass: is-light is-outlined
+                  watcher:
+                    func: onEnvArrayChange
+                    paths:
+                      - temp/properties/env
+                  schema: temp/properties/env
+                  elements:
+                  - type: input
+                    label: Name
+                    schema: name
+                    validation:
+                      type: required
+                  - type: radio
+                    label: Value From
+                    schema: temp/properties/valueFromType
+                    validation:
+                      type: required
+                    init: 
+                      type: func 
+                      value: setValueFrom
+                    options:
+                    - text: Input
+                      value: input
+                    - text: Secret
+                      value: secret
+                    - text: ConfigMap
+                      value: configMap
+                    watcher:
+                      func: onValueFromChange
+                      paths:
+                        - temp/properties/valueFromType
+                  - type: input 
+                    label: Value 
+                    schema: value
+                    validation:
+                      type: required
+                    if:
+                      name: isEqualToTemp|input
+                      type: function
+                  - type: select
+                    if:
+                      type: function
+                      name: isEqualToTemp|configMap
+                    label: ConfigMap Name
+                    schema: valueFrom/properties/configMapKeyRef/properties/name
+                    loader:
+                      name: resourceNames|core|v1|configmaps
+                      watchPaths:
+                        - schema/metadata/release/namespace
+                    validation:
+                      type: required
+                  - type: select
+                    label: ConfigMap Key
+                    schema: valueFrom/properties/configMapKeyRef/properties/key
+                    if:
+                      type: function
+                      name: isEqualToTemp|configMap
+                    loader:
+                      name: getConfigMapKeys
+                      watchPaths:
+                        - schema/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/configMapKeyRef/name
+                        - schema/metadata/release/namespace
+                  - type: select
+                    label: Secret Name
+                    schema: valueFrom/properties/secretKeyRef/properties/name
+                    if:
+                      type: function
+                      name: isEqualToTemp|secret
+                    loader:
+                      name: getSecrets
+                      watchPaths:
+                        - schema/metadata/release/namespace
+                    validation:
+                      type: required
+                  - type: select
+                    label: Secret Key
+                    schema: valueFrom/properties/secretKeyRef/properties/key
+                    if:
+                      type: function
+                      name: isEqualToTemp|secret
+                    loader:
+                      name: getSecretKeys
+                      watchPaths:
+                        - schema/resources/kubedbComElasticsearch/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/secretKeyRef/name
+                        - schema/metadata/release/namespace
+
+
+  - type: single-step-form
+    id: compute-autoscaler
+    loader: getDbDetails
+    elements:
+    - type: block-layout
+      showLabels: false
+      loader: fetchTopologyMachines
+      elements:
+        # Node mode (Combined)
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/node/trigger
+          schema: temp/properties/compute/properties/node/properties/trigger
+          watcher:
+            func: onTriggerChange|compute/node
+            paths:
+              - temp/properties/compute/properties/node/properties/trigger
+        - type: label-element
+          label: Pod lifetime threshold
+          subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+        - type: input
+          label: Pod LifeTime Threshold (e.g., 10m 30s)
+          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+          customClass: width-300
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+        - type: block-layout
+          label: Node
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          showLabels: true
+          # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node
+          elements:
+            - type: threshold-input
+              label: ResourceDiff Percentage
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+              customClass: width-300
+            - type: label-element
+              label: Resource Configuration
+              subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+            - type: block-layout
+              showLabels: false
+              elements:
+                - type: machine-compare
+                  label: Min Allowed Profile
+                  header: Minimum Resource Limit
+                  schema: temp/properties/allowedMachine-node-min
+                  if:
+                    type: function
+                    name: hasAnnotations
+                  init:
+                    type: func
+                    value: setAllowedMachine|node|min
+                  loader:
+                    name: getMachines|node|min
+                    watchPaths:
+                      - temp/properties/topologyMachines
+                      - temp/properties/allowedMachine-node-max
+                  watcher:
+                    func: onMachineChange|node
+                    paths:
+                      - temp/properties/allowedMachine-node-min
+                - type: block-layout
+                  label: Min Allowed
+                  fixedBlock: true
+                  if:
+                    type: function
+                    name: hasNoAnnotations
+                  showLabels: true
+                  elements:
+                    - type: input-compare
+                      label: Cpu
+                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+                    - type: input-compare
+                      label: Memory
+                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+                - type: machine-compare
+                  label: Max Allowed Profile
+                  header: Maximum Resource Limit
+                  schema: temp/properties/allowedMachine-node-max
+                  if:
+                    type: function
+                    name: hasAnnotations
+                  init:
+                    type: func
+                    value: setAllowedMachine|node|max
+                  loader:
+                    name: getMachines|node|max
+                    watchPaths:
+                      - temp/properties/topologyMachines
+                      - temp/properties/allowedMachine-node-min
+                  watcher:
+                    func: onMachineChange|node
+                    paths:
+                      - temp/properties/allowedMachine-node-max
+                - type: block-layout
+                  label: Max Allowed
+                  fixedBlock: true
+                  if:
+                    type: function
+                    name: hasNoAnnotations
+                  showLabels: true
+                  elements:
+                    - type: input-compare
+                      label: Cpu
+                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+                    - type: input-compare
+                      label: Memory
+                      schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+            - type: select
+              label: Controlled Resources
+              loader: setControlledResources|compute/node
+              multiple: true
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+
+        # Topology mode
+        - type: block-layout
+          showLabels: false
+          if:
+            type: function
+            name: dbTypeEqualsTo|topology
+          elements:
+            # Data
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/data/trigger
+              schema: temp/properties/compute/properties/data/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/data
+                paths:
+                  - temp/properties/compute/properties/data/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s)
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/podLifeTimeThreshold
+              customClass: width-300
+            - type: block-layout
+              label: Data
+              showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data
+              elements:
+                - type: threshold-input
+                  label: ResourceDiff Percentage
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                - type: block-layout
+                  showLabels: false
+                  elements:
+                    - type: machine-compare
+                      label: Min Allowed Profile
+                      header: Minimum Resource Limit
+                      schema: temp/properties/allowedMachine-data-min
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|data|min
+                      loader:
+                        name: getMachines|data|min
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-data-max
+                      watcher:
+                        func: onMachineChange|data
+                        paths:
+                          - temp/properties/allowedMachine-data-min
+                    - type: block-layout
+                      label: Min Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
+                    - type: machine-compare
+                      label: Max Allowed Profile
+                      header: Maximum Resource Limit
+                      schema: temp/properties/allowedMachine-data-max
+                      if:
+                        type: function
+                        name: hasAnnotations
+                      init:
+                        type: func
+                        value: setAllowedMachine|data|max
+                      loader:
+                        name: getMachines|data|max
+                        watchPaths:
+                          - temp/properties/topologyMachines
+                          - temp/properties/allowedMachine-data-min
+                      watcher:
+                        func: onMachineChange|data
+                        paths:
+                          - temp/properties/allowedMachine-data-max
+                    - type: block-layout
+                      label: Max Allowed
+                      fixedBlock: true
+                      if:
+                        type: function
+                        name: hasNoAnnotations
+                      showLabels: true
+                      elements:
+                        - type: input-compare
+                          label: Cpu
+                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
+                        - type: input-compare
+                          label: Memory
+                          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
+                - type: select
+                  label: Controlled Resources
+                  loader: setControlledResources|compute/data
+                  multiple: true
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
+
+            # Ingest
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/ingest/trigger
+              schema: temp/properties/compute/properties/ingest/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/ingest
+                paths:
+                  - temp/properties/compute/properties/ingest/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s)
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/podLifeTimeThreshold
+              customClass: width-300
+            - type: block-layout
+              label: Ingest
+              showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest
+              elements:
+                - type: threshold-input
+                  label: ResourceDiff Percentage
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                - type: block-layout
+                  showLabels: false
+                  elements:
+                      - type: machine-compare
+                        label: Min Allowed Profile
+                        header: Minimum Resource Limit
+                        schema: temp/properties/allowedMachine-ingest-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|ingest|min
+                        loader:
+                          name: getMachines|ingest|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-ingest-max
+                        watcher:
+                          func: onMachineChange|ingest
+                          paths:
+                            - temp/properties/allowedMachine-ingest-min
+                      - type: block-layout
+                        label: Min Allowed
+                        fixedBlock: true
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/memory
+                      - type: machine-compare
+                        label: Max Allowed Profile
+                        header: Maximum Resource Limit
+                        schema: temp/properties/allowedMachine-ingest-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|ingest|max
+                        loader:
+                          name: getMachines|ingest|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-ingest-min
+                        watcher:
+                          func: onMachineChange|ingest
+                          paths:
+                            - temp/properties/allowedMachine-ingest-max
+                      - type: block-layout
+                        label: Max Allowed
+                        fixedBlock: true
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/memory
+                - type: select
+                  label: Controlled Resources
+                  loader: setControlledResources|compute/ingest
+                  multiple: true
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/controlledResources
+
+            # Master
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/compute/master/trigger
+              schema: temp/properties/compute/properties/master/properties/trigger
+              watcher:
+                func: onTriggerChange|compute/master
+                paths:
+                  - temp/properties/compute/properties/master/properties/trigger
+            - type: label-element
+              label: Pod lifetime threshold
+              subtitle: Specifies the duration a pod can exist before using considered for scaling decisions, ensuring resource optimization and workload stability
+            - type: input
+              label: Pod LifeTime Threshold (e.g., 10m 30s)
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/podLifeTimeThreshold
+              customClass: width-300
+            - type: block-layout
+              label: Master
+              showLabels: true
+              # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master
+              elements:
+                - type: threshold-input
+                  label: ResourceDiff Percentage
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/resourceDiffPercentage
+                  customClass: width-300
+                - type: label-element
+                  label: Resource Configuration
+                  subtitle: Define minimum and maximum allowed resources to ensure optimal database performance
+                - type: block-layout
+                  showLabels: false
+                  elements:
+                      - type: machine-compare
+                        label: Min Allowed Profile
+                        header: Minimum Resource Limit
+                        schema: temp/properties/allowedMachine-master-min
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|master|min
+                        loader:
+                          name: getMachines|master|min
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-master-max
+                        watcher:
+                          func: onMachineChange|master
+                          paths:
+                            - temp/properties/allowedMachine-master-min
+                      - type: block-layout
+                        label: Min Allowed
+                        fixedBlock: true
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/memory
+                      - type: machine-compare
+                        label: Max Allowed Profile
+                        header: Maximum Resource Limit
+                        schema: temp/properties/allowedMachine-master-max
+                        if:
+                          type: function
+                          name: hasAnnotations
+                        init:
+                          type: func
+                          value: setAllowedMachine|master|max
+                        loader:
+                          name: getMachines|master|max
+                          watchPaths:
+                            - temp/properties/topologyMachines
+                            - temp/properties/allowedMachine-master-min
+                        watcher:
+                          func: onMachineChange|master
+                          paths:
+                            - temp/properties/allowedMachine-master-max
+                      - type: block-layout
+                        label: Max Allowed
+                        fixedBlock: true
+                        if:
+                          type: function
+                          name: hasNoAnnotations
+                        showLabels: true
+                        elements:
+                          - type: input-compare
+                            label: Cpu
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/cpu
+                          - type: input-compare
+                            label: Memory
+                            schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/memory
+                - type: select
+                  label: Controlled Resources
+                  loader: setControlledResources|compute/master
+                  multiple: true
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/controlledResources
+
+        - type: block-layout
+          label: NodeTopology
+          if:
+            type: function
+            name: hasNoAnnotations
+          showLabels: true
+          # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+          elements:
+            - type: select
+              label: Select NodeTopology
+              loader: fetchNodeTopology
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+            - type: threshold-input
+              label: Scale Up DiffPercentage
+              if:
+                type: function
+                name: isNodeTopologySelected
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+            - type: threshold-input
+              label: Scale Down DiffPercentage
+              if:
+                type: function
+                name: isNodeTopologySelected
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+        - type: block-layout
+          label: Ops Request Options
+          showLabels: true
+          if:
+            type: function
+            name: showOpsRequestOptions
+          # schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions
+          elements:
+            - type: time-picker
+              label: Timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+            - type: radio
+              label: Apply
+              init:
+                type: func
+                value: setApplyToIfReady
+              options:
+                - text: IfReady (OpsRequest will be applied if database is ready)
+                  value: IfReady
+                - text: Always (OpsRequest will always be applied)
+                  value: Always
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+
+  - type: single-step-form
+    id: storage-autoscaler
+    loader: getDbDetails
+    elements:
+    - type: block-layout
+      showLabels: false
+      elements:
+        # Node mode (Combined)
+        - type: switch
+          label: Trigger
+          fullwidth: true
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          init:
+            type: func
+            value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/trigger
+          schema: temp/properties/storage/properties/node/properties/trigger
+          watcher:
+            func: onTriggerChange|storage/node
+            paths:
+              - temp/properties/storage/properties/node/properties/trigger
+        - type: label-element
+          label: Expansion Mode (Online/Offline)
+          subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+        - type: select
+          label: Mode
+          description: Select how the storage expansion should be handled.
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          options:
+            - text: Online
+              value: Online
+            - text: Offline
+              value: Offline
+          schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
+        - type: block-layout
+          label: Node
+          if:
+            type: function
+            name: dbTypeEqualsTo|node
+          showLabels: true
+          elements:
+            - type: threshold-input
+              label: UsageThreshold (%)
+              subtitle: Set the threshold percentage of storage usage to trigger scaling.
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
+            - type: scaling-rules
+              label: Scaling Rules
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+              loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/storage/resources/requests/storage
+              watcher:
+                func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/scalingRules|scalingRules
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+          
+            - type: input
+              label: UpperBound
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+              watcher:
+                func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/upperBound
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+
+        # Topology mode
+        - type: block-layout
+          showLabels: false
+          if:
+            type: function
+            name: dbTypeEqualsTo|topology
+          elements:
+            # Data
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/trigger
+              schema: temp/properties/storage/properties/data/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/data
+                paths:
+                  - temp/properties/storage/properties/data/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/expansionMode
+            - type: block-layout
+              label: Data
+              showLabels: true
+              elements:
+                - type: threshold-input
+                  label: UsageThreshold (%) 
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/topology/data/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
+
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
+
+            # Ingest
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/trigger
+              schema: temp/properties/storage/properties/ingest/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/ingest
+                paths:
+                  - temp/properties/storage/properties/ingest/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/expansionMode
+            - type: block-layout
+              label: Ingest
+              showLabels: true
+              elements:
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/topology/ingest/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/upperBound
+
+            # Master
+            - type: switch
+              label: Trigger
+              fullwidth: true
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/trigger
+              schema: temp/properties/storage/properties/master/properties/trigger
+              watcher:
+                func: onTriggerChange|storage/master
+                paths:
+                  - temp/properties/storage/properties/master/properties/trigger
+            - type: label-element
+              label: Expansion Mode (Online/Offline)
+              subtitle: For Online Mode enables scaling without downtime by dynamically resizing storage while the database remains operational and Offline Mode performs storage scaling during scheduled downtime, ensuring consistency but requiring database restarts.
+            - type: select
+              label: Mode
+              description: Select how the storage expansion should be handled.
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/expansionMode
+            - type: block-layout
+              label: Master
+              showLabels: true
+              elements:
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  subtitle: Set the threshold percentage of storage usage to trigger scaling.
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComElasticsearch/spec/topology/master/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
+
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
+
+        - type: block-layout
+          label: Ops Request Options
+          showLabels: true
+          if:
+            type: function
+            name: showOpsRequestOptions
+          elements:
+            - type: time-picker
+              label: Timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+            - type: radio
+              label: Apply
+              init:
+                type: func
+                value: setApplyToIfReady
+              options:
+                - text: IfReady (OpsRequest will be applied if database is ready)
+                  value: IfReady
+                - text: Always (OpsRequest will always be applied)
+                  value: Always
+              schema: schema/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+
+  - type: single-step-form
+    id: binding
+    elements:
+    - type: switch
+      label: Expose Database
+      schema: temp/properties/binding
+      fullwidth: true
+      init:
+        type: func
+        value: isBindingAlreadyOn
+      watcher:
+        func: addOrRemoveBinding
+        paths:
+          - temp/properties/binding

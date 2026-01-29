@@ -1,368 +1,580 @@
-steps:
-- form:
-    discriminator:
-      dbDetails:
-        type: object
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      schema:
-        $ref: discriminator#/properties/dbDetails
-      type: input
-    - if: showAndInitName
-      label:
-        text: labels.op_req_name
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/name
-      type: input
-    - computed: initNamespace
-      disabled: isNamespaceDisabled
-      fetch: getNamespaces
-      hasGroup: isRancherManaged
-      if: showAndInitNamespace
-      label:
-        text: labels.namespace
-      onChange: onNamespaceChange
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/namespace
-      type: select
-    - computed: initDatabaseRef
-      disabled: isDatabaseRefDisabled
-      fetch: getDbs
-      if: showAndInitDatabaseRef
-      label:
-        text: labels.databaseRef
-      onChange: onDbChange
-      refresh: true
-      required: true
-      schema:
-        $ref: schema#/properties/spec/properties/databaseRef/properties/name
-      type: select
-    - if: showConfigureOpsrequestLabel
-      label:
-        text: labels.config_ops_request
-      type: label-element
-    - computed: getRequestTypeFromRoute
-      disabled: isDbDetailsLoading
-      hasDescription: true
-      if: showAndInitOpsRequestType
-      individualItemDisabilityCheck: disableOpsRequest
-      label:
-        text: labels.ops_request_type
-      onChange: onRequestTypeChange
-      options:
-      - description: options.UpdateVersion.description
-        text: options.UpdateVersion.text
-        value: UpdateVersion
-      - description: options.HorizontalScaling.description
-        text: options.HorizontalScaling.text
-        value: HorizontalScaling
-      - description: options.VerticalScaling.description
-        text: options.VerticalScaling.text
-        value: VerticalScaling
-      - description: options.Restart.description
-        text: options.Restart.text
-        value: Restart
-      - description: options.Reconfigure.description
-        text: options.Reconfigure.text
-        value: Reconfigure
-      - description: options.ReconfigureTLS.description
-        text: options.ReconfigureTLS.text
-        value: ReconfigureTLS
-      schema:
-        $ref: schema#/properties/spec/properties/type
-      type: radio
-    - elements:
-      - computed: setValueFromDbDetails|/spec/version
-        fetch: getDbVersions
-        label:
-          text: labels.targetVersion
-        schema:
-          $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
-        type: select
-      if: ifRequestTypeEqualsTo|UpdateVersion
-      type: single-step-form
-    - elements:
-      - computed: setValueFromDbDetails|/spec/replicas
-        label:
-          text: Node
-        schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/node
-        type: input
-      if: ifRequestTypeEqualsTo|HorizontalScaling
-      label:
-        text: Horizontal Scaling Form
-      type: single-step-form
-    - elements:
-      - discriminator:
-          machine:
-            default: ""
-            type: string
-        elements:
-        - computed: setMachine
-          customClass: mt-20
-          disableUnselect: true
-          fetch: getMachines
-          label:
-            text: Machine Profile
-          onChange: onMachineChange|node|/spec/podTemplate/spec/containers
-          schema:
-            $ref: discriminator#/machine
-          type: select
-        - if: isMachineCustom
-          label:
-            text: labels.resources
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/resources
-          type: resource-input-form
-        - label:
-            text: Node Selection Policy
-          options:
-          - text: LabelSelector
-            value: LabelSelector
-          - text: Taint
-            value: Taint
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
-          type: select
-        - elements:
-          - label:
-              text: key
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
-            type: input
-          - label:
-              text: value
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/value
-            type: input
-          label:
-            text: Topology
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology
-          show_label: true
-          type: single-step-form
-        label:
-          text: Node
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/node
-        show_label: true
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|VerticalScaling
-      type: single-step-form
-    - elements:
-      - discriminator:
-          reconfigurationType:
-            type: string
-        elements:
-        - label:
-            text: labels.reconfigurationType
-          onChange: onReconfigurationTypeChange
-          options:
-          - text: Select New Config Secret
-            value: selectNewConfigSecret
-          - text: Apply Config
-            value: applyConfig
-          - text: Remove
-            value: remove
-          required: true
-          schema:
-            $ref: discriminator#/properties/reconfigurationType
-          type: radio
-        - elements:
-          - add_new_button:
-              label: labels.createConfig
-              target: _blank
-              url:
-                function: createSecretUrl
-            computed: setValueFromDbDetails|/spec/configSecret/name
-            fetch: getConfigSecrets
-            label:
-              text: labels.configSecret
-            refresh: true
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/configSecret/properties/name
-            type: select
-          if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-          label:
-            text: Configuration config secret
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/configSecret
-          type: single-step-form
-        - addFormLabel: labels.applyConfig.label
-          element:
-            discriminator:
-              configArray:
-                emitAs: applyConfig
-                type: array
-            elements:
-            - label:
-                text: labels.applyConfig.key
-              required: true
-              schema:
-                $ref: discriminator#/properties/configArray/items/properties/key
-              type: input
-            - label:
-                text: labels.applyConfig.value
-              required: true
-              schema:
-                $ref: discriminator#/properties/configArray/items/properties/value
-              type: editor
-            type: single-step-form
-          if: ifReconfigurationTypeEqualsTo|applyConfig
-          label:
-            text: labels.applyConfig.label
-          onChange: onApplyconfigChange
-          required: true
-          schema:
-            $ref: discriminator#/properties/applyConfig
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.applyConfig.key
-            path: key
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: labels.applyConfig.value
-            path: value
-            type: value
-            typeOfValue: code
-          type: single-step-form-array
-        - if: returnFalse
-          label:
-            text: labels.removeCustomConfig
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/removeCustomConfig
-          type: switch
-        label:
-          text: labels.configuration
-        schema:
-          $ref: schema#/properties/spec/properties/configuration
-        show_label: true
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|Reconfigure
-      label:
-        text: Reconfigure Form
-      type: single-step-form
-    - discriminator:
-        tlsOperation:
-          default: update
-          type: string
-      elements:
-      - computed: initTlsOperation
-        if: hasTlsField
-        label:
-          text: labels.tlsOperation
-        onChange: onTlsOperationChange
-        options:
-        - text: Update
-          value: update
-        - text: Rotate
-          value: rotate
-        - text: Remove
-          value: remove
-        schema:
-          $ref: discriminator#/properties/tlsOperation
-        type: radio
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/remove
-        type: switch
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
-        type: switch
-      - elements:
-        - computed: initIssuerRefApiGroup
-          disabled: true
-          label:
-            text: labels.api_group
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-          type: input
-        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
-          label:
-            text: labels.kind
-          options:
-          - text: Issuer
-            value: Issuer
-          - text: ClusterIssuer
-            value: ClusterIssuer
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
-          sortable: true
-          type: select
-        - allowUserDefinedOption: true
-          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
-          fetch: getIssuerRefsName
-          label:
-            text: labels.name
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
-          sortable: true
-          type: select
-        if: showIssuerRefAndCertificates
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
-        type: single-step-form
-      - alias: reusable_certificates
-        chart:
-          name: uibytebuildersdev-component-certificates
-          version: v0.29.0
-        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
-        functionCallbacks:
-          getAliasOptions:
-            $ref: functions#/getAliasOptions
-        if: showIssuerRefAndCertificates
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/certificates
-        type: reusable-element
-      if: ifRequestTypeEqualsTo|ReconfigureTLS
-      label:
-        text: labels.tls
-      schema:
-        $ref: schema#/properties/spec/properties/tls
-      type: single-step-form
-    - label:
-        text: labels.timeout
-      options:
-      - text: 5 minutes
-        value: 5m
-      - text: 10 minutes
-        value: 10m
-      - text: 30 minutes
-        value: 30m
-      - text: 1 hour
-        value: 1h
-      - text: 2 hours
-        value: 2h
-      - text: 5 hours
-        value: 5h
-      - text: 10 hours
-        value: 10h
-      schema:
-        $ref: schema#/properties/spec/properties/timeout
-      type: select
-    - computed: setApplyToIfReady
-      label:
-        text: labels.apply
-      options:
-      - text: IfReady (OpsRequest will be applied if database is ready)
-        value: IfReady
-      - text: Always (OpsRequest will always be applied)
-        value: Always
-      schema:
-        $ref: schema#/properties/spec/properties/apply
-      type: radio
-    type: single-step-form
-  id: basic
-  title: steps.0.label
 type: multi-step-form
+step:
+  - type: single-step-form
+    loader: getDbDetails
+    elements:
+# common
+      - type: input
+        label: op_req_name
+        if:
+          type: function
+          name: showAndInitName        
+        validation:
+          type: required
+        schema: schema/properties/metadata/properties/name
+      - type: select
+        label: Namespace
+        if:
+          type: function
+          name: showAndInitNamespace
+        init:
+          type: func
+          value: initNamespace
+        disable: isNamespaceDisabled
+        loader: getNamespaces
+        validation:
+          type: required
+        hasGroup: isRancherManaged
+        schema: schema/properties/metadata/properties/namespace
+        watcher:
+          func: onNamespaceChange
+          paths:
+            - schema/properties/metadata/properties/namespace
+      - type: select
+        label: Database Ref
+        if:
+          type: function
+          name: showAndInitDatabaseRef
+        loader:
+          name: getDbs
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
+        init:
+          type: func
+          value: initDatabaseRef
+        validation:
+          type: required
+        disable: isDatabaseRefDisabled
+        refresh: true
+        watcher:
+          paths:
+            - schema/properties/spec/properties/databaseRef/properties/name
+          func: onDbChange
+        schema: schema/properties/spec/properties/databaseRef/properties/name
+      - type: label-element
+        label: config_ops_request
+        if:
+          type: function
+          name: showConfigureOpsrequestLabel
+      - type: radio
+        label: Type of Ops Request
+        if:
+          type: function
+          name: showAndInitOpsRequestType
+        options:
+          - description: Update your database to any version
+            text: Update Version
+            value: UpdateVersion
+          - description: Scale up or down pod count
+            text: Horizontal Scaling
+            value: HorizontalScaling
+          - description: Manage your CPU resources
+            text: Vertical Scaling
+            value: VerticalScaling
+          - description: Restart your database
+            text: Restart
+            value: Restart
+          - description: Reconfigure your database
+            text: Reconfigure
+            value: Reconfigure
+          - description: Reconfigure your database tls configuration
+            text: Reconfigure TLS
+            value: ReconfigureTLS
+        init:
+          type: func
+          value: getRequestTypeFromRoute
+        disable: isDbDetailsLoading
+        watcher:
+          func: onRequestTypeChange
+          paths:
+            - schema/properties/spec/properties/type
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
+# UpdateVersion
+      - type: block-layout
+        showLabels: true
+        label: Version
+        fixedBlock: true
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|UpdateVersion
+        elements:
+          - type: select-compare
+            label: Target Version
+            subtitle: Select the desired PgPool version to which you want to update your database.
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/version
+            loader: getDbVersions
+            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+          - type: info
+            label: ''
+            loader:
+              name: getVersionInfo
+              watchPaths:
+                - temp/properties/filteredVersion
+            if:
+              type: function
+              name: isVersionEmpty
+# Horizontal Scale
+      - type: block-layout
+        label: Horizontal Scaling Form
+        showLabels: true
+        fixedBlock: true
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|HorizontalScaling
+        elements:
+          - type: horizontal-layout
+            elements:
+              - type: input-compare
+                header: Node
+                label: Node
+                subtitle: Define the total number of PgPool nodes for your database. Increasing nodes improves fault tolerance and load distribution, while reducing nodes conserves resources
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/replicas
+                schema: schema/properties/spec/properties/horizontalScaling/properties/node
+              - type: info
+                hasIcon: true
+                label: Each PgPool node acts as a connection pooler and load balancer. For example, setting this to 3 creates three PgPool instances for better availability and load distribution.
+# vertical Scale           
+      - type: block-layout
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VerticalScaling
+        elements:
+          - type: block-layout
+            label: Node Vertical Scaling
+            elements:
+              - type: machine-compare
+                label: Resources
+                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
+                loader: getMachines
+                init:
+                  type: func
+                  value: setMachine
+                watcher:
+                  func: onMachineChange|node|/spec/podTemplate/spec/containers
+                  paths:
+                    - temp/properties/machine
+                schema: temp/properties/machine
+              - type: block-layout
+                label: Node Selection 
+                showLabels: true
+                elements:
+                  - type: horizontal-layout
+                    elements:
+                    - type: block-layout
+                      showLabels: false
+                      hideBorder: true
+                      elements:
+                        - type: label-element
+                          label: Node Selection Policy
+                          subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
+                        - type: select
+                          label: Node Selection Policy
+                          schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+                          options:
+                            - text: LabelSelector
+                              value: LabelSelector
+                            - text: Taint
+                              value: Taint
+                    - type: info
+                      label: "<b> Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b> Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
+                      customClass: mt-20
+                  - type: label-element
+                    label: Topology
+                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+                  - type: horizontal-layout
+                    elements:
+                      - type: input
+                        label: Key
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired
+                        schema: temp/topologyKey
+                      - type: input
+                        label: Value
+                        validation:
+                          type: custom
+                          name: isVerticalScaleTopologyRequired
+                        schema: temp/topologyValue
+              - type: block-layout
+                label: Exporter
+                showLabels: true
+                hideBlock: true
+                elements:
+                  - type: horizontal-layout
+                    showLabels: true
+                    elements:
+                      - init:
+                          type: func
+                          value: setExporter|cpu
+                        type: input
+                        label: CPU
+                        schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
+                      - type: input
+                        init:
+                          type: func
+                          value: setExporter|memory
+                        label: Memory
+                        schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+                        watcher:
+                          func: onExporterResourceChange|memory
+                          paths:
+                            - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+# Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        loader:
+          name: fetchConfigSecrets
+          watchPaths:
+            - schema/properties/metadata/properties/namespace
+        elements:
+          - type: block-layout
+            label: Configuration
+            elements:
+              - type: label-element
+                label: ''
+                subtitle: Select a new configuration secret, apply a custom configuration, or remove an existing setup to update your database settings
+              - type: tab-layout
+                label: New Config Secret
+                schema: temp/properties/reconfigurationType
+                options:
+                - text: NEW CONFIG SECRET
+                  value: selectNewConfigSecret
+                - text: APPLY CONFIG
+                  value: applyConfig
+                - text: REMOVE
+                  value: remove
+                elements:
+                - type: block-layout
+                  label: Config Secret
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                    type: function
+                  elements:
+                    - type:  label-element
+                      label: Config Secret
+                      subtitle: Select a configuration secret from the available list to update your database settings
+                      customClass: mb-10
+                    - type: select
+                      customClass: mb-2
+                      schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                      refresh: true
+                      label: Config Secret
+                      loader:
+                        name: getConfigSecrets
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                          - temp/properties/createSecret/properties/status
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/configSecret/name
+                      watcher:
+                        func: onCreateSecretChange
+                        paths:
+                          - temp/properties/createSecret/properties/status
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedConfigurationName|create
+                        watchPaths:
+                          - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                    - type: block-layout
+                      label: Create a New Config Secret
+                      showLabels: true
+                      if:
+                        type: function
+                        name: isCreateSecret
+                      hasButton:
+                        text: Save
+                        hasCancel: cancelCreateSecret
+                        action: createNewConfigSecret
+                      elements:
+                        - type: input
+                          label: Secret Name
+                          schema: temp/properties/createSecret/properties/name
+                          validation:
+                            type: required
+                        - type: array-object-form
+                          label: String Data
+                          schema: temp/properties/createSecret/properties/data
+                          buttonClass: is-light is-outlined
+                          validation:
+                            type: required
+                          elements:
+                            - type: select
+                              label: Key
+                              schema: key
+                              loader:
+                                name: onSelectedSecretChange
+                                watchPaths:
+                                  - temp/properties/createSecret/properties/data
+                              validation:
+                                type: required
+                            - type: textarea
+                              label: Value
+                              schema: value
+                    - type: multi-file-editor
+                      editorHeight: 500px
+                      readonly: true
+                      if:
+                        type: function
+                        name: isNotCreateSecret
+                      loader:
+                        name: onNewConfigSecretChange
+                        watchPaths:
+                          - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+                      schema: temp/properties/newConfigSecret
+                - type: block-layout
+                  label: ApplyConfig
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|applyConfig
+                    type: function
+                  elements:
+                    - type: label-element
+                      label: New Apply Config
+                      subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Enter the parameter you want to configure (e.g., max_connections).
+                      customClass: mb-10
+                    - type: select
+                      customClass: mb-2
+                      schema: temp/properties/selectedConfiguration
+                      refresh: true
+                      label: Configuration
+                      loader: getConfigSecretsforAppyConfig
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedConfigurationName|apply
+                        watchPaths:
+                          - temp/properties/selectedConfiguration
+                    - type: multi-file-editor
+                      editorHeight: 500px
+                      schema: temp/properties/applyConfig
+                      loader:
+                        name: setApplyConfig
+                        watchPaths:
+                            - temp/properties/selectedConfiguration
+                      watcher:
+                       func: onApplyconfigChange
+                       paths:
+                        - temp/properties/applyConfig
+                - type: block-layout
+                  label: Remove
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|remove
+                    type: function
+                  elements:
+                    - type: label-element
+                      label: Remove
+                      subtitle: Selected a configuration secret from the available list to update your database settings
+                      customClass: mb-10
+                    - type: select
+                      customClass: mb-2
+                      schema: temp/properties/selectedConfigurationRemove
+                      refresh: true
+                      label: Configuration
+                      loader:
+                        name: getConfigSecretsforAppyConfig
+                        watchPaths:
+                          - schema/properties/metadata/properties/namespace
+                    - type: label-element
+                      label: ''
+                      loader:
+                        name: getSelectedConfigurationName|remove
+                        watchPaths:
+                          - temp/properties/selectedConfigurationRemove
+                    - type: multi-file-editor
+                      editorHeight: 500px
+                      readonly: true
+                      init:
+                        type: func
+                        value: onRemoveConfigChange
+                      watcher:
+                        func: onRemoveConfigChange
+                        paths:
+                          - temp/properties/selectedConfigurationRemove
+                      schema: temp/properties/removeConfig
+# Reconfigure TLS
+      - type: block-layout
+        label: TLS
+        if:
+          name: ifRequestTypeEqualsTo|ReconfigureTLS
+          type: function
+        elements:
+          - type: radio
+            label: TLS Operation
+            if:
+              name: hasTlsField
+              type: function
+            options:
+              - text: Update
+                value: update
+              - text: Rotate
+                value: rotate
+              - text: Remove
+                value: remove
+            init:
+              type: func
+              value: initTlsOperation
+            schema: temp/properties/tlsOperation
+            watcher:
+              func: onTlsOperationChange
+              paths:
+                - temp/properties/tlsOperation
+          - type: switch
+            label: Remove TLS
+            fullwidth: true
+            if:
+              name: isTlsEnabled
+              type: function
+            schema: schema/properties/spec/properties/tls/properties/remove
+          - type: switch
+            label: Rotate Certificates
+            fullwidth: true
+            schema: schema/properties/spec/properties/tls/properties/rotateCertificates
+            if:
+              name: isTlsEnabled
+              type: function
+          - type: block-layout
+            label: Issuer Reference
+            showLabels: true
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            elements:
+              - type: input
+                label: API Group
+                init:
+                  type: func
+                  value: initIssuerRefApiGroup
+                watcher:
+                  func: initIssuerRefApiGroup
+                  paths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                disable: true
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+              - type: select
+                label: Kind
+                options:
+                  - text: Issuer
+                    value: Issuer
+                  - text: ClusterIssuer
+                    value: ClusterIssuer
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/kind
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+              - type: select
+                label: Name
+                loader:
+                  name: getIssuerRefsName
+                  watchPaths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                    - schema/properties/metadata/properties/namespace
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/name
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
+          - type: block-layout
+            label: Certificates
+            showLabels: false
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+            elements:
+              - type: array-object-form
+                label: Certificates
+                buttonClass: is-light is-outlined
+                schema: schema/properties/spec/properties/tls/properties/certificates
+                elements:
+                - type: select
+                  label: Alias
+                  loader: fetchAliasOptions
+                  disable: disableAlias
+                  schema: alias
+                  validation:
+                    type: required
+                - type: input
+                  label: Secret Name
+                  schema: secretName
+                - type: input
+                  label: Duration
+                  schema: duration
+                - type: input
+                  label: Renew Before
+                  schema: renewBefore
+                - type: array-item-form
+                  label: Organizations
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/organizations
+                  element:
+                    type: input
+                    label: Organization
+                - type: array-item-form
+                  label: Countries
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/countries
+                  element:
+                    type: input
+                    label: Country
+                - type: array-item-form
+                  label: Organizational Units
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/organizationalUnits
+                  element:
+                    type: input
+                    label: Organizational Unit
+                - type: array-item-form
+                  label: Provinces
+                  buttonClass: is-light is-outlined
+                  schema: subject/properties/provinces
+                  element:
+                    type: input
+                    label: Province
+                - type: array-item-form
+                  label: DNS Names
+                  buttonClass: is-light  is-outlined
+                  schema: dnsNames
+                  element:
+                    type: input
+                    label: DNS Name
+                - type: array-item-form
+                  label: IP Addresses
+                  buttonClass: is-light is-outlined
+                  schema: ipAddresses
+                  element:
+                    type: input
+                    label: IP Address
+# common
+      - type: block-layout
+        label: OpsRequest Options
+        showLabels: true
+        elements:
+          - type: time-picker
+            label: Timeout
+            subtitle: Specify the maximum time allowed for the operation to complete before it times out
+            schema: 'schema/properties/spec/properties/timeout'
+          - type: radio
+            label: Apply
+            schema: 'schema/properties/spec/properties/apply'
+            init:
+              type: func
+              value: setApplyToIfReady
+            options:
+              - text: IfReady (OpsRequest will be applied if database is ready)
+                value: IfReady
+              - text: Always (OpsRequest will always be applied)
+                value: Always

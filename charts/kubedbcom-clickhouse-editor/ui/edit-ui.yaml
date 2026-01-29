@@ -1,352 +1,231 @@
-steps:
-- form:
-    discriminator:
-      dbDetails:
-        default: false
-        type: boolean
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      type: input
-    - elements:
-      - label:
-          text: Name
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/metadata/properties/name
-        type: input
-      - fetch: getNamespaces
-        hasGroup: isRancherManaged
-        label:
-          text: SelectNamespace
-        onChange: onNamespaceChange
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/metadata/properties/namespace
-        type: select
-      - fetch: getDbs
-        label:
-          text: Select Db
-        onChange: initMetadata
-        refresh: true
-        required: true
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/databaseRef/properties/name
-        type: select
-      if: isConsole
-      type: single-step-form
-    - hasDescription: true
-      if: isConsole
-      label:
-        text: Select Type
-      onChange: initMetadata
-      options:
-      - description: Scale your CPU Memory based on resource usage
-        text: Compute
-        value: compute
-      - description: Expand your database size based on volume usage
-        text: Storage
-        value: storage
-      required: true
-      schema:
-        $ref: discriminator#/properties/autoscalingType
-      type: radio
-    - elements:
-      - elements:
-        - computed: setTrigger|autoscalingKubedbComClickHouseAutoscaler/spec/compute/clickhouse/trigger
-          label:
-            text: Trigger
-          options:
-          - "On"
-          - "Off"
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/trigger
-          type: select
-        - label:
-            text: Pod LifeTime Threshold
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/podLifeTimeThreshold
-          type: input
-        - label:
-            text: Resource Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/resourceDiffPercentage
-          type: input
-        - elements:
-          - label:
-              text: cpu
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/minAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/minAllowed/properties/memory
-            type: input
-          label:
-            text: Min Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/minAllowed
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: cpu
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/maxAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/maxAllowed/properties/memory
-            type: input
-          label:
-            text: Max Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/maxAllowed
-          show_label: true
-          type: single-step-form
-        - fetch: setControlledResources|clickhouse
-          label:
-            text: Controlled Resources
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/controlledResources
-          type: multiselect
-        label:
-          text: ClickHouse
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse
-        show_label: true
-        type: single-step-form
-      - elements:
-        - fetch: fetchNodeTopology
-          label:
-            text: Select Node Topology
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-          type: select
-        - if: isNodeTopologySelected
-          label:
-            text: ScaleUp Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-          type: input
-        - if: isNodeTopologySelected
-          label:
-            text: ScaleDown Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
-          type: input
-        label:
-          text: NodeTopology
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/nodeTopology
-        show_label: true
-        type: single-step-form
-      type: single-step-form
-    - elements:
-      - label:
-          text: Timeout
-        options:
-        - text: 5 minutes
-          value: 5m0s
-        - text: 10 minutes
-          value: 10m0s
-        - text: 30 minutes
-          value: 30m0s
-        - text: 1 hour
-          value: 1h0m
-        - text: 2 hours
-          value: 2h0m
-        - text: 5 hours
-          value: 5h0m
-        - text: 10 hours
-          value: 10h0m
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-        type: select
-      - computed: setApplyToIfReady
-        label:
-          text: Apply
-        options:
-        - text: IfReady (OpsRequest will be applied if database is ready)
-          value: IfReady
-        - text: Always (OpsRequest will always be applied)
-          value: Always
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-        type: radio
-      if: showOpsRequestOptions
-      label:
-        text: Ops Request Options
-      schema:
-        $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions
-      show_label: true
-      type: single-step-form
-    type: single-step-form
-  id: compute-autoscaler
-  title: steps.6.label
-- form:
-    discriminator:
-      dbDetails:
-        default: false
-        type: boolean
-    elements:
-    - computed: getDbDetails
-      if: returnFalse
-      type: input
-    - elements:
-      - computed: getDbDetails
-        if: returnFalse
-        type: input
-      - label:
-          text: Name
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/metadata/properties/name
-        type: input
-      - fetch: getNamespaces
-        hasGroup: isRancherManaged
-        label:
-          text: SelectNamespace
-        onChange: onNamespaceChange
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/metadata/properties/namespace
-        type: select
-      - fetch: getDbs
-        label:
-          text: Select Db
-        onChange: initMetadata
-        refresh: true
-        required: true
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/databaseRef/properties/name
-        type: select
-      if: isConsole
-      type: single-step-form
-    - hasDescription: true
-      if: isConsole
-      label:
-        text: Select Type
-      onChange: initMetadata
-      options:
-      - description: Scale your CPU Memory based on resource usage
-        text: Compute
-        value: compute
-      - description: Expand your database size based on volume usage
-        text: Storage
-        value: storage
-      required: true
-      schema:
-        $ref: discriminator#/properties/autoscalingType
-      type: radio
-    - elements:
-      - elements:
-        - computed: setTrigger|autoscalingKubedbComClickHouseAutoscaler/spec/storage/clickhouse/trigger
-          label:
-            text: Trigger
-          options:
-          - "On"
-          - "Off"
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/trigger
-          type: select
-        - label:
-            text: Expansion Mode
-          options:
-          - Online
-          - Offline
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/expansionMode
-          type: select
-        - label:
-            text: UsageThreshold (%)
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/usageThreshold
-          type: input
-        - addFormLabel: ScalingRules
-          element:
-            elements:
-            - label:
-                text: AppliesUpto (In Storage units)
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/scalingRules/items/properties/appliesUpto
-              type: input
-            - label:
-                text: Threshold (In %, Or In Storage Units)
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/scalingRules/items/properties/threshold
-              type: input
-            type: single-step-form
-          label:
-            text: ScalingRules
-          onChange: handleUnit|autoscalingKubedbComClickHouseAutoscaler/spec/storage/clickhouse/scalingRules|scalingRules
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/scalingRules
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: AppliesUpto (In Storage units)
-            path: appliesUpto
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: Threshold (In %, Or In Storage Units)
-            path: threshold
-            type: value
-            typeOfValue: string
-          type: single-step-form-array
-        - label:
-            text: UpperBound
-          onChange: handleUnit|autoscalingKubedbComClickHouseAutoscaler/spec/storage/clickhouse/upperBound
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/upperBound
-          type: input
-        label:
-          text: ClickHouse
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse
-        show_label: true
-        type: single-step-form
-      type: single-step-form
-    - elements:
-      - label:
-          text: Timeout
-        options:
-        - text: 5 minutes
-          value: 5m0s
-        - text: 10 minutes
-          value: 10m0s
-        - text: 30 minutes
-          value: 30m0s
-        - text: 1 hour
-          value: 1h0m
-        - text: 2 hours
-          value: 2h0m
-        - text: 5 hours
-          value: 5h0m
-        - text: 10 hours
-          value: 10h0m
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-        type: select
-      - computed: setApplyToIfReady
-        label:
-          text: Apply
-        options:
-        - text: IfReady (OpsRequest will be applied if database is ready)
-          value: IfReady
-        - text: Always (OpsRequest will always be applied)
-          value: Always
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
-        type: radio
-      if: showOpsRequestOptions
-      label:
-        text: Ops Request Options
-      schema:
-        $ref: schema#/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions
-      show_label: true
-      type: single-step-form
-    type: single-step-form
-  id: storage-autoscaler
-  title: steps.7.label
 type: multi-step-form
+step:
+  - type: single-step-form
+    id: compute-autoscaler
+    loader: getDbDetails
+    elements:
+      - type: block-layout
+        if:
+         type: function
+         name: isConsole
+        elements:
+          - type: input
+            label: Name
+            schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/metadata/properties/name
+          - type: select
+            label: Select Namespace
+            loader: getNamespaces
+            if:
+              type: function
+              name: isRancherManaged
+            schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/metadata/properties/namespace
+            watcher:
+              func: onNamespaceChange
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/metadata/properties/namespace
+          - type: select
+            label: Select Db
+            loader: getDbs
+            validation:
+              type: required
+            refresh: true
+            schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/databaseRef/properties/name
+            watcher:
+              func: initMetadata
+              paths:
+                - schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/databaseRef/properties/name
+
+      - type: radio
+        if:
+          type: function
+          name: isConsole
+        label: Select Type
+        validation:
+          type: required
+        schema: temp/properties/autoscalingType
+        watcher:
+          func: initMetadata
+          paths:
+            - temp/properties/autoscalingType
+        options:
+          - text: Compute
+            value: compute
+            description: Scale your CPU Memory based on resource usage
+          - text: Storage
+            value: storage
+            description: Expand your database size based on volume usage
+
+      - type: block-layout
+        showLabels: false
+        elements:
+          # clickhouse mode
+          - type: block-layout
+            label: ClickHouse
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse
+            elements:
+              - type: select
+                label: Trigger
+                init:
+                  type: func
+                  value: setTrigger|autoscalingKubedbComClickHouseAutoscaler/spec/compute/clickhouse/trigger
+                options:
+                  - text: 'On'
+                    value: 'On'
+                  - text: 'Off'
+                    value: 'Off'
+                schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/trigger
+              - type: input
+                label: Pod LifeTime Threshold
+                schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/podLifeTimeThreshold
+              - type: threshold-input
+                label: Resource Diff Percentage
+                schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/resourceDiffPercentage
+              - type: block-layout
+                showLabels: false
+                elements:
+                  - type: block-layout
+                    label: Min Allowed
+                    showLabels: true
+                    fixedBlock: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/minAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/minAllowed/properties/memory
+                  - type: block-layout
+                    label: Max Allowed
+                    showLabels: true
+                    fixedBlock: true
+                    elements:
+                      - type: input
+                        label: Cpu
+                        schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/maxAllowed/properties/cpu
+                      - type: input
+                        label: Memory
+                        schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/maxAllowed/properties/memory
+              - type: select
+                label: Controlled Resources
+                loader: setControlledResources|clickhouse
+                multiple: true
+                schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/clickhouse/properties/controlledResources
+
+          - type: block-layout
+            label: Node Topology
+            showLabels: true
+            # schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+            elements:
+              - type: select
+                label: Select Node Topology
+                loader: fetchNodeTopology
+                schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+              - type: threshold-input
+                label: ScaleUp Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected
+                schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+              - type: threshold-input
+                label: ScaleDown Diff Percentage
+                if:
+                  type: function
+                  name: isNodeTopologySelected
+                schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+
+          - type: block-layout
+            label: Ops Request Options
+            showLabels: true
+            if:
+              type: function
+              name: showOpsRequestOptions
+            # schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions
+            elements:
+              - type: time-picker
+                label: Timeout
+                schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+              - type: radio
+                label: Apply
+                init:
+                  type: func
+                  value: setApplyToIfReady
+                options:
+                  - text: IfReady (OpsRequest will be applied if database is ready)
+                    value: IfReady
+                  - text: Always (OpsRequest will always be applied)
+                    value: Always
+                schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+
+  - type: single-step-form
+    id: storage-autoscaler
+    elements:
+    - type: block-layout
+      showLabels: false
+      elements:
+        - type: block-layout
+          showLabels: false
+          elements:
+            - type: block-layout
+              label: ClickHouse
+              showLabels: true
+              elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComClickHouseAutoscaler/spec/storage/clickhouse/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/expansionMode
+                - type: threshold-input
+                  label: UsageThreshold (%)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/usageThreshold
+                - type: scaling-rules
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/scalingRules
+                  loader: setValueFromDbDetails|resources/kubedbComClickHouse/spec/storage/resources/requests/storage
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComClickHouseAutoscaler/spec/storage/clickhouse/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/scalingRules
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComClickHouseAutoscaler/spec/storage/clickhouse/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/upperBound
+        - type: block-layout
+          label: OpsRequest Options
+          showLabels: true
+          if:
+            type: function
+            name: showOpsRequestOptions
+          elements:
+            - type: time-picker
+              label: Timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+            - type: radio
+              label: Apply
+              init:
+                type: func
+                value: setApplyToIfReady
+              options:
+                - text: IfReady (OpsRequest will be applied if database is ready)
+                  value: IfReady
+                - text: Always (OpsRequest will always be applied)
+                  value: Always
+              schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+  
