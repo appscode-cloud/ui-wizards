@@ -433,6 +433,8 @@ export const useFunc = (model) => {
     } else return {}
   }
 
+  let presetVersions = []
+  setDiscriminatorValue('/filteredVersion', [])
   async function getDbVersions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -448,7 +450,7 @@ export const useFunc = (model) => {
       }
     }
     try {
-      const presetVersions = presets.admin?.databases?.Kafka?.versions?.available || []
+      presetVersions = presets.admin?.databases?.Kafka?.versions?.available || []
       const queryParams = {
         filter: {
           items: {
@@ -497,6 +499,7 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
+      setDiscriminatorValue('/filteredVersion', filteredKafkaVersions)
       return filteredKafkaVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
@@ -545,6 +548,37 @@ export const useFunc = (model) => {
         return false
     }
     return true
+  }
+
+  function getVersionInfo() {
+    const filteredVersion = getValue(discriminator, '/filteredVersion')
+    if (filteredVersion.length) return ''
+
+    let txt = 'No versions from this list can be selected as the target version: [ '
+
+    presetVersions.forEach((v, idx) => {
+      txt = `${txt}"${v}"`
+      if (idx !== presetVersions.length - 1) txt = txt + ', '
+      else txt = txt + ' ]'
+    })
+
+    return txt
+  }
+
+  function getVersion() {
+    return filteredVersion.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      const specVersion = (item.spec && item.spec.version) || ''
+      return {
+        text: `${name} (${specVersion})`,
+        value: name,
+      }
+    })
+  }
+
+  function isVersionEmpty() {
+    const val = getValue(discriminator, '/filteredVersion')
+    return val.length === 0
   }
 
   function ifRequestTypeEqualsTo(type) {
@@ -1780,6 +1814,9 @@ export const useFunc = (model) => {
     getDbs,
     getDbDetails,
     getDbVersions,
+    getVersionInfo,
+    isVersionEmpty,
+    getVersion,
     ifRequestTypeEqualsTo,
     onRequestTypeChange,
     getDbTls,

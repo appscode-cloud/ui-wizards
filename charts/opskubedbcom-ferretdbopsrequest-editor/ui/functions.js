@@ -430,6 +430,8 @@ export const useFunc = (model) => {
     } else return {}
   }
 
+  let presetVersions = []
+  setDiscriminatorValue('/filteredVersion', [])
   async function getDbVersions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -445,7 +447,7 @@ export const useFunc = (model) => {
       }
     }
     try {
-      const presetVersions = presets.admin?.databases?.FerretDB?.versions?.available || []
+      presetVersions = presets.admin?.databases?.FerretDB?.versions?.available || []
       const queryParams = {
         filter: {
           items: {
@@ -471,7 +473,7 @@ export const useFunc = (model) => {
       const limit = allowed.length ? allowed[0] : '0.0'
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
       // if presets.status is 404, it means no presets available, no need to filter with presets
-      const filteredFerretDBVersions = sortedVersions.filter((item) => {
+      const filteredDbVersions = sortedVersions.filter((item) => {
         // default limit 0.0 means no restrictions, show all higher versions
         if (limit === '0.0')
           return (
@@ -494,7 +496,8 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      return filteredFerretDBVersions.map((item) => {
+      setDiscriminatorValue('/filteredVersion', filteredDbVersions)
+      return filteredDbVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -542,6 +545,37 @@ export const useFunc = (model) => {
         return false
     }
     return true
+  }
+
+  function getVersionInfo() {
+    const filteredVersion = getValue(discriminator, '/filteredVersion')
+    if (filteredVersion.length) return ''
+
+    let txt = 'No versions from this list can be selected as the target version: [ '
+
+    presetVersions.forEach((v, idx) => {
+      txt = `${txt}"${v}"`
+      if (idx !== presetVersions.length - 1) txt = txt + ', '
+      else txt = txt + ' ]'
+    })
+
+    return txt
+  }
+
+  function getVersion() {
+    return filteredVersion.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      const specVersion = (item.spec && item.spec.version) || ''
+      return {
+        text: `${name} (${specVersion})`,
+        value: name,
+      }
+    })
+  }
+
+  function isVersionEmpty() {
+    const val = getValue(discriminator, '/filteredVersion')
+    return val.length === 0
   }
 
   function ifRequestTypeEqualsTo(type) {
@@ -1243,6 +1277,9 @@ export const useFunc = (model) => {
     getDbs,
     getDbDetails,
     getDbVersions,
+    getVersionInfo,
+    isVersionEmpty,
+    getVersion,
     ifRequestTypeEqualsTo,
     onRequestTypeChange,
     getDbTls,
