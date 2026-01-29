@@ -51,7 +51,7 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	Backend        FerretDBBackend   `json:"backend"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
-	Configuration  string            `json:"configuration"`
+	Configuration  Configuration     `json:"configuration"`
 	// +optional
 	HostName string `json:"hostName"`
 	// +optional
