@@ -1,465 +1,478 @@
-type: multi-step-form
 step:
-  - type: single-step-form
-    loader: getDbDetails
-    elements:
-# common
-      - type: input
-        label: op_req_name
-        if:
+- elements:
+  - if:
+      name: showAndInitName
+      type: function
+    label: op_req_name
+    schema: schema/properties/metadata/properties/name
+    type: input
+    validation:
+      type: required
+  - disable: isNamespaceDisabled
+    hasGroup: isRancherManaged
+    if:
+      name: showAndInitNamespace
+      type: function
+    init:
+      type: func
+      value: initNamespace
+    label: Namespace
+    loader: getNamespaces
+    schema: schema/properties/metadata/properties/namespace
+    type: select
+    validation:
+      type: required
+  - disable: isDatabaseRefDisabled
+    if:
+      name: showAndInitDatabaseRef
+      type: function
+    init:
+      type: func
+      value: initDatabaseRef
+    label: Database Ref
+    loader:
+      name: getDbs
+      watchPaths:
+      - schema/properties/metadata/properties/namespace
+    refresh: true
+    schema: schema/properties/spec/properties/databaseRef/properties/name
+    type: select
+    validation:
+      type: required
+    watcher:
+      func: onDbChange
+      paths:
+      - schema/properties/spec/properties/databaseRef/properties/name
+  - if:
+      name: showConfigureOpsrequestLabel
+      type: function
+    label: config_ops_request
+    type: label-element
+  - disable: isDbDetailsLoading
+    if:
+      name: showAndInitOpsRequestType
+      type: function
+    init:
+      type: func
+      value: getRequestTypeFromRoute
+    isHorizontal: true
+    label: Type of Ops Request
+    options:
+    - description: Update your database to any version
+      text: Update Version
+      value: UpdateVersion
+    - description: Scale up or down pod count
+      text: Horizontal Scaling
+      value: HorizontalScaling
+    - description: Manage your CPU resources
+      text: Vertical Scaling
+      value: VerticalScaling
+    - description: Restart your database
+      text: Restart
+      value: Restart
+    - description: Reconfigure your database tls configuration
+      text: Reconfigure TLS
+      value: ReconfigureTLS
+    schema: schema/properties/spec/properties/type
+    type: radio
+    watcher:
+      func: isDbDetailsLoading
+      paths:
+      - temp/dbDetails
+      - schema/properties/spec/properties/databaseRef/properties/name
+  - elements:
+    - init:
+        type: func
+        value: setValueFromDbDetails|/spec/version
+      label: Target Version
+      loader: getDbVersions
+      schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+      subtitle: Select the desired FerretDB version to which you want to update your
+        database.
+      type: select-compare
+    - if:
+        name: isVersionEmpty
+        type: function
+      label: ""
+      loader:
+        name: getVersionInfo
+        watchPaths:
+        - temp/properties/filteredVersion
+      type: info
+    fixedBlock: true
+    if:
+      name: ifRequestTypeEqualsTo|UpdateVersion
+      type: function
+    label: Version
+    showLabels: true
+    type: block-layout
+  - elements:
+    - elements:
+      - init:
+          type: func
+          value: setValueFromDbDetails|/spec/server/primary/replicas
+        label: Primary Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/primary/properties/replicas
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution, while reducing
+          replicas conserves resources
+        type: input-compare
+      - hasIcon: true
+        label: Each replica represents an independent copy of your database. For example,
+          setting this to 3 creates three copies of the database for better availability.
+        type: info
+      type: horizontal-layout
+    - elements:
+      - if:
+          name: ferretTypeEqualsTo|secondary
           type: function
-          name: showAndInitName
-        validation:
-          type: required
-        schema: schema/properties/metadata/properties/name
-      - type: select
-        label: Namespace
-        if:
-          type: function
-          name: showAndInitNamespace
         init:
           type: func
-          value: initNamespace
-        disable: isNamespaceDisabled
-        loader: getNamespaces
-        validation:
-          type: required
-        hasGroup: isRancherManaged
-        schema: schema/properties/metadata/properties/namespace
-      - type: select
-        label: Database Ref
-        if:
-          type: function
-          name: showAndInitDatabaseRef
-        loader:
-          name: getDbs
-          watchPaths:
-            - schema/properties/metadata/properties/namespace
-        init:
+          value: setValueFromDbDetails|/spec/server/secondary/replicas
+        label: Secondary Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/secondary/properties/replicas
+        type: input-compare
+      type: horizontal-layout
+    fixedBlock: true
+    if:
+      name: ifRequestTypeEqualsTo|HorizontalScaling
+      type: function
+    label: Horizontal Scaling Form
+    showLabels: true
+    type: block-layout
+  - elements:
+    - elements:
+      - init:
           type: func
-          value: initDatabaseRef
-        validation:
-          type: required
-        disable: isDatabaseRefDisabled
-        refresh: true
+          value: setMachine|primary
+        label: Resources
+        loader: getMachines|primary
+        schema: temp/properties/machine-primary
+        subtitle: Compare your current machine configuration with the proposed memory
+          adjustments and make informed decisions for your database setup
+        type: machine-compare
         watcher:
-          func: onDbChange
+          func: onMachineChange|primary|/spec/server/primary/podTemplate/spec/containers
           paths:
-            - schema/properties/spec/properties/databaseRef/properties/name
-        schema: schema/properties/spec/properties/databaseRef/properties/name
-      - type: label-element
-        label: config_ops_request
-        if:
-          type: function
-          name: showConfigureOpsrequestLabel
-      - type: radio
-        label: Type of Ops Request
-        if:
-          type: function
-          name: showAndInitOpsRequestType
-        options:
-          - description: Update your database to any version
-            text: Update Version
-            value: UpdateVersion
-          - description: Scale up or down pod count
-            text: Horizontal Scaling
-            value: HorizontalScaling
-          - description: Manage your CPU resources
-            text: Vertical Scaling
-            value: VerticalScaling
-          - description: Restart your database
-            text: Restart
-            value: Restart
-          - description: Reconfigure your database tls configuration
-            text: Reconfigure TLS
-            value: ReconfigureTLS
-        init:
-          type: func
-          value: getRequestTypeFromRoute
-        disable: isDbDetailsLoading
-        watcher:
-          func: isDbDetailsLoading
-          paths:
-            - temp/dbDetails
-            - schema/properties/spec/properties/databaseRef/properties/name
-        isHorizontal: true
-        schema: schema/properties/spec/properties/type
-# UpdateVersion
-      - type: block-layout
-        showLabels: true
-        label: Version
-        fixedBlock: true
-        if:
-          type: function
-          name: ifRequestTypeEqualsTo|UpdateVersion
-        elements:
-          - type: select-compare
-            label: Target Version
-            subtitle: Select the desired FerretDB version to which you want to update your database.
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/version
-            loader: getDbVersions
-            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
-          - type: info
-            label: ''
-            loader:
-              name: getVersionInfo
-              watchPaths:
-                - temp/properties/filteredVersion
-            if:
-              type: function
-              name: isVersionEmpty
-# Horizontal Scale
-      - type: block-layout
-        label: Horizontal Scaling Form
-        showLabels: true
-        fixedBlock: true
-        if:
-          type: function
-          name: ifRequestTypeEqualsTo|HorizontalScaling
-        elements:
-          - type: horizontal-layout
-            elements:
-              - type: input-compare
-                label: Primary Replicas
-                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/server/primary/replicas
-                schema: schema/properties/spec/properties/horizontalScaling/properties/primary/properties/replicas
-              - type: info
-                hasIcon: true
-                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.  
-          - type: horizontal-layout
-            elements:
-              - type: input-compare
-                label: Secondary Replicas
-                if:
-                  type: function
-                  name: ferretTypeEqualsTo|secondary
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/server/secondary/replicas
-                schema: schema/properties/spec/properties/horizontalScaling/properties/secondary/properties/replicas
-# vertical Scale
-      - type: block-layout
-        if:
-          type: function
-          name: ifRequestTypeEqualsTo|VerticalScaling
-        elements:
-          - type: block-layout
-            label: Primary
-            showLabels: true
-            elements:
-              - type: machine-compare
-                label: Resources
-                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
-                loader: getMachines|primary
-                init:
-                  type: func
-                  value: setMachine|primary
-                watcher:
-                  func: onMachineChange|primary|/spec/server/primary/podTemplate/spec/containers
-                  paths:
-                    - temp/properties/machine-primary
-                schema: temp/properties/machine-primary
-              - type: block-layout
-                label: Node Selection
-                showLabels: true
-                elements:
-                  - type: horizontal-layout
-                    elements:
-                      - type: block-layout
-                        showLabels: false
-                        hideBorder: true
-                        elements:
-                          - type: label-element
-                            label: Node Selection Policy
-                            subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
-                          - type: select
-                            label: Node Selection Policy
-                            schema: schema/properties/spec/properties/verticalScaling/properties/primary/properties/nodeSelectionPolicy
-                            options:
-                              - text: LabelSelector
-                                value: LabelSelector
-                              - text: Taint
-                                value: Taint
-                      - type: info
-                        label: "<b>Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b>Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
-                        customClass: mt-20
-                  - type: label-element
-                    label: Topology
-                    subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-                  - type: horizontal-layout
-                    elements:
-                      - type: input
-                        label: Key
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|primary
-                        schema: temp/topologyKey-primary
-                      - type: input
-                        label: Value
-                        validation:
-                          type: custom
-                          name: isVerticalScaleTopologyRequired|primary
-                        schema: temp/topologyValue-primary
-          - type: block-layout
-            label: Secondary
-            showLabels: true
-            if:
-              type: function
-              name: ferretTypeEqualsTo|secondary
-            elements:
-              - type: machine-compare
-                label: Resources
-                subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
-                loader: getMachines|secondary
-                init:
-                  type: func
-                  value: setMachine|secondary
-                watcher:
-                  func: onMachineChange|secondary|/spec/server/secondary/podTemplate/spec/containers
-                  paths:
-                    - temp/properties/machine-secondary
-                schema: temp/properties/machine-secondary
-              - type: block-layout
-                label: Node Selection
-                showLabels: true
-                elements:
-                  - type: horizontal-layout
-                    elements:
-                      - type: block-layout
-                        showLabels: false
-                        hideBorder: true
-                        elements:
-                          - type: label-element
-                            label: Node Selection Policy
-                            subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
-                          - type: select
-                            label: Node Selection Policy
-                            schema: schema/properties/spec/properties/verticalScaling/properties/secondary/properties/nodeSelectionPolicy
-                            options:
-                              - text: LabelSelector
-                                value: LabelSelector
-                              - text: Taint
-                                value: Taint
-                      - type: info
-                        label: "<b>Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b>Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
-                        customClass: mt-20
-              - type: label-element
-                label: Topology
-                subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-              - type: horizontal-layout
-                elements:
-                  - type: input
-                    label: Key
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|secondary
-                    schema: temp/topologyKey-secondary
-                  - type: input
-                    label: Value
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired|secondary
-                    schema: temp/topologyValue-secondary
-          - type: block-layout
-            label: Exporter
-            showLabels: true
-            hideBlock: true
-            elements:
-              - type: horizontal-layout
-                showLabels: true
-                elements:
-                  - init:
-                      type: func
-                      value: setExporter|cpu
-                    type: input
-                    label: CPU
-                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-                  - type: input
-                    init:
-                      type: func
-                      value: setExporter|memory
-                    label: Memory
-                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-                    watcher:
-                      func: onExporterResourceChange|memory
-                      paths:
-                        - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-# Reconfigure TLS
-      - type: block-layout
-        label: TLS
-        if:
-          name: ifRequestTypeEqualsTo|ReconfigureTLS
-          type: function
-        elements:
-          - type: radio
-            label: TLS Operation
-            if:
-              name: hasTlsField
-              type: function
-            options:
-              - text: Update
-                value: update
-              - text: Rotate
-                value: rotate
-              - text: Remove
-                value: remove
-            init:
-              type: func
-              value: initTlsOperation
-            schema: temp/properties/tlsOperation
-          - type: switch
-            label: Remove TLS
-            fullwidth: true
-            if:
-              name: isTlsEnabled
-              type: function
-            schema: schema/properties/spec/properties/tls/properties/remove
-          - type: switch
-            label: Rotate Certificates
-            fullwidth: true
-            schema: schema/properties/spec/properties/tls/properties/rotateCertificates
-            if:
-              name: isTlsEnabled
-              type: function
-          - type: block-layout
-            label: Issuer Reference
-            showLabels: true
-            if:
-              name: showIssuerRefAndCertificates
-              type: function
-            elements:
-              - type: input
-                label: API Group
-                init:
-                  type: func
-                  value: initIssuerRefApiGroup
-                watcher:
-                  func: initIssuerRefApiGroup
-                  paths:
-                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-                disable: true
-                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-              - type: select
-                label: Kind
-                options:
-                  - text: Issuer
-                    value: Issuer
-                  - text: ClusterIssuer
-                    value: ClusterIssuer
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/tls/issuerRef/kind
-                validation:
-                  type: custom
-                  name: isIssuerRefRequired
-                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-              - type: select
-                label: Name
-                loader:
-                  name: getIssuerRefsName
-                  watchPaths:
-                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-                    - schema/properties/metadata/properties/namespace
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/tls/issuerRef/name
-                validation:
-                  type: custom
-                  name: isIssuerRefRequired
-                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
-          - type: block-layout
-            label: Certificates
+          - temp/properties/machine-primary
+      - elements:
+        - elements:
+          - elements:
+            - label: Node Selection Policy
+              subtitle: Control where your workloads runs by configuring node selection
+                criteria. Use label selectors to match specific nodes or taints to
+                avoid unsuitable nodes
+              type: label-element
+            - label: Node Selection Policy
+              options:
+              - text: LabelSelector
+                value: LabelSelector
+              - text: Taint
+                value: Taint
+              schema: schema/properties/spec/properties/verticalScaling/properties/primary/properties/nodeSelectionPolicy
+              type: select
+            hideBorder: true
             showLabels: false
-            if:
-              name: showIssuerRefAndCertificates
-              type: function
-            loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
-            elements:
-              - type: array-object-form
-                label: Certificates
-                buttonClass: is-light is-outlined
-                schema: schema/properties/spec/properties/tls/properties/certificates
-                elements:
-                - type: select
-                  label: Alias
-                  loader: fetchAliasOptions
-                  disable: disableAlias
-                  schema: alias
-                  validation:
-                    type: required
-                - type: input
-                  label: Secret Name
-                  schema: secretName
-                - type: input
-                  label: Duration
-                  schema: duration
-                - type: input
-                  label: Renew Before
-                  schema: renewBefore
-                - type: array-item-form
-                  label: Organizations
-                  buttonClass: is-light is-outlined
-                  schema: subject/properties/organizations
-                  element:
-                    type: input
-                    label: Organization
-                - type: array-item-form
-                  label: Countries
-                  buttonClass: is-light is-outlined
-                  schema: subject/properties/countries
-                  element:
-                    type: input
-                    label: Country
-                - type: array-item-form
-                  label: Organizational Units
-                  buttonClass: is-light is-outlined
-                  schema: subject/properties/organizationalUnits
-                  element:
-                    type: input
-                    label: Organizational Unit
-                - type: array-item-form
-                  label: Provinces
-                  buttonClass: is-light is-outlined
-                  schema: subject/properties/provinces
-                  element:
-                    type: input
-                    label: Province
-                - type: array-item-form
-                  label: DNS Names
-                  buttonClass: is-light  is-outlined
-                  schema: dnsNames
-                  element:
-                    type: input
-                    label: DNS Name
-                - type: array-item-form
-                  label: IP Addresses
-                  buttonClass: is-light is-outlined
-                  schema: ipAddresses
-                  element:
-                    type: input
-                    label: IP Address
-# common
-      - type: block-layout
-        label: OpsRequest Options
+            type: block-layout
+          - customClass: mt-20
+            label: <b>Label Selector:</b> Specify key-value pairs to target nodes
+              that match your workload's requirements. <br/><b>Taints:</b> Define
+              tolerations for node taints to ensure your workload runs only on compatible
+              nodes
+            type: info
+          type: horizontal-layout
+        - label: Topology
+          subtitle: Define node topology preferences, such as zone or region. For
+            example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
+          type: label-element
+        - elements:
+          - label: Key
+            schema: temp/topologyKey-primary
+            type: input
+            validation:
+              name: isVerticalScaleTopologyRequired|primary
+              type: custom
+          - label: Value
+            schema: temp/topologyValue-primary
+            type: input
+            validation:
+              name: isVerticalScaleTopologyRequired|primary
+              type: custom
+          type: horizontal-layout
+        label: Node Selection
         showLabels: true
+        type: block-layout
+      label: Primary
+      showLabels: true
+      type: block-layout
+    - elements:
+      - init:
+          type: func
+          value: setMachine|secondary
+        label: Resources
+        loader: getMachines|secondary
+        schema: temp/properties/machine-secondary
+        subtitle: Compare your current machine configuration with the proposed memory
+          adjustments and make informed decisions for your database setup
+        type: machine-compare
+        watcher:
+          func: onMachineChange|secondary|/spec/server/secondary/podTemplate/spec/containers
+          paths:
+          - temp/properties/machine-secondary
+      - elements:
+        - elements:
+          - elements:
+            - label: Node Selection Policy
+              subtitle: Control where your workloads runs by configuring node selection
+                criteria. Use label selectors to match specific nodes or taints to
+                avoid unsuitable nodes
+              type: label-element
+            - label: Node Selection Policy
+              options:
+              - text: LabelSelector
+                value: LabelSelector
+              - text: Taint
+                value: Taint
+              schema: schema/properties/spec/properties/verticalScaling/properties/secondary/properties/nodeSelectionPolicy
+              type: select
+            hideBorder: true
+            showLabels: false
+            type: block-layout
+          - customClass: mt-20
+            label: <b>Label Selector:</b> Specify key-value pairs to target nodes
+              that match your workload's requirements. <br/><b>Taints:</b> Define
+              tolerations for node taints to ensure your workload runs only on compatible
+              nodes
+            type: info
+          type: horizontal-layout
+        label: Node Selection
+        showLabels: true
+        type: block-layout
+      - label: Topology
+        subtitle: Define node topology preferences, such as zone or region. For example,
+          'zone=us-central1-a' ensures workloads are deployed in that zone.
+        type: label-element
+      - elements:
+        - label: Key
+          schema: temp/topologyKey-secondary
+          type: input
+          validation:
+            name: isVerticalScaleTopologyRequired|secondary
+            type: custom
+        - label: Value
+          schema: temp/topologyValue-secondary
+          type: input
+          validation:
+            name: isVerticalScaleTopologyRequired|secondary
+            type: custom
+        type: horizontal-layout
+      if:
+        name: ferretTypeEqualsTo|secondary
+        type: function
+      label: Secondary
+      showLabels: true
+      type: block-layout
+    - elements:
+      - elements:
+        - init:
+            type: func
+            value: setExporter|cpu
+          label: CPU
+          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setExporter|memory
+          label: Memory
+          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+          type: input
+          watcher:
+            func: onExporterResourceChange|memory
+            paths:
+            - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+        showLabels: true
+        type: horizontal-layout
+      hideBlock: true
+      label: Exporter
+      showLabels: true
+      type: block-layout
+    if:
+      name: ifRequestTypeEqualsTo|VerticalScaling
+      type: function
+    type: block-layout
+  - elements:
+    - if:
+        name: hasTlsField
+        type: function
+      init:
+        type: func
+        value: initTlsOperation
+      label: TLS Operation
+      options:
+      - text: Update
+        value: update
+      - text: Rotate
+        value: rotate
+      - text: Remove
+        value: remove
+      schema: temp/properties/tlsOperation
+      type: radio
+    - fullwidth: true
+      if:
+        name: isTlsEnabled
+        type: function
+      label: Remove TLS
+      schema: schema/properties/spec/properties/tls/properties/remove
+      type: switch
+    - fullwidth: true
+      if:
+        name: isTlsEnabled
+        type: function
+      label: Rotate Certificates
+      schema: schema/properties/spec/properties/tls/properties/rotateCertificates
+      type: switch
+    - elements:
+      - disable: true
+        init:
+          type: func
+          value: initIssuerRefApiGroup
+        label: API Group
+        schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+        type: input
+        watcher:
+          func: initIssuerRefApiGroup
+          paths:
+          - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+      - init:
+          type: func
+          value: setValueFromDbDetails|/spec/tls/issuerRef/kind
+        label: Kind
+        options:
+        - text: Issuer
+          value: Issuer
+        - text: ClusterIssuer
+          value: ClusterIssuer
+        schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+        type: select
+        validation:
+          name: isIssuerRefRequired
+          type: custom
+      - init:
+          type: func
+          value: setValueFromDbDetails|/spec/tls/issuerRef/name
+        label: Name
+        loader:
+          name: getIssuerRefsName
+          watchPaths:
+          - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+          - schema/properties/metadata/properties/namespace
+        schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
+        type: select
+        validation:
+          name: isIssuerRefRequired
+          type: custom
+      if:
+        name: showIssuerRefAndCertificates
+        type: function
+      label: Issuer Reference
+      showLabels: true
+      type: block-layout
+    - elements:
+      - buttonClass: is-light is-outlined
         elements:
-          - type: time-picker
-            label: Timeout
-            schema: 'schema/properties/spec/properties/timeout'
-            subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
-          - type: radio
-            label: Apply
-            schema: 'schema/properties/spec/properties/apply'
-            init:
-              type: func
-              value: setApplyToIfReady
-            options:
-              - text: IfReady (OpsRequest will be applied if database is ready)
-                value: IfReady
-              - text: Always (OpsRequest will always be applied)
-                value: Always
+        - disable: disableAlias
+          label: Alias
+          loader: fetchAliasOptions
+          schema: alias
+          type: select
+          validation:
+            type: required
+        - label: Secret Name
+          schema: secretName
+          type: input
+        - label: Duration
+          schema: duration
+          type: input
+        - label: Renew Before
+          schema: renewBefore
+          type: input
+        - buttonClass: is-light is-outlined
+          element:
+            label: Organization
+            type: input
+          label: Organizations
+          schema: subject/properties/organizations
+          type: array-item-form
+        - buttonClass: is-light is-outlined
+          element:
+            label: Country
+            type: input
+          label: Countries
+          schema: subject/properties/countries
+          type: array-item-form
+        - buttonClass: is-light is-outlined
+          element:
+            label: Organizational Unit
+            type: input
+          label: Organizational Units
+          schema: subject/properties/organizationalUnits
+          type: array-item-form
+        - buttonClass: is-light is-outlined
+          element:
+            label: Province
+            type: input
+          label: Provinces
+          schema: subject/properties/provinces
+          type: array-item-form
+        - buttonClass: is-light  is-outlined
+          element:
+            label: DNS Name
+            type: input
+          label: DNS Names
+          schema: dnsNames
+          type: array-item-form
+        - buttonClass: is-light is-outlined
+          element:
+            label: IP Address
+            type: input
+          label: IP Addresses
+          schema: ipAddresses
+          type: array-item-form
+        label: Certificates
+        schema: schema/properties/spec/properties/tls/properties/certificates
+        type: array-object-form
+      if:
+        name: showIssuerRefAndCertificates
+        type: function
+      label: Certificates
+      loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+      showLabels: false
+      type: block-layout
+    if:
+      name: ifRequestTypeEqualsTo|ReconfigureTLS
+      type: function
+    label: TLS
+    type: block-layout
+  - elements:
+    - label: Timeout
+      schema: schema/properties/spec/properties/timeout
+      subtitle: Specify the maximum time allowed for the scaling operation to complete.
+        Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
+      type: time-picker
+    - init:
+        type: func
+        value: setApplyToIfReady
+      label: Apply
+      options:
+      - text: IfReady (OpsRequest will be applied if database is ready)
+        value: IfReady
+      - text: Always (OpsRequest will always be applied)
+        value: Always
+      schema: schema/properties/spec/properties/apply
+      type: radio
+    label: OpsRequest Options
+    showLabels: true
+    type: block-layout
+  loader: getDbDetails
+  type: single-step-form
+type: multi-step-form

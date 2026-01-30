@@ -1,53 +1,49 @@
 step:
-- type: single-step-form
-  loader: initBundle
-  elements:
-  - type: label-element
-    label: ''
-    subtitle: Select the Redis version you want to deploy on Kubernetes. The chosen version determines the Redis engine features, compatibility, and runtime behavior of your in-memory data store.
+- elements:
+  - label: ""
+    subtitle: Select the Redis version you want to deploy on Kubernetes. The chosen
+      version determines the Redis engine features, compatibility, and runtime behavior
+      of your in-memory data store.
+    type: label-element
   - disableUnselect: true
-    loader: getAdminOptions|databases/Redis/versions
     if:
-      type: function
       name: isToggleOn|databases/Redis/versions
+      type: function
     label: Database Version
+    loader: getAdminOptions|databases/Redis/versions
     schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
     type: select
-  - init:
+  - if:
+      name: isToggleOn|databases/Redis/mode
+      type: function
+    init:
       type: func
       value: getDefault|databases/Redis/mode
-    loader: getAdminOptions|databases/Redis/mode
     isHorizontal: true
-    if:
-      type: function
-      name: isToggleOn|databases/Redis/mode
     label: Database Mode
+    loader: getAdminOptions|databases/Redis/mode
     schema: schema/properties/spec/properties/mode
     type: radio
   - elements:
-    - type: horizontal-layout
+    - elements:
+      - label: Shards
+        schema: schema/properties/spec/properties/cluster/properties/master
+        type: input
+      - customClass: mb-20
+        label: Replica Number
+        schema: schema/properties/spec/properties/cluster/properties/replicas
+        type: input
       showLabels: true
-      elements:
-        - label: Shards
-          schema: schema/properties/spec/properties/cluster/properties/master
-          type: input
-        - label: Replica Number
-          schema: schema/properties/spec/properties/cluster/properties/replicas
-          customClass: mb-20
-          type: input
+      type: horizontal-layout
     if:
-      type: function
       name: isEqualToModelPathValue|Cluster|/spec/mode
+      type: function
     type: block-layout
   - elements:
     - init:
         type: func
         value: returnTrue
       label: Sentinel Type
-      watcher:
-        func: onCreateSentinelChange
-        paths:
-          - temp/createSentinel
       options:
       - text: Use Existing Sentinel
         value: "false"
@@ -55,109 +51,117 @@ step:
         value: "true"
       schema: temp/createSentinel
       type: radio
-    - loader: getResources|core|v1|namespaces
-      if:
-        type: function
+      watcher:
+        func: onCreateSentinelChange
+        paths:
+        - temp/createSentinel
+    - if:
         name: showSentinelNameAndNamespace
+        type: function
       label: Namespace
+      loader: getResources|core|v1|namespaces
       schema: schema/properties/spec/properties/sentinelRef/properties/namespace
       type: select
-    - loader: getRedisSentinels
-      if:
-        type: function
+    - if:
         name: showSentinelNameAndNamespace
+        type: function
       label: Name
+      loader: getRedisSentinels
       schema: schema/properties/spec/properties/sentinelRef/properties/name
       type: select
-    - label: Replica Number
+    - customClass: mb-20
+      label: Replica Number
       schema: schema/properties/spec/properties/replicas
       type: input
-      customClass: mb-20
     if:
-      type: function
       name: isEqualToModelPathValue|Sentinel|/spec/mode
+      type: function
     type: block-layout
   - elements:
-    - type: label-element
-      label: ''
-      subtitle: Select a machine profile to allocate CPU and memory resources for your in-memory data store. Choose 'custom' to manually specify resource requirements or select a predefined profile.
-    - type: horizontal-layout
+    - label: ""
+      subtitle: Select a machine profile to allocate CPU and memory resources for
+        your in-memory data store. Choose 'custom' to manually specify resource requirements
+        or select a predefined profile.
+      type: label-element
+    - elements:
+      - init:
+          type: func
+          value: setMachineToCustom
+        label: Machine
+        loader: getMachineListForOptions
+        schema: schema/properties/spec/properties/podResources/properties/machine
+        type: select
+      - disable: isMachineNotCustom
+        if:
+          name: isMachineCustom
+          type: function
+        init:
+          type: func
+          value: setLimits|cpu
+        label: CPU
+        loader: setLimits|cpu
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+        watcher:
+          func: setRequests|cpu
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          - schema/properties/spec/properties/podResources/properties/machine
+      - disable: isMachineNotCustom
+        if:
+          name: isMachineCustom
+          type: function
+        init:
+          type: func
+          value: setLimits|memory
+        label: Memory
+        loader: setLimits|memory
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+        watcher:
+          func: setRequests|memory
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          - schema/properties/spec/properties/podResources/properties/machine
       showLabels: true
-      elements:
-        - init:
-            type: func
-            value: setMachineToCustom
-          loader: getMachineListForOptions
-          label: Machine
-          schema: schema/properties/spec/properties/podResources/properties/machine
-          type: select
-        - init:
-            type: func
-            value: setLimits|cpu
-          disable: isMachineNotCustom
-          if:
-            type: function
-            name: isMachineCustom
-          label: CPU
-          loader: setLimits|cpu
-          watcher:
-            func: setRequests|cpu
-            paths:
-              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-              - schema/properties/spec/properties/podResources/properties/machine
-          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-          type: input
-        - init:
-            type: func
-            value: setLimits|memory
-          disable: isMachineNotCustom
-          if:
-            type: function
-            name: isMachineCustom
-          label: Memory
-          loader: setLimits|memory
-          watcher:
-            func: setRequests|memory
-            paths:
-              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-              - schema/properties/spec/properties/podResources/properties/machine
-          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-          type: input
+      type: horizontal-layout
     if:
-      type: function
       name: notEqualToDatabaseMode|Sharded
+      type: function
     label: Machine profile
     showLabels: true
     type: block-layout
   - elements:
-    - type: horizontal-layout
+    - elements:
+      - label: Storage Class
+        loader: getAdminOptions|storageClasses
+        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+        type: select
+      - if:
+          name: isNotEqualToModelPathValue|Sentinel|/spec/mode
+          type: function
+        label: Storage Size
+        schema: schema/properties/spec/properties/persistence/properties/size
+        type: input
       showLabels: true
-      elements:
-        - loader: getAdminOptions|storageClasses
-          label: Storage Class
-          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-          type: select
-        - if:
-            type: function
-            name: isNotEqualToModelPathValue|Sentinel|/spec/mode
-          label: Storage Size
-          schema: schema/properties/spec/properties/persistence/properties/size
-          type: input
+      type: horizontal-layout
     type: block-layout
   - init:
       type: func
       value: setAnnounce
     label: Announce Redis Endpoints ?
+    schema: temp/announce
+    type: switch
     watcher:
       func: setAnnounce
       paths:
-        - temp/announce
-    schema: temp/announce
-    type: switch
+      - temp/announce
   - elements:
-    - type: label-element
-      label: ''
-      subtitle: Configure how Redis cluster endpoints are announced to clients. Specify the announcement type (IP or hostname) and define shard endpoints for cluster mode connectivity.
+    - label: ""
+      subtitle: Configure how Redis cluster endpoints are announced to clients. Specify
+        the announcement type (IP or hostname) and define shard endpoints for cluster
+        mode connectivity.
+      type: label-element
     - label: Type
       options:
       - text: ip
@@ -166,48 +170,46 @@ step:
         value: hostname
       schema: schema/properties/spec/properties/cluster/properties/announce/properties/type
       type: select
-    - type: array-item-form
-      element:
+    - element:
         label: Shard Endpoints (comma-separated, e.g. "endpoint1,endpoint2,endpoint3")
         type: input
       label: Shards
       schema: schema/properties/spec/properties/cluster/properties/announce/properties/shards
+      type: array-item-form
     if:
-      type: function
       name: showAnnounce
+      type: function
     label: Announce
     showLabels: true
     type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
-      - type: object-item
+      - label: ""
+        subtitle: Add custom labels and annotations to your database resources for
+          organization, monitoring, and integration with other Kubernetes tools and
+          services.
+        type: label-element
+      - buttonClass: is-light is-outlined
         label: Labels
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/labels
-      - type: object-item
+        type: object-item
+      - buttonClass: is-light is-outlined
         label: Annotations
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/annotations
+        type: object-item
       hideBlock: true
       label: Labels & Annotations
       showLabels: true
       type: block-layout
-    - init:
+    - customClass: mt-20
+      if:
+        name: isToggleOn|deletionPolicy
+        type: function
+      init:
         type: func
         value: getDefault|deletionPolicy
-      customClass: mt-20
-      if:
-        type: function
-        name: isToggleOn|deletionPolicy
       label: Deletion Policy
-      watcher:
-        func: setStorageClass
-        paths:
-          - schema/properties/spec/properties/deletionPolicy
       options:
       - description: options.deletionPolicy.delete.description
         text: Delete ( Keep only database Secrets and backed up data )
@@ -223,58 +225,62 @@ step:
         value: DoNotTerminate
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
+      watcher:
+        func: setStorageClass
+        paths:
+        - schema/properties/spec/properties/deletionPolicy
     - if:
-        type: function
         name: getDefaultValue|spec/admin/authCredential/customize
+        type: function
       label: Provide Authentication Credentials?
+      schema: temp/createAuthSecret
+      type: switch
       watcher:
         func: onAuthChange
         paths:
-          - temp/createAuthSecret
-      schema: temp/createAuthSecret
-      type: switch
+        - temp/createAuthSecret
     - if:
-        type: function
         name: showReferSecretSwitch
+        type: function
       label: Refer existing Secret?
+      schema: temp/referSecret
+      type: switch
       watcher:
         func: onReferSecretChange
         paths:
-          - temp/referSecret
-      schema: temp/referSecret
-      type: switch
-    - loader: getReferSecrets
-      if:
-        type: function
+        - temp/referSecret
+    - if:
         name: showSecretDropdown
+        type: function
       label: Secret
+      loader: getReferSecrets
       schema: schema/properties/spec/properties/authSecret/properties/name
       type: select
     - if:
-        type: function
         name: showReferSecret
+        type: function
       label: Password (leave it blank to auto generate password)
       schema: schema/properties/spec/properties/authSecret/properties/password
       type: input
     - if:
-        type: function
         name: getDefaultValue|spec/admin/customConfiguration
+        type: function
       label: Configure Database?
+      schema: temp/configDatabase
+      type: switch
       watcher:
         func: clearConfiguration
         paths:
-          - temp/configDatabase
-      schema: temp/configDatabase
-      type: switch
+        - temp/configDatabase
     - if:
-        type: function
         name: isConfigDatabaseOn
+        type: function
       label: Configuration
       schema: schema/properties/spec/properties/configuration
       type: textarea
     - if:
-        type: function
         name: isToggleOn|deployment
+        type: function
       label: Deployment Mode
       options:
       - description: For exploring databases when high-performance is not required.
@@ -286,8 +292,8 @@ step:
       schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
     - if:
-        type: function
         name: isToggleOn|clusterTier
+        type: function
       isHorizontal: true
       label: Cluster Tier
       options:
@@ -300,19 +306,19 @@ step:
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
-      loader: getAdminOptions|clusterTier/placement
       if:
-        type: function
         name: isToggleOn|clusterTier/placement
+        type: function
       label: Placement Policy
+      loader: getAdminOptions|clusterTier/placement
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
-      loader: getNodeTopology
       if:
-        type: function
         name: isToggleOn|clusterTier/nodeTopology
+        type: function
       label: Node Topology
+      loader: getNodeTopology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     hideBlock: true
@@ -326,16 +332,16 @@ step:
           type: func
           value: setMonitoring
         label: Enable Monitoring
+        schema: temp/monitoring
+        type: switch
         watcher:
           func: updateAlertValue
           paths:
-            - temp/monitoring
-        schema: temp/monitoring
-        type: switch
+          - temp/monitoring
       - customClass: mt-10
         if:
-          type: function
           name: showAlerts
+          type: function
         label: Alert Options
         options:
         - text: None
@@ -349,53 +355,54 @@ step:
         schema: schema/properties/form/properties/alert/properties/enabled
         type: select
       if:
-        type: function
         name: isToggleOn|monitoring
+        type: function
       type: block-layout
-    - init:
+    - if:
+        name: isToggleOn|backup
+        type: function
+      init:
         type: func
         value: setBackup
-      if:
-        type: function
-        name: isToggleOn|backup
       label: Enable Backup?
+      schema: temp/backup
+      type: switch
       watcher:
         func: onBackupSwitch
         paths:
-          - temp/backup
-      schema: temp/backup
-      type: switch
+        - temp/backup
     - elements:
       - label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
-      - loader: getAdminOptions|clusterIssuers
-        if:
-          type: function
+      - if:
           name: showIssuer
+          type: function
         label: Cluster Issuers
-        validation:
-          type: required
+        loader: getAdminOptions|clusterIssuers
         schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
         type: select
+        validation:
+          type: required
       if:
-        type: function
         name: isToggleOn|tls
+        type: function
       type: block-layout
     - elements:
       - if:
-          type: function
           name: isToggleOn|expose
+          type: function
         label: Expose via Gateway?
         schema: schema/properties/spec/properties/admin/properties/expose/properties/default
         type: switch
       type: block-layout
     if:
-      type: function
       name: showAdditionalSettings
+      type: function
     label: Additional Options
     showLabels: true
     type: block-layout
   id: options
-  # title: steps.0.label
+  loader: initBundle
+  type: single-step-form
 type: multi-step-form

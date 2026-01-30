@@ -1,119 +1,121 @@
 step:
-- type: single-step-form
-  loader: initBundle
-  elements:
-  - type: label-element
-    label: ''
-    subtitle: Select the MSSQLServer version you want to deploy on Kubernetes. The chosen version determines the SQL Server engine features, compatibility, and runtime behavior of your database cluster.
+- elements:
+  - label: ""
+    subtitle: Select the MSSQLServer version you want to deploy on Kubernetes. The
+      chosen version determines the SQL Server engine features, compatibility, and
+      runtime behavior of your database cluster.
+    type: label-element
   - disableUnselect: true
-    loader: getAdminOptions|databases/MSSQLServer/versions
     if:
-      type: function
       name: isToggleOn|databases/MSSQLServer/versions
+      type: function
     label: Database version
+    loader: getAdminOptions|databases/MSSQLServer/versions
     schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/default
     type: select
-  - init:
-     type: func
-     value: getDefault|databases/MSSQLServer/mode
-    loader: getAdminOptions|databases/MSSQLServer/mode
-    if:
-      type: function
+  - if:
       name: isToggleOn|databases/MSSQLServer/mode
-    label: Database mode
+      type: function
+    init:
+      type: func
+      value: getDefault|databases/MSSQLServer/mode
     isHorizontal: true
+    label: Database mode
+    loader: getAdminOptions|databases/MSSQLServer/mode
+    schema: schema/properties/spec/properties/mode
+    type: radio
     watcher:
       func: onModeChange
       paths:
-        - schema/properties/spec/properties/mode
-    schema: schema/properties/spec/properties/mode
-    type: radio
-  - type: array-item-form
-    element:
+      - schema/properties/spec/properties/mode
+  - element:
       label: Databases
       type: input
     if:
-      type: function
       name: isEqualToModelPathValue|Topology|/spec/mode
+      type: function
     label: Availability Group
     schema: schema/properties/spec/properties/topology/properties/availabilityGroup/properties/databases
+    type: array-item-form
   - if:
-      type: function
       name: isEqualToModelPathValue|Topology|/spec/mode
+      type: function
     label: Replicaset number
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:
-    - type: label-element
-      label: ''
-      subtitle: Select a machine profile to allocate CPU and memory resources for your database cluster. Choose 'custom' to manually specify resource requirements or select a predefined profile.
-    - type: horizontal-layout
+    - label: ""
+      subtitle: Select a machine profile to allocate CPU and memory resources for
+        your database cluster. Choose 'custom' to manually specify resource requirements
+        or select a predefined profile.
+      type: label-element
+    - elements:
+      - init:
+          type: func
+          value: setMachineToCustom
+        label: Machine
+        loader: getMachineListForOptions
+        schema: schema/properties/spec/properties/podResources/properties/machine
+        type: select
+      - disable: isMachineNotCustom
+        if:
+          name: isMachineCustom
+          type: function
+        init:
+          type: func
+          value: setLimits|cpu
+        label: CPU
+        loader: setLimits|cpu
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+        watcher:
+          func: setRequests|cpu
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          - schema/properties/spec/properties/podResources/properties/machine
+      - disable: isMachineNotCustom
+        if:
+          name: isMachineCustom
+          type: function
+        init:
+          type: func
+          value: setLimits|memory
+        label: Memory
+        loader: setLimits|memory
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+        watcher:
+          func: setRequests|memory
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          - schema/properties/spec/properties/podResources/properties/machine
       showLabels: true
-      elements:
-        - init:
-            type: func
-            value: setMachineToCustom
-          loader: getMachineListForOptions
-          label: Machine
-          schema: schema/properties/spec/properties/podResources/properties/machine
-          type: select
-        - init:
-            type: func
-            value: setLimits|cpu
-          disable: isMachineNotCustom
-          if:
-            type: function
-            name: isMachineCustom
-          label: CPU
-          loader: setLimits|cpu
-          watcher:
-            func: setRequests|cpu
-            paths:
-              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-              - schema/properties/spec/properties/podResources/properties/machine
-          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-          type: input
-        - init:
-            type: func
-            value: setLimits|memory
-          disable: isMachineNotCustom
-          if:
-            type: function
-            name: isMachineCustom
-          label: Memory
-          loader: setLimits|memory
-          watcher:
-            func: setRequests|memory
-            paths:
-              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-              - schema/properties/spec/properties/podResources/properties/machine
-          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-          type: input
+      type: horizontal-layout
     label: Machine Profile
     showLabels: true
     type: block-layout
   - elements:
-    - type: horizontal-layout
+    - elements:
+      - label: Storage Class
+        loader: getAdminOptions|storageClasses
+        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+        type: select
+      - if:
+          name: showStorageSizeField
+          type: function
+        label: Storage Size
+        schema: schema/properties/spec/properties/persistence/properties/size
+        type: input
       showLabels: true
-      elements:
-        - loader: getAdminOptions|storageClasses
-          label: Storage Class
-          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-          type: select
-        - if:
-            type: function
-            name: showStorageSizeField
-          label: Storage Size
-          schema: schema/properties/spec/properties/persistence/properties/size
-          type: input
+      type: horizontal-layout
     type: block-layout
   - elements:
-    - loader: getAdminOptions|clusterIssuers
-      label: Cluster Issuers
-      validation:
-        type: required
+    - label: Cluster Issuers
+      loader: getAdminOptions|clusterIssuers
       schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
       type: select
+      validation:
+        type: required
     type: block-layout
   - label: Accept EULA?
     schema: schema/properties/spec/properties/acceptEULA
@@ -122,10 +124,6 @@ step:
       type: func
       value: getDefaulPid
     label: PID
-    watcher:
-      func: onPidChange
-      paths:
-        - temp/pid
     options:
     - Developer
     - Express
@@ -134,52 +132,54 @@ step:
     - Enterprise
     - EnterpriseCore
     - Custom
-    validation:
-      type: required
     schema: temp/pid
     type: select
+    validation:
+      type: required
+    watcher:
+      func: onPidChange
+      paths:
+      - temp/pid
   - if:
-      type: function
       name: isPidCustom
+      type: function
     label: Custom PID
+    schema: temp/customPid
+    type: input
+    validation:
+      type: required
     watcher:
       func: onCustomPidChange
       paths:
-        - temp/customPid
-    validation:
-      type: required
-    schema: temp/customPid
-    type: input
+      - temp/customPid
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
-      - type: object-item
+      - label: ""
+        subtitle: Add custom labels and annotations to your database resources for
+          organization, monitoring, and integration with other Kubernetes tools and
+          services.
+        type: label-element
+      - buttonClass: is-light is-outlined
         label: Labels
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/labels
-      - type: object-item
+        type: object-item
+      - buttonClass: is-light is-outlined
         label: Annotations
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/annotations
+        type: object-item
+      hideBlock: true
       label: Labels & Annotations
       showLabels: true
-      hideBlock: true
       type: block-layout
-    - init:
+    - customClass: mt-20
+      if:
+        name: isToggleOn|deletionPolicy
+        type: function
+      init:
         type: func
         value: getDefault|deletionPolicy
-      customClass: mt-20
-      if:
-        type: function
-        name: isToggleOn|deletionPolicy
       label: Deletion Policy
-      watcher:
-        func: setStorageClass
-        paths:
-          - schema/properties/spec/properties/deletionPolicy
       options:
       - description: options.deletionPolicy.delete.description
         text: Delete
@@ -195,91 +195,96 @@ step:
         value: DoNotTerminate
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
+      watcher:
+        func: setStorageClass
+        paths:
+        - schema/properties/spec/properties/deletionPolicy
     - if:
-        type: function
         name: getDefaultValue|spec/admin/authCredential/customize
+        type: function
       label: Provide Authentication Credentials?
+      schema: temp/createAuthSecret
+      type: switch
       watcher:
         func: onAuthChange
         paths:
-          - temp/createAuthSecret
-      schema: temp/createAuthSecret
-      type: switch
+        - temp/createAuthSecret
     - if:
-        type: function
         name: showReferSecretSwitch
+        type: function
       label: Refer existing Secret?
+      schema: temp/referSecret
+      type: switch
       watcher:
         func: onReferSecretChange
         paths:
-          - temp/referSecret
-      schema: temp/referSecret
-      type: switch
-    - loader: getReferSecrets
-      if:
-        type: function
+        - temp/referSecret
+    - if:
         name: showSecretDropdown
+        type: function
       label: Secret
+      loader: getReferSecrets
       schema: schema/properties/spec/properties/authSecret/properties/name
       type: select
     - if:
-        type: function
         name: showReferSecret
+        type: function
       label: password
       schema: schema/properties/spec/properties/authSecret/properties/password
       type: input
     - if:
-        type: function
         name: getDefaultValue|spec/admin/customConfiguration
+        type: function
       label: Configure Database?
+      schema: temp/configDatabase
+      type: switch
       watcher:
         func: clearConfiguration
         paths:
-          - temp/configDatabase
-      schema: temp/configDatabase
-      type: switch
+        - temp/configDatabase
     - if:
-        type: function
         name: isConfigDatabaseOn
+        type: function
       label: Configuration
-      # hasCopy: true
       schema: schema/properties/spec/properties/configuration
       type: textarea
-    - init:
+    - if:
+        name: isToggleOn|pointInTimeRecovery
+        type: function
+      init:
         type: func
         value: getDefault|pointInTimeRecovery
-      if:
-        type: function
-        name: isToggleOn|pointInTimeRecovery
       label: Point in-time Recovery?
       schema: temp/recovery
       type: switch
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Configure point-in-time recovery to restore your database to a specific moment. Specify the source database namespace, name, and the exact timestamp for recovery.
-      - type: horizontal-layout
+      - label: ""
+        subtitle: Configure point-in-time recovery to restore your database to a specific
+          moment. Specify the source database namespace, name, and the exact timestamp
+          for recovery.
+        type: label-element
+      - elements:
+        - forceRequired: true
+          label: Namespace
+          schema: temp/refNamespace
+          type: input
+          validation:
+            type: required
+          watcher:
+            func: setPointInTimeRecovery
+            paths:
+            - temp/refNamespace
+        - label: Name
+          schema: temp/refDBName
+          type: input
+          validation:
+            type: required
+          watcher:
+            func: setPointInTimeRecovery
+            paths:
+            - temp/refDBName
         showLabels: true
-        elements:
-          - label: Namespace
-            watcher:
-              func: setPointInTimeRecovery
-              paths:
-                - temp/refNamespace
-            forceRequired: true
-            validation:
-              type: required
-            schema: temp/refNamespace
-            type: input
-          - label: Name
-            watcher:
-              func: setPointInTimeRecovery
-              paths:
-                - temp/refDBName
-            validation:
-              type: required
-            schema: temp/refDBName
-            type: input
+        type: horizontal-layout
       - customClass: mt-10
         label: Recovery Timestamp
         schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
@@ -287,16 +292,16 @@ step:
         watcher:
           func: onTimestampChange
           paths:
-            - schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
+          - schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
       if:
-        type: function
         name: showRecovery
+        type: function
       label: Point in-time Recovery
       showLabels: true
       type: block-layout
     - if:
-        type: function
         name: isToggleOn|deployment
+        type: function
       label: Deployment name
       options:
       - description: labels.deployment.shared
@@ -308,8 +313,8 @@ step:
       schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
     - if:
-        type: function
         name: isToggleOn|clusterTier
+        type: function
       isHorizontal: true
       label: Cluster Tier
       options:
@@ -322,19 +327,19 @@ step:
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
-      loader: getAdminOptions|clusterTier/placement
       if:
-        type: function
         name: isToggleOn|clusterTier/placement
+        type: function
       label: Placement
+      loader: getAdminOptions|clusterTier/placement
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
-      loader: getNodeTopology
       if:
-        type: function
         name: isToggleOn|clusterTier/nodeTopology
+        type: function
       label: Node Topology
+      loader: getNodeTopology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     label: Advanced Configuration
@@ -343,54 +348,54 @@ step:
   - description: Enable Backup, Monitoring, TLS etc.
     elements:
     - elements:
-      - init:
+      - if:
+          name: isToggleOn|monitoring
+          type: function
+        init:
           type: func
           value: setMonitoring
-        if:
-          type: function
-          name: isToggleOn|monitoring
         label: Enable Monitoring?
+        schema: temp/monitoring
+        type: switch
         watcher:
           func: updateAlertValue
           paths:
-            - temp/monitoring
-        schema: temp/monitoring
-        type: switch
+          - temp/monitoring
       type: block-layout
-    - init:
+    - if:
+        name: isToggleOn|backup
+        type: function
+      init:
         type: func
         value: setBackup
-      if:
-        type: function
-        name: isToggleOn|backup
       label: Enable Backup?
+      schema: temp/backup
+      type: switch
       watcher:
         func: onBackupSwitch
         paths:
-          - temp/backup
-      schema: temp/backup
-      type: switch
+        - temp/backup
     - elements:
       - disable: showArchiverAlert
         label: Enable Archiver?
+        schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+        type: switch
         watcher:
           func: onArchiverChange
           paths:
-            - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
-        schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
-        type: switch
+          - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
       - if:
-          type: function
           name: showArchiverAlert
+          type: function
         label: The selected StorageClass does not support Archiver
         type: warning
       if:
-        type: function
         name: showArchiver
+        type: function
       type: block-layout
     - if:
-        type: function
         name: isToggleOn|tls
+        type: function
       label: Enable TLS?
       schema: schema/properties/spec/properties/admin/properties/tls/properties/default
       type: switch
@@ -399,15 +404,16 @@ step:
         schema: schema/properties/spec/properties/admin/properties/expose/properties/default
         type: switch
       if:
-        type: function
         name: isToggleOn|expose
+        type: function
       type: block-layout
     if:
-      type: function
       name: showAdditionalSettings
+      type: function
     label: Additional Options
     showLabels: true
     type: block-layout
   id: options
-  # title: steps.0.label
+  loader: initBundle
+  type: single-step-form
 type: multi-step-form

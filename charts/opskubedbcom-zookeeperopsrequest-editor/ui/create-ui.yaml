@@ -1,466 +1,476 @@
-type: multi-step-form
 step:
-  - type: single-step-form
-    loader: getDbDetails
-    elements:
-# common
-      - type: input
-        label: op_req_name
-        if:
-          type: function
-          name: showAndInitName
-        validation:
-          type: required
-        schema: schema/properties/metadata/properties/name
-      - type: select
-        label: Namespace
-        if:
-          type: function
-          name: showAndInitNamespace
+- elements:
+  - if:
+      name: showAndInitName
+      type: function
+    label: op_req_name
+    schema: schema/properties/metadata/properties/name
+    type: input
+    validation:
+      type: required
+  - disable: isNamespaceDisabled
+    hasGroup: isRancherManaged
+    if:
+      name: showAndInitNamespace
+      type: function
+    init:
+      type: func
+      value: initNamespace
+    label: Namespace
+    loader: getNamespaces
+    schema: schema/properties/metadata/properties/namespace
+    type: select
+    validation:
+      type: required
+    watcher:
+      func: onNamespaceChange
+      paths:
+      - schema/properties/metadata/properties/namespace
+  - disable: isDatabaseRefDisabled
+    if:
+      name: showAndInitDatabaseRef
+      type: function
+    init:
+      type: func
+      value: initDatabaseRef
+    label: Database Ref
+    loader:
+      name: getDbs
+      watchPaths:
+      - schema/properties/metadata/properties/namespace
+    refresh: true
+    schema: schema/properties/spec/properties/databaseRef/properties/name
+    type: select
+    validation:
+      type: required
+    watcher:
+      func: onDbChange
+      paths:
+      - schema/properties/spec/properties/databaseRef/properties/name
+  - if:
+      name: showConfigureOpsrequestLabel
+      type: function
+    label: config_ops_request
+    type: label-element
+  - disable: isDbDetailsLoading
+    if:
+      name: showAndInitOpsRequestType
+      type: function
+    init:
+      type: func
+      value: getRequestTypeFromRoute
+    isHorizontal: true
+    label: Type of Ops Request
+    options:
+    - description: Update your database to any version
+      text: Update Version
+      value: UpdateVersion
+    - description: Scale up or down pod count
+      text: Horizontal Scaling
+      value: HorizontalScaling
+    - description: Manage your CPU resources
+      text: Vertical Scaling
+      value: VerticalScaling
+    - description: Manage your database size
+      text: Volume Expansion
+      value: VolumeExpansion
+    - description: Restart your database
+      text: Restart
+      value: Restart
+    - description: Reconfigure your database
+      text: Reconfigure
+      value: Reconfigure
+    - description: Reconfigure your database tls configuration
+      text: Reconfigure TLS
+      value: ReconfigureTLS
+    schema: schema/properties/spec/properties/type
+    type: radio
+    watcher:
+      func: onRequestTypeChange
+      paths:
+      - schema/properties/spec/properties/type
+  - elements:
+    - init:
+        type: func
+        value: setValueFromDbDetails|/spec/version
+      label: Target Version
+      loader: getDbVersions
+      schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+      subtitle: Select the desired ZooKeeper version to which you want to update your
+        database.
+      type: select-compare
+    - if:
+        name: isVersionEmpty
+        type: function
+      label: ""
+      loader:
+        name: getVersionInfo
+        watchPaths:
+        - temp/properties/filteredVersion
+      type: info
+    fixedBlock: true
+    if:
+      name: ifRequestTypeEqualsTo|UpdateVersion
+      type: function
+    label: Version
+    showLabels: true
+    type: block-layout
+  - elements:
+    - elements:
+      - header: Replicas
         init:
           type: func
-          value: initNamespace
-        disable: isNamespaceDisabled
-        loader: getNamespaces
-        validation:
-          type: required
-        hasGroup: isRancherManaged
-        schema: schema/properties/metadata/properties/namespace
-        watcher:
-          func: onNamespaceChange
-          paths:
-            - schema/properties/metadata/properties/namespace
-      - type: select
-        label: Database Ref
-        if:
-          type: function
-          name: showAndInitDatabaseRef
-        loader:
-          name: getDbs
-          watchPaths:
-            - schema/properties/metadata/properties/namespace
-        init:
-          type: func
-          value: initDatabaseRef
-        validation:
-          type: required
-        disable: isDatabaseRefDisabled
-        refresh: true
-        watcher:
-          paths:
-            - schema/properties/spec/properties/databaseRef/properties/name
-          func: onDbChange
-        schema: schema/properties/spec/properties/databaseRef/properties/name
-      - type: label-element
-        label: config_ops_request
-        if:
-          type: function
-          name: showConfigureOpsrequestLabel
-      - type: radio
-        label: Type of Ops Request
-        if:
-          type: function
-          name: showAndInitOpsRequestType
-        options:
-          - description: Update your database to any version
-            text: Update Version
-            value: UpdateVersion
-          - description: Scale up or down pod count
-            text: Horizontal Scaling
-            value: HorizontalScaling
-          - description: Manage your CPU resources
-            text: Vertical Scaling
-            value: VerticalScaling
-          - description: Manage your database size
-            text: Volume Expansion
-            value: VolumeExpansion
-          - description: Restart your database
-            text: Restart
-            value: Restart
-          - description: Reconfigure your database
-            text: Reconfigure
-            value: Reconfigure
-          - description: Reconfigure your database tls configuration
-            text: Reconfigure TLS
-            value: ReconfigureTLS
-        init:
-          type: func
-          value: getRequestTypeFromRoute
-        disable: isDbDetailsLoading
-        watcher:
-          func: onRequestTypeChange
-          paths:
-            - schema/properties/spec/properties/type
-        isHorizontal: true
-        schema: schema/properties/spec/properties/type
-# UpdateVersion
-      - type: block-layout
-        showLabels: true
-        label: Version
-        fixedBlock: true
-        if:
-          type: function
-          name: ifRequestTypeEqualsTo|UpdateVersion
-        elements:
-          - type: select-compare
-            label: Target Version
-            subtitle: Select the desired ZooKeeper version to which you want to update your database.
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/version
-            loader: getDbVersions
-            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
-          - type: info
-            label: ''
-            loader:
-              name: getVersionInfo
-              watchPaths:
-                - temp/properties/filteredVersion
-            if:
-              type: function
-              name: isVersionEmpty
-# Horizontal Scale
-      - type: block-layout
-        label: Horizontal Scaling Form
-        showLabels: true
-        fixedBlock: true
-        if:
-          type: function
-          name: ifRequestTypeEqualsTo|HorizontalScaling
-        elements:
-          - type: horizontal-layout
-            elements:
-              - type: input-compare
-                label: Replicas
-                header: Replicas
-                subtitle: Define the total number of replicas for the database. Increasing replicas improves fault tolerance and load distribution, while reducing replicas conserves resources
-                init:
-                  type: func
-                  value: setValueFromDbDetails|/spec/replicas
-                schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
-              - type: info
-                hasIcon: true
-                label: Each replica represents an independent copy of your database. For example, setting this to 3 creates three copies of the database for better availability.
-# vertical Scale
-      - type: block-layout
-        if:
-          type: function
-          name: ifRequestTypeEqualsTo|VerticalScaling
-        elements:
-          - type: machine-compare
-            label: Resources
-            subtitle: Compare your current machine configuration with the proposed memory adjustments and make informed decisions for your database setup
-            loader: getMachines
-            init:
-              type: func
-              value: setMachine
-            watcher:
-              func: onMachineChange|node|/spec/podTemplate/spec/containers
-              paths:
-                - temp/properties/machine
-            schema: temp/properties/machine
-          - type: block-layout
-            label: Node Selection
-            showLabels: true
-            elements:
-              - type: horizontal-layout
-                elements:
-                - type: block-layout
-                  showLabels: false
-                  hideBorder: true
-                  elements:
-                    - type: label-element
-                      label: Node Selection Policy
-                      subtitle: Control where your workloads runs by configuring node selection criteria. Use label selectors to match specific nodes or taints to avoid unsuitable nodes
-                    - type: select
-                      label: Node Selection Policy
-                      schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
-                      options:
-                        - text: LabelSelector
-                          value: LabelSelector
-                        - text: Taint
-                          value: Taint
-                - type: info
-                  label: "<b>Label Selector:</b> Specify key-value pairs to target nodes that match your workload's requirements. <br/><b>Taints:</b> Define tolerations for node taints to ensure your workload runs only on compatible nodes"
-                  customClass: mt-20
-              - type: label-element
-                label: Topology
-                subtitle: Define node topology preferences, such as zone or region. For example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-              - type: horizontal-layout
-                elements:
-                  - type: input
-                    label: Key
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired
-                    schema: temp/topologyKey
-                  - type: input
-                    label: Value
-                    validation:
-                      type: custom
-                      name: isVerticalScaleTopologyRequired
-                    schema: temp/topologyValue
-          - type: block-layout
-            label: Exporter
-            showLabels: true
-            hideBlock: true
-            elements:
-              - type: horizontal-layout
-                showLabels: true
-                elements:
-                  - init:
-                      type: func
-                      value: setExporter|cpu
-                    type: input
-                    label: CPU
-                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-                  - type: input
-                    init:
-                      type: func
-                      value: setExporter|memory
-                    label: Memory
-                    schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-                    watcher:
-                      func: onExporterResourceChange|memory
-                      paths:
-                        - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-# Volume Expansion
-
-      - type: block-layout
-        label: Volume Expansion Form
-        if:
-          type: function
-          name: ifRequestTypeEqualsTo|VolumeExpansion
-        elements:
-          - type: horizontal-layout
-            elements:
-              - type: block-layout
-                elements:
-                  - type: label-element
-                    label: Mode
-                    subtitle: Not sure which mode to pick? Use Online Mode for smooth operations with minimal disruption. Choose Offline Mode if you can afford a brief downtime for added reliability during the volume expansion.
-                  - type: select
-                    label: Mode
-                    options:
-                      - text: Offline
-                        value: Offline
-                      - text: Online
-                        value: Online
-                    validation:
-                      type: required
-                    schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          - type: block-layout
-            label: ZooKeeper volume expansion
-            showLabels: true
-            fixedBlock: true
-            elements:
-              - type: horizontal-layout
-                elements:
-                  - type: input-compare
-                    header: Storage
-                    subtitle: How much extra storage does your database need? Specify the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-                    label: Node
-                    init:
-                      type: func
-                      value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-                    validation:
-                      type: custom
-                      name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
-                    schema: schema/properties/spec/properties/volumeExpansion/properties/node
-# Reconfigure
-      - type: block-layout
-        label: Reconfigure Form
-        if:
-          name: ifRequestTypeEqualsTo|Reconfigure
-          type: function
-        loader:
-          name: fetchConfigSecrets
-          watchPaths:
-            - schema/properties/metadata/properties/namespace
-        elements:
-          - type: block-layout
-            label: Configuration
-            elements:
-              - type: label-element
-                label: ''
-                subtitle: Select a new configuration secret, apply a custom configuration, or remove an existing setup to update your database settings
-              - type: tab-layout
-                label: New Config Secret
-                schema: temp/properties/reconfigurationType
-                options:
-                - text: NEW CONFIG SECRET
-                  value: selectNewConfigSecret
-                - text: APPLY CONFIG
-                  value: applyConfig
-                - text: REMOVE
-                  value: remove
-                elements:
-                - type: block-layout
-                  label: Config Secret
-                  if:
-                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-                    type: function
-                  elements:
-                    - type:  label-element
-                      label: Config Secret
-                      subtitle: Select a configuration secret from the available list to update your database settings
-                      customClass: mb-10
-                    - type: select
-                      customClass: mb-2
-                      schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                      refresh: true
-                      label: Config Secret
-                      loader:
-                        name: getConfigSecrets
-                        watchPaths:
-                          - schema/properties/metadata/properties/namespace
-                          - temp/properties/createSecret/properties/status
-                      init:
-                        type: func
-                        value: setValueFromDbDetails|/spec/configSecret/name
-                      watcher:
-                        func: onCreateSecretChange
-                        paths:
-                          - temp/properties/createSecret/properties/status
-                    - type: label-element
-                      label: ''
-                      loader:
-                        name: getSelectedConfigurationName|create
-                        watchPaths:
-                          - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                    - type: block-layout
-                      label: Create a New Config Secret
-                      showLabels: true
-                      if:
-                        type: function
-                        name: isCreateSecret
-                      hasButton:
-                        text: Save
-                        hasCancel: cancelCreateSecret
-                        action: createNewConfigSecret
-                      elements:
-                        - type: input
-                          label: Secret Name
-                          schema: temp/properties/createSecret/properties/name
-                          validation:
-                            type: required
-                        - type: array-object-form
-                          label: String Data
-                          schema: temp/properties/createSecret/properties/data
-                          buttonClass: is-light is-outlined
-                          validation:
-                            type: required
-                          elements:
-                            - type: select
-                              label: Key
-                              schema: key
-                              loader:
-                                name: onSelectedSecretChange
-                                watchPaths:
-                                  - temp/properties/createSecret/properties/data
-                              validation:
-                                type: required
-                            - type: textarea
-                              label: Value
-                              schema: value
-                    - type: multi-file-editor
-                      editorHeight: 500px
-                      readonly: true
-                      if:
-                        type: function
-                        name: isNotCreateSecret
-                      loader:
-                        name: onNewConfigSecretChange
-                        watchPaths:
-                          - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-                      schema: temp/properties/newConfigSecret
-                - type: block-layout
-                  label: ApplyConfig
-                  if:
-                    name: ifReconfigurationTypeEqualsTo|applyConfig
-                    type: function
-                  elements:
-                    - type: label-element
-                      label: New Apply Config
-                      subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Enter the parameter you want to configure (e.g., max_connections).
-                      customClass: mb-10
-                    - type: select
-                      customClass: mb-2
-                      schema: temp/properties/selectedConfiguration
-                      refresh: true
-                      label: Configuration
-                      loader: getConfigSecretsforAppyConfig
-                    - type: label-element
-                      label: ''
-                      loader:
-                        name: getSelectedConfigurationName|apply
-                        watchPaths:
-                          - temp/properties/selectedConfiguration
-                    - type: multi-file-editor
-                      editorHeight: 500px
-                      schema: temp/properties/applyConfig
-                      loader:
-                        name: setApplyConfig
-                        watchPaths:
-                            - temp/properties/selectedConfiguration
-                      watcher:
-                       func: onApplyconfigChange
-                       paths:
-                        - temp/properties/applyConfig
-                - type: block-layout
-                  label: Remove
-                  if:
-                    name: ifReconfigurationTypeEqualsTo|remove
-                    type: function
-                  elements:
-                    - type: label-element
-                      label: Remove
-                      subtitle: Selected a configuration secret from the available list to update your database settings
-                      customClass: mb-10
-                    - type: select
-                      customClass: mb-2
-                      schema: temp/properties/selectedConfigurationRemove
-                      refresh: true
-                      label: Configuration
-                      loader:
-                        name: getConfigSecretsforAppyConfig
-                        watchPaths:
-                          - schema/properties/metadata/properties/namespace
-                    - type: label-element
-                      label: ''
-                      loader:
-                        name: getSelectedConfigurationName|remove
-                        watchPaths:
-                          - temp/properties/selectedConfigurationRemove
-                    - type: multi-file-editor
-                      editorHeight: 500px
-                      readonly: true
-                      init:
-                        type: func
-                        value: onRemoveConfigChange
-                      watcher:
-                        func: onRemoveConfigChange
-                        paths:
-                          - temp/properties/selectedConfigurationRemove
-                      schema: temp/properties/removeConfig
-
-# common
-      - type: block-layout
-        label: OpsRequest Options
-        showLabels: true
-        elements:
-          - type: time-picker
-            label: Timeout
-            schema: 'schema/properties/spec/properties/timeout'
-            subtitle: Specify the maximum time allowed for the scaling operation to complete. Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
-          - type: radio
-            label: Apply
-            schema: 'schema/properties/spec/properties/apply'
-            init:
-              type: func
-              value: setApplyToIfReady
+          value: setValueFromDbDetails|/spec/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution, while reducing
+          replicas conserves resources
+        type: input-compare
+      - hasIcon: true
+        label: Each replica represents an independent copy of your database. For example,
+          setting this to 3 creates three copies of the database for better availability.
+        type: info
+      type: horizontal-layout
+    fixedBlock: true
+    if:
+      name: ifRequestTypeEqualsTo|HorizontalScaling
+      type: function
+    label: Horizontal Scaling Form
+    showLabels: true
+    type: block-layout
+  - elements:
+    - init:
+        type: func
+        value: setMachine
+      label: Resources
+      loader: getMachines
+      schema: temp/properties/machine
+      subtitle: Compare your current machine configuration with the proposed memory
+        adjustments and make informed decisions for your database setup
+      type: machine-compare
+      watcher:
+        func: onMachineChange|node|/spec/podTemplate/spec/containers
+        paths:
+        - temp/properties/machine
+    - elements:
+      - elements:
+        - elements:
+          - label: Node Selection Policy
+            subtitle: Control where your workloads runs by configuring node selection
+              criteria. Use label selectors to match specific nodes or taints to avoid
+              unsuitable nodes
+            type: label-element
+          - label: Node Selection Policy
             options:
-              - text: IfReady (OpsRequest will be applied if database is ready)
-                value: IfReady
-              - text: Always (OpsRequest will always be applied)
-                value: Always
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+            type: select
+          hideBorder: true
+          showLabels: false
+          type: block-layout
+        - customClass: mt-20
+          label: <b>Label Selector:</b> Specify key-value pairs to target nodes that
+            match your workload's requirements. <br/><b>Taints:</b> Define tolerations
+            for node taints to ensure your workload runs only on compatible nodes
+          type: info
+        type: horizontal-layout
+      - label: Topology
+        subtitle: Define node topology preferences, such as zone or region. For example,
+          'zone=us-central1-a' ensures workloads are deployed in that zone.
+        type: label-element
+      - elements:
+        - label: Key
+          schema: temp/topologyKey
+          type: input
+          validation:
+            name: isVerticalScaleTopologyRequired
+            type: custom
+        - label: Value
+          schema: temp/topologyValue
+          type: input
+          validation:
+            name: isVerticalScaleTopologyRequired
+            type: custom
+        type: horizontal-layout
+      label: Node Selection
+      showLabels: true
+      type: block-layout
+    - elements:
+      - elements:
+        - init:
+            type: func
+            value: setExporter|cpu
+          label: CPU
+          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
+          type: input
+        - init:
+            type: func
+            value: setExporter|memory
+          label: Memory
+          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+          type: input
+          watcher:
+            func: onExporterResourceChange|memory
+            paths:
+            - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+        showLabels: true
+        type: horizontal-layout
+      hideBlock: true
+      label: Exporter
+      showLabels: true
+      type: block-layout
+    if:
+      name: ifRequestTypeEqualsTo|VerticalScaling
+      type: function
+    type: block-layout
+  - elements:
+    - elements:
+      - elements:
+        - label: Mode
+          subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
+            with minimal disruption. Choose Offline Mode if you can afford a brief
+            downtime for added reliability during the volume expansion.
+          type: label-element
+        - label: Mode
+          options:
+          - text: Offline
+            value: Offline
+          - text: Online
+            value: Online
+          schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+          type: select
+          validation:
+            type: required
+        type: block-layout
+      type: horizontal-layout
+    - elements:
+      - elements:
+        - header: Storage
+          init:
+            type: func
+            value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+          label: Node
+          schema: schema/properties/spec/properties/volumeExpansion/properties/node
+          subtitle: How much extra storage does your database need? Specify the size
+            (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+          type: input-compare
+          validation:
+            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+            type: custom
+        type: horizontal-layout
+      fixedBlock: true
+      label: ZooKeeper volume expansion
+      showLabels: true
+      type: block-layout
+    if:
+      name: ifRequestTypeEqualsTo|VolumeExpansion
+      type: function
+    label: Volume Expansion Form
+    type: block-layout
+  - elements:
+    - elements:
+      - label: ""
+        subtitle: Select a new configuration secret, apply a custom configuration,
+          or remove an existing setup to update your database settings
+        type: label-element
+      - elements:
+        - elements:
+          - customClass: mb-10
+            label: Config Secret
+            subtitle: Select a configuration secret from the available list to update
+              your database settings
+            type: label-element
+          - customClass: mb-2
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/configSecret/name
+            label: Config Secret
+            loader:
+              name: getConfigSecrets
+              watchPaths:
+              - schema/properties/metadata/properties/namespace
+              - temp/properties/createSecret/properties/status
+            refresh: true
+            schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+            type: select
+            watcher:
+              func: onCreateSecretChange
+              paths:
+              - temp/properties/createSecret/properties/status
+          - label: ""
+            loader:
+              name: getSelectedConfigurationName|create
+              watchPaths:
+              - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+            type: label-element
+          - elements:
+            - label: Secret Name
+              schema: temp/properties/createSecret/properties/name
+              type: input
+              validation:
+                type: required
+            - buttonClass: is-light is-outlined
+              elements:
+              - label: Key
+                loader:
+                  name: onSelectedSecretChange
+                  watchPaths:
+                  - temp/properties/createSecret/properties/data
+                schema: key
+                type: select
+                validation:
+                  type: required
+              - label: Value
+                schema: value
+                type: textarea
+              label: String Data
+              schema: temp/properties/createSecret/properties/data
+              type: array-object-form
+              validation:
+                type: required
+            hasButton:
+              action: createNewConfigSecret
+              hasCancel: cancelCreateSecret
+              text: Save
+            if:
+              name: isCreateSecret
+              type: function
+            label: Create a New Config Secret
+            showLabels: true
+            type: block-layout
+          - editorHeight: 500px
+            if:
+              name: isNotCreateSecret
+              type: function
+            loader:
+              name: onNewConfigSecretChange
+              watchPaths:
+              - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+            readonly: true
+            schema: temp/properties/newConfigSecret
+            type: multi-file-editor
+          if:
+            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            type: function
+          label: Config Secret
+          type: block-layout
+        - elements:
+          - customClass: mb-10
+            label: New Apply Config
+            subtitle: Define custom configurations for your database using key-value
+              pairs. These parameters will overwrite existing settings.<br>Enter the
+              parameter you want to configure (e.g., max_connections).
+            type: label-element
+          - customClass: mb-2
+            label: Configuration
+            loader: getConfigSecretsforAppyConfig
+            refresh: true
+            schema: temp/properties/selectedConfiguration
+            type: select
+          - label: ""
+            loader:
+              name: getSelectedConfigurationName|apply
+              watchPaths:
+              - temp/properties/selectedConfiguration
+            type: label-element
+          - editorHeight: 500px
+            loader:
+              name: setApplyConfig
+              watchPaths:
+              - temp/properties/selectedConfiguration
+            schema: temp/properties/applyConfig
+            type: multi-file-editor
+            watcher:
+              func: onApplyconfigChange
+              paths:
+              - temp/properties/applyConfig
+          if:
+            name: ifReconfigurationTypeEqualsTo|applyConfig
+            type: function
+          label: ApplyConfig
+          type: block-layout
+        - elements:
+          - customClass: mb-10
+            label: Remove
+            subtitle: Selected a configuration secret from the available list to update
+              your database settings
+            type: label-element
+          - customClass: mb-2
+            label: Configuration
+            loader:
+              name: getConfigSecretsforAppyConfig
+              watchPaths:
+              - schema/properties/metadata/properties/namespace
+            refresh: true
+            schema: temp/properties/selectedConfigurationRemove
+            type: select
+          - label: ""
+            loader:
+              name: getSelectedConfigurationName|remove
+              watchPaths:
+              - temp/properties/selectedConfigurationRemove
+            type: label-element
+          - editorHeight: 500px
+            init:
+              type: func
+              value: onRemoveConfigChange
+            readonly: true
+            schema: temp/properties/removeConfig
+            type: multi-file-editor
+            watcher:
+              func: onRemoveConfigChange
+              paths:
+              - temp/properties/selectedConfigurationRemove
+          if:
+            name: ifReconfigurationTypeEqualsTo|remove
+            type: function
+          label: Remove
+          type: block-layout
+        label: New Config Secret
+        options:
+        - text: NEW CONFIG SECRET
+          value: selectNewConfigSecret
+        - text: APPLY CONFIG
+          value: applyConfig
+        - text: REMOVE
+          value: remove
+        schema: temp/properties/reconfigurationType
+        type: tab-layout
+      label: Configuration
+      type: block-layout
+    if:
+      name: ifRequestTypeEqualsTo|Reconfigure
+      type: function
+    label: Reconfigure Form
+    loader:
+      name: fetchConfigSecrets
+      watchPaths:
+      - schema/properties/metadata/properties/namespace
+    type: block-layout
+  - elements:
+    - label: Timeout
+      schema: schema/properties/spec/properties/timeout
+      subtitle: Specify the maximum time allowed for the scaling operation to complete.
+        Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
+      type: time-picker
+    - init:
+        type: func
+        value: setApplyToIfReady
+      label: Apply
+      options:
+      - text: IfReady (OpsRequest will be applied if database is ready)
+        value: IfReady
+      - text: Always (OpsRequest will always be applied)
+        value: Always
+      schema: schema/properties/spec/properties/apply
+      type: radio
+    label: OpsRequest Options
+    showLabels: true
+    type: block-layout
+  loader: getDbDetails
+  type: single-step-form
+type: multi-step-form

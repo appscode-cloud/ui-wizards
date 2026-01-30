@@ -1,62 +1,62 @@
 step:
-- type: single-step-form
-  elements:
-  - loader: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
-    if: 
+- elements:
+  - if:
       name: isConsole
       type: function
     label: Select Database
+    loader: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
     refresh: true
-    validation:
-      type: required
     schema: temp/properties/database
     sortable: true
     type: select
-  - watcher:
-      func: setRoleName
-      paths:
-        - schema/properties/spec/properties/secretEngineRef/properties/name
-    label: Name
     validation:
       type: required
+  - label: Name
     schema: schema/properties/metadata/properties/name
     type: input
-  - init:
-      value: getDbNamespace
-      type: func
-    disable: true
+    validation:
+      type: required
+    watcher:
+      func: setRoleName
+      paths:
+      - schema/properties/spec/properties/secretEngineRef/properties/name
+  - disable: true
     if:
       name: isDbSelected
       type: function
+    init:
+      type: func
+      value: getDbNamespace
     label: Namespace
     schema: schema/properties/metadata/properties/namespace
     type: input
-  - loader: getEngines|engine.kubevault.com|v1alpha1|secretengines
-    if:
+  - if:
       name: isDbSelected
       type: function
     label: Select SecretEngine
+    loader: getEngines|engine.kubevault.com|v1alpha1|secretengines
     refresh: true
-    validation:
-      type: required
     schema: schema/properties/spec/properties/secretEngineRef/properties/name
     type: select
+    validation:
+      type: required
   - label: Default TTL
     schema: schema/properties/spec/properties/defaultTTL
     type: input
   - label: Max TTL
     schema: schema/properties/spec/properties/maxTTL
     type: input
-  - type: array-item-form
-    element:
+  - element:
       label: Statement
       type: input
     label: Creation Statement
     schema: schema/properties/spec/properties/creationStatements
-  - type: array-item-form
-    element:
+    type: array-item-form
+  - element:
       label: Statement
       type: input
     label: Revocation Statement
     schema: schema/properties/spec/properties/revocationStatements
+    type: array-item-form
+  type: single-step-form
 type: multi-step-form

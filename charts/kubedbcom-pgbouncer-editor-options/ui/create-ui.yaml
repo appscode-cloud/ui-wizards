@@ -1,132 +1,136 @@
 step:
-- type: single-step-form
-  loader: initBundle
-  elements:
-  - type: label-element
-    label: ''
-    subtitle: Select the PgBouncer version you want to deploy on Kubernetes. The chosen version determines the PgBouncer engine features, compatibility, and runtime behavior of your connection pooler.
+- elements:
+  - label: ""
+    subtitle: Select the PgBouncer version you want to deploy on Kubernetes. The chosen
+      version determines the PgBouncer engine features, compatibility, and runtime
+      behavior of your connection pooler.
+    type: label-element
   - disableUnselect: true
-    loader: getAdminOptions|databases/PgBouncer/versions
     if:
-      type: function
       name: isToggleOn|databases/PgBouncer/versions
+      type: function
     label: Database Version
+    loader: getAdminOptions|databases/PgBouncer/versions
     schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
     type: select
-  - init:
+  - if:
+      name: isToggleOn|databases/PgBouncer/mode
+      type: function
+    init:
       type: func
       value: getDefault|databases/PgBouncer/mode
-    loader: getAdminOptions|databases/PgBouncer/mode
     isHorizontal: true
-    if:
-      type: function
-      name: isToggleOn|databases/PgBouncer/mode
     label: Database Mode
+    loader: getAdminOptions|databases/PgBouncer/mode
+    schema: schema/properties/spec/properties/mode
+    type: radio
     watcher:
       func: onDatabaseModeChange
       paths:
-        - schema/properties/spec/properties/mode
-    schema: schema/properties/spec/properties/mode
-    type: radio
+      - schema/properties/spec/properties/mode
   - if:
-      type: function
       name: isEqualToModelPathValue|Replicaset|/spec/mode
+      type: function
     label: Replica number
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:
-    - type: label-element
-      label: ''
-      subtitle: Select a machine profile to allocate CPU and memory resources for your connection pooler. Choose 'custom' to manually specify resource requirements or select a predefined profile.
-    - type: horizontal-layout
+    - label: ""
+      subtitle: Select a machine profile to allocate CPU and memory resources for
+        your connection pooler. Choose 'custom' to manually specify resource requirements
+        or select a predefined profile.
+      type: label-element
+    - elements:
+      - init:
+          type: func
+          value: setMachineToCustom
+        label: Machine
+        loader: getMachineListForOptions
+        schema: schema/properties/spec/properties/podResources/properties/machine
+        type: select
+      - disable: isMachineNotCustom
+        if:
+          name: isMachineCustom
+          type: function
+        init:
+          type: func
+          value: setLimits|cpu
+        label: CPU
+        loader: setLimits|cpu
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+        watcher:
+          func: setRequests|cpu
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          - schema/properties/spec/properties/podResources/properties/machine
+      - disable: isMachineNotCustom
+        if:
+          name: isMachineCustom
+          type: function
+        init:
+          type: func
+          value: setLimits|memory
+        label: Memory
+        loader: setLimits|memory
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+        watcher:
+          func: setRequests|memory
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          - schema/properties/spec/properties/podResources/properties/machine
       showLabels: true
-      elements:
-        - init:
-            type: func
-            value: setMachineToCustom
-          loader: getMachineListForOptions
-          label: Machine
-          schema: schema/properties/spec/properties/podResources/properties/machine
-          type: select
-        - init:
-            type: func
-            value: setLimits|cpu
-          disable: isMachineNotCustom
-          label: CPU
-          loader: setLimits|cpu
-          if:
-            type: function
-            name: isMachineCustom
-          watcher:
-            func: setRequests|cpu
-            paths:
-              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-              - schema/properties/spec/properties/podResources/properties/machine
-          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-          type: input
-        - init:
-            type: func
-            value: setLimits|memory
-          disable: isMachineNotCustom
-          if:
-            type: function
-            name: isMachineCustom
-          label: Memory
-          loader: setLimits|memory
-          watcher:
-            func: setRequests|memory
-            paths:
-              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-              - schema/properties/spec/properties/podResources/properties/machine
-          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-          type: input
+      type: horizontal-layout
     label: Machine Profile
     showLabels: true
     type: block-layout
   - elements:
-    - type: horizontal-layout
+    - elements:
+      - label: Database Reference Name
+        schema: schema/properties/spec/properties/database/properties/databaseName
+        type: input
+      - label: Select Database Reference
+        loader: getAppBindings|postgres
+        refresh: true
+        schema: temp/pgRef
+        type: select
+        validation:
+          type: required
+        watcher:
+          func: onRefChange
+          paths:
+          - temp/pgRef
       showLabels: true
-      elements:
-        - label: Database Reference Name
-          schema: schema/properties/spec/properties/database/properties/databaseName
-          type: input
-        - loader: getAppBindings|postgres
-          label: Select Database Reference
-          watcher:
-            func: onRefChange
-            paths:
-              - temp/pgRef
-          refresh: true
-          validation:
-            type: required
-          schema: temp/pgRef
-          type: select
+      type: horizontal-layout
     type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
-      - type: object-item
+      - label: ""
+        subtitle: Add custom labels and annotations to your database resources for
+          organization, monitoring, and integration with other Kubernetes tools and
+          services.
+        type: label-element
+      - buttonClass: is-light is-outlined
         label: Labels
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/labels
-      - type: object-item
+        type: object-item
+      - buttonClass: is-light is-outlined
         label: Annotations
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/annotations
+        type: object-item
+      hideBlock: true
       label: Labels & Annotations
       showLabels: true
-      hideBlock: true
       type: block-layout
-    - init:
+    - customClass: mt-20
+      if:
+        name: isToggleOn|deletionPolicy
+        type: function
+      init:
         type: func
         value: getDefault|deletionPolicy
-      customClass: mt-20
-      if:
-        type: function
-        name: isToggleOn|deletionPolicy
       label: Deletion Policy
       options:
       - description: options.deletionPolicy.delete.description
@@ -141,61 +145,61 @@ step:
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
     - if:
-        type: function
         name: getDefaultValue|spec/admin/authCredential/customize
+        type: function
       label: Provide Authentication Credentials?
+      schema: temp/createAuthSecret
+      type: switch
       watcher:
         func: onAuthChange
         paths:
-          - temp/createAuthSecret
-      schema: temp/createAuthSecret
-      type: switch
+        - temp/createAuthSecret
     - if:
-        type: function
         name: showReferSecretSwitch
+        type: function
       label: Refer existing Secret?
+      schema: temp/referSecret
+      type: switch
       watcher:
         func: onReferSecretChange
         paths:
-          - temp/referSecret
-      schema: temp/referSecret
-      type: switch
-    - loader: getReferSecrets
-      if:
-        type: function
+        - temp/referSecret
+    - if:
         name: showSecretDropdown
+        type: function
       label: Secret
+      loader: getReferSecrets
       schema: schema/properties/spec/properties/authSecret/properties/name
       type: select
     - if:
-        type: function
         name: showReferSecret
+        type: function
       label: Password
       schema: schema/properties/spec/properties/authSecret/properties/password
       type: input
     - if:
-        type: function
         name: getDefaultValue|spec/admin/customConfiguration
+        type: function
       label: Configure Database?
+      schema: temp/configDatabase
+      type: switch
       watcher:
         func: clearConfiguration
         paths:
-          - temp/configDatabase
-      schema: temp/configDatabase
-      type: switch
+        - temp/configDatabase
     - if:
-        type: function
         name: isConfigDatabaseOn
+        type: function
       label: Configuration
       schema: schema/properties/spec/properties/configuration
       type: textarea
     - label: Sync Users
       schema: schema/properties/spec/properties/database/properties/syncUsers
       type: switch
-    - isHorizontal: true
-      if:
-        type: function
+    - if:
         name: isToggleOn|deployment
+        type: function
+      isHorizontal: true
       label: Deployment Mode
       options:
       - description: Shared
@@ -207,8 +211,8 @@ step:
       schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
     - if:
-        type: function
         name: isToggleOn|clusterTier
+        type: function
       isHorizontal: true
       label: Cluster Tier
       options:
@@ -221,19 +225,19 @@ step:
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
-      loader: getAdminOptions|clusterTier/placement
       if:
-        type: function
         name: isToggleOn|clusterTier/placement
+        type: function
       label: Placement Policy
+      loader: getAdminOptions|clusterTier/placement
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
-      loader: getNodeTopology
       if:
-        type: function
         name: isToggleOn|clusterTier/nodeTopology
+        type: function
       label: Node Topology
+      loader: getNodeTopology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     label: Advanced Configuration
@@ -246,16 +250,16 @@ step:
           type: func
           value: setMonitoring
         label: Enable Monitoring
+        schema: temp/monitoring
+        type: switch
         watcher:
           func: updateAlertValue
           paths:
-            - temp/monitoring
-        schema: temp/monitoring
-        type: switch
+          - temp/monitoring
       - customClass: mt-10
         if:
-          type: function
           name: showAlerts
+          type: function
         label: Alert Options
         options:
         - text: None
@@ -267,34 +271,35 @@ step:
         - text: Info
           value: info
         schema: schema/properties/form/properties/alert/properties/enabled
-        # sortable: true
         type: select
       if:
-        type: function
         name: isToggleOn|monitoring
+        type: function
       type: block-layout
     - elements:
       - if:
-          type: function
           name: isToggleOn|tls
+          type: function
         label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
-      - loader: getAdminOptions|clusterIssuers
-        if:
-          type: function
+      - if:
           name: showIssuer
+          type: function
         label: Cluster Issuers
-        validation:
-          type: required
+        loader: getAdminOptions|clusterIssuers
         schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
         type: select
+        validation:
+          type: required
       type: block-layout
     if:
-      type: function
       name: showAdditionalSettings
+      type: function
     label: Additional Options
     showLabels: true
     type: block-layout
   id: options
+  loader: initBundle
+  type: single-step-form
 type: multi-step-form

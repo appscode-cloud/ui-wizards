@@ -1,80 +1,79 @@
 step:
-- type: single-step-form
-  elements:
-  - loader: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
-    if:
+- elements:
+  - if:
       name: isConsole
       type: function
     label: Select Database
-    watcher:
-      func: getSpecRef
-      paths:
-        - schema/properties/spec/properties/database
+    loader: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
     refresh: true
-    validation:
-      type: required
     schema: temp/properties/database
     sortable: true
     type: select
+    validation:
+      type: required
+    watcher:
+      func: getSpecRef
+      paths:
+      - schema/properties/spec/properties/database
   - init:
       type: func
       value: getEngineName
     label: Name
-    validation:
-      type: required  
     schema: schema/properties/metadata/properties/name
     type: input
-  - init:
-      type: func
-      value: getDbNamespace
-    disable: true
+    validation:
+      type: required
+  - disable: true
     if:
       name: isDbSelected
       type: function
+    init:
+      type: func
+      value: getDbNamespace
     label: Namespace
     schema: schema/properties/metadata/properties/namespace
     type: input
-  - loader: getVaultservers|kubevault.com|v1alpha2|vaultservers
-    label: Select VaultServer
+  - label: Select VaultServer
+    loader: getVaultservers|kubevault.com|v1alpha2|vaultservers
     refresh: true
+    schema: temp/properties/vaultserver
+    type: select
     validation:
       type: required
-    schema: temp/properties/vaultserver
     watcher:
       func: getSpecRef
       paths:
-        - temp/properties/vaultserver
-    type: select
-  - init:
-      value: vaultRefName
-      type: func
-    disable: true
+      - temp/properties/vaultserver
+  - disable: true
     if:
       name: isVaultSelected
       type: function
+    init:
+      type: func
+      value: vaultRefName
     label: Vaultref Name
-    
     schema: schema/properties/spec/properties/vaultRef/properties/name
     type: input
-  - init:
-      value: vaultRefNamespace
-      type: func
-    disable: true
+  - disable: true
     if:
       name: isVaultSelected
       type: function
+    init:
+      type: func
+      value: vaultRefNamespace
     label: Vaultref Namespace
     schema: schema/properties/spec/properties/vaultRef/properties/namespace
     type: input
-  - watcher:
-      func: getPluginName
-      paths:
-        - schema/properties/spec/properties/database
-    disable: true
+  - disable: true
     if:
       name: isDbSelected
       type: function
     label: Plugin Name
     schema: discriminator/properties/plugin-name
     type: input
+    watcher:
+      func: getPluginName
+      paths:
+      - schema/properties/spec/properties/database
+  type: single-step-form
 type: multi-step-form

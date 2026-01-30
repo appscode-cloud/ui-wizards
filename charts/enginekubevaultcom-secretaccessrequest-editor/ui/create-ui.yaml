@@ -1,60 +1,59 @@
 step:
-- type: single-step-form
-  elements:
-  - loader: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
-    if:
+- elements:
+  - if:
       name: isConsole
       type: function
     label: Select Database
+    loader: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
     refresh: true
-    validation:
-      type: required
     schema: temp/properties/database
     sortable: true
     type: select
-  - watcher:
-      func: setRequestName
-      paths:
-        - schema/properties/spec/properties/roleRef
-    label: Name
     validation:
       type: required
+  - label: Name
     schema: schema/properties/metadata/properties/name
     type: input
-  - init:
-      type: func
-      value: getDbNamespace
-    disable: true
+    validation:
+      type: required
+    watcher:
+      func: setRequestName
+      paths:
+      - schema/properties/spec/properties/roleRef
+  - disable: true
     if:
       name: isDbSelected
       type: function
+    init:
+      type: func
+      value: getDbNamespace
     label: Namespace
     schema: schema/properties/metadata/properties/namespace
     type: input
-  - loader: getDbRoles|engine.kubevault.com|v1alpha1
-    if:
+  - if:
       name: isDbSelected
       type: function
     label: Select Role
+    loader: getDbRoles|engine.kubevault.com|v1alpha1
     refresh: true
-    validation:
-      type: required
     schema: schema/properties/spec/properties/roleRef
     type: select
+    validation:
+      type: required
   - elements:
     - label: Name
-      validation:
-        type: required
       schema: name
       type: input
-    - label: Kind
-      validation: 
+      validation:
         type: required
+    - label: Kind
       schema: kind
       type: input
-    - loader: getNamespaces|core|v1|namespaces
-      hasGroup: isRancherManaged
+      validation:
+        type: required
+    - hasGroup: isRancherManaged
       label: Namespace
+      loader: getNamespaces|core|v1|namespaces
       schema: namespace
       type: select
     - label: APIGroup
@@ -66,4 +65,5 @@ step:
   - label: TTL
     schema: schema/properties/spec/properties/ttl
     type: input
+  type: single-step-form
 type: multi-step-form

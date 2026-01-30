@@ -1,22 +1,21 @@
 step:
-- type: single-step-form
-  elements:
-  - loader: fetchNamespaces
-    hasGroup: isRancherManaged
+- elements:
+  - hasGroup: isRancherManaged
     label: Namespace
+    loader: fetchNamespaces
     schema: schema/properties/metadata/properties/release/properties/namespace
     type: select
-  - type: block-layout
+  - elements:
+    - label: Labels
+      schema: schema/properties/spec/properties/labels
+      type: object-item
+    - label: Annotations
+      schema: schema/properties/spec/properties/annotations
+      type: object-item
+    hideBlock: true
     label: Labels & Annotations
     showLabels: true
-    hideBlock: true
-    elements:
-      - type: object-item
-        label: Labels
-        schema: schema/properties/spec/properties/labels
-      - type: object-item
-        label: Annotations
-        schema: schema/properties/spec/properties/annotations
+    type: block-layout
   - label: Invoker Kind
     options:
     - text: Backup Configurations
@@ -25,29 +24,29 @@ step:
       value: BackupBlueprint
     schema: schema/properties/spec/properties/invoker/properties/kind
     type: select
-  - loader:
+  - label: Invoker Name
+    loader:
       name: fetchInvokerName
       watchPaths:
-        - schema/properties/spec/properties/invoker/properties/kind
-        - schema/properties/metadata/properties/release/properties/namespace
-    label: Invoker Name
-    watcher:
-      func: initName
-      paths:
-        - schema/properties/spec/properties/invoker/properties/name
+      - schema/properties/spec/properties/invoker/properties/kind
+      - schema/properties/metadata/properties/release/properties/namespace
     schema: schema/properties/spec/properties/invoker/properties/name
     type: select
-  - loader:
-      name: fetchSessions
-      watchPaths:
-        - schema/properties/spec/properties/invoker/properties/name
-    label: Session
     watcher:
       func: initName
       paths:
-        - schema/properties/spec/properties/session
+      - schema/properties/spec/properties/invoker/properties/name
+  - label: Session
+    loader:
+      name: fetchSessions
+      watchPaths:
+      - schema/properties/spec/properties/invoker/properties/name
     schema: schema/properties/spec/properties/session
     type: select
+    watcher:
+      func: initName
+      paths:
+      - schema/properties/spec/properties/session
   - label: Timeout
     options:
     - text: 5 minutes
@@ -67,4 +66,5 @@ step:
     schema: schema/properties/spec/properties/backupTimeout
     type: select
   id: options
+  type: single-step-form
 type: multi-step-form
