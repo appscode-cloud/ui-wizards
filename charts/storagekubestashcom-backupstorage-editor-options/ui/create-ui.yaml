@@ -1,24 +1,23 @@
 step:
-- type: single-step-form
-  elements:
-  - loader: getNamespaces
-    hasGroup: isRancherManaged
+- elements:
+  - hasGroup: isRancherManaged
     label: Namespace
+    loader: getNamespaces
     schema: schema/properties/metadata/properties/release/properties/namespace
     type: select
   - label: Name
     schema: schema/properties/metadata/properties/release/properties/name
     type: input
   - elements:
-    - type: object-item
-      label: Labels
+    - label: Labels
       schema: schema/properties/spec/properties/labels
-    - type: object-item
-      label: Annotations
+      type: object-item
+    - label: Annotations
       schema: schema/properties/spec/properties/annotations
+      type: object-item
+    hideBlock: true
     label: Labels & Annotations
     showLabels: true
-    hideBlock: true
     type: block-layout
   - customClass: mt-10
     label: Deletion Policy
@@ -35,7 +34,10 @@ step:
     schema: schema/properties/spec/properties/runtimeSettings/properties/securityContext
     type: input
   - elements:
-    - label: Provider
+    - init:
+        type: func
+        value: initBackendProvider
+      label: Provider
       options:
       - text: Azure
         value: azure
@@ -45,15 +47,12 @@ step:
         value: gcs
       - text: Local
         value: local
-      init:
-        type: func
-        value: initBackendProvider
+      schema: schema/properties/spec/properties/backend/properties/provider
+      type: select
       watcher:
         func: onBackendProviderChange
         paths:
-          - schema/properties/spec/properties/backend/properties/provider
-      schema: schema/properties/spec/properties/backend/properties/provider
-      type: select
+        - schema/properties/spec/properties/backend/properties/provider
     - elements:
       - elements:
         - label: Account Key
@@ -79,8 +78,8 @@ step:
         showLabels: true
         type: block-layout
       if:
-        type: function
         name: isProvider|azure
+        type: function
       label: Azure
       showLabels: true
       type: block-layout
@@ -109,8 +108,8 @@ step:
         showLabels: true
         type: block-layout
       if:
-        type: function
         name: isProvider|gcs
+        type: function
       label: GCS
       showLabels: true
       type: block-layout
@@ -148,8 +147,8 @@ step:
         showLabels: true
         type: block-layout
       if:
-        type: function
         name: isProvider|s3
+        type: function
       label: S3
       showLabels: true
       type: block-layout
@@ -171,8 +170,8 @@ step:
         showLabels: true
         type: block-layout
       if:
-        type: function
         name: isProvider|local
+        type: function
       label: Local
       showLabels: true
       type: block-layout
@@ -180,5 +179,5 @@ step:
     showLabels: true
     type: block-layout
   id: options
-  # title: steps.0.label
+  type: single-step-form
 type: multi-step-form

@@ -1,102 +1,104 @@
 step:
-- type: single-step-form
-  loader: initBundle
-  elements:
-  - type: label-element
-    label: ''
-    subtitle: Select the Memcached version you want to deploy on Kubernetes. The chosen version determines the Memcached engine features, compatibility, and runtime behavior of your database.
+- elements:
+  - label: ""
+    subtitle: Select the Memcached version you want to deploy on Kubernetes. The chosen
+      version determines the Memcached engine features, compatibility, and runtime
+      behavior of your database.
+    type: label-element
   - disableUnselect: true
-    loader: getAdminOptions|databases/Memcached/versions
     if:
-      type: function
       name: isToggleOn|databases/Memcached/versions
+      type: function
     label: Database version
+    loader: getAdminOptions|databases/Memcached/versions
     schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/default
     type: select
-  - init:
-     type: func
-     value: getDefault|databases/Memcached/mode
-    loader: getAdminOptions|databases/Memcached/mode
-    if:
-      type: function
+  - if:
       name: isToggleOn|databases/Memcached/mode
+      type: function
+    init:
+      type: func
+      value: getDefault|databases/Memcached/mode
     isHorizontal: true
     label: Database mode
+    loader: getAdminOptions|databases/Memcached/mode
     schema: schema/properties/spec/properties/mode
     type: radio
   - if:
-      type: function
       name: isEqualToModelPathValue|Replicaset|/spec/mode
+      type: function
     label: Replicaset number
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:
-    - type: label-element
-      label: ''
-      subtitle: Select a machine profile to allocate CPU and memory resources for your database. Choose 'custom' to manually specify resource requirements or select a predefined profile.
-    - type: horizontal-layout
-      showLabels: true
-      elements:
+    - label: ""
+      subtitle: Select a machine profile to allocate CPU and memory resources for
+        your database. Choose 'custom' to manually specify resource requirements or
+        select a predefined profile.
+      type: label-element
+    - elements:
       - init:
           type: func
           value: setMachineToCustom
-        loader: getMachineListForOptions
         label: Machine
+        loader: getMachineListForOptions
         schema: schema/properties/spec/properties/podResources/properties/machine
         type: select
-      - init:
+      - if:
+          name: isMachineCustom
+          type: function
+        init:
           type: func
           value: setLimits|cpu
-        if:
-          type: function
-          name: isMachineCustom
         label: cpu
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
         watcher:
           func: setRequests|cpu
           paths:
-            - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-            - schema/properties/spec/properties/podResources/properties/machine
-        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-        type: input
-      - init:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          - schema/properties/spec/properties/podResources/properties/machine
+      - if:
+          name: isMachineCustom
+          type: function
+        init:
           type: func
           value: setLimits|memory
-        if:
-          type: function
-          name: isMachineCustom
         label: memory
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
         watcher:
           func: setRequests|memory
           paths:
-            - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-            - schema/properties/spec/properties/podResources/properties/machine
-        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-        type: input
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          - schema/properties/spec/properties/podResources/properties/machine
+      showLabels: true
+      type: horizontal-layout
     label: Machine_profile
     showLabels: true
     type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
-      - type: object-item
+      - buttonClass: is-light is-outlined
         label: Labels
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/labels
-      - type: object-item
+        type: object-item
+      - buttonClass: is-light is-outlined
         label: Annotations
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/annotations
+        type: object-item
+      hideBlock: true
       label: Labels & Annotations
       showLabels: true
-      hideBlock: true
       type: block-layout
-    - init:
+    - customClass: mt-20
+      if:
+        name: isToggleOn|deletionPolicy
+        type: function
+      init:
         type: func
         value: getDefault|deletionPolicy
-      customClass: mt-20
-      if:
-        type: function
-        name: isToggleOn|deletionPolicy
       label: Deletion Policy
       options:
       - description: options.deletionPolicy.delete.description
@@ -114,58 +116,57 @@ step:
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
     - if:
-        type: function
         name: getDefaultValue|spec/admin/authCredential/customize
+        type: function
       label: Provide Authentication Credentials?
+      schema: temp/createAuthSecret
+      type: switch
       watcher:
         func: onAuthChange
         paths:
-          - temp/createAuthSecret
-      schema: temp/createAuthSecret
-      type: switch
+        - temp/createAuthSecret
     - if:
-        type: function
         name: showReferSecretSwitch
+        type: function
       label: Refer existing Secret?
+      schema: temp/referSecret
+      type: switch
       watcher:
         func: onReferSecretChange
         paths:
-          - temp/referSecret
-      schema: temp/referSecret
-      type: switch
-    - loader: getReferSecrets
-      if:
-        type: function
+        - temp/referSecret
+    - if:
         name: showSecretDropdown
+        type: function
       label: Secret
+      loader: getReferSecrets
       schema: schema/properties/spec/properties/authSecret/properties/name
       type: select
     - if:
-        type: function
         name: showReferSecret
+        type: function
       label: password
       schema: schema/properties/spec/properties/authSecret/properties/password
       type: input
     - if:
-        type: function
         name: getDefaultValue|spec/admin/customConfiguration
+        type: function
       label: Configure Database?
+      schema: temp/configDatabase
+      type: switch
       watcher:
         func: clearConfiguration
         paths:
-          - temp/configDatabase
-      schema: temp/configDatabase
-      type: switch
+        - temp/configDatabase
     - if:
-        type: function
         name: isConfigDatabaseOn
+        type: function
       label: Configuration
-      # hasCopy: true
       schema: schema/properties/spec/properties/configuration
       type: textarea
     - if:
-        type: function
         name: isToggleOn|deployment
+        type: function
       label: Deployment name
       options:
       - description: labels.deployment.shared
@@ -177,8 +178,8 @@ step:
       schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
     - if:
-        type: function
         name: isToggleOn|clusterTier
+        type: function
       isHorizontal: true
       label: Cluster Tier
       options:
@@ -191,19 +192,19 @@ step:
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
-      loader: getAdminOptions|clusterTier/placement
       if:
-        type: function
         name: isToggleOn|clusterTier/placement
+        type: function
       label: Placement
+      loader: getAdminOptions|clusterTier/placement
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
-      loader: getNodeTopology
       if:
-        type: function
         name: isToggleOn|clusterTier/nodeTopology
+        type: function
       label: Node Topology
+      loader: getNodeTopology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     label: Advanced Configuration
@@ -216,22 +217,23 @@ step:
           type: func
           value: setMonitoring
         label: Enable Monitoring?
+        schema: temp/monitoring
+        type: switch
         watcher:
           func: updateAlertValue
           paths:
-            - temp/monitoring
-        schema: temp/monitoring
-        type: switch
+          - temp/monitoring
       if:
-        type: function
         name: isToggleOn|monitoring
+        type: function
       type: block-layout
     if:
-      type: function
       name: showAdditionalSettings
+      type: function
     label: Additional Options
     showLabels: true
     type: block-layout
   id: options
-  # title: steps.0.label
+  loader: initBundle
+  type: single-step-form
 type: multi-step-form

@@ -1,314 +1,319 @@
 step:
-- type: single-step-form
-  loader: initBundle
-  elements:
-  - type: label-element
-    label: ''
-    subtitle: Select the Elasticsearch version you want to deploy on Kubernetes. The chosen version determines the Elasticsearch engine features, compatibility, and runtime behavior of your analytics database.
+- elements:
+  - label: ""
+    subtitle: Select the Elasticsearch version you want to deploy on Kubernetes. The
+      chosen version determines the Elasticsearch engine features, compatibility,
+      and runtime behavior of your analytics database.
+    type: label-element
   - disableUnselect: true
-    loader: getAdminOptions|databases/Elasticsearch/versions
     if:
-      type: function
       name: isToggleOn|databases/Elasticsearch/versions
+      type: function
     label: Database version
+    loader: getAdminOptions|databases/Elasticsearch/versions
     schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/default
     type: select
-  - init:
+  - if:
+      name: isToggleOn|databases/Elasticsearch/mode
+      type: function
+    init:
       type: func
       value: getDefault|databases/Elasticsearch/mode
-    loader: getAdminOptions|databases/Elasticsearch/mode
-    if:
-      type: function
-      name: isToggleOn|databases/Elasticsearch/mode
-    label: Database mode
     isHorizontal: true
+    label: Database mode
+    loader: getAdminOptions|databases/Elasticsearch/mode
     schema: schema/properties/spec/properties/mode
     type: radio
   - elements:
-    - label: Replicaset number
+    - customClass: mb-20
+      label: Replicaset number
       schema: schema/properties/spec/properties/replicas
       type: input
-      customClass: mb-20
     if:
-      type: function
       name: isEqualToModelPathValue|Combined|/spec/mode
+      type: function
     type: block-layout
   - elements:
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Master nodes manage cluster state and coordinate operations. Configure replicas, storage, and resource allocation for reliable cluster management.
-      - type: horizontal-layout
+      - label: ""
+        subtitle: Master nodes manage cluster state and coordinate operations. Configure
+          replicas, storage, and resource allocation for reliable cluster management.
+        type: label-element
+      - elements:
+        - label: Replicaset number
+          schema: schema/properties/spec/properties/topology/properties/master/properties/replicas
+          type: input
+        - label: Storage size
+          schema: schema/properties/spec/properties/topology/properties/master/properties/persistence/properties/size
+          type: input
         showLabels: true
-        elements:
-          - label: Replicaset number
-            schema: schema/properties/spec/properties/topology/properties/master/properties/replicas
-            type: input
-          - label: Storage size
-            schema: schema/properties/spec/properties/topology/properties/master/properties/persistence/properties/size
-            type: input
-      - type: horizontal-layout
+        type: horizontal-layout
+      - elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          label: Machine
+          loader: getMachineListForOptions
+          schema: schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/machine
+          type: select
+        - disable: isMachineNotCustom|topology/master
+          if:
+            name: isMachineCustom|topology/master
+            type: function
+          init:
+            type: func
+            value: setLimits|cpu|topology/master
+          label: cpu
+          loader: setLimits|cpu|topology/master
+          schema: schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+          watcher:
+            func: setRequests|cpu|topology/master
+            paths:
+            - schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/requests/properties/cpu
+            - schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/machine
+        - disable: isMachineNotCustom|topology/master
+          if:
+            name: isMachineCustom|topology/master
+            type: function
+          init:
+            type: func
+            value: setLimits|memory|topology/master
+          label: memory
+          loader: setLimits|memory|topology/master
+          schema: schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+          watcher:
+            func: setRequests|memory|topology/master
+            paths:
+            - schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/requests/properties/memory
+            - schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/machine
         showLabels: true
-        elements:
-          - init:
-              type: func
-              value: setMachineToCustom
-            loader: getMachineListForOptions
-            label: Machine
-            schema: schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/machine
-            type: select
-          - init:
-              type: func
-              value: setLimits|cpu|topology/master
-            disable: isMachineNotCustom|topology/master
-            if:
-              type: function
-              name: isMachineCustom|topology/master
-            label: cpu
-            loader: setLimits|cpu|topology/master
-            watcher:
-              func: setRequests|cpu|topology/master
-              paths:
-                - schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/requests/properties/cpu
-                - schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/machine
-            schema: schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - init:
-              type: func
-              value: setLimits|memory|topology/master
-            disable: isMachineNotCustom|topology/master
-            if:
-              type: function
-              name: isMachineCustom|topology/master
-            label: memory
-            loader: setLimits|memory|topology/master
-            watcher:
-              func: setRequests|memory|topology/master
-              paths:
-                - schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/requests/properties/memory
-                - schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/machine
-            schema: schema/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
+        type: horizontal-layout
       label: Master nodes
       showLabels: true
       type: block-layout
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Data nodes store and index documents. Configure replicas, storage capacity, and resource allocation to handle your data ingestion and query workload.
-      - type: horizontal-layout
+      - label: ""
+        subtitle: Data nodes store and index documents. Configure replicas, storage
+          capacity, and resource allocation to handle your data ingestion and query
+          workload.
+        type: label-element
+      - elements:
+        - label: Replicaset number
+          schema: schema/properties/spec/properties/topology/properties/data/properties/replicas
+          type: input
+        - label: Storage size
+          schema: schema/properties/spec/properties/topology/properties/data/properties/persistence/properties/size
+          type: input
         showLabels: true
-        elements:
-          - label: Replicaset number
-            schema: schema/properties/spec/properties/topology/properties/data/properties/replicas
-            type: input
-          - label: Storage size
-            schema: schema/properties/spec/properties/topology/properties/data/properties/persistence/properties/size
-            type: input
-      - type: horizontal-layout
+        type: horizontal-layout
+      - elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          label: Machine
+          loader: getMachineListForOptions
+          schema: schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
+          type: select
+        - disable: isMachineNotCustom|topology/data
+          if:
+            name: isMachineCustom|topology/data
+            type: function
+          init:
+            type: func
+            value: setLimits|cpu|topology/data
+          label: cpu
+          loader: setLimits|cpu|topology/data
+          schema: schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+          watcher:
+            func: setRequests|cpu|topology/data
+            paths:
+            - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/requests/properties/cpu
+            - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
+        - disable: isMachineNotCustom|topology/data
+          if:
+            name: isMachineCustom|topology/data
+            type: function
+          init:
+            type: func
+            value: setLimits|memory|topology/data
+          label: memory
+          loader: setLimits|memory|topology/data
+          schema: schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+          watcher:
+            func: setRequests|memory|topology/data
+            paths:
+            - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/requests/properties/memory
+            - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
         showLabels: true
-        elements:
-          - init:
-              type: func
-              value: setMachineToCustom
-            loader: getMachineListForOptions
-            label: Machine
-            schema: schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
-            type: select
-          - init:
-              type: func
-              value: setLimits|cpu|topology/data
-            disable: isMachineNotCustom|topology/data
-            if:
-              type: function
-              name: isMachineCustom|topology/data
-            label: cpu
-            loader: setLimits|cpu|topology/data
-            watcher:
-              func: setRequests|cpu|topology/data
-              paths:
-                - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/requests/properties/cpu
-                - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
-            schema: schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - init:
-              type: func
-              value: setLimits|memory|topology/data
-            disable: isMachineNotCustom|topology/data
-            if:
-              type: function
-              name: isMachineCustom|topology/data
-            label: memory
-            loader: setLimits|memory|topology/data
-            watcher:
-              func: setRequests|memory|topology/data
-              paths:
-                - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/requests/properties/memory
-                - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
-            schema: schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
+        type: horizontal-layout
       label: Data nodes
       showLabels: true
       type: block-layout
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Ingest nodes preprocess documents before indexing using pipelines. Configure replicas, storage, and resources for data transformation and enrichment workloads.
-      - type: horizontal-layout
+      - label: ""
+        subtitle: Ingest nodes preprocess documents before indexing using pipelines.
+          Configure replicas, storage, and resources for data transformation and enrichment
+          workloads.
+        type: label-element
+      - elements:
+        - label: Replicaset number
+          schema: schema/properties/spec/properties/topology/properties/ingest/properties/replicas
+          type: input
+        - label: Storage size
+          schema: schema/properties/spec/properties/topology/properties/ingest/properties/persistence/properties/size
+          type: input
         showLabels: true
-        elements:
-          - label: Replicaset number
-            schema: schema/properties/spec/properties/topology/properties/ingest/properties/replicas
-            type: input
-          - label: Storage size
-            schema: schema/properties/spec/properties/topology/properties/ingest/properties/persistence/properties/size
-            type: input
-      - type: horizontal-layout
+        type: horizontal-layout
+      - elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          label: Machine
+          loader: getMachineListForOptions
+          schema: schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/machine
+          type: select
+        - disable: isMachineNotCustom|topology/ingest
+          if:
+            name: isMachineCustom|topology/ingest
+            type: function
+          init:
+            type: func
+            value: setLimits|cpu|topology/ingest
+          label: cpu
+          loader: setLimits|cpu|topology/ingest
+          schema: schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+          watcher:
+            func: setRequests|cpu|topology/ingest
+            paths:
+            - schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/requests/properties/cpu
+            - schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/machine
+        - disable: isMachineNotCustom|topology/ingest
+          if:
+            name: isMachineCustom|topology/ingest
+            type: function
+          init:
+            type: func
+            value: setLimits|memory|topology/ingest
+          label: memory
+          loader: setLimits|memory|topology/ingest
+          schema: schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+          watcher:
+            func: setRequests|memory|topology/ingest
+            paths:
+            - schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/requests/properties/memory
+            - schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/machine
         showLabels: true
-        elements:
-          - init:
-              type: func
-              value: setMachineToCustom
-            loader: getMachineListForOptions
-            label: Machine
-            schema: schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/machine
-            type: select
-          - init:
-              type: func
-              value: setLimits|cpu|topology/ingest
-            disable: isMachineNotCustom|topology/ingest
-            if:
-              type: function
-              name: isMachineCustom|topology/ingest
-            label: cpu
-            loader: setLimits|cpu|topology/ingest
-            watcher:
-              func: setRequests|cpu|topology/ingest
-              paths:
-                - schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/requests/properties/cpu
-                - schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/machine
-            schema: schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - init:
-              type: func
-              value: setLimits|memory|topology/ingest
-            disable: isMachineNotCustom|topology/ingest
-            if:
-              type: function
-              name: isMachineCustom|topology/ingest
-            label: memory
-            loader: setLimits|memory|topology/ingest
-            watcher:
-              func: setRequests|memory|topology/ingest
-              paths:
-                - schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/requests/properties/memory
-                - schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/machine
-            schema: schema/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
+        type: horizontal-layout
       label: Ingest nodes
       showLabels: true
       type: block-layout
     if:
-      type: function
       name: isEqualToModelPathValue|Topology|/spec/mode
+      type: function
     type: block-layout
   - elements:
-    - type: label-element
-      label: ''
-      subtitle: Select a machine profile to allocate CPU and memory resources for your database. Choose 'custom' to manually specify resource requirements or select a predefined profile.
-    - type: horizontal-layout
+    - label: ""
+      subtitle: Select a machine profile to allocate CPU and memory resources for
+        your database. Choose 'custom' to manually specify resource requirements or
+        select a predefined profile.
+      type: label-element
+    - elements:
+      - init:
+          type: func
+          value: setMachineToCustom
+        label: Machine
+        loader: getMachineListForOptions
+        schema: schema/properties/spec/properties/podResources/properties/machine
+        type: select
+      - disable: isMachineNotCustom
+        if:
+          name: isMachineCustom
+          type: function
+        init:
+          type: func
+          value: setLimits|cpu
+        label: cpu
+        loader: setLimits|cpu
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+        watcher:
+          func: setRequests|cpu
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          - schema/properties/spec/properties/podResources/properties/machine
+      - disable: isMachineNotCustom|schema/properties/spec/properties/podResources/properties/machine
+        init:
+          type: func
+          value: setLimits|memory
+        label: memory
+        loader: setLimits|memory
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+        watcher:
+          func: setRequests|memory
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          - schema/properties/spec/properties/podResources/properties/machine
       showLabels: true
-      elements:
-        - init:
-            type: func
-            value: setMachineToCustom
-          loader: getMachineListForOptions
-          label: Machine
-          schema: schema/properties/spec/properties/podResources/properties/machine
-          type: select
-        - init:
-            type: func
-            value: setLimits|cpu
-          disable: isMachineNotCustom
-          if:
-            type: function
-            name: isMachineCustom
-          label: cpu
-          loader: setLimits|cpu
-          watcher:
-            func: setRequests|cpu
-            paths:
-              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-              - schema/properties/spec/properties/podResources/properties/machine
-          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-          type: input
-        - init:
-            type: func
-            value: setLimits|memory
-          disable: isMachineNotCustom|schema/properties/spec/properties/podResources/properties/machine
-          label: memory
-          loader: setLimits|memory
-          watcher:
-            func: setRequests|memory
-            paths:
-              - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-              - schema/properties/spec/properties/podResources/properties/machine
-          schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-          type: input
+      type: horizontal-layout
     if:
-      type: function
       name: isEqualToModelPathValue|Combined|/spec/mode
+      type: function
     label: Machine_profile
     showLabels: true
     type: block-layout
   - elements:
-    - type: horizontal-layout
+    - elements:
+      - label: Storage class
+        loader: getAdminOptions|storageClasses
+        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+        type: select
+      - if:
+          name: isEqualToModelPathValue|Combined|/spec/mode
+          type: function
+        label: Storage size
+        schema: schema/properties/spec/properties/persistence/properties/size
+        type: input
       showLabels: true
-      elements:
-        - loader: getAdminOptions|storageClasses
-          label: Storage class
-          schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-          type: select
-        - if:
-            type: function
-            name: isEqualToModelPathValue|Combined|/spec/mode
-          label: Storage size
-          schema: schema/properties/spec/properties/persistence/properties/size
-          type: input
+      type: horizontal-layout
     if:
-      type: function
       name: isEqualToModelPathValue|Combined|/spec/mode
+      type: function
     type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
-      - type: label-element
-        label: ''
-        subtitle: Add custom labels and annotations to your database resources for organization, monitoring, and integration with other Kubernetes tools and services.
-      - type: object-item
+      - label: ""
+        subtitle: Add custom labels and annotations to your database resources for
+          organization, monitoring, and integration with other Kubernetes tools and
+          services.
+        type: label-element
+      - buttonClass: is-light is-outlined
         label: Labels
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/labels
-      - type: object-item
+        type: object-item
+      - buttonClass: is-light is-outlined
         label: Annotations
-        buttonClass: is-light is-outlined
         schema: schema/properties/spec/properties/annotations
+        type: object-item
+      hideBlock: true
       label: Labels & Annotations
       showLabels: true
-      hideBlock: true
       type: block-layout
-    - init:
+    - customClass: mt-20
+      if:
+        name: isToggleOn|deletionPolicy
+        type: function
+      init:
         type: func
         value: getDefault|deletionPolicy
-      customClass: mt-20
-      if:
-        type: function
-        name: isToggleOn|deletionPolicy
       label: Deletion Policy
-      watcher:
-        func: setStorageClass
-        paths:
-          - schema/properties/spec/properties/deletionPolicy
       options:
       - description: options.deletionPolicy.delete.description
         text: Delete
@@ -324,59 +329,62 @@ step:
         value: DoNotTerminate
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
+      watcher:
+        func: setStorageClass
+        paths:
+        - schema/properties/spec/properties/deletionPolicy
     - if:
-        type: function
         name: getDefaultValue|spec/admin/authCredential/customize
+        type: function
       label: Provide Authentication Credentials?
+      schema: temp/createAuthSecret
+      type: switch
       watcher:
         func: onAuthChange
         paths:
-          - temp/createAuthSecret
-      schema: temp/createAuthSecret
-      type: switch
+        - temp/createAuthSecret
     - if:
-        type: function
         name: showReferSecretSwitch
+        type: function
       label: Refer existing Secret?
+      schema: temp/referSecret
+      type: switch
       watcher:
         func: onReferSecretChange
         paths:
-          - temp/referSecret
-      schema: temp/referSecret
-      type: switch
-    - loader: getReferSecrets
-      if:
-        type: function
+        - temp/referSecret
+    - if:
         name: showSecretDropdown
+        type: function
       label: Secret
+      loader: getReferSecrets
       schema: schema/properties/spec/properties/authSecret/properties/name
       type: select
     - if:
-        type: function
         name: showReferSecret
+        type: function
       label: password
       schema: schema/properties/spec/properties/authSecret/properties/password
       type: input
     - if:
-        type: function
         name: getDefaultValue|spec/admin/customConfiguration
+        type: function
       label: Configure Database?
+      schema: temp/configDatabase
+      type: switch
       watcher:
         func: clearConfiguration
         paths:
-          - temp/configDatabase
-      schema: temp/configDatabase
-      type: switch
+        - temp/configDatabase
     - if:
-        type: function
         name: isConfigDatabaseOn
+        type: function
       label: Configuration
-      # hasCopy: true
       schema: schema/properties/spec/properties/configuration
       type: textarea
     - if:
-        type: function
         name: isToggleOn|deployment
+        type: function
       label: Deployment name
       options:
       - description: labels.deployment.shared
@@ -388,8 +396,8 @@ step:
       schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
     - if:
-        type: function
         name: isToggleOn|clusterTier
+        type: function
       isHorizontal: true
       label: Cluster Tier
       options:
@@ -402,19 +410,19 @@ step:
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
-      loader: getAdminOptions|clusterTier/placement
       if:
-        type: function
         name: isToggleOn|clusterTier/placement
+        type: function
       label: Placement
+      loader: getAdminOptions|clusterTier/placement
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
-      loader: getNodeTopology
       if:
-        type: function
         name: isToggleOn|clusterTier/nodeTopology
+        type: function
       label: Node Topology
+      loader: getNodeTopology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     label: Advanced Configuration
@@ -423,23 +431,23 @@ step:
   - description: Enable Backup, Monitoring, TLS etc.
     elements:
     - elements:
-      - init:
+      - if:
+          name: isToggleOn|monitoring
+          type: function
+        init:
           type: func
           value: setMonitoring
-        if:
-          type: function
-          name: isToggleOn|monitoring
         label: Enable Monitoring?
+        schema: temp/monitoring
+        type: switch
         watcher:
           func: updateAlertValue
           paths:
-            - temp/monitoring
-        schema: temp/monitoring
-        type: switch
+          - temp/monitoring
       - customClass: mt-10
         if:
-          type: function
           name: showAlerts
+          type: function
         label: Alert Options
         options:
         - text: None
@@ -453,40 +461,40 @@ step:
         schema: schema/properties/form/properties/alert/properties/enabled
         type: select
       type: block-layout
-    - init:
+    - if:
+        name: isToggleOn|backup
+        type: function
+      init:
         type: func
         value: setBackup
-      if:
-        type: function
-        name: isToggleOn|backup
       label: Enable Backup?
+      schema: temp/backup
+      type: switch
       watcher:
         func: onBackupSwitch
         paths:
-          - temp/backup
-      schema: temp/backup
-      type: switch
+        - temp/backup
     - elements:
       - if:
-          type: function
           name: isToggleOn|tls
+          type: function
         label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
-      - loader: getAdminOptions|clusterIssuers
-        if:
-          type: function
+      - if:
           name: showIssuer
+          type: function
         label: Cluster Issuers
-        validation:
-          type: required
+        loader: getAdminOptions|clusterIssuers
         schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
         type: select
+        validation:
+          type: required
       type: block-layout
     - elements:
       - if:
-          type: function
           name: isToggleOn|expose
+          type: function
         label: Expose via Gateway?
         schema: schema/properties/spec/properties/admin/properties/expose/properties/default
         type: switch
@@ -497,10 +505,12 @@ step:
         type: switch
       type: block-layout
     if:
-      type: function
       name: showAdditionalSettings
+      type: function
     label: Additional Options
     showLabels: true
     type: block-layout
   id: options
+  loader: initBundle
+  type: single-step-form
 type: multi-step-form

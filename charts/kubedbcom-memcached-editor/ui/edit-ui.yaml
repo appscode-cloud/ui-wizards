@@ -1,474 +1,470 @@
-type: multi-step-form
 step:
-  - type: single-step-form
-    id: monitoring
-    loader: initMonitoring
-    elements:
-    - type: label-element
-      label: To update Exporter Resource section click on Create OpsRequest
-    - type: anchor
-      label: Create OpsRequest
-      schema: temp/properties/opsRequestUrl
-      init:
-        type: func
-        value: getOpsRequestUrl|scale-vertically
-    - type: switch
-      label: Enable Monitoring
-      fullwidth: true
-      schema: temp/properties/enableMonitoring
-      init: 
-        type: func
-        value: isValueExistInModel|/resources/kubedbComMemcached/spec/monitor
+- elements:
+  - label: To update Exporter Resource section click on Create OpsRequest
+    type: label-element
+  - init:
+      type: func
+      value: getOpsRequestUrl|scale-vertically
+    label: Create OpsRequest
+    schema: temp/properties/opsRequestUrl
+    type: anchor
+  - fullwidth: true
+    init:
+      type: func
+      value: isValueExistInModel|/resources/kubedbComMemcached/spec/monitor
+    label: Enable Monitoring
+    schema: temp/properties/enableMonitoring
+    type: switch
+    watcher:
+      func: onEnableMonitoringChange
+      paths:
+      - temp/properties/enableMonitoring
+  - elements:
+    - init:
+        type: static
+        value: prometheus.io/operator
+      isHorizontal: true
+      label: Select a Monitoring Method
+      options:
+      - description: Inject metric exporter sidecar and creates a ServiceMonitor
+        text: Prometheus Operator
+        value: prometheus.io/operator
+      - description: Injects the metric exporter sidecar and let you customize ServiceMonitor
+        text: Custom ServiceMonitor
+        value: prometheus.io
+      - description: Inject metric exporter sidecar and add Prometheus annotations
+          to the stats Service
+        text: Custom Scrapper
+        value: prometheus.io/builtin
+      schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/agent
+      type: radio
       watcher:
-        func: onEnableMonitoringChange
+        func: onAgentChange
         paths:
-          - temp/properties/enableMonitoring
-    - type: block-layout
+        - schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/agent
+    - elements:
+      - label: Scrapping Interval
+        schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+        type: input
       if:
+        name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMemcached/spec/monitor/agent
         type: function
-        name: showMonitoringSection
-      elements:
-        - type: radio
-          label: Select a Monitoring Method
-          schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/agent
-          isHorizontal: true
-          options:
-          - text: Prometheus Operator
-            value: prometheus.io/operator
-            description: Inject metric exporter sidecar and creates a ServiceMonitor
-          - text: Custom ServiceMonitor
-            value: prometheus.io
-            description: Injects the metric exporter sidecar and let you customize ServiceMonitor
-          - text: Custom Scrapper
-            value: prometheus.io/builtin
-            description: Inject metric exporter sidecar and add Prometheus annotations to the stats Service
-          init:
-            type: static
-            value: prometheus.io/operator
-          watcher:
-            func: onAgentChange
-            paths:
-              - schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/agent
-        - type: block-layout
-          label: ServiceMonitor Configuration  
-          showLabels: true 
-          if: 
-            type: function
-            name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMemcached/spec/monitor/agent
-          elements:
-            - label: Scrapping Interval
-              schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-              type: input 
-        - type: block-layout
-          label: Service Monitor
-          showLabels: true
-          if:
-            type: function
-            name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMemcached/spec/monitor/agent
-          elements:
-          - type: array-object-form
-            label: Endpoints
-            schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
-            buttonClass: is-light is-outlined
-            elements:
-            - type: switch
-              label: Honor labels
-              fullwidth: true
-              schema: honorLabels
-            - type: input
-              label: Interval
-              schema: interval
-              validation:
-                type: required
-            - type: input
-              label: Path
-              schema: path
-              validation:
-                type: required
-            - type: input
-              label: Port
-              schema: port
-              validation:
-                type: required
-          - type: select
-            multiple: true
-            label: Match Namespaces
-            schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
-            loader: getResources|core|v1|namespaces
-            if: 
-              type: function
-              name: returnFalse
-          - type: block-layout
-            showLabels: false
-            if: 
-              type: function
-              name: returnFalse
-            elements:
-              - type: object-item
-                label: Labels
-                schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
-        - type: object-item
-          schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
-          label : Labels
-          if:
-            type: function
-            name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMemcached/spec/monitor/agent
-        - type: label-element
-          label: Exporter Configuration
-          schema: ''
-        - type: switch
-          label: Customize Exporter Sidecar
-          fullwidth: true
-          schema: temp/properties/customizeExporter
-          init: 
-            type: static
-            value: true
-          watcher:
-            func: onCustomizeExporterChange
-            paths: 
-              - temp/properties/customizeExporter
-        - type: block-layout
-          label: Customer Exporter Section 
-          showLabels: false
-          if:
-            type: function
-            name: showCustomizeExporterSection
-          elements:
-            - type: machine-compare
-              label: Resources
-              schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
-              if: 
-                type: function
-                name: returnFalse
-            - type: label-element
-              label: Security Context
-              schema: ''
-            - type: input
-              schema:  schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
-              label: Run as User
-            - type: input
-              schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
-              label: Run as Group
-            - type: input
-              schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
-              label: Port
-            - type: array-item-form
-              label: Args
-              schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-              init: 
-                type: static
-                value: ['--compatible-mode']
-              element:
-                type: input
-                label: Args
-            - type: block-layout
-              label: Metadata
-              showLabels: false
-              elements: 
-                - type: array-object-form
-                  init:
-                    type: func
-                    value: initEnvArray
-                  label: Environment Variables
-                  buttonClass: is-light is-outlined
-                  watcher:
-                    func: onEnvArrayChange
-                    paths:
-                      - temp/properties/env
-                  schema: temp/properties/env
-                  elements:
-                  - type: input
-                    label: Name
-                    schema: name
-                    validation:
-                      type: required
-                  - type: radio
-                    label: Value From
-                    schema: temp/properties/valueFromType
-                    validation:
-                      type: required
-                    init: 
-                      type: func 
-                      value: setValueFrom
-                    options:
-                    - text: Input
-                      value: input
-                    - text: Secret
-                      value: secret
-                    - text: ConfigMap
-                      value: configMap
-                    watcher:
-                      func: onValueFromChange
-                      paths:
-                        - temp/properties/valueFromType
-                  - type: input 
-                    label: Value 
-                    schema: value
-                    validation:
-                      type: required
-                    if:
-                      name: isEqualToTemp|input
-                      type: function
-                  - type: select
-                    if:
-                      type: function
-                      name: isEqualToTemp|configMap
-                    label: ConfigMap Name
-                    schema: valueFrom/properties/configMapKeyRef/properties/name
-                    loader:
-                      name: resourceNames|core|v1|configmaps
-                      watchPaths:
-                        - schema/metadata/release/namespace
-                    validation:
-                      type: required
-                  - type: select
-                    label: ConfigMap Key
-                    schema: valueFrom/properties/configMapKeyRef/properties/key
-                    if:
-                      type: function
-                      name: isEqualToTemp|configMap
-                    loader:
-                      name: getConfigMapKeys
-                      watchPaths:
-                        - schema/resources/kubedbComMemcached/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/configMapKeyRef/name
-                        - schema/metadata/release/namespace
-                  - type: select
-                    label: Secret Name
-                    schema: valueFrom/properties/secretKeyRef/properties/name
-                    if:
-                      type: function
-                      name: isEqualToTemp|secret
-                    loader:
-                      name: getSecrets
-                      watchPaths:
-                        - schema/metadata/release/namespace
-                    validation:
-                      type: required
-                  - type: select
-                    label: Secret Key
-                    schema: valueFrom/properties/secretKeyRef/properties/key
-                    if:
-                      type: function
-                      name: isEqualToTemp|secret
-                    loader:
-                      name: getSecretKeys
-                      watchPaths:
-                        - schema/resources/kubedbComMemcached/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/secretKeyRef/name
-                        - schema/metadata/release/namespace
-
-  - type: single-step-form
-    id: compute-autoscaler
-    loader: getDbDetails
-    elements:
-      - type: block-layout
-        if:
-          type: function
-          name: isConsole
+      label: ServiceMonitor Configuration
+      showLabels: true
+      type: block-layout
+    - elements:
+      - buttonClass: is-light is-outlined
         elements:
-          - type: input
-            label: Name
-            schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/metadata/properties/name
-          - type: select
-            label: Select Namespace
-            loader: getNamespaces
-            if:
-              type: function
-              name: isRancherManaged
-            schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/metadata/properties/namespace
-            watcher:
-              func: onNamespaceChange
-              paths:
-                - schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/metadata/properties/namespace
-          - type: select
-            label: Select Db
-            loader: getDbs
+        - fullwidth: true
+          label: Honor labels
+          schema: honorLabels
+          type: switch
+        - label: Interval
+          schema: interval
+          type: input
+          validation:
+            type: required
+        - label: Path
+          schema: path
+          type: input
+          validation:
+            type: required
+        - label: Port
+          schema: port
+          type: input
+          validation:
+            type: required
+        label: Endpoints
+        schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
+        type: array-object-form
+      - if:
+          name: returnFalse
+          type: function
+        label: Match Namespaces
+        loader: getResources|core|v1|namespaces
+        multiple: true
+        schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
+        type: select
+      - elements:
+        - label: Labels
+          schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
+          type: object-item
+        if:
+          name: returnFalse
+          type: function
+        showLabels: false
+        type: block-layout
+      if:
+        name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMemcached/spec/monitor/agent
+        type: function
+      label: Service Monitor
+      showLabels: true
+      type: block-layout
+    - if:
+        name: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMemcached/spec/monitor/agent
+        type: function
+      label: Labels
+      schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
+      type: object-item
+    - label: Exporter Configuration
+      schema: ""
+      type: label-element
+    - fullwidth: true
+      init:
+        type: static
+        value: true
+      label: Customize Exporter Sidecar
+      schema: temp/properties/customizeExporter
+      type: switch
+      watcher:
+        func: onCustomizeExporterChange
+        paths:
+        - temp/properties/customizeExporter
+    - elements:
+      - if:
+          name: returnFalse
+          type: function
+        label: Resources
+        schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+        type: machine-compare
+      - label: Security Context
+        schema: ""
+        type: label-element
+      - label: Run as User
+        schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+        type: input
+      - label: Run as Group
+        schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+        type: input
+      - label: Port
+        schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+        type: input
+      - element:
+          label: Args
+          type: input
+        init:
+          type: static
+          value:
+          - --compatible-mode
+        label: Args
+        schema: schema/properties/resources/properties/kubedbComMemcached/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+        type: array-item-form
+      - elements:
+        - buttonClass: is-light is-outlined
+          elements:
+          - label: Name
+            schema: name
+            type: input
             validation:
               type: required
-            refresh: true
-            schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/databaseRef/properties/name
+          - init:
+              type: func
+              value: setValueFrom
+            label: Value From
+            options:
+            - text: Input
+              value: input
+            - text: Secret
+              value: secret
+            - text: ConfigMap
+              value: configMap
+            schema: temp/properties/valueFromType
+            type: radio
+            validation:
+              type: required
             watcher:
-              func: initMetadata
+              func: onValueFromChange
               paths:
-                - schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/databaseRef/properties/name
-
-      - type: radio
-        if:
-          type: function
-          name: isConsole
-        label: Select Type
-        validation:
-          type: required
-        schema: temp/properties/autoscalingType
-        watcher:
-          func: initMetadata
-          paths:
-            - temp/properties/autoscalingType
-        options:
-          - text: Compute
-            value: compute
-            description: Scale your CPU Memory based on resource usage
-          - text: Storage
-            value: storage
-            description: Expand your database size based on volume usage
-
-      - type: block-layout
+              - temp/properties/valueFromType
+          - if:
+              name: isEqualToTemp|input
+              type: function
+            label: Value
+            schema: value
+            type: input
+            validation:
+              type: required
+          - if:
+              name: isEqualToTemp|configMap
+              type: function
+            label: ConfigMap Name
+            loader:
+              name: resourceNames|core|v1|configmaps
+              watchPaths:
+              - schema/metadata/release/namespace
+            schema: valueFrom/properties/configMapKeyRef/properties/name
+            type: select
+            validation:
+              type: required
+          - if:
+              name: isEqualToTemp|configMap
+              type: function
+            label: ConfigMap Key
+            loader:
+              name: getConfigMapKeys
+              watchPaths:
+              - schema/resources/kubedbComMemcached/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/configMapKeyRef/name
+              - schema/metadata/release/namespace
+            schema: valueFrom/properties/configMapKeyRef/properties/key
+            type: select
+          - if:
+              name: isEqualToTemp|secret
+              type: function
+            label: Secret Name
+            loader:
+              name: getSecrets
+              watchPaths:
+              - schema/metadata/release/namespace
+            schema: valueFrom/properties/secretKeyRef/properties/name
+            type: select
+            validation:
+              type: required
+          - if:
+              name: isEqualToTemp|secret
+              type: function
+            label: Secret Key
+            loader:
+              name: getSecretKeys
+              watchPaths:
+              - schema/resources/kubedbComMemcached/spec/monitor/prometheus/exporter/env/dynamicIndex/valueFrom/secretKeyRef/name
+              - schema/metadata/release/namespace
+            schema: valueFrom/properties/secretKeyRef/properties/key
+            type: select
+          init:
+            type: func
+            value: initEnvArray
+          label: Environment Variables
+          schema: temp/properties/env
+          type: array-object-form
+          watcher:
+            func: onEnvArrayChange
+            paths:
+            - temp/properties/env
+        label: Metadata
         showLabels: false
-        loader: fetchTopologyMachines
-        elements:
-          # memcached mode
-          - type: block-layout
-            label: Memcached
-            showLabels: true
-            elements:
-              - type: select
-                label: Trigger
-                init:
-                  type: func
-                  value: setTrigger|autoscalingKubedbComMemcachedAutoscaler/spec/compute/memcached/trigger
-                options:
-                  - text: 'On'
-                    value: 'On'
-                  - text: 'Off'
-                    value: 'Off'
-                schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/trigger
-              - type: input
-                label: Pod LifeTime Threshold
-                schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/podLifeTimeThreshold
-              - type: threshold-input
-                label: Resource Diff Percentage
-                schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/resourceDiffPercentage
-              - type: block-layout
-                showLabels: false
-                elements:
-                  - type: machine-compare
-                    label: Min Allowed Profile
-                    header: Minimum Resource Limit
-                    schema: temp/properties/allowedMachine-min
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|min
-                    loader:
-                      name: getMachines|min
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-max
-                    watcher:
-                      func: onMachineChange|memcached
-                      paths:
-                        - temp/properties/allowedMachine-min
-                  - type: block-layout
-                    label: Min Allowed
-                    fixedBlock: true
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input-compare
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/minAllowed/properties/cpu
-                      - type: input-compare
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/minAllowed/properties/memory
-                  - type: machine-compare
-                    label: Max Allowed Profile
-                    header: Maximum Resource Limit
-                    schema: temp/properties/allowedMachine-max
-                    if:
-                      type: function
-                      name: hasAnnotations
-                    init:
-                      type: func
-                      value: setAllowedMachine|max
-                    loader:
-                      name: getMachines|max
-                      watchPaths:
-                        - temp/properties/topologyMachines
-                        - temp/properties/allowedMachine-min
-                    watcher:
-                      func: onMachineChange|memcached
-                      paths:
-                        - temp/properties/allowedMachine-max
-                  - type: block-layout
-                    label: Max Allowed
-                    fixedBlock: true
-                    if:
-                      type: function
-                      name: hasNoAnnotations
-                    showLabels: true
-                    elements:
-                      - type: input-compare
-                        label: Cpu
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/maxAllowed/properties/cpu
-                      - type: input-compare
-                        label: Memory
-                        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/maxAllowed/properties/memory
-              - type: select
-                label: Controlled Resources
-                loader: setControlledResources|memcached
-                multiple: true
-                schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/controlledResources
-
-          - type: block-layout
-            label: Node Topology
-            if:
-              type: function
-              name: hasNoAnnotations
-            showLabels: true
-            elements:
-              - type: select
-                label: Select Node Topology
-                loader: fetchNodeTopology
-                schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-              - type: threshold-input
-                label: ScaleUp Diff Percentage
-                if:
-                  type: function
-                  name: isNodeTopologySelected
-                schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-              - type: threshold-input
-                label: ScaleDown Diff Percentage
-                if:
-                  type: function
-                  name: isNodeTopologySelected
-                schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
-
-          - type: block-layout
-            label: Ops Request Options
-            showLabels: true
-            if:
-              type: function
-              name: showOpsRequestOptions
-            elements:
-              - type: select
-                label: Timeout
-                schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
-                options:
-                - text: 5 minutes
-                  value: 5m0s
-                - text: 10 minutes
-                  value: 10m0s
-                - text: 30 minutes
-                  value: 30m0s
-                - text: 1 hour
-                  value: 1h0m
-                - text: 2 hours
-                  value: 2h0m
-                - text: 5 hours
-                  value: 5h0m
-                - text: 10 hours
-                  value: 10h0m
-              - type: radio
-                label: Apply
-                init:
-                  type: func
-                  value: setApplyToIfReady
-                options:
-                  - text: IfReady (OpsRequest will be applied if database is ready)
-                    value: IfReady
-                  - text: Always (OpsRequest will always be applied)
-                    value: Always
-                schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: block-layout
+      if:
+        name: showCustomizeExporterSection
+        type: function
+      label: Customer Exporter Section
+      showLabels: false
+      type: block-layout
+    if:
+      name: showMonitoringSection
+      type: function
+    type: block-layout
+  id: monitoring
+  loader: initMonitoring
+  type: single-step-form
+- elements:
+  - elements:
+    - label: Name
+      schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/metadata/properties/name
+      type: input
+    - if:
+        name: isRancherManaged
+        type: function
+      label: Select Namespace
+      loader: getNamespaces
+      schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/metadata/properties/namespace
+      type: select
+      watcher:
+        func: onNamespaceChange
+        paths:
+        - schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/metadata/properties/namespace
+    - label: Select Db
+      loader: getDbs
+      refresh: true
+      schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/databaseRef/properties/name
+      type: select
+      validation:
+        type: required
+      watcher:
+        func: initMetadata
+        paths:
+        - schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/databaseRef/properties/name
+    if:
+      name: isConsole
+      type: function
+    type: block-layout
+  - if:
+      name: isConsole
+      type: function
+    label: Select Type
+    options:
+    - description: Scale your CPU Memory based on resource usage
+      text: Compute
+      value: compute
+    - description: Expand your database size based on volume usage
+      text: Storage
+      value: storage
+    schema: temp/properties/autoscalingType
+    type: radio
+    validation:
+      type: required
+    watcher:
+      func: initMetadata
+      paths:
+      - temp/properties/autoscalingType
+  - elements:
+    - elements:
+      - init:
+          type: func
+          value: setTrigger|autoscalingKubedbComMemcachedAutoscaler/spec/compute/memcached/trigger
+        label: Trigger
+        options:
+        - text: "On"
+          value: "On"
+        - text: "Off"
+          value: "Off"
+        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/trigger
+        type: select
+      - label: Pod LifeTime Threshold
+        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/podLifeTimeThreshold
+        type: input
+      - label: Resource Diff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/resourceDiffPercentage
+        type: threshold-input
+      - elements:
+        - header: Minimum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|min
+          label: Min Allowed Profile
+          loader:
+            name: getMachines|min
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-max
+          schema: temp/properties/allowedMachine-min
+          type: machine-compare
+          watcher:
+            func: onMachineChange|memcached
+            paths:
+            - temp/properties/allowedMachine-min
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/minAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/minAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Min Allowed
+          showLabels: true
+          type: block-layout
+        - header: Maximum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|max
+          label: Max Allowed Profile
+          loader:
+            name: getMachines|max
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-min
+          schema: temp/properties/allowedMachine-max
+          type: machine-compare
+          watcher:
+            func: onMachineChange|memcached
+            paths:
+            - temp/properties/allowedMachine-max
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/maxAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/maxAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Max Allowed
+          showLabels: true
+          type: block-layout
+        showLabels: false
+        type: block-layout
+      - label: Controlled Resources
+        loader: setControlledResources|memcached
+        multiple: true
+        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/controlledResources
+        type: select
+      label: Memcached
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Select Node Topology
+        loader: fetchNodeTopology
+        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+        type: select
+      - if:
+          name: isNodeTopologySelected
+          type: function
+        label: ScaleUp Diff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+        type: threshold-input
+      - if:
+          name: isNodeTopologySelected
+          type: function
+        label: ScaleDown Diff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+        type: threshold-input
+      if:
+        name: hasNoAnnotations
+        type: function
+      label: Node Topology
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - init:
+          type: func
+          value: setApplyToIfReady
+        label: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if:
+        name: showOpsRequestOptions
+        type: function
+      label: Ops Request Options
+      showLabels: true
+      type: block-layout
+    loader: fetchTopologyMachines
+    showLabels: false
+    type: block-layout
+  id: compute-autoscaler
+  loader: getDbDetails
+  type: single-step-form
+type: multi-step-form

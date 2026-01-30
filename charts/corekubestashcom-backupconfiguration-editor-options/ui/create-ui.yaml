@@ -1,125 +1,125 @@
 step:
-- type: single-step-form
-  loader: initBundle
-  elements:
-  - loader: getNamespaces
-    label: Namespace
+- elements:
+  - label: Namespace
+    loader: getNamespaces
     schema: schema/properties/metadata/properties/release/properties/namespace
     type: select
   - label: Name
     schema: schema/properties/metadata/properties/release/properties/name
     type: input
-  - loader: getData|storageRef
-    label: Storage Ref
+  - label: Storage Ref
+    loader: getData|storageRef
     schema: schema/properties/spec/properties/backend/properties/storageRef
     type: select
-  - loader: getData|retentionPolicy
-    label: Retention Policy
+  - label: Retention Policy
+    loader: getData|retentionPolicy
     schema: schema/properties/spec/properties/backend/properties/retentionPolicy
     type: select
   - elements:
-    - type: object-item
-      label: Labels
+    - label: Labels
       schema: schema/properties/spec/properties/labels
-    - type: object-item
-      label: Annotations
+      type: object-item
+    - label: Annotations
       schema: schema/properties/spec/properties/annotations
+      type: object-item
+    hideBlock: true
     label: Labels & Annotations
     showLabels: true
-    hideBlock: true
     type: block-layout
-  - label: Sessions
-    elements:
-      - type: input
-        label: Session Name
-        schema: sessionName
-      - type: input
-        label: Schedule
-        schema: schedule
-      - type: input
-        label: Security Context (runAsUser)
-        schema: addon/properties/jobTemplate/properties/securityContext
-      - type: select
-        label: Addon Name
-        loader: getAddon
-        schema: addon/properties/name
-      - type: array-object-form
-        label: Tasks
-        validation: 
-          type: required
-        elements:
-        - type: select
-          label: Task Name
-          loader:
-            name: getTaskNames
-            watchPaths:
-              - schema/properties/spec/properties/sessions/dynamicIndex/properties/addon/properties/name
-          schema: name
-          validation:
-            type: required
-        - type: editor
-          label: Params
-          schema: params
-        schema: addon/properties/tasks
-      - type: select
-        customClass: mt-4
-        label: Encryption Secret Namespace
-        loader: getNamespaces
-        schema: encryptionSecret/properties/namespace
-      - type: select
-        label: Encryption Secret Name
+  - elements:
+    - label: Session Name
+      schema: sessionName
+      type: input
+    - label: Schedule
+      schema: schedule
+      type: input
+    - label: Security Context (runAsUser)
+      schema: addon/properties/jobTemplate/properties/securityContext
+      type: input
+    - label: Addon Name
+      loader: getAddon
+      schema: addon/properties/name
+      type: select
+    - elements:
+      - label: Task Name
         loader:
+          name: getTaskNames
           watchPaths:
-            - schema/properties/spec/properties/sessions/dynamicIndex/properties/encryptionSecret/properties/namespace
-          name: getEncryptionSecretNames
-        schema: encryptionSecret/properties/name
-      - type: input
-        label: Repo Name
-        schema: repoName
+          - schema/properties/spec/properties/sessions/dynamicIndex/properties/addon/properties/name
+        schema: name
+        type: select
+        validation:
+          type: required
+      - label: Params
+        schema: params
+        type: editor
+      label: Tasks
+      schema: addon/properties/tasks
+      type: array-object-form
+      validation:
+        type: required
+    - customClass: mt-4
+      label: Encryption Secret Namespace
+      loader: getNamespaces
+      schema: encryptionSecret/properties/namespace
+      type: select
+    - label: Encryption Secret Name
+      loader:
+        name: getEncryptionSecretNames
+        watchPaths:
+        - schema/properties/spec/properties/sessions/dynamicIndex/properties/encryptionSecret/properties/namespace
+      schema: encryptionSecret/properties/name
+      type: select
+    - label: Repo Name
+      schema: repoName
+      type: input
+    label: Sessions
     schema: schema/properties/spec/properties/sessions
     type: array-object-form
   - elements:
-    - loader: getApiGroup
-      label: Api Group
-      validation:
-        type: required
+    - label: Api Group
+      loader: getApiGroup
       schema: schema/properties/spec/properties/target/properties/apiGroup
       type: select
-    - loader:
+      validation:
+        type: required
+    - label: Kind
+      loader:
         name: getKinds
         watchPaths:
-          - schema/properties/spec/properties/target/properties/apiGroup
-      label: Kind
+        - schema/properties/spec/properties/target/properties/apiGroup
+      schema: schema/properties/spec/properties/target/properties/kind
+      type: select
+      validation:
+        type: required
       watcher:
         func: setVersion
         paths:
-          - schema/properties/spec/properties/target/properties/kind
-      validation:
-        type: required
-      schema: schema/properties/spec/properties/target/properties/kind
-      type: select
-    - loader: getNamespaces
-      label: Namespace
-      validation:
-        type: required
+        - schema/properties/spec/properties/target/properties/kind
+    - label: Namespace
+      loader: getNamespaces
       schema: schema/properties/spec/properties/target/properties/namespace
       type: select
-    - loader: 
-        name: getTargetName
-        watchPaths:
-          - schema/properties/spec/properties/target/properties/namespace
-          - schema/properties/spec/properties/target/properties/kind
-      label: Name
-      refresh: true
       validation:
         type: required
+    - label: Name
+      loader:
+        name: getTargetName
+        watchPaths:
+        - schema/properties/spec/properties/target/properties/namespace
+        - schema/properties/spec/properties/target/properties/kind
+      refresh: true
       schema: schema/properties/spec/properties/target/properties/name
       type: select
+      validation:
+        type: required
     if:
-      type: function
       name: showTarget
+      type: function
     label: Target
     showLabels: true
     type: block-layout
   id: options
+  loader: initBundle
+  type: single-step-form
 type: multi-step-form
