@@ -74,6 +74,11 @@ type Openshift struct {
 	SecurityContext SecurityContext `json:"securityContext"`
 }
 
+type Configuration struct {
+	SecretName  string            `json:"secretName"`
+	ApplyConfig map[string]string `json:"applyConfig"`
+}
+
 type SecurityContext struct {
 	// +optional
 	RunAsUser *int64 `json:"runAsUser"`

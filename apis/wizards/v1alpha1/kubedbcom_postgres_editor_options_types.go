@@ -56,7 +56,7 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	Persistence    Persistence            `json:"persistence"`
 	PodResources   PodResources           `json:"podResources"`
 	AuthSecret     AuthSecret             `json:"authSecret"`
-	Configuration  string                 `json:"configuration"`
+	Configuration  Configuration          `json:"configuration"`
 	// +optional
 	ArchiverName string             `json:"archiverName"`
 	Init         InitDatabase       `json:"init"`
