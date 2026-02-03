@@ -558,7 +558,7 @@ export const useFunc = (model) => {
         return 'The value must start with a letter, can include letters, numbers, hyphens (-), and underscores (_).'
       }
     }
-    return true
+    return ''
   }
 
   function updateAlertValue() {
