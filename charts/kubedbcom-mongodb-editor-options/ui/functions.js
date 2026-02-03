@@ -575,8 +575,6 @@ export const useFunc = (model) => {
       force: true,
     })
 
-    console.log({ modelPathValue })
-
     if (!modelPathValue) return
     if (modelPathValue === 'custom') return val
 
