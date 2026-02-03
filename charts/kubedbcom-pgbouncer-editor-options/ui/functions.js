@@ -317,8 +317,6 @@ const modeDetails = {
   },
 }
 
-
-
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
@@ -350,7 +348,7 @@ export const useFunc = (model) => {
         queryParams,
       )
       const resources = (resp && resp.data && resp.data.items) || []
-  
+
       const fileredResources = resources
         .filter((item) => item.spec?.type === `kubedb.com/${type}`)
         .map((item) => {
@@ -775,10 +773,10 @@ export const useFunc = (model) => {
     return returnArray
   }
 
-  function getAdminOptions(type) {
+  async function getAdminOptions(type) {
     // watchDependency('discriminator#/bundleApiLoaded')
 
-    const options = getValue(model, `/spec/admin/${type}/available`) || []
+    const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
     if (options.length === 0) {
       return fetchOptions(type)
@@ -934,16 +932,14 @@ export const useFunc = (model) => {
   function showAlerts() {
     // watchDependency('discriminator#/monitoring')
     const isMonitorEnabled = getValue(discriminator, '/monitoring')
-    const isAlertToggleEnabled = isToggleOn('alert',
-    )
+    const isAlertToggleEnabled = isToggleOn('alert')
     return isMonitorEnabled && isAlertToggleEnabled
   }
 
   function showIssuer() {
     // watchDependency('model#/spec/admin/tls/default')
     const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
-    const isIssuerToggleEnabled = isToggleOn('clusterIssuers',
-    )
+    const isIssuerToggleEnabled = isToggleOn('clusterIssuers')
     return isTlsEnabled && isIssuerToggleEnabled
   }
 
@@ -1103,5 +1099,4 @@ export const useFunc = (model) => {
     setBackup,
     getDefault,
   }
-
 }

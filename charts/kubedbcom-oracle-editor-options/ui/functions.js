@@ -317,7 +317,6 @@ const modeDetails = {
   },
 }
 
-
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
@@ -679,8 +678,7 @@ export const useFunc = (model) => {
       storageClass = retainClassList.length ? retainClassList[0] : simpleClassList[0]
     }
 
-    const isChangeable = isToggleOn('storageClasses',
-    )
+    const isChangeable = isToggleOn('storageClasses')
     if (isChangeable && storageClass) {
       commit('wizard/model$update', {
         path: '/spec/admin/storageClasses/default',
@@ -693,9 +691,7 @@ export const useFunc = (model) => {
   function showAlerts() {
     // // // // watchDependency('discriminator#/monitoring')
     const isMonitorEnabled = getValue(discriminator, '/monitoring')
-    return (
-      isMonitorEnabled && isToggleOn('alert')
-    )
+    return isMonitorEnabled && isToggleOn('alert')
   }
 
   function onBackupSwitch() {
@@ -850,10 +846,10 @@ export const useFunc = (model) => {
     return returnArray
   }
 
-  function getAdminOptions(type) {
+  async function getAdminOptions(type) {
     // // // // watchDependency('discriminator#/bundleApiLoaded')
 
-    const options = getValue(model, `/spec/admin/${type}/available`) || []
+    const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
     if (options.length === 0) {
       return fetchOptions(type)
@@ -1049,8 +1045,7 @@ export const useFunc = (model) => {
   function showIssuer() {
     // // // // watchDependency('model#/spec/admin/tls/default')
     const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
-    const isIssuerToggleEnabled = isToggleOn('clusterIssuers',
-    )
+    const isIssuerToggleEnabled = isToggleOn('clusterIssuers')
     return isTlsEnabled && isIssuerToggleEnabled
   }
   function onAuthChange() {
@@ -1400,7 +1395,6 @@ export const useFunc = (model) => {
     return show
   }
 
-
   return {
     showReferSecretSwitch,
     onReferSecretChange,
@@ -1467,5 +1461,4 @@ export const useFunc = (model) => {
     onArchiverChange,
     showArchiverAlert,
   }
-
 }
