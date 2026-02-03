@@ -34,6 +34,7 @@ step:
     type: radio
   - elements:
     - label: Replica number
+      customClass: mb-16
       schema: schema/properties/spec/properties/replicas
       type: input
     if:
@@ -63,10 +64,10 @@ step:
         loader: getMachineListForOptions
         schema: schema/properties/spec/properties/topology/properties/overseer/properties/podResources/properties/machine
         type: select
-      - disable: isMachineNotCustom|topology/overseer
-        if:
-          name: isMachineCustom|topology/overseer
-          type: function
+      - disable:
+          name: isMachineNotCustom|topology/overseer
+          watchPaths:
+            - schema/properties/spec/properties/topology/properties/overseer/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|cpu|topology/overseer
@@ -79,10 +80,10 @@ step:
           paths:
           - schema/properties/spec/properties/topology/properties/overseer/properties/podResources/properties/resources/properties/requests/properties/cpu
           - schema/properties/spec/properties/topology/properties/overseer/properties/podResources/properties/machine
-      - disable: isMachineNotCustom|topology/overseer
-        if:
-          name: isMachineCustom|topology/overseer
-          type: function
+      - disable:
+          name: isMachineNotCustom|topology/overseer
+          watchPaths:
+            - schema/properties/spec/properties/topology/properties/overseer/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|memory|topology/overseer
@@ -125,10 +126,10 @@ step:
         loader: getMachineListForOptions
         schema: schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
         type: select
-      - disable: isMachineNotCustom|topology/data
-        if:
-          name: isMachineCustom|topology/data
-          type: function
+      - disable:
+          name: isMachineNotCustom|topology/data
+          watchPaths:
+            - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|cpu|topology/data
@@ -141,10 +142,10 @@ step:
           paths:
           - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/requests/properties/cpu
           - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
-      - disable: isMachineNotCustom|topology/data
-        if:
-          name: isMachineCustom|topology/data
-          type: function
+      - disable:
+          name: isMachineNotCustom|topology/data
+          watchPaths:
+            - schema/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|memory|topology/data
@@ -189,10 +190,10 @@ step:
         loader: getMachineListForOptions
         schema: schema/properties/spec/properties/topology/properties/coordinator/properties/podResources/properties/machine
         type: select
-      - disable: isMachineNotCustom|topology/coordinator
-        if:
-          name: isMachineCustom|topology/coordinator
-          type: function
+      - disable:
+          name: isMachineNotCustom|topology/coordinator
+          watchPaths:
+            - schema/properties/spec/properties/topology/properties/coordinator/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|cpu|topology/coordinator
@@ -205,10 +206,10 @@ step:
           paths:
           - schema/properties/spec/properties/topology/properties/coordinator/properties/podResources/properties/resources/properties/requests/properties/cpu
           - schema/properties/spec/properties/topology/properties/coordinator/properties/podResources/properties/machine
-      - disable: isMachineNotCustom|topology/coordinator
-        if:
-          name: isMachineCustom|topology/coordinator
-          type: function
+      - disable:
+          name: isMachineNotCustom|topology/coordinator
+          watchPaths:
+            - schema/properties/spec/properties/topology/properties/coordinator/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|memory|topology/coordinator
@@ -243,10 +244,10 @@ step:
         loader: getMachineListForOptions
         schema: schema/properties/spec/properties/podResources/properties/machine
         type: select
-      - disable: isMachineNotCustom
-        if:
-          name: isMachineCustom
-          type: function
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+            - schema/properties/spec/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|cpu
@@ -259,10 +260,10 @@ step:
           paths:
           - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
           - schema/properties/spec/properties/podResources/properties/machine
-      - disable: isMachineNotCustom
-        if:
-          name: isMachineCustom
-          type: function
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+            - schema/properties/spec/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|memory

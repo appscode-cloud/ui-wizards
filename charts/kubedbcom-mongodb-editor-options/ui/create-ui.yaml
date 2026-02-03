@@ -104,9 +104,10 @@ step:
             loader: getMachineListForOptions
             schema: schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
             type: select
-          - if:
-              name: isMachineCustom|shardTopology/shard
-              type: function
+          - disable:
+              name: isMachineNotCustom|shardTopology/shard
+              watchPaths:
+                - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
             init:
               type: func
               value: setLimits|cpu|shardTopology/shard
@@ -118,9 +119,10 @@ step:
               paths:
               - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/cpu
               - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
-          - if:
-              name: isMachineCustom|shardTopology/shard
-              type: function
+          - disable:
+              name: isMachineNotCustom|shardTopology/shard
+              watchPaths:
+                - schema/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
             init:
               type: func
               value: setLimits|memory|shardTopology/shard
@@ -162,9 +164,10 @@ step:
             loader: getMachineListForOptions
             schema: schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
             type: select
-          - if:
-              name: isMachineCustom|shardTopology/configServer
-              type: function
+          - disable:
+              name: isMachineNotCustom|shardTopology/configServer
+              watchPaths:
+                - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
             init:
               type: func
               value: setLimits|cpu|shardTopology/configServer
@@ -176,9 +179,10 @@ step:
               paths:
               - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/cpu
               - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
-          - if:
-              name: isMachineCustom|shardTopology/configServer
-              type: function
+          - disable:
+              name: isMachineNotCustom|shardTopology/configServer
+              watchPaths:
+                - schema/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
             init:
               type: func
               value: setLimits|memory|shardTopology/configServer
@@ -214,9 +218,10 @@ step:
           loader: getMachineListForOptions
           schema: schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
           type: select
-        - if:
-            name: isMachineCustom|shardTopology/mongos
-            type: function
+        - disable:
+            name: isMachineNotCustom|shardTopology/mongos
+            watchPaths:
+              - schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
           init:
             type: func
             value: setLimits|cpu|shardTopology/mongos
@@ -228,9 +233,10 @@ step:
             paths:
             - schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/cpu
             - schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
-        - if:
-            name: isMachineCustom|shardTopology/mongos
-            type: function
+        - disable:
+            name: isMachineNotCustom|shardTopology/mongos
+            watchPaths:
+              - schema/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
           init:
             type: func
             value: setLimits|memory|shardTopology/mongos
@@ -265,10 +271,10 @@ step:
         loader: getMachineListForOptions
         schema: schema/properties/spec/properties/podResources/properties/machine
         type: select
-      - disable: isMachineNotCustom|schema/properties/spec/properties/podResources/properties/machine
-        if:
-          name: isMachineCustom
-          type: function
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+            - schema/properties/spec/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|cpu
@@ -280,9 +286,10 @@ step:
           paths:
           - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
           - schema/properties/spec/properties/podResources/properties/machine
-      - if:
-          name: isMachineCustom
-          type: function
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+            - schema/properties/spec/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|memory
@@ -434,9 +441,10 @@ step:
           loader: getMachineListForOptions
           schema: schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
           type: select
-        - if:
-            name: isMachineCustom|arbiter
-            type: function
+        - disable:
+            name: isMachineNotCustom|arbiter
+            watchPaths:
+              - schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
           init:
             type: func
             value: setLimits|cpu|arbiter
@@ -448,9 +456,10 @@ step:
             paths:
             - schema/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/cpu
             - schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
-        - if:
-            name: isMachineCustom|arbiter
-            type: function
+        - disable:
+            name: isMachineNotCustom|arbiter
+            watchPaths:
+              - schema/properties/spec/properties/arbiter/properties/podResources/properties/machine
           init:
             type: func
             value: setLimits|memory|arbiter
@@ -499,9 +508,10 @@ step:
           loader: getMachineListForOptions
           schema: schema/properties/spec/properties/hidden/properties/podResources/properties/machine
           type: select
-        - if:
-            name: isMachineCustom|hidden
-            type: function
+        - disable:
+            name: isMachineNotCustom|hidden
+            watchPaths:
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/machine
           init:
             type: func
             value: setLimits|cpu|hidden
@@ -513,9 +523,10 @@ step:
             paths:
             - schema/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
             - schema/properties/spec/properties/hidden/properties/podResources/properties/machine
-        - if:
-            name: isMachineCustom|hidden
-            type: function
+        - disable:
+            name: isMachineNotCustom|hidden
+            watchPaths:
+              - schema/properties/spec/properties/hidden/properties/podResources/properties/machine
           init:
             type: func
             value: setLimits|memory|hidden
@@ -677,7 +688,11 @@ step:
         paths:
         - temp/backup
     - elements:
-      - disable: showArchiverAlert
+      - disable:
+          name: showArchiverAlert
+          watchPaths:
+            - schema/spec/admin/storageClasses/default
+            - schema/spec/mode
         label: Enable Archiver?
         schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
         type: switch
