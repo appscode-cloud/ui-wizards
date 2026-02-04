@@ -453,10 +453,10 @@ export const useFunc = (model) => {
     return []
   }
 
+  let array = []
   function getMachineListForOptions() {
     const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
     const available = getValue(model, '/spec/admin/machineProfiles/available')
-    let array = []
 
     if (available.length) {
       array = available.map((machine) => {
@@ -1079,10 +1079,7 @@ export const useFunc = (model) => {
   }
 
   function isMachineNotCustom(path) {
-    const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
-    const modelPathValue = getValue(model, fullpath)
-    // watchDependency(`model#${fullpath}`)
-    return modelPathValue !== 'custom' && !!modelPathValue
+    return !isMachineCustom(path)
   }
   async function getNamespaces() {
     const params = storeGet('/route/params')
@@ -1216,11 +1213,51 @@ export const useFunc = (model) => {
     const commitPath = type
       ? `/spec/${type}/podResources/resources/limits/${resource}`
       : `/spec/podResources/resources/limits/${resource}`
+
+    const fullpath = type ? `/spec/${type}/podResources/machine` : `/spec/podResources/machine`
+    const modelPathValue = getValue(model, fullpath)
+
     commit('wizard/model$update', {
       path: commitPath,
       value: val,
       force: true,
     })
+
+    if (!modelPathValue) return
+    if (modelPathValue === 'custom') return val
+
+    let commitCpuMemory, ModelPathValue
+    if (resource && type) {
+      const fullPath = `/spec/${type}/podResources/machine`
+      ModelPathValue = getValue(model, fullPath)
+      commitCpuMemory = `spec/${type}/podResources/resources/requests/${resource}`
+    } else {
+      const fullPath = `/spec/podResources/machine`
+      ModelPathValue = getValue(model, fullPath)
+      commitCpuMemory = `spec/podResources/resources/requests/${resource}`
+    }
+    let cpuMemoryValue
+    array.forEach((item) => {
+      if (item.value === ModelPathValue) {
+        // Parse subText like "CPU: 2, Memory: 2Gi"
+        const subText = item.subText || ''
+        if (resource === 'cpu') {
+          // Extract CPU value
+          const cpuMatch = subText.match(/CPU:\s*([^,]+)/)
+          cpuMemoryValue = cpuMatch ? cpuMatch[1].trim() : ''
+        } else if (resource === 'memory') {
+          // Extract Memory value
+          const memoryMatch = subText.match(/Memory:\s*(.+)/)
+          cpuMemoryValue = memoryMatch ? memoryMatch[1].trim() : ''
+        }
+      }
+    })
+    commit('wizard/model$update', {
+      path: commitCpuMemory,
+      value: cpuMemoryValue,
+      force: true,
+    })
+    return cpuMemoryValue
   }
 
   function toggleTls() {

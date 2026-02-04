@@ -563,7 +563,7 @@ export const useFunc = (model) => {
       ? `/spec/${type}/podResources/resources/limits/${resource}`
       : `/spec/podResources/resources/limits/${resource}`
 
-    const fullpath = `/spec/podResources/machine`
+    const fullpath = type ? `/spec/${type}/podResources/machine` : `/spec/podResources/machine`
     const modelPathValue = getValue(model, fullpath)
 
     commit('wizard/model$update', {
@@ -572,9 +572,9 @@ export const useFunc = (model) => {
       force: true,
     })
 
-    if (modelPathValue === 'custom') {
-      return
-    }
+    if (!modelPathValue) return
+    if (modelPathValue === 'custom') return val
+
     let commitCpuMemory, ModelPathValue
     if (resource && type) {
       const fullPath = `/spec/${type}/podResources/machine`
@@ -607,17 +607,6 @@ export const useFunc = (model) => {
       force: true,
     })
     return cpuMemoryValue
-  }
-
-  function setRequests(resource) {
-    const modelPath = `/spec/podResources/resources/requests/${resource}`
-    const val = getValue(model, modelPath)
-    const commitPath = `/spec/podResources/resources/limits/${resource}`
-    commit('wizard/model$update', {
-      path: commitPath,
-      value: val,
-      force: true,
-    })
   }
 
   function setMachineToCustom() {
@@ -1246,10 +1235,7 @@ export const useFunc = (model) => {
   }
 
   function isMachineNotCustom(path) {
-    const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
-    const modelPathValue = getValue(model, fullpath)
-    // watchDependency(`model#${fullpath}`)
-    return modelPathValue !== 'custom' && !!modelPathValue
+    return !isMachineCustom(path)
   }
 
   function EqualToDatabaseMode(mode) {
