@@ -487,10 +487,10 @@ export const useFunc = (model) => {
     } else return filteredlist
   }
 
-  function getAdminOptions(type) {
+  async function getAdminOptions(type) {
     // watchDependency('discriminator#/bundleApiLoaded')
 
-    const options = getValue(model, `/spec/admin/${type}/available`) || []
+    const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
     if (options.length === 0) {
       return fetchOptions(type)
