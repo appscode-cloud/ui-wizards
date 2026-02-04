@@ -45,10 +45,10 @@ step:
         loader: getMachineListForOptions
         schema: schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
         type: select
-      - disable: isMachineNotCustom|server/primary
-        if:
-          name: isMachineCustom|server/primary
-          type: function
+      - disable:
+          name: isMachineNotCustom|server/primary
+          watchPaths:
+            - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|cpu|server/primary
@@ -61,10 +61,10 @@ step:
           paths:
           - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/cpu
           - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
-      - disable: isMachineNotCustom|server/primary
-        if:
-          name: isMachineCustom|server/primary
-          type: function
+      - disable:
+          name: isMachineNotCustom|server/primary
+          watchPaths:
+            - schema/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|memory|server/primary
@@ -99,10 +99,10 @@ step:
         loader: getMachineListForOptions
         schema: schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
         type: select
-      - disable: isMachineNotCustom|server/secondary
-        if:
-          name: isMachineCustom|server/secondary
-          type: function
+      - disable:
+          name: isMachineNotCustom|server/secondary
+          watchPaths:
+            - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|cpu|server/secondary
@@ -115,10 +115,10 @@ step:
           paths:
           - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/cpu
           - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
-      - disable: isMachineNotCustom|server/secondary
-        if:
-          name: isMachineCustom|server/secondary
-          type: function
+      - disable:
+          name: isMachineNotCustom|server/secondary
+          watchPaths:
+            - schema/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|memory|server/secondary
@@ -167,10 +167,10 @@ step:
         loader: getMachineListForOptions
         schema: schema/properties/spec/properties/backend/properties/podResources/properties/machine
         type: select
-      - disable: isMachineNotCustom|backend
-        if:
-          name: isMachineCustom|backend
-          type: function
+      - disable:
+          name: isMachineNotCustom|backend
+          watchPaths:
+            - schema/properties/spec/properties/backend/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|cpu|backend
@@ -183,10 +183,10 @@ step:
           paths:
           - schema/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/cpu
           - schema/properties/spec/properties/backend/properties/podResources/properties/machine
-      - disable: isMachineNotCustom|backend
-        if:
-          name: isMachineCustom|backend
-          type: function
+      - disable:
+          name: isMachineNotCustom|backend
+          watchPaths:
+            - schema/properties/spec/properties/backend/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|memory|backend

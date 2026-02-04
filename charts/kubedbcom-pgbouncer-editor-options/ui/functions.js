@@ -317,8 +317,6 @@ const modeDetails = {
   },
 }
 
-
-
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
@@ -350,7 +348,7 @@ export const useFunc = (model) => {
         queryParams,
       )
       const resources = (resp && resp.data && resp.data.items) || []
-  
+
       const fileredResources = resources
         .filter((item) => item.spec?.type === `kubedb.com/${type}`)
         .map((item) => {
@@ -548,7 +546,7 @@ export const useFunc = (model) => {
       ? `/spec/${type}/podResources/resources/limits/${resource}`
       : `/spec/podResources/resources/limits/${resource}`
 
-    const fullpath = `/spec/podResources/machine`
+    const fullpath = type ? `/spec/${type}/podResources/machine` : `/spec/podResources/machine`
     const modelPathValue = getValue(model, fullpath)
 
     commit('wizard/model$update', {
@@ -557,9 +555,9 @@ export const useFunc = (model) => {
       force: true,
     })
 
-    if (modelPathValue === 'custom') {
-      return
-    }
+    if (!modelPathValue) return
+    if (modelPathValue === 'custom') return val
+
     let commitCpuMemory, ModelPathValue
     if (resource && type) {
       const fullPath = `/spec/${type}/podResources/machine`
@@ -594,17 +592,6 @@ export const useFunc = (model) => {
     return cpuMemoryValue
   }
 
-  function setRequests(resource) {
-    const modelPath = `/spec/podResources/resources/requests/${resource}`
-    const val = getValue(model, modelPath)
-    commitPath = `/spec/podResources/resources/limits/${resource}`
-    commit('wizard/model$update', {
-      path: commitPath,
-      value: val,
-      force: true,
-    })
-  }
-
   function setMachineToCustom() {
     const machine = getValue(model, '/spec/admin/machineProfiles/default')
     return machine || 'custom'
@@ -618,10 +605,7 @@ export const useFunc = (model) => {
   }
 
   function isMachineNotCustom(path) {
-    const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
-    const modelPathValue = getValue(model, fullpath)
-    // watchDependency(`model#${fullpath}`)
-    return modelPathValue !== 'custom' && !!modelPathValue
+    return !isMachineCustom(path)
   }
 
   function updateAlertValue() {
@@ -934,16 +918,14 @@ export const useFunc = (model) => {
   function showAlerts() {
     // watchDependency('discriminator#/monitoring')
     const isMonitorEnabled = getValue(discriminator, '/monitoring')
-    const isAlertToggleEnabled = isToggleOn('alert',
-    )
+    const isAlertToggleEnabled = isToggleOn('alert')
     return isMonitorEnabled && isAlertToggleEnabled
   }
 
   function showIssuer() {
     // watchDependency('model#/spec/admin/tls/default')
     const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
-    const isIssuerToggleEnabled = isToggleOn('clusterIssuers',
-    )
+    const isIssuerToggleEnabled = isToggleOn('clusterIssuers')
     return isTlsEnabled && isIssuerToggleEnabled
   }
 
@@ -1103,5 +1085,4 @@ export const useFunc = (model) => {
     setBackup,
     getDefault,
   }
-
 }

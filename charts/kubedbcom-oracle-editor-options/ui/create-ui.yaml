@@ -48,13 +48,14 @@ step:
         loader: getMachineListForOptions
         schema: schema/properties/spec/properties/podResources/properties/machine
         type: select
-      - disable: isMachineNotCustom
-        if:
-          name: isMachineCustom
-          type: function
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+            - schema/properties/spec/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|cpu
+        loader: setLimits|cpu
         label: CPU
         schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
@@ -62,13 +63,15 @@ step:
           func: setRequests|cpu
           paths:
           - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-      - disable: isMachineNotCustom
-        if:
-          name: isMachineCustom
-          type: function
+          - schema/properties/spec/properties/podResources/properties/machine
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+            - schema/properties/spec/properties/podResources/properties/machine
         init:
           type: func
           value: setLimits|memory
+        loader: setLimits|memory
         label: Memory
         schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
         type: input
@@ -76,6 +79,7 @@ step:
           func: setRequests|memory
           paths:
           - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          - schema/properties/spec/properties/podResources/properties/machine
       showLabels: true
       type: horizontal-layout
     label: Machine Profile
@@ -253,7 +257,11 @@ step:
         paths:
         - temp/backup
     - elements:
-      - disable: showArchiverAlert
+      - disable:
+          name: showArchiverAlert
+          watchPaths:
+            - schema/spec/admin/storageClasses/default
+            - schema/spec/mode
         label: Enable Archiver?
         schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
         type: switch
