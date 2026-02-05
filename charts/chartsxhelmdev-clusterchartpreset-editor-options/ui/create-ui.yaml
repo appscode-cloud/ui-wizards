@@ -1,44 +1,41 @@
-steps:
-- form:
-    elements:
-    - elements:
-      - discriminator:
-          bundle:
-            default: {}
-            type: object
+step:
+- type: single-step-form
+  id: options
+  elements:
+    - type: block-layout
+      if:
+        name: presetNameEqualsTo|kubedb-ui-presets
+        type: function
+      loader: FetchDbBundle
+      showLabels: false
+      elements:
+      - type: block-layout
+        if:
+          name: isKubedbUiPreset
+          type: function
         elements:
-        - fetch: FetchDbBundle
-          if: returnFalse
-          schema:
-            $ref: discriminator#/bundle
-          type: input
         - elements:
-          - label:
-              text: labels.deployment.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/toggle
+          - label: Can users modify Deployment type?
+            schema: schema/properties/spec/properties/admin/properties/deployment/properties/toggle
             type: switch
-          - hasDescription: true
-            options:
-            - description: labels.deployment.shared
+          - options:
+            - description: For exploring databases when high-performance is not required.
               text: Shared
               value: Shared
-            - description: labels.deployment.dedicated
+            - description: For production applications with sophisticated workload requirements.
               text: Dedicated
               value: Dedicated
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
+            schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
+            label: Deployment Type
+            isHorizontal: true
             type: radio
-          hideForm: true
-          label:
-            text: labels.deployment.name
-          show_label: true
-          type: single-step-form
+          # hideBlock: true
+          label: Deployment Type
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.clusterTier.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/toggle
+          - label: Can users modify Cluster Tier?
+            schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/toggle
             type: switch
           - isHorizontal: true
             options:
@@ -48,1602 +45,1431 @@ steps:
               value: MemoryOptimized
             - text: CPU Optimized
               value: CPUOptimized
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
+            schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
+            label: Cluster Tier
             type: radio
           - elements:
-            - label:
-                text: labels.clusterTier.placement.toggle
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/toggle
+            - label: Can user modify Placement?
+              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/toggle
               type: switch
-            - fetch: getPlacements
-              label:
-                text: labels.clusterTier.placement.availablePlacement
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/available
-              type: multiselect
-            - disableUnselect: true
-              fetch: getOptions|clusterTier/placement
-              label:
-                text: labels.clusterTier.placement.default
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+            - loader: getPlacements
+              label: Available Placements
+              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/available
               type: select
-            type: single-step-form
-          - elements:
-            - label:
-                text: labels.clusterTier.nodeTopology.toggle
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/toggle
-              type: switch
-            - fetch: getNodeTopology
-              label:
-                text: labels.clusterTier.nodeTopology.availableNodeTopology
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/available
-              type: multiselect
+              multiple: true
             - disableUnselect: true
-              fetch: getOptions|clusterTier/nodeTopology
-              label:
-                text: labels.clusterTier.nodeTopology.default
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+              loader: getOptions|clusterTier/placement
+              label: Default Placement
+              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
               type: select
-            type: single-step-form
-          hideForm: false
-          label:
-            text: labels.clusterTier.name
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            allDbVersions:
-              default: {}
-              type: object
-          elements:
-          - fetch: FetchAllDbVersions
-            if: returnFalse
-            schema:
-              $ref: discriminator#/allDbVersions
-            type: input
+            showLabels: false
+            type: block-layout
           - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Cassandra.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Cassandra
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Cassandra
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Cassandra
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Cassandra
-                label:
-                  text: labels.databases.Cassandra.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Cassandra
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|Cassandra
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Cassandra
-                fetch: availableModes|Cassandra
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Cassandra
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Cassandra
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.ClickHouse.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|ClickHouse
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|ClickHouse
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|ClickHouse
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|ClickHouse
-                label:
-                  text: labels.databases.ClickHouse.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|ClickHouse
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|clickHouse
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|ClickHouse
-                fetch: availableModes|ClickHouse
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: ClickHouse
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Druid.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Druid
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Druid
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Druid
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Druid
-                label:
-                  text: labels.databases.Druid.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Druid
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|druid
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Druid
-                fetch: availableModes|Druid
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Druid
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Elasticsearch.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Elasticsearch
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Elasticsearch
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Elasticsearch
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Elasticsearch
-                label:
-                  text: labels.databases.Elasticsearch.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Elasticsearch
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|elasticsearch
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Elasticsearch
-                fetch: availableModes|Elasticsearch
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Elasticsearch
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.FerretDB.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|FerretDB
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|FerretDB
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|FerretDB
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|FerretDB
-                label:
-                  text: labels.databases.FerretDB.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|FerretDB
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|ferretdb
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|FerretDB
-                fetch: availableModes|FerretDB
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: FerretDB
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Hazelcast.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Hazelcast
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Hazelcast
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Hazelcast
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Hazelcast
-                label:
-                  text: labels.databases.Hazelcast.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Hazelcast
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|Hazelcast
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Hazelcast
-                fetch: availableModes|Hazelcast
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Hazelcast
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Hazelcast
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Ignite.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Ignite
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Ignite
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Ignite
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Ignite
-                label:
-                  text: labels.databases.Ignite.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Ignite
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|Ignite
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Ignite
-                fetch: availableModes|Ignite
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Ignite
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Ignite
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Kafka.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Kafka
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Kafka
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Kafka
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Kafka
-                label:
-                  text: labels.databases.Kafka.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Kafka
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|kafka
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Kafka
-                fetch: availableModes|Kafka
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Kafka
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.MSSQLServer.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|MSSQLServer
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|MSSQLServer
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|MSSQLServer
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|MSSQLServer
-                label:
-                  text: labels.databases.MSSQLServer.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|MSSQLServer
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|mssqlserver
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|MSSQLServer
-                fetch: availableModes|MSSQLServer
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: MSSQLServer
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.MariaDB.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|MariaDB
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|MariaDB
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|MariaDB
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|MariaDB
-                label:
-                  text: labels.databases.MariaDB.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|MariaDB
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|mariadb
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|MariaDB
-                fetch: availableModes|MariaDB
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: MariaDB
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Memcached.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Memcached
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Memcached
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Memcached
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Memcached
-                label:
-                  text: labels.databases.Memcached.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Memcached
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|memcached
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Memcached
-                fetch: availableModes|Memcached
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Memcached
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.MongoDB.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|MongoDB
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|MongoDB
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|MongoDB
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|MongoDB
-                label:
-                  text: labels.databases.MongoDB.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|MongoDB
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|mongodb
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|MongoDB
-                fetch: availableModes|MongoDB
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: MongoDB
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.MySQL.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|MySQL
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|MySQL
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|MySQL
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|MySQL
-                label:
-                  text: labels.databases.MySQL.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|MySQL
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|mysql
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|MySQL
-                fetch: availableModes|MySQL
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: MySQL
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Oracle.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Oracle
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Oracle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Oracle
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Oracle
-                label:
-                  text: labels.databases.Oracle.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Oracle
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|Oracle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Oracle
-                fetch: availableModes|Oracle
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Oracle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Oracle
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.PerconaXtraDB.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|PerconaXtraDB
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|PerconaXtraDB
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|PerconaXtraDB
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|PerconaXtraDB
-                label:
-                  text: labels.databases.PerconaXtraDB.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|PerconaXtraDB
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|perconaxtradb
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|PerconaXtraDB
-                fetch: availableModes|PerconaXtraDB
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: PerconaXtraDB
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.PgBouncer.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|PgBouncer
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|PgBouncer
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|PgBouncer
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|PgBouncer
-                label:
-                  text: labels.databases.PgBouncer.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|PgBouncer
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|pgbouncer
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|PgBouncer
-                fetch: availableModes|PgBouncer
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: PgBouncer
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Pgpool.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Pgpool
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Pgpool
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Pgpool
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Pgpool
-                label:
-                  text: labels.databases.Pgpool.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Pgpool
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|pgpool
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Pgpool
-                fetch: availableModes|Pgpool
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Pgpool
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Postgres.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Postgres
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Postgres
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Postgres
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Postgres
-                label:
-                  text: labels.databases.Postgres.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Postgres
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|postgres
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Postgres
-                fetch: availableModes|Postgres
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Postgres
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.ProxySQL.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|ProxySQL
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|ProxySQL
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|ProxySQL
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|ProxySQL
-                label:
-                  text: labels.databases.ProxySQL.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|ProxySQL
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|proxysql
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|ProxySQL
-                fetch: availableModes|ProxySQL
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: ProxySQL
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.RabbitMQ.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|RabbitMQ
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|RabbitMQ
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|RabbitMQ
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|RabbitMQ
-                label:
-                  text: labels.databases.RabbitMQ.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|RabbitMQ
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|rabbitmq
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|RabbitMQ
-                fetch: availableModes|RabbitMQ
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: RabbitMQ
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Redis.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Redis
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Redis
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Redis
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Redis
-                label:
-                  text: labels.databases.Redis.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Redis
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|redis
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Redis
-                fetch: availableModes|Redis
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Redis
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Singlestore.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Singlestore
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Singlestore
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Singlestore
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Singlestore
-                label:
-                  text: labels.databases.Singlestore.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Singlestore
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|singlestore
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Singlestore
-                fetch: availableModes|Singlestore
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Singlestore
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.Solr.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|Solr
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|Solr
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|Solr
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|Solr
-                label:
-                  text: labels.databases.Solr.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|Solr
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|solr
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|Solr
-                fetch: availableModes|Solr
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Solr
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr
-            show_label: true
-            type: single-step-form
-          - elements:
-            - elements:
-              - label:
-                  text: labels.databases.ZooKeeper.toggle
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/toggle
-                type: switch
-              - fetch: FetchDbVersions|ZooKeeper
-                label:
-                  text: labels.databases.versions
-                onChange: clearDefaultVersion|ZooKeeper
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/available
-                type: multiselect
-              - fetch: availableVersions|ZooKeeper
-                label:
-                  text: labels.databases.default
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions
-              type: single-step-form
-            - elements:
-              - computed: checkModeToggle|ZooKeeper
-                label:
-                  text: labels.databases.ZooKeeper.toggleMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/toggle
-                type: switch
-              - fetch: fetchModes|ZooKeeper
-                label:
-                  text: labels.databases.modes
-                onChange: clearDefaultMode|zookeeper
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/available
-                type: multiselect
-              - computed: setDefaultMode|ZooKeeper
-                fetch: availableModes|ZooKeeper
-                label:
-                  text: labels.databases.defaultMode
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/default
-                type: select
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode
-              type: single-step-form
-            hideForm: true
-            label:
-              text: Zookeeper
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper
-            show_label: true
-            type: single-step-form
-          hideForm: true
-          label:
-            text: labels.databases.name
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: Can user modify AuthCredential?
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/authCredential/properties/customize
-            type: switch
-          - label:
-              text: Can user refer existing Auth?
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/authCredential/properties/referExisting
-            type: switch
-          hideForm: true
-          label:
-            text: Auth Credential
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: Custom Configuration
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/customConfiguration
-            type: switch
-          hideForm: true
-          label:
-            text: Custom Configuration
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            enableProfiles:
-              default: true
-              type: boolean
-          elements:
-          - computed: hasMachineProfiles
-            label:
-              text: Use custom profiles?
-            onChange: onMachineProfilesToggle
-            schema:
-              $ref: discriminator#/enableProfiles
-            type: switch
-          - discriminator:
-              useCustomProfile:
-                type: boolean
-            elements:
-            - addFormLabel: MachineProfile
-              element:
-                discriminator:
-                  profile:
-                    default: ""
-                    type: string
-                  profileChoseSwitch:
-                    default: false
-                    type: boolean
-                elements:
-                - label:
-                    text: Choose from well-known profiles
-                  schema:
-                    $ref: discriminator#/profileChoseSwitch
-                  type: switch
-                - fetch: getKnownProfile
-                  if: isKnownProfileToggled
-                  label:
-                    text: Profile
-                  schema:
-                    $ref: discriminator#/profile
-                  type: select
-                - computed: getProfileName
-                  label:
-                    text: ID
-                  schema:
-                    $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/id
-                  type: input
-                - computed: getProfileName
-                  label:
-                    text: Name
-                  schema:
-                    $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/name
-                  type: input
-                - elements:
-                  - computed: setLimits|cpu
-                    label:
-                      text: CPU Limits
-                    required: true
-                    schema:
-                      $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits/properties/cpu
-                    type: input
-                  - computed: setLimits|memory
-                    label:
-                      text: Memory Limits
-                    required: true
-                    schema:
-                      $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits/properties/memory
-                    type: input
-                  schema:
-                    $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits
-                  type: single-step-form
-                type: single-step-form
-              hideDetailsButton: true
-              label:
-                text: Machine Profiles
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines
-              tableContents:
-              - inTableColumn: true
-                label:
-                  text: ID
-                path: id
-                type: value
-                typeOfValue: string
-              - inTableColumn: true
-                label:
-                  text: Name
-                path: name
-                type: value
-                typeOfValue: string
-              - inTableColumn: true
-                label:
-                  text: Limits
-                path: limits
-                type: value
-                typeOfValue: string
-              temporaryPath: /profile
-              type: single-step-form-array
-            - computed: hasCustomProfile
-              label:
-                text: Can users set their own custom CPU & memory resources?
-              schema:
-                $ref: discriminator#/useCustomProfile
+            - label: Can user modify Node Topology?
+              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/toggle
               type: switch
-            - computed: setCustomAvlMachine
+            - loader: getNodeTopology
+              label: Available Node Topologies
+              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/available
+              type: select
+              multiple: true
+            - disableUnselect: true
+              loader: getOptions|clusterTier/nodeTopology
+              label: Default Node Topology
+              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+              type: select
+            showLabels: false
+            type: block-layout
+          hideBlock: false
+          label: Cluster Tier
+          showLabels: true
+          type: block-layout
+        - elements:
+          - elements:
+            - elements:
+              - label: Can user modify Cassandra Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Cassandra
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Cassandra
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Cassandra
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Cassandra
+                label: Can user modify Cassandra Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Cassandra
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|Cassandra
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Cassandra
+                loader: availableModes|Cassandra
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode
+              showLabels: false
+              type: block-layout
+            hideBlock: true
+            label: Cassandra
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify ClickHouse Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|ClickHouse
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|ClickHouse
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|ClickHouse
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|ClickHouse
+                label: Can user modify ClickHouse Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|ClickHouse
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|clickHouse
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|ClickHouse
+                loader: availableModes|ClickHouse
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: ClickHouse
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Druid Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Druid
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Druid
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Druid
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Druid
+                label: Can user modify Druid Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Druid
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|druid
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Druid
+                loader: availableModes|Druid
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Druid
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Elasticsearch Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Elasticsearch
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Elasticsearch
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Elasticsearch
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Elasticsearch
+                label: Can user modify Elasticsearch Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Elasticsearch
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|elasticsearch
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Elasticsearch
+                loader: availableModes|Elasticsearch
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Elasticsearch
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify FerretDB Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|FerretDB
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|FerretDB
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|FerretDB
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|FerretDB
+                label: Can user modify FerretDB Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|FerretDB
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|ferretdb
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|FerretDB
+                loader: availableModes|FerretDB
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: FerretDB
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Hazelcast Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Hazelcast
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Hazelcast
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Hazelcast
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Hazelcast
+                label: Can user modify Hazelcast Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Hazelcast
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|Hazelcast
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Hazelcast
+                loader: availableModes|Hazelcast
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Hazelcast
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Ignite Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Ignite
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Ignite
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Ignite
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Ignite
+                label: Can user modify Ignite Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Ignite
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|Ignite
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Ignite
+                loader: availableModes|Ignite
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Ignite
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Kafka Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Kafka
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Kafka
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Kafka
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Kafka
+                label: Can user modify Kafka Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Kafka
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|kafka
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Kafka
+                loader: availableModes|Kafka
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Kafka
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify MSSQLServer Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|MSSQLServer
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|MSSQLServer
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|MSSQLServer
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|MSSQLServer
+                label: Can user modify MSSQLServer Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|MSSQLServer
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|mssqlserver
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|MSSQLServer
+                loader: availableModes|MSSQLServer
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: MSSQLServer
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify MariaDB Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|MariaDB
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|MariaDB
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|MariaDB
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|MariaDB
+                label: Can user modify MariaDB Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|MariaDB
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|mariadb
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|MariaDB
+                loader: availableModes|MariaDB
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: MariaDB
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Memcached Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Memcached
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Memcached
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Memcached
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Memcached
+                label: Can user modify Memcached Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Memcached
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|memcached
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Memcached
+                loader: availableModes|Memcached
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Memcached
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify MongoDB Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|MongoDB
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|MongoDB
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|MongoDB
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|MongoDB
+                label: Can user modify MongoDB Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|MongoDB
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|mongodb
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|MongoDB
+                loader: availableModes|MongoDB
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: MongoDB
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify MySQL Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|MySQL
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|MySQL
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|MySQL
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|MySQL
+                label: Can user modify MySQL Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|MySQL
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|mysql
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|MySQL
+                loader: availableModes|MySQL
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: MySQL
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Oracle Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Oracle
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Oracle
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Oracle
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Oracle
+                label: Can user modify Oracle Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Oracle
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|Oracle
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Oracle
+                loader: availableModes|Oracle
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Oracle
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify PerconaXtraDB Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|PerconaXtraDB
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|PerconaXtraDB
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|PerconaXtraDB
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|PerconaXtraDB
+                label: Can user modify PerconaXtraDB Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|PerconaXtraDB
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|perconaxtradb
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|PerconaXtraDB
+                loader: availableModes|PerconaXtraDB
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: PerconaXtraDB
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify PgBouncer Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|PgBouncer
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|PgBouncer
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|PgBouncer
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|PgBouncer
+                label: Can user modify PgBouncer Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|PgBouncer
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|pgbouncer
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|PgBouncer
+                loader: availableModes|PgBouncer
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: PgBouncer
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Pgpool Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Pgpool
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Pgpool
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Pgpool
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Pgpool
+                label: Can user modify Pgpool Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Pgpool
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|pgpool
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Pgpool
+                loader: availableModes|Pgpool
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Pgpool
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Postgres Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Postgres
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Postgres
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Postgres
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Postgres
+                label: Can user modify Postgres Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Postgres
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|postgres
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Postgres
+                loader: availableModes|Postgres
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Postgres
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify ProxySQL Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|ProxySQL
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|ProxySQL
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|ProxySQL
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|ProxySQL
+                label: Can user modify ProxySQL Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|ProxySQL
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|proxysql
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|ProxySQL
+                loader: availableModes|ProxySQL
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: ProxySQL
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify RabbitMQ Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|RabbitMQ
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|RabbitMQ
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|RabbitMQ
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|RabbitMQ
+                label: Can user modify RabbitMQ Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|RabbitMQ
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|rabbitmq
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|RabbitMQ
+                loader: availableModes|RabbitMQ
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: RabbitMQ
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Redis Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Redis
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Redis
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Redis
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Redis
+                label: Can user modify Redis Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Redis
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|redis
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Redis
+                loader: availableModes|Redis
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Redis
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Singlestore Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Singlestore
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Singlestore
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Singlestore
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Singlestore
+                label: Can user modify Singlestore Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Singlestore
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|singlestore
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Singlestore
+                loader: availableModes|Singlestore
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Singlestore
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Solr configuration?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|Solr
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|Solr
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|Solr
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|Solr
+                label: Can user modify Solr Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|Solr
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|solr
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|Solr
+                loader: availableModes|Solr
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Solr
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify ZooKeeper Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/toggle
+                type: switch
+              - loader: FetchDbVersions|ZooKeeper
+                label: Available Versions
+                watcher:
+                  func: clearDefaultVersion|ZooKeeper
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/available
+                type: select
+                multiple: true
+              - loader: availableVersions|ZooKeeper
+                label: Default Version
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions
+              type: block-layout
+            - elements:
+              - init:
+                  type: func
+                  value: checkModeToggle|ZooKeeper
+                label: Can user modify ZooKeeper Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/toggle
+                type: switch
+              - loader: fetchModes|ZooKeeper
+                label: Available Modes
+                watcher:
+                  func: clearDefaultMode|zookeeper
+                  paths:
+                    - schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/available
+                type: select
+                multiple: true
+              - init:
+                  type: func
+                  value: setDefaultMode|ZooKeeper
+                loader: availableModes|ZooKeeper
+                label: Default Mode
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/default
+                type: select
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode
+              type: block-layout
+            hideBlock: true
+            label: Zookeeper
+            # schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper
+            showLabels: true
+            type: block-layout
+          hideBlock: true
+          loader: FetchAllDbVersions
+          label: Configure Databases
+          showLabels: true
+          type: block-layout
+        - elements:
+          - label: Can user modify AuthCredential?
+            schema: schema/properties/spec/properties/admin/properties/authCredential/properties/customize
+            type: switch
+          - label: Can user refer existing Auth?
+            schema: schema/properties/spec/properties/admin/properties/authCredential/properties/referExisting
+            type: switch
+          hideBlock: true
+          label: Auth Credential
+          showLabels: true
+          type: block-layout
+        - elements:
+          - label: Custom Configuration
+            schema: schema/properties/spec/properties/admin/properties/customConfiguration
+            type: switch
+          hideBlock: true
+          label: Custom Configuration
+          showLabels: true
+          type: block-layout
+        - elements:
+          - init:
+              type: func
+              value: hasMachineProfiles
+            label: Use custom profiles?
+            watcher:
+              func: onMachineProfilesToggle
+              paths:
+                - discriminator/enableProfiles
+            schema: discriminator/enableProfiles
+            type: switch
+          - elements:
+            - elements:
+              - label: Choose from well-known profiles
+                schema: temp/profileChoseSwitch
+                type: switch
+              - loader: getKnownProfile
+                if:
+                  name: isKnownProfileToggled
+                  type: function
+                label: Profile
+                schema: temp/profile
+                type: select
+              - loader:
+                  name: getProfileName
+                  watchPaths:
+                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                watcher:
+                  func: onProfileIdChange
+                  paths:
+                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/id
+                label: ID
+                validation:
+                  type: required
+                schema: id
+                type: input
+              - loader:
+                  name: getProfileName
+                  watchPaths:
+                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                label: Name
+                schema: name
+                type: input
+              - loader:
+                  name: setLimits|cpu
+                  watchPaths:
+                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                label: CPU Limits
+                validation:
+                  type: required
+                schema: limits/properties/cpu
+                type: input
+              - loader:
+                  name: setLimits|memory
+                  watchPaths:
+                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                label: Memory Limits
+                validation:
+                  type: required
+                schema: limits/properties/memory
+                type: input
+              label: Machine Profiles
+              schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/machines
+              # temporaryPath: /profile
+              type: array-object-form
+            - init:
+                type: func
+                value: hasCustomProfile
+              label: Can users set their own custom CPU & memory resources?
+              schema: discriminator/useCustomProfile
+              type: switch
+            - init:
+                type: func
+                value: setCustomAvlMachine
               customClass: mt-10
-              fetch: getMachines
-              label:
-                text: Available Machines
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/available
-              type: multiselect
-            - fetch: getAvailableMachines
-              label:
-                text: Default Machine
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/default
+              loader: getMachines
+              label: Available Machines
+              schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/available
               type: select
-            if: isEnableProfiles
-            type: single-step-form
-          hideForm: true
-          label:
-            text: Configure MachineProfiles
-          show_label: true
-          type: single-step-form
+              multiple: true
+            - loader: getAvailableMachines
+              label: Default Machine
+              schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/default
+              type: select
+            if:
+              name: isEnableProfiles
+              type: function
+            type: block-layout
+          hideBlock: true
+          label: Configure MachineProfiles
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.storageClass.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/toggle
+          - label: Can users modify Storage Class?
+            schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/toggle
             type: switch
-          - fetch: getStorageClass
-            label:
-              text: labels.storageClass.available
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/available
-            type: multiselect
-          - computed: setStorageClass
-            fetch: getOptions|storageClasses
-            label:
-              text: labels.storageClass.default
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
+          - loader: getStorageClass
+            label: Available Storage Classes
+            schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/available
             type: select
-          hideForm: false
-          label:
-            text: labels.storageClass.name
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.tls.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/tls/properties/toggle
-            type: switch
-          - label:
-              text: labels.tls.default
-            onChange: preSelectClusterIssuer
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-            type: switch
-          hideForm: true
-          label:
-            text: labels.tls.name
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.clusterIssuers.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/toggle
-            type: switch
-          - fetch: getClusterIssuers
-            label:
-              text: labels.clusterIssuers.available
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/available
-            type: multiselect
-          - fetch: getOptions|clusterIssuers
-            label:
-              text: labels.clusterIssuers.default
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+            multiple: true
+          - init:
+              type: func
+              value: setStorageClass
+            loader: getOptions|storageClasses
+            label: Default Storage Class
+            schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
             type: select
-          hideForm: false
-          label:
-            text: labels.clusterIssuers.name
-          show_label: true
-          type: single-step-form
+          hideBlock: false
+          label: Storage Class
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.expose.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/expose/properties/toggle
+          - label: Can users modify TLS?
+            schema: schema/properties/spec/properties/admin/properties/tls/properties/toggle
             type: switch
-          - label:
-              text: labels.expose.default
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
+          - label: Enable TLS?
+            watcher:
+              func: preSelectClusterIssuer
+              paths:
+                - schema/properties/spec/properties/admin/properties/tls/properties/default
+            schema: schema/properties/spec/properties/admin/properties/tls/properties/default
             type: switch
-          hideForm: true
-          label:
-            text: labels.expose.name
-          show_label: true
-          type: single-step-form
+          hideBlock: true
+          label: TLS
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.monitoring.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/monitoring/properties/toggle
+          - label: Can user modify Cluster Issuers?
+            schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/toggle
             type: switch
-          - label:
-              text: labels.monitoring.agent
+          - loader: getClusterIssuers
+            label: Available Cluster Issuers
+            schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/available
+            type: select
+            multiple: true
+          - loader: getOptions|clusterIssuers
+            label: Default Cluster Issuer
+            schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+            type: select
+          hideBlock: false
+          label: Cluster Issuers
+          showLabels: true
+          type: block-layout
+        - elements:
+          - label: Can users modify Exposer via gateway?
+            schema: schema/properties/spec/properties/admin/properties/expose/properties/toggle
+            type: switch
+          - label: Expose via gateway?
+            schema: schema/properties/spec/properties/admin/properties/expose/properties/default
+            type: switch
+          hideBlock: true
+          label: Expose
+          showLabels: true
+          type: block-layout
+        - elements:
+          - label: Can users modify Monitoring?
+            schema: schema/properties/spec/properties/admin/properties/monitoring/properties/toggle
+            type: switch
+          - label: Agent
             options:
             - text: prometheus.io/operator
               value: prometheus.io/operator
@@ -1651,40 +1477,41 @@ steps:
               value: prometheus.io
             - text: prometheus.io/builtin
               value: prometheus.io/builtin
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/monitoring/properties/agent
+            schema: schema/properties/spec/properties/admin/properties/monitoring/properties/agent
             type: radio
-          - elements:
-            - label:
-                text: labels.monitoring.exporter.name
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources
-              type: resource-input-form
-            type: single-step-form
-          hideForm: true
-          label:
-            text: labels.monitoring.name
-          show_label: true
-          type: single-step-form
+          - type: horizontal-layout
+            label: Resources
+            showLabels: true
+            elements:
+              - type: input
+                label: CPU Requests
+                schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/requests/properties/cpu
+              - type: input
+                label: CPU Limits
+                schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/limits/properties/cpu
+              - type: input
+                label: Memory Requests
+                schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/requests/properties/memory
+              - type: input
+                label: Memory Limits
+                schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/limits/properties/memory
+          hideBlock: true
+          label: Monitoring
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.alert.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/alert/properties/toggle
+          - label: Can user modify Alert?
+            schema: schema/properties/spec/properties/admin/properties/alert/properties/toggle
             type: switch
-          hideForm: true
-          label:
-            text: labels.alert.name
-          show_label: true
-          type: single-step-form
+          hideBlock: true
+          label: Alert
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.deletionPolicy.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/deletionPolicy/properties/toggle
+          - label: Can user modify Deletion Policy?
+            schema: schema/properties/spec/properties/admin/properties/deletionPolicy/properties/toggle
             type: switch
-          - label:
-              text: labels.deletionPolicy.default
+          - label: Default Deletion Policy
             options:
             - description: options.deletionPolicy.delete.description
               text: options.deletionPolicy.delete.label
@@ -1698,251 +1525,150 @@ steps:
             - description: options.deletionPolicy.doNotTerminate.description
               text: options.deletionPolicy.doNotTerminate.label
               value: DoNotTerminate
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/deletionPolicy/properties/default
+            schema: schema/properties/spec/properties/admin/properties/deletionPolicy/properties/default
             type: select
-          hideForm: true
-          label:
-            text: labels.deletionPolicy.name
-          show_label: true
-          type: single-step-form
+          hideBlock: true
+          label: Deletion Policy
+          showLabels: true
+          type: block-layout
         - elements:
-          - addFormLabel: labels.tolerations.label
-            element:
-              elements:
-              - label:
-                  text: labels.tolerations.key
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/key
-                type: input
-              - label:
-                  text: labels.tolerations.operator
-                options:
-                - NoSchedule
-                - PreferNoSchedule
-                - NoExecute
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/operator
-                type: select
-              - label:
-                  text: labels.tolerations.value
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/value
-                type: input
-              - label:
-                  text: labels.tolerations.effect
-                options:
-                - Exists
-                - Equal
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/effect
-                type: select
-              - label:
-                  text: labels.tolerations.tolerationSeconds
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/tolerationSeconds
-                type: input
-              type: single-step-form
-            label:
-              text: labels.tolerations.label
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/tolerations
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: labels.tolerations.effect
-              path: effect
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.tolerations.key
-              path: key
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.tolerations.operator
-              path: operator
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.tolerations.tolerationSeconds
-              path: tolerationSeconds
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.tolerations.value
-              path: value
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          hideForm: true
-          label:
-            text: labels.tolerations.label
-          show_label: true
-          type: single-step-form
-        - elements:
-          - isArray: true
-            keys:
-              label:
-                text: labels.nodeSelector.key
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/nodeSelector
-            type: key-value-input-form
-            values:
-              label:
-                text: labels.nodeSelector.value
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/nodeSelector/additionalProperties
+          - elements:
+            - label: Key
+              schema: key
               type: input
-          hideForm: true
-          label:
-            text: labels.nodeSelector.label
-          show_label: true
-          type: single-step-form
+            - label: Operator
+              options:
+              - NoSchedule
+              - PreferNoSchedule
+              - NoExecute
+              schema: operator
+              type: select
+            - label: Value
+              schema: value
+              type: input
+            - label: Effect
+              options:
+              - Exists
+              - Equal
+              schema: effect
+              type: select
+            - label: Toleration Seconds
+              schema: tolerationSeconds
+              type: input
+            label: Tolerations
+            schema: schema/properties/spec/properties/admin/properties/tolerations
+            type: array-object-form
+          hideBlock: true
+          label: Tolerations
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.backup.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/backup/properties/enable/properties/toggle
+          - label: Key
+            schema: schema/properties/spec/properties/admin/properties/nodeSelector
+            type: object-item
+            buttonClass: is-light is-outlined
+          hideBlock: true
+          label: Node Selector
+          showLabels: true
+          type: block-layout
+        - elements:
+          - label: Can user modify Backup?
+            schema: schema/properties/spec/properties/admin/properties/backup/properties/enable/properties/toggle
             type: switch
-          - label:
-              text: labels.backup.default
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/backup/properties/enable/properties/default
+          - label: Enable Backup
+            schema: schema/properties/spec/properties/admin/properties/backup/properties/enable/properties/default
             type: switch
           - isHorizontal: true
-            label:
-              text: Take Backup by
+            label: Take Backup by
             options:
             - text: BackupConfiguration
               value: BackupConfiguration
             - text: BackupBlueprint
               value: BackupBlueprint
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/backup/properties/by
+            schema: schema/properties/spec/properties/admin/properties/backup/properties/by
             type: radio
-          hideForm: true
-          label:
-            text: labels.backup.name
-          show_label: true
-          type: single-step-form
+          hideBlock: true
+          label: Backup
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.pointInTimeRecovery.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/toggle
+          - label: Can users modify Point In-Time Recovery?
+            schema: schema/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/toggle
             type: switch
-          - label:
-              text: labels.pointInTimeRecovery.default
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/default
+          - label: Enable Point In-Time Recovery
+            schema: schema/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/default
             type: switch
-          hideForm: true
-          label:
-            text: labels.pointInTimeRecovery.name
-          show_label: true
-          type: single-step-form
+          hideBlock: true
+          label: Point In Time-Recovery
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.archiver.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/enable/properties/toggle
+          - label: Can user modify Archiver?
+            schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/toggle
             type: switch
-          - label:
-              text: labels.archiver.default
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+          - label: Default Archiver
+            schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
             type: switch
-          hideForm: true
-          label:
-            text: labels.archiver.name
-          show_label: true
-          type: single-step-form
+          hideBlock: true
+          label: Archiver
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.showPreview.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/showPreview
+          - label: Show Preview?
+            schema: schema/properties/spec/properties/admin/properties/showPreview
             type: switch
-          - label:
-              text: Enable Gitops
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/gitOps/properties/enable/properties/default
+          - label: Enable Gitops
+            schema: schema/properties/spec/properties/admin/properties/gitOps/properties/enable/properties/default
             type: switch
-          hideForm: true
-          label:
-            text: labels.showPreview.name
-          show_label: true
-          type: single-step-form
+          hideBlock: true
+          label: Preview
+          showLabels: true
+          type: block-layout
         - elements:
-          - label:
-              text: labels.leftPanel.showBackup
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/leftPanel/properties/showBackup
+          - label: Show Backup?
+            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showBackup
             type: switch
-          - label:
-              text: labels.leftPanel.showBackupLegacy
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/leftPanel/properties/showBackupLegacy
+          - label: Show BackupLegacy?
+            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showBackupLegacy
             type: switch
-          - label:
-              text: labels.leftPanel.showInsights
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/leftPanel/properties/showInsights
+          - label: Show Insights?
+            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showInsights
             type: switch
-          - label:
-              text: labels.leftPanel.showOperations
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/leftPanel/properties/showOperations
+          - label: Show Operations?
+            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showOperations
             type: switch
-          - label:
-              text: labels.leftPanel.showSecurity
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/leftPanel/properties/showSecurity
+          - label: Show Security?
+            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showSecurity
             type: switch
-          - label:
-              text: labels.leftPanel.showVaultInfo
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/leftPanel/properties/showVaultInfo
+          - label: Show VaultInfo?
+            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showVaultInfo
             type: switch
-          hideForm: true
-          label:
-            text: labels.leftPanel.name
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/leftPanel
-          show_label: true
-          type: single-step-form
-        if: isKubedbUiPreset
-        type: single-step-form
-      if: presetNameEqualsTo|kubedb-ui-presets
-      type: single-step-form
+          hideBlock: true
+          label: Left Panel
+          # schema: schema/properties/spec/properties/admin/properties/leftPanel
+          showLabels: true
+          type: block-layout
     - elements:
       - elements:
-        - alias: reusable_stash-presets
-          chart:
-            name: uibytebuildersdev-component-stash-presets
-            version: v0.29.0
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/spec/properties/backup/properties/kubestash
-          type: reusable-element
-        - computed: setTool
-          if: returnFalse
-          schema:
-            $ref: schema#/properties/spec/properties/backup/properties/tool
-          type: input
-        schema:
-          $ref: schema#/properties/spec/properties/backup
-        type: single-step-form
-      if: presetNameEqualsTo|stash-presets
-      type: single-step-form
-    - elements: []
-      type: single-step-form
-    type: single-step-form
-  id: options
-  title: Basic
+        - type: input
+          label: demo
+          schema: schema/properties/demo
+          if:
+            name: returnFalse
+            type: function
+        # - alias: reusable_stash-presets
+        #   chart:
+        #     name: uibytebuildersdev-component-stash-presets
+        #     version: v0.29.0
+        #   moduleResolver: fetchJsons
+        #   schema:
+        #     $ref: schema#/properties/spec/properties/backup/properties/kubestash
+        #   type: reusable-element
+        # schema: schema/properties/spec/properties/backup
+        loader: setTool
+        type: block-layout
+      if:
+        name: presetNameEqualsTo|stash-presets
+        type: function
+      type: block-layout
 type: multi-step-form
