@@ -52,7 +52,7 @@ type KubedbcomDruidEditorOptionsSpecSpec struct {
 	ZookeeperRef    DruidZooKeeperRef    `json:"zookeeperRef"`
 	AuthSecret      AuthSecret           `json:"authSecret"`
 	DeletionPolicy  DeletionPolicy       `json:"deletionPolicy"`
-	Configuration   string               `json:"configuration"`
+	Configuration   Configuration        `json:"configuration"`
 	Admin           AdminOptions         `json:"admin"`
 	Backup          BackupToolSpec       `json:"backup"`
 	Monitoring      MonitoringOperator   `json:"monitoring"`
