@@ -52,13 +52,19 @@ step:
             - label: Can user modify Placement?
               schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/toggle
               type: switch
-            - loader: getPlacements
+            - loader:
+                name: getPlacements
+                watchPaths:
+                  - temp/bundle
               label: Available Placements
               schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/available
               type: select
               multiple: true
             - disableUnselect: true
-              loader: getOptions|clusterTier/placement
+              loader:
+                name: getOptions|clusterTier/placement
+                watchPaths:
+                  - schema/spec/admin/clusterTier/placement/available
               label: Default Placement
               schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
               type: select
@@ -68,13 +74,19 @@ step:
             - label: Can user modify Node Topology?
               schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/toggle
               type: switch
-            - loader: getNodeTopology
+            - loader:
+                name: getNodeTopology
+                watchPaths:
+                  - temp/bundle
               label: Available Node Topologies
               schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/available
               type: select
               multiple: true
             - disableUnselect: true
-              loader: getOptions|clusterTier/nodeTopology
+              loader:
+                name: getOptions|clusterTier/nodeTopology
+                watchPaths:
+                  - schema/spec/admin/clusterTier/nodeTopology/available
               label: Default Node Topology
               schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
               type: select
@@ -90,7 +102,10 @@ step:
               - label: Can user modify Cassandra Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Cassandra
+              - loader: 
+                  name: FetchDbVersions|Cassandra
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Cassandra
@@ -99,7 +114,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Cassandra
+              - loader:
+                  name: availableVersions|Cassandra
+                  watchPaths:
+                    - schema/spec/admin/databases/Cassandra/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/default
                 type: select
@@ -124,7 +142,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Cassandra
-                loader: availableModes|Cassandra
+                loader:
+                  name: availableModes|Cassandra
+                  watchPaths:
+                    - schema/spec/admin/databases/Cassandra/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/default
                 type: select
@@ -141,7 +162,10 @@ step:
               - label: Can user modify ClickHouse Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|ClickHouse
+              - loader:
+                  name: FetchDbVersions|ClickHouse
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|ClickHouse
@@ -150,7 +174,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|ClickHouse
+              - loader:
+                  name: availableVersions|ClickHouse
+                  watchPaths:
+                    - schema/spec/admin/databases/ClickHouse/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/default
                 type: select
@@ -175,7 +202,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|ClickHouse
-                loader: availableModes|ClickHouse
+                loader:
+                  name: availableModes|ClickHouse
+                  watchPaths:
+                    - schema/spec/admin/databases/ClickHouse/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/default
                 type: select
@@ -191,7 +221,10 @@ step:
               - label: Can user modify Druid Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Druid
+              - loader:
+                  name: FetchDbVersions|Druid
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Druid
@@ -200,7 +233,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Druid
+              - loader:
+                  name: availableVersions|Druid
+                  watchPaths:
+                    - schema/spec/admin/databases/Druid/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/default
                 type: select
@@ -225,7 +261,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Druid
-                loader: availableModes|Druid
+                loader:
+                  name: availableModes|Druid
+                  watchPaths:
+                    - schema/spec/admin/databases/Druid/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/default
                 type: select
@@ -241,7 +280,10 @@ step:
               - label: Can user modify Elasticsearch Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Elasticsearch
+              - loader:
+                  name: FetchDbVersions|Elasticsearch
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Elasticsearch
@@ -250,7 +292,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Elasticsearch
+              - loader:
+                  name: availableVersions|Elasticsearch
+                  watchPaths:
+                    - schema/spec/admin/databases/Elasticsearch/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/default
                 type: select
@@ -275,7 +320,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Elasticsearch
-                loader: availableModes|Elasticsearch
+                loader:
+                  name: availableModes|Elasticsearch
+                  watchPaths:
+                    - schema/spec/admin/databases/Elasticsearch/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/default
                 type: select
@@ -291,7 +339,10 @@ step:
               - label: Can user modify FerretDB Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|FerretDB
+              - loader:
+                  name: FetchDbVersions|FerretDB
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|FerretDB
@@ -300,7 +351,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|FerretDB
+              - loader:
+                  name: availableVersions|FerretDB
+                  watchPaths:
+                    - schema/spec/admin/databases/FerretDB/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/default
                 type: select
@@ -325,7 +379,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|FerretDB
-                loader: availableModes|FerretDB
+                loader:
+                  name: availableModes|FerretDB
+                  watchPaths:
+                    - schema/spec/admin/databases/FerretDB/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/default
                 type: select
@@ -341,7 +398,10 @@ step:
               - label: Can user modify Hazelcast Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Hazelcast
+              - loader:
+                  name: FetchDbVersions|Hazelcast
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Hazelcast
@@ -350,7 +410,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Hazelcast
+              - loader:
+                  name: availableVersions|Hazelcast
+                  watchPaths:
+                    - schema/spec/admin/databases/Hazelcast/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/default
                 type: select
@@ -375,7 +438,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Hazelcast
-                loader: availableModes|Hazelcast
+                loader:
+                  name: availableModes|Hazelcast
+                  watchPaths:
+                    - schema/spec/admin/databases/Hazelcast/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/default
                 type: select
@@ -391,7 +457,10 @@ step:
               - label: Can user modify Ignite Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Ignite
+              - loader:
+                  name: FetchDbVersions|Ignite
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Ignite
@@ -400,7 +469,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Ignite
+              - loader:
+                  name: availableVersions|Ignite
+                  watchPaths:
+                    - schema/spec/admin/databases/Ignite/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/default
                 type: select
@@ -425,7 +497,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Ignite
-                loader: availableModes|Ignite
+                loader:
+                  name: availableModes|Ignite
+                  watchPaths:
+                    - schema/spec/admin/databases/Ignite/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/default
                 type: select
@@ -441,7 +516,10 @@ step:
               - label: Can user modify Kafka Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Kafka
+              - loader:
+                  name: FetchDbVersions|Kafka
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Kafka
@@ -450,7 +528,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Kafka
+              - loader:
+                  name: availableVersions|Kafka
+                  watchPaths:
+                    - schema/spec/admin/databases/Kafka/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/default
                 type: select
@@ -475,7 +556,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Kafka
-                loader: availableModes|Kafka
+                loader:
+                  name: availableModes|Kafka
+                  watchPaths:
+                    - schema/spec/admin/databases/Kafka/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/default
                 type: select
@@ -491,7 +575,10 @@ step:
               - label: Can user modify MSSQLServer Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|MSSQLServer
+              - loader:
+                  name: FetchDbVersions|MSSQLServer
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|MSSQLServer
@@ -500,7 +587,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|MSSQLServer
+              - loader:
+                  name: availableVersions|MSSQLServer
+                  watchPaths:
+                    - schema/spec/admin/databases/MSSQLServer/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/default
                 type: select
@@ -525,7 +615,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|MSSQLServer
-                loader: availableModes|MSSQLServer
+                loader:
+                  name: availableModes|MSSQLServer
+                  watchPaths:
+                    - schema/spec/admin/databases/MSSQLServer/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/default
                 type: select
@@ -541,7 +634,10 @@ step:
               - label: Can user modify MariaDB Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|MariaDB
+              - loader:
+                  name: FetchDbVersions|MariaDB
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|MariaDB
@@ -550,7 +646,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|MariaDB
+              - loader:
+                  name: availableVersions|MariaDB
+                  watchPaths:
+                    - schema/spec/admin/databases/MariaDB/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/default
                 type: select
@@ -575,7 +674,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|MariaDB
-                loader: availableModes|MariaDB
+                loader:
+                  name: availableModes|MariaDB
+                  watchPaths:
+                    - schema/spec/admin/databases/MariaDB/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/default
                 type: select
@@ -591,7 +693,10 @@ step:
               - label: Can user modify Memcached Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Memcached
+              - loader:
+                  name: FetchDbVersions|Memcached
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Memcached
@@ -600,7 +705,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Memcached
+              - loader:
+                  name: availableVersions|Memcached
+                  watchPaths:
+                    - schema/spec/admin/databases/Memcached/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/default
                 type: select
@@ -625,7 +733,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Memcached
-                loader: availableModes|Memcached
+                loader:
+                  name: availableModes|Memcached
+                  watchPaths:
+                    - schema/spec/admin/databases/Memcached/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/default
                 type: select
@@ -641,7 +752,10 @@ step:
               - label: Can user modify MongoDB Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|MongoDB
+              - loader:
+                  name: FetchDbVersions|MongoDB
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|MongoDB
@@ -650,7 +764,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|MongoDB
+              - loader:
+                  name: availableVersions|MongoDB
+                  watchPaths:
+                    - schema/spec/admin/databases/MongoDB/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
                 type: select
@@ -675,7 +792,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|MongoDB
-                loader: availableModes|MongoDB
+                loader:
+                  name: availableModes|MongoDB
+                  watchPaths:
+                    - schema/spec/admin/databases/MongoDB/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/default
                 type: select
@@ -691,7 +811,10 @@ step:
               - label: Can user modify MySQL Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|MySQL
+              - loader:
+                  name: FetchDbVersions|MySQL
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|MySQL
@@ -700,7 +823,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|MySQL
+              - loader:
+                  name: availableVersions|MySQL
+                  watchPaths:
+                    - schema/spec/admin/databases/MySQL/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/default
                 type: select
@@ -725,7 +851,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|MySQL
-                loader: availableModes|MySQL
+                loader:
+                  name: availableModes|MySQL
+                  watchPaths:
+                    - schema/spec/admin/databases/MySQL/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/default
                 type: select
@@ -741,7 +870,10 @@ step:
               - label: Can user modify Oracle Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Oracle
+              - loader:
+                  name: FetchDbVersions|Oracle
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Oracle
@@ -750,7 +882,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Oracle
+              - loader:
+                  name: availableVersions|Oracle
+                  watchPaths:
+                    - schema/spec/admin/databases/Oracle/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/default
                 type: select
@@ -775,7 +910,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Oracle
-                loader: availableModes|Oracle
+                loader:
+                  name: availableModes|Oracle
+                  watchPaths:
+                    - schema/spec/admin/databases/Oracle/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/default
                 type: select
@@ -791,7 +929,10 @@ step:
               - label: Can user modify PerconaXtraDB Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|PerconaXtraDB
+              - loader:
+                  name: FetchDbVersions|PerconaXtraDB
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|PerconaXtraDB
@@ -800,7 +941,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|PerconaXtraDB
+              - loader:
+                  name: availableVersions|PerconaXtraDB
+                  watchPaths:
+                    - schema/spec/admin/databases/PerconaXtraDB/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
                 type: select
@@ -825,7 +969,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|PerconaXtraDB
-                loader: availableModes|PerconaXtraDB
+                loader:
+                  name: availableModes|PerconaXtraDB
+                  watchPaths:
+                    - schema/spec/admin/databases/PerconaXtraDB/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/default
                 type: select
@@ -841,7 +988,10 @@ step:
               - label: Can user modify PgBouncer Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|PgBouncer
+              - loader:
+                  name: FetchDbVersions|PgBouncer
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|PgBouncer
@@ -850,7 +1000,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|PgBouncer
+              - loader:
+                  name: availableVersions|PgBouncer
+                  watchPaths:
+                    - schema/spec/admin/databases/PgBouncer/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
                 type: select
@@ -875,7 +1028,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|PgBouncer
-                loader: availableModes|PgBouncer
+                loader:
+                  name: availableModes|PgBouncer
+                  watchPaths:
+                    - schema/spec/admin/databases/PgBouncer/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/default
                 type: select
@@ -891,7 +1047,10 @@ step:
               - label: Can user modify Pgpool Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Pgpool
+              - loader:
+                  name: FetchDbVersions|Pgpool
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Pgpool
@@ -900,7 +1059,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Pgpool
+              - loader:
+                  name: availableVersions|Pgpool
+                  watchPaths:
+                    - schema/spec/admin/databases/Pgpool/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/default
                 type: select
@@ -925,7 +1087,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Pgpool
-                loader: availableModes|Pgpool
+                loader:
+                  name: availableModes|Pgpool
+                  watchPaths:
+                    - schema/spec/admin/databases/Pgpool/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/default
                 type: select
@@ -941,7 +1106,10 @@ step:
               - label: Can user modify Postgres Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Postgres
+              - loader:
+                  name: FetchDbVersions|Postgres
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Postgres
@@ -950,7 +1118,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Postgres
+              - loader:
+                  name: availableVersions|Postgres
+                  watchPaths:
+                    - schema/spec/admin/databases/Postgres/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/default
                 type: select
@@ -975,7 +1146,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Postgres
-                loader: availableModes|Postgres
+                loader:
+                  name: availableModes|Postgres
+                  watchPaths:
+                    - schema/spec/admin/databases/Postgres/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/default
                 type: select
@@ -991,7 +1165,10 @@ step:
               - label: Can user modify ProxySQL Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|ProxySQL
+              - loader:
+                  name: FetchDbVersions|ProxySQL
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|ProxySQL
@@ -1000,7 +1177,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|ProxySQL
+              - loader:
+                  name: availableVersions|ProxySQL
+                  watchPaths:
+                    - schema/spec/admin/databases/ProxySQL/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
                 type: select
@@ -1025,7 +1205,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|ProxySQL
-                loader: availableModes|ProxySQL
+                loader:
+                  name: availableModes|ProxySQL
+                  watchPaths:
+                    - schema/spec/admin/databases/ProxySQL/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/default
                 type: select
@@ -1041,7 +1224,10 @@ step:
               - label: Can user modify RabbitMQ Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|RabbitMQ
+              - loader:
+                  name: FetchDbVersions|RabbitMQ
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|RabbitMQ
@@ -1050,7 +1236,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|RabbitMQ
+              - loader:
+                  name: availableVersions|RabbitMQ
+                  watchPaths:
+                    - schema/spec/admin/databases/RabbitMQ/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/default
                 type: select
@@ -1075,7 +1264,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|RabbitMQ
-                loader: availableModes|RabbitMQ
+                loader:
+                  name: availableModes|RabbitMQ
+                  watchPaths:
+                    - schema/spec/admin/databases/RabbitMQ/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/default
                 type: select
@@ -1091,7 +1283,10 @@ step:
               - label: Can user modify Redis Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Redis
+              - loader:
+                  name: FetchDbVersions|Redis
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Redis
@@ -1100,7 +1295,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Redis
+              - loader:
+                  name: availableVersions|Redis
+                  watchPaths:
+                    - schema/spec/admin/databases/Redis/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
                 type: select
@@ -1125,7 +1323,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Redis
-                loader: availableModes|Redis
+                loader:
+                  name: availableModes|Redis
+                  watchPaths:
+                    - schema/spec/admin/databases/Redis/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/default
                 type: select
@@ -1141,7 +1342,10 @@ step:
               - label: Can user modify Singlestore Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Singlestore
+              - loader:
+                  name: FetchDbVersions|Singlestore
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Singlestore
@@ -1150,7 +1354,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Singlestore
+              - loader:
+                  name: availableVersions|Singlestore
+                  watchPaths:
+                    - schema/spec/admin/databases/Singlestore/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/default
                 type: select
@@ -1175,7 +1382,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Singlestore
-                loader: availableModes|Singlestore
+                loader:
+                  name: availableModes|Singlestore
+                  watchPaths:
+                    - schema/spec/admin/databases/Singlestore/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/default
                 type: select
@@ -1191,7 +1401,10 @@ step:
               - label: Can user modify Solr configuration?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|Solr
+              - loader:
+                  name: FetchDbVersions|Solr
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|Solr
@@ -1200,7 +1413,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|Solr
+              - loader:
+                  name: availableVersions|Solr
+                  watchPaths:
+                    - schema/spec/admin/databases/Solr/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/default
                 type: select
@@ -1225,7 +1441,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|Solr
-                loader: availableModes|Solr
+                loader:
+                  name: availableModes|Solr
+                  watchPaths:
+                    - schema/spec/admin/databases/Solr/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/default
                 type: select
@@ -1241,7 +1460,10 @@ step:
               - label: Can user modify ZooKeeper Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/toggle
                 type: switch
-              - loader: FetchDbVersions|ZooKeeper
+              - loader:
+                  name: FetchDbVersions|ZooKeeper
+                  watchPaths:
+                    - temp/allDbVersions
                 label: Available Versions
                 watcher:
                   func: clearDefaultVersion|ZooKeeper
@@ -1250,7 +1472,10 @@ step:
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/available
                 type: select
                 multiple: true
-              - loader: availableVersions|ZooKeeper
+              - loader:
+                  name: availableVersions|ZooKeeper
+                  watchPaths:
+                    - schema/spec/admin/databases/ZooKeeper/versions/available
                 label: Default Version
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/default
                 type: select
@@ -1275,7 +1500,10 @@ step:
               - init:
                   type: func
                   value: setDefaultMode|ZooKeeper
-                loader: availableModes|ZooKeeper
+                loader:
+                  name: availableModes|ZooKeeper
+                  watchPaths:
+                    - schema/spec/admin/databases/ZooKeeper/mode/available
                 label: Default Mode
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/default
                 type: select
@@ -1384,13 +1612,24 @@ step:
             - init:
                 type: func
                 value: setCustomAvlMachine
+              watcher:
+                func: setCustomAvlMachine
+                paths:
+                  - temp/useCustomProfile
               customClass: mt-10
-              loader: getMachines
+              loader:
+                name: getMachines
+                watchPaths:
+                  - schema/spec/admin/machineProfiles/machines
+                  - temp/useCustomProfile
               label: Available Machines
               schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/available
               type: select
               multiple: true
-            - loader: getAvailableMachines
+            - loader:
+                name: getAvailableMachines
+                watchPaths:
+                  - schema/spec/admin/machineProfiles/available
               label: Default Machine
               schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/default
               type: select
@@ -1406,7 +1645,10 @@ step:
           - label: Can users modify Storage Class?
             schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/toggle
             type: switch
-          - loader: getStorageClass
+          - loader:
+              name: getStorageClass
+              watchPaths:
+                - temp/bundle
             label: Available Storage Classes
             schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/available
             type: select
@@ -1414,7 +1656,10 @@ step:
           - init:
               type: func
               value: setStorageClass
-            loader: getOptions|storageClasses
+            loader:
+              name: setStorageClass
+              watchPaths:
+                - schema/spec/admin/storageClasses/available
             label: Default Storage Class
             schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
             type: select
@@ -1441,12 +1686,18 @@ step:
           - label: Can user modify Cluster Issuers?
             schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/toggle
             type: switch
-          - loader: getClusterIssuers
+          - loader:
+              name: getClusterIssuers
+              watchPaths:
+                - temp/bundle
             label: Available Cluster Issuers
             schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/available
             type: select
             multiple: true
-          - loader: getOptions|clusterIssuers
+          - loader:
+              name: getOptions|clusterIssuers
+              watchPaths:
+                - schema/spec/admin/clusterIssuers/available
             label: Default Cluster Issuer
             schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
             type: select
@@ -1656,14 +1907,65 @@ step:
           if:
             name: returnFalse
             type: function
-        # - alias: reusable_stash-presets
-        #   chart:
-        #     name: uibytebuildersdev-component-stash-presets
-        #     version: v0.29.0
-        #   moduleResolver: fetchJsons
-        #   schema:
-        #     $ref: schema#/properties/spec/properties/backup/properties/kubestash
-        #   type: reusable-element
+        - elements:
+          - elements:
+            - loader: getNamespaces
+              disableUnselect: true
+              label: labels.kubestash.encryptionSecret.namespace
+              refresh: true
+              schema: schema/properties/encryptionSecret/properties/namespace
+              type: select
+            - loader: fetchNames|encryptionSecret
+              disableUnselect: true
+              label: labels.kubestash.encryptionSecret.name
+              refresh: true
+              schema: schema/properties/encryptionSecret/properties/name
+              type: select
+            label: labels.kubestash.encryptionSecret.label
+            # schema: schema/properties/encryptionSecret
+            showLabels: true
+            type: block-layout
+          - elements:
+            - loader: getNamespaces
+              disableUnselect: true
+              hasGroup: isRancherManaged
+              label: labels.kubestash.retentionPolicy.namespace
+              refresh: true
+              schema: schema/properties/retentionPolicy/properties/namespace
+              type: select
+            - loader: fetchNames|retentionPolicy
+              disableUnselect: true
+              label: labels.kubestash.retentionPolicy.name
+              refresh: true
+              schema: schema/properties/retentionPolicy/properties/name
+              type: select
+            label: labels.kubestash.retentionPolicy.label
+            # schema: schema/properties/retentionPolicy
+            showLabels: true
+            type: block-layout
+          - elements:
+            - loader: getNamespaces
+              disableUnselect: true
+              hasGroup: isRancherManaged
+              label: labels.kubestash.retentionPolicy.namespace
+              refresh: true
+              schema: schema/properties/storageRef/properties/namespace
+              type: select
+            - loader: fetchNames|storageRef
+              disableUnselect: true
+              label: labels.kubestash.storageRef.name
+              refresh: true
+              schema: schema/properties/storageRef/properties/name
+              type: select
+            label: labels.kubestash.storageRef.label
+            # schema: schema/properties/storageRef
+            showLabels: true
+            type: block-layout
+          - label: labels.kubestash.schedule
+            schema: schema/properties/schedule
+            type: input
+          # schema: schema/
+          type: block-layout
         # schema: schema/properties/spec/properties/backup
         loader: setTool
         type: block-layout

@@ -477,7 +477,6 @@ export const useFunc = (model) => {
   }
 
   function presetNameEqualsTo(value) {
-    console.log('foundddddddddd -> ', value)
     const presetName = storeGet('/route/params/presetName') || ''
     return presetName === value
   }
