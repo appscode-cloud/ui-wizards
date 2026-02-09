@@ -29,7 +29,7 @@ step:
             label: Deployment Type
             isHorizontal: true
             type: radio
-          # hideBlock: true
+          hideBlock: true
           label: Deployment Type
           showLabels: true
           type: block-layout
@@ -1564,11 +1564,7 @@ step:
               - loader:
                   name: getProfileName
                   watchPaths:
-                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
-                watcher:
-                  func: onProfileIdChange
-                  paths:
-                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/id
+                    - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
                 label: ID
                 validation:
                   type: required
@@ -1577,14 +1573,14 @@ step:
               - loader:
                   name: getProfileName
                   watchPaths:
-                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                    - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
                 label: Name
                 schema: name
                 type: input
               - loader:
                   name: setLimits|cpu
                   watchPaths:
-                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                    - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
                 label: CPU Limits
                 validation:
                   type: required
@@ -1593,14 +1589,22 @@ step:
               - loader:
                   name: setLimits|memory
                   watchPaths:
-                    - schema/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                    - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
                 label: Memory Limits
                 validation:
                   type: required
                 schema: limits/properties/memory
                 type: input
               label: Machine Profiles
-              schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/machines
+              # schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/machines
+              schema: temp/properties/spec/properties/admin/properties/machineProfiles/properties/machines
+              init:
+                type: func
+                value: setMachineProfiles
+              watcher:
+                func: onMachineProfileChange
+                paths:
+                  - temp/properties/spec/properties/admin/properties/machineProfiles/properties/machines
               # temporaryPath: /profile
               type: array-object-form
             - init:
@@ -1657,7 +1661,7 @@ step:
               type: func
               value: setStorageClass
             loader:
-              name: setStorageClass
+              name: getOptions|storageClasses
               watchPaths:
                 - schema/spec/admin/storageClasses/available
             label: Default Storage Class
@@ -1764,17 +1768,17 @@ step:
             type: switch
           - label: Default Deletion Policy
             options:
-            - description: options.deletionPolicy.delete.description
-              text: options.deletionPolicy.delete.label
+            - description: Keep only database Secrets and backed up data.
+              text: Delete ( Keep only database Secrets and backed up data )
               value: Delete
-            - description: options.deletionPolicy.halt.description
-              text: options.deletionPolicy.halt.label
+            - description: Keep PVCs, database Secrets and backed up data.
+              text: Halt ( Keep PVCs, database Secrets and backed up data )
               value: Halt
-            - description: options.deletionPolicy.wipeOut.description
-              text: options.deletionPolicy.wipeOut.label
+            - description: Delete everything including backed up data.
+              text: WipeOut ( Delete everything including backed up data )
               value: WipeOut
-            - description: options.deletionPolicy.doNotTerminate.description
-              text: options.deletionPolicy.doNotTerminate.label
+            - description: Prevent deletion of the Druid CRD.
+              text: DoNotTerminate ( Prevent deletion of the Druid CRD )
               value: DoNotTerminate
             schema: schema/properties/spec/properties/admin/properties/deletionPolicy/properties/default
             type: select

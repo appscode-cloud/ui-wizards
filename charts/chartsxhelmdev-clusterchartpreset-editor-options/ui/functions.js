@@ -841,7 +841,7 @@ export const useFunc = (model) => {
   function isKnownProfileToggled(index) {
     // watchDependency('discriminator#/profileChoseSwitch')
     const val = getValue(
-      model,
+      discriminator,
       `/spec/admin/machineProfiles/machines/${index}/temp/profileChoseSwitch`,
     )
     return val
@@ -864,10 +864,11 @@ export const useFunc = (model) => {
 
   function setLimits(type, index) {
     // watchDependency('discriminator#/profile')
-    const pro = getValue(model, `/spec/admin/machineProfiles/machines/${index}/temp/profile`) || ''
+    const pro =
+      getValue(discriminator, `/spec/admin/machineProfiles/machines/${index}/temp/profile`) || ''
     if (!pro) {
       const input = getValue(
-        model,
+        discriminator,
         `/spec/admin/machineProfiles/machines/${index}/temp/profile/limits/${type}`,
       )
       return input
@@ -879,20 +880,31 @@ export const useFunc = (model) => {
 
   function getProfileName(index) {
     // watchDependency('discriminator#/profile')
-    const pro = getValue(model, `/spec/admin/machineProfiles/machines/${index}/temp/profile`) || ''
-    console.log({ pro })
+    const pro =
+      getValue(discriminator, `/spec/admin/machineProfiles/machines/${index}/temp/profile`) || ''
     if (!pro) return
     return pro
   }
 
-  function onProfileIdChange(index) {
-    commit('wizard/model$delete', `/spec/admin/machineProfiles/machines/${index}/temp`)
+  function onMachineProfileChange(index) {
+    const machines = getValue(discriminator, 'spec/admin/machineProfiles/machines')
+    const updatedMachines = machines.map(({ temp, ...rest }) => rest)
+
+    commit('wizard/model$update', {
+      path: '/spec/admin/machineProfiles/machines',
+      value: updatedMachines,
+    })
   }
 
   function hasCustomProfile() {
     const machines = getValue(model, '/spec/admin/machineProfiles/available')
     const hasCustom = machines.includes('custom')
     return hasCustom
+  }
+
+  function setMachineProfiles() {
+    const machines = getValue(model, '/spec/admin/machineProfiles/machines') || []
+    return machines
   }
 
   function parseMemory(memory) {
@@ -997,6 +1009,7 @@ export const useFunc = (model) => {
     hasCustomProfile,
     getAvailableMachines,
     setCustomAvlMachine,
-    onProfileIdChange,
+    onMachineProfileChange,
+    setMachineProfiles,
   }
 }
