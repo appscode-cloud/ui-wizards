@@ -28,13 +28,22 @@ steps:
       - computed: checkIsResourceLoaded
         if: hideThisElement
         type: input
+      - alertInfo:
+          show: true
+          type: info
+        label:
+          text: 'Note: Enabling a feature auto enables any prerequisite features'
+        type: label-element
+      - if: checkIsOtelStackEnabled
+        fetch: fetchMonitoringClusterOptions
+        onChange: onMonitoringClusterChange
+        required: true
+        label:
+          text: Select Monitoring Cluster
+        schema:
+          $ref: discriminator#/properties/monitoringClusterName
+        type: select
       type: single-step-form
-    - alertInfo:
-        show: true
-        type: info
-      label:
-        text: 'Note: Enabling a feature auto enables any prerequisite features'
-      type: label-element
     type: single-step-form
   id: opscenter-monitoring
   title: steps.0.label

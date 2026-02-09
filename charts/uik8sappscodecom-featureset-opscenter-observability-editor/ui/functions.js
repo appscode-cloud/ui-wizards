@@ -375,6 +375,46 @@ function checkIsResourceLoaded({ commit, storeGet, watchDependency, getValue, di
   }
 }
 
+//this function is used to check if AppsCode OpenTelemetry Stack is enabled
+//it is the condition to show monitoring cluster dropdown
+function checkIsOtelStackEnabled({ discriminator, getValue, watchDependency }) {
+  watchDependency('discriminator#/enabledFeatures')
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  if (enabledFeatures.includes('appscode-otel-stack')) {
+    return true
+  }
+  return false
+}
+
+//this function is used to fetch monitoring cluster options from dropdown
+async function fetchMonitoringClusterOptions({ discriminator, storeGet, axios, getValue }) {
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  if (!enabledFeatures.includes('appscode-otel-stack')) {
+    return []
+  }
+
+  const owner = storeGet('/route/params/user')
+  let url = `/clustersv2/${owner}/monitoring-clusters`
+
+  const { data } = await axios.get(url)
+
+  return data || []
+}
+
+async function onMonitoringClusterChange({ discriminator, getValue, storeGet, axios }) {
+  const monitoringClusterName = getValue(discriminator, '/monitoringClusterName')
+  if (!monitoringClusterName) {
+    return
+  }
+
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+
+  const { data } = await axios.get(
+    `/clustersv2/${owner}/${cluster}/telemetry/values/appscode-otel-stack?cluster=${monitoringClusterName}`,
+  )
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -388,4 +428,7 @@ return {
   returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
+  checkIsOtelStackEnabled,
+  fetchMonitoringClusterOptions,
+  onMonitoringClusterChange,
 }
