@@ -1915,17 +1915,20 @@ step:
           - elements:
             - loader: getNamespaces
               disableUnselect: true
-              label: labels.kubestash.encryptionSecret.namespace
+              label: Namespace
               refresh: true
-              schema: schema/properties/encryptionSecret/properties/namespace
+              schema: schema/properties/spec/properties/backup/properties/kubestash/properties/encryptionSecret/properties/namespace
               type: select
-            - loader: fetchNames|encryptionSecret
+            - loader:
+                name: fetchNames|encryptionSecret
+                watchPaths:
+                  - schema/properties/spec/properties/backup/properties/kubestash/properties/encryptionSecret/properties/namespace
               disableUnselect: true
-              label: labels.kubestash.encryptionSecret.name
+              label: Name
               refresh: true
-              schema: schema/properties/encryptionSecret/properties/name
+              schema: schema/properties/spec/properties/backup/properties/kubestash/properties/encryptionSecret/properties/name
               type: select
-            label: labels.kubestash.encryptionSecret.label
+            label: Encryption Secret
             # schema: schema/properties/encryptionSecret
             showLabels: true
             type: block-layout
@@ -1933,17 +1936,20 @@ step:
             - loader: getNamespaces
               disableUnselect: true
               hasGroup: isRancherManaged
-              label: labels.kubestash.retentionPolicy.namespace
+              label: Namespace
               refresh: true
-              schema: schema/properties/retentionPolicy/properties/namespace
+              schema: schema/properties/spec/properties/backup/properties/kubestash/properties/retentionPolicy/properties/namespace
               type: select
-            - loader: fetchNames|retentionPolicy
+            - loader:
+                name: fetchNames|retentionPolicy
+                watchPaths:
+                  - schema/properties/spec/properties/backup/properties/kubestash/properties/retentionPolicy/properties/namespace
               disableUnselect: true
-              label: labels.kubestash.retentionPolicy.name
+              label: Name
               refresh: true
-              schema: schema/properties/retentionPolicy/properties/name
+              schema: schema/properties/spec/properties/backup/properties/kubestash/properties/retentionPolicy/properties/name
               type: select
-            label: labels.kubestash.retentionPolicy.label
+            label: Retention Policy
             # schema: schema/properties/retentionPolicy
             showLabels: true
             type: block-layout
@@ -1951,26 +1957,28 @@ step:
             - loader: getNamespaces
               disableUnselect: true
               hasGroup: isRancherManaged
-              label: labels.kubestash.retentionPolicy.namespace
+              label: Namespace
               refresh: true
-              schema: schema/properties/storageRef/properties/namespace
+              schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef/properties/namespace
               type: select
-            - loader: fetchNames|storageRef
+            - loader:
+                name: fetchNames|storageRef
+                watchPaths:
+                  - schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef/properties/namespace
               disableUnselect: true
-              label: labels.kubestash.storageRef.name
+              label: Name
               refresh: true
-              schema: schema/properties/storageRef/properties/name
+              schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef/properties/name
               type: select
-            label: labels.kubestash.storageRef.label
+            label: Storage Ref
             # schema: schema/properties/storageRef
             showLabels: true
             type: block-layout
-          - label: labels.kubestash.schedule
-            schema: schema/properties/schedule
+          - label: Schedule
+            schema: schema/properties/spec/properties/backup/properties/kubestash/properties/schedule
             type: input
-          # schema: schema/
           type: block-layout
-        # schema: schema/properties/spec/properties/backup
+        # schema: schema#/properties/spec/properties/backup/properties/kubestash
         loader: setTool
         type: block-layout
       if:
