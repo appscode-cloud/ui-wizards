@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/corekubestashcom-backupconfiguration-editor-options --version=v0.29.0
-$ helm upgrade -i kubestashcom-backupconfiguration-editor-options appscode/corekubestashcom-backupconfiguration-editor-options -n kube-system --create-namespace --version=v0.29.0
+$ helm search repo appscode/corekubestashcom-backupconfiguration-editor-options --version=v0.30.0
+$ helm upgrade -i kubestashcom-backupconfiguration-editor-options appscode/corekubestashcom-backupconfiguration-editor-options -n kube-system --create-namespace --version=v0.30.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Backupconfiguration Editor UI Options on a [Kubernetes](htt
 To install/upgrade the chart with the release name `kubestashcom-backupconfiguration-editor-options`:
 
 ```bash
-$ helm upgrade -i kubestashcom-backupconfiguration-editor-options appscode/corekubestashcom-backupconfiguration-editor-options -n kube-system --create-namespace --version=v0.29.0
+$ helm upgrade -i kubestashcom-backupconfiguration-editor-options appscode/corekubestashcom-backupconfiguration-editor-options -n kube-system --create-namespace --version=v0.30.0
 ```
 
 The command deploys a Backupconfiguration Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -60,6 +60,7 @@ The following table lists the configurable parameters of the `corekubestashcom-b
 | spec.backend.storageRef.namespace      |                                                    | <code>""</code>                   |
 | spec.backend.retentionPolicy.name      |                                                    | <code>""</code>                   |
 | spec.backend.retentionPolicy.namespace |                                                    | <code>""</code>                   |
+| spec.sessions                          |                                                    | <code>[]</code>                   |
 | spec.target.apiGroup                   |                                                    | <code>"kubedb.com"</code>         |
 | spec.target.kind                       |                                                    | <code>""</code>                   |
 | spec.target.name                       |                                                    | <code>""</code>                   |
@@ -69,12 +70,12 @@ The following table lists the configurable parameters of the `corekubestashcom-b
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubestashcom-backupconfiguration-editor-options appscode/corekubestashcom-backupconfiguration-editor-options -n kube-system --create-namespace --version=v0.29.0 --set metadata.resource.group=core.kubestash.com
+$ helm upgrade -i kubestashcom-backupconfiguration-editor-options appscode/corekubestashcom-backupconfiguration-editor-options -n kube-system --create-namespace --version=v0.30.0 --set metadata.resource.group=core.kubestash.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubestashcom-backupconfiguration-editor-options appscode/corekubestashcom-backupconfiguration-editor-options -n kube-system --create-namespace --version=v0.29.0 --values values.yaml
+$ helm upgrade -i kubestashcom-backupconfiguration-editor-options appscode/corekubestashcom-backupconfiguration-editor-options -n kube-system --create-namespace --version=v0.30.0 --values values.yaml
 ```
