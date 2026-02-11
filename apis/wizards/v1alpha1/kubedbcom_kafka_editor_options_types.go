@@ -56,7 +56,7 @@ type KubedbcomKafkaEditorOptionsSpecSpec struct {
 	PodResources   PodResources       `json:"podResources"`
 	AuthSecret     AuthSecret         `json:"authSecret"`
 	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Configuration  string             `json:"configuration"`
+	Configuration  Configuration      `json:"configuration"`
 	Admin          AdminOptions       `json:"admin"`
 	Backup         BackupToolSpec     `json:"backup"`
 	Monitoring     MonitoringOperator `json:"monitoring"`
