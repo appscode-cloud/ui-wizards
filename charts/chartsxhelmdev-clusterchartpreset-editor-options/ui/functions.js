@@ -10,7 +10,7 @@ export const useFunc = (model) => {
 
   setDiscriminatorValue('/bundle', {})
   setDiscriminatorValue('/allDbVersions', {})
-  setDiscriminatorValue('/enableProfiles', true)
+  setDiscriminatorValue('/enableProfiles', false)
   setDiscriminatorValue('/useCustomProfile', false)
   setDiscriminatorValue('/profile', '')
   setDiscriminatorValue('/profileChoseSwitch', false)
@@ -721,14 +721,8 @@ export const useFunc = (model) => {
 
   function setStorageClass() {
     // watchDependency('model#/spec/admin/storageClasses/available')
-    const classes = getValue(model, '/spec/admin/storageClasses/available')
-    if (classes.length === 1)
-      commit('wizard/model$update', {
-        path: '/spec/admin/storageClasses/default',
-        value: classes[0],
-        force: true,
-      })
-    return classes[0] ?? ''
+    const classes = getValue(model, '/spec/admin/storageClasses/available') || []
+    if (classes.length === 1) return classes[0]
   }
 
   function preSelectClusterIssuer() {
@@ -752,6 +746,22 @@ export const useFunc = (model) => {
   }
 
   // machine profiles stuffs
+
+  function sortMachines(arr) {
+    return arr.sort((a, b) => {
+      const memA = parseMemory(a.limits.memory)
+      const memB = parseMemory(b.limits.memory)
+
+      if (memA !== memB) {
+        return memA - memB
+      }
+
+      const cpuA = parseCPU(a.limits.cpu)
+      const cpuB = parseCPU(b.limits.cpu)
+
+      return cpuA - cpuB
+    })
+  }
 
   let initialMachines = []
   function hasMachineProfiles() {
@@ -794,16 +804,13 @@ export const useFunc = (model) => {
     // watchDependency('discriminator#/useCustomProfile')
     let machines = getValue(model, '/spec/admin/machineProfiles/machines') || []
 
-    commit('wizard/model$update', {
-      path: '/spec/admin/machineProfiles/machines',
-      value: sortMachines(machines),
-      force: true,
-    })
-
-    let mappedMachine = machines?.map((machine) => ({
-      text: machine.id,
-      value: machine.id,
-    }))
+    let mappedMachine =
+      machines
+        ?.filter((machine) => machine.id)
+        .map((machine) => ({
+          text: machine.id,
+          value: machine.id,
+        })) || []
 
     const hasCustom = getValue(discriminator, '/useCustomProfile')
     if (hasCustom) mappedMachine = [{ text: 'custom', value: 'custom' }, ...mappedMachine]
@@ -818,10 +825,21 @@ export const useFunc = (model) => {
     const hasCustom = getValue(discriminator, '/useCustomProfile')
     let avl = getValue(model, '/spec/admin/machineProfiles/available') || []
 
-    if (hasCustom) avl = ['custom', ...avl]
-    else avl = avl.filter((item) => item !== 'custom')
+    avl = avl.map((item) => ({ text: item, value: item }))
+    avl = avl.filter((item) => item.value !== 'custom')
 
+    if (hasCustom) {
+      avl = [{ text: 'custom', value: 'custom' }, ...avl]
+    }
     return avl
+  }
+
+  function onAvailableMachineChange() {
+    const hasCustom = getValue(discriminator, '/useCustomProfile')
+    if (hasCustom) {
+      return [{ text: 'custom', value: 'custom' }]
+    }
+    return []
   }
 
   function getAvailableMachines() {
@@ -880,11 +898,10 @@ export const useFunc = (model) => {
 
   function onMachineProfileChange(index) {
     const machines = getValue(discriminator, 'spec/admin/machineProfiles/machines')
-    const updatedMachines = machines.map(({ temp, ...rest }) => rest)
 
     commit('wizard/model$update', {
       path: '/spec/admin/machineProfiles/machines',
-      value: updatedMachines,
+      value: sortMachines(machines),
     })
   }
 
@@ -946,22 +963,6 @@ export const useFunc = (model) => {
     }
 
     return parseFloat(cpu) // Convert '1', '0.5' directly
-  }
-
-  function sortMachines(arr) {
-    return arr.sort((a, b) => {
-      const memA = parseMemory(a.limits.memory)
-      const memB = parseMemory(b.limits.memory)
-
-      if (memA !== memB) {
-        return memA - memB
-      }
-
-      const cpuA = parseCPU(a.limits.cpu)
-      const cpuB = parseCPU(b.limits.cpu)
-
-      return cpuA - cpuB
-    })
   }
 
   async function getNamespaces() {
@@ -1038,6 +1039,26 @@ export const useFunc = (model) => {
     return []
   }
 
+  function onNodeSelectorChange() {
+    let nodeSelector = getValue(discriminator, '/spec/admin/nodeSelector')
+    if (nodeSelector) {
+      nodeSelector = Object.fromEntries(
+        Object.entries(nodeSelector).filter(
+          ([key, value]) => key?.toString().trim() !== '' || value?.toString().trim() !== '',
+        ),
+      )
+    }
+    if (!nodeSelector || Object.entries(nodeSelector).length === 0) {
+      commit('wizard/model$delete', '/spec/admin/nodeSelector')
+    } else {
+      commit('wizard/model$update', {
+        path: '/spec/admin/nodeSelector',
+        value: nodeSelector,
+        force: true,
+      })
+    }
+  }
+
   return {
     preSelectClusterIssuer,
     isRancherManaged,
@@ -1080,5 +1101,7 @@ export const useFunc = (model) => {
     isRancherManaged,
     getNamespaces,
     fetchNames,
+    onNodeSelectorChange,
+    onAvailableMachineChange,
   }
 }
