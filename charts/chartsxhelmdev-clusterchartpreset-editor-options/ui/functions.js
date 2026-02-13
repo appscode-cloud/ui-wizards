@@ -806,7 +806,7 @@ export const useFunc = (model) => {
 
     let mappedMachine =
       machines
-        ?.filter((machine) => machine.id)
+        ?.filter((machine) => machine?.id && machine?.limits?.cpu && machine?.limits?.memory)
         .map((machine) => ({
           text: machine.id,
           value: machine.id,
@@ -817,6 +817,10 @@ export const useFunc = (model) => {
     else if (hasCustom === false)
       mappedMachine = mappedMachine.filter((item) => item.value !== 'custom')
 
+    commit('wizard/temp$update', {
+      path: '/spec/admin/machineProfiles/available',
+      value: mappedMachine?.map((item) => item.value) || []
+    })
     return mappedMachine
   }
 
@@ -835,11 +839,17 @@ export const useFunc = (model) => {
   }
 
   function onAvailableMachineChange() {
+    const setMachines = getValue(model, '/spec/admin/machineProfiles/available') || []
+    const loadedMachines = getValue(discriminator, '/spec/admin/machineProfiles/available') || []
     const hasCustom = getValue(discriminator, '/useCustomProfile')
-    if (hasCustom) {
-      return [{ text: 'custom', value: 'custom' }]
-    }
-    return []
+
+    // filter out unselected machines from from available machine list
+    let res = setMachines?.filter((item) => loadedMachines?.includes(item)) || []
+    res = res?.filter((item) => item !== 'custom')
+    if(hasCustom) res = ['custom', ...res]
+    res = res?.map((item) => ({text: item, value: item})) || []
+
+    return res
   }
 
   function getAvailableMachines() {
