@@ -440,11 +440,6 @@ export const useFunc = (model) => {
     return false
   }
 
-  function checkModeToggle(db) {
-    const toggle = getValue(model, `/spec/admin/databases/${db}/mode/toggle`)
-    if (toggle === undefined) return true
-  }
-
   // remove itemCtx
   async function fetchJsons({ itemCtx }) {
     let ui = {}
@@ -748,6 +743,7 @@ export const useFunc = (model) => {
   // machine profiles stuffs
 
   function sortMachines(arr) {
+    if (!Array.isArray(arr)) return arr
     return arr.sort((a, b) => {
       const memA = parseMemory(a.limits.memory)
       const memB = parseMemory(b.limits.memory)
@@ -819,7 +815,7 @@ export const useFunc = (model) => {
 
     commit('wizard/temp$update', {
       path: '/spec/admin/machineProfiles/available',
-      value: mappedMachine?.map((item) => item.value) || []
+      value: mappedMachine?.map((item) => item.value) || [],
     })
     return mappedMachine
   }
@@ -846,8 +842,8 @@ export const useFunc = (model) => {
     // filter out unselected machines from from available machine list
     let res = setMachines?.filter((item) => loadedMachines?.includes(item)) || []
     res = res?.filter((item) => item !== 'custom')
-    if(hasCustom) res = ['custom', ...res]
-    res = res?.map((item) => ({text: item, value: item})) || []
+    if (hasCustom) res = ['custom', ...res]
+    res = res?.map((item) => ({ text: item, value: item })) || []
 
     return res
   }
@@ -1087,7 +1083,6 @@ export const useFunc = (model) => {
     FetchDbBundle,
     setTool,
     returnFalse,
-    checkModeToggle,
     fetchJsons,
     presetNameEqualsTo,
     fetchModes,
