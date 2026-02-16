@@ -1,6 +1,8 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
 
+const appsCodeOtelStack = 'appscode-otel-stack'
+
 // get specific feature details
 function getFeatureSetDetails(storeGet) {
   const featureSets = storeGet('/cluster/featureSets/result') || []
@@ -195,8 +197,53 @@ function getResourceValuePathFromFeature(feature) {
   return resourceValuePath
 }
 
-function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) {
+function deepMergeValues(existingValues, newValues) {
+  if (!newValues) return existingValues
+  if (!existingValues) return newValues
+
+  const merged = { ...existingValues }
+
+  Object.keys(newValues).forEach((key) => {
+    if (
+      typeof newValues[key] === 'object' &&
+      newValues[key] !== null &&
+      !Array.isArray(newValues[key])
+    ) {
+      merged[key] = deepMergeValues(existingValues[key], newValues[key])
+    } else {
+      merged[key] = newValues[key]
+    }
+  })
+
+  return merged
+}
+
+// fetch monitoring cluster configuration
+async function fetchMonitoringClusterConfig({ storeGet, axios, monitoringClusterName }) {
+  if (!monitoringClusterName) {
+    return null
+  }
+
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const { data } = await axios.get(
+    `/clustersv2/${owner}/${cluster}/telemetry/values/appscode-otel-stack?cluster=${monitoringClusterName}`,
+  )
+  return data
+}
+
+async function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, axios }) {
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  const monitoringClusterName = getValue(discriminator, '/monitoringClusterName')
+  let monitoringClusterConfig = getValue(discriminator, '/monitoringClusterConfig')
+
+  if (monitoringClusterName && !monitoringClusterConfig) {
+    monitoringClusterConfig = await fetchMonitoringClusterConfig({
+      storeGet,
+      axios,
+      monitoringClusterName,
+    })
+  }
 
   const allFeatures = storeGet('/cluster/features/result') || []
 
@@ -232,6 +279,14 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) 
       if (isEnabled && !isManaged) {
         commit('wizard/model$delete', `/resources/${resourceValuePath}`)
       } else {
+        // Merge existing values with otelStack data only for appscode-otel-stack feature
+        const initialResourceValues = resources?.[resourceValuePath]?.spec?.values
+        let mergedResourceValues = initialResourceValues
+
+        if (featureName === appsCodeOtelStack && monitoringClusterName && monitoringClusterConfig) {
+          mergedResourceValues = deepMergeValues(initialResourceValues, monitoringClusterConfig)
+        }
+
         commit('wizard/model$update', {
           path: `/resources/${resourceValuePath}`,
           value: {
@@ -246,6 +301,7 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) 
             },
             spec: {
               ...resources?.[resourceValuePath]?.spec,
+              values: mergedResourceValues,
               chart: {
                 spec: {
                   chart,
@@ -380,7 +436,7 @@ function checkIsResourceLoaded({ commit, storeGet, watchDependency, getValue, di
 function checkIsOtelStackEnabled({ discriminator, getValue, watchDependency }) {
   watchDependency('discriminator#/enabledFeatures')
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
-  if (enabledFeatures.includes('appscode-otel-stack')) {
+  if (enabledFeatures.includes(appsCodeOtelStack)) {
     return true
   }
   return false
@@ -389,30 +445,45 @@ function checkIsOtelStackEnabled({ discriminator, getValue, watchDependency }) {
 //this function is used to fetch monitoring cluster options from dropdown
 async function fetchMonitoringClusterOptions({ discriminator, storeGet, axios, getValue }) {
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
-  if (!enabledFeatures.includes('appscode-otel-stack')) {
+  if (!enabledFeatures.includes(appsCodeOtelStack)) {
     return []
   }
 
   const owner = storeGet('/route/params/user')
   let url = `/clustersv2/${owner}/monitoring-clusters`
-
   const { data } = await axios.get(url)
 
   return data || []
 }
 
-async function onMonitoringClusterChange({ discriminator, getValue, storeGet, axios }) {
+async function onMonitoringClusterChange({
+  discriminator,
+  getValue,
+  storeGet,
+  axios,
+  commit,
+  setDiscriminatorValue,
+}) {
   const monitoringClusterName = getValue(discriminator, '/monitoringClusterName')
   if (!monitoringClusterName) {
     return
   }
 
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
+  const data = await fetchMonitoringClusterConfig({
+    storeGet,
+    axios,
+    monitoringClusterName,
+  })
 
-  const { data } = await axios.get(
-    `/clustersv2/${owner}/${cluster}/telemetry/values/appscode-otel-stack?cluster=${monitoringClusterName}`,
-  )
+  setDiscriminatorValue('/monitoringClusterConfig', data)
+  onEnabledFeaturesChange({
+    discriminator,
+    getValue,
+    commit,
+    storeGet,
+    axios,
+    setDiscriminatorValue,
+  })
 }
 
 return {
