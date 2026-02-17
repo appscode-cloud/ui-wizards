@@ -14,1732 +14,1784 @@ step:
           name: isKubedbUiPreset
           type: function
         elements:
-        - elements:
-          - label: Can users modify Deployment type?
-            schema: schema/properties/spec/properties/admin/properties/deployment/properties/toggle
-            type: switch
-          - options:
-            - description: For exploring databases when high-performance is not required.
-              text: Shared
-              value: Shared
-            - description: For production applications with sophisticated workload requirements.
-              text: Dedicated
-              value: Dedicated
-            schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
-            label: ''
-            isHorizontal: true
-            type: radio
+
+        - type: block-layout
+          label: Machine specifics
+          showLabels: true
           hideBlock: true
-          label: Deployment Type
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can users modify Cluster Tier?
-            schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/toggle
-            type: switch
-          - isHorizontal: true
-            options:
-            - text: General Purpose
-              value: GeneralPurpose
-            - text: Memory Optimized
-              value: MemoryOptimized
-            - text: CPU Optimized
-              value: CPUOptimized
-            schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
-            label: ''
-            type: radio
+          elements:
+          # Deployment Type
           - elements:
-            - label: Can user modify Placement?
-              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/toggle
+            - label: Can users modify Deployment type?
+              schema: schema/properties/spec/properties/admin/properties/deployment/properties/toggle
               type: switch
-            - loader:
-                name: getPlacements
-                watchPaths:
-                  - temp/bundle
-              label: Available Placements
-              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/available
-              type: select
-              multiple: true
-            - disableUnselect: true
-              loader:
-                name: getOptions|clusterTier/placement
-                watchPaths:
-                  - schema/spec/admin/clusterTier/placement/available
-              label: Default Placement
-              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
-              type: select
-            showLabels: false
+            - options:
+              - description: For exploring databases when high-performance is not required.
+                text: Shared
+                value: Shared
+              - description: For production applications with sophisticated workload requirements.
+                text: Dedicated
+                value: Dedicated
+              schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
+              label: ''
+              isHorizontal: true
+              type: radio
+            hideBlock: true
+            label: Deployment Type
+            showLabels: true
             type: block-layout
+          # Cluster Tier
           - elements:
-            - label: Can user modify Node Topology?
-              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/toggle
+            - label: Can users modify Cluster Tier?
+              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/toggle
               type: switch
-            - loader:
-                name: getNodeTopology
-                watchPaths:
-                  - temp/bundle
-              label: Available Node Topologies
-              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/available
-              type: select
-              multiple: true
-            - disableUnselect: true
-              loader:
-                name: getOptions|clusterTier/nodeTopology
-                watchPaths:
-                  - schema/spec/admin/clusterTier/nodeTopology/available
-              label: Default Node Topology
-              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
-              type: select
-            showLabels: false
-            type: block-layout
-          hideBlock: false
-          label: Cluster Tier
-          showLabels: true
-          type: block-layout
-        - elements:
-          - elements:
+            - isHorizontal: true
+              options:
+              - text: General Purpose
+                value: GeneralPurpose
+              - text: Memory Optimized
+                value: MemoryOptimized
+              - text: CPU Optimized
+                value: CPUOptimized
+              schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
+              label: ''
+              type: radio
             - elements:
-              - label: Can user modify Cassandra Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/toggle
+              - label: Can user modify Placement?
+                schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/toggle
                 type: switch
-              - loader: 
-                  name: FetchDbVersions|Cassandra
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Cassandra
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/available
-                type: select
-                multiple: true
               - loader:
-                  name: availableVersions|Cassandra
+                  name: getPlacements
                   watchPaths:
-                    - schema/spec/admin/databases/Cassandra/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Cassandra Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Cassandra
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/available
+                    - temp/bundle
+                label: Available Placements
+                schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/available
                 type: select
                 multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Cassandra
+              - disableUnselect: true
                 loader:
-                  name: availableModes|Cassandra
+                  name: getOptions|clusterTier/placement
                   watchPaths:
-                    - schema/spec/admin/databases/Cassandra/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/default
+                    - schema/spec/admin/clusterTier/placement/available
+                label: Default Placement
+                schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
                 type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode
               showLabels: false
               type: block-layout
-            hideBlock: true
-            label: Cassandra
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra
-            showLabels: true
-            type: block-layout
-          - elements:
             - elements:
-              - label: Can user modify ClickHouse Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/toggle
+              - label: Can user modify Node Topology?
+                schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/toggle
                 type: switch
               - loader:
-                  name: FetchDbVersions|ClickHouse
+                  name: getNodeTopology
                   watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|ClickHouse
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/available
+                    - temp/bundle
+                label: Available Node Topologies
+                schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/available
                 type: select
                 multiple: true
-              - loader:
-                  name: availableVersions|ClickHouse
-                  watchPaths:
-                    - schema/spec/admin/databases/ClickHouse/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify ClickHouse Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|ClickHouse
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|ClickHouse
+              - disableUnselect: true
                 loader:
-                  name: availableModes|ClickHouse
+                  name: getOptions|clusterTier/nodeTopology
                   watchPaths:
-                    - schema/spec/admin/databases/ClickHouse/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/default
+                    - schema/spec/admin/clusterTier/nodeTopology/available
+                label: Default Node Topology
+                schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
                 type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode
+              showLabels: false
               type: block-layout
-            hideBlock: true
-            label: ClickHouse
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse
+            hideBlock: false
+            label: Cluster Tier
             showLabels: true
             type: block-layout
+          # Machine Profiles
           - elements:
-            - elements:
-              - label: Can user modify Druid Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Druid
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Druid
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Druid
-                  watchPaths:
-                    - schema/spec/admin/databases/Druid/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Druid Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Druid
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Druid
-                loader:
-                  name: availableModes|Druid
-                  watchPaths:
-                    - schema/spec/admin/databases/Druid/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Druid
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Elasticsearch Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Elasticsearch
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Elasticsearch
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Elasticsearch
-                  watchPaths:
-                    - schema/spec/admin/databases/Elasticsearch/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Elasticsearch Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Elasticsearch
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Elasticsearch
-                loader:
-                  name: availableModes|Elasticsearch
-                  watchPaths:
-                    - schema/spec/admin/databases/Elasticsearch/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Elasticsearch
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify FerretDB Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|FerretDB
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|FerretDB
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|FerretDB
-                  watchPaths:
-                    - schema/spec/admin/databases/FerretDB/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify FerretDB Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|FerretDB
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|FerretDB
-                loader:
-                  name: availableModes|FerretDB
-                  watchPaths:
-                    - schema/spec/admin/databases/FerretDB/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: FerretDB
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Hazelcast Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Hazelcast
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Hazelcast
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Hazelcast
-                  watchPaths:
-                    - schema/spec/admin/databases/Hazelcast/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Hazelcast Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Hazelcast
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Hazelcast
-                loader:
-                  name: availableModes|Hazelcast
-                  watchPaths:
-                    - schema/spec/admin/databases/Hazelcast/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Hazelcast
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Ignite Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Ignite
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Ignite
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Ignite
-                  watchPaths:
-                    - schema/spec/admin/databases/Ignite/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Ignite Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Ignite
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Ignite
-                loader:
-                  name: availableModes|Ignite
-                  watchPaths:
-                    - schema/spec/admin/databases/Ignite/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Ignite
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Kafka Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Kafka
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Kafka
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Kafka
-                  watchPaths:
-                    - schema/spec/admin/databases/Kafka/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Kafka Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Kafka
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Kafka
-                loader:
-                  name: availableModes|Kafka
-                  watchPaths:
-                    - schema/spec/admin/databases/Kafka/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Kafka
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify MSSQLServer Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|MSSQLServer
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|MSSQLServer
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|MSSQLServer
-                  watchPaths:
-                    - schema/spec/admin/databases/MSSQLServer/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify MSSQLServer Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|MSSQLServer
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|MSSQLServer
-                loader:
-                  name: availableModes|MSSQLServer
-                  watchPaths:
-                    - schema/spec/admin/databases/MSSQLServer/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: MSSQLServer
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify MariaDB Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|MariaDB
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|MariaDB
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|MariaDB
-                  watchPaths:
-                    - schema/spec/admin/databases/MariaDB/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify MariaDB Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|MariaDB
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|MariaDB
-                loader:
-                  name: availableModes|MariaDB
-                  watchPaths:
-                    - schema/spec/admin/databases/MariaDB/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: MariaDB
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Memcached Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Memcached
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Memcached
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Memcached
-                  watchPaths:
-                    - schema/spec/admin/databases/Memcached/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Memcached Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Memcached
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Memcached
-                loader:
-                  name: availableModes|Memcached
-                  watchPaths:
-                    - schema/spec/admin/databases/Memcached/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Memcached
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify MongoDB Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|MongoDB
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|MongoDB
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|MongoDB
-                  watchPaths:
-                    - schema/spec/admin/databases/MongoDB/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify MongoDB Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|MongoDB
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|MongoDB
-                loader:
-                  name: availableModes|MongoDB
-                  watchPaths:
-                    - schema/spec/admin/databases/MongoDB/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: MongoDB
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify MySQL Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|MySQL
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|MySQL
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|MySQL
-                  watchPaths:
-                    - schema/spec/admin/databases/MySQL/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify MySQL Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|MySQL
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|MySQL
-                loader:
-                  name: availableModes|MySQL
-                  watchPaths:
-                    - schema/spec/admin/databases/MySQL/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: MySQL
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Oracle Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Oracle
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Oracle
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Oracle
-                  watchPaths:
-                    - schema/spec/admin/databases/Oracle/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Oracle Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Oracle
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Oracle
-                loader:
-                  name: availableModes|Oracle
-                  watchPaths:
-                    - schema/spec/admin/databases/Oracle/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Oracle
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify PerconaXtraDB Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|PerconaXtraDB
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|PerconaXtraDB
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|PerconaXtraDB
-                  watchPaths:
-                    - schema/spec/admin/databases/PerconaXtraDB/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify PerconaXtraDB Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|PerconaXtraDB
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|PerconaXtraDB
-                loader:
-                  name: availableModes|PerconaXtraDB
-                  watchPaths:
-                    - schema/spec/admin/databases/PerconaXtraDB/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: PerconaXtraDB
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify PgBouncer Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|PgBouncer
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|PgBouncer
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|PgBouncer
-                  watchPaths:
-                    - schema/spec/admin/databases/PgBouncer/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify PgBouncer Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|PgBouncer
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|PgBouncer
-                loader:
-                  name: availableModes|PgBouncer
-                  watchPaths:
-                    - schema/spec/admin/databases/PgBouncer/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: PgBouncer
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Pgpool Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Pgpool
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Pgpool
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Pgpool
-                  watchPaths:
-                    - schema/spec/admin/databases/Pgpool/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Pgpool Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Pgpool
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Pgpool
-                loader:
-                  name: availableModes|Pgpool
-                  watchPaths:
-                    - schema/spec/admin/databases/Pgpool/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Pgpool
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Postgres Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Postgres
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Postgres
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Postgres
-                  watchPaths:
-                    - schema/spec/admin/databases/Postgres/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Postgres Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Postgres
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Postgres
-                loader:
-                  name: availableModes|Postgres
-                  watchPaths:
-                    - schema/spec/admin/databases/Postgres/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Postgres
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify ProxySQL Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|ProxySQL
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|ProxySQL
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|ProxySQL
-                  watchPaths:
-                    - schema/spec/admin/databases/ProxySQL/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify ProxySQL Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|ProxySQL
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|ProxySQL
-                loader:
-                  name: availableModes|ProxySQL
-                  watchPaths:
-                    - schema/spec/admin/databases/ProxySQL/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: ProxySQL
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify RabbitMQ Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|RabbitMQ
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|RabbitMQ
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|RabbitMQ
-                  watchPaths:
-                    - schema/spec/admin/databases/RabbitMQ/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify RabbitMQ Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|RabbitMQ
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|RabbitMQ
-                loader:
-                  name: availableModes|RabbitMQ
-                  watchPaths:
-                    - schema/spec/admin/databases/RabbitMQ/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: RabbitMQ
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Redis Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Redis
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Redis
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Redis
-                  watchPaths:
-                    - schema/spec/admin/databases/Redis/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Redis Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Redis
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Redis
-                loader:
-                  name: availableModes|Redis
-                  watchPaths:
-                    - schema/spec/admin/databases/Redis/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Redis
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Singlestore Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Singlestore
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Singlestore
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Singlestore
-                  watchPaths:
-                    - schema/spec/admin/databases/Singlestore/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Singlestore Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Singlestore
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Singlestore
-                loader:
-                  name: availableModes|Singlestore
-                  watchPaths:
-                    - schema/spec/admin/databases/Singlestore/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Singlestore
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify Solr configuration?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|Solr
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|Solr
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|Solr
-                  watchPaths:
-                    - schema/spec/admin/databases/Solr/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify Solr Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|Solr
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|Solr
-                loader:
-                  name: availableModes|Solr
-                  watchPaths:
-                    - schema/spec/admin/databases/Solr/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Solr
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr
-            showLabels: true
-            type: block-layout
-          - elements:
-            - elements:
-              - label: Can user modify ZooKeeper Version?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/toggle
-                type: switch
-              - loader:
-                  name: FetchDbVersions|ZooKeeper
-                  watchPaths:
-                    - temp/allDbVersions
-                label: Available Versions
-                watcher:
-                  func: clearDefaultVersion|ZooKeeper
-                  paths:
-                    - schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/available
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/available
-                type: select
-                multiple: true
-              - loader:
-                  name: availableVersions|ZooKeeper
-                  watchPaths:
-                    - schema/spec/admin/databases/ZooKeeper/versions/available
-                label: Default Version
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions
-              type: block-layout
-            - elements:
-              - label: Can user modify ZooKeeper Mode?
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/toggle
-                type: switch
-              - loader: fetchModes|ZooKeeper
-                label: Available Modes
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/available
-                type: select
-                multiple: true
-              - init:
-                  type: func
-                  value: setDefaultMode|ZooKeeper
-                loader:
-                  name: availableModes|ZooKeeper
-                  watchPaths:
-                    - schema/spec/admin/databases/ZooKeeper/mode/available
-                label: Default Mode
-                schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/default
-                type: select
-              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode
-              type: block-layout
-            hideBlock: true
-            label: Zookeeper
-            # schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper
-            showLabels: true
-            type: block-layout
-          hideBlock: true
-          loader: FetchAllDbVersions
-          label: Configure Databases
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can user modify AuthCredential?
-            schema: schema/properties/spec/properties/admin/properties/authCredential/properties/customize
-            type: switch
-          - label: Can user refer existing Auth?
-            schema: schema/properties/spec/properties/admin/properties/authCredential/properties/referExisting
-            type: switch
-          hideBlock: true
-          label: Auth Credential
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Custom Configuration
-            schema: schema/properties/spec/properties/admin/properties/customConfiguration
-            type: switch
-          hideBlock: true
-          label: Custom Configuration
-          showLabels: true
-          type: block-layout
-        - elements:
-          - init:
-              type: func
-              value: hasMachineProfiles
-            label: Use custom profiles?
-            watcher:
-              func: onMachineProfilesToggle
-              paths:
-                - temp/enableProfiles
-            schema: temp/enableProfiles
-            type: switch
-          - elements:
-            - elements:
-              - label: Choose from well-known profiles
-                schema: temp/profileChoseSwitch
-                type: switch
-              - loader: getKnownProfile
-                if:
-                  name: isKnownProfileToggled
-                  type: function
-                label: Profile
-                schema: temp/profile
-                type: select
-              - loader:
-                  name: getProfileName
-                  watchPaths:
-                    - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
-                label: ID
-                validation:
-                  type: required
-                schema: id
-                type: input
-              - loader:
-                  name: getProfileName
-                  watchPaths:
-                    - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
-                label: Name
-                schema: name
-                type: input
-              - loader:
-                  name: setLimits|cpu
-                  watchPaths:
-                    - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
-                label: CPU Limits
-                validation:
-                  type: required
-                schema: limits/properties/cpu
-                type: input
-              - loader:
-                  name: setLimits|memory
-                  watchPaths:
-                    - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
-                label: Memory Limits
-                validation:
-                  type: required
-                schema: limits/properties/memory
-                type: input
-              label: Machine Profiles
-              # schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/machines
-              schema: temp/properties/spec/properties/admin/properties/machineProfiles/properties/machines
-              init:
-                type: func
-                value: setMachineProfiles
-              watcher:
-                func: onMachineProfileChange
-                paths:
-                  - temp/properties/spec/properties/admin/properties/machineProfiles/properties/machines
-              # temporaryPath: /profile
-              type: array-object-form
             - init:
                 type: func
-                value: hasCustomProfile
-              label: Can users set their own custom CPU & memory resources?
-              schema: temp/useCustomProfile
+                value: hasMachineProfiles
+              label: Use custom profiles?
+              watcher:
+                func: onMachineProfilesToggle
+                paths:
+                  - temp/enableProfiles
+              schema: temp/enableProfiles
               type: switch
+            - elements:
+              - elements:
+                - label: Choose from well-known profiles
+                  schema: temp/profileChoseSwitch
+                  type: switch
+                - loader: getKnownProfile
+                  if:
+                    name: isKnownProfileToggled
+                    type: function
+                  label: Profile
+                  schema: temp/profile
+                  type: select
+                - loader:
+                    name: getProfileName
+                    watchPaths:
+                      - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                  label: ID
+                  validation:
+                    type: required
+                  schema: id
+                  type: input
+                - loader:
+                    name: getProfileName
+                    watchPaths:
+                      - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                  label: Name
+                  schema: name
+                  type: input
+                - loader:
+                    name: setLimits|cpu
+                    watchPaths:
+                      - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                  label: CPU Limits
+                  validation:
+                    type: required
+                  schema: limits/properties/cpu
+                  type: input
+                - loader:
+                    name: setLimits|memory
+                    watchPaths:
+                      - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
+                  label: Memory Limits
+                  validation:
+                    type: required
+                  schema: limits/properties/memory
+                  type: input
+                label: Machine Profiles
+                # schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/machines
+                schema: temp/properties/spec/properties/admin/properties/machineProfiles/properties/machines
+                init:
+                  type: func
+                  value: setMachineProfiles
+                watcher:
+                  func: onMachineProfileChange
+                  paths:
+                    - temp/properties/spec/properties/admin/properties/machineProfiles/properties/machines
+                # temporaryPath: /profile
+                type: array-object-form
+              - init:
+                  type: func
+                  value: hasCustomProfile
+                label: Can users set their own custom CPU & memory resources?
+                schema: temp/useCustomProfile
+                type: switch
+              - init:
+                  type: func
+                  value: setCustomAvlMachine
+                watcher:
+                  func: onAvailableMachineChange
+                  paths:
+                    - temp/spec/admin/machineProfiles/available
+                    - temp/useCustomProfile
+                customClass: mt-10
+                loader:
+                  name: getMachines
+                  watchPaths:
+                    - schema/spec/admin/machineProfiles/machines
+                    - temp/useCustomProfile
+                label: Available Machines
+                schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/available
+                type: select
+                multiple: true
+              - loader:
+                  name: getAvailableMachines
+                  watchPaths:
+                    - schema/spec/admin/machineProfiles/available
+                label: Default Machine
+                schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/default
+                type: select
+              if:
+                name: isEnableProfiles
+                type: function
+              type: block-layout
+            hideBlock: true
+            label: Configure MachineProfiles
+            showLabels: true
+            type: block-layout
+          # Node Selector
+          - elements:
+            - label: Node Selector
+              schema: temp/properties/spec/properties/admin/properties/nodeSelector
+              type: object-item
+              buttonClass: is-light is-outlined
+              watcher:
+                func: onNodeSelectorChange
+                paths:
+                  - temp/properties/spec/properties/admin/properties/nodeSelector
+            hideBlock: true
+            label: Node Selector
+            showLabels: true
+            type: block-layout
+          # Tolerations
+          - elements:
+            - elements:
+              - label: Key
+                schema: key
+                type: input
+              - label: Operator
+                options:
+                - NoSchedule
+                - PreferNoSchedule
+                - NoExecute
+                schema: operator
+                type: select
+              - label: Value
+                schema: value
+                type: input
+              - label: Effect
+                options:
+                - Exists
+                - Equal
+                schema: effect
+                type: select
+              - label: Toleration Seconds
+                schema: tolerationSeconds
+                type: input
+              label: New Tolerations
+              schema: schema/properties/spec/properties/admin/properties/tolerations
+              type: array-object-form
+            hideBlock: true
+            label: Tolerations
+            showLabels: true
+            type: block-layout
+        
+        - type: block-layout
+          label: Database sepcifics
+          showLabels: true
+          hideBlock: true
+          elements:
+          # Databases
+          - elements:
+            - elements:
+              - elements:
+                - label: Can user modify Cassandra Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/toggle
+                  type: switch
+                - loader: 
+                    name: FetchDbVersions|Cassandra
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Cassandra
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Cassandra
+                    watchPaths:
+                      - schema/spec/admin/databases/Cassandra/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Cassandra Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Cassandra
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Cassandra
+                  loader:
+                    name: availableModes|Cassandra
+                    watchPaths:
+                      - schema/spec/admin/databases/Cassandra/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode
+                showLabels: false
+                type: block-layout
+              hideBlock: true
+              label: Cassandra
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify ClickHouse Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|ClickHouse
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|ClickHouse
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|ClickHouse
+                    watchPaths:
+                      - schema/spec/admin/databases/ClickHouse/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify ClickHouse Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|ClickHouse
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|ClickHouse
+                  loader:
+                    name: availableModes|ClickHouse
+                    watchPaths:
+                      - schema/spec/admin/databases/ClickHouse/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: ClickHouse
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Druid Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Druid
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Druid
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Druid
+                    watchPaths:
+                      - schema/spec/admin/databases/Druid/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Druid Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Druid
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Druid
+                  loader:
+                    name: availableModes|Druid
+                    watchPaths:
+                      - schema/spec/admin/databases/Druid/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Druid
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Elasticsearch Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Elasticsearch
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Elasticsearch
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Elasticsearch
+                    watchPaths:
+                      - schema/spec/admin/databases/Elasticsearch/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Elasticsearch Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Elasticsearch
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Elasticsearch
+                  loader:
+                    name: availableModes|Elasticsearch
+                    watchPaths:
+                      - schema/spec/admin/databases/Elasticsearch/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Elasticsearch
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify FerretDB Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|FerretDB
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|FerretDB
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|FerretDB
+                    watchPaths:
+                      - schema/spec/admin/databases/FerretDB/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify FerretDB Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|FerretDB
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|FerretDB
+                  loader:
+                    name: availableModes|FerretDB
+                    watchPaths:
+                      - schema/spec/admin/databases/FerretDB/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: FerretDB
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/FerretDB
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Hazelcast Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Hazelcast
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Hazelcast
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Hazelcast
+                    watchPaths:
+                      - schema/spec/admin/databases/Hazelcast/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Hazelcast Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Hazelcast
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Hazelcast
+                  loader:
+                    name: availableModes|Hazelcast
+                    watchPaths:
+                      - schema/spec/admin/databases/Hazelcast/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Hazelcast
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Ignite Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Ignite
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Ignite
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Ignite
+                    watchPaths:
+                      - schema/spec/admin/databases/Ignite/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Ignite Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Ignite
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Ignite
+                  loader:
+                    name: availableModes|Ignite
+                    watchPaths:
+                      - schema/spec/admin/databases/Ignite/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Ignite
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Kafka Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Kafka
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Kafka
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Kafka
+                    watchPaths:
+                      - schema/spec/admin/databases/Kafka/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Kafka Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Kafka
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Kafka
+                  loader:
+                    name: availableModes|Kafka
+                    watchPaths:
+                      - schema/spec/admin/databases/Kafka/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Kafka
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify MSSQLServer Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|MSSQLServer
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|MSSQLServer
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|MSSQLServer
+                    watchPaths:
+                      - schema/spec/admin/databases/MSSQLServer/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify MSSQLServer Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|MSSQLServer
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|MSSQLServer
+                  loader:
+                    name: availableModes|MSSQLServer
+                    watchPaths:
+                      - schema/spec/admin/databases/MSSQLServer/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: MSSQLServer
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify MariaDB Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|MariaDB
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|MariaDB
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|MariaDB
+                    watchPaths:
+                      - schema/spec/admin/databases/MariaDB/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify MariaDB Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|MariaDB
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|MariaDB
+                  loader:
+                    name: availableModes|MariaDB
+                    watchPaths:
+                      - schema/spec/admin/databases/MariaDB/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: MariaDB
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Memcached Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Memcached
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Memcached
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Memcached
+                    watchPaths:
+                      - schema/spec/admin/databases/Memcached/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Memcached Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Memcached
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Memcached
+                  loader:
+                    name: availableModes|Memcached
+                    watchPaths:
+                      - schema/spec/admin/databases/Memcached/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Memcached
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify MongoDB Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|MongoDB
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|MongoDB
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|MongoDB
+                    watchPaths:
+                      - schema/spec/admin/databases/MongoDB/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify MongoDB Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|MongoDB
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|MongoDB
+                  loader:
+                    name: availableModes|MongoDB
+                    watchPaths:
+                      - schema/spec/admin/databases/MongoDB/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: MongoDB
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify MySQL Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|MySQL
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|MySQL
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|MySQL
+                    watchPaths:
+                      - schema/spec/admin/databases/MySQL/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify MySQL Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|MySQL
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|MySQL
+                  loader:
+                    name: availableModes|MySQL
+                    watchPaths:
+                      - schema/spec/admin/databases/MySQL/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: MySQL
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Oracle Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Oracle
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Oracle
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Oracle
+                    watchPaths:
+                      - schema/spec/admin/databases/Oracle/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Oracle Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Oracle
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Oracle
+                  loader:
+                    name: availableModes|Oracle
+                    watchPaths:
+                      - schema/spec/admin/databases/Oracle/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Oracle
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify PerconaXtraDB Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|PerconaXtraDB
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|PerconaXtraDB
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|PerconaXtraDB
+                    watchPaths:
+                      - schema/spec/admin/databases/PerconaXtraDB/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify PerconaXtraDB Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|PerconaXtraDB
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|PerconaXtraDB
+                  loader:
+                    name: availableModes|PerconaXtraDB
+                    watchPaths:
+                      - schema/spec/admin/databases/PerconaXtraDB/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: PerconaXtraDB
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify PgBouncer Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|PgBouncer
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|PgBouncer
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|PgBouncer
+                    watchPaths:
+                      - schema/spec/admin/databases/PgBouncer/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify PgBouncer Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|PgBouncer
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|PgBouncer
+                  loader:
+                    name: availableModes|PgBouncer
+                    watchPaths:
+                      - schema/spec/admin/databases/PgBouncer/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: PgBouncer
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Pgpool Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Pgpool
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Pgpool
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Pgpool
+                    watchPaths:
+                      - schema/spec/admin/databases/Pgpool/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Pgpool Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Pgpool
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Pgpool
+                  loader:
+                    name: availableModes|Pgpool
+                    watchPaths:
+                      - schema/spec/admin/databases/Pgpool/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Pgpool
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Postgres Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Postgres
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Postgres
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Postgres
+                    watchPaths:
+                      - schema/spec/admin/databases/Postgres/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Postgres Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Postgres
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Postgres
+                  loader:
+                    name: availableModes|Postgres
+                    watchPaths:
+                      - schema/spec/admin/databases/Postgres/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Postgres
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify ProxySQL Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|ProxySQL
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|ProxySQL
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|ProxySQL
+                    watchPaths:
+                      - schema/spec/admin/databases/ProxySQL/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify ProxySQL Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|ProxySQL
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|ProxySQL
+                  loader:
+                    name: availableModes|ProxySQL
+                    watchPaths:
+                      - schema/spec/admin/databases/ProxySQL/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: ProxySQL
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify RabbitMQ Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|RabbitMQ
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|RabbitMQ
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|RabbitMQ
+                    watchPaths:
+                      - schema/spec/admin/databases/RabbitMQ/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify RabbitMQ Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|RabbitMQ
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|RabbitMQ
+                  loader:
+                    name: availableModes|RabbitMQ
+                    watchPaths:
+                      - schema/spec/admin/databases/RabbitMQ/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: RabbitMQ
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Redis Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Redis
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Redis
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Redis
+                    watchPaths:
+                      - schema/spec/admin/databases/Redis/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Redis Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Redis
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Redis
+                  loader:
+                    name: availableModes|Redis
+                    watchPaths:
+                      - schema/spec/admin/databases/Redis/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Redis
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Singlestore Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Singlestore
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Singlestore
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Singlestore
+                    watchPaths:
+                      - schema/spec/admin/databases/Singlestore/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Singlestore Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Singlestore
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Singlestore
+                  loader:
+                    name: availableModes|Singlestore
+                    watchPaths:
+                      - schema/spec/admin/databases/Singlestore/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Singlestore
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify Solr configuration?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|Solr
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|Solr
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|Solr
+                    watchPaths:
+                      - schema/spec/admin/databases/Solr/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify Solr Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|Solr
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|Solr
+                  loader:
+                    name: availableModes|Solr
+                    watchPaths:
+                      - schema/spec/admin/databases/Solr/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Solr
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr
+              showLabels: true
+              type: block-layout
+            - elements:
+              - elements:
+                - label: Can user modify ZooKeeper Version?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/toggle
+                  type: switch
+                - loader:
+                    name: FetchDbVersions|ZooKeeper
+                    watchPaths:
+                      - temp/allDbVersions
+                  label: Available Versions
+                  watcher:
+                    func: clearDefaultVersion|ZooKeeper
+                    paths:
+                      - schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/available
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/available
+                  type: select
+                  multiple: true
+                - loader:
+                    name: availableVersions|ZooKeeper
+                    watchPaths:
+                      - schema/spec/admin/databases/ZooKeeper/versions/available
+                  label: Default Version
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions
+                type: block-layout
+              - elements:
+                - label: Can user modify ZooKeeper Mode?
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/toggle
+                  type: switch
+                - loader: fetchModes|ZooKeeper
+                  label: Available Modes
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/available
+                  type: select
+                  multiple: true
+                - init:
+                    type: func
+                    value: setDefaultMode|ZooKeeper
+                  loader:
+                    name: availableModes|ZooKeeper
+                    watchPaths:
+                      - schema/spec/admin/databases/ZooKeeper/mode/available
+                  label: Default Mode
+                  schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/default
+                  type: select
+                # schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode
+                type: block-layout
+              hideBlock: true
+              label: Zookeeper
+              # schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper
+              showLabels: true
+              type: block-layout
+            hideBlock: true
+            loader: FetchAllDbVersions
+            label: Configure Databases
+            showLabels: true
+            type: block-layout
+          # Auth Credential
+          - elements:
+            - label: Can user modify AuthCredential?
+              schema: schema/properties/spec/properties/admin/properties/authCredential/properties/customize
+              type: switch
+            - label: Can user refer existing Auth?
+              schema: schema/properties/spec/properties/admin/properties/authCredential/properties/referExisting
+              type: switch
+            hideBlock: true
+            label: Auth Credential
+            showLabels: true
+            type: block-layout
+          # Custom Configuration
+          - elements:
+            - label: Custom Configuration
+              schema: schema/properties/spec/properties/admin/properties/customConfiguration
+              type: switch
+            hideBlock: true
+            label: Custom Configuration
+            showLabels: true
+            type: block-layout
+          # Deletion Policy
+          - elements:
+            - label: Can user modify Deletion Policy?
+              schema: schema/properties/spec/properties/admin/properties/deletionPolicy/properties/toggle
+              type: switch
+            - label: Default Deletion Policy
+              options:
+              - description: Keep only database Secrets and backed up data.
+                text: Delete ( Keep only database Secrets and backed up data )
+                value: Delete
+              - description: Keep PVCs, database Secrets and backed up data.
+                text: Halt ( Keep PVCs, database Secrets and backed up data )
+                value: Halt
+              - description: Delete everything including backed up data.
+                text: WipeOut ( Delete everything including backed up data )
+                value: WipeOut
+              - description: Prevent deletion of the Druid CRD.
+                text: DoNotTerminate ( Prevent deletion of the Druid CRD )
+                value: DoNotTerminate
+              schema: schema/properties/spec/properties/admin/properties/deletionPolicy/properties/default
+              type: select
+            hideBlock: true
+            label: Deletion Policy
+            showLabels: true
+            type: block-layout
+          # Storage Class
+          - elements:
+            - label: Can users modify Storage Class?
+              schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/toggle
+              type: switch
+            - loader:
+                name: getStorageClass
+                watchPaths:
+                  - temp/bundle
+              label: Available Storage Classes
+              schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/available
+              type: select
+              multiple: true
             - init:
                 type: func
-                value: setCustomAvlMachine
-              watcher:
-                func: onAvailableMachineChange
-                paths:
-                  - temp/spec/admin/machineProfiles/available
-                  - temp/useCustomProfile
-              customClass: mt-10
+                value: setStorageClass
               loader:
-                name: getMachines
+                name: getOptions|storageClasses
                 watchPaths:
-                  - schema/spec/admin/machineProfiles/machines
-                  - temp/useCustomProfile
-              label: Available Machines
-              schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/available
+                  - schema/spec/admin/storageClasses/available
+              label: Default Storage Class
+              schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+              type: select
+            hideBlock: false
+            label: Storage Class
+            showLabels: true
+            type: block-layout
+          # TLS
+          - elements:
+            - label: Can users modify TLS?
+              schema: schema/properties/spec/properties/admin/properties/tls/properties/toggle
+              type: switch
+            - label: Enable TLS?
+              watcher:
+                func: preSelectClusterIssuer
+                paths:
+                  - schema/properties/spec/properties/admin/properties/tls/properties/default
+              schema: schema/properties/spec/properties/admin/properties/tls/properties/default
+              type: switch
+            hideBlock: true
+            label: TLS
+            showLabels: true
+            type: block-layout
+          # Cluster Issuers
+          - elements:
+            - label: Can user modify Cluster Issuers?
+              schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/toggle
+              type: switch
+            - loader:
+                name: getClusterIssuers
+                watchPaths:
+                  - temp/bundle
+              label: Available Cluster Issuers
+              schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/available
               type: select
               multiple: true
             - loader:
-                name: getAvailableMachines
+                name: getOptions|clusterIssuers
                 watchPaths:
-                  - schema/spec/admin/machineProfiles/available
-              label: Default Machine
-              schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/default
+                  - schema/spec/admin/clusterIssuers/available
+              label: Default Cluster Issuer
+              schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
               type: select
-            if:
-              name: isEnableProfiles
-              type: function
-            type: block-layout
-          hideBlock: true
-          label: Configure MachineProfiles
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can users modify Storage Class?
-            schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/toggle
-            type: switch
-          - loader:
-              name: getStorageClass
-              watchPaths:
-                - temp/bundle
-            label: Available Storage Classes
-            schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/available
-            type: select
-            multiple: true
-          - init:
-              type: func
-              value: setStorageClass
-            loader:
-              name: getOptions|storageClasses
-              watchPaths:
-                - schema/spec/admin/storageClasses/available
-            label: Default Storage Class
-            schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-            type: select
-          hideBlock: false
-          label: Storage Class
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can users modify TLS?
-            schema: schema/properties/spec/properties/admin/properties/tls/properties/toggle
-            type: switch
-          - label: Enable TLS?
-            watcher:
-              func: preSelectClusterIssuer
-              paths:
-                - schema/properties/spec/properties/admin/properties/tls/properties/default
-            schema: schema/properties/spec/properties/admin/properties/tls/properties/default
-            type: switch
-          hideBlock: true
-          label: TLS
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can user modify Cluster Issuers?
-            schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/toggle
-            type: switch
-          - loader:
-              name: getClusterIssuers
-              watchPaths:
-                - temp/bundle
-            label: Available Cluster Issuers
-            schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/available
-            type: select
-            multiple: true
-          - loader:
-              name: getOptions|clusterIssuers
-              watchPaths:
-                - schema/spec/admin/clusterIssuers/available
-            label: Default Cluster Issuer
-            schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-            type: select
-          hideBlock: false
-          label: Cluster Issuers
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can users modify Exposer via gateway?
-            schema: schema/properties/spec/properties/admin/properties/expose/properties/toggle
-            type: switch
-          - label: Expose via gateway?
-            schema: schema/properties/spec/properties/admin/properties/expose/properties/default
-            type: switch
-          hideBlock: true
-          label: Expose
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can users modify Monitoring?
-            schema: schema/properties/spec/properties/admin/properties/monitoring/properties/toggle
-            type: switch
-          - label: Agent
-            options:
-            - text: prometheus.io/operator
-              value: prometheus.io/operator
-            - text: prometheus.io
-              value: prometheus.io
-            - text: prometheus.io/builtin
-              value: prometheus.io/builtin
-            schema: schema/properties/spec/properties/admin/properties/monitoring/properties/agent
-            type: radio
-          - type: horizontal-layout
-            label: Resources
+            hideBlock: false
+            label: Cluster Issuers
             showLabels: true
-            elements:
-              - type: input
-                label: CPU Requests
-                schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/requests/properties/cpu
-              - type: input
-                label: CPU Limits
-                schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/limits/properties/cpu
-              - type: input
-                label: Memory Requests
-                schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/requests/properties/memory
-              - type: input
-                label: Memory Limits
-                schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/limits/properties/memory
-          hideBlock: true
-          label: Monitoring
+            type: block-layout
+
+        - type: block-layout
+          label: Monitoring & Backups specifics
           showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can user modify Alert?
-            schema: schema/properties/spec/properties/admin/properties/alert/properties/toggle
-            type: switch
           hideBlock: true
-          label: Alert
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can user modify Deletion Policy?
-            schema: schema/properties/spec/properties/admin/properties/deletionPolicy/properties/toggle
-            type: switch
-          - label: Default Deletion Policy
-            options:
-            - description: Keep only database Secrets and backed up data.
-              text: Delete ( Keep only database Secrets and backed up data )
-              value: Delete
-            - description: Keep PVCs, database Secrets and backed up data.
-              text: Halt ( Keep PVCs, database Secrets and backed up data )
-              value: Halt
-            - description: Delete everything including backed up data.
-              text: WipeOut ( Delete everything including backed up data )
-              value: WipeOut
-            - description: Prevent deletion of the Druid CRD.
-              text: DoNotTerminate ( Prevent deletion of the Druid CRD )
-              value: DoNotTerminate
-            schema: schema/properties/spec/properties/admin/properties/deletionPolicy/properties/default
-            type: select
-          hideBlock: true
-          label: Deletion Policy
-          showLabels: true
-          type: block-layout
-        - elements:
+          elements:
+          # Monitoring
           - elements:
-            - label: Key
-              schema: key
-              type: input
-            - label: Operator
+            - label: Can users modify Monitoring?
+              schema: schema/properties/spec/properties/admin/properties/monitoring/properties/toggle
+              type: switch
+            - label: Agent
               options:
-              - NoSchedule
-              - PreferNoSchedule
-              - NoExecute
-              schema: operator
-              type: select
-            - label: Value
-              schema: value
-              type: input
-            - label: Effect
+              - text: prometheus.io/operator
+                value: prometheus.io/operator
+              - text: prometheus.io
+                value: prometheus.io
+              - text: prometheus.io/builtin
+                value: prometheus.io/builtin
+              schema: schema/properties/spec/properties/admin/properties/monitoring/properties/agent
+              type: radio
+            - type: horizontal-layout
+              label: Resources
+              showLabels: true
+              elements:
+                - type: input
+                  label: CPU Requests
+                  schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/requests/properties/cpu
+                - type: input
+                  label: CPU Limits
+                  schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/limits/properties/cpu
+                - type: input
+                  label: Memory Requests
+                  schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/requests/properties/memory
+                - type: input
+                  label: Memory Limits
+                  schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/limits/properties/memory
+            hideBlock: true
+            label: Monitoring
+            showLabels: true
+            type: block-layout
+          # Alert
+          - elements:
+            - label: Can user modify Alert?
+              schema: schema/properties/spec/properties/admin/properties/alert/properties/toggle
+              type: switch
+            hideBlock: true
+            label: Alert
+            showLabels: true
+            type: block-layout
+          # Backup
+          - elements:
+            - label: Can user modify Backup?
+              schema: schema/properties/spec/properties/admin/properties/backup/properties/enable/properties/toggle
+              type: switch
+            - label: Enable Backup
+              schema: schema/properties/spec/properties/admin/properties/backup/properties/enable/properties/default
+              type: switch
+            - isHorizontal: true
+              label: Take Backup by
               options:
-              - Exists
-              - Equal
-              schema: effect
-              type: select
-            - label: Toleration Seconds
-              schema: tolerationSeconds
-              type: input
-            label: New Tolerations
-            schema: schema/properties/spec/properties/admin/properties/tolerations
-            type: array-object-form
-          hideBlock: true
-          label: Tolerations
+              - text: BackupConfiguration
+                value: BackupConfiguration
+              - text: BackupBlueprint
+                value: BackupBlueprint
+              schema: schema/properties/spec/properties/admin/properties/backup/properties/by
+              type: radio
+            hideBlock: true
+            label: Backup
+            showLabels: true
+            type: block-layout
+          # Archiver
+          - elements:
+            - label: Can user modify Archiver?
+              schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/toggle
+              type: switch
+            - label: Default Archiver
+              schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+              type: switch
+            hideBlock: true
+            label: Archiver
+            showLabels: true
+            type: block-layout
+          # Point In Time-Recovery
+          - elements:
+            - label: Can users modify Point In-Time Recovery?
+              schema: schema/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/toggle
+              type: switch
+            - label: Enable Point In-Time Recovery
+              schema: schema/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/default
+              type: switch
+            hideBlock: true
+            label: Point In Time-Recovery
+            showLabels: true
+            type: block-layout
+
+        - type: block-layout
+          label: Extras
           showLabels: true
-          type: block-layout
-        - elements:
-          - label: Node Selector
-            schema: temp/properties/spec/properties/admin/properties/nodeSelector
-            type: object-item
-            buttonClass: is-light is-outlined
-            watcher:
-              func: onNodeSelectorChange
-              paths:
-                - temp/properties/spec/properties/admin/properties/nodeSelector
           hideBlock: true
-          label: Node Selector
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can user modify Backup?
-            schema: schema/properties/spec/properties/admin/properties/backup/properties/enable/properties/toggle
-            type: switch
-          - label: Enable Backup
-            schema: schema/properties/spec/properties/admin/properties/backup/properties/enable/properties/default
-            type: switch
-          - isHorizontal: true
-            label: Take Backup by
-            options:
-            - text: BackupConfiguration
-              value: BackupConfiguration
-            - text: BackupBlueprint
-              value: BackupBlueprint
-            schema: schema/properties/spec/properties/admin/properties/backup/properties/by
-            type: radio
-          hideBlock: true
-          label: Backup
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can users modify Point In-Time Recovery?
-            schema: schema/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/toggle
-            type: switch
-          - label: Enable Point In-Time Recovery
-            schema: schema/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/default
-            type: switch
-          hideBlock: true
-          label: Point In Time-Recovery
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Can user modify Archiver?
-            schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/toggle
-            type: switch
-          - label: Default Archiver
-            schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
-            type: switch
-          hideBlock: true
-          label: Archiver
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Show Preview?
-            schema: schema/properties/spec/properties/admin/properties/showPreview
-            type: switch
-          - label: Enable Gitops
-            schema: schema/properties/spec/properties/admin/properties/gitOps/properties/enable/properties/default
-            type: switch
-          hideBlock: true
-          label: Preview
-          showLabels: true
-          type: block-layout
-        - elements:
-          - label: Show Backup?
-            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showBackup
-            type: switch
-          - label: Show BackupLegacy?
-            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showBackupLegacy
-            type: switch
-          - label: Show Insights?
-            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showInsights
-            type: switch
-          - label: Show Operations?
-            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showOperations
-            type: switch
-          - label: Show Security?
-            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showSecurity
-            type: switch
-          - label: Show VaultInfo?
-            schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showVaultInfo
-            type: switch
-          hideBlock: true
-          label: Left Panel
-          # schema: schema/properties/spec/properties/admin/properties/leftPanel
-          showLabels: true
-          type: block-layout
+          elements:
+          # Preview
+          - elements:
+            - label: Show Preview?
+              schema: schema/properties/spec/properties/admin/properties/showPreview
+              type: switch
+            hideBlock: true
+            label: Preview
+            showLabels: true
+            type: block-layout           
+          # Left Panel
+          - elements:
+            - label: Show Backup?
+              schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showBackup
+              type: switch
+            - label: Show BackupLegacy?
+              schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showBackupLegacy
+              type: switch
+            - label: Show Insights?
+              schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showInsights
+              type: switch
+            - label: Show Operations?
+              schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showOperations
+              type: switch
+            - label: Show Security?
+              schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showSecurity
+              type: switch
+            - label: Show VaultInfo?
+              schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showVaultInfo
+              type: switch
+            hideBlock: true
+            label: Left Panel
+            # schema: schema/properties/spec/properties/admin/properties/leftPanel
+            showLabels: true
+            type: block-layout
+          # Expose
+          - elements:
+            - label: Can users modify Exposer via gateway?
+              schema: schema/properties/spec/properties/admin/properties/expose/properties/toggle
+              type: switch
+            - label: Expose via gateway?
+              schema: schema/properties/spec/properties/admin/properties/expose/properties/default
+              type: switch
+            hideBlock: true
+            label: Expose
+            showLabels: true
+            type: block-layout         
+          # GitOps
+          - elements:
+            - label: Enable GitOps?
+              schema: schema/properties/spec/properties/admin/properties/gitOps/properties/enable/properties/default
+              type: switch
+            hideBlock: true
+            label: GitOps
+            showLabels: true
+            type: block-layout
+    
+    # Stash Preset
     - elements:
       - elements:
         - type: input
