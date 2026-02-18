@@ -646,45 +646,6 @@ export const useFunc = (model) => {
     return !!found
   }
 
-  function setTool() {
-    commit('wizard/model$update', {
-      path: '/spec/backup/tool',
-      value: 'KubeStash',
-      force: true,
-    })
-    return 'KubeStash'
-  }
-
-  async function fetchJsons({ itemCtx }) {
-    let ui = {}
-    let language = {}
-    let functions = {}
-    const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
-
-    try {
-      ui = await axios.get(
-        `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      language = await axios.get(
-        `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      const functionString = await axios.get(
-        `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-      )
-      // declare evaluate the functionString to get the functions Object
-      const evalFunc = new Function(functionString.data || '')
-      functions = evalFunc()
-    } catch (e) {
-      console.log(e)
-    }
-
-    return {
-      ui: ui.data || {},
-      language: language.data || {},
-      functions,
-    }
-  }
-
   function isKubedbUiPreset() {
     const presetName = storeGet('/route/params/presetName') || ''
     if (presetName === 'kubedb-ui-presets') return true
@@ -974,53 +935,6 @@ export const useFunc = (model) => {
     return machines
   }
 
-  async function getNamespaces() {
-    const params = storeGet('/route/params')
-    const { user, cluster, group, version, resource } = params
-    try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
-          apiVersion: 'identity.k8s.appscode.com/v1alpha1',
-          kind: 'SelfSubjectNamespaceAccessReview',
-          spec: {
-            resourceAttributes: [
-              {
-                verb: 'create',
-                group: group,
-                version: version,
-                resource: resource,
-              },
-            ],
-          },
-        },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
-        let projectsNamespace = []
-        projectsNamespace = Object.keys(projects).map((project) => ({
-          project: project,
-          namespaces: projects[project].map((namespace) => ({
-            text: namespace,
-            value: namespace,
-          })),
-        }))
-        return projectsNamespace
-      } else {
-        return resp.data?.status?.namespaces || []
-      }
-    } catch (e) {
-      console.log(e)
-    }
-    return []
-  }
-
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
-  }
-
   async function fetchNames(type) {
     // watchDependency(`model#/${type}/namespace`)
     const username = storeGet('/route/params/user')
@@ -1106,8 +1020,6 @@ export const useFunc = (model) => {
     setCustomAvlMachine,
     onMachineProfileChange,
     setMachineProfiles,
-    isRancherManaged,
-    getNamespaces,
     fetchNames,
     onNodeSelectorChange,
     onAvailableMachineChange,
