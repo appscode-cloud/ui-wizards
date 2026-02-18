@@ -742,18 +742,69 @@ export const useFunc = (model) => {
 
   // machine profiles stuffs
 
+  function parseMemory(memory) {
+    if (memory == null || (typeof memory !== 'string' && typeof memory !== 'number')) return 0
+    const units = {
+      B: 1, // Base unit (Bytes)
+      K: 1000, // 1 K = 1000 B
+      KB: 1000, // 1 KB = 1000 B
+      Ki: 1024, // 1 Ki = 1024 B
+      M: 1000 * 1000, // 1 M = 1000 K
+      MB: 1000 * 1000, // 1 MB = 1000 KB
+      Mi: 1024 * 1024, // 1 Mi = 1024 Ki
+      G: 1000 * 1000 * 1000, // 1 G = 1000 M
+      GB: 1000 * 1000 * 1000, // 1 GB = 1000 MB
+      Gi: 1024 * 1024 * 1024, // 1 Gi = 1024 Mi
+      T: 1000 * 1000 * 1000 * 1000, // 1 T = 1000 G
+      TB: 1000 * 1000 * 1000 * 1000, // 1 TB = 1000 GB
+      Ti: 1024 * 1024 * 1024 * 1024, // 1 Ti = 1024 Gi
+      P: 1000 * 1000 * 1000 * 1000 * 1000, // 1 P = 1000 T
+      PB: 1000 * 1000 * 1000 * 1000 * 1000, // 1 PB = 1000 TB
+      Pi: 1024 * 1024 * 1024 * 1024 * 1024, // 1 Pi = 1024 Ti
+    }
+
+    // If memory is just a number (int or float), treat it as bytes
+    if (/^\d+(\.\d+)?$/.test(memory)) {
+      return parseFloat(memory)
+    }
+
+    // Match float or int followed by optional unit
+    const match = memory.match(/^(\d+(?:\.\d+)?)(B|KB|Ki|K|M|MB|Mi|G|GB|Gi|T|TB|Ti|P|PB|Pi)?$/)
+    if (match) {
+      const value = parseFloat(match[1])
+      const unit = match[2] || 'B'
+      return value * (units[unit] || 1)
+    }
+
+    return 0 // Default fallback for unexpected formats
+  }
+
+  function parseCPU(cpu) {
+    if (cpu == null) return 0
+    if (typeof cpu === 'number') return cpu // If already a number, return as is
+
+    const match = cpu.match(/^(\d+(?:\.\d+)?)(m)?$/)
+    if (!match) return 0 // Invalid format, return 0
+
+    if (cpu.endsWith('m')) {
+      return parseFloat(cpu) / 1000 // Convert '500m' to 0.5
+    }
+
+    return parseFloat(cpu) // Convert '1', '0.5' directly
+  }
+
   function sortMachines(arr) {
-    if (!Array.isArray(arr)) return arr
+    if (!Array.isArray(arr)) return []
     return arr.sort((a, b) => {
-      const memA = parseMemory(a.limits.memory)
-      const memB = parseMemory(b.limits.memory)
+      const memA = parseMemory(a?.limits?.memory)
+      const memB = parseMemory(b?.limits?.memory)
 
       if (memA !== memB) {
         return memA - memB
       }
 
-      const cpuA = parseCPU(a.limits.cpu)
-      const cpuB = parseCPU(b.limits.cpu)
+      const cpuA = parseCPU(a?.limits?.cpu)
+      const cpuB = parseCPU(b?.limits?.cpu)
 
       return cpuA - cpuB
     })
@@ -904,10 +955,11 @@ export const useFunc = (model) => {
 
   function onMachineProfileChange(index) {
     const machines = getValue(discriminator, 'spec/admin/machineProfiles/machines')
+    const cleanedMachines = machines.map(({ temp, ...rest }) => rest)
 
     commit('wizard/model$update', {
       path: '/spec/admin/machineProfiles/machines',
-      value: sortMachines(machines),
+      value: sortMachines(cleanedMachines),
     })
   }
 
@@ -920,55 +972,6 @@ export const useFunc = (model) => {
   function setMachineProfiles() {
     const machines = getValue(model, '/spec/admin/machineProfiles/machines') || []
     return machines
-  }
-
-  function parseMemory(memory) {
-    const units = {
-      B: 1, // Base unit (Bytes)
-      K: 1000, // 1 K = 1000 B
-      KB: 1000, // 1 KB = 1000 B
-      Ki: 1024, // 1 Ki = 1024 B
-      M: 1000 * 1000, // 1 M = 1000 K
-      MB: 1000 * 1000, // 1 MB = 1000 KB
-      Mi: 1024 * 1024, // 1 Mi = 1024 Ki
-      G: 1000 * 1000 * 1000, // 1 G = 1000 M
-      GB: 1000 * 1000 * 1000, // 1 GB = 1000 MB
-      Gi: 1024 * 1024 * 1024, // 1 Gi = 1024 Mi
-      T: 1000 * 1000 * 1000 * 1000, // 1 T = 1000 G
-      TB: 1000 * 1000 * 1000 * 1000, // 1 TB = 1000 GB
-      Ti: 1024 * 1024 * 1024 * 1024, // 1 Ti = 1024 Gi
-      P: 1000 * 1000 * 1000 * 1000 * 1000, // 1 P = 1000 T
-      PB: 1000 * 1000 * 1000 * 1000 * 1000, // 1 PB = 1000 TB
-      Pi: 1024 * 1024 * 1024 * 1024 * 1024, // 1 Pi = 1024 Ti
-    }
-
-    // If memory is just a number (int or float), treat it as bytes
-    if (/^\d+(\.\d+)?$/.test(memory)) {
-      return parseFloat(memory)
-    }
-
-    // Match float or int followed by optional unit
-    const match = memory.match(/^(\d+(?:\.\d+)?)(B|KB|Ki|K|M|MB|Mi|G|GB|Gi|T|TB|Ti|P|PB|Pi)?$/)
-    if (match) {
-      const value = parseFloat(match[1])
-      const unit = match[2] || 'B'
-      return value * (units[unit] || 1)
-    }
-
-    return 0 // Default fallback for unexpected formats
-  }
-
-  function parseCPU(cpu) {
-    if (typeof cpu === 'number') return cpu // If already a number, return as is
-
-    const match = cpu.match(/^(\d+(?:\.\d+)?)(m)?$/)
-    if (!match) return 0 // Invalid format, return 0
-
-    if (cpu.endsWith('m')) {
-      return parseFloat(cpu) / 1000 // Convert '500m' to 0.5
-    }
-
-    return parseFloat(cpu) // Convert '1', '0.5' directly
   }
 
   async function getNamespaces() {
