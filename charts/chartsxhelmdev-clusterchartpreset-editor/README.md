@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/chartsxhelmdev-clusterchartpreset-editor --version=v0.29.0
-$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor appscode/chartsxhelmdev-clusterchartpreset-editor -n default --create-namespace --version=v0.29.0
+$ helm search repo appscode/chartsxhelmdev-clusterchartpreset-editor --version=v0.30.0
+$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor appscode/chartsxhelmdev-clusterchartpreset-editor -n default --create-namespace --version=v0.30.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a ClusterChartPreset Editor on a [Kubernetes](http://kubernet
 To install/upgrade the chart with the release name `chartsxhelmdev-clusterchartpreset-editor`:
 
 ```bash
-$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor appscode/chartsxhelmdev-clusterchartpreset-editor -n default --create-namespace --version=v0.29.0
+$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor appscode/chartsxhelmdev-clusterchartpreset-editor -n default --create-namespace --version=v0.30.0
 ```
 
 The command deploys a ClusterChartPreset Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `chartsxhelmdev-clu
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor appscode/chartsxhelmdev-clusterchartpreset-editor -n default --create-namespace --version=v0.29.0 --set apiVersion=charts.x-helm.dev/v1alpha1
+$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor appscode/chartsxhelmdev-clusterchartpreset-editor -n default --create-namespace --version=v0.30.0 --set apiVersion=charts.x-helm.dev/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor appscode/chartsxhelmdev-clusterchartpreset-editor -n default --create-namespace --version=v0.29.0 --values values.yaml
+$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor appscode/chartsxhelmdev-clusterchartpreset-editor -n default --create-namespace --version=v0.30.0 --values values.yaml
 ```
