@@ -258,7 +258,8 @@ APP_VERSION        ?= $(CHART_VERSION)
 
 .PHONY: update-charts
 update-charts: uibuilder-tools $(shell find $$(pwd)/charts -maxdepth 1 -mindepth 1 -type d -printf 'chart-%f ')
-	$(UIBUILDER_TOOLS) update-version --wizard-dir=./charts --version=$(CHART_VERSION)
+	true
+	#$(UIBUILDER_TOOLS) update-version --wizard-dir=./charts --version=$(CHART_VERSION)
 
 chart-%:
 	@$(MAKE) contents-$* gen-chart-doc-$* --no-print-directory
