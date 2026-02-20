@@ -916,7 +916,7 @@ export const useFunc = (model) => {
 
   function onMachineProfileChange(index) {
     const machines = getValue(discriminator, 'spec/admin/machineProfiles/machines')
-    const cleanedMachines = machines.map(({ temp, ...rest }) => rest)
+    const cleanedMachines = Array.isArray(machines) ? machines.map(({ temp, ...rest }) => rest) : []
 
     commit('wizard/model$update', {
       path: '/spec/admin/machineProfiles/machines',
