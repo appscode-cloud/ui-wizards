@@ -780,6 +780,10 @@ export const useFunc = (model) => {
       value: sortMachines(val),
       force: true,
     })
+    commit('wizard/temp$update', {
+      path: '/enableProfiles',
+      value: !!val?.length,
+    })
 
     return !!val?.length
   }
@@ -927,6 +931,11 @@ export const useFunc = (model) => {
   function hasCustomProfile() {
     const machines = getValue(model, '/spec/admin/machineProfiles/available')
     const hasCustom = machines.includes('custom')
+
+    commit('wizard/temp$update', {
+      path: '/useCustomProfile',
+      value: hasCustom,
+    })
     return hasCustom
   }
 
