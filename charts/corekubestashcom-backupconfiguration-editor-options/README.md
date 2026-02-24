@@ -60,6 +60,7 @@ The following table lists the configurable parameters of the `corekubestashcom-b
 | spec.backend.storageRef.namespace      |                                                    | <code>""</code>                   |
 | spec.backend.retentionPolicy.name      |                                                    | <code>""</code>                   |
 | spec.backend.retentionPolicy.namespace |                                                    | <code>""</code>                   |
+| spec.sessions                          |                                                    | <code>[]</code>                   |
 | spec.target.apiGroup                   |                                                    | <code>"kubedb.com"</code>         |
 | spec.target.kind                       |                                                    | <code>""</code>                   |
 | spec.target.name                       |                                                    | <code>""</code>                   |
