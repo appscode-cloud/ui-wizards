@@ -22,30 +22,18 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, DataGuard
-  mode: DataGuard
-  replicas: 3
+  # Standalone or SystemReplication
+  mode: Standalone
+  replicas: 1
 
-  dataGuard:
-    applyLagThreshold: 0
-    observer:
-      persistence:
-        size: 2Gi
-      podResources:
-        machine: ""
-
-        resources:
-          requests:
-            cpu: 500m
-            memory: 2Gi
-    protectionMode: MaximumProtection
-    standbyType: PHYSICAL
-    syncMode: SYNC
+  systemReplication:
+    replicationMode: ""      # sync, syncmem, async, fullsync
+    operationMode: ""       # logreplay, delta_datashipping, logreplay_readaccess
 
   deletionPolicy: WipeOut
 
   persistence:
-    size: 4Gi
+    size: 64Gi
   podResources:
     machine: ""
 
@@ -99,18 +87,10 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: ["Standalone", "Replicaset"]
-          default: "Replicaset"
+          available: ["Standalone", "SystemReplication"]
+          default: "Standalone"
           toggle: true
     storageClasses:
-      available: []
-      default: ""
-      toggle: true
-
-    tls:
-      default: false
-      toggle: true
-    clusterIssuers:
       available: []
       default: ""
       toggle: true

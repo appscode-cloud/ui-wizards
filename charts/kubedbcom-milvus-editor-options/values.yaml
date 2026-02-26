@@ -22,30 +22,13 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, DataGuard
-  mode: DataGuard
-  replicas: 3
-
-  dataGuard:
-    applyLagThreshold: 0
-    observer:
-      persistence:
-        size: 2Gi
-      podResources:
-        machine: ""
-
-        resources:
-          requests:
-            cpu: 500m
-            memory: 2Gi
-    protectionMode: MaximumProtection
-    standbyType: PHYSICAL
-    syncMode: SYNC
+  # Standalone or Distributed
+  mode: Standalone
 
   deletionPolicy: WipeOut
 
   persistence:
-    size: 4Gi
+    size: 10Gi
   podResources:
     machine: ""
 
@@ -54,11 +37,72 @@ spec:
         cpu: 3
         memory: 4Gi
 
+  # MetaStorage configuration for etcd
+  metaStorage:
+    externallyManaged: true
+    endpoints: []
+    size: 3
+
+  # ObjectStorage configuration for MinIO/S3
+  objectStorage:
+    configSecretName: ""
+
+  # Distributed topology configuration (only used when mode: Distributed)
+  distributed:
+    mixcoord:
+      replicas: 1
+      podResources:
+        machine: ""
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+    proxy:
+      replicas: 2
+      podResources:
+        machine: ""
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+    streamingnode:
+      replicas: 3
+      persistence:
+        size: 10Gi
+      podResources:
+        machine: ""
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+    datanode:
+      replicas: 1
+      podResources:
+        machine: ""
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+    querynode:
+      replicas: 1
+      podResources:
+        machine: ""
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+
+  disableSecurity: false
+  halted: false
+
   authSecret:
     name: ""
-
+    externallyManaged: false
     password: ""
+
+  configurationSecretName: ""
   configuration: ""
+  configurationInline: {}
 
   openshift:
     securityContext:
@@ -99,18 +143,10 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: ["Standalone", "Replicaset"]
-          default: "Replicaset"
+          available: ["Standalone", "Distributed"]
+          default: "Standalone"
           toggle: true
     storageClasses:
-      available: []
-      default: ""
-      toggle: true
-
-    tls:
-      default: false
-      toggle: true
-    clusterIssuers:
       available: []
       default: ""
       toggle: true
