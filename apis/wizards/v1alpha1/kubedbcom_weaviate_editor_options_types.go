@@ -45,17 +45,26 @@ type KubedbcomWeaviateEditorOptionsSpecSpec struct {
 	// +optional
 	Labels map[string]string `json:"labels"`
 	// +optional
-	Replicas       int                `json:"replicas,omitempty"`
-	Persistence    Persistence        `json:"persistence"`
-	PodResources   PodResources       `json:"podResources"`
-	AuthSecret     AuthSecret         `json:"authSecret"`
-	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Configuration  string             `json:"configuration"`
-	Admin          AdminOptions       `json:"admin"`
-	Backup         BackupToolSpec     `json:"backup"`
-	Monitoring     MonitoringOperator `json:"monitoring"`
+	Replicas        int  `json:"replicas,omitempty"`
+	DisableSecurity bool `json:"disableSecurity"`
+	// +optional
+	HealthChecker  *WeaviateHealthChecker `json:"healthChecker,omitempty"`
+	Persistence    Persistence            `json:"persistence"`
+	PodResources   PodResources           `json:"podResources"`
+	AuthSecret     AuthSecret             `json:"authSecret"`
+	DeletionPolicy DeletionPolicy         `json:"deletionPolicy"`
+	Configuration  string                 `json:"configuration"`
+	Admin          AdminOptions           `json:"admin"`
+	Backup         BackupToolSpec         `json:"backup"`
+	Monitoring     MonitoringOperator     `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+type WeaviateHealthChecker struct {
+	PeriodSeconds    int32 `json:"periodSeconds"`
+	TimeoutSeconds   int32 `json:"timeoutSeconds"`
+	FailureThreshold int32 `json:"failureThreshold"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
