@@ -98,29 +98,35 @@ type ClusterTierProfile struct {
 // *** Machine-related ends *** //
 
 type DatabaseProfiles struct {
+	DB2           *DatabaseProfile `json:"DB2,omitempty"`
 	ClickHouse    *DatabaseProfile `json:"ClickHouse,omitempty"`
 	Cassandra     *DatabaseProfile `json:"Cassandra,omitempty"`
 	Druid         *DatabaseProfile `json:"Druid,omitempty"`
 	Elasticsearch *DatabaseProfile `json:"Elasticsearch,omitempty"`
 	FerretDB      *DatabaseProfile `json:"FerretDB,omitempty"`
+	HanaDB        *DatabaseProfile `json:"HanaDB,omitempty"`
 	Hazelcast     *DatabaseProfile `json:"Hazelcast,omitempty"`
 	Ignite        *DatabaseProfile `json:"Ignite,omitempty"`
 	Kafka         *DatabaseProfile `json:"Kafka,omitempty"`
 	MariaDB       *DatabaseProfile `json:"MariaDB,omitempty"`
 	Memcached     *DatabaseProfile `json:"Memcached,omitempty"`
+	Milvus        *DatabaseProfile `json:"Milvus,omitempty"`
 	MongoDB       *DatabaseProfile `json:"MongoDB,omitempty"`
 	MSSQLServer   *DatabaseProfile `json:"MSSQLServer,omitempty"`
 	MySQL         *DatabaseProfile `json:"MySQL,omitempty"`
+	Neo4j         *DatabaseProfile `json:"Neo4j,omitempty"`
 	Oracle        *DatabaseProfile `json:"Oracle,omitempty"`
 	PerconaXtraDB *DatabaseProfile `json:"PerconaXtraDB,omitempty"`
 	PgBouncer     *DatabaseProfile `json:"PgBouncer,omitempty"`
 	Pgpool        *DatabaseProfile `json:"Pgpool,omitempty"`
 	Postgres      *DatabaseProfile `json:"Postgres,omitempty"`
 	ProxySQL      *DatabaseProfile `json:"ProxySQL,omitempty"`
+	Qdrant        *DatabaseProfile `json:"Qdrant,omitempty"`
 	RabbitMQ      *DatabaseProfile `json:"RabbitMQ,omitempty"`
 	Redis         *DatabaseProfile `json:"Redis,omitempty"`
 	Singlestore   *DatabaseProfile `json:"Singlestore,omitempty"`
 	Solr          *DatabaseProfile `json:"Solr,omitempty"`
+	Weaviate      *DatabaseProfile `json:"Weaviate,omitempty"`
 	ZooKeeper     *DatabaseProfile `json:"ZooKeeper,omitempty"`
 }
 
