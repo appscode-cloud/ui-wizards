@@ -94,7 +94,7 @@ Alert Group Enabled
 {{- range $k, $v := $flags.rules -}}
 {{- $sev := dig $v.severity 0 $ranks -}}
 {{- if (and $sev (le $sev $group) $v.enabled) -}}{{ $hasRules = true }}{{- end -}}
-{{- end -}}
+{{- end }}
 {{- if (and $group $hasRules) -}}{{ $flags.enabled }}{{- end -}}
 {{- end }}
 
@@ -128,9 +128,8 @@ seccompProfile:
 
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- $profiles := "" -}}
+{{- $profiles := dict -}}
 {{- $res := dict -}}
-{{- $observer_res := dict -}}
 {{- $res = .Values.spec.podResources.resources -}}
 {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
   {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
@@ -138,18 +137,47 @@ seccompProfile:
 {{- range .Values.spec.admin.machineProfiles.machines }}
   {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
     {{- $res  = dict "requests" .limits "limits" .limits }}
-    {{- $profiles = .id -}}
+    {{- $_ := set $profiles (lower $.Values.spec.mode) .id -}}
   {{- end }}
 {{- end }}
 
-{{- $observer_res = .Values.spec.dataGuard.observer.podResources.resources -}}
-{{- if and .Values.spec.dataGuard.observer.podResources.machine (hasKey $machines .Values.spec.dataGuard.observer.podResources.machine) }}
-  {{- $observer_res = get (get $machines .Values.spec.dataGuard.observer.podResources.machine) "resources" }}
-{{- end }}
-{{- range .Values.spec.admin.machineProfiles.machines }}
-  {{- if and $.Values.spec.dataGuard.observer.podResources.machine (eq .id $.Values.spec.dataGuard.observer.podResources.machine) }}
-    {{- $observer_res  = dict "requests" .limits "limits" .limits }}
-    {{- $_ := set $profiles "observer" .id -}}
+{{/* Distributed mode resources */}}
+{{- $mixcoord_res := dict -}}
+{{- $proxy_res := dict -}}
+{{- $streamingnode_res := dict -}}
+{{- $datanode_res := dict -}}
+{{- $querynode_res := dict -}}
+
+{{- if .Values.spec.distributed }}
+  {{- if .Values.spec.distributed.mixcoord }}
+    {{- $mixcoord_res = .Values.spec.distributed.mixcoord.podResources.resources -}}
+    {{- if and .Values.spec.distributed.mixcoord.podResources.machine (hasKey $machines .Values.spec.distributed.mixcoord.podResources.machine) }}
+      {{- $mixcoord_res = get (get $machines .Values.spec.distributed.mixcoord.podResources.machine) "resources" }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.spec.distributed.proxy }}
+    {{- $proxy_res = .Values.spec.distributed.proxy.podResources.resources -}}
+    {{- if and .Values.spec.distributed.proxy.podResources.machine (hasKey $machines .Values.spec.distributed.proxy.podResources.machine) }}
+      {{- $proxy_res = get (get $machines .Values.spec.distributed.proxy.podResources.machine) "resources" }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.spec.distributed.streamingnode }}
+    {{- $streamingnode_res = .Values.spec.distributed.streamingnode.podResources.resources -}}
+    {{- if and .Values.spec.distributed.streamingnode.podResources.machine (hasKey $machines .Values.spec.distributed.streamingnode.podResources.machine) }}
+      {{- $streamingnode_res = get (get $machines .Values.spec.distributed.streamingnode.podResources.machine) "resources" }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.spec.distributed.datanode }}
+    {{- $datanode_res = .Values.spec.distributed.datanode.podResources.resources -}}
+    {{- if and .Values.spec.distributed.datanode.podResources.machine (hasKey $machines .Values.spec.distributed.datanode.podResources.machine) }}
+      {{- $datanode_res = get (get $machines .Values.spec.distributed.datanode.podResources.machine) "resources" }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.spec.distributed.querynode }}
+    {{- $querynode_res = .Values.spec.distributed.querynode.podResources.resources -}}
+    {{- if and .Values.spec.distributed.querynode.podResources.machine (hasKey $machines .Values.spec.distributed.querynode.podResources.machine) }}
+      {{- $querynode_res = get (get $machines .Values.spec.distributed.querynode.podResources.machine) "resources" }}
+    {{- end }}
   {{- end }}
 {{- end }}
 
@@ -159,7 +187,11 @@ seccompProfile:
 {{- $_ := set . "res" $res -}}
 {{- $_ = set . "init_res" $init_res -}}
 {{- $_ = set . "sidecar_res" $sidecar_res -}}
-{{- $_ = set . "observer_res" $observer_res -}}
+{{- $_ = set . "mixcoord_res" $mixcoord_res -}}
+{{- $_ = set . "proxy_res" $proxy_res -}}
+{{- $_ = set . "streamingnode_res" $streamingnode_res -}}
+{{- $_ = set . "datanode_res" $datanode_res -}}
+{{- $_ = set . "querynode_res" $querynode_res -}}
 
 {{- $profiles | toJson -}}
 {{- end -}}

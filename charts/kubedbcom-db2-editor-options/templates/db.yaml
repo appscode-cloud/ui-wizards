@@ -77,48 +77,8 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.DB2.versions.default | quote }}
-{{- if .Values.spec.authSecret.name }}
-  authSecret:
-    name: {{ .Values.spec.authSecret.name }}
-{{- end }}
-  edition: enterprise
-  mode: {{ .Values.spec.mode }}
-  replicas: {{ (eq .Values.spec.mode "DataGuard") | ternary .Values.spec.replicas 1 }}
-{{- if eq .Values.spec.mode "DataGuard" }}
-  dataGuard:
-    fastStartFailover:
-      fastStartFailoverThreshold: 15
-    observer:
-      storage:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: {{ .Values.spec.persistence.size }}
-        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
-      storageType: Durable
-      podTemplate:
-        spec:
-          securityContext:
-            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 54321 }}
-          containers:
-            - name: observer
-              resources:
-                {{- toYaml .observer_res | nindent 16 }}
-              securityContext:
-                {{- include "container.securityContext" . | nindent 16 }}
-          initContainers:
-            - name: observer-init
-              resources:
-                {{- toYaml .init_res | nindent 16 }}
-              securityContext:
-                {{- include "container.securityContext" . | nindent 16 }}
-          {{- include "common.placement" . | nindent 10 }}
-    protectionMode: {{ .Values.spec.dataGuard.protectionMode }}
-    standbyType: {{ .Values.spec.dataGuard.standbyType }}
-    syncMode: {{ .Values.spec.dataGuard.syncMode }}
-    transportLagThreshold: 0
-{{- end}}
+  replicas: {{ .Values.spec.replicas }}
+  storageType: Durable
   storage:
     accessModes:
     - ReadWriteOnce
@@ -126,7 +86,6 @@ spec:
       requests:
         storage: {{ .Values.spec.persistence.size }}
     storageClassName: {{ .Values.spec.admin.storageClasses.default }}
-  storageType: Durable
   podTemplate:
     spec:
       securityContext:
@@ -137,13 +96,6 @@ spec:
             {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
-          {{- if ne .Values.spec.mode "Standalone" }}
-        - name: db2-coordinator
-          resources:
-            {{- toYaml .sidecar_res | nindent 12 }}
-          securityContext:
-            {{- include "container.securityContext" . | nindent 12 }}
-          {{- end }}
       initContainers:
         - name: db2-init
           resources:
@@ -160,16 +112,3 @@ spec:
   authSecret:
     name: {{ include "kubedbcom-db2-editor-options.fullname" . }}-auth
 {{- end }}
-{{- if .Values.spec.configuration }}
-  configSecret:
-    name: {{ include "kubedbcom-db2-editor-options.fullname" . }}-config
-{{- end }}
-{{- if .Values.spec.admin.tls.default }}
-  tls:
-    issuerRef:
-      apiGroup: "cert-manager.io"
-      kind: ClusterIssuer
-      name: {{ .Values.spec.admin.clusterIssuers.default }}
-  requireSSL: true
-{{- end }}
-

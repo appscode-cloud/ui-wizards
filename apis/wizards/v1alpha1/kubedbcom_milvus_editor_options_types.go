@@ -44,18 +44,71 @@ type KubedbcomMilvusEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
+	Mode   MilvusMode        `json:"mode"`
 	// +optional
-	Replicas       int                `json:"replicas,omitempty"`
-	Persistence    Persistence        `json:"persistence"`
-	PodResources   PodResources       `json:"podResources"`
-	AuthSecret     AuthSecret         `json:"authSecret"`
-	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Configuration  string             `json:"configuration"`
-	Admin          AdminOptions       `json:"admin"`
-	Backup         BackupToolSpec     `json:"backup"`
-	Monitoring     MonitoringOperator `json:"monitoring"`
+	Replicas      int                 `json:"replicas,omitempty"`
+	Persistence   Persistence         `json:"persistence"`
+	PodResources  PodResources        `json:"podResources"`
+	MetaStorage   MilvusMetaStorage   `json:"metaStorage"`
+	ObjectStorage MilvusObjectStorage `json:"objectStorage"`
+	// +optional
+	Distributed     *MilvusDistributed `json:"distributed,omitempty"`
+	DisableSecurity bool               `json:"disableSecurity"`
+	Halted          bool               `json:"halted"`
+	AuthSecret      MilvusAuthSecret   `json:"authSecret"`
+	DeletionPolicy  DeletionPolicy     `json:"deletionPolicy"`
+	Configuration   string             `json:"configuration"`
+	// +optional
+	ConfigurationSecretName string `json:"configurationSecretName,omitempty"`
+	// +optional
+	ConfigurationInline map[string]string  `json:"configurationInline,omitempty"`
+	Admin               AdminOptions       `json:"admin"`
+	Backup              BackupToolSpec     `json:"backup"`
+	Monitoring          MonitoringOperator `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=Standalone;Distributed
+type MilvusMode string
+
+type MilvusMetaStorage struct {
+	ExternallyManaged bool     `json:"externallyManaged"`
+	Endpoints         []string `json:"endpoints"`
+	Size              int      `json:"size"`
+}
+
+type MilvusObjectStorage struct {
+	ConfigSecretName string `json:"configSecretName"`
+}
+
+type MilvusDistributed struct {
+	Mixcoord      MilvusDistributedNode `json:"mixcoord"`
+	Proxy         MilvusDistributedNode `json:"proxy"`
+	Streamingnode MilvusStreamingNode   `json:"streamingnode"`
+	Datanode      MilvusDistributedNode `json:"datanode"`
+	Querynode     MilvusDistributedNode `json:"querynode"`
+}
+
+type MilvusDistributedNode struct {
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+}
+
+type MilvusStreamingNode struct {
+	Replicas     int          `json:"replicas"`
+	Persistence  Persistence  `json:"persistence"`
+	PodResources PodResources `json:"podResources"`
+}
+
+type MilvusAuthSecret struct {
+	// +optional
+	Name string `json:"name"`
+	// +optional
+	ExternallyManaged bool `json:"externallyManaged"`
+	// +optional
+	// +kubebuilder:validation:Format:=password
+	Password string `json:"password"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -44,6 +44,9 @@ type KubedbcomHanaDBEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
+	Mode   HanaDBMode        `json:"mode"`
+	// +optional
+	SystemReplication *HanaDBSystemReplication `json:"systemReplication,omitempty"`
 	// +optional
 	Replicas       int                `json:"replicas,omitempty"`
 	Persistence    Persistence        `json:"persistence"`
@@ -57,6 +60,20 @@ type KubedbcomHanaDBEditorOptionsSpecSpec struct {
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
+
+// +kubebuilder:validation:Enum=Standalone;SystemReplication
+type HanaDBMode string
+
+type HanaDBSystemReplication struct {
+	ReplicationMode HanaDBReplicationMode `json:"replicationMode"`
+	OperationMode   HanaDBOperationMode   `json:"operationMode"`
+}
+
+// +kubebuilder:validation:Enum=sync;syncmem;async;fullsync
+type HanaDBReplicationMode string
+
+// +kubebuilder:validation:Enum=logreplay;delta_datashipping;logreplay_readaccess
+type HanaDBOperationMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
