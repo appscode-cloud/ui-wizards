@@ -1,4 +1,4 @@
-{{- $profiles := "" -}}
+{{- $profiles := dict -}}
 {{- with $ctx := . -}}
 {{- $profiles = include "resource-profiles" $ctx | fromJson -}}
 {{- end -}}
@@ -66,7 +66,7 @@ metadata:
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
     {{- if $profiles }}
-    kubernetes.io/instance-type: {{ printf "%s" (include "resource-profiles" .) }}
+    kubernetes.io/instance-type: {{ printf "'%s'" (include "resource-profiles" . | fromJson | toJson) }}
     {{- end -}}
   {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
     blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint
@@ -77,48 +77,104 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.Milvus.versions.default | quote }}
-{{- if .Values.spec.authSecret.name }}
-  authSecret:
-    name: {{ .Values.spec.authSecret.name }}
+{{- if .Values.spec.metaStorage }}
+  {{- if .Values.spec.metaStorage.externallyManaged }}
+    {{- if .Values.spec.metaStorage.endpoints }}
+  metaStorage:
+    externallyManaged: true
+    endpoints:
+      {{- toYaml .Values.spec.metaStorage.endpoints | nindent 6 }}
+    {{- end }}
+  {{- else }}
+  metaStorage:
+    externallyManaged: false
+    size: {{ .Values.spec.metaStorage.size }}
+  {{- end }}
 {{- end }}
-  edition: enterprise
-  mode: {{ .Values.spec.mode }}
-  replicas: {{ (eq .Values.spec.mode "DataGuard") | ternary .Values.spec.replicas 1 }}
-{{- if eq .Values.spec.mode "DataGuard" }}
-  dataGuard:
-    fastStartFailover:
-      fastStartFailoverThreshold: 15
-    observer:
-      storage:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: {{ .Values.spec.persistence.size }}
-        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
-      storageType: Durable
-      podTemplate:
-        spec:
-          securityContext:
-            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 54321 }}
-          containers:
-            - name: observer
-              resources:
-                {{- toYaml .observer_res | nindent 16 }}
-              securityContext:
-                {{- include "container.securityContext" . | nindent 16 }}
-          initContainers:
-            - name: observer-init
-              resources:
-                {{- toYaml .init_res | nindent 16 }}
-              securityContext:
-                {{- include "container.securityContext" . | nindent 16 }}
-          {{- include "common.placement" . | nindent 10 }}
-    protectionMode: {{ .Values.spec.dataGuard.protectionMode }}
-    standbyType: {{ .Values.spec.dataGuard.standbyType }}
-    syncMode: {{ .Values.spec.dataGuard.syncMode }}
-    transportLagThreshold: 0
-{{- end}}
+  objectStorage:
+    configSecret:
+      name: {{ .Values.spec.objectStorage.configSecretName }}
+{{- if eq .Values.spec.mode "Distributed" }}
+  topology:
+    mode: Distributed
+    distributed:
+      {{- if .Values.spec.distributed.mixcoord }}
+      mixcoord:
+        replicas: {{ .Values.spec.distributed.mixcoord.replicas }}
+        {{- if .Values.spec.distributed.mixcoord.podResources }}
+        podTemplate:
+          spec:
+            containers:
+              - name: milvus
+                resources:
+                  {{- toYaml .mixcoord_res | nindent 18 }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.spec.distributed.proxy }}
+      proxy:
+        replicas: {{ .Values.spec.distributed.proxy.replicas }}
+        {{- if .Values.spec.distributed.proxy.podResources }}
+        podTemplate:
+          spec:
+            containers:
+              - name: milvus
+                resources:
+                  {{- toYaml .proxy_res | nindent 18 }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.spec.distributed.streamingnode }}
+      streamingnode:
+        replicas: {{ .Values.spec.distributed.streamingnode.replicas }}
+        storageType: Durable
+        storage:
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+          resources:
+            requests:
+              storage: {{ .Values.spec.distributed.streamingnode.persistence.size }}
+        {{- if .Values.spec.distributed.streamingnode.podResources }}
+        podTemplate:
+          spec:
+            containers:
+              - name: milvus
+                resources:
+                  {{- toYaml .streamingnode_res | nindent 18 }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.spec.distributed.datanode }}
+      datanode:
+        replicas: {{ .Values.spec.distributed.datanode.replicas }}
+        {{- if .Values.spec.distributed.datanode.podResources }}
+        podTemplate:
+          spec:
+            containers:
+              - name: milvus
+                resources:
+                  {{- toYaml .datanode_res | nindent 18 }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.spec.distributed.querynode }}
+      querynode:
+        replicas: {{ .Values.spec.distributed.querynode.replicas }}
+        {{- if .Values.spec.distributed.querynode.podResources }}
+        podTemplate:
+          spec:
+            containers:
+              - name: milvus
+                resources:
+                  {{- toYaml .querynode_res | nindent 18 }}
+        {{- end }}
+      {{- end }}
+{{- else }}
+  topology:
+    mode: Standalone
+{{- end }}
+{{- if or (eq .Values.spec.mode "Standalone") .Values.spec.disableSecurity }}
+  disableSecurity: {{ .Values.spec.disableSecurity | default false }}
+{{- end }}
+{{- if ne .Values.spec.mode "Distributed" }}
+  storageType: Durable
   storage:
     accessModes:
     - ReadWriteOnce
@@ -126,7 +182,16 @@ spec:
       requests:
         storage: {{ .Values.spec.persistence.size }}
     storageClassName: {{ .Values.spec.admin.storageClasses.default }}
-  storageType: Durable
+{{- end }}
+{{- if or .Values.spec.configuration .Values.spec.configurationInline .Values.spec.configurationSecretName }}
+  configuration:
+    secretName: {{ .Values.spec.configurationSecretName | default (printf "%s-config" (include "kubedbcom-milvus-editor-options.fullname" .)) }}
+    {{- if .Values.spec.configurationInline }}
+    inline:
+      {{- toYaml .Values.spec.configurationInline | nindent 6 }}
+    {{- end }}
+{{- end }}
+{{- if ne .Values.spec.mode "Distributed" }}
   podTemplate:
     spec:
       securityContext:
@@ -137,13 +202,6 @@ spec:
             {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
-          {{- if ne .Values.spec.mode "Standalone" }}
-        - name: milvus-coordinator
-          resources:
-            {{- toYaml .sidecar_res | nindent 12 }}
-          securityContext:
-            {{- include "container.securityContext" . | nindent 12 }}
-          {{- end }}
       initContainers:
         - name: milvus-init
           resources:
@@ -151,25 +209,15 @@ spec:
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
+{{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
-{{- if .Values.spec.authSecret.name }}
+{{- if or .Values.spec.authSecret.name .Values.spec.authSecret.password .Values.spec.authSecret.externallyManaged }}
   authSecret:
-    name: {{ .Values.spec.authSecret.name }}
+    name: {{ .Values.spec.authSecret.name | default (printf "%s-auth" (include "kubedbcom-milvus-editor-options.fullname" .)) }}
+    {{- if .Values.spec.authSecret.externallyManaged }}
+    externallyManaged: true
+    {{- end }}
 {{- end }}
-{{- if .Values.spec.authSecret.password }}
-  authSecret:
-    name: {{ include "kubedbcom-milvus-editor-options.fullname" . }}-auth
+{{- if .Values.spec.halted }}
+  halted: {{ .Values.spec.halted }}
 {{- end }}
-{{- if .Values.spec.configuration }}
-  configSecret:
-    name: {{ include "kubedbcom-milvus-editor-options.fullname" . }}-config
-{{- end }}
-{{- if .Values.spec.admin.tls.default }}
-  tls:
-    issuerRef:
-      apiGroup: "cert-manager.io"
-      kind: ClusterIssuer
-      name: {{ .Values.spec.admin.clusterIssuers.default }}
-  requireSSL: true
-{{- end }}
-

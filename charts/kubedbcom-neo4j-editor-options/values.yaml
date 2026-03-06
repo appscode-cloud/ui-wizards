@@ -22,27 +22,15 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, DataGuard
-  mode: DataGuard
+  # Standalone, Replicaset
+  mode: Replicaset
   replicas: 3
 
-  dataGuard:
-    applyLagThreshold: 0
-    observer:
-      persistence:
-        size: 2Gi
-      podResources:
-        machine: ""
-
-        resources:
-          requests:
-            cpu: 500m
-            memory: 2Gi
-    protectionMode: MaximumProtection
-    standbyType: PHYSICAL
-    syncMode: SYNC
+  storageType: ""
 
   deletionPolicy: WipeOut
+  
+  disableSecurity: false
 
   persistence:
     size: 4Gi
@@ -59,6 +47,18 @@ spec:
 
     password: ""
   configuration: ""
+  
+  tls:
+    issuerRef:
+      apiGroup: cert-manager.io
+      kind: Issuer
+      name: ""
+    bolt:
+      mode: TLS
+    http:
+      mode: TLS
+    cluster:
+      mode: mTLS
 
   openshift:
     securityContext:
@@ -122,6 +122,7 @@ spec:
       # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
       agent: prometheus.io/operator
       exporter:
+        port: 0
         resources: # +doc-gen:break
           requests:
             cpu: 100m
@@ -180,6 +181,7 @@ spec:
         namespace: ""
   monitoring:
     serviceMonitor:
+      interval: 10s
       # Specify the labels for ServiceMonitor.
       # Prometheus crd will select ServiceMonitor using these labels.
       # Only usable when monitoring agent is `prometheus.io/webhook server`.

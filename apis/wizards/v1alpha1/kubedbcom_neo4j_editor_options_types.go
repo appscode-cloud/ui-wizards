@@ -44,19 +44,44 @@ type KubedbcomNeo4jEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
+	Mode   GeneralMode       `json:"mode"`
 	// +optional
-	Replicas       int                `json:"replicas,omitempty"`
-	Persistence    Persistence        `json:"persistence"`
-	PodResources   PodResources       `json:"podResources"`
-	AuthSecret     AuthSecret         `json:"authSecret"`
-	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Configuration  string             `json:"configuration"`
-	Admin          AdminOptions       `json:"admin"`
-	Backup         BackupToolSpec     `json:"backup"`
-	Monitoring     MonitoringOperator `json:"monitoring"`
+	Replicas int `json:"replicas,omitempty"`
+	// +optional
+	StorageType     string             `json:"storageType,omitempty"`
+	DisableSecurity bool               `json:"disableSecurity"`
+	Persistence     Persistence        `json:"persistence"`
+	PodResources    PodResources       `json:"podResources"`
+	AuthSecret      AuthSecret         `json:"authSecret"`
+	DeletionPolicy  DeletionPolicy     `json:"deletionPolicy"`
+	Configuration   string             `json:"configuration"`
+	TLS             Neo4jTLS           `json:"tls"`
+	Admin           AdminOptions       `json:"admin"`
+	Backup          BackupToolSpec     `json:"backup"`
+	Monitoring      MonitoringOperator `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
+
+type Neo4jTLS struct {
+	IssuerRef Neo4jIssuerRef   `json:"issuerRef"`
+	Bolt      Neo4jProtocolTLS `json:"bolt"`
+	HTTP      Neo4jProtocolTLS `json:"http"`
+	Cluster   Neo4jProtocolTLS `json:"cluster"`
+}
+
+type Neo4jIssuerRef struct {
+	APIGroup string `json:"apiGroup"`
+	Kind     string `json:"kind"`
+	Name     string `json:"name"`
+}
+
+type Neo4jProtocolTLS struct {
+	Mode Neo4jTLSMode `json:"mode"`
+}
+
+// +kubebuilder:validation:Enum=Disabled;TLS;mTLS
+type Neo4jTLSMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

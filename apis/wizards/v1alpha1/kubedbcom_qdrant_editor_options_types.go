@@ -44,18 +44,39 @@ type KubedbcomQdrantEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
+	Mode   QdrantMode        `json:"mode"`
 	// +optional
-	Replicas       int                `json:"replicas,omitempty"`
-	Persistence    Persistence        `json:"persistence"`
-	PodResources   PodResources       `json:"podResources"`
-	AuthSecret     AuthSecret         `json:"authSecret"`
-	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Configuration  string             `json:"configuration"`
-	Admin          AdminOptions       `json:"admin"`
-	Backup         BackupToolSpec     `json:"backup"`
-	Monitoring     MonitoringOperator `json:"monitoring"`
+	Replicas int `json:"replicas,omitempty"`
+	// +optional
+	StorageType     string             `json:"storageType,omitempty"`
+	DisableSecurity bool               `json:"disableSecurity"`
+	Halted          bool               `json:"halted"`
+	Persistence     Persistence        `json:"persistence"`
+	PodResources    PodResources       `json:"podResources"`
+	AuthSecret      AuthSecret         `json:"authSecret"`
+	DeletionPolicy  DeletionPolicy     `json:"deletionPolicy"`
+	Configuration   string             `json:"configuration"`
+	TLS             QdrantTLS          `json:"tls"`
+	Admin           AdminOptions       `json:"admin"`
+	Backup          BackupToolSpec     `json:"backup"`
+	Monitoring      MonitoringOperator `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=Standalone;Distributed
+type QdrantMode string
+
+type QdrantTLS struct {
+	IssuerRef QdrantIssuerRef `json:"issuerRef"`
+	P2P       bool            `json:"p2p"`
+	Client    bool            `json:"client"`
+}
+
+type QdrantIssuerRef struct {
+	APIGroup string `json:"apiGroup"`
+	Kind     string `json:"kind"`
+	Name     string `json:"name"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
