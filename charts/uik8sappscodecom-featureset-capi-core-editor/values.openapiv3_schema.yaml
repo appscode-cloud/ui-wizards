@@ -1367,6 +1367,20 @@ properties:
                     type: object
                   criticalAddon:
                     type: boolean
+                  distro:
+                    properties:
+                      openshift:
+                        type: boolean
+                      ubi:
+                        enum:
+                        - all
+                        - catalog
+                        - operator
+                        type: string
+                    required:
+                    - openshift
+                    - ubi
+                    type: object
                   fullnameOverride:
                     type: string
                   imagePullPolicy:
@@ -1415,6 +1429,8 @@ properties:
                             items:
                               properties:
                                 name:
+                                  type: string
+                                request:
                                   type: string
                               required:
                               - name
@@ -1551,6 +1567,8 @@ properties:
                       runAsUser:
                         format: int64
                         type: integer
+                      seLinuxChangePolicy:
+                        type: string
                       seLinuxOptions:
                         properties:
                           level:
@@ -1577,6 +1595,8 @@ properties:
                           type: integer
                         type: array
                         x-kubernetes-list-type: atomic
+                      supplementalGroupsPolicy:
+                        type: string
                       sysctls:
                         items:
                           properties:
@@ -1614,6 +1634,8 @@ properties:
                             items:
                               properties:
                                 name:
+                                  type: string
+                                request:
                                   type: string
                               required:
                               - name
@@ -2637,6 +2659,20 @@ properties:
                             type: array
                             x-kubernetes-list-type: atomic
                         type: object
+                    type: object
+                  distro:
+                    properties:
+                      openshift:
+                        type: boolean
+                      ubi:
+                        enum:
+                        - all
+                        - catalog
+                        - operator
+                        type: string
+                    required:
+                    - openshift
+                    - ubi
                     type: object
                   fullnameOverride:
                     type: string
@@ -3696,6 +3732,25 @@ properties:
                                           type: object
                                         type: array
                                         x-kubernetes-list-type: atomic
+                                    type: object
+                                  podCertificate:
+                                    properties:
+                                      certificateChainPath:
+                                        type: string
+                                      credentialBundlePath:
+                                        type: string
+                                      keyPath:
+                                        type: string
+                                      keyType:
+                                        type: string
+                                      maxExpirationSeconds:
+                                        format: int32
+                                        type: integer
+                                      signerName:
+                                        type: string
+                                    required:
+                                    - keyType
+                                    - signerName
                                     type: object
                                   secret:
                                     properties:
