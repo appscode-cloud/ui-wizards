@@ -315,6 +315,10 @@ const modeDetails = {
     description: 'Neo4j Data Guard for high availability, data protection, and disaster recovery',
     text: 'DataGuard',
   },
+  Replicaset: {
+    description: 'Neo4j Replicaset for high availability, data protection, and disaster recovery',
+    text: 'Replicaset',
+  },
 }
 
 export const useFunc = (model) => {
