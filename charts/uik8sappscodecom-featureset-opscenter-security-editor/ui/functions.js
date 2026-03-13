@@ -249,7 +249,6 @@ export const useFunc = (model) => {
                   },
                 },
                 targetNamespace,
-                releaseName: featureName,
               },
             },
             force: true,
