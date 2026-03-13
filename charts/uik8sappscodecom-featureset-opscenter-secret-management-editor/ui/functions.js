@@ -1,11 +1,14 @@
 const { axios, store, useOperator } = window.vueHelpers || {}
 
 export const useFunc = (model) => {
-  const { getValue, setDiscriminatorValue, commit, storeGet, discriminator, watchDependency } =
-    useOperator(model, store.state)
+  const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
+    model,
+    store.state,
+  )
 
   setDiscriminatorValue('/enabledFeatures', [])
   setDiscriminatorValue('/isResourceLoaded', false)
+  let resources = {}
 
   // get specific feature details
   function getFeatureSetDetails() {
@@ -49,7 +52,7 @@ export const useFunc = (model) => {
   }
 
   function isEqualToModelPathValue(path, value) {
-    watchDependency(`model#${path}`)
+    // watchDependency(`model#${path}`)
 
     const modelValue = getValue(model, path)
     return modelValue === value
@@ -187,7 +190,7 @@ export const useFunc = (model) => {
   }
 
   function disableFeatures() {
-    watchDependency('discriminator#/isResourceLoaded')
+    // watchDependency('discriminator#/isResourceLoaded')
 
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (!isResourceLoaded) return true
@@ -263,8 +266,6 @@ export const useFunc = (model) => {
       }
     })
   }
-
-  let resources = {}
 
   function returnFalse() {
     return false
@@ -360,7 +361,7 @@ export const useFunc = (model) => {
   // this computed's main purpose is to watch isResourceLoaded flag
   // and fire the onEnabledFeatureChange function when it's true
   function checkIsResourceLoaded() {
-    watchDependency('discriminator#/isResourceLoaded')
+    // watchDependency('discriminator#/isResourceLoaded')
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (isResourceLoaded) {
       onEnabledFeaturesChange()
