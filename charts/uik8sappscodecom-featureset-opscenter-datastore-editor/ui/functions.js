@@ -331,6 +331,8 @@ export const useFunc = (model) => {
     })
 
     setDiscriminatorValue('/isResourceLoaded', true)
+
+    await databaseLoader()
   }
 
   function fetchFeatureSetOptions() {
