@@ -61,7 +61,7 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	PodResources   PodResources   `json:"podResources"`
 	AuthSecret     AuthSecret     `json:"authSecret"`
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
-	Configuration  string         `json:"configuration"`
+	Configuration  Configuration  `json:"configuration"`
 	// +optional
 	ArchiverName string             `json:"archiverName"`
 	Init         InitDatabase       `json:"init"`
