@@ -1,0 +1,163 @@
+{{- $profiles := "" -}}
+{{- with $ctx := . -}}
+{{- $profiles = include "resource-profiles" $ctx | fromJson -}}
+{{- end -}}
+
+{{- define "common.placement" -}}
+
+{{- if .Values.spec.admin.clusterTier.placement.default }}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- end }}
+
+nodeSelector:
+  kubernetes.io/os: linux
+{{- if .Values.spec.admin.nodeSelector }}
+{{- toYaml .Values.spec.admin.nodeSelector | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+  app: neo4js.kubedb.com
+  instance: {{ include "kubedbcom-neo4j-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+{{- end }}
+
+{{- if or .Values.spec.admin.tolerations (eq .Values.spec.admin.deployment.default "Dedicated") }}
+tolerations:
+{{- if .Values.spec.admin.tolerations }}
+{{- toYaml .Values.spec.admin.tolerations | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+  - key: app
+    operator: "Equal"
+    value: "neo4js.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-neo4j-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.spec.admin.gitOps.enable.default }}
+apiVersion: gitops.kubedb.com/v1alpha1
+{{ else }}
+apiVersion: kubedb.com/v1alpha2
+{{- end }}
+kind: Neo4j
+metadata:
+  name: {{ include "kubedbcom-neo4j-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-neo4j-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.admin.archiver.enable.default }}
+    kubedb.com/archiver: "true"
+    kubedb.com/archiving-via: {{ .Values.spec.admin.archiver.via }}
+{{- end }}
+  annotations:
+    app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+    {{- if $profiles }}
+    kubernetes.io/instance-type: {{ printf "%s" (include "resource-profiles" .) }}
+    {{- end -}}
+  {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
+    blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint
+    blueprint.kubestash.com/namespace: kubedb
+  {{- end }}
+{{- if .Values.spec.annotations }}
+    {{- include "kubedbcom-neo4j-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  version: {{ .Values.spec.admin.databases.Neo4j.versions.default | quote }}
+  replicas: {{ .Values.spec.replicas }}
+  {{- if .Values.spec.storageType }}
+  storageType: {{ .Values.spec.storageType }}
+  {{- end }}
+  storage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ .Values.spec.persistence.size }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+  disableSecurity: {{ .Values.spec.disableSecurity | default false }}
+  {{- if .Values.spec.configuration }}
+  configuration:
+    secretName: {{ include "kubedbcom-neo4j-editor-options.fullname" . }}-config
+  {{- end }}
+  podTemplate:
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 54321 }}
+      containers:
+        - name: neo4j
+          resources:
+            {{- toYaml .res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+      initContainers:
+        - name: neo4j-init
+          resources:
+            {{- toYaml .init_res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+      {{- include "common.placement" . | nindent 6 }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-neo4j-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
+  monitor:
+    agent: {{ .Values.spec.admin.monitoring.agent }}
+    prometheus:
+    {{- with .Values.spec.admin.monitoring.exporter }}
+      exporter:
+        {{- if .port }}
+        port: {{ .port }}
+        {{- end }}
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+    {{- end }}
+      serviceMonitor:
+        interval: {{ .Values.spec.monitoring.serviceMonitor.interval | default "30s" }}
+        labels:
+          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      {{- if .Values.spec.tls.issuerRef.name }}
+      apiGroup: {{ .Values.spec.tls.issuerRef.apiGroup | default "cert-manager.io" | quote }}
+      kind: {{ .Values.spec.tls.issuerRef.kind | default "Issuer" }}
+      name: {{ .Values.spec.tls.issuerRef.name }}
+      {{- else }}
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+      {{- end }}
+    {{- if .Values.spec.tls.bolt }}
+    bolt:
+      mode: {{ .Values.spec.tls.bolt.mode }}
+    {{- end }}
+    {{- if .Values.spec.tls.http }}
+    http:
+      mode: {{ .Values.spec.tls.http.mode }}
+    {{- end }}
+    {{- if .Values.spec.tls.cluster }}
+    cluster:
+      mode: {{ .Values.spec.tls.cluster.mode }}
+    {{- end }}
+{{- end }}
