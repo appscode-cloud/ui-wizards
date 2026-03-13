@@ -4,6 +4,9 @@ export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator, watchDependency } =
     useOperator(model, store.state)
 
+  setDiscriminatorValue('/enabledFeatures', [])
+  setDiscriminatorValue('/isResourceLoaded', false)
+
   // get specific feature details
   function getFeatureSetDetails() {
     const featureSets = storeGet('/cluster/featureSets/result') || []
@@ -35,7 +38,6 @@ export const useFunc = (model) => {
   function getFeaturePropertyValue(name, path) {
     const feature = getFeatureDetails(name)
     const value = storeGet(path, feature)
-    console.log({ name, feature, value })
 
     return value
   }
@@ -72,7 +74,6 @@ export const useFunc = (model) => {
     })
 
     const enabledFeatureNames = enabledFeatures.map((item) => item?.metadata?.name) || []
-    console.log(enabledFeatureNames)
     return enabledFeatureNames
   }
 
@@ -154,7 +155,6 @@ export const useFunc = (model) => {
     const featureBlock = storeGet('/route/query/activeBlock') || ''
     const configureMode = storeGet('/route/query/mode') || ''
     const activeFeature = storeGet('/route/query/activeFeature') || ''
-    console.log({ featureBlock, configureMode, activeFeature })
 
     const allFeatureSetFeature =
       allFeatures.filter((item) => {
@@ -215,8 +215,6 @@ export const useFunc = (model) => {
     allFeatures.forEach((item) => {
       const featureName = item?.metadata?.name || ''
       const resourceValuePath = getResourceValuePathFromFeature(item)
-      // console.log(resources)
-      console.log(resourceValuePath)
 
       if (enabledFeatures.includes(featureName)) {
         const featureSet = storeGet('/route/params/featureset') || ''
@@ -228,7 +226,6 @@ export const useFunc = (model) => {
 
         const isEnabled = getFeaturePropertyValue(featureName, '/status/enabled')
         const isManaged = getFeaturePropertyValue(featureName, '/status/managed')
-        console.log({ chart, sourceRef, version, targetNamespace, isEnabled, isManaged })
 
         if (isEnabled && !isManaged) {
           commit('wizard/model$delete', `/resources/${resourceValuePath}`)
@@ -278,7 +275,6 @@ export const useFunc = (model) => {
     resources = { ...modelResources }
 
     const isFeatureSetInstalled = getFeatureSetPropertyValue('/status/enabled')
-    console.log(isFeatureSetInstalled)
 
     if (isFeatureSetInstalled) {
       // get resources default values when featureset is installed
@@ -299,7 +295,6 @@ export const useFunc = (model) => {
         url = `/clusters/${owner}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
       const { data } = await axios.get(url)
       const { resources: resourcesDefaultValues } = data || {}
-      console.log(resourcesDefaultValues)
 
       Object.keys(resourcesDefaultValues || {}).forEach((key) => {
         if (!resources[key]) {
@@ -322,7 +317,6 @@ export const useFunc = (model) => {
     const allFeatureResourceValuePathNames = allFeatures.map((feature) =>
       getResourceValuePathFromFeature(feature),
     )
-    console.log(allFeatureResourceValuePathNames)
 
     Object.keys(modelResources).forEach((modelResourcePath) => {
       if (!allFeatureResourceValuePathNames.includes(modelResourcePath)) {
