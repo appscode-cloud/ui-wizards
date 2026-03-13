@@ -1339,6 +1339,20 @@ properties:
                     type: object
                   criticalAddon:
                     type: boolean
+                  distro:
+                    properties:
+                      openshift:
+                        type: boolean
+                      ubi:
+                        enum:
+                        - all
+                        - catalog
+                        - operator
+                        type: string
+                    required:
+                    - openshift
+                    - ubi
+                    type: object
                   fullnameOverride:
                     type: string
                   image:
@@ -2562,6 +2576,8 @@ properties:
                     properties:
                       caBundle:
                         type: string
+                      emailDomain:
+                        type: string
                       jmapSessionEndpoint:
                         type: string
                       token:
@@ -2569,6 +2585,7 @@ properties:
                       webadminEndpoint:
                         type: string
                     required:
+                    - emailDomain
                     - jmapSessionEndpoint
                     - token
                     - webadminEndpoint
@@ -5178,8 +5195,74 @@ properties:
                     - maxReplicas
                     - minReplicas
                     type: object
+                  distro:
+                    properties:
+                      openshift:
+                        type: boolean
+                      ubi:
+                        enum:
+                        - all
+                        - catalog
+                        - operator
+                        type: string
+                    required:
+                    - openshift
+                    - ubi
+                    type: object
                   fullnameOverride:
                     type: string
+                  gateway:
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      enabled:
+                        type: boolean
+                      hosts:
+                        items:
+                          properties:
+                            host:
+                              type: string
+                            paths:
+                              properties:
+                                path:
+                                  type: string
+                                pathType:
+                                  enum:
+                                  - Exact
+                                  - PathPrefix
+                                  - RegularExpression
+                                  type: string
+                              required:
+                              - path
+                              type: object
+                          required:
+                          - host
+                          - paths
+                          type: object
+                        type: array
+                      tls:
+                        properties:
+                          enabled:
+                            type: boolean
+                          secret:
+                            properties:
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                        required:
+                        - enabled
+                        - secret
+                        type: object
+                    required:
+                    - annotations
+                    - enabled
+                    - hosts
+                    - tls
+                    type: object
                   image:
                     properties:
                       pullPolicy:
@@ -5493,6 +5576,7 @@ properties:
                     type: array
                 required:
                 - autoscaling
+                - gateway
                 - image
                 - ingress
                 - replicaCount
@@ -7868,6 +7952,20 @@ properties:
                     type: object
                   criticalAddon:
                     type: boolean
+                  distro:
+                    properties:
+                      openshift:
+                        type: boolean
+                      ubi:
+                        enum:
+                        - all
+                        - catalog
+                        - operator
+                        type: string
+                    required:
+                    - openshift
+                    - ubi
+                    type: object
                   fullnameOverride:
                     type: string
                   hubUID:
@@ -9239,6 +9337,20 @@ properties:
                     type: object
                   criticalAddon:
                     type: boolean
+                  distro:
+                    properties:
+                      openshift:
+                        type: boolean
+                      ubi:
+                        enum:
+                        - all
+                        - catalog
+                        - operator
+                        type: string
+                    required:
+                    - openshift
+                    - ubi
+                    type: object
                   fullnameOverride:
                     type: string
                   image:
