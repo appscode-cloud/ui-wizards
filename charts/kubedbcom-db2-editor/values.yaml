@@ -1,0 +1,115 @@
+metadata:
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: db2s
+    kind: DB2
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: db2-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: db2-ca
+  kubedbComDB2: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: DB2
+    metadata:
+      name: db2
+      namespace: default
+    spec:
+      deletionPolicy: WipeOut
+      podTemplate:
+        spec:
+          containers:
+            - name: db2
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 1Gi
+          nodeSelector:
+            app: db2s.kubedb.com
+            instance: hello
+            namespace: default
+            nodepool: standard-bsv2-family
+          podPlacementPolicy:
+            name: default
+          tolerations:
+            - effect: NoSchedule
+              key: app
+              operator: Equal
+              value: db2s.kubedb.com
+            - effect: NoSchedule
+              key: instance
+              operator: Equal
+              value: hello
+            - effect: NoSchedule
+              key: namespace
+              operator: Equal
+              value: default
+            - effect: NoSchedule
+              key: nodepool
+              operator: Equal
+              value: standard-bsv2-family
+      replicas: 3
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: default
+      storageType: Durable
+      version: 24.4.1
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: db2
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: db2
+          app.kubernetes.io/name: db2s.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: db2-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: db2-config
+      namespace: demo
+    stringData:
+      db2.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque
