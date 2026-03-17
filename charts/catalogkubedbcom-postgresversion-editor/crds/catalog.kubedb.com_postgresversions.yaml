@@ -1,7 +1,6 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   name: postgresversions.catalog.kubedb.com
 spec:
   group: catalog.kubedb.com
@@ -109,7 +108,10 @@ spec:
                 - KubeDB
                 - DocumentDB
                 - PostgreSQL
+                - Percona
                 type: string
+              endOfLife:
+                type: boolean
               exporter:
                 properties:
                   image:
@@ -130,6 +132,23 @@ spec:
                     type: string
                 required:
                 - image
+                type: object
+              migrator:
+                properties:
+                  cli:
+                    properties:
+                      image:
+                        type: string
+                    required:
+                    - image
+                    type: object
+                  statusReporter:
+                    properties:
+                      image:
+                        type: string
+                    required:
+                    - image
+                    type: object
                 type: object
               podSecurityPolicies:
                 properties:
@@ -227,6 +246,7 @@ spec:
               version:
                 type: string
             required:
+            - coordinator
             - db
             - exporter
             - podSecurityPolicies
