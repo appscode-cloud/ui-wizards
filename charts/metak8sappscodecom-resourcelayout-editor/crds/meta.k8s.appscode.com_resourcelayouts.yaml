@@ -1,7 +1,6 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   name: resourcelayouts.meta.k8s.appscode.com
 spec:
   group: meta.k8s.appscode.com
@@ -263,6 +262,16 @@ spec:
                           - type
                           type: object
                         type: array
+                      sort:
+                        properties:
+                          fieldName:
+                            type: string
+                          order:
+                            enum:
+                            - Ascending
+                            - Descending
+                            type: string
+                        type: object
                     type: object
                   width:
                     type: integer
@@ -274,6 +283,8 @@ spec:
               pages:
                 items:
                   properties:
+                    icon:
+                      type: string
                     name:
                       type: string
                     requiredFeatureSets:
@@ -513,6 +524,16 @@ spec:
                                         - type
                                         type: object
                                       type: array
+                                    sort:
+                                      properties:
+                                        fieldName:
+                                          type: string
+                                        order:
+                                          enum:
+                                          - Ascending
+                                          - Descending
+                                          type: string
+                                      type: object
                                   type: object
                                 width:
                                   type: integer
@@ -771,6 +792,16 @@ spec:
                                       - type
                                       type: object
                                     type: array
+                                  sort:
+                                    properties:
+                                      fieldName:
+                                        type: string
+                                      order:
+                                        enum:
+                                        - Ascending
+                                        - Descending
+                                        type: string
+                                    type: object
                                 type: object
                               width:
                                 type: integer
@@ -1006,6 +1037,16 @@ spec:
                                       - type
                                       type: object
                                     type: array
+                                  sort:
+                                    properties:
+                                      fieldName:
+                                        type: string
+                                      order:
+                                        enum:
+                                        - Ascending
+                                        - Descending
+                                        type: string
+                                    type: object
                                 type: object
                               width:
                                 type: integer
@@ -1277,6 +1318,16 @@ spec:
                           - type
                           type: object
                         type: array
+                      sort:
+                        properties:
+                          fieldName:
+                            type: string
+                          order:
+                            enum:
+                            - Ascending
+                            - Descending
+                            type: string
+                        type: object
                     type: object
                   width:
                     type: integer
@@ -1291,6 +1342,8 @@ spec:
                     items:
                       properties:
                         description:
+                          type: string
+                        icon:
                           type: string
                         items:
                           items:
@@ -1337,6 +1390,8 @@ spec:
                                 type: boolean
                               flow:
                                 type: string
+                              icon:
+                                type: string
                               icons:
                                 items:
                                   description: ImageSpec contains information about
@@ -1362,6 +1417,8 @@ spec:
                               name:
                                 type: string
                               operationId:
+                                type: string
+                              partOf:
                                 type: string
                             required:
                             - enforceQuota

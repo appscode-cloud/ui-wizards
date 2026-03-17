@@ -1,7 +1,6 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  creationTimestamp: null
   name: rabbitmqopsrequests.ops.kubedb.com
 spec:
   group: ops.kubedb.com
@@ -34,9 +33,17 @@ spec:
                 properties:
                   secretRef:
                     properties:
-                      name:
+                      apiGroup:
                         default: ""
                         type: string
+                      kind:
+                        default: Secret
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - kind
+                    - name
                     type: object
                     x-kubernetes-map-type: atomic
                 type: object
@@ -55,6 +62,13 @@ spec:
                     x-kubernetes-map-type: atomic
                   removeCustomConfig:
                     type: boolean
+                  restart:
+                    default: auto
+                    enum:
+                    - auto
+                    - "true"
+                    - "false"
+                    type: string
                 type: object
               databaseRef:
                 properties:
@@ -69,6 +83,10 @@ spec:
                     format: int32
                     type: integer
                 type: object
+              maxRetries:
+                default: 1
+                format: int32
+                type: integer
               restart:
                 type: object
               timeout:
