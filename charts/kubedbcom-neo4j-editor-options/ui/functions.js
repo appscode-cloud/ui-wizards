@@ -315,6 +315,10 @@ const modeDetails = {
     description: 'Neo4j Data Guard for high availability, data protection, and disaster recovery',
     text: 'DataGuard',
   },
+  Replicaset: {
+    description: 'Neo4j Replicaset for high availability, data protection, and disaster recovery',
+    text: 'Replicaset',
+  },
 }
 
 export const useFunc = (model) => {
@@ -1014,7 +1018,7 @@ export const useFunc = (model) => {
   function showStorageSizeField() {
     const modelPathValue = getValue(model, '/spec/mode')
     // // // // watchDependency('model#/spec/mode')
-    const validType = []
+    const validType = ['Standalone', 'Replicaset']
     return !validType.includes(modelPathValue)
   }
   function showHidden() {
@@ -1328,6 +1332,7 @@ export const useFunc = (model) => {
 
   function getDefaultValue(path) {
     const val = getValue(model, `/${path}`) || ''
+    console.log({ val }, { path })
     return val
   }
 

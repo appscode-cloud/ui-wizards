@@ -315,7 +315,7 @@ step:
     - if:
         name: isToggleOn|storageClasses
         type: function
-      label: Storage select
+      label: Storage Class
       loader: getAdminOptions|storageClasses
       schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
@@ -356,16 +356,16 @@ step:
         value: getDefault|deletionPolicy
       label: Deletion Policy
       options:
-      - description: options.deletionPolicy.delete.description
+      - description: Keep only database Secrets and backed up data.
         text: Delete
         value: Delete
-      - description: options.deletionPolicy.halt.description
+      - description: 'Keep PVCs, database Secrets and backed up data.'
         text: Halt
         value: Halt
-      - description: options.deletionPolicy.wipeOut.description
+      - description: Delete everything including backed up data.
         text: WipeOut
         value: WipeOut
-      - description: options.deletionPolicy.doNotTerminate.description
+      - description: Prevent deletion of the MongoDB CRD.
         text: DoNotTerminate
         value: DoNotTerminate
       schema: schema/properties/spec/properties/deletionPolicy
@@ -600,9 +600,10 @@ step:
     - if:
         name: isToggleOn|deployment
         type: function
-      label: Deployment
+      isHorizontal: true
+      label: Deployment Mode
       options:
-      - description: shared
+      - description: Shared
         text: Shared
         value: Shared
       - description: Dedicated
@@ -628,7 +629,7 @@ step:
       if:
         name: isToggleOn|clusterTier/placement
         type: function
-      label: labels.placement
+      label: Placement Policy
       loader: getAdminOptions|clusterTier/placement
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
