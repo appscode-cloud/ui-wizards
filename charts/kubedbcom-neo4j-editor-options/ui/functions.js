@@ -728,6 +728,8 @@ export const useFunc = (model) => {
   let nodetopologiesShared = []
   let nodetopologiesDedicated = []
   let features = []
+  let hostName = ''
+  let ip = ''
   async function initBundle() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -759,6 +761,9 @@ export const useFunc = (model) => {
           force: true,
         })
       }
+      const gatewayinfosResp = await axios.get(gatewayinfosurl)
+      hostName = gatewayinfosResp.data?.spec?.hostName
+      ip = gatewayinfosResp.data?.spec?.ip
     } catch (e) {
       console.log(e)
     }
@@ -870,6 +875,7 @@ export const useFunc = (model) => {
     return options
   }
 
+  let backupToolInitialValue = ''
   function checkIfFeatureOn(type) {
     let val = getValue(model, `/spec/admin/${type}/toggle`)
     if (type === 'backup' || type === 'archiver') {
@@ -878,7 +884,17 @@ export const useFunc = (model) => {
     const backupVal = getValue(model, '/spec/backup/tool')
 
     if (type === 'backup') {
-      return features.includes('backup') && backupVal === 'KubeStash' && val
+      if (backupToolInitialValue === '') {
+        backupToolInitialValue =
+          features.includes('backup') && backupVal === 'KubeStash' && val ? 'on' : 'off'
+        return features.includes('backup') && backupVal === 'KubeStash' && val
+      } else {
+        if (backupToolInitialValue === 'on') {
+          return true
+        } else {
+          return false
+        }
+      }
     } else if (type === 'tls') {
       return features.includes('tls') && val
     } else if (type === 'expose') {
@@ -1365,7 +1381,7 @@ export const useFunc = (model) => {
     return checkIfFeatureOn('archiver')
   }
 
-  function checkHostnameOrIP() {
+  function checkHostnameOrIP(type) {
     const tls = getValue(model, '/spec/admin/tls/default')
     const expose = getValue(model, '/spec/admin/expose/default')
     if (tls && expose) {
@@ -1394,6 +1410,7 @@ export const useFunc = (model) => {
         force: true,
       })
     }
+    if (type === 'tls') return tls
   }
 
   function onArchiverChange() {
