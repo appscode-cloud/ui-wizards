@@ -1084,9 +1084,10 @@ export const useFunc = (model) => {
   }
 
   function setAnnounce() {
+    const isAnnounceEnable = getValue(discriminator, '/announce')
     commit('wizard/model$update', {
       path: '/spec/cluster/announce',
-      value: null,
+      value: isAnnounceEnable ? {} : null,
       force: true,
     })
   }
@@ -1265,6 +1266,7 @@ export const useFunc = (model) => {
   function showAnnounce() {
     // watchDependency('discriminator#/announce')
     const isAnnounceEnable = getValue(discriminator, '/announce')
+    setAnnounce()
     return isAnnounceEnable
   }
 
