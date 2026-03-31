@@ -1,314 +1,347 @@
-steps:
-- form:
-    discriminator:
-      isResourceLoaded:
-        default: false
-        type: boolean
-    elements:
-    - computed: setReleaseNameAndNamespaceAndInitializeValues
-      if: returnFalse
-      type: input
-    - discriminator:
-        backupPresetType:
-          type: string
-        enabledFeatures:
-          type: array
-      elements:
-      - alertInfo:
-          show: true
-          type: info
-        label:
-          text: 'Note: Enabling a feature auto enables any prerequisite features'
-        type: label-element
-      - computed: getFeatureSetDescription
-        customClass: mb-20
-        label:
-          isSubsection: true
-        type: label-element
-      - computed: getEnabledFeatures
-        fetch: fetchFeatureSetOptions
-        hasDescription: true
-        individualItemDisabilityCheck: disableFeatures
-        onChange: onEnabledFeaturesChange
-        schema:
-          $ref: discriminator#/properties/enabledFeatures
-        type: checkbox
-      - computed: checkIsResourceLoaded
-        if: hideThisElement
-        type: input
-      - discriminator:
-          isFormOpen:
-            type: boolean
-        elements:
-        - elements:
-          - elements:
-            - elements:
-              - label:
-                  text: labels.backup.type
-                type: label-element
-              - computed: setTool
-                if: returnFalse
-                required: true
-                schema:
-                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/tool
-                type: input
-              - elements:
-                - elements:
-                  - computed: setProvider
-                    label:
-                      text: labels.backend.provider
-                    options:
-                    - text: Azure Blob Storage
-                      value: azure
-                    - text: Google Cloud Service
-                      value: gcs
-                    - text: AWS S3
-                      value: s3
-                    schema:
-                      $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/provider
-                    type: select
-                  - elements:
-                    - discriminator:
-                        s3:
-                          default: false
-                          type: boolean
-                      elements:
-                      - label:
-                          text: labels.backend.bucket
-                        required: true
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/bucket
-                        type: input
-                      - label:
-                          text: labels.backend.endPoint
-                        required: true
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/endpoint
-                        type: input
-                      - label:
-                          text: labels.backend.insecureTLS
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/insecureTLS
-                        type: input
-                      - label:
-                          text: labels.backend.prefix
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/prefix
-                        type: input
-                      - label:
-                          text: labels.backend.region
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/region
-                        type: input
-                      schema:
-                        $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec
-                      type: single-step-form
-                    - computed: setStorageSecret
-                      label:
-                        text: labels.kubestash.storageSecret.switch
-                      onChange: onAuthChange|s3
-                      schema:
-                        $ref: discriminator#/s3
-                      type: switch
-                    - elements:
-                      - label:
-                          text: labels.backend.s3.access_key_id
-                        required: true
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
-                        type: input
-                      - label:
-                          text: labels.backend.s3.secret_access_key
-                        required: true
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
-                        type: input
-                      - label:
-                          text: labels.backend.s3.ca_cert_data
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
-                        type: input
-                      if: authEnabled
-                      label:
-                        text: labels.kubestash.storageSecret.label
-                      schema:
-                        $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth
-                      show_label: true
-                      type: single-step-form
-                    if: providerType|s3
-                    schema:
-                      $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3
-                    type: single-step-form
-                  - elements:
-                    - discriminator:
-                        azure:
-                          default: false
-                          type: boolean
-                      elements:
-                      - label:
-                          text: labels.backend.container
-                        required: true
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/container
-                        type: input
-                      - label:
-                          text: labels.backend.max_connections
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/maxConnections
-                        type: input
-                      - label:
-                          text: labels.backend.prefix
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/prefix
-                        type: input
-                      schema:
-                        $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec
-                      type: single-step-form
-                    - computed: setStorageSecret
-                      label:
-                        text: labels.kubestash.storageSecret.switch
-                      onChange: onAuthChange|azure
-                      schema:
-                        $ref: discriminator#/azure
-                      type: switch
-                    - elements:
-                      - label:
-                          text: labels.backend.azure.account_name
-                        required: true
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
-                        type: input
-                      - label:
-                          text: labels.backend.azure.account_key
-                        required: true
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
-                        type: input
-                      if: authEnabled
-                      label:
-                        text: labels.kubestash.storageSecret.label
-                      schema:
-                        $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth
-                      show_label: true
-                      type: single-step-form
-                    if: providerType|azure
-                    schema:
-                      $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure
-                    type: single-step-form
-                  - elements:
-                    - discriminator:
-                        gcs:
-                          default: false
-                          type: boolean
-                      elements:
-                      - elements:
-                        - label:
-                            text: labels.backend.bucket
-                          required: true
-                          schema:
-                            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/bucket
-                          type: input
-                        - label:
-                            text: labels.backend.max_connections
-                          schema:
-                            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
-                          type: input
-                        - label:
-                            text: labels.backend.prefix
-                          schema:
-                            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/prefix
-                          type: input
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec
-                        type: single-step-form
-                      type: single-step-form
-                    - computed: setStorageSecret
-                      label:
-                        text: labels.kubestash.storageSecret.switch
-                      onChange: onAuthChange|gcs
-                      schema:
-                        $ref: discriminator#/gcs
-                      type: switch
-                    - elements:
-                      - label:
-                          text: labels.backend.gcs.project_id
-                        required: true
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
-                        type: input
-                      - label:
-                          text: labels.backend.gcs.service_account
-                        required: true
-                        schema:
-                          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
-                        type: input
-                      if: authEnabled
-                      label:
-                        text: labels.kubestash.storageSecret.label
-                      schema:
-                        $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth
-                      show_label: true
-                      type: single-step-form
-                    if: providerType|gcs
-                    schema:
-                      $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs
-                    type: single-step-form
-                  schema:
-                    $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend
-                  type: single-step-form
-                - elements:
-                  - if: returnFalse
-                    label:
-                      text: labels.kubestash.storageSecret
-                    schema:
-                      $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/storageSecret/properties/create
-                    type: switch
-                  schema:
-                    $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/storageSecret
-                  type: single-step-form
-                - label:
-                    text: labels.kubestash.encryptionSecret
-                  required: true
-                  schema:
-                    $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/encryptionSecret
-                  type: input
-                - label:
-                    text: labels.kubestash.retentionPolicy
-                  options:
-                  - text: Keep 1 week
-                    value: keep-1wk
-                  - text: Keep 1 Month
-                    value: keep-1mo
-                  - text: Keep 3 Month
-                    value: keep-3mo
-                  - text: Keep 1 Year
-                    value: keep-1yr
-                  required: true
-                  schema:
-                    $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/retentionPolicy
-                  type: select
-                - label:
-                    text: labels.kubestash.schedule
-                  schema:
-                    $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/schedule
-                  type: input
-                if: presetType|kubestash
-                schema:
-                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash
-                type: single-step-form
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values
-              type: single-step-form
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec
-            type: single-step-form
-          if: isStashPreset
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets
-          type: single-step-form
-        type: single-step-form
-      type: single-step-form
-    type: single-step-form
+step:
+- loader: setReleaseNameAndNamespaceAndInitializeValues
+  type: single-step-form
   id: opscenter-backup
-  title: steps.0.label
+  elements:
+  - type: checkbox
+    schema: temp/properties/enabledFeatures
+    label: ''
+    loader: fetchFeatureSetOptions
+    init:
+      type: func
+      value: getEnabledFeatures
+    watcher:
+      func: onEnabledFeaturesChange
+      paths:
+        - temp/properties/enabledFeatures
+  - type: info
+    label: 'Note: Enabling a feature auto enables any prerequisite features'
+    watcher:
+      func: checkIsResourceLoaded
+      paths:
+        - temp/properties/isResourceLoaded
+  - type: select
+    label: Backend Provider
+    options:
+    - text: Azure Blob Storage
+      value: azure
+    - text: Google Cloud Service
+      value: gcs
+    - text: AWS S3
+      value: s3
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/provider
 type: multi-step-form
+# steps:
+# - form:
+#     discriminator:
+#       isResourceLoaded:
+#         default: false
+#         type: boolean
+#     elements:
+#     - computed: setReleaseNameAndNamespaceAndInitializeValues
+#       if: returnFalse
+#       type: input
+#     - discriminator:
+#         backupPresetType:
+#           type: string
+#         enabledFeatures:
+#           type: array
+#       elements:
+#       - alertInfo:
+#           show: true
+#           type: info
+#         label:
+#           text: 'Note: Enabling a feature auto enables any prerequisite features'
+#         type: label-element
+#       - computed: getFeatureSetDescription
+#         customClass: mb-20
+#         label:
+#           isSubsection: true
+#         type: label-element
+#       - computed: getEnabledFeatures
+#         fetch: fetchFeatureSetOptions
+#         hasDescription: true
+#         individualItemDisabilityCheck: disableFeatures
+#         onChange: onEnabledFeaturesChange
+#         schema:
+#           $ref: discriminator#/properties/enabledFeatures
+#         type: checkbox
+#       - computed: checkIsResourceLoaded
+#         if: hideThisElement
+#         type: input
+#       - discriminator:
+#           isFormOpen:
+#             type: boolean
+#         elements:
+#         - elements:
+#           - elements:
+#             - elements:
+#               - label:
+#                   text: labels.backup.type
+#                 type: label-element
+#               - computed: setTool
+#                 if: returnFalse
+#                 required: true
+#                 schema:
+#                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/tool
+#                 type: input
+#               - elements:
+#                 - elements:
+#                   - computed: setProvider
+#                     label:
+#                       text: labels.backend.provider
+#                     options:
+#                     - text: Azure Blob Storage
+#                       value: azure
+#                     - text: Google Cloud Service
+#                       value: gcs
+#                     - text: AWS S3
+#                       value: s3
+#                     schema:
+#                       $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/provider
+#                     type: select
+#                   - elements:
+#                     - discriminator:
+#                         s3:
+#                           default: false
+#                           type: boolean
+#                       elements:
+#                       - label:
+#                           text: labels.backend.bucket
+#                         required: true
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/bucket
+#                         type: input
+#                       - label:
+#                           text: labels.backend.endPoint
+#                         required: true
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/endpoint
+#                         type: input
+#                       - label:
+#                           text: labels.backend.insecureTLS
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/insecureTLS
+#                         type: input
+#                       - label:
+#                           text: labels.backend.prefix
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/prefix
+#                         type: input
+#                       - label:
+#                           text: labels.backend.region
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/region
+#                         type: input
+#                       schema:
+#                         $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec
+#                       type: single-step-form
+#                     - computed: setStorageSecret
+#                       label:
+#                         text: labels.kubestash.storageSecret.switch
+#                       onChange: onAuthChange|s3
+#                       schema:
+#                         $ref: discriminator#/s3
+#                       type: switch
+#                     - elements:
+#                       - label:
+#                           text: labels.backend.s3.access_key_id
+#                         required: true
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
+#                         type: input
+#                       - label:
+#                           text: labels.backend.s3.secret_access_key
+#                         required: true
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
+#                         type: input
+#                       - label:
+#                           text: labels.backend.s3.ca_cert_data
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
+#                         type: input
+#                       if: authEnabled
+#                       label:
+#                         text: labels.kubestash.storageSecret.label
+#                       schema:
+#                         $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth
+#                       show_label: true
+#                       type: single-step-form
+#                     if: providerType|s3
+#                     schema:
+#                       $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3
+#                     type: single-step-form
+#                   - elements:
+#                     - discriminator:
+#                         azure:
+#                           default: false
+#                           type: boolean
+#                       elements:
+#                       - label:
+#                           text: labels.backend.container
+#                         required: true
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/container
+#                         type: input
+#                       - label:
+#                           text: labels.backend.max_connections
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/maxConnections
+#                         type: input
+#                       - label:
+#                           text: labels.backend.prefix
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/prefix
+#                         type: input
+#                       schema:
+#                         $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec
+#                       type: single-step-form
+#                     - computed: setStorageSecret
+#                       label:
+#                         text: labels.kubestash.storageSecret.switch
+#                       onChange: onAuthChange|azure
+#                       schema:
+#                         $ref: discriminator#/azure
+#                       type: switch
+#                     - elements:
+#                       - label:
+#                           text: labels.backend.azure.account_name
+#                         required: true
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
+#                         type: input
+#                       - label:
+#                           text: labels.backend.azure.account_key
+#                         required: true
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
+#                         type: input
+#                       if: authEnabled
+#                       label:
+#                         text: labels.kubestash.storageSecret.label
+#                       schema:
+#                         $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth
+#                       show_label: true
+#                       type: single-step-form
+#                     if: providerType|azure
+#                     schema:
+#                       $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure
+#                     type: single-step-form
+#                   - elements:
+#                     - discriminator:
+#                         gcs:
+#                           default: false
+#                           type: boolean
+#                       elements:
+#                       - elements:
+#                         - label:
+#                             text: labels.backend.bucket
+#                           required: true
+#                           schema:
+#                             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/bucket
+#                           type: input
+#                         - label:
+#                             text: labels.backend.max_connections
+#                           schema:
+#                             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
+#                           type: input
+#                         - label:
+#                             text: labels.backend.prefix
+#                           schema:
+#                             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/prefix
+#                           type: input
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec
+#                         type: single-step-form
+#                       type: single-step-form
+#                     - computed: setStorageSecret
+#                       label:
+#                         text: labels.kubestash.storageSecret.switch
+#                       onChange: onAuthChange|gcs
+#                       schema:
+#                         $ref: discriminator#/gcs
+#                       type: switch
+#                     - elements:
+#                       - label:
+#                           text: labels.backend.gcs.project_id
+#                         required: true
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
+#                         type: input
+#                       - label:
+#                           text: labels.backend.gcs.service_account
+#                         required: true
+#                         schema:
+#                           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+#                         type: input
+#                       if: authEnabled
+#                       label:
+#                         text: labels.kubestash.storageSecret.label
+#                       schema:
+#                         $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth
+#                       show_label: true
+#                       type: single-step-form
+#                     if: providerType|gcs
+#                     schema:
+#                       $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs
+#                     type: single-step-form
+#                   schema:
+#                     $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend
+#                   type: single-step-form
+#                 - elements:
+#                   - if: returnFalse
+#                     label:
+#                       text: labels.kubestash.storageSecret
+#                     schema:
+#                       $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/storageSecret/properties/create
+#                     type: switch
+#                   schema:
+#                     $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/storageSecret
+#                   type: single-step-form
+#                 - label:
+#                     text: labels.kubestash.encryptionSecret
+#                   required: true
+#                   schema:
+#                     $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/encryptionSecret
+#                   type: input
+#                 - label:
+#                     text: labels.kubestash.retentionPolicy
+#                   options:
+#                   - text: Keep 1 week
+#                     value: keep-1wk
+#                   - text: Keep 1 Month
+#                     value: keep-1mo
+#                   - text: Keep 3 Month
+#                     value: keep-3mo
+#                   - text: Keep 1 Year
+#                     value: keep-1yr
+#                   required: true
+#                   schema:
+#                     $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/retentionPolicy
+#                   type: select
+#                 - label:
+#                     text: labels.kubestash.schedule
+#                   schema:
+#                     $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/schedule
+#                   type: input
+#                 if: presetType|kubestash
+#                 schema:
+#                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash
+#                 type: single-step-form
+#               schema:
+#                 $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values
+#               type: single-step-form
+#             schema:
+#               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec
+#             type: single-step-form
+#           if: isStashPreset
+#           schema:
+#             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets
+#           type: single-step-form
+#         type: single-step-form
+#       type: single-step-form
+#     type: single-step-form
+#   id: opscenter-backup
+#   title: steps.0.label
+# type: multi-step-form
