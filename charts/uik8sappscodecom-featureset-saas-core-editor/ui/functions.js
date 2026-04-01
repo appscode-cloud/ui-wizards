@@ -367,6 +367,31 @@ export const useFunc = (model) => {
     }
   }
 
+  function checkDnsProvider(provider) {
+    const selectedProvider = getValue(
+      model,
+      '/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/dns/provider',
+    )
+    return selectedProvider === provider
+  }
+
+  function checkIssuer(issuer) {
+    const selectedIssuer = getValue(
+      model,
+      '/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/tls/issuer',
+    )
+    return selectedIssuer === issuer
+  }
+
+  function isServiceGatewaySelected() {
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    if (enabledFeatures?.find((service) => service === 'service-gateway-presets')) return true
+    else return false
+  }
+
+  function returnProvider() {
+    return 'none'
+  }
   return {
     hideThisElement,
     checkIsResourceLoaded,
@@ -380,5 +405,9 @@ export const useFunc = (model) => {
     returnFalse,
     setReleaseNameAndNamespaceAndInitializeValues,
     fetchFeatureSetOptions,
+    isServiceGatewaySelected,
+    returnProvider,
+    checkDnsProvider,
+    checkIssuer,
   }
 }
