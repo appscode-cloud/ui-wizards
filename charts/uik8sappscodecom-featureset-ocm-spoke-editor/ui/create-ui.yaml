@@ -14,67 +14,57 @@ step:
       func: onEnabledFeaturesChange
       paths:
         - temp/properties/enabledFeatures
-  - type: select
-    customClass: mt-16
-    multiple: true
-    schema: temp/properties/enabledTypes
-    label: Select Database Types
-    loader: getDatabaseTypes
-    init:
-      type: func
-      value: getEnabledTypes
-    if:
-      type: function
-      name: isKubedbSelected
-    watcher:
-      func: onTypeUpdate
-      paths:
-        - temp/properties/enabledTypes
   - type: info
     label: 'Note: Enabling a feature auto enables any prerequisite features'
+    customClass: mt-24
     watcher:
       func: checkIsResourceLoaded
       paths:
         - temp/properties/isResourceLoaded
-  - type: label-element
-    label: Hub Information
-  - type: select
-    label: Select Hub
-    loader: getHubList
-    schema: temp/properties/hubName
-    validation:
-      type: required
-    watcher:
-      func: onHubChange
-      paths:
-        - temp/properties/hubName
-  - type: input
-    label: Api Server
-    disable: true
+  - type: block-layout
     if:
-      name: isHubSelected
+      name: checkSpokeComponent
       type: function
-    schema: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/apiServer
-    validation:
-      type: required
-  - type: input
-    label: Token
-    disable: true
-    if:
-      name: isHubSelected
-      type: function
-    schema: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/token
-    validation:
-      type: required
-  - type: label-element
-    label: Spoke Information
-  - type: input
-    label: Cluster Name
-    description: 'Cluster Name Must not Be Same As any Managed Cluster '
-    init:
-      type: func
-      value: getClusterName
-    schema: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/clusterMetadata/properties/name
-    validation:
-      type: required
+    elements:
+    - type: label-element
+      label: Hub Information
+    - type: select
+      label: Select Hub
+      loader: getHubList
+      schema: temp/properties/hubName
+      validation:
+        type: required
+      watcher:
+        func: onHubChange
+        paths:
+          - temp/properties/hubName
+    - type: input
+      label: Api Server
+      disable: true
+      if:
+        name: isHubSelected
+        type: function
+      schema: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/apiServer
+      validation:
+        type: required
+    - type: input
+      label: Token
+      disable: true
+      if:
+        name: isHubSelected
+        type: function
+      schema: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/token
+      validation:
+        type: required
+    - type: label-element
+      label: Spoke Information
+    - type: input
+      label: Cluster Name
+      description: 'Cluster Name Must not Be Same As any Managed Cluster '
+      init:
+        type: func
+        value: getClusterName
+      schema: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/clusterMetadata/properties/name
+      validation:
+        type: required
 type: multi-step-form

@@ -41,8 +41,6 @@ export const useFunc = (model) => {
   }
 
   function isEqualToModelPathValue(path, value) {
-    watchDependency(`model#${path}`)
-
     const modelValue = getValue(model, path)
     return modelValue === value
   }
@@ -154,8 +152,6 @@ export const useFunc = (model) => {
   }
 
   function disableFeatures(itemCtx) {
-    watchDependency('discriminator#/isResourceLoaded')
-
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (!isResourceLoaded) return true
 
@@ -337,7 +333,6 @@ export const useFunc = (model) => {
   // this computed's main purpose is to watch isResourceLoaded flag
   // and fire the onEnabledFeatureChange function when it's true
   function checkIsResourceLoaded() {
-    watchDependency('discriminator#/isResourceLoaded')
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (isResourceLoaded) {
       onEnabledFeaturesChange()
@@ -346,7 +341,6 @@ export const useFunc = (model) => {
 
   function checkSpokeComponent() {
     const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
-    watchDependency('discriminator#/enabledFeatures')
     if (enabledFeatures.includes('cluster-manager-spoke')) return true
     else return false
   }
@@ -386,10 +380,8 @@ export const useFunc = (model) => {
   }
 
   function isHubSelected() {
-    watchDependency(
-      'model#/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/token',
-    )
     const hubName = getValue(discriminator, '/hubName')
+    console.log(hubName)
 
     if (hubName !== undefined && hubName !== '') {
       return true
