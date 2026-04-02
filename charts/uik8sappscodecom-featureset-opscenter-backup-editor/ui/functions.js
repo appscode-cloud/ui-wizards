@@ -9,8 +9,6 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/enabledFeatures', [])
   setDiscriminatorValue('/isResourceLoaded', false)
   let resources = {}
-  // *************************      common functions ********************************************
-  // eslint-disable-next-line no-empty-pattern
   let enabledFeaturesChanged = false
   const backendMap = {
     azure: {

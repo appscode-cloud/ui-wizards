@@ -1,88 +1,74 @@
-steps:
-- form:
-    discriminator:
-      isResourceLoaded:
-        default: false
-        type: boolean
+step:
+- loader: setReleaseNameAndNamespaceAndInitializeValues
+  type: single-step-form
+  id: opscenter-datastore
+  elements:
+  - type: checkbox
+    schema: temp/properties/enabledFeatures
+    label: ''
+    loader: fetchFeatureSetOptions
+    init:
+      type: func
+      value: getEnabledFeatures
+    watcher:
+      func: onEnabledFeaturesChange
+      paths:
+        - temp/properties/enabledFeatures
+  - type: info
+    label: 'Note: Enabling a feature auto enables any prerequisite features'
+    customClass: mt-24
+    watcher:
+      func: checkIsResourceLoaded
+      paths:
+        - temp/properties/isResourceLoaded
+  - type: block-layout
+    if:
+      name: checkSpokeComponent
+      type: function
     elements:
-    - computed: setReleaseNameAndNamespaceAndInitializeValues
-      if: returnFalse
-      type: input
-    - discriminator:
-        enabledFeatures:
-          type: array
-      elements:
-      - computed: getFeatureSetDescription
-        customClass: mb-20
-        label:
-          isSubsection: true
-        type: label-element
-      - computed: getEnabledFeatures
-        fetch: fetchFeatureSetOptions
-        hasDescription: true
-        individualItemDisabilityCheck: disableFeatures
-        onChange: onEnabledFeaturesChange
-        schema:
-          $ref: discriminator#/properties/enabledFeatures
-        type: checkbox
-      - computed: checkIsResourceLoaded
-        if: hideThisElement
-        type: input
-      - alertInfo:
-          show: true
-          type: info
-        label:
-          text: 'Note: Enabling a feature auto enables any prerequisite features'
-        type: label-element
-      - discriminator:
-          hubName:
-            type: string
-        elements:
-        - label:
-            text: labels.spoke.hubInfo
-          type: label-element
-        - fetch: getHubList
-          label:
-            text: labels.selectHub
-          onChange: onHubChange
-          required: true
-          schema:
-            $ref: discriminator#/properties/hubName
-          type: select
-        - disabled: true
-          if: isHubSelected
-          label:
-            text: labels.spoke.apiServer
-          required: true
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/apiServer
-          type: input
-        - disabled: true
-          if: isHubSelected
-          label:
-            text: labels.spoke.token
-          required: true
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/token
-          type: input
-        - label:
-            text: labels.spoke.clusterInfo
-          type: label-element
-        - computed: getClusterName
-          description:
-            text: 'Cluster Name Must not Be Same As any Managed Cluster '
-          label:
-            text: labels.spoke.cluster
-          required: true
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/clusterMetadata/properties/name
-          type: input
-        if: checkSpokeComponent
-        schema:
-          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke
-        type: single-step-form
-      type: single-step-form
-    type: single-step-form
-  id: opscenter-core
-  title: steps.0.label
+    - type: label-element
+      label: Hub Information
+    - type: select
+      label: Select Hub
+      loader: getHubList
+      schema: temp/properties/hubName
+      validation:
+        type: required
+    - type: input
+      loader:
+        name: getHubInfo|apiServer
+        watchPaths:
+          - temp/properties/hubName
+      label: Api Server
+      disable: true
+      if:
+        name: isHubSelected
+        type: function
+      schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/apiServer
+      validation:
+        type: required
+    - type: input
+      loader:
+        name: getHubInfo|apiServer
+        watchPaths:
+          - temp/properties/hubName
+      label: Token
+      disable: true
+      if:
+        name: isHubSelected
+        type: function
+      schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/token
+      validation:
+        type: required
+    - type: label-element
+      label: Spoke Information
+    - type: input
+      label: Cluster Name
+      description: 'Cluster Name Must not Be Same As any Managed Cluster '
+      init:
+        type: func
+        value: getClusterName
+      schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/clusterMetadata/properties/name
+      validation:
+        type: required
 type: multi-step-form
