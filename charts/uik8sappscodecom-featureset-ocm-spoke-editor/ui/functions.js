@@ -351,16 +351,15 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const resp = await axios.get(`/clustersv2/${owner}/hub-info`)
 
-    hubData = Object.entries(resp.data).map(([name, info]) => ({
-      name,
-      apiServer: info.apiServer,
-      token: info.token,
-    }))
+    hubData = [{ name: 'yo', apiServer: 'https://api-server-url', token: 'token-value' }]
+    console.log(hubData)
+
     return hubData.map((item) => item.name)
   }
 
   function onHubChange() {
     const hubName = getValue(discriminator, '/hubName')
+    console.log(hubName)
 
     hubData.forEach((item) => {
       if (item.name === hubName) {
@@ -379,9 +378,16 @@ export const useFunc = (model) => {
     })
   }
 
+  function getHubInfo(type) {
+    const hubName = getValue(discriminator, '/hubName')
+    const hubInfo = hubData.find((item) => item.name === hubName) || {}
+    if (type === 'apiServer') return hubInfo.apiServer || ''
+    if (type === 'token') return hubInfo.token || ''
+    return ''
+  }
+
   function isHubSelected() {
     const hubName = getValue(discriminator, '/hubName')
-    console.log(hubName)
 
     if (hubName !== undefined && hubName !== '') {
       return true
@@ -411,5 +417,6 @@ export const useFunc = (model) => {
     onHubChange,
     isHubSelected,
     getClusterName,
+    getHubInfo,
   }
 }

@@ -34,26 +34,30 @@ step:
       schema: temp/properties/hubName
       validation:
         type: required
-      watcher:
-        func: onHubChange
-        paths:
-          - temp/properties/hubName
     - type: input
+      loader:
+        name: getHubInfo|apiServer
+        watchPaths:
+          - temp/properties/hubName
       label: Api Server
       disable: true
       if:
         name: isHubSelected
         type: function
-      schema: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/apiServer
+      schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/apiServer
       validation:
         type: required
     - type: input
+      loader:
+        name: getHubInfo|apiServer
+        watchPaths:
+          - temp/properties/hubName
       label: Token
       disable: true
       if:
         name: isHubSelected
         type: function
-      schema: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/token
+      schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/token
       validation:
         type: required
     - type: label-element
@@ -64,7 +68,7 @@ step:
       init:
         type: func
         value: getClusterName
-      schema: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/clusterMetadata/properties/name
+      schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/clusterMetadata/properties/name
       validation:
         type: required
 type: multi-step-form
