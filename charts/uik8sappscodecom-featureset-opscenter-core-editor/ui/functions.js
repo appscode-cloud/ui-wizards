@@ -103,6 +103,7 @@ export const useFunc = (model) => {
         checkedFeatures.map((item) => {
           return item.name
         }) || []
+
       checkedFeatureName.push(featureBlock)
       return checkedFeatureName
     }
@@ -162,6 +163,15 @@ export const useFunc = (model) => {
 
     // extreme special case for OCM featureSet
     if (featureSet === 'opscenter-core' && getRoute?.fullPath?.includes('/hubs/')) {
+      if (featureBlock === 'aceshifter') {
+        return [
+          'aceshifter',
+          'flux2',
+          'kube-ui-server',
+          'license-proxyserver',
+          'opscenter-features',
+        ]
+      }
       return ['flux2', 'kube-ui-server', 'license-proxyserver', 'opscenter-features']
     }
 
@@ -195,16 +205,18 @@ export const useFunc = (model) => {
     }
   }
 
-  function disableFeatures() {
+  function disableFeatures(value) {
     // watchDependency('discriminator#/isResourceLoaded')
 
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (!isResourceLoaded) return true
 
-    const featureName = itemCtx.value
+    const featureName = value
 
+    const getRoute = storeGet('/route')
     let featureSet = {}
     let requiredFeatures = []
+
     if (getRoute.fullPath.includes('/hubs/')) {
       featureSet = getFeatureSetDetailsOcm()
       requiredFeatures = featureSet?.requiredFeatures || []

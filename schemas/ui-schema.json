@@ -124,6 +124,12 @@
             "box": {
               "type": "boolean"
             },
+            "code": {
+              "type": "string"
+            },
+            "codeContent": {
+              "$ref": "#/definitions/CodeCard"
+            },
             "customClass": {
               "type": "string"
             },
@@ -165,10 +171,22 @@
             "fullwidth": {
               "type": "boolean"
             },
+            "hasCopy": {
+              "type": "boolean"
+            },
+            "hasCrossIcon": {
+              "type": "boolean"
+            },
             "hasGroup": {
               "type": ["boolean", "string"]
             },
             "hasIcon": {
+              "type": "boolean"
+            },
+            "hasPrimaryOutline": {
+              "type": "boolean"
+            },
+            "hasTextCopy": {
               "type": "boolean"
             },
             "header": {
@@ -185,6 +203,9 @@
             },
             "if": {
               "$ref": "#/definitions/IfType"
+            },
+            "individualDisability": {
+              "$ref": "#/definitions/LoaderType"
             },
             "init": {
               "$ref": "#/definitions/Init"
@@ -250,7 +271,8 @@
                 "multi-file-editor",
                 "time-picker",
                 "threshold-input",
-                "input-compare"
+                "input-compare",
+                "code-card"
               ],
               "type": "string"
             },
@@ -479,6 +501,9 @@
         },
         {
           "$ref": "#/definitions/InputCompare"
+        },
+        {
+          "$ref": "#/definitions/CodeCard"
         }
       ]
     },
@@ -570,6 +595,9 @@
         "if": {
           "$ref": "#/definitions/IfType"
         },
+        "individualDisability": {
+          "$ref": "#/definitions/LoaderType"
+        },
         "init": {
           "$ref": "#/definitions/Init"
         },
@@ -600,6 +628,69 @@
         }
       },
       "required": ["label", "schema", "type"],
+      "type": "object"
+    },
+    "CodeCard": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "customClass": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "disable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/definitions/LoaderType"
+            }
+          ]
+        },
+        "hasCopy": {
+          "type": "boolean"
+        },
+        "hasPrimaryOutline": {
+          "type": "boolean"
+        },
+        "hasTextCopy": {
+          "type": "boolean"
+        },
+        "if": {
+          "$ref": "#/definitions/IfType"
+        },
+        "init": {
+          "$ref": "#/definitions/Init"
+        },
+        "label": {
+          "type": "string"
+        },
+        "loader": {
+          "$ref": "#/definitions/LoaderType"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "type": {
+          "const": "code-card",
+          "type": "string"
+        },
+        "validation": {
+          "$ref": "#/definitions/Validation"
+        },
+        "watcher": {
+          "$ref": "#/definitions/Watchers"
+        }
+      },
+      "required": ["type"],
       "type": "object"
     },
     "DerivedElement": {
@@ -899,6 +990,9 @@
         "box": {
           "type": "boolean"
         },
+        "codeContent": {
+          "$ref": "#/definitions/CodeCard"
+        },
         "customClass": {
           "type": "string"
         },
@@ -914,6 +1008,9 @@
               "$ref": "#/definitions/LoaderType"
             }
           ]
+        },
+        "hasCrossIcon": {
+          "type": "boolean"
         },
         "hasIcon": {
           "type": "boolean"

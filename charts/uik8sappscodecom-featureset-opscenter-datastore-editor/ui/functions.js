@@ -188,7 +188,7 @@ export const useFunc = (model) => {
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (!isResourceLoaded) return true
 
-    const featureName = itemCtx.value
+    const featureName = value
     const featureSet = getFeatureSetDetails()
     const requiredFeatures = featureSet?.spec?.requiredFeatures || []
 
