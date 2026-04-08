@@ -183,7 +183,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function disableFeatures() {
+  function disableFeatures(value) {
     // watchDependency('discriminator#/isResourceLoaded')
 
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')

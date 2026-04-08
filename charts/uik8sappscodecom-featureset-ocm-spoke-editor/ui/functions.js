@@ -151,7 +151,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function disableFeatures(itemCtx) {
+  function disableFeatures(value) {
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (!isResourceLoaded) return true
 

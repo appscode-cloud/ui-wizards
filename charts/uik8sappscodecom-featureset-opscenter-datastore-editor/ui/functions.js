@@ -182,7 +182,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function disableFeatures() {
+  function disableFeatures(value) {
     // watchDependency('discriminator#/isResourceLoaded')
 
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
@@ -460,7 +460,16 @@ export const useFunc = (model) => {
             if (value === true) enabledTypes.push(key)
             allAvailableTypes.push(key)
           }
-        }
+        } else
+          enabledTypes = [
+            'Elasticsearch',
+            'Kafka',
+            'MariaDB',
+            'MongoDB',
+            'MySQL',
+            'Postgres',
+            'Redis',
+          ]
       } catch (e) {
         console.log(e)
       }
@@ -507,8 +516,6 @@ export const useFunc = (model) => {
 
   function getEnabledTypes() {
     const enabledTypes = getValue(discriminator, '/enabledTypes') || []
-    console.log(enabledTypes)
-
     return enabledTypes
   }
 
