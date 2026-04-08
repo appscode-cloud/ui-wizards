@@ -26,14 +26,10 @@ step:
     loader: getAdminOptions|databases/Qdrant/mode
     schema: schema/properties/spec/properties/mode
     type: radio
-    watcher:
-      func: toggleTls
-      paths:
-      - schema/properties/spec/properties/mode
   - if:
-      name: isEqualToModelPathValue|Replicaset|/spec/mode
+      name: isEqualToModelPathValue|Distributed|/spec/mode
       type: function
-    label: Replica number
+    label: Replicas
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:
@@ -88,18 +84,22 @@ step:
     showLabels: true
     type: block-layout
   - elements:
-    - if:
-        name: isToggleOn|storageClasses
-        type: function
-      label: Storage Class
-      loader: getAdminOptions|storageClasses
-      schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-      type: select
-    - label: Storage Size
-      schema: schema/properties/spec/properties/persistence/properties/size
-      type: input
-    showLabels: true
-    type: horizontal-layout
+    - elements:
+      - if:
+          name: isToggleOn|storageClasses
+          type: function
+        label: Storage Class
+        loader: getAdminOptions|storageClasses
+        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+        type: select
+      - label: Storage Size
+        schema: schema/properties/spec/properties/persistence/properties/size
+        type: input
+        validation:
+          type: required
+      showLabels: true
+      type: horizontal-layout
+    type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
@@ -196,6 +196,12 @@ step:
       label: Configuration
       schema: schema/properties/spec/properties/configuration
       type: textarea
+    - label: Disable Security?
+      schema: schema/properties/spec/properties/disableSecurity
+      type: switch
+    - label: Halt Database?
+      schema: schema/properties/spec/properties/halted
+      type: switch
     - if:
         name: isToggleOn|deployment
         type: function
@@ -245,8 +251,39 @@ step:
     type: block-layout
   - description: Enable Backup, Monitoring, TLS etc.
     elements:
+    - elements:
+      - init:
+          type: func
+          value: setMonitoring
+        label: Enable Monitoring?
+        schema: temp/monitoring
+        type: switch
+        watcher:
+          func: updateAlertValue
+          paths:
+          - temp/monitoring
+      - customClass: mt-10
+        if:
+          name: showAlerts
+          type: function
+        label: Alert Options
+        options:
+        - text: None
+          value: none
+        - text: Critical
+          value: critical
+        - text: Warning
+          value: warning
+        - text: Info
+          value: info
+        schema: schema/properties/form/properties/alert/properties/enabled
+        type: select
+      if:
+        name: isToggleOn|monitoring
+        type: function
+      type: block-layout
     - if:
-        name: returnFalse
+        name: isToggleOn|backup
         type: function
       init:
         type: func
@@ -277,23 +314,13 @@ step:
         label: The selected StorageClass does not support Archiver
         type: warning
       if:
-        name: returnFalse
+        name: showArchiver
         type: function
       type: block-layout
     - elements:
-      - if:
-          name: returnFalse
-          type: function
-        init:
-          type: func
-          value: checkHostnameOrIP
-        label: Enable TLS?
+      - label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
-        watcher:
-          func: checkHostnameOrIP
-          paths:
-          - schema/properties/spec/properties/admin/properties/tls/properties/default
       - if:
           name: showIssuer
           type: function
@@ -303,21 +330,29 @@ step:
         type: select
         validation:
           type: required
+      - if:
+          name: showTlsDetails
+          type: function
+        label: Enable Client TLS?
+        schema: schema/properties/spec/properties/tls/properties/client
+        type: switch
+      - if:
+          name: showTlsDetails
+          type: function
+        label: Enable P2P TLS?
+        schema: schema/properties/spec/properties/tls/properties/p2p
+        type: switch
+      if:
+        name: isToggleOn|tls
+        type: function
       type: block-layout
     - elements:
-      - if:
-          name: isToggleOn|expose
-          type: function
-        init:
-          type: func
-          value: checkHostnameOrIP
-        label: Expose via Gateway?
+      - label: Expose via Gateway?
         schema: schema/properties/spec/properties/admin/properties/expose/properties/default
         type: switch
-        watcher:
-          func: checkHostnameOrIP
-          paths:
-          - schema/properties/spec/properties/admin/properties/expose/properties/default
+      if:
+        name: isToggleOn|expose
+        type: function
       type: block-layout
     if:
       name: showAdditionalSettings
