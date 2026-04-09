@@ -95,7 +95,10 @@ step:
       loader: getAdminOptions|storageClasses
       schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
-    - label: Storage Size
+    - if:
+        name: showStorageSizeField
+        type: function
+      label: Storage Size
       schema: schema/properties/spec/properties/persistence/properties/size
       type: input
     showLabels: true
@@ -129,16 +132,16 @@ step:
         value: getDefault|deletionPolicy
       label: Deletion Policy
       options:
-      - description: options.deletionPolicy.delete.description
+      - description: Keep only database Secrets and backed up data.
         text: Delete
         value: Delete
-      - description: options.deletionPolicy.halt.description
+      - description: 'Keep PVCs, database Secrets and backed up data.'
         text: Halt
         value: Halt
-      - description: options.deletionPolicy.wipeOut.description
+      - description: Delete everything including backed up data.
         text: WipeOut
         value: WipeOut
-      - description: options.deletionPolicy.doNotTerminate.description
+      - description: Prevent deletion of the Singlestore CRD.
         text: DoNotTerminate
         value: DoNotTerminate
       schema: schema/properties/spec/properties/deletionPolicy
@@ -240,13 +243,16 @@ step:
       loader: getNodeTopology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
+    # - type: switch
+    #   label: Disable Security?
+    #   schema: schema/properties/spec/properties/disableSecurity
     label: Advanced Configuration
     showLabels: true
     type: block-layout
   - description: Enable Backup, Monitoring, TLS etc.
     elements:
     - if:
-        name: returnFalse
+        name: isToggleOn|backup
         type: function
       init:
         type: func
@@ -282,16 +288,16 @@ step:
       type: block-layout
     - elements:
       - if:
-          name: returnFalse
+          name: isToggleOn|tls
           type: function
         init:
           type: func
-          value: checkHostnameOrIP
+          value: checkHostnameOrIP|tls
         label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
         watcher:
-          func: checkHostnameOrIP
+          func: checkHostnameOrIP|tls
           paths:
           - schema/properties/spec/properties/admin/properties/tls/properties/default
       - if:

@@ -311,9 +311,9 @@ const modeDetails = {
     description: 'Single node Weaviate without high availability.',
     text: 'Standalone',
   },
-  DataGuard: {
-    description: 'Weaviate Data Guard for high availability, data protection, and disaster recovery',
-    text: 'DataGuard',
+  Replicaset: {
+    description: 'Weaviate Data ReplicaSet for high availability',
+    text: 'Replicaset',
   },
 }
 
@@ -724,6 +724,8 @@ export const useFunc = (model) => {
   let nodetopologiesShared = []
   let nodetopologiesDedicated = []
   let features = []
+  let hostName = ''
+  let ip = ''
   async function initBundle() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -732,6 +734,7 @@ export const useFunc = (model) => {
     let db = getValue(model, '/metadata/resource/kind')
     db = db.toLowerCase()
     let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
+    const gatewayinfosurl = `/clusters/${owner}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/gatewayinfos/${namespace}`
     const annotationUrl = `clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`
 
     try {
@@ -755,6 +758,9 @@ export const useFunc = (model) => {
           force: true,
         })
       }
+      // const gatewayinfosResp = await axios.get(gatewayinfosurl)
+      // hostName = gatewayinfosResp.data?.spec?.hostName
+      // ip = gatewayinfosResp.data?.spec?.ip
     } catch (e) {
       console.log(e)
     }
@@ -866,6 +872,7 @@ export const useFunc = (model) => {
     return options
   }
 
+  let backupToolInitialValue = ''
   function checkIfFeatureOn(type) {
     let val = getValue(model, `/spec/admin/${type}/toggle`)
     if (type === 'backup' || type === 'archiver') {
@@ -874,7 +881,17 @@ export const useFunc = (model) => {
     const backupVal = getValue(model, '/spec/backup/tool')
 
     if (type === 'backup') {
-      return features.includes('backup') && backupVal === 'KubeStash' && val
+      if (backupToolInitialValue === '') {
+        backupToolInitialValue =
+          features.includes('backup') && backupVal === 'KubeStash' && val ? 'on' : 'off'
+        return features.includes('backup') && backupVal === 'KubeStash' && val
+      } else {
+        if (backupToolInitialValue === 'on') {
+          return true
+        } else {
+          return false
+        }
+      }
     } else if (type === 'tls') {
       return features.includes('tls') && val
     } else if (type === 'expose') {
@@ -1272,6 +1289,13 @@ export const useFunc = (model) => {
       value: modelPathValue !== 'Standalone',
       force: true,
     })
+    if (modelPathValue === 'Standalone') {
+      console.log({ modelPathValue })
+      commit('wizard/model$update', {
+        path: '/spec/replicas',
+        value: 1,
+      })
+    }
   }
 
   function showAdditionalSettings() {
@@ -1360,7 +1384,7 @@ export const useFunc = (model) => {
     return checkIfFeatureOn('archiver')
   }
 
-  function checkHostnameOrIP() {
+  function checkHostnameOrIP(type) {
     const tls = getValue(model, '/spec/admin/tls/default')
     const expose = getValue(model, '/spec/admin/expose/default')
     if (tls && expose) {
@@ -1389,6 +1413,7 @@ export const useFunc = (model) => {
         force: true,
       })
     }
+    if (type === 'tls') return tls
   }
 
   function onArchiverChange() {

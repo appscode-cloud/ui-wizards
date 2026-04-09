@@ -315,6 +315,10 @@ const modeDetails = {
     description: 'DB2 Data Guard for high availability, data protection, and disaster recovery',
     text: 'DataGuard',
   },
+  Replicaset: {
+    description: 'DB2 Replicaset for high availability, data protection, and disaster recovery',
+    text: 'Replicaset',
+  },
 }
 
 export const useFunc = (model) => {
@@ -724,6 +728,8 @@ export const useFunc = (model) => {
   let nodetopologiesShared = []
   let nodetopologiesDedicated = []
   let features = []
+  let hostName = ''
+  let ip = ''
   async function initBundle() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1014,7 +1020,7 @@ export const useFunc = (model) => {
   function showStorageSizeField() {
     const modelPathValue = getValue(model, '/spec/mode')
     // // // // watchDependency('model#/spec/mode')
-    const validType = []
+    const validType = ['Standalone', 'Replicaset']
     return !validType.includes(modelPathValue)
   }
   function showHidden() {
@@ -1360,7 +1366,7 @@ export const useFunc = (model) => {
     return checkIfFeatureOn('archiver')
   }
 
-  function checkHostnameOrIP() {
+  function checkHostnameOrIP(type) {
     const tls = getValue(model, '/spec/admin/tls/default')
     const expose = getValue(model, '/spec/admin/expose/default')
     if (tls && expose) {
@@ -1389,6 +1395,7 @@ export const useFunc = (model) => {
         force: true,
       })
     }
+    if (type === 'tls') return tls
   }
 
   function onArchiverChange() {
