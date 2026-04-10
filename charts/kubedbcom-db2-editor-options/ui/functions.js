@@ -334,8 +334,14 @@ export const useFunc = (model) => {
   setDiscriminatorValue('backup', false)
 
   function isEqualToModelPathValue(value, modelPath) {
+    // watchDependency('model#' + modelPath)
     const modelPathValue = getValue(model, modelPath)
-    // // watchDependency('model#' + modelPath)
+    if (value === 'Replicaset') {
+      commit('wizard/model$update', {
+        path: '/spec/replicas',
+        value: 1,
+      })
+    }
     return modelPathValue === value
   }
 
@@ -871,6 +877,7 @@ export const useFunc = (model) => {
     }
     return options
   }
+  let backupToolInitialValue = ''
 
   function checkIfFeatureOn(type) {
     let val = getValue(model, `/spec/admin/${type}/toggle`)
@@ -880,7 +887,14 @@ export const useFunc = (model) => {
     const backupVal = getValue(model, '/spec/backup/tool')
 
     if (type === 'backup') {
-      return features.includes('backup') && backupVal === 'KubeStash' && val
+      if (backupToolInitialValue === '') {
+        backupToolInitialValue =
+          features.includes('backup') && backupVal === 'KubeStash' && val ? 'on' : 'off'
+        return features.includes('backup') && backupVal === 'KubeStash' && val
+      } else {
+        if (backupToolInitialValue === 'on') return true
+        else return false
+      }
     } else if (type === 'tls') {
       return features.includes('tls') && val
     } else if (type === 'expose') {
