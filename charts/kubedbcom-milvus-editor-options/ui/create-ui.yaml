@@ -1,0 +1,656 @@
+step:
+- elements:
+  - label: ""
+    subtitle: Select the Milvus version you want to deploy on Kubernetes. The chosen
+      version determines the Milvus engine features, compatibility, and runtime behavior
+      of your database.
+    type: label-element
+  - disableUnselect: true
+    if:
+      name: isToggleOn|databases/Milvus/versions
+      type: function
+    label: Database Version
+    loader: getAdminOptions|databases/Milvus/versions
+    schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/versions/properties/default
+    type: select
+    validation:
+      type: required
+  - if:
+      name: isToggleOn|databases/Milvus/mode
+      type: function
+    init:
+      type: func
+      value: getDefault|databases/Milvus/mode
+    isHorizontal: true
+    label: Database Mode
+    loader: getAdminOptions|databases/Milvus/mode
+    schema: schema/properties/spec/properties/mode
+    type: radio
+  - if:
+      name: isEqualToModelPathValue|Standalone|/spec/mode
+      type: function
+    label: Replicas
+    schema: schema/properties/spec/properties/replicas
+    type: input
+  - elements:
+    - label: ""
+      subtitle: Select a machine profile to allocate CPU and memory resources for
+        your database. Choose 'custom' to manually specify resource requirements or
+        select a predefined profile.
+      type: label-element
+    - elements:
+      - init:
+          type: func
+          value: setMachineToCustom
+        label: Machine
+        loader: getMachineListForOptions
+        schema: schema/properties/spec/properties/podResources/properties/machine
+        type: select
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+          - schema/properties/spec/properties/podResources/properties/machine
+        init:
+          type: func
+          value: setLimits|cpu
+        label: CPU
+        loader: setLimits|cpu
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+        watcher:
+          func: setRequests|cpu
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          - schema/properties/spec/properties/podResources/properties/machine
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+          - schema/properties/spec/properties/podResources/properties/machine
+        init:
+          type: func
+          value: setLimits|memory
+        label: Memory
+        loader: setLimits|memory
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+        watcher:
+          func: setRequests|memory
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          - schema/properties/spec/properties/podResources/properties/machine
+      showLabels: true
+      type: horizontal-layout
+    label: Machine Profile
+    showLabels: true
+    type: block-layout
+  - elements:
+    - elements:
+      - if:
+          name: isToggleOn|storageClasses
+          type: function
+        label: Storage Class
+        loader: getAdminOptions|storageClasses
+        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+        type: select
+      - label: Storage Size
+        schema: schema/properties/spec/properties/persistence/properties/size
+        type: input
+        validation:
+          type: required
+      showLabels: true
+      type: horizontal-layout
+    type: block-layout
+  - elements:
+    - label: ""
+      subtitle: Configure metadata storage for Milvus. This stores collection schemas,
+        indexes, and system state using etcd. Set externally managed to true when
+        using an external etcd cluster and provide its endpoints.
+      type: label-element
+    - label: Externally Managed?
+      schema: schema/properties/spec/properties/metaStorage/properties/externallyManaged
+      type: switch
+    - element:
+        label: Endpoint
+        type: input
+      if:
+        name: isMetaStorageExternallyManaged
+        type: function
+      label: Endpoints
+      schema: schema/properties/spec/properties/metaStorage/properties/endpoints
+      type: array-item-form
+    - label: Size
+      schema: schema/properties/spec/properties/metaStorage/properties/size
+      type: input
+      validation:
+        type: required
+    label: Meta Storage
+    showLabels: true
+    type: block-layout
+  - elements:
+    - label: ""
+      subtitle: Configure object storage for Milvus. Object storage persists segment
+        files and index files. Provide the name of a Kubernetes secret that contains
+        the MinIO or S3-compatible storage configuration.
+      type: label-element
+    - label: Config Secret Name
+      schema: schema/properties/spec/properties/objectStorage/properties/configSecretName
+      type: input
+      validation:
+        type: required
+    label: Object Storage
+    showLabels: true
+    type: block-layout
+  - elements:
+    - label: ""
+      subtitle: Configure resources and replicas for each component in Distributed
+        mode. Each component runs as an independent set of pods with its own resource
+        allocation.
+      type: label-element
+    - elements:
+      - elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          label: Machine
+          loader: getMachineListForOptions
+          schema: schema/properties/spec/properties/distributed/properties/datanode/properties/podResources/properties/machine
+          type: select
+        - disable:
+            name: isMachineNotCustom|distributed/datanode
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/datanode/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|cpu|distributed/datanode
+          label: CPU
+          loader: setLimits|cpu|distributed/datanode
+          schema: schema/properties/spec/properties/distributed/properties/datanode/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+          watcher:
+            func: setRequests|cpu|distributed/datanode
+            paths:
+            - schema/properties/spec/properties/distributed/properties/datanode/properties/podResources/properties/resources/properties/requests/properties/cpu
+            - schema/properties/spec/properties/distributed/properties/datanode/properties/podResources/properties/machine
+        - disable:
+            name: isMachineNotCustom|distributed/datanode
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/datanode/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|memory|distributed/datanode
+          label: Memory
+          loader: setLimits|memory|distributed/datanode
+          schema: schema/properties/spec/properties/distributed/properties/datanode/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+          watcher:
+            func: setRequests|memory|distributed/datanode
+            paths:
+            - schema/properties/spec/properties/distributed/properties/datanode/properties/podResources/properties/resources/properties/requests/properties/memory
+            - schema/properties/spec/properties/distributed/properties/datanode/properties/podResources/properties/machine
+        showLabels: true
+        type: horizontal-layout
+      - label: Replicas
+        schema: schema/properties/spec/properties/distributed/properties/datanode/properties/replicas
+        type: input
+      label: Datanode
+      showLabels: true
+      type: block-layout
+    - elements:
+      - elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          label: Machine
+          loader: getMachineListForOptions
+          schema: schema/properties/spec/properties/distributed/properties/mixcoord/properties/podResources/properties/machine
+          type: select
+        - disable:
+            name: isMachineNotCustom|distributed/mixcoord
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/mixcoord/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|cpu|distributed/mixcoord
+          label: CPU
+          loader: setLimits|cpu|distributed/mixcoord
+          schema: schema/properties/spec/properties/distributed/properties/mixcoord/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+          watcher:
+            func: setRequests|cpu|distributed/mixcoord
+            paths:
+            - schema/properties/spec/properties/distributed/properties/mixcoord/properties/podResources/properties/resources/properties/requests/properties/cpu
+            - schema/properties/spec/properties/distributed/properties/mixcoord/properties/podResources/properties/machine
+        - disable:
+            name: isMachineNotCustom|distributed/mixcoord
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/mixcoord/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|memory|distributed/mixcoord
+          label: Memory
+          loader: setLimits|memory|distributed/mixcoord
+          schema: schema/properties/spec/properties/distributed/properties/mixcoord/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+          watcher:
+            func: setRequests|memory|distributed/mixcoord
+            paths:
+            - schema/properties/spec/properties/distributed/properties/mixcoord/properties/podResources/properties/resources/properties/requests/properties/memory
+            - schema/properties/spec/properties/distributed/properties/mixcoord/properties/podResources/properties/machine
+        showLabels: true
+        type: horizontal-layout
+      - label: Replicas
+        schema: schema/properties/spec/properties/distributed/properties/mixcoord/properties/replicas
+        type: input
+      label: Mixcoord
+      showLabels: true
+      type: block-layout
+    - elements:
+      - elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          label: Machine
+          loader: getMachineListForOptions
+          schema: schema/properties/spec/properties/distributed/properties/proxy/properties/podResources/properties/machine
+          type: select
+        - disable:
+            name: isMachineNotCustom|distributed/proxy
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/proxy/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|cpu|distributed/proxy
+          label: CPU
+          loader: setLimits|cpu|distributed/proxy
+          schema: schema/properties/spec/properties/distributed/properties/proxy/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+          watcher:
+            func: setRequests|cpu|distributed/proxy
+            paths:
+            - schema/properties/spec/properties/distributed/properties/proxy/properties/podResources/properties/resources/properties/requests/properties/cpu
+            - schema/properties/spec/properties/distributed/properties/proxy/properties/podResources/properties/machine
+        - disable:
+            name: isMachineNotCustom|distributed/proxy
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/proxy/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|memory|distributed/proxy
+          label: Memory
+          loader: setLimits|memory|distributed/proxy
+          schema: schema/properties/spec/properties/distributed/properties/proxy/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+          watcher:
+            func: setRequests|memory|distributed/proxy
+            paths:
+            - schema/properties/spec/properties/distributed/properties/proxy/properties/podResources/properties/resources/properties/requests/properties/memory
+            - schema/properties/spec/properties/distributed/properties/proxy/properties/podResources/properties/machine
+        showLabels: true
+        type: horizontal-layout
+      - label: Replicas
+        schema: schema/properties/spec/properties/distributed/properties/proxy/properties/replicas
+        type: input
+      label: Proxy
+      showLabels: true
+      type: block-layout
+    - elements:
+      - elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          label: Machine
+          loader: getMachineListForOptions
+          schema: schema/properties/spec/properties/distributed/properties/querynode/properties/podResources/properties/machine
+          type: select
+        - disable:
+            name: isMachineNotCustom|distributed/querynode
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/querynode/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|cpu|distributed/querynode
+          label: CPU
+          loader: setLimits|cpu|distributed/querynode
+          schema: schema/properties/spec/properties/distributed/properties/querynode/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+          watcher:
+            func: setRequests|cpu|distributed/querynode
+            paths:
+            - schema/properties/spec/properties/distributed/properties/querynode/properties/podResources/properties/resources/properties/requests/properties/cpu
+            - schema/properties/spec/properties/distributed/properties/querynode/properties/podResources/properties/machine
+        - disable:
+            name: isMachineNotCustom|distributed/querynode
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/querynode/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|memory|distributed/querynode
+          label: Memory
+          loader: setLimits|memory|distributed/querynode
+          schema: schema/properties/spec/properties/distributed/properties/querynode/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+          watcher:
+            func: setRequests|memory|distributed/querynode
+            paths:
+            - schema/properties/spec/properties/distributed/properties/querynode/properties/podResources/properties/resources/properties/requests/properties/memory
+            - schema/properties/spec/properties/distributed/properties/querynode/properties/podResources/properties/machine
+        showLabels: true
+        type: horizontal-layout
+      - label: Replicas
+        schema: schema/properties/spec/properties/distributed/properties/querynode/properties/replicas
+        type: input
+      label: Querynode
+      showLabels: true
+      type: block-layout
+    - elements:
+      - elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          label: Machine
+          loader: getMachineListForOptions
+          schema: schema/properties/spec/properties/distributed/properties/streamingnode/properties/podResources/properties/machine
+          type: select
+        - disable:
+            name: isMachineNotCustom|distributed/streamingnode
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/streamingnode/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|cpu|distributed/streamingnode
+          label: CPU
+          loader: setLimits|cpu|distributed/streamingnode
+          schema: schema/properties/spec/properties/distributed/properties/streamingnode/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+          watcher:
+            func: setRequests|cpu|distributed/streamingnode
+            paths:
+            - schema/properties/spec/properties/distributed/properties/streamingnode/properties/podResources/properties/resources/properties/requests/properties/cpu
+            - schema/properties/spec/properties/distributed/properties/streamingnode/properties/podResources/properties/machine
+        - disable:
+            name: isMachineNotCustom|distributed/streamingnode
+            watchPaths:
+            - schema/properties/spec/properties/distributed/properties/streamingnode/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|memory|distributed/streamingnode
+          label: Memory
+          loader: setLimits|memory|distributed/streamingnode
+          schema: schema/properties/spec/properties/distributed/properties/streamingnode/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+          watcher:
+            func: setRequests|memory|distributed/streamingnode
+            paths:
+            - schema/properties/spec/properties/distributed/properties/streamingnode/properties/podResources/properties/resources/properties/requests/properties/memory
+            - schema/properties/spec/properties/distributed/properties/streamingnode/properties/podResources/properties/machine
+        showLabels: true
+        type: horizontal-layout
+      - label: Replicas
+        schema: schema/properties/spec/properties/distributed/properties/streamingnode/properties/replicas
+        type: input
+      - label: Persistence Size
+        schema: schema/properties/spec/properties/distributed/properties/streamingnode/properties/persistence/properties/size
+        type: input
+        validation:
+          type: required
+      label: Streamingnode
+      showLabels: true
+      type: block-layout
+    if:
+      name: isEqualToModelPathValue|Distributed|/spec/mode
+      type: function
+    label: Distributed Configuration
+    showLabels: true
+    type: block-layout
+  - description: Configure Credentials, Deployment Mode etc.
+    elements:
+    - elements:
+      - label: ""
+        subtitle: Add custom labels and annotations to your database resources for
+          organization, monitoring, and integration with other Kubernetes tools and
+          services.
+        type: label-element
+      - buttonClass: is-light is-outlined
+        label: Labels
+        schema: schema/properties/spec/properties/labels
+        type: object-item
+      - buttonClass: is-light is-outlined
+        label: Annotations
+        schema: schema/properties/spec/properties/annotations
+        type: object-item
+      hideBlock: true
+      label: Labels & Annotations
+      showLabels: true
+      type: block-layout
+    - customClass: mt-20
+      if:
+        name: isToggleOn|deletionPolicy
+        type: function
+      init:
+        type: func
+        value: getDefault|deletionPolicy
+      label: Deletion Policy
+      options:
+      - description: options.deletionPolicy.delete.description
+        text: Delete
+        value: Delete
+      - description: options.deletionPolicy.halt.description
+        text: Halt
+        value: Halt
+      - description: options.deletionPolicy.wipeOut.description
+        text: WipeOut
+        value: WipeOut
+      - description: options.deletionPolicy.doNotTerminate.description
+        text: DoNotTerminate
+        value: DoNotTerminate
+      schema: schema/properties/spec/properties/deletionPolicy
+      type: select
+      watcher:
+        func: setStorageClass
+        paths:
+        - schema/properties/spec/properties/deletionPolicy
+    - if:
+        name: getDefaultValue|spec/admin/authCredential/customize
+        type: function
+      label: Provide Authentication Credentials?
+      schema: temp/createAuthSecret
+      type: switch
+      watcher:
+        func: onAuthChange
+        paths:
+        - temp/createAuthSecret
+    - if:
+        name: showReferSecretSwitch
+        type: function
+      label: Refer existing Secret?
+      schema: temp/referSecret
+      type: switch
+      watcher:
+        func: onReferSecretChange
+        paths:
+        - temp/referSecret
+    - if:
+        name: showSecretDropdown
+        type: function
+      label: Secret
+      loader: getReferSecrets
+      schema: schema/properties/spec/properties/authSecret/properties/name
+      type: select
+    - if:
+        name: showReferSecret
+        type: function
+      label: Password
+      schema: schema/properties/spec/properties/authSecret/properties/password
+      type: input
+    - if:
+        name: getDefaultValue|spec/admin/customConfiguration
+        type: function
+      label: Configure Database?
+      schema: temp/configDatabase
+      type: switch
+      watcher:
+        func: clearConfiguration
+        paths:
+        - temp/configDatabase
+    - if:
+        name: isConfigDatabaseOn
+        type: function
+      label: Configuration
+      schema: schema/properties/spec/properties/configuration
+      type: textarea
+    - label: Disable Security?
+      schema: schema/properties/spec/properties/disableSecurity
+      type: switch
+    - label: Halt Database?
+      schema: schema/properties/spec/properties/halted
+      type: switch
+    - if:
+        name: isToggleOn|deployment
+        type: function
+      isHorizontal: true
+      label: Deployment Mode
+      options:
+      - description: Shared
+        text: Shared
+        value: Shared
+      - description: Dedicated
+        text: Dedicated
+        value: Dedicated
+      schema: schema/properties/spec/properties/admin/properties/deployment/properties/default
+      type: radio
+    - if:
+        name: isToggleOn|clusterTier
+        type: function
+      isHorizontal: true
+      label: Cluster Tier
+      options:
+      - text: General Purpose
+        value: GeneralPurpose
+      - text: Memory Optimized
+        value: MemoryOptimized
+      - text: CPU Optimized
+        value: CPUOptimized
+      schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
+      type: radio
+    - disableUnselect: true
+      if:
+        name: isToggleOn|clusterTier/placement
+        type: function
+      label: Placement Policy
+      loader: getAdminOptions|clusterTier/placement
+      schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
+    - disableUnselect: true
+      if:
+        name: isToggleOn|clusterTier/nodeTopology
+        type: function
+      label: Node Topology
+      loader: getNodeTopology
+      schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    label: Advanced Configuration
+    showLabels: true
+    type: block-layout
+  - description: Enable Backup, Monitoring, TLS etc.
+    elements:
+    - elements:
+      - init:
+          type: func
+          value: setMonitoring
+        label: Enable Monitoring?
+        schema: temp/monitoring
+        type: switch
+        watcher:
+          func: updateAlertValue
+          paths:
+          - temp/monitoring
+      - customClass: mt-10
+        if:
+          name: showAlerts
+          type: function
+        label: Alert Options
+        options:
+        - text: None
+          value: none
+        - text: Critical
+          value: critical
+        - text: Warning
+          value: warning
+        - text: Info
+          value: info
+        schema: schema/properties/form/properties/alert/properties/enabled
+        type: select
+      if:
+        name: isToggleOn|monitoring
+        type: function
+      type: block-layout
+    - if:
+        name: isToggleOn|backup
+        type: function
+      init:
+        type: func
+        value: setBackup
+      label: Enable Backup?
+      schema: temp/backup
+      type: switch
+      watcher:
+        func: onBackupSwitch
+        paths:
+        - temp/backup
+    - elements:
+      - disable:
+          name: showArchiverAlert
+          watchPaths:
+          - schema/spec/admin/storageClasses/default
+          - schema/spec/mode
+        label: Enable Archiver?
+        schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+        type: switch
+        watcher:
+          func: onArchiverChange
+          paths:
+          - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+      - if:
+          name: showArchiverAlert
+          type: function
+        label: The selected StorageClass does not support Archiver
+        type: warning
+      if:
+        name: showArchiver
+        type: function
+      type: block-layout
+    - elements:
+      - label: Enable TLS?
+        schema: schema/properties/spec/properties/admin/properties/tls/properties/default
+        type: switch
+      - if:
+          name: showIssuer
+          type: function
+        label: Cluster Issuers
+        loader: getAdminOptions|clusterIssuers
+        schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+        type: select
+        validation:
+          type: required
+      if:
+        name: isToggleOn|tls
+        type: function
+      type: block-layout
+    - elements:
+      - label: Expose via Gateway?
+        schema: schema/properties/spec/properties/admin/properties/expose/properties/default
+        type: switch
+      if:
+        name: isToggleOn|expose
+        type: function
+      type: block-layout
+    if:
+      name: showAdditionalSettings
+      type: function
+    label: Additional Options
+    showLabels: true
+    type: block-layout
+  id: options
+  loader: initBundle
+  type: single-step-form
+type: multi-step-form
