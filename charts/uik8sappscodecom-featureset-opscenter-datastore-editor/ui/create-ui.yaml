@@ -1,51 +1,40 @@
-steps:
-- form:
-    discriminator:
-      isResourceLoaded:
-        default: false
-        type: boolean
-    elements:
-    - computed: setReleaseNameAndNamespaceAndInitializeValues
-      if: returnFalse
-      type: input
-    - discriminator:
-        enabledFeatures:
-          type: array
-        enabledTypes:
-          type: array
-      elements:
-      - computed: getFeatureSetDescription
-        customClass: mb-20
-        label:
-          isSubsection: true
-        type: label-element
-      - computed: getEnabledFeatures
-        fetch: fetchFeatureSetOptions
-        hasDescription: true
-        individualItemDisabilityCheck: disableFeatures
-        onChange: onEnabledFeaturesChange
-        schema:
-          $ref: discriminator#/properties/enabledFeatures
-        type: checkbox
-      - fetch: checkIsResourceLoaded
-        if: hideThisElement
-        type: input
-      - fetch: getDatabaseTypes
-        if: isKubedbSelected
-        label:
-          text: labels.select_db_types
-        onChange: onTypeUpdate
-        schema:
-          $ref: discriminator#/properties/enabledTypes
-        type: multiselect
-      - alertInfo:
-          show: true
-          type: info
-        label:
-          text: 'Note: Enabling a feature auto enables any prerequisite features'
-        type: label-element
-      type: single-step-form
-    type: single-step-form
+step:
+- loader: setReleaseNameAndNamespaceAndInitializeValues
+  type: single-step-form
   id: opscenter-datastore
-  title: steps.0.label
+  elements:
+  - type: checkbox
+    schema: temp/properties/enabledFeatures
+    label: ''
+    loader: fetchFeatureSetOptions
+    individualDisability: disableFeatures
+    init:
+      type: func
+      value: getEnabledFeatures
+    watcher:
+      func: onEnabledFeaturesChange
+      paths:
+        - temp/properties/enabledFeatures
+  - type: select
+    customClass: mt-16
+    multiple: true
+    schema: temp/properties/enabledTypes
+    label: Select Database Types
+    loader: getDatabaseTypes
+    init:
+      type: func
+      value: getEnabledTypes
+    if:
+      type: function
+      name: isKubedbSelected
+    watcher:
+      func: onTypeUpdate
+      paths:
+        - temp/properties/enabledTypes
+  - type: info
+    label: 'Note: Enabling a feature auto enables any prerequisite features'
+    watcher:
+      func: checkIsResourceLoaded
+      paths:
+        - temp/properties/isResourceLoaded
 type: multi-step-form

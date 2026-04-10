@@ -156,7 +156,7 @@ function disableFeatures({ getValue, storeGet, itemCtx, discriminator, watchDepe
   const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
   if (!isResourceLoaded) return true
 
-  const featureName = itemCtx.value
+  const featureName = value
   const featureSet = getFeatureSetDetails(storeGet)
   const requiredFeatures = featureSet?.spec?.requiredFeatures || []
 
