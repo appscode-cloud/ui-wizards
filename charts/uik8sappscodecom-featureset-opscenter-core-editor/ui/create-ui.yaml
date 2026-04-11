@@ -1,26 +1,25 @@
 step:
-- loader: setReleaseNameAndNamespaceAndInitializeValues
-  type: single-step-form
-  id: opscenter-core
-  elements:
-  - type: checkbox
-    schema: temp/properties/enabledFeatures
-    label: ''
-    loader: fetchFeatureSetOptions
-    individualDisability: disableFeatures
-    individualDisability: disableFeatures
+- elements:
+  - individualDisability: disableFeatures
     init:
       type: func
       value: getEnabledFeatures
+    label: ""
+    loader: fetchFeatureSetOptions
+    schema: temp/properties/enabledFeatures
+    type: checkbox
     watcher:
       func: onEnabledFeaturesChange
       paths:
-        - temp/properties/enabledFeatures
-  - type: info
-    customClass: mt-24
+      - temp/properties/enabledFeatures
+  - customClass: mt-24
     label: 'Note: Enabling a feature auto enables any prerequisite features'
+    type: info
     watcher:
       func: checkIsResourceLoaded
       paths:
-        - temp/properties/isResourceLoaded  
+      - temp/properties/isResourceLoaded
+  id: opscenter-core
+  loader: setReleaseNameAndNamespaceAndInitializeValues
+  type: single-step-form
 type: multi-step-form

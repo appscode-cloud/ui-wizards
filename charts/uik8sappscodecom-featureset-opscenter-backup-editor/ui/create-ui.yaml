@@ -1,41 +1,29 @@
 step:
-- loader: setReleaseNameAndNamespaceAndInitializeValues
-  type: single-step-form
-  id: opscenter-backup
-  elements:
-  - type: checkbox
-    schema: temp/properties/enabledFeatures
-    label: ''
-    loader: fetchFeatureSetOptions
-    individualDisability: disableFeatures
+- elements:
+  - individualDisability: disableFeatures
     init:
       type: func
       value: getEnabledFeatures
+    label: ""
+    loader: fetchFeatureSetOptions
+    schema: temp/properties/enabledFeatures
+    type: checkbox
     watcher:
       func: onEnabledFeaturesChange
       paths:
-        - temp/properties/enabledFeatures
-  - type: info
-    customClass: mt-24
+      - temp/properties/enabledFeatures
+  - customClass: mt-24
     label: 'Note: Enabling a feature auto enables any prerequisite features'
+    type: info
     watcher:
       func: checkIsResourceLoaded
       paths:
-        - temp/properties/isResourceLoaded
-  - type: block-layout
-    if:
-      name: isStashPreset
-      type: function
-    elements:
-    - type: label-element
-      label: Preset Configuration
-    - type: block-layout
-      if:
-        name: presetType|kubestash
-        type: function
-      elements:
-      - type: select
-        label: Backend Provider
+      - temp/properties/isResourceLoaded
+  - elements:
+    - label: Preset Configuration
+      type: label-element
+    - elements:
+      - label: Backend Provider
         options:
         - text: Azure Blob Storage
           value: azure
@@ -44,140 +32,145 @@ step:
         - text: AWS S3
           value: s3
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/provider
-    - type: block-layout
+        type: select
       if:
-        name: providerType|s3
+        name: presetType|kubestash
         type: function
-      elements:
-      - type: input
+      type: block-layout
+    - elements:
+      - forceRequired: true
         label: Bucket
-        forceRequired: true
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/bucket
-      - type: input
+        type: input
+      - forceRequired: true
         label: End Point
-        forceRequired: true
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/endpoint
-      - type: input
-        label: Insecure TLS
+        type: input
+      - label: Insecure TLS
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/insecureTLS
-      - type: input
-        label: Prefix
+        type: input
+      - label: Prefix
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/prefix
-      - type: input
-        label: Region
+        type: input
+      - label: Region
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/region
-      - type: switch
-        label: Enable Storage Secret?
-        init:
+        type: input
+      - init:
           type: func
           value: setStorageSecret
+        label: Enable Storage Secret?
         schema: temp/properties/s3
+        type: switch
         watcher:
           func: onAuthChange|s3
           paths:
-            - temp/properties/s3
-      - type: block-layout
+          - temp/properties/s3
+      - elements:
+        - forceRequired: true
+          label: Access Key ID
+          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
+          type: input
+        - forceRequired: true
+          label: Secret Access Key
+          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
+          type: input
+        - label: CA Cert Data
+          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
+          type: input
         if:
           name: authEnabled
           type: function
         label: Storage Secret
-        elements:
-        - type: input
-          label: Access Key ID
-          forceRequired: true
-          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
-        - type: input
-          label: Secret Access Key
-          forceRequired: true
-          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
-        - type: input
-          label: CA Cert Data
-          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
-    - type: block-layout
+        type: block-layout
       if:
-        name: providerType|azure
+        name: providerType|s3
         type: function
-      elements:
-      - type: input
+      type: block-layout
+    - elements:
+      - forceRequired: true
         label: Container
-        forceRequired: true
-        schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/pro perties/azure/properties/spec/properties/container
-      - type: input
-        label: Max Connections
+        schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/pro
+          perties/azure/properties/spec/properties/container
+        type: input
+      - label: Max Connections
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/maxConnections
-      - type: input
-        label: Prefix
+        type: input
+      - label: Prefix
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/prefix
-      - type: switch
-        label: Enable Storage Secret?
-        init:
+        type: input
+      - init:
           type: func
           value: setStorageSecret
+        label: Enable Storage Secret?
         schema: temp/properties/azure
+        type: switch
         watcher:
           func: onAuthChange|azure
           paths:
-            - temp/properties/azure
-      - type: block-layout
+          - temp/properties/azure
+      - elements:
+        - forceRequired: true
+          label: Azure Account Name
+          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
+          type: input
+        - forceRequired: true
+          label: Azure Account Key
+          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
+          type: input
         if:
           name: authEnabled
           type: function
         label: Storage Secret
-        elements:
-        - type: input
-          label: Azure Account Name
-          forceRequired: true
-          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
-        - type: input
-          label: Azure Account Key
-          forceRequired: true
-          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
-    - type: block-layout
+        type: block-layout
       if:
-        name: providerType|gcs
+        name: providerType|azure
         type: function
-      elements:
-      - type: input
+      type: block-layout
+    - elements:
+      - forceRequired: true
         label: Bucket
-        forceRequired: true
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/bucket
-      - type: input
-        label: Max Connections
+        type: input
+      - label: Max Connections
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
-      - type: input
-        label: Prefix
+        type: input
+      - label: Prefix
         schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/prefix
-      - type: switch
-        label: Enable Storage Secret?
-        init:
+        type: input
+      - init:
           type: func
           value: setStorageSecret
+        label: Enable Storage Secret?
         schema: temp/properties/gcs
+        type: switch
         watcher:
           func: onAuthChange|gcs
           paths:
-            - temp/properties/gcs
-      - type: block-layout
+          - temp/properties/gcs
+      - elements:
+        - forceRequired: true
+          label: Project ID
+          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
+          type: input
+        - forceRequired: true
+          label: Service Account
+          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+          type: input
         if:
           name: authEnabled
           type: function
         label: Storage Secret
-        elements:
-        - type: input
-          label: Project ID
-          forceRequired: true
-          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
-        - type: input
-          label: Service Account
-          forceRequired: true
-          schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
-    - type: input
-      label: Encryption Secret
-      customClass: mt-16
+        type: block-layout
+      if:
+        name: providerType|gcs
+        type: function
+      type: block-layout
+    - customClass: mt-16
       forceRequired: true
+      label: Encryption Secret
       schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/encryptionSecret
-    - type: select
-      label: Retention Policy
+      type: input
+    - label: Retention Policy
       options:
       - text: Keep 1 week
         value: keep-1wk
@@ -187,10 +180,18 @@ step:
         value: keep-3mo
       - text: Keep 1 Year
         value: keep-1yr
+      schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/retentionPolicy
+      type: select
       validation:
         type: required
-      schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/retentionPolicy
-    - type: input
-      label: Schedule
+    - label: Schedule
       schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/schedule
+      type: input
+    if:
+      name: isStashPreset
+      type: function
+    type: block-layout
+  id: opscenter-backup
+  loader: setReleaseNameAndNamespaceAndInitializeValues
+  type: single-step-form
 type: multi-step-form
