@@ -7911,6 +7911,53 @@ properties:
                             x-kubernetes-list-type: atomic
                         type: object
                     type: object
+                  alertmanager:
+                    properties:
+                      email:
+                        properties:
+                          authUsername:
+                            type: string
+                          enabled:
+                            type: boolean
+                          from:
+                            type: string
+                          password:
+                            type: string
+                          requireTLS:
+                            type: boolean
+                          sendResolved:
+                            type: boolean
+                          smarthost:
+                            type: string
+                          to:
+                            type: string
+                        required:
+                        - authUsername
+                        - enabled
+                        - from
+                        - password
+                        - requireTLS
+                        - sendResolved
+                        - smarthost
+                        - to
+                        type: object
+                      webhook:
+                        properties:
+                          enabled:
+                            type: boolean
+                          sendResolved:
+                            type: boolean
+                          url:
+                            type: string
+                        required:
+                        - enabled
+                        - sendResolved
+                        - url
+                        type: object
+                    required:
+                    - email
+                    - webhook
+                    type: object
                   annotations:
                     additionalProperties:
                       type: string
@@ -8264,6 +8311,7 @@ properties:
                       type: object
                     type: array
                 required:
+                - alertmanager
                 - apiserver
                 - hubUID
                 - image
