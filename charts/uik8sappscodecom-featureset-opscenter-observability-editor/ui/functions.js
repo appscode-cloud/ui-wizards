@@ -9,6 +9,11 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/enabledFeatures', [])
   setDiscriminatorValue('/isResourceLoaded', false)
   const appsCodeOtelStack = 'appscode-otel-stack'
+  const thanosOperator = 'thanos-operator'
+  const promLabelProxy = 'prom-label-proxy'
+
+  const thanosOperatorResPath = 'helmToolkitFluxcdIoHelmRelease_thanos_operator'
+  const promLabelProxyResPath = 'helmToolkitFluxcdIoHelmRelease_prom_label_proxy'
   let resources = {}
 
   // get specific feature details
@@ -244,14 +249,15 @@ export const useFunc = (model) => {
     return data
   }
 
-  function onEnabledFeaturesChange() {
+  async function onEnabledFeaturesChange() {
     const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
     const monitoringClusterName = getValue(discriminator, '/monitoringClusterName')
     let monitoringClusterConfig = getValue(discriminator, '/monitoringClusterConfig')
+    const objStorage = getValue(discriminator, '/objStorage')
 
     const allFeatures = storeGet('/cluster/features/result') || []
 
-    allFeatures.forEach((item) => {
+    for (const item of allFeatures) {
       const featureName = item?.metadata?.name || ''
       const resourceValuePath = getResourceValuePathFromFeature(item)
 
@@ -286,6 +292,48 @@ export const useFunc = (model) => {
             }
           }
 
+          if (featureName === thanosOperator && objStorage) {
+            const endpoint = (objStorage.endpoint || '').replace(/^https?:\/\//, '')
+            mergedResourceValues = deepMergeValues(initialResourceValues, {
+              objStorage: {
+                provider: objStorage.provider || 's3',
+                bucket: objStorage.bucket || '',
+                endpoint: endpoint,
+                accessKey: objStorage.accessKey || '',
+                secretKey: objStorage.secretKey || '',
+                region: objStorage.region || '',
+              },
+            })
+          }
+
+          if (featureName === promLabelProxy && objStorage) {
+            const owner = storeGet('/route/params/user')
+            const cluster = storeGet('/route/params/cluster')
+            let telemetryHost = ''
+            try {
+              const { data } = await axios.get(`/telemetry/${owner}/${cluster}/stack/host`)
+              telemetryHost = data || ''
+            } catch (e) {
+              window.console.error('Failed to fetch telemetry host', e)
+            }
+
+            mergedResourceValues = deepMergeValues(initialResourceValues, {
+              clickhouse: {
+                s3: {
+                  provider: objStorage.provider || 's3',
+                  bucket: objStorage.bucket || '',
+                  endpoint: objStorage.endpoint || '',
+                  accessKey: objStorage.accessKey || '',
+                  secretKey: objStorage.secretKey || '',
+                  region: objStorage.region || '',
+                },
+              },
+              infra: {
+                host: telemetryHost,
+              },
+            })
+          }
+
           commit('wizard/model$update', {
             path: `/resources/${resourceValuePath}`,
             value: {
@@ -317,7 +365,7 @@ export const useFunc = (model) => {
       } else {
         commit('wizard/model$delete', `/resources/${resourceValuePath}`)
       }
-    })
+    }
   }
 
   function returnFalse() {
@@ -413,11 +461,11 @@ export const useFunc = (model) => {
 
   // this computed's main purpose is to watch isResourceLoaded flag
   // and fire the onEnabledFeatureChange function when it's true
-  function checkIsResourceLoaded() {
+  async function checkIsResourceLoaded() {
     // watchDependency('discriminator#/isResourceLoaded')
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (isResourceLoaded) {
-      onEnabledFeaturesChange()
+      await onEnabledFeaturesChange()
     }
   }
 
@@ -455,7 +503,54 @@ export const useFunc = (model) => {
     const data = await fetchMonitoringClusterConfig(monitoringClusterName)
 
     setDiscriminatorValue('/monitoringClusterConfig', data)
-    onEnabledFeaturesChange()
+    await onEnabledFeaturesChange()
+  }
+
+  function checkIsThanosOrPromLabelProxyEnabled() {
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    return enabledFeatures.includes(thanosOperator) || enabledFeatures.includes(promLabelProxy)
+  }
+
+  function fetchInitialObjStorageProvider() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.provider || thanosValues.provider || 's3'
+  }
+
+  function fetchInitialObjStorageBucket() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.bucket || thanosValues.bucket || ''
+  }
+
+  function fetchInitialObjStorageEndpoint() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.endpoint || thanosValues.endpoint || ''
+  }
+
+  function fetchInitialObjStorageRegion() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.region || thanosValues.region || ''
+  }
+
+  function fetchInitialObjStorageAccessKey() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.accessKey || thanosValues.accessKey || ''
+  }
+
+  function fetchInitialObjStorageSecretKey() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.secretKey || thanosValues.secretKey || ''
   }
 
   return {
@@ -474,5 +569,12 @@ export const useFunc = (model) => {
     checkIsOtelStackEnabled,
     fetchMonitoringClusterOptions,
     onMonitoringClusterChange,
+    checkIsThanosOrPromLabelProxyEnabled,
+    fetchInitialObjStorageProvider,
+    fetchInitialObjStorageBucket,
+    fetchInitialObjStorageEndpoint,
+    fetchInitialObjStorageRegion,
+    fetchInitialObjStorageAccessKey,
+    fetchInitialObjStorageSecretKey,
   }
 }
