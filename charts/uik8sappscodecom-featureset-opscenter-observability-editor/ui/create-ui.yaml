@@ -40,8 +40,10 @@ step:
         elements:
           - type: select
             label: Backend Provider
-            loader: fetchInitialObjStorageProvider
             schema: temp/properties/objStorage/provider
+            init:
+              type: static
+              value: s3
             options:
               - text: s3
                 value: s3
@@ -101,6 +103,25 @@ step:
               func: onEnabledFeaturesChange
               paths:
                 - temp/properties/objStorage/region
+          - type: label-element
+            label: TLS Config (Client CA Certificate)
+            customClass: mt-16 font-semibold
+          - type: input
+            label: Secret Name
+            loader: fetchInitialObjStorageTlsSecretName
+            schema: temp/properties/objStorage/tlsSecretName
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/tlsSecretName
+          - type: input
+            label: Key
+            loader: fetchInitialObjStorageTlsKey
+            schema: temp/properties/objStorage/tlsKey
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/tlsKey
     id: opscenter-monitoring
     loader: setReleaseNameAndNamespaceAndInitializeValues
     type: single-step-form
