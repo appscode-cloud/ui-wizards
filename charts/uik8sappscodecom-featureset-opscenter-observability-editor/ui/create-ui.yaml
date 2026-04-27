@@ -104,24 +104,29 @@ step:
               paths:
                 - temp/properties/objStorage/region
           - type: label-element
+            if:
+              name: checkIsPromLabelProxyEnabled
+              type: function
             label: TLS Config (Client CA Certificate)
             customClass: mt-16 font-semibold
           - type: input
+            if:
+              name: checkIsPromLabelProxyEnabled
+              type: function
             label: Secret Name
             loader: fetchInitialObjStorageTlsSecretName
             schema: temp/properties/objStorage/tlsSecretName
-            validation:
-              type: required
             watcher:
               func: onEnabledFeaturesChange
               paths:
                 - temp/properties/objStorage/tlsSecretName
           - type: input
+            if:
+              name: checkIsPromLabelProxyEnabled
+              type: function
             label: Key
             loader: fetchInitialObjStorageTlsKey
             schema: temp/properties/objStorage/tlsKey
-            validation:
-              type: required
             watcher:
               func: onEnabledFeaturesChange
               paths:

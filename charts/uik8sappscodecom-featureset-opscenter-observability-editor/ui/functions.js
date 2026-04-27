@@ -529,6 +529,11 @@ export const useFunc = (model) => {
     return enabledFeatures.includes(thanosOperator) || enabledFeatures.includes(promLabelProxy)
   }
 
+  function checkIsPromLabelProxyEnabled() {
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    return enabledFeatures.includes(promLabelProxy)
+  }
+
   function fetchInitialObjStorageProvider() {
     const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
     const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
@@ -573,14 +578,14 @@ export const useFunc = (model) => {
 
   function fetchInitialObjStorageTlsSecretName() {
     const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.tls || {}
-    const refs = promValues.clientCaCertificateRefs || []
-    return refs[0]?.name || ''
+    const refs = promValues.clientCaCertificateRefs || {}
+    return refs.name || ''
   }
 
   function fetchInitialObjStorageTlsKey() {
     const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.tls || {}
-    const refs = promValues.clientCaCertificateRefs || []
-    return refs[0]?.key || ''
+    const refs = promValues.clientCaCertificateRefs || {}
+    return refs.key || ''
   }
 
   return {
@@ -600,6 +605,7 @@ export const useFunc = (model) => {
     fetchMonitoringClusterOptions,
     onMonitoringClusterChange,
     checkIsThanosOrPromLabelProxyEnabled,
+    checkIsPromLabelProxyEnabled,
     fetchInitialObjStorageProvider,
     fetchInitialObjStorageBucket,
     fetchInitialObjStorageEndpoint,
