@@ -63,7 +63,7 @@ export const useFunc = (model) => {
   // get specific attribute's value of a feature
   function getFeatureSetPropertyValue(path) {
     const featureSet = getFeatureSetDetails()
-    const value = getValue(featureSet, path)
+    const value = storeGet(path, featureSet)
     return value
   }
 
@@ -82,7 +82,7 @@ export const useFunc = (model) => {
   // get specific attribute's value of a feature
   function getFeaturePropertyValue(name, path) {
     const feature = getFeatureDetails(name)
-    const value = getValue(feature, path)
+    const value = storeGet(path, feature)
     return value
   }
 
@@ -228,28 +228,14 @@ export const useFunc = (model) => {
     }
   }
 
-  function disableFeatures({ itemCtx }) {
+  function disableFeatures(value) {
     // watchDependency('discriminator#/isResourceLoaded')
-
-    // unchecking stash-presets and disabling when kubestash is unchecked
-    // watchDependency('discriminator#/enabledFeatures')
-    const enabledFeatures = getValue(discriminator, '/enabledFeatures')
-    if (!enabledFeatures?.includes('kubestash') && itemCtx.value === 'stash-presets') {
-      enabledFeaturesChanged = true
-      const idx = enabledFeatures?.indexOf('stash-presets')
-      if (idx !== -1) {
-        enabledFeatures?.splice(idx, 1)
-        setDiscriminatorValue('/enabledFeatures', enabledFeatures)
-        // update discriminator when kubestash not found but stash-presets enabled
-      }
-      return true
-    }
 
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (!isResourceLoaded) return true
 
     const featureName = value
-    const featureSet = getFeatureSetDetails(storeGet)
+    const featureSet = getFeatureSetDetails()
     const requiredFeatures = featureSet?.spec?.requiredFeatures || []
 
     if (requiredFeatures.includes(featureName)) return true

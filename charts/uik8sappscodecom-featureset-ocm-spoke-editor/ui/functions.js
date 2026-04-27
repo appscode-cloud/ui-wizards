@@ -17,7 +17,7 @@ export const useFunc = (model) => {
   // get specific attribute's value of a feature
   function getFeatureSetPropertyValue(path) {
     const featureSet = getFeatureSetDetails()
-    const value = getValue(featureSet, path)
+    const value = storeGet(path, featureSet)
     return value
   }
 
@@ -36,7 +36,7 @@ export const useFunc = (model) => {
   // get specific attribute's value of a feature
   function getFeaturePropertyValue(name, path) {
     const feature = getFeatureDetails(name)
-    const value = getValue(feature, path)
+    const value = storeGet(path, feature)
     return value
   }
 
