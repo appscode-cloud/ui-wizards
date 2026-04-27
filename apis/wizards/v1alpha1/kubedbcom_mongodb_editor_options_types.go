@@ -55,7 +55,7 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	PodResources   PodResources         `json:"podResources"`
 	AuthSecret     AuthSecret           `json:"authSecret"`
 	DeletionPolicy DeletionPolicy       `json:"deletionPolicy"`
-	Configuration  string               `json:"configuration"`
+	Configuration  Configuration        `json:"configuration"`
 	// +optional
 	HostName string `json:"hostName"`
 	// +optional
