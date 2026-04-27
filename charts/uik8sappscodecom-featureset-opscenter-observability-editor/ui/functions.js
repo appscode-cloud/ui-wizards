@@ -15,6 +15,7 @@ export const useFunc = (model) => {
   const thanosOperatorResPath = 'helmToolkitFluxcdIoHelmRelease_thanos_operator'
   const promLabelProxyResPath = 'helmToolkitFluxcdIoHelmRelease_prom_label_proxy'
   let resources = {}
+  let telemetryHostPromise = null
 
   // get specific feature details
   function getFeatureSetDetails() {
@@ -309,13 +310,21 @@ export const useFunc = (model) => {
           if (featureName === promLabelProxy && objStorage) {
             const owner = storeGet('/route/params/user')
             const cluster = storeGet('/route/params/cluster')
-            let telemetryHost = ''
-            try {
-              const { data } = await axios.get(`/telemetry/${owner}/${cluster}/stack/host`)
-              telemetryHost = data || ''
-            } catch (e) {
-              window.console.error('Failed to fetch telemetry host', e)
+            if (!telemetryHostPromise) {
+              telemetryHostPromise = (async () => {
+                try {
+                  const { data } = await axios.get(`/telemetry/${owner}/${cluster}/stack/host`)
+                  return data || ''
+                } catch (e) {
+                  window.console.error('Failed to fetch telemetry host', e)
+                  return ''
+                }
+              })()
             }
+            const telemetryHost = await telemetryHostPromise
+
+            const tlsSecretName = (objStorage.tlsSecretName || '').trim()
+            const tlsKey = (objStorage.tlsKey || '').trim()
 
             mergedResourceValues = deepMergeValues(initialResourceValues, {
               clickhouse: {
@@ -327,6 +336,15 @@ export const useFunc = (model) => {
                   secretKey: objStorage.secretKey || '',
                   region: objStorage.region || '',
                 },
+                tls:
+                  tlsSecretName && tlsKey
+                    ? {
+                        clientCaCertificateRefs: {
+                          key: tlsKey,
+                          name: tlsSecretName,
+                        },
+                      }
+                    : undefined,
               },
               infra: {
                 host: telemetryHost,
@@ -553,6 +571,18 @@ export const useFunc = (model) => {
     return promValues.secretKey || thanosValues.secretKey || ''
   }
 
+  function fetchInitialObjStorageTlsSecretName() {
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.tls || {}
+    const refs = promValues.clientCaCertificateRefs || []
+    return refs[0]?.name || ''
+  }
+
+  function fetchInitialObjStorageTlsKey() {
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.tls || {}
+    const refs = promValues.clientCaCertificateRefs || []
+    return refs[0]?.key || ''
+  }
+
   return {
     hideThisElement,
     checkIsResourceLoaded,
@@ -576,5 +606,7 @@ export const useFunc = (model) => {
     fetchInitialObjStorageRegion,
     fetchInitialObjStorageAccessKey,
     fetchInitialObjStorageSecretKey,
+    fetchInitialObjStorageTlsSecretName,
+    fetchInitialObjStorageTlsKey,
   }
 }
