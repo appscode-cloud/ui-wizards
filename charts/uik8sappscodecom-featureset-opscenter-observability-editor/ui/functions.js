@@ -246,7 +246,9 @@ export const useFunc = (model) => {
 
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const { data } = await axios.get(`/telemetry/${owner}/${cluster}/values/appscode-otel-stack`)
+    const { data } = await axios.get(
+      `/telemetry/${owner}/${monitoringClusterName}/values/appscode-otel-stack?targetClusterName=${cluster}`,
+    )
     return data
   }
 
