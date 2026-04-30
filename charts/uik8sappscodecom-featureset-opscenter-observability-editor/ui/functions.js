@@ -8,7 +8,14 @@ export const useFunc = (model) => {
 
   setDiscriminatorValue('/enabledFeatures', [])
   setDiscriminatorValue('/isResourceLoaded', false)
+  const appsCodeOtelStack = 'appscode-otel-stack'
+  const thanosOperator = 'thanos-operator'
+  const promLabelProxy = 'prom-label-proxy'
+
+  const thanosOperatorResPath = 'helmToolkitFluxcdIoHelmRelease_thanos_operator'
+  const promLabelProxyResPath = 'helmToolkitFluxcdIoHelmRelease_prom_label_proxy'
   let resources = {}
+  let telemetryHostPromise = null
 
   // get specific feature details
   function getFeatureSetDetails() {
@@ -210,12 +217,50 @@ export const useFunc = (model) => {
     return resourceValuePath
   }
 
-  function onEnabledFeaturesChange() {
+  function deepMergeValues(existingValues, newValues) {
+    if (!newValues) return existingValues
+    if (!existingValues) return newValues
+
+    const merged = { ...existingValues }
+
+    Object.keys(newValues).forEach((key) => {
+      if (
+        typeof newValues[key] === 'object' &&
+        newValues[key] !== null &&
+        !Array.isArray(newValues[key])
+      ) {
+        merged[key] = deepMergeValues(existingValues[key], newValues[key])
+      } else {
+        merged[key] = newValues[key]
+      }
+    })
+
+    return merged
+  }
+
+  // fetch monitoring cluster configuration
+  async function fetchMonitoringClusterConfig(monitoringClusterName) {
+    if (!monitoringClusterName) {
+      return null
+    }
+
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const { data } = await axios.get(
+      `/telemetry/${owner}/${monitoringClusterName}/values/appscode-otel-stack?targetClusterName=${cluster}`,
+    )
+    return data
+  }
+
+  async function onEnabledFeaturesChange() {
     const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    const monitoringClusterName = getValue(discriminator, '/monitoringClusterName')
+    let monitoringClusterConfig = getValue(discriminator, '/monitoringClusterConfig')
+    const objStorage = getValue(discriminator, '/objStorage')
 
     const allFeatures = storeGet('/cluster/features/result') || []
 
-    allFeatures.forEach((item) => {
+    for (const item of allFeatures) {
       const featureName = item?.metadata?.name || ''
       const resourceValuePath = getResourceValuePathFromFeature(item)
 
@@ -233,6 +278,82 @@ export const useFunc = (model) => {
         if (isEnabled && !isManaged) {
           commit('wizard/model$delete', `/resources/${resourceValuePath}`)
         } else {
+          // Merge existing values with otelStack data only for appscode-otel-stack feature
+          const initialResourceValues = resources?.[resourceValuePath]?.spec?.values
+          let mergedResourceValues = initialResourceValues
+
+          let finalSourceRef = sourceRef
+          if (
+            featureName === appsCodeOtelStack &&
+            monitoringClusterName &&
+            monitoringClusterConfig
+          ) {
+            mergedResourceValues = deepMergeValues(initialResourceValues, monitoringClusterConfig)
+            finalSourceRef = {
+              ...sourceRef,
+              monitoringCluster: monitoringClusterName,
+            }
+          }
+
+          if (featureName === thanosOperator && objStorage) {
+            const endpoint = (objStorage.endpoint || '').replace(/^https?:\/\//, '')
+            mergedResourceValues = deepMergeValues(initialResourceValues, {
+              objectStorage: {
+                provider: objStorage.provider || 's3',
+                bucket: objStorage.bucket || '',
+                endpoint: endpoint,
+                accessKey: objStorage.accessKey || '',
+                secretKey: objStorage.secretKey || '',
+                region: objStorage.region || '',
+              },
+            })
+          }
+
+          if (featureName === promLabelProxy && objStorage) {
+            const owner = storeGet('/route/params/user')
+            const cluster = storeGet('/route/params/cluster')
+            if (!telemetryHostPromise) {
+              telemetryHostPromise = (async () => {
+                try {
+                  const { data } = await axios.get(`/telemetry/${owner}/${cluster}/stack/host`)
+                  return data || ''
+                } catch (e) {
+                  window.console.error('Failed to fetch telemetry host', e)
+                  return ''
+                }
+              })()
+            }
+            const telemetryHost = await telemetryHostPromise
+
+            const tlsSecretName = (objStorage.tlsSecretName || '').trim()
+            const tlsKey = (objStorage.tlsKey || '').trim()
+
+            mergedResourceValues = deepMergeValues(initialResourceValues, {
+              clickhouse: {
+                s3: {
+                  provider: objStorage.provider || 's3',
+                  bucket: objStorage.bucket || '',
+                  endpoint: objStorage.endpoint || '',
+                  accessKey: objStorage.accessKey || '',
+                  secretKey: objStorage.secretKey || '',
+                  region: objStorage.region || '',
+                },
+                tls:
+                  tlsSecretName && tlsKey
+                    ? {
+                        clientCaCertificateRefs: [{
+                          key: tlsKey,
+                          name: tlsSecretName,
+                        }],
+                      }
+                    : undefined,
+              },
+              infra: {
+                host: telemetryHost,
+              },
+            })
+          }
+
           commit('wizard/model$update', {
             path: `/resources/${resourceValuePath}`,
             value: {
@@ -247,10 +368,11 @@ export const useFunc = (model) => {
               },
               spec: {
                 ...resources?.[resourceValuePath]?.spec,
+                values: mergedResourceValues,
                 chart: {
                   spec: {
                     chart,
-                    sourceRef,
+                    sourceRef: finalSourceRef,
                     version,
                   },
                 },
@@ -263,7 +385,7 @@ export const useFunc = (model) => {
       } else {
         commit('wizard/model$delete', `/resources/${resourceValuePath}`)
       }
-    })
+    }
   }
 
   function returnFalse() {
@@ -359,12 +481,113 @@ export const useFunc = (model) => {
 
   // this computed's main purpose is to watch isResourceLoaded flag
   // and fire the onEnabledFeatureChange function when it's true
-  function checkIsResourceLoaded() {
+  async function checkIsResourceLoaded() {
     // watchDependency('discriminator#/isResourceLoaded')
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (isResourceLoaded) {
-      onEnabledFeaturesChange()
+      await onEnabledFeaturesChange()
     }
+  }
+
+  //this function is used to check if AppsCode OpenTelemetry Stack is enabled
+  //it is the condition to show monitoring cluster dropdown
+  function checkIsOtelStackEnabled() {
+    // watchDependency('discriminator#/enabledFeatures')
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    if (enabledFeatures.includes(appsCodeOtelStack)) {
+      return true
+    }
+    return false
+  }
+
+  //this function is used to fetch monitoring cluster options from dropdown
+  async function fetchMonitoringClusterOptions() {
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    if (!enabledFeatures.includes(appsCodeOtelStack)) {
+      return []
+    }
+
+    const owner = storeGet('/route/params/user')
+    let url = `/telemetry/${owner}/monitoring-clusters`
+    const { data } = await axios.get(url)
+
+    return data || []
+  }
+
+  async function onMonitoringClusterChange() {
+    const monitoringClusterName = getValue(discriminator, '/monitoringClusterName')
+    if (!monitoringClusterName) {
+      return
+    }
+
+    const data = await fetchMonitoringClusterConfig(monitoringClusterName)
+
+    setDiscriminatorValue('/monitoringClusterConfig', data)
+    await onEnabledFeaturesChange()
+  }
+
+  function checkIsThanosOrPromLabelProxyEnabled() {
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    return enabledFeatures.includes(thanosOperator) || enabledFeatures.includes(promLabelProxy)
+  }
+
+  function checkIsPromLabelProxyEnabled() {
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    return enabledFeatures.includes(promLabelProxy)
+  }
+
+  function fetchInitialObjStorageProvider() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.provider || thanosValues.provider || 's3'
+  }
+
+  function fetchInitialObjStorageBucket() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.bucket || thanosValues.bucket || ''
+  }
+
+  function fetchInitialObjStorageEndpoint() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.endpoint || thanosValues.endpoint || ''
+  }
+
+  function fetchInitialObjStorageRegion() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.region || thanosValues.region || ''
+  }
+
+  function fetchInitialObjStorageAccessKey() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.accessKey || thanosValues.accessKey || ''
+  }
+
+  function fetchInitialObjStorageSecretKey() {
+    const thanosValues = resources[thanosOperatorResPath]?.spec?.values?.objStorage || {}
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.s3 || {}
+
+    return promValues.secretKey || thanosValues.secretKey || ''
+  }
+
+  function fetchInitialObjStorageTlsSecretName() {
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.tls || {}
+    const refs = promValues.clientCaCertificateRefs || {}
+    return refs.name || ''
+  }
+
+  function fetchInitialObjStorageTlsKey() {
+    const promValues = resources[promLabelProxyResPath]?.spec?.values?.clickhouse?.tls || {}
+    const refs = promValues.clientCaCertificateRefs || {}
+    return refs.key || ''
   }
 
   return {
@@ -380,5 +603,18 @@ export const useFunc = (model) => {
     returnFalse,
     setReleaseNameAndNamespaceAndInitializeValues,
     fetchFeatureSetOptions,
+    checkIsOtelStackEnabled,
+    fetchMonitoringClusterOptions,
+    onMonitoringClusterChange,
+    checkIsThanosOrPromLabelProxyEnabled,
+    checkIsPromLabelProxyEnabled,
+    fetchInitialObjStorageProvider,
+    fetchInitialObjStorageBucket,
+    fetchInitialObjStorageEndpoint,
+    fetchInitialObjStorageRegion,
+    fetchInitialObjStorageAccessKey,
+    fetchInitialObjStorageSecretKey,
+    fetchInitialObjStorageTlsSecretName,
+    fetchInitialObjStorageTlsKey,
   }
 }

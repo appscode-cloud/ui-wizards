@@ -1,25 +1,137 @@
 step:
-- elements:
-  - individualDisability: disableFeatures
-    init:
-      type: func
-      value: getEnabledFeatures
-    label: ""
-    loader: fetchFeatureSetOptions
-    schema: temp/properties/enabledFeatures
-    type: checkbox
-    watcher:
-      func: onEnabledFeaturesChange
-      paths:
-      - temp/properties/enabledFeatures
-  - customClass: mt-24
-    label: 'Note: Enabling a feature auto enables any prerequisite features'
-    type: info
-    watcher:
-      func: checkIsResourceLoaded
-      paths:
-      - temp/properties/isResourceLoaded
-  id: opscenter-monitoring
-  loader: setReleaseNameAndNamespaceAndInitializeValues
-  type: single-step-form
+  - elements:
+      - individualDisability: disableFeatures
+        init:
+          type: func
+          value: getEnabledFeatures
+        label: ''
+        loader: fetchFeatureSetOptions
+        schema: temp/properties/enabledFeatures
+        type: checkbox
+        watcher:
+          func: onEnabledFeaturesChange
+          paths:
+            - temp/properties/enabledFeatures
+      - customClass: mt-24
+        label: 'Note: Enabling a feature auto enables any prerequisite features'
+        type: info
+        watcher:
+          func: checkIsResourceLoaded
+          paths:
+            - temp/properties/isResourceLoaded
+      - type: select
+        if:
+          name: checkIsOtelStackEnabled
+          type: function
+        loader: fetchMonitoringClusterOptions
+        label: Select Monitoring Cluster
+        schema: temp/properties/monitoringClusterName
+        watcher:
+          func: onMonitoringClusterChange
+          paths:
+            - temp/properties/monitoringClusterName
+        validation:
+          type: required
+      - type: block-layout
+        if:
+          name: checkIsThanosOrPromLabelProxyEnabled
+          type: function
+        label: Object Storage Configuration
+        elements:
+          - type: select
+            label: Backend Provider
+            schema: temp/properties/objStorage/provider
+            init:
+              type: static
+              value: s3
+            options:
+              - text: s3
+                value: s3
+            validation:
+              type: required
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/provider
+          - type: input
+            label: Bucket
+            loader: fetchInitialObjStorageBucket
+            schema: temp/properties/objStorage/bucket
+            validation:
+              type: required
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/bucket
+          - type: input
+            label: Endpoint
+            loader: fetchInitialObjStorageEndpoint
+            schema: temp/properties/objStorage/endpoint
+            validation:
+              type: required
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/endpoint
+          - type: input
+            label: Access Key
+            loader: fetchInitialObjStorageAccessKey
+            schema: temp/properties/objStorage/accessKey
+            validation:
+              type: required
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/accessKey
+          - type: input
+            label: Secret Key
+            loader: fetchInitialObjStorageSecretKey
+            schema: temp/properties/objStorage/secretKey
+            validation:
+              type: required
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/secretKey
+          - type: input
+            label: Region
+            loader: fetchInitialObjStorageRegion
+            schema: temp/properties/objStorage/region
+            validation:
+              type: required
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/region
+          - type: label-element
+            if:
+              name: checkIsPromLabelProxyEnabled
+              type: function
+            label: TLS Config (Client CA Certificate)
+            customClass: mt-16 font-semibold
+          - type: input
+            if:
+              name: checkIsPromLabelProxyEnabled
+              type: function
+            label: Secret Name
+            loader: fetchInitialObjStorageTlsSecretName
+            schema: temp/properties/objStorage/tlsSecretName
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/tlsSecretName
+          - type: input
+            if:
+              name: checkIsPromLabelProxyEnabled
+              type: function
+            label: Key
+            loader: fetchInitialObjStorageTlsKey
+            schema: temp/properties/objStorage/tlsKey
+            watcher:
+              func: onEnabledFeaturesChange
+              paths:
+                - temp/properties/objStorage/tlsKey
+    id: opscenter-monitoring
+    loader: setReleaseNameAndNamespaceAndInitializeValues
+    type: single-step-form
 type: multi-step-form

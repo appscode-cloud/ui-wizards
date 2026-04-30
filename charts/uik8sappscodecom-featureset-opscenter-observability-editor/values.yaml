@@ -319,6 +319,37 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
+  helmToolkitFluxcdIoHelmRelease_prom_label_proxy: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: prom-label-proxy
+      name: prom-label-proxy
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: prom-label-proxy
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2026.4.30
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: prom-label-proxy
+      storageNamespace: monitoring
+      targetNamespace: monitoring
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_prometheus_adapter: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -343,6 +374,68 @@ resources:
           retries: -1
       interval: 5m
       releaseName: prometheus-adapter
+      storageNamespace: monitoring
+      targetNamespace: monitoring
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_tenant_operator: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: tenant-operator
+      name: tenant-operator
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: tenant-operator
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2026.4.30
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: tenant-operator
+      storageNamespace: monitoring
+      targetNamespace: monitoring
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_thanos_operator: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: thanos-operator
+      name: thanos-operator
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: thanos-operator
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2026.4.30
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: thanos-operator
       storageNamespace: monitoring
       targetNamespace: monitoring
       timeout: 30m
