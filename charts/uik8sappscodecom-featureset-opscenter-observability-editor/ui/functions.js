@@ -298,7 +298,7 @@ export const useFunc = (model) => {
           if (featureName === thanosOperator && objStorage) {
             const endpoint = (objStorage.endpoint || '').replace(/^https?:\/\//, '')
             mergedResourceValues = deepMergeValues(initialResourceValues, {
-              objStorage: {
+              objectStorage: {
                 provider: objStorage.provider || 's3',
                 bucket: objStorage.bucket || '',
                 endpoint: endpoint,
@@ -341,10 +341,10 @@ export const useFunc = (model) => {
                 tls:
                   tlsSecretName && tlsKey
                     ? {
-                        clientCaCertificateRefs: {
+                        clientCaCertificateRefs: [{
                           key: tlsKey,
                           name: tlsSecretName,
-                        },
+                        }],
                       }
                     : undefined,
               },
