@@ -450,6 +450,13 @@ export const useFunc = (model) => {
     }
     try {
       presetVersions = presets.admin?.databases?.Postgres?.versions?.available || []
+      if (presetVersions.length === 0) {
+        const resp = await axios.get(
+          `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/all-available`,
+        )
+        const versions = resp.data?.PostgresVersion || []
+        return versions
+      }
       const queryParams = {
         filter: {
           items: {
