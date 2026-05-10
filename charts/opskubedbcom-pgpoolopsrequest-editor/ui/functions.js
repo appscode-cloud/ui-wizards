@@ -452,6 +452,13 @@ export const useFunc = (model) => {
     }
     try {
       presetVersions = presets.admin?.databases?.Pgpool?.versions?.available || []
+      if (presetVersions.length === 0) {
+        const resp = await axios.get(
+          `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/all-available`,
+        )
+        const versions = resp.data?.PgpoolVersion || []
+        return versions
+      }
       const queryParams = {
         filter: {
           items: {
