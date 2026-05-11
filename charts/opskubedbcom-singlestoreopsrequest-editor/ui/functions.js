@@ -450,13 +450,6 @@ export const useFunc = (model) => {
     }
     try {
       presetVersions = presets.admin?.databases?.Singlestore?.versions?.available || []
-      if (presetVersions.length === 0) {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/all-available`,
-        )
-        const versions = resp.data?.SinglestoreVersion || []
-        return versions
-      }
       const queryParams = {
         filter: {
           items: {
@@ -487,21 +480,27 @@ export const useFunc = (model) => {
         if (limit === '0.0')
           return (
             !item.spec?.deprecated &&
-            (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
+            (presets.status === '404' ||
+              presetVersions.length === 0 ||
+              presetVersions.includes(item.metadata?.name)) &&
             versionCompare(item.spec?.version, ver) >= 0
           )
         // if limit doesn't have any operator, it's a single version
         else if (!limit.match(/^(>=|<=|>|<)/))
           return (
             !item.spec?.deprecated &&
-            (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
+            (presets.status === '404' ||
+              presetVersions.length === 0 ||
+              presetVersions.includes(item.metadata?.name)) &&
             item.spec?.version === limit
           )
         // if limit has operator, check version with constraints
         else
           return (
             !item.spec?.deprecated &&
-            (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
+            (presets.status === '404' ||
+              presetVersions.length === 0 ||
+              presetVersions.includes(item.metadata?.name)) &&
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
