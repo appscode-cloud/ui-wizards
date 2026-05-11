@@ -510,19 +510,25 @@ export const useFunc = (model) => {
         if (limit === '0.0')
           return (
             !item.spec?.deprecated &&
-            (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
+            (presets.status === '404' ||
+              presetVersions.length === 0 ||
+              presetVersions.includes(item.metadata?.name)) &&
             versionCompare(item.spec?.version, ver) >= 0
           )
         else if (!limit.match(/^(>=|<=|>|<)/))
           return (
             !item.spec?.deprecated &&
-            (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
+            (presets.status === '404' ||
+              presetVersions.length === 0 ||
+              presetVersions.includes(item.metadata?.name)) &&
             item.spec?.version === limit
           )
         else
           return (
             !item.spec?.deprecated &&
-            (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
+            (presets.status === '404' ||
+              presetVersions.length === 0 ||
+              presetVersions.includes(item.metadata?.name)) &&
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
