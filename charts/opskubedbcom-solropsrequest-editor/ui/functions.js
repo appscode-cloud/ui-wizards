@@ -454,13 +454,6 @@ export const useFunc = (model) => {
     }
     try {
       presetVersions = presets.admin?.databases?.Solr?.versions?.available || []
-      if (presetVersions.length === 0) {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/all-available`,
-        )
-        const versions = resp.data?.SolrVersion || []
-        return versions
-      }
       const queryParams = {
         filter: {
           items: {

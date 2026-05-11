@@ -470,13 +470,6 @@ export const useFunc = (model) => {
           },
         },
       }
-      if (presetVersions.length === 0) {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/all-available`,
-        )
-        const versions = resp.data?.MongoDBVersion || []
-        return versions
-      }
       const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mongodbversions`,
         {
