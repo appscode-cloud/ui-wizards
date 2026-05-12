@@ -1285,6 +1285,22 @@ export const useFunc = (model) => {
           content: applyConfig[fileName],
         })
       })
+<<<<<<< HEAD
+=======
+    } else {
+      if (applyconfigData.data) {
+        Object.keys(applyconfigData.data).forEach((fileName) => {
+          configObj.push({
+            name: fileName,
+            content: applyconfigData.data[fileName],
+          })
+        })
+      } else {
+        configObj.push({ name: 'mongod.conf', content: '' })
+        configObj.push({ name: 'replicaset.json', content: '' })
+        configObj.push({ name: 'configuration.js', content: '' })
+      }
+>>>>>>> 927ca5409 (fix reconfigure functions in all dbs)
     }
     configSecretKeys.forEach((key) => {
       if (!configObj.find((item) => item.name === key)) {
