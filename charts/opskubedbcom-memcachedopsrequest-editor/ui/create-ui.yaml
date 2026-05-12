@@ -253,12 +253,6 @@ step:
               func: onCreateSecretChange
               paths:
               - temp/properties/createSecret/properties/status
-          - label: ""
-            loader:
-              name: getSelectedConfigurationName|create
-              watchPaths:
-              - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-            type: label-element
           - elements:
             - label: Secret Name
               schema: temp/properties/createSecret/properties/name
@@ -295,6 +289,8 @@ step:
             showLabels: true
             type: block-layout
           - editorHeight: 500px
+            hideFormatButton: true
+            validateContent: false
             if:
               name: isNotCreateSecret
               type: function
@@ -323,13 +319,9 @@ step:
             refresh: true
             schema: temp/properties/selectedConfiguration
             type: select
-          - label: ""
-            loader:
-              name: getSelectedConfigurationName|apply
-              watchPaths:
-              - temp/properties/selectedConfiguration
-            type: label-element
           - editorHeight: 500px
+            hideFormatButton: true
+            validateContent: false
             loader:
               name: setApplyConfig
               watchPaths:
@@ -360,13 +352,9 @@ step:
             refresh: true
             schema: temp/properties/selectedConfigurationRemove
             type: select
-          - label: ""
-            loader:
-              name: getSelectedConfigurationName|remove
-              watchPaths:
-              - temp/properties/selectedConfigurationRemove
-            type: label-element
           - editorHeight: 500px
+            hideFormatButton: true
+            validateContent: false
             init:
               type: func
               value: onRemoveConfigChange

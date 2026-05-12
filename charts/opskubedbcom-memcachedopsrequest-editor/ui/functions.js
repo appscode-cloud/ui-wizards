@@ -1150,7 +1150,7 @@ export const useFunc = (model) => {
     }
     const tempConfigObj = {}
     configValue.forEach((item) => {
-      if (item.name) {
+      if (item.name && item.content) {
         tempConfigObj[item.name] = item.content
       }
     })
@@ -1187,7 +1187,16 @@ export const useFunc = (model) => {
         })
       })
     } else {
-      configObj.push({ name: '', content: '' })
+      if (applyconfigData.data) {
+        Object.keys(applyconfigData.data).forEach((fileName) => {
+          configObj.push({
+            name: fileName,
+            content: applyconfigData.data[fileName],
+          })
+        })
+      } else {
+        configObj.push({ name: 'kubedb-user.cnf', content: '' })
+      }
     }
     return configObj
   }
