@@ -60,7 +60,7 @@ git checkout -b $PR_BRANCH
 git add --all
 git commit -a -s -m "$COMMIT_MSG" -m "/skip-trigger"
 git push -u origin HEAD
-hub pull-request \
-    --labels automerge \
-    --message "$COMMIT_MSG" \
-    --message "$(git show -s --format=%b)"
+gh pr create \
+    --label automerge \
+    --title "$COMMIT_MSG" \
+    --body "$(git show -s --format=%b)"
