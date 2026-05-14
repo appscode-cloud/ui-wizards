@@ -889,6 +889,7 @@ export const useFunc = (model) => {
   // for secret configurations in reconfigure
   let configSecrets = []
   let secretConfigData = []
+  let existingSecrets = []
 
   async function fetchConfigSecrets() {
     const owner = storeGet('/route/params/user')
@@ -927,6 +928,18 @@ export const useFunc = (model) => {
       )
       configSecrets = resp?.data?.response?.availableSecrets || []
       secretConfigData = resp?.data?.response?.configurations || []
+    } catch (e) {
+      console.log(e)
+    }
+
+    // Fetching all existing secrets
+    try {
+      const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/secrets`)
+      resp.data?.items.forEach((item) => {
+        if (item.metadata?.name) {
+          existingSecrets.push(item.metadata.name)
+        }
+      })
     } catch (e) {
       console.log(e)
     }
@@ -1059,6 +1072,14 @@ export const useFunc = (model) => {
     const secretData = getValue(discriminator, `${type}createSecret/data`)
     const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
 
+    // Check uniqueness of secret name
+    if (existingSecrets.includes(secretName)) {
+      toast.error('A secret with this name already exists. Please choose another name.', {
+        timeout: 8000,
+      })
+      return false
+    }
+
     try {
       const res = await axios.post(url, {
         apiVersion: 'v1',
@@ -1084,6 +1105,7 @@ export const useFunc = (model) => {
       toast.error(errMsg, { timeout: 5000 })
       cancelCreateSecret()
     }
+    return true
   }
 
   function decodeError(msg, defaultMsg) {
@@ -1184,18 +1206,12 @@ export const useFunc = (model) => {
           content: applyConfig[fileName],
         })
       })
-    } else {
-      if (applyconfigData.data) {
-        Object.keys(applyconfigData.data).forEach((fileName) => {
-          configObj.push({
-            name: fileName,
-            content: applyconfigData.data[fileName],
-          })
-        })
-      } else {
-        configObj.push({ name: 'user.conf', content: '' })
-      }
     }
+    configSecretKeys.forEach((key) => {
+      if (!configObj.find((item) => item.name === key)) {
+        configObj.push({ name: key, content: '' })
+      }
+    })
     return configObj
   }
 
