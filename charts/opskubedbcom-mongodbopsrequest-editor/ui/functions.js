@@ -1855,7 +1855,28 @@ export const useFunc = (model) => {
       })
   }
 
+  function isMachineValid(type) {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    console.log(dbDetails)
+
+    const limits = (type === 'replicaSet' || type === 'standalone'
+      ? dbDetails?.spec?.podTemplate?.spec?.resources?.requests
+      : dbDetails?.spec?.shardTopology?.[type]?.podTemplate?.spec?.resources?.requests) || {
+      cpu: '',
+      memory: '',
+    }
+
+    const selectedMachine = getValue(discriminator, `/machine-${type}`)
+    const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
+
+    if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
+      return 'Resource limits are same as current machine configuration. Please select different resources or machine preset.'
+    }
+    return false
+  }
+
   return {
+    isMachineValid,
     setExporter,
     onExporterResourceChange,
     fetchAliasOptions,
