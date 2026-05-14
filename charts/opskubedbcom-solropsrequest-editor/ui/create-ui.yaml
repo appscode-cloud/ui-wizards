@@ -630,10 +630,9 @@ step:
     - elements:
       - elements:
         - elements:
-          - customClass: mb-10
+          - customClass: mb-15
             label: Config Secret
-            subtitle: Select a configuration secret from the available list to update
-              your database settings
+            subtitle: Select an existing secret or create a new one to apply to your database configuration.
             type: label-element
           - customClass: mb-2
             init:
@@ -645,20 +644,17 @@ step:
               watchPaths:
               - schema/properties/metadata/properties/namespace
               - temp/properties/node/properties/createSecret/properties/status
-            refresh: true
+            refresh: fetchConfigSecrets
             schema: schema/properties/spec/properties/configuration/properties/node/properties/configSecret/properties/name
             type: select
             watcher:
               func: onCreateSecretChange|node
               paths:
               - temp/properties/node/properties/createSecret/properties/status
-          - label: ""
-            loader:
-              name: getSelectedConfigurationName|create|node
-              watchPaths:
-              - schema/properties/spec/properties/configuration/properties/node/properties/configSecret/properties/name
-            type: label-element
           - elements:
+            - type: label-element
+              label: ''
+              subtitle: Enter a <b>unique name</b> to identify this secret.
             - label: Secret Name
               schema: temp/properties/node/properties/createSecret/properties/name
               type: input
@@ -677,12 +673,14 @@ step:
                   type: required
               - label: Value
                 schema: value
+                height: 120px
                 type: textarea
               label: String Data
               schema: temp/properties/node/properties/createSecret/properties/data
               type: array-object-form
               validation:
                 type: required
+              keepInitial: true
             hasButton:
               action: createNewConfigSecret|node
               hasCancel: cancelCreateSecret|node
@@ -692,8 +690,11 @@ step:
               type: function
             label: Create a New Config Secret
             showLabels: true
+            customClass: mt-15
             type: block-layout
           - editorHeight: 500px
+            hideFormatButton: true
+            validateContent: false
             if:
               name: isNotCreateSecret|node
               type: function
@@ -710,7 +711,7 @@ step:
           label: Config Secret
           type: block-layout
         - elements:
-          - customClass: mb-10
+          - customClass: mb-15
             label: New Apply Config
             subtitle: Define custom configurations for your database using key-value
               pairs. These parameters will overwrite existing settings.<br>Enter the
@@ -719,16 +720,12 @@ step:
           - customClass: mb-2
             label: Configuration
             loader: getConfigSecretsforAppyConfig
-            refresh: true
+            refresh: fetchConfigSecrets
             schema: temp/properties/node/selectedConfiguration
             type: select
-          - label: ""
-            loader:
-              name: getSelectedConfigurationName|apply|node
-              watchPaths:
-              - temp/properties/node/selectedConfiguration
-            type: label-element
           - editorHeight: 500px
+            hideFormatButton: true
+            validateContent: false
             loader:
               name: setApplyConfig|node
               watchPaths:
@@ -745,7 +742,7 @@ step:
           label: ApplyConfig
           type: block-layout
         - elements:
-          - customClass: mb-10
+          - customClass: mb-15
             label: Remove
             subtitle: Selected a configuration secret from the available list to update
               your database settings
@@ -756,16 +753,12 @@ step:
               name: getConfigSecretsforAppyConfig
               watchPaths:
               - schema/properties/metadata/properties/namespace
-            refresh: true
+            refresh: fetchConfigSecrets
             schema: temp/properties/node/selectedConfigurationRemove
             type: select
-          - label: ""
-            loader:
-              name: getSelectedConfigurationName|remove|node
-              watchPaths:
-              - temp/properties/node/selectedConfigurationRemove
-            type: label-element
           - editorHeight: 500px
+            hideFormatButton: true
+            validateContent: false
             init:
               type: func
               value: onRemoveConfigChange|node
@@ -800,10 +793,9 @@ step:
       - elements:
         - elements:
           - elements:
-            - customClass: mb-10
+            - customClass: mb-15
               label: Config Secret
-              subtitle: Select a configuration secret from the available list to update
-                your database settings
+              subtitle: Select an existing secret or create a new one to apply to your database configuration.
               type: label-element
             - customClass: mb-2
               init:
@@ -815,20 +807,17 @@ step:
                 watchPaths:
                 - schema/properties/metadata/properties/namespace
                 - temp/properties/coordinator/properties/createSecret/properties/status
-              refresh: true
+              refresh: fetchConfigSecrets
               schema: schema/properties/spec/properties/configuration/properties/coordinator/properties/configSecret/properties/name
               type: select
               watcher:
                 func: onCreateSecretChange|coordinator
                 paths:
                 - temp/properties/coordinator/properties/createSecret/properties/status
-            - label: ""
-              loader:
-                name: getSelectedConfigurationName|create|coordinator
-                watchPaths:
-                - schema/properties/spec/properties/configuration/properties/coordinator/properties/configSecret/properties/name
-              type: label-element
             - elements:
+              - type: label-element
+                label: ''
+                subtitle: Enter a <b>unique name</b> to identify this secret.
               - label: Secret Name
                 schema: temp/properties/coordinator/properties/createSecret/properties/name
                 type: input
@@ -847,12 +836,14 @@ step:
                     type: required
                 - label: Value
                   schema: value
+                  height: 120px
                   type: textarea
                 label: String Data
                 schema: temp/properties/coordinator/properties/createSecret/properties/data
                 type: array-object-form
                 validation:
                   type: required
+                keepInitial: true
               hasButton:
                 action: createNewConfigSecret|coordinator
                 hasCancel: cancelCreateSecret|coordinator
@@ -862,8 +853,11 @@ step:
                 type: function
               label: Create a New Config Secret
               showLabels: true
+              customClass: mt-15
               type: block-layout
             - editorHeight: 500px
+              hideFormatButton: true
+              validateContent: false
               if:
                 name: isNotCreateSecret|coordinator
                 type: function
@@ -880,7 +874,7 @@ step:
             label: Config Secret
             type: block-layout
           - elements:
-            - customClass: mb-10
+            - customClass: mb-15
               label: New Apply Config
               subtitle: Define custom configurations for your database using key-value
                 pairs. These parameters will overwrite existing settings.<br>Enter
@@ -889,16 +883,12 @@ step:
             - customClass: mb-2
               label: Configuration
               loader: getConfigSecretsforAppyConfig
-              refresh: true
+              refresh: fetchConfigSecrets
               schema: temp/properties/coordinator/selectedConfiguration
               type: select
-            - label: ""
-              loader:
-                name: getSelectedConfigurationName|apply|coordinator
-                watchPaths:
-                - temp/properties/coordinator/selectedConfiguration
-              type: label-element
             - editorHeight: 500px
+              hideFormatButton: true
+              validateContent: false
               loader:
                 name: setApplyConfig|coordinator
                 watchPaths:
@@ -915,7 +905,7 @@ step:
             label: ApplyConfig
             type: block-layout
           - elements:
-            - customClass: mb-10
+            - customClass: mb-15
               label: Remove
               subtitle: Selected a configuration secret from the available list to
                 update your database settings
@@ -926,16 +916,12 @@ step:
                 name: getConfigSecretsforAppyConfig
                 watchPaths:
                 - schema/properties/metadata/properties/namespace
-              refresh: true
+              refresh: fetchConfigSecrets
               schema: temp/properties/coordinator/selectedConfigurationRemove
               type: select
-            - label: ""
-              loader:
-                name: getSelectedConfigurationName|remove|coordinator
-                watchPaths:
-                - temp/properties/coordinator/selectedConfigurationRemove
-              type: label-element
             - editorHeight: 500px
+              hideFormatButton: true
+              validateContent: false
               init:
                 type: func
                 value: onRemoveConfigChange|coordinator
@@ -967,10 +953,9 @@ step:
       - elements:
         - elements:
           - elements:
-            - customClass: mb-10
+            - customClass: mb-15
               label: Config Secret
-              subtitle: Select a configuration secret from the available list to update
-                your database settings
+              subtitle: Select an existing secret or create a new one to apply to your database configuration.
               type: label-element
             - customClass: mb-2
               init:
@@ -982,20 +967,17 @@ step:
                 watchPaths:
                 - schema/properties/metadata/properties/namespace
                 - temp/properties/data/properties/createSecret/properties/status
-              refresh: true
+              refresh: fetchConfigSecrets
               schema: schema/properties/spec/properties/configuration/properties/data/properties/configSecret/properties/name
               type: select
               watcher:
                 func: onCreateSecretChange|data
                 paths:
                 - temp/properties/data/properties/createSecret/properties/status
-            - label: ""
-              loader:
-                name: getSelectedConfigurationName|create|data
-                watchPaths:
-                - schema/properties/spec/properties/configuration/properties/data/properties/configSecret/properties/name
-              type: label-element
             - elements:
+              - type: label-element
+                label: ''
+                subtitle: Enter a <b>unique name</b> to identify this secret.
               - label: Secret Name
                 schema: temp/properties/data/properties/createSecret/properties/name
                 type: input
@@ -1014,12 +996,14 @@ step:
                     type: required
                 - label: Value
                   schema: value
+                  height: 120px
                   type: textarea
                 label: String Data
                 schema: temp/properties/data/properties/createSecret/properties/data
                 type: array-object-form
                 validation:
                   type: required
+                keepInitial: true
               hasButton:
                 action: createNewConfigSecret|data
                 hasCancel: cancelCreateSecret|data
@@ -1029,8 +1013,11 @@ step:
                 type: function
               label: Create a New Config Secret
               showLabels: true
+              customClass: mt-15
               type: block-layout
             - editorHeight: 500px
+              hideFormatButton: true
+              validateContent: false
               if:
                 name: isNotCreateSecret|data
                 type: function
@@ -1047,7 +1034,7 @@ step:
             label: Config Secret
             type: block-layout
           - elements:
-            - customClass: mb-10
+            - customClass: mb-15
               label: New Apply Config
               subtitle: Define custom configurations for your database using key-value
                 pairs. These parameters will overwrite existing settings.<br>Enter
@@ -1056,16 +1043,12 @@ step:
             - customClass: mb-2
               label: Configuration
               loader: getConfigSecretsforAppyConfig
-              refresh: true
+              refresh: fetchConfigSecrets
               schema: temp/properties/data/selectedConfiguration
               type: select
-            - label: ""
-              loader:
-                name: getSelectedConfigurationName|apply|data
-                watchPaths:
-                - temp/properties/data/selectedConfiguration
-              type: label-element
             - editorHeight: 500px
+              hideFormatButton: true
+              validateContent: false
               loader:
                 name: setApplyConfig|data
                 watchPaths:
@@ -1082,7 +1065,7 @@ step:
             label: ApplyConfig
             type: block-layout
           - elements:
-            - customClass: mb-10
+            - customClass: mb-15
               label: Remove
               subtitle: Selected a configuration secret from the available list to
                 update your database settings
@@ -1093,16 +1076,12 @@ step:
                 name: getConfigSecretsforAppyConfig
                 watchPaths:
                 - schema/properties/metadata/properties/namespace
-              refresh: true
+              refresh: fetchConfigSecrets
               schema: temp/properties/data/selectedConfigurationRemove
               type: select
-            - label: ""
-              loader:
-                name: getSelectedConfigurationName|remove|data
-                watchPaths:
-                - temp/properties/data/selectedConfigurationRemove
-              type: label-element
             - editorHeight: 500px
+              hideFormatButton: true
+              validateContent: false
               init:
                 type: func
                 value: onRemoveConfigChange|data
@@ -1134,10 +1113,9 @@ step:
       - elements:
         - elements:
           - elements:
-            - customClass: mb-10
+            - customClass: mb-15
               label: Config Secret
-              subtitle: Select a configuration secret from the available list to update
-                your database settings
+              subtitle: Select an existing secret or create a new one to apply to your database configuration.
               type: label-element
             - customClass: mb-2
               init:
@@ -1149,20 +1127,17 @@ step:
                 watchPaths:
                 - schema/properties/metadata/properties/namespace
                 - temp/properties/overseer/properties/createSecret/properties/status
-              refresh: true
+              refresh: fetchConfigSecrets
               schema: schema/properties/spec/properties/configuration/properties/overseer/properties/configSecret/properties/name
               type: select
               watcher:
                 func: onCreateSecretChange|overseer
                 paths:
                 - temp/properties/overseer/properties/createSecret/properties/status
-            - label: ""
-              loader:
-                name: getSelectedConfigurationName|create|overseer
-                watchPaths:
-                - schema/properties/spec/properties/configuration/properties/overseer/properties/configSecret/properties/name
-              type: label-element
             - elements:
+              - type: label-element
+                label: ''
+                subtitle: Enter a <b>unique name</b> to identify this secret.
               - label: Secret Name
                 schema: temp/properties/overseer/properties/createSecret/properties/name
                 type: input
@@ -1181,12 +1156,14 @@ step:
                     type: required
                 - label: Value
                   schema: value
+                  height: 120px
                   type: textarea
                 label: String Data
                 schema: temp/properties/overseer/properties/createSecret/properties/data
                 type: array-object-form
                 validation:
                   type: required
+                keepInitial: true
               hasButton:
                 action: createNewConfigSecret|overseer
                 hasCancel: cancelCreateSecret|overseer
@@ -1196,8 +1173,11 @@ step:
                 type: function
               label: Create a New Config Secret
               showLabels: true
+              customClass: mt-15
               type: block-layout
             - editorHeight: 500px
+              hideFormatButton: true
+              validateContent: false
               if:
                 name: isNotCreateSecret|overseer
                 type: function
@@ -1214,7 +1194,7 @@ step:
             label: Config Secret
             type: block-layout
           - elements:
-            - customClass: mb-10
+            - customClass: mb-15
               label: New Apply Config
               subtitle: Define custom configurations for your database using key-value
                 pairs. These parameters will overwrite existing settings.<br>Enter
@@ -1223,16 +1203,12 @@ step:
             - customClass: mb-2
               label: Configuration
               loader: getConfigSecretsforAppyConfig
-              refresh: true
+              refresh: fetchConfigSecrets
               schema: temp/properties/overseer/selectedConfiguration
               type: select
-            - label: ""
-              loader:
-                name: getSelectedConfigurationName|apply|overseer
-                watchPaths:
-                - temp/properties/overseer/selectedConfiguration
-              type: label-element
             - editorHeight: 500px
+              hideFormatButton: true
+              validateContent: false
               loader:
                 name: setApplyConfig|overseer
                 watchPaths:
@@ -1249,7 +1225,7 @@ step:
             label: ApplyConfig
             type: block-layout
           - elements:
-            - customClass: mb-10
+            - customClass: mb-15
               label: Remove
               subtitle: Selected a configuration secret from the available list to
                 update your database settings
@@ -1260,16 +1236,12 @@ step:
                 name: getConfigSecretsforAppyConfig
                 watchPaths:
                 - schema/properties/metadata/properties/namespace
-              refresh: true
+              refresh: fetchConfigSecrets
               schema: temp/properties/overseer/selectedConfigurationRemove
               type: select
-            - label: ""
-              loader:
-                name: getSelectedConfigurationName|remove|overseer
-                watchPaths:
-                - temp/properties/overseer/selectedConfigurationRemove
-              type: label-element
             - editorHeight: 500px
+              hideFormatButton: true
+              validateContent: false
               init:
                 type: func
                 value: onRemoveConfigChange|overseer
