@@ -1286,6 +1286,7 @@ export const useFunc = (model) => {
         })
       })
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     } else {
       if (applyconfigData.data) {
@@ -1301,6 +1302,8 @@ export const useFunc = (model) => {
         configObj.push({ name: 'configuration.js', content: '' })
       }
 >>>>>>> 927ca5409 (fix reconfigure functions in all dbs)
+=======
+>>>>>>> 6feb3f063 (fix reconfigure issues & add new modifications)
     }
     configSecretKeys.forEach((key) => {
       if (!configObj.find((item) => item.name === key)) {
