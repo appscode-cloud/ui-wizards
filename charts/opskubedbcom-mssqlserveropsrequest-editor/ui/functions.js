@@ -1747,7 +1747,23 @@ export const useFunc = (model) => {
       })
   }
 
+  function isMachineValid() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const mssqlContainer = containers.find((c) => c.name === 'mssql')
+    const limits = mssqlContainer?.resources?.requests || {}
+
+    const selectedMachine = getValue(discriminator, '/machine')
+    const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
+
+    if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
+      return 'Resource limits are same as current machine configuration. Please select different resources or machine preset.'
+    }
+    return false
+  }
+
   return {
+    isMachineValid,
     isRancherManaged,
     setExporter,
     onExporterResourceChange,
