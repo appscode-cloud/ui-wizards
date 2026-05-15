@@ -1832,7 +1832,21 @@ export const useFunc = (model) => {
       })
   }
 
+  function isMachineValid() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+
+    const selectedMachine = getValue(discriminator, '/machine-node') || {}
+    const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
+
+    if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
+      return 'Resource limits are same as current machine configuration. Please select different resources or machine preset.'
+    }
+    return false
+  }
+
   return {
+    isMachineValid,
     setExporter,
     onExporterResourceChange,
     fetchAliasOptions,
