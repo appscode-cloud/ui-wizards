@@ -1081,7 +1081,6 @@ export const useFunc = (model) => {
   let configSecrets = []
   let secretConfigData = []
   let existingSecrets = []
-  let databaseInfoResponse = {}
 
   async function fetchConfigSecrets() {
     const owner = storeGet('/route/params/user')
@@ -1118,7 +1117,6 @@ export const useFunc = (model) => {
           },
         },
       )
-      databaseInfoResponse = resp?.data?.response || {}
       configSecrets = resp?.data?.response?.availableSecrets || []
       secretConfigData = resp?.data?.response?.configurations || []
     } catch (e) {
@@ -1136,11 +1134,6 @@ export const useFunc = (model) => {
     } catch (e) {
       console.log(e)
     }
-  }
-
-  function getCurrentConfig() {
-    const currentConfig = databaseInfoResponse?.appliedConfig ?? ''
-    return currentConfig
   }
 
   async function getConfigSecrets(type) {
@@ -1404,23 +1397,6 @@ export const useFunc = (model) => {
           content: applyConfig[fileName],
         })
       })
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    } else {
-      if (applyconfigData.data) {
-        Object.keys(applyconfigData.data).forEach((fileName) => {
-          configObj.push({
-            name: fileName,
-            content: applyconfigData.data[fileName],
-          })
-        })
-      } else {
-        configObj.push({ name: '.properties', content: '' })
-      }
->>>>>>> 927ca5409 (fix reconfigure functions in all dbs)
-=======
->>>>>>> 6feb3f063 (fix reconfigure issues & add new modifications)
     }
     configSecretKeys.forEach((key) => {
       if (!configObj.find((item) => item.name === key)) {
@@ -2155,7 +2131,6 @@ export const useFunc = (model) => {
     getSelectedConfigurationData,
     getSelectedConfigurationName,
     getSelectedConfigurationValueForRemove,
-    getCurrentConfig,
     createNewConfigSecret,
     decodeError,
     isCreateSecret,
