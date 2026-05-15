@@ -901,6 +901,7 @@ export const useFunc = (model) => {
   let configSecrets = []
   let secretConfigData = []
   let existingSecrets = []
+  let databaseInfoResponse = {}
 
   async function fetchConfigSecrets() {
     const owner = storeGet('/route/params/user')
@@ -937,6 +938,7 @@ export const useFunc = (model) => {
           },
         },
       )
+      databaseInfoResponse = resp?.data?.response || {}
       configSecrets = resp?.data?.response?.availableSecrets || []
       secretConfigData = resp?.data?.response?.configurations || []
     } catch (e) {
@@ -954,6 +956,11 @@ export const useFunc = (model) => {
     } catch (e) {
       console.log(e)
     }
+  }
+
+  function getCurrentConfig() {
+    const currentConfig = databaseInfoResponse?.appliedConfig ?? ''
+    return currentConfig
   }
 
   async function getConfigSecrets(type) {
@@ -1233,38 +1240,12 @@ export const useFunc = (model) => {
 
     if (!selectedConfig) {
       commit('wizard/model$delete', `/spec/configuration/${type}removeCustomConfig`)
-      return [{ name: '', content: '' }]
+      return
     }
     commit('wizard/model$update', {
       path: `/spec/configuration/${type}removeCustomConfig`,
       value: true,
     })
-
-    const configuration = secretConfigData.find((item) => item.componentName === selectedConfig)
-
-    if (!configuration.data) {
-      return [{ name: '', content: '' }]
-    }
-
-    const configObj = []
-    // Decode base64 and format as array of objects with name and content
-    Object.keys(configuration.data).forEach((fileName) => {
-      try {
-        // Decode base64 string
-        const decodedString = atob(configuration.data[fileName])
-        configObj.push({
-          name: fileName,
-          content: decodedString,
-        })
-      } catch (e) {
-        console.error(`Error decoding ${fileName}:`, e)
-        configObj.push({
-          name: fileName,
-          content: configuration.data[fileName], // Fallback to original if decode fails
-        })
-      }
-    })
-    return configObj
   }
 
   async function onNewConfigSecretChange(type) {
@@ -1866,5 +1847,6 @@ export const useFunc = (model) => {
     onNewConfigSecretChange,
     onSelectedSecretChange,
     isTlsEnabled,
+    getCurrentConfig,
   }
 }
