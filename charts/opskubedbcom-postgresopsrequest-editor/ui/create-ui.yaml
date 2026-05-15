@@ -291,6 +291,20 @@ step:
         subtitle: Select a new configuration secret, apply a custom configuration,
           or remove an existing setup to update your database settings
         type: label-element
+      - type: editor
+        label: Current Configuration
+        schema: temp/properties/currentConfig
+        readonly: true
+        editorHeight: 120px
+        validateContent: false
+        if:
+          name: getCurrentConfig
+          type: function
+        loader:
+          name: getCurrentConfig
+          watchPaths:
+          - schema/properties/metadata/properties/namespace
+          - temp/properties/standalone/properties/createSecret/properties/status
       - elements:
         - elements:
           - customClass: mb-15
@@ -419,15 +433,6 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/selectedConfigurationRemove
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            validateContent: false
-            init:
-              type: func
-              value: onRemoveConfigChange
-            readonly: true
-            schema: temp/properties/removeConfig
-            type: multi-file-editor
             watcher:
               func: onRemoveConfigChange
               paths:
