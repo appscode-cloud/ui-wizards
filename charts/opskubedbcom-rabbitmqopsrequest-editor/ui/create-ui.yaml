@@ -296,7 +296,8 @@ step:
         - elements:
           - customClass: mb-15
             label: Config Secret
-            subtitle: Select an existing secret or create a new one to apply to your database configuration.
+            subtitle: Select an existing secret or create a new one to apply to your
+              database configuration.
             type: label-element
           - customClass: mb-2
             init:
@@ -315,10 +316,11 @@ step:
               func: onCreateSecretChange
               paths:
               - temp/properties/createSecret/properties/status
-          - elements:
-            - type: label-element
-              label: ''
+          - customClass: mt-15
+            elements:
+            - label: ""
               subtitle: Enter a <b>unique name</b> to identify this secret.
+              type: label-element
             - label: Secret Name
               schema: temp/properties/createSecret/properties/name
               type: input
@@ -335,16 +337,16 @@ step:
                 type: select
                 validation:
                   type: required
-              - label: Value
+              - height: 120px
+                label: Value
                 schema: value
-                height: 120px
                 type: textarea
+              keepInitial: true
               label: String Data
               schema: temp/properties/createSecret/properties/data
               type: array-object-form
               validation:
                 type: required
-              keepInitial: true
             hasButton:
               action: createNewConfigSecret
               hasCancel: cancelCreateSecret
@@ -354,11 +356,9 @@ step:
               type: function
             label: Create a New Config Secret
             showLabels: true
-            customClass: mt-15
             type: block-layout
           - editorHeight: 500px
             hideFormatButton: true
-            validateContent: false
             if:
               name: isNotCreateSecret
               type: function
@@ -369,6 +369,7 @@ step:
             readonly: true
             schema: temp/properties/newConfigSecret
             type: multi-file-editor
+            validateContent: false
           if:
             name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
             type: function
@@ -389,13 +390,13 @@ step:
             type: select
           - editorHeight: 500px
             hideFormatButton: true
-            validateContent: false
             loader:
               name: setApplyConfig
               watchPaths:
               - temp/properties/selectedConfiguration
             schema: temp/properties/applyConfig
             type: multi-file-editor
+            validateContent: false
             watcher:
               func: onApplyconfigChange
               paths:
@@ -422,13 +423,13 @@ step:
             type: select
           - editorHeight: 500px
             hideFormatButton: true
-            validateContent: false
             init:
               type: func
               value: onRemoveConfigChange
             readonly: true
             schema: temp/properties/removeConfig
             type: multi-file-editor
+            validateContent: false
             watcher:
               func: onRemoveConfigChange
               paths:
