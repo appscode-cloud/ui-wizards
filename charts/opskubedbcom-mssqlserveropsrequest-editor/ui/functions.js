@@ -717,6 +717,7 @@ export const useFunc = (model) => {
     const opMap = {
       upgrade: 'UpdateVersion',
       updateVersion: 'UpdateVersion',
+      'update-version': 'UpdateVersion',
       horizontalscaling: 'HorizontalScaling',
       verticalscaling: 'VerticalScaling',
       volumeexpansion: 'VolumeExpansion',
