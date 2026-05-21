@@ -130,20 +130,10 @@ resources:
           resourceDiffPercentage: 20
           trigger: "On"
       databaseRef:
-        name: repl
+        name: zookeeper
       opsRequestOptions:
         apply: IfReady
         timeout: 10m
-  catalogAppscodeComZooKeeperBinding: # +doc-gen:break
-    apiVersion: catalog.appscode.com/v1alpha1
-    kind: ZooKeeperBinding
-    metadata:
-      name: zookeeper
-      namespace: demo
-    spec:
-      sourceRef:
-        name: zookeeper
-        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
@@ -257,7 +247,7 @@ resources:
           name: zookeeper-frequent-backup
           repositories:
             - backend: zookeeper-backend
-              directory: /mongo-repo
+              directory: /zookeeper-repo
               encryptionSecret:
                 name: zookeeper-encryption-secret
                 namespace: demo

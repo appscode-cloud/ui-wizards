@@ -1,3 +1,74 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          milvusGoroutinesExplosion:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 1000
+          milvusHighCPUUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          milvusHighFDsUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 110
+          milvusHighMemoryUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          milvusHighProcessMemoryUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 8e+08
+          milvusHighThreadPressure:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 60
+          milvusInstanceDown:
+            duration: 30s
+            enabled: true
+            severity: critical
+          milvusRestarted:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 180
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: prometheus
 metadata:
   resource:
     group: kubedb.com
@@ -9,6 +80,31 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComMilvusAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: MilvusAutoscaler
+    metadata:
+      name: milvus
+      namespace: demo
+    spec:
+      compute:
+        milvus:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: milvus
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer

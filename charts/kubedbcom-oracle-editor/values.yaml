@@ -1,3 +1,63 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          oracleInstanceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          oracleRestarted:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 60
+          oracleServiceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: prometheus
 metadata:
   resource:
     group: kubedb.com
@@ -9,6 +69,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComOracleAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: OracleAutoscaler
+    metadata:
+      name: oracle
+      namespace: demo
+    spec:
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        oracle:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: oracle
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComOracleBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: OracleBinding
+    metadata:
+      name: oracle
+      namespace: demo
+    spec:
+      sourceRef:
+        name: oracle
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
@@ -18,181 +113,6 @@ resources:
     spec:
       ca:
         secretName: oracle-ca
-  coreKubestashComBackupBlueprint: # +doc-gen:break
-    apiVersion: core.kubestash.com/v1alpha1
-    kind: BackupBlueprint
-    metadata:
-      name: oracle
-      namespace: demo
-    spec:
-      backupConfigurationTemplate:
-        backends:
-          - name: oracle-backend
-            retentionPolicy:
-              name: oracle-retention-policy
-              namespace: demo
-            storageRef:
-              name: oracle-storage
-              namespace: demo
-        sessions:
-          - addon:
-              jobTemplate:
-                spec:
-                  containerSecurityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                      drop:
-                        - ALL
-                    runAsGroup: 0
-                    runAsNonRoot: true
-                    runAsUser: 999
-                    seccompProfile:
-                      type: RuntimeDefault
-                  nodeSelector:
-                    kubernetes.io/os: linux
-              name: oracle-addon
-              tasks:
-                - name: logical-backup
-            name: oracle-frequent-backup
-            repositories:
-              - backend: oracle-backend
-                directory: /mongo-repo
-                encryptionSecret:
-                  name: oracle-encryption-secret
-                  namespace: demo
-                name: oracle-repo
-            scheduler:
-              failedJobsHistoryLimit: 4
-              jobTemplate:
-                backoffLimit: 2
-                template:
-                  spec:
-                    containerSecurityContext:
-                      allowPrivilegeEscalation: false
-                      capabilities:
-                        drop:
-                          - ALL
-                      runAsGroup: 0
-                      runAsNonRoot: true
-                      runAsUser: 999
-                      seccompProfile:
-                        type: RuntimeDefault
-                    nodeSelector:
-                      kubernetes.io/os: linux
-              schedule: 0 */2 * * *
-              successfulJobsHistoryLimit: 2
-            sessionHistoryLimit: 3
-      usagePolicy:
-        allowedNamespaces:
-          from: Same
-  coreKubestashComBackupConfiguration: # +doc-gen:break
-    apiVersion: core.kubestash.com/v1alpha1
-    kind: BackupConfiguration
-    metadata:
-      name: oracle
-      namespace: demo
-    spec:
-      backends:
-        - name: oracle-backend
-          retentionPolicy:
-            name: oracle-retention-policy
-            namespace: demo
-          storageRef:
-            name: oracle-storage
-            namespace: demo
-      sessions:
-        - addon:
-            jobTemplate:
-              spec:
-                containerSecurityContext:
-                  allowPrivilegeEscalation: false
-                  capabilities:
-                    drop:
-                      - ALL
-                  runAsGroup: 0
-                  runAsNonRoot: true
-                  runAsUser: 999
-                  seccompProfile:
-                    type: RuntimeDefault
-                nodeSelector:
-                  kubernetes.io/os: linux
-            name: oracle-addon
-            tasks:
-              - name: logical-backup
-          name: oracle-frequent-backup
-          repositories:
-            - backend: oracle-backend
-              directory: /mongo-repo
-              encryptionSecret:
-                name: oracle-encryption-secret
-                namespace: demo
-              name: oracle-repo
-          scheduler:
-            failedJobsHistoryLimit: 4
-            jobTemplate:
-              backoffLimit: 2
-              template:
-                spec:
-                  containerSecurityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                      drop:
-                        - ALL
-                    runAsGroup: 0
-                    runAsNonRoot: true
-                    runAsUser: 999
-                    seccompProfile:
-                      type: RuntimeDefault
-                  nodeSelector:
-                    kubernetes.io/os: linux
-            schedule: 0 */2 * * *
-            successfulJobsHistoryLimit: 2
-          sessionHistoryLimit: 3
-      target:
-        apiGroup: kubedb.com
-        kind: Oracle
-        name: oracle
-        namespace: demo
-  coreKubestashComRestoreSession: # +doc-gen:break
-    apiVersion: core.kubestash.com/v1alpha1
-    kind: RestoreSession
-    metadata:
-      name: oracle
-      namespace: demo
-    spec:
-      addon:
-        containerRuntimeSettings:
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            runAsGroup: 0
-            runAsNonRoot: true
-            runAsUser: 999
-            seccompProfile:
-              type: RuntimeDefault
-        jobTemplate:
-          spec:
-            nodeSelector:
-              kubernetes.io/os: linux
-            securityContext:
-              runAsGroup: 0
-              runAsUser: 999
-        name: oracle-addon
-        tasks:
-          - name: logical-backup-restore
-      dataSource:
-        encryptionSecret:
-          name: oracle-encryption-secret
-          namespace: demo
-        repository: oracle-repo
-        snapshot: latest
-      target:
-        apiGroup: kubedb.com
-        kind: Oracle
-        name: oracle
-        namespace: demo
   kubedbComOracle: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Oracle

@@ -1,3 +1,62 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          hanadbHighCPUUsage:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 80
+          hanadbHighMemoryUsage:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 80
+          hanadbInstanceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          hanadbReplicationNotActive:
+            duration: 2m
+            enabled: true
+            severity: critical
+          hanadbRestarted:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 180
+          hanadbServiceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com
@@ -9,15 +68,31 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  certManagerIoIssuer_ca: # +doc-gen:break
-    apiVersion: cert-manager.io/v1
-    kind: Issuer
+  autoscalingKubedbComHanaDBAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: HanaDBAutoscaler
     metadata:
-      name: hanadb-ca
+      name: hanadb
       namespace: demo
     spec:
-      ca:
-        secretName: hanadb-ca
+      compute:
+        hanadb:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: hanadb
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
   kubedbComHanaDB: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: HanaDB

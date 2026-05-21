@@ -103,7 +103,7 @@ resources:
         nodeTopology:
           name: standard-basv2-family
       databaseRef:
-        name: repl
+        name: druid
       opsRequestOptions:
         apply: IfReady
         timeout: 10m
@@ -126,6 +126,181 @@ resources:
     spec:
       ca:
         secretName: druid-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: druid
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: druid-backend
+            retentionPolicy:
+              name: druid-retention-policy
+              namespace: demo
+            storageRef:
+              name: druid-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 999
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+              name: druid-addon
+              tasks:
+                - name: logical-backup
+            name: druid-frequent-backup
+            repositories:
+              - backend: druid-backend
+                directory: /druid-repo
+                encryptionSecret:
+                  name: druid-encryption-secret
+                  namespace: demo
+                name: druid-repo
+            scheduler:
+              failedJobsHistoryLimit: 4
+              jobTemplate:
+                backoffLimit: 2
+                template:
+                  spec:
+                    containerSecurityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                          - ALL
+                      runAsGroup: 0
+                      runAsNonRoot: true
+                      runAsUser: 999
+                      seccompProfile:
+                        type: RuntimeDefault
+                    nodeSelector:
+                      kubernetes.io/os: linux
+              schedule: 0 */2 * * *
+              successfulJobsHistoryLimit: 2
+            sessionHistoryLimit: 3
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: druid
+      namespace: demo
+    spec:
+      backends:
+        - name: druid-backend
+          retentionPolicy:
+            name: druid-retention-policy
+            namespace: demo
+          storageRef:
+            name: druid-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                containerSecurityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+                  runAsGroup: 0
+                  runAsNonRoot: true
+                  runAsUser: 999
+                  seccompProfile:
+                    type: RuntimeDefault
+                nodeSelector:
+                  kubernetes.io/os: linux
+            name: druid-addon
+            tasks:
+              - name: logical-backup
+          name: druid-frequent-backup
+          repositories:
+            - backend: druid-backend
+              directory: /druid-repo
+              encryptionSecret:
+                name: druid-encryption-secret
+                namespace: demo
+              name: druid-repo
+          scheduler:
+            failedJobsHistoryLimit: 4
+            jobTemplate:
+              backoffLimit: 2
+              template:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 999
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+            schedule: 0 */2 * * *
+            successfulJobsHistoryLimit: 2
+          sessionHistoryLimit: 3
+      target:
+        apiGroup: kubedb.com
+        kind: Druid
+        name: druid
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: druid
+      namespace: demo
+    spec:
+      addon:
+        containerRuntimeSettings:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+        jobTemplate:
+          spec:
+            nodeSelector:
+              kubernetes.io/os: linux
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 999
+        name: druid-addon
+        tasks:
+          - name: logical-backup-restore
+      dataSource:
+        encryptionSecret:
+          name: druid-encryption-secret
+          namespace: demo
+        repository: druid-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: Druid
+        name: druid
+        namespace: demo
   gitopsKubedbComDruid: # +doc-gen:break
     apiVersion: gitops.kubedb.com/v1alpha1
     kind: Druid

@@ -148,6 +148,31 @@ spec:
         summary: Recurrent memory page faults in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Recurrent memory page faults\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
+
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    - alert: DiskUsageHigh
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+        * 100 > {{ .rules.diskUsageHigh.val }}
+      for: {{ .rules.diskUsageHigh.duration }}
+      labels:
+        severity: {{ .rules.diskUsageHigh.severity }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    - alert: DiskAlmostFull
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+        * 100 > {{ .rules.diskAlmostFull.val }}
+      for: {{ .rules.diskAlmostFull.duration }}
+      labels:
+        severity: {{ .rules.diskAlmostFull.severity }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
   {{end -}}
   {{end -}}
 
@@ -262,7 +287,7 @@ spec:
     {{ end -}}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
     - alert: MongoDBStashRepositoryCorrupted
-      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"}
+      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .rules.repositoryCorrupted.severity }}
@@ -303,6 +328,91 @@ spec:
       annotations:
         summary:  MongoDB Stash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.kubeStash -}}
+  {{ if (include "kubedbcom-mongodb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: mongodb.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    - alert: MongoDBKubeStashBackupSessionFailed
+      expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.backupSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.backupSessionFailed.severity }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MongoDB KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MongoDB KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    - alert: MongoDBKubeStashRestoreSessionFailed
+      expr: core_kubestash_com_restoresession_phase{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
+      for: {{ .rules.restoreSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionFailed.severity }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MongoDB KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MongoDB KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    - alert: MongoDBKubeStashNoBackupSessionForTooLong
+      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
+      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      labels:
+        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MongoDB KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MongoDB KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    - alert: MongoDBKubeStashRepositoryCorrupted
+      expr: storage_kubestash_com_repository_info{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
+      for: {{ .rules.repositoryCorrupted.duration }}
+      labels:
+        severity: {{ .rules.repositoryCorrupted.severity }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MongoDB KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MongoDB KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    - alert: MongoDBKubeStashRepositoryStorageRunningLow
+      expr: storage_kubestash_com_repository_size_bytes{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
+      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      labels:
+        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MongoDB KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MongoDB KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    - alert: MongoDBKubeStashBackupSessionPeriodTooLong
+      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
+      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MongoDB KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MongoDB KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    - alert: MongoDBKubeStashRestoreSessionPeriodTooLong
+      expr: core_kubestash_com_restoresession_duration_seconds{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
+      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MongoDB KubeStash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MongoDB KubeStash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
   {{ end -}}

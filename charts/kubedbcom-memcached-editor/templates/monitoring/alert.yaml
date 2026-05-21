@@ -1,0 +1,124 @@
+{{ $app := (include "kubedbcom-memcached-editor.fullname" .) }}
+
+  {{ if (include "kubedbcom-memcached-editor.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-memcached-editor.selectorLabels" . | nindent 4 }}
+  {{- if .Values.form.alert.labels }}
+  {{- toYaml .Values.form.alert.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.form.alert.annotations }}
+annotations:
+  {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  groups:
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "kubedbcom-memcached-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: memcached.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-memcached-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedDown.enabled .rules.memcachedDown.severity)) -}}
+    - alert: MemcachedDown
+      expr: memcached_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.memcachedDown.duration }}
+      labels:
+        severity: {{ .rules.memcachedDown.severity }}
+        {{- include "kubedbcom-memcached-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Memcached down (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Memcached is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-memcached-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedServiceRespawn.enabled .rules.memcachedServiceRespawn.severity)) -}}
+    - alert: MemcachedServiceRespawn
+      expr:  (memcached_uptime_seconds{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) < {{.rules.memcachedServiceRespawn.val}}
+      for: {{ .rules.memcachedServiceRespawn.duration }}
+      labels:
+        severity: {{ .rules.memcachedServiceRespawn.severity }}
+        {{- include "kubedbcom-memcached-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Memcached service restart (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Memcached service restart on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-memcached-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedConnectionThrottled.enabled .rules.memcachedConnectionThrottled.severity)) -}}
+    - alert: MemcachedConnectionThrottled
+      expr: increase(memcached_connections_yielded_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.memcachedConnectionThrottled.val}}
+      for: {{ .rules.memcachedConnectionThrottled.duration }}
+      labels:
+        severity: {{ .rules.memcachedConnectionThrottled.severity }}
+        {{- include "kubedbcom-memcached-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Memcached too many connections (> {{.rules.memcachedConnectionThrottled.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{.rules.memcachedConnectionThrottled.val}}% of Memcached connections are throttled {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-memcached-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedConnectionsNoneMinor.enabled .rules.memcachedConnectionsNoneMinor.severity)) -}}
+    - alert: MemcachedConnectionsNoneMinor
+      expr: memcached_current_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.memcachedConnectionsNoneMinor.duration }}
+      labels:
+        severity: {{ .rules.memcachedConnectionsNoneMinor.severity }}
+        {{- include "kubedbcom-memcached-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Memcached no connection (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "No connection to memcached {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-memcached-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedItemsNoneMinor.enabled .rules.memcachedItemsNoneMinor.severity)) -}}
+    - alert: MemcachedItemsNoneMinor
+      expr: memcached_current_items{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.memcachedItemsNoneMinor.duration }}
+      labels:
+        severity: {{ .rules.memcachedItemsNoneMinor.severity }}
+        {{- include "kubedbcom-memcached-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Memcached has no item ({{.rules.memcachedItemsNoneMinor.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Memcached has no item\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-memcached-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.memcachedEvictionsLimit.enabled .rules.memcachedEvictionsLimit.severity)) -}}
+    - alert: memcachedEvictionsLimit
+      expr: increase(memcached_items_evicted_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.memcachedEvictionsLimit.val}}
+      for: {{ .rules.memcachedEvictionsLimit.duration }}
+      labels:
+        severity: {{ .rules.memcachedEvictionsLimit.severity }}
+        {{- include "kubedbcom-memcached-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Memcached has high evictions per minute (> {{.rules.memcachedEvictionsLimit.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Memcached has high evictions on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "kubedbcom-memcached-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: memcached.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-memcached-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    - alert: KubeDBMemcachedPhaseNotReady
+      expr: kubedb_com_memcached_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-memcached-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB Memcached Phase NotReady (memcached {{`{{`}} $labels.memcached {{`}}`}})
+        description: "KubeDB Memcached Phase not ready on {{`{{`}} $labels.memcached {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-memcached-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    - alert: KubeDBMemcachedPhaseCritical
+      expr: kubedb_com_memcached_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-memcached-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB Memcached Phase Critical (memcached {{`{{`}} $labels.memcached {{`}}`}})
+        description: "KubeDB Memcached Phase Critical {{`{{`}} $labels.memcached {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+{{ end }}

@@ -9,15 +9,6 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  certManagerIoIssuer_ca: # +doc-gen:break
-    apiVersion: cert-manager.io/v1
-    kind: Issuer
-    metadata:
-      name: db2-ca
-      namespace: demo
-    spec:
-      ca:
-        secretName: db2-ca
   kubedbComDB2: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: DB2
@@ -72,25 +63,6 @@ resources:
         storageClassName: default
       storageType: Durable
       version: 24.4.1
-  monitoringCoreosComServiceMonitor: # +doc-gen:break
-    apiVersion: monitoring.coreos.com/v1
-    kind: ServiceMonitor
-    metadata:
-      name: db2
-      namespace: demo
-    spec:
-      endpoints:
-        - honorLabels: true
-          interval: 30s
-          path: /metrics
-          port: metrics
-      namespaceSelector:
-        matchNames:
-          - demo
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: db2
-          app.kubernetes.io/name: db2s.kubedb.com
   secret_auth: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -100,16 +72,4 @@ resources:
     stringData:
       password: thisIs1StrongPassword
       username: root
-    type: Opaque
-  secret_config: # +doc-gen:break
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: db2-config
-      namespace: demo
-    stringData:
-      db2.cnf: |
-        [mysqld]
-        max_connections = 200
-        read_buffer_size = 1048576
     type: Opaque

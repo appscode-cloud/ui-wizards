@@ -1,3 +1,65 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          neo4jHighCPUUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          neo4jHighMemoryUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          neo4jPageCacheHitRatioLow:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 0.98
+          neo4jPageCacheUsageRatioHigh:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 0.85
+          neo4jPageFaultFailuresHigh:
+            duration: 5m
+            enabled: true
+            severity: critical
+            val: 0
+          neo4jPageFaultsHigh:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 5000
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: prometheus
 metadata:
   resource:
     group: kubedb.com
@@ -9,6 +71,31 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComNeo4jAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: Neo4jAutoscaler
+    metadata:
+      name: neo4j
+      namespace: demo
+    spec:
+      compute:
+        neo4j:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: neo4j
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
@@ -18,6 +105,181 @@ resources:
     spec:
       ca:
         secretName: neo4j-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: neo4j
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: neo4j-backend
+            retentionPolicy:
+              name: neo4j-retention-policy
+              namespace: demo
+            storageRef:
+              name: neo4j-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 999
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+              name: neo4j-addon
+              tasks:
+                - name: logical-backup
+            name: neo4j-frequent-backup
+            repositories:
+              - backend: neo4j-backend
+                directory: /neo4j-repo
+                encryptionSecret:
+                  name: neo4j-encryption-secret
+                  namespace: demo
+                name: neo4j-repo
+            scheduler:
+              failedJobsHistoryLimit: 4
+              jobTemplate:
+                backoffLimit: 2
+                template:
+                  spec:
+                    containerSecurityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                          - ALL
+                      runAsGroup: 0
+                      runAsNonRoot: true
+                      runAsUser: 999
+                      seccompProfile:
+                        type: RuntimeDefault
+                    nodeSelector:
+                      kubernetes.io/os: linux
+              schedule: 0 */2 * * *
+              successfulJobsHistoryLimit: 2
+            sessionHistoryLimit: 3
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: neo4j
+      namespace: demo
+    spec:
+      backends:
+        - name: neo4j-backend
+          retentionPolicy:
+            name: neo4j-retention-policy
+            namespace: demo
+          storageRef:
+            name: neo4j-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                containerSecurityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+                  runAsGroup: 0
+                  runAsNonRoot: true
+                  runAsUser: 999
+                  seccompProfile:
+                    type: RuntimeDefault
+                nodeSelector:
+                  kubernetes.io/os: linux
+            name: neo4j-addon
+            tasks:
+              - name: logical-backup
+          name: neo4j-frequent-backup
+          repositories:
+            - backend: neo4j-backend
+              directory: /neo4j-repo
+              encryptionSecret:
+                name: neo4j-encryption-secret
+                namespace: demo
+              name: neo4j-repo
+          scheduler:
+            failedJobsHistoryLimit: 4
+            jobTemplate:
+              backoffLimit: 2
+              template:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 999
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+            schedule: 0 */2 * * *
+            successfulJobsHistoryLimit: 2
+          sessionHistoryLimit: 3
+      target:
+        apiGroup: kubedb.com
+        kind: Neo4j
+        name: neo4j
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: neo4j
+      namespace: demo
+    spec:
+      addon:
+        containerRuntimeSettings:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+        jobTemplate:
+          spec:
+            nodeSelector:
+              kubernetes.io/os: linux
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 999
+        name: neo4j-addon
+        tasks:
+          - name: logical-backup-restore
+      dataSource:
+        encryptionSecret:
+          name: neo4j-encryption-secret
+          namespace: demo
+        repository: neo4j-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: Neo4j
+        name: neo4j
+        namespace: demo
   kubedbComNeo4j: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Neo4j

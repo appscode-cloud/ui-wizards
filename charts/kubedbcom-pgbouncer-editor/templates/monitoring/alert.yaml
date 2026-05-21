@@ -1,0 +1,102 @@
+{{ $app := (include "kubedbcom-pgbouncer-editor.fullname" .) }}
+
+{{ if (include "kubedbcom-pgbouncer-editor.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-pgbouncer-editor.selectorLabels" . | nindent 4 }}
+{{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+{{- end }}
+{{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+{{- end }}
+spec:
+  groups:
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "kubedbcom-pgbouncer-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: pgbouncer.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-pgbouncer-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgbouncerTooManyConnections.enabled .rules.pgbouncerTooManyConnections.severity)) -}}
+    - alert: pgbouncerTooManyConnections
+      expr: (sum by (pod) (pgbouncer_databases_current_connections{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"}) / sum by (pod) (pgbouncer_databases_max_connections{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"})) > {{ .rules.pgbouncerTooManyConnections.val }}
+      for: {{ .rules.pgbouncerTooManyConnections.duration }}
+      labels:
+        severity: {{ .rules.pgbouncerTooManyConnections.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: PgBouncer too many connection usage (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PgBouncer {{`{{`}} $labels.pod {{`}}`}} high connection usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-pgbouncer-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgbouncerExporterLastScrapeError.enabled .rules.pgbouncerExporterLastScrapeError.severity)) -}}
+    - alert: PgBouncerExporterLastScrapeError
+      expr: pgbouncer_last_scrape_error{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
+      for: {{ .rules.pgbouncerExporterLastScrapeError.duration }}
+      labels:
+        severity: {{ .rules.pgbouncerExporterLastScrapeError.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: PgBouncer exporter error (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PgBouncer exporter is showing errors.\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-pgbouncer-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgbouncerDown.enabled .rules.pgbouncerDown.severity)) -}}
+    - alert: PgBouncerDown
+      expr: pgbouncer_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < 0
+      for: {{ .rules.pgbouncerDown.duration }}
+      labels:
+        severity: {{ .rules.pgbouncerDown.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: PgBouncer down (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
+        description: "pgbouncer is down {{`{{`}} $labels.role {{`}}`}} of pgbouncer {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-pgbouncer-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgbouncerLogPoolerError.enabled .rules.pgbouncerLogPoolerError.severity)) -}}
+    - alert: PgBouncerLogPoolerErrorMessageCount
+      expr: pgbouncer_config_log_pooler_errors{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgbouncerLogPoolerError.val }}
+      for: {{ .rules.pgbouncerLogPoolerError.duration }}
+      labels:
+        severity: {{ .rules.pgbouncerLogPoolerError.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: PgBouncer backend error message (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
+        description: "Error messages returned from postgres backend {{`{{`}} $labels.role {{`}}`}} of pgbouncer {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{end -}}
+  {{end -}}
+
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "kubedbcom-pgbouncer-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: pgbouncer.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-pgbouncer-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    - alert: KubeDBpgbouncerPhaseNotReady
+      expr: kubedb_com_pgbouncer_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB PgBouncer Phase NotReady (pgbouncer {{`{{`}} $labels.pgbouncer {{`}}`}})
+        description: "KubeDB PgBouncer Phase not ready on {{`{{`}} $labels.pgbouncer {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-pgbouncer-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    - alert: KubeDBPgBouncerPhaseCritical
+      expr: kubedb_com_pgbouncer_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB PgBouncer Phase Critical (pgbouncer {{`{{`}} $labels.pgbouncer {{`}}`}})
+        description: "KubeDB PgBouncer Phase Critical {{`{{`}} $labels.pgbouncer {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+{{ end }}
