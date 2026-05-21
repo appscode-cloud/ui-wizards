@@ -227,3 +227,94 @@ spec:
       # Prometheus crd will select ServiceMonitor using these labels.
       # Only usable when monitoring agent is `prometheus.io/webhook server`.
       labels: {}
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: prometheus
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          # Specifies the alert configuration for database cpu usage (ratio usage/limits).
+          milvusHighCPUUsage:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 80
+          # Specifies the alert configuration for database memory usage (ratio working_set/limits).
+          milvusHighMemoryUsage:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 80
+          # Specifies the alert configuration for persistent volume usage, indicating when storage usage exceeds the defined threshold.
+          diskUsageHigh:
+            enabled: true
+            val: 80
+            duration: "1m"
+            severity: warning
+          diskAlmostFull:
+            enabled: true
+            val: 95
+            duration: "1m"
+            severity: critical
+          # Specifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
+          milvusInstanceDown:
+            enabled: true
+            duration: "30s"
+            severity: critical
+          # Specifies the alert configuration for database service restarts, indicating the database service has been restarted recently.
+          milvusRestarted:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 180
+          # Specifies the alert configuration for Milvus process memory usage (resident memory of the process).
+          milvusHighProcessMemoryUsage:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 800000000
+          # Specifies the alert configuration for Milvus goroutines total, indicating a sudden explosion of goroutines which could indicate leaks or overload.
+          milvusGoroutinesExplosion:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 1000
+          # Specifies the alert configuration for Milvus threads total, indicating high thread pressure which may affect performance.
+          milvusHighThreadPressure:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 60
+          # Specifies the alert configuration for Milvus open file descriptors usage, indicating high FD usage that may exhaust system resources.
+          milvusHighFDsUsage:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 110
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning

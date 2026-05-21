@@ -55,6 +55,28 @@ spec:
         summary: Postgresql too many locks acquired (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many locks acquired on the database. \n  If this alert happens frequently, we may need to increase the postgres setting max_locks_per_transaction.\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.PostgresReplicationSlotLagHigh.enabled .rules.PostgresReplicationSlotLagHigh.severity)) -}}
+    - alert: PostgresReplicationSlotLagHigh
+      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff[{{ .rules.PostgresReplicationSlotLagHigh.duration }}]) > {{ .rules.PostgresReplicationSlotLagHigh.val }}
+      for: {{ .rules.PostgresReplicationSlotLagHigh.duration }}
+      labels:
+        severity: {{ .rules.PostgresReplicationSlotLagHigh.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: "High replication slot WAL lag detected on slot {{`{{`}} $labels.slot_name {{`}}`}}"
+        description: "The replication lag for slot {{`{{`}} $labels.slot_name {{`}}`}} is {{`{{`}} $value {{`}}`}} bytes, which may cause disk space issues or replication errors. This indicates the replica or consumer might be falling behind."
+    {{end -}}
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.PostgresReplicationSlotLagCritical.enabled .rules.PostgresReplicationSlotLagCritical.severity)) -}}
+    - alert: PostgresReplicationSlotLagCritical
+      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff[{{ .rules.PostgresReplicationSlotLagCritical.duration }}]) > {{ .rules.PostgresReplicationSlotLagCritical.val }}
+      for: {{ .rules.PostgresReplicationSlotLagCritical.duration }}
+      labels:
+        severity: {{ .rules.PostgresReplicationSlotLagCritical.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: "Critical PostgreSQL replication lag detected on slot {{`{{`}} $labels.slot_name {{`}}`}}"
+        description: "Replication slot {{`{{`}} $labels.slot_name {{`}}`}} is lagging by more than {{`{{`}} $value {{`}}`}} bytes. WAL file deletion is imminent. Immediate intervention required to prevent replication slot invalidation and potential data loss."
+    {{end -}}
     {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.postgresRestarted.enabled .rules.postgresRestarted.severity)) -}}
     - alert: PostgresqlRestarted
       expr: time() - pg_postmaster_start_time_seconds{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} < {{ .rules.postgresRestarted.val }}
@@ -98,6 +120,31 @@ spec:
       annotations:
         summary: Postgresql too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PostgreSQL instance has too many connections . {{.rules.postgresTooManyConnections.val}}% of Postgres connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    - alert: DiskUsageHigh
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+        * 100 > {{ .rules.diskUsageHigh.val }}
+      for: {{ .rules.diskUsageHigh.duration }}
+      labels:
+        severity: {{ .rules.diskUsageHigh.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    - alert: DiskAlmostFull
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+        * 100 > {{ .rules.diskAlmostFull.val }}
+      for: {{ .rules.diskAlmostFull.duration }}
+      labels:
+        severity: {{ .rules.diskAlmostFull.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
   {{ end -}}
@@ -213,7 +260,7 @@ spec:
     {{ end -}}
     {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
     - alert: PostgreSQLStashRepositoryCorrupted
-      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"}
+      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .rules.repositoryCorrupted.severity }}
@@ -254,6 +301,91 @@ spec:
       annotations:
         summary:  PostgreSQL Stash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PostgreSQL Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.kubeStash -}}
+  {{ if (include "kubedbcom-postgres-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: postgres.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    - alert: PostgreSQLKubeStashBackupSessionFailed
+      expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="PostgreSQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.backupSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.backupSessionFailed.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: PostgreSQL KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "PostgreSQL KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    - alert: PostgreSQLKubeStashRestoreSessionFailed
+      expr: core_kubestash_com_restoresession_phase{target_kind="PostgreSQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
+      for: {{ .rules.restoreSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionFailed.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: PostgreSQL KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "PostgreSQL KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    - alert: PostgreSQLKubeStashNoBackupSessionForTooLong
+      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="PostgreSQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
+      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      labels:
+        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: PostgreSQL KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "PostgreSQL KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    - alert: PostgreSQLKubeStashRepositoryCorrupted
+      expr: storage_kubestash_com_repository_info{target_kind="PostgreSQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
+      for: {{ .rules.repositoryCorrupted.duration }}
+      labels:
+        severity: {{ .rules.repositoryCorrupted.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: PostgreSQL KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "PostgreSQL KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    - alert: PostgreSQLKubeStashRepositoryStorageRunningLow
+      expr: storage_kubestash_com_repository_size_bytes{target_kind="PostgreSQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
+      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      labels:
+        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: PostgreSQL KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "PostgreSQL KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    - alert: PostgreSQLKubeStashBackupSessionPeriodTooLong
+      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="PostgreSQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
+      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary:  PostgreSQL KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "PostgreSQL KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    - alert: PostgreSQLKubeStashRestoreSessionPeriodTooLong
+      expr: core_kubestash_com_restoresession_duration_seconds{target_kind="PostgreSQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
+      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary:  PostgreSQL KubeStash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "PostgreSQL KubeStash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
   {{ end -}}

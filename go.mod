@@ -3,7 +3,7 @@ module go.bytebuilders.dev/ui-wizards
 go 1.25
 
 require (
-	go.appscode.dev/alerts v0.2.1-0.20250217100836-596fabefb762
+	go.appscode.dev/alerts v0.2.1-0.20260516020454-00c8e56b1991
 	k8s.io/api v0.34.3
 	k8s.io/apimachinery v0.34.3
 	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912
@@ -62,7 +62,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.18.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

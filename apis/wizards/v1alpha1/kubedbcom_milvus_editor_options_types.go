@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -37,6 +38,7 @@ type KubedbcomMilvusEditorOptions struct {
 type KubedbcomMilvusEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMilvusEditorOptionsSpecSpec `json:"spec"`
+	Form         MilvusAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomMilvusEditorOptionsSpecSpec struct {
@@ -109,6 +111,10 @@ type MilvusAuthSecret struct {
 	// +optional
 	// +kubebuilder:validation:Format:=password
 	Password string `json:"password"`
+}
+
+type MilvusAlertsSpecForm struct {
+	Alert alerts.MilvusAlert `json:"alert"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

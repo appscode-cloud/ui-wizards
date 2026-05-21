@@ -1,0 +1,198 @@
+{{ $app := (include "kubedbcom-milvus-editor-options.fullname" .) }}
+
+{{ if (include "kubedbcom-milvus-editor-options.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-milvus-editor-options.selectorLabels" . | nindent 4 }}
+    {{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  groups:
+    {{- with .Values.form.alert.groups.database }}
+    {{- if (include "kubedbcom-milvus-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
+    - name: milvus.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+      rules:
+        {{- if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.milvusHighCPUUsage.enabled .rules.milvusHighCPUUsage.severity)) }}
+        - alert: MilvusHighCPUUsage
+          expr: avg(irate(container_cpu_usage_seconds_total{pod=~"{{ $.Release.Name }}.*",namespace=~"{{ $.Release.Namespace }}"}[5m])) by (pod) * 100 > {{ .rules.milvusHighCPUUsage.val }}
+          for: {{ .rules.milvusHighCPUUsage.duration }}
+          labels:
+            severity: {{ .rules.milvusHighCPUUsage.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: High CPU usage on Milvus pods (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: |
+              CPU usage percentage is {{`{{`}} $value {{`}}`}}%.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.milvusHighMemoryUsage.enabled .rules.milvusHighMemoryUsage.severity)) }}
+        - alert: MilvusHighMemoryUsage
+          expr: avg(container_memory_working_set_bytes{pod=~"{{ $.Release.Name }}.*",namespace=~"{{ $.Release.Namespace }}"}) by (pod) / avg(kube_pod_container_resource_limits{resource="memory",pod=~"{{ $.Release.Name }}.*",namespace=~"{{ $.Release.Namespace }}"}) by (pod) * 100 > {{ .rules.milvusHighMemoryUsage.val }}
+          for: {{ .rules.milvusHighMemoryUsage.duration }}
+          labels:
+            severity: {{ .rules.milvusHighMemoryUsage.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: High memory usage on Milvus pods (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: |
+              Memory usage percentage is {{`{{`}} $value {{`}}`}}%.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) }}
+        - alert: DiskUsageHigh
+          expr: 100 * kubelet_volume_stats_used_bytes{namespace=~"{{ $.Release.Namespace }}"} / on(persistentvolumeclaim, namespace) group_left(pod) kubelet_volume_stats_capacity_bytes{namespace=~"{{ $.Release.Namespace }}"} > {{ .rules.diskUsageHigh.val }}
+          for: {{ .rules.diskUsageHigh.duration }}
+          labels:
+            severity: {{ .rules.diskUsageHigh.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Persistent Volume usage is high (instance {{`{{`}} $labels.instance {{`}}`}})
+            description: |
+              Persistent Volume usage is {{`{{`}} $value {{`}}`}}%.
+              Consider expanding the volume.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) }}
+        - alert: DiskAlmostFull
+          expr: 100 * kubelet_volume_stats_used_bytes{namespace=~"{{ $.Release.Namespace }}"} / on(persistentvolumeclaim, namespace) group_left(pod) kubelet_volume_stats_capacity_bytes{namespace=~"{{ $.Release.Namespace }}"} > {{ .rules.diskAlmostFull.val }}
+          for: {{ .rules.diskAlmostFull.duration }}
+          labels:
+            severity: {{ .rules.diskAlmostFull.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Persistent Volume is almost full (instance {{`{{`}} $labels.instance {{`}}`}})
+            description: |
+              Persistent Volume usage is {{`{{`}} $value {{`}}`}}%.
+              Urgent: Expand the volume immediately.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{ if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.milvusInstanceDown.enabled .rules.milvusInstanceDown.severity)) -}}
+        - alert: MilvusInstanceDown
+          expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
+          for: {{ .rules.milvusInstanceDown.duration }}
+          labels:
+            severity: {{ .rules.milvusInstanceDown.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus instance down (instance {{`{{`}} $labels.pod {{`}}`}})
+            description: "Milvus database instance is down and not accepting connections. Database read/write operations are failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{ if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.milvusRestarted.enabled .rules.milvusRestarted.severity)) -}}
+        - alert: MilvusRestarted
+          expr: (time() - min(kube_pod_start_time{ namespace="{{ $.Release.Namespace }}", pod=~"{{ $app }}.*"})) < {{.rules.milvusRestarted.val}}
+          for: {{ .rules.milvusRestarted.duration }}
+          labels:
+            severity: {{ .rules.milvusRestarted.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus service recently restarted (instance {{`{{`}} $labels.pod {{`}}`}})
+            description: "Milvus service on pod {{`{{`}} $labels.pod {{`}}`}} has restarted within the last 3 minutes. This may indicate a crash or graceful restart.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{ if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.milvusHighProcessMemoryUsage.enabled .rules.milvusHighProcessMemoryUsage.severity)) -}}
+        - alert: MilvusHighProcessMemoryUsage
+          expr: process_resident_memory_bytes{namespace="{{ $.Release.Namespace }}", pod=~"{{ $app }}.*"} > {{ .rules.milvusHighProcessMemoryUsage.val }}
+          for: {{ .rules.milvusHighProcessMemoryUsage.duration }}
+          labels:
+            severity: {{ .rules.milvusHighProcessMemoryUsage.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus high process memory usage (instance {{`{{`}} $labels.pod {{`}}`}})
+            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} is using high resident memory.\n  VALUE = {{`{{`}} $value {{`}}`}} bytes\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{ if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.milvusGoroutinesExplosion.enabled .rules.milvusGoroutinesExplosion.severity)) -}}
+        - alert: MilvusGoroutinesExplosion
+          expr: go_goroutines{namespace="{{ $.Release.Namespace }}", pod=~"{{ $app }}.*"} > {{ .rules.milvusGoroutinesExplosion.val }}
+          for: {{ .rules.milvusGoroutinesExplosion.duration }}
+          labels:
+            severity: {{ .rules.milvusGoroutinesExplosion.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus high goroutine count (instance {{`{{`}} $labels.pod {{`}}`}})
+            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.instance {{`}}`}}) has a high number of goroutines. This may indicate excessive concurrency or a possible goroutine leak.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{ if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.milvusHighThreadPressure.enabled .rules.milvusHighThreadPressure.severity)) -}}
+        - alert: MilvusHighThreadPressure
+          expr: go_threads{namespace="{{ $.Release.Namespace }}", pod=~"{{ $app }}.*"} > {{ .rules.milvusHighThreadPressure.val }}
+          for: {{ .rules.milvusHighThreadPressure.duration }}
+          labels:
+            severity: {{ .rules.milvusHighThreadPressure.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus high thread count (instance {{`{{`}} $labels.pod {{`}}`}})
+            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.instance {{`}}`}}) has a high number of OS threads. This may indicate heavy parallel workload or thread contention.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{ if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.milvusHighFDsUsage.enabled .rules.milvusHighFDsUsage.severity)) -}}
+        - alert: MilvusHighFDsUsage
+          expr: process_open_fds{namespace="{{ $.Release.Namespace }}", pod=~"{{ $app }}.*"} > {{ .rules.milvusHighFDsUsage.val }}
+          for: {{ .rules.milvusHighFDsUsage.duration }}
+          labels:
+            severity: {{ .rules.milvusHighFDsUsage.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus high open file descriptors (instance {{`{{`}} $labels.pod {{`}}`}})
+            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.instance {{`}}`}}) has a high number of open file descriptors. This may indicate too many open files or network connections.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+    {{- end }}
+    {{- end }}
+
+    {{- with .Values.form.alert.groups.provisioner }}
+    {{- if (include "kubedbcom-milvus-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
+    - name: milvus.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+      rules:
+        {{- if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) }}
+        - alert: KubeDBMilvusPhaseNotReady
+          expr: kubedb_com_milvus_status_phase{phase="NotReady",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+          for: {{ .rules.appPhaseNotReady.duration }}
+          labels:
+            severity: {{ .rules.appPhaseNotReady.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: KubeDB Milvus Phase NotReady (milvus {{`{{`}} $labels.milvus {{`}}`}})
+            description: |
+              KubeDB Milvus Phase not ready on {{`{{`}} $labels.milvus {{`}}`}}.
+              The database provisioning or initialization is not complete.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) }}
+        - alert: KubeDBMilvusPhaseCritical
+          expr: kubedb_com_milvus_status_phase{phase="Critical",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+          for: {{ .rules.appPhaseCritical.duration }}
+          labels:
+            severity: {{ .rules.appPhaseCritical.severity }}
+            {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: KubeDB Milvus Phase Critical (milvus {{`{{`}} $labels.milvus {{`}}`}})
+            description: |
+              KubeDB Milvus is in Critical phase on {{`{{`}} $labels.milvus {{`}}`}}.
+              One or more nodes are not functioning properly.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}

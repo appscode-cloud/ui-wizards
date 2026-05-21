@@ -7,6 +7,7 @@ metadata:
   name: {{ $app }}
   namespace: {{ $.Release.Namespace }}
   labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
     {{- include "kubedbcom-singlestore-editor-options.selectorLabels" . | nindent 4 }}
 {{- if .Values.form.alert.labels }}
     {{- toYaml .Values.form.alert.labels | nindent 4 }}
@@ -112,7 +113,7 @@ spec:
     
     {{ if (include "kubedbcom-singlestore-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
@@ -124,7 +125,7 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-singlestore-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
@@ -174,7 +175,7 @@ spec:
     rules:
     {{ if (include "kubedbcom-singlestore-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
     - alert: SinglestoreKubeStashBackupSessionFailed
-      expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
+      expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .rules.backupSessionFailed.severity }}
@@ -196,7 +197,7 @@ spec:
     {{ end -}}
     {{ if (include "kubedbcom-singlestore-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
     - alert: SinglestoreKubeStashNoBackupSessionForTooLong
-      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
+      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .rules.noBackupSessionForTooLong.severity }}
@@ -229,7 +230,7 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-singlestore-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
     - alert: SinglestoreKubeStashBackupSessionPeriodTooLong
-      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
+      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .rules.backupSessionPeriodTooLong.severity }}

@@ -31,6 +31,46 @@ properties:
                     type: string
                   rules:
                     properties:
+                      PostgresReplicationSlotLagCritical:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      PostgresReplicationSlotLagHigh:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
                       diskAlmostFull:
                         properties:
                           duration:
@@ -262,6 +302,8 @@ properties:
                         - val
                         type: object
                     required:
+                    - PostgresReplicationSlotLagCritical
+                    - PostgresReplicationSlotLagHigh
                     - diskAlmostFull
                     - diskUsageHigh
                     - postgresExporterError

@@ -1,0 +1,170 @@
+{{ $app := (include "kubedbcom-ignite-editor-options.fullname" .) }}
+
+  {{ if (include "kubedbcom-ignite-editor-options.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-ignite-editor-options.selectorLabels" . | nindent 4 }}
+  {{- if .Values.form.alert.labels }}
+  {{- toYaml .Values.form.alert.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.form.alert.annotations }}
+annotations:
+  {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  groups:
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "kubedbcom-ignite-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: ignite.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteDown.enabled .rules.igniteDown.severity)) -}}
+    - alert: IgniteDown
+      expr: kubedb_com_ignite_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="NotReady"} >= 1
+      for: {{ .rules.igniteDown.duration }}
+      labels:
+        severity: {{ .rules.igniteDown.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ignite database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ignitePhaseCritical.enabled .rules.ignitePhaseCritical.severity)) -}}
+    - alert: IgnitePhaseCritical
+      expr: kubedb_com_ignite_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="Critical"} >= 1
+      for: {{ .rules.ignitePhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.ignitePhaseCritical.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ignite database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteClusterNoBaselineNode.enabled .rules.igniteClusterNoBaselineNode.severity)) -}}
+    - alert: IgniteClusterNoBaselineNode
+      expr: cluster_TotalBaselineNodes{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == {{.rules.igniteClusterNoBaselineNode.val}}
+      for: {{ .rules.igniteClusterNoBaselineNode.duration }}
+      labels:
+        severity: {{ .rules.igniteClusterNoBaselineNode.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ignite no baseline node (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Ignite No Baseline Nodes on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteRestarted.enabled .rules.igniteRestarted.severity)) -}}
+    - alert: IgniteRestarted
+      expr: (ignite_uptime{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) < {{.rules.igniteRestarted.val}}
+      for: {{ .rules.igniteRestarted.duration }}
+      labels:
+        severity: {{ .rules.igniteRestarted.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ignite service restart (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Ignite service restart on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteHighCPULoad.enabled .rules.igniteHighCPULoad.severity)) -}}
+    - alert: IgniteHighCPULoad
+      expr: (sys_CpuLoad{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{.rules.igniteHighCPULoad.val}}
+      for: {{ .rules.igniteHighCPULoad.duration }}
+      labels:
+        severity: {{ .rules.igniteHighCPULoad.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ignite System CPU High Load (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Ignite System CPU High Load on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteHighHeapMemoryUsed.enabled .rules.igniteHighHeapMemoryUsed.severity)) -}}
+    - alert: IgniteHighHeapMemoryUsed
+      expr:       (100 - (( sys_memory_heap_max{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} - sys_memory_heap_used{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 / sys_memory_heap_max{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"})) > {{.rules.igniteHighHeapMemoryUsed.val}}
+      for: {{ .rules.igniteHighHeapMemoryUsed.duration }}
+      labels:
+        severity: {{ .rules.igniteHighHeapMemoryUsed.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ignite High System Heap Memory Used (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Ignite High System Heap Memory Used on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteHighDataregionOffHeapUsed.enabled .rules.igniteHighDataregionOffHeapUsed.severity)) -}}
+    - alert: IgniteHighDataregionOffHeapUsed
+      expr: ((io_dataregion_default_OffheapUsedSize{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) / 1024 / 1024 / 1024)  * 100 > {{.rules.igniteHighDataregionOffHeapUsed.val}}
+      for: {{ .rules.igniteHighDataregionOffHeapUsed.duration }}
+      labels:
+        severity: {{ .rules.igniteHighDataregionOffHeapUsed.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ignite High default Dataregion Off Heap Memory Used (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Ignite High default Dataregion Off Heap Memory Used on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.igniteJVMPausesTotalDuration.enabled .rules.igniteJVMPausesTotalDuration.severity)) -}}
+    - alert: IgniteJVMPausesTotalDuration
+      expr: (ignite_longJVMPausesTotalDuration{job=~"{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{.rules.igniteJVMPausesTotalDuration.val}}
+      for: {{ .rules.igniteJVMPausesTotalDuration.duration }}
+      labels:
+        severity: {{ .rules.igniteJVMPausesTotalDuration.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ignite JVM Pauses Total Duration (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Ignite JVM Pauses Total Duration on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    - alert: DiskUsageHigh
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+        * 100 > {{ .rules.diskUsageHigh.val }}
+      for: {{ .rules.diskUsageHigh.duration }}
+      labels:
+        severity: {{ .rules.diskUsageHigh.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    - alert: DiskAlmostFull
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+        * 100 > {{ .rules.diskAlmostFull.val }}
+      for: {{ .rules.diskAlmostFull.duration }}
+      labels:
+        severity: {{ .rules.diskAlmostFull.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{end -}}
+  {{end -}}
+
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "kubedbcom-ignite-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: ignite.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    - alert: KubeDBIgnitePhaseNotReady
+      expr: kubedb_com_ignite_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB Ignite Phase NotReady (ignite {{`{{`}} $labels.ignite {{`}}`}})
+        description: "KubeDB Ignite Phase not ready on {{`{{`}} $labels.ignite {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ignite-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    - alert: KubeDBIgnitePhaseCritical
+      expr: kubedb_com_ignite_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-ignite-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB Ignite Phase Critical (ignite {{`{{`}} $labels.ignite {{`}}`}})
+        description: "KubeDB Ignite Phase Critical {{`{{`}} $labels.ignite {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+  {{ end }}

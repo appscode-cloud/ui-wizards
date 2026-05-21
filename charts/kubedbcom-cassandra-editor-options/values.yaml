@@ -201,9 +201,6 @@ form:
     ## Additional labels for PrometheusRule alerts
     additionalRuleLabels: {}
 
-    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
-    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
-
     groups:
       database:
         enabled: warning
@@ -211,38 +208,38 @@ form:
           # Specifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
           cassandraDown:
             enabled: true
-            duration: "1m"
+            duration: "0m"
             severity: critical
           # Specifies the alert configuration for recently respawned(restarted).
           cassandraServiceRespawn:
             enabled: true
-            duration: "1m"
+            duration: "0m"
             val: 180
             severity: critical
           cassandraConnectionTimeouts:
             enabled: true
-            duration: "1m"
+            duration: "0m"
             val: 100
             severity: warning
           cassandraDroppedMessages:
             enabled: true
-            duration: "1m"
+            duration: "0m"
             severity: warning
             val: 1
           cassandraHighReadLatency:
             enabled: true
-            duration: "1m"
+            duration: "0m"
             severity: warning
             val: 7000
           cassandraHighWriteLatency:
             enabled: true
-            duration: "1m"
+            duration: "0m"
             val: 7000
             severity: warning
           # High memory usage
           cassandraMemoryLimit:
             enabled: true
-            duration: "1m"
+            duration: "0m"
             val: 33554432  # 32MB
             severity: critical
       provisioner:
@@ -256,3 +253,5 @@ form:
             enabled: true
             duration: "5m"
             severity: warning
+
+

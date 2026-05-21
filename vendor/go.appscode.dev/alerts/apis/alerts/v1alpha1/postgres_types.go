@@ -76,18 +76,20 @@ type PostgresDatabaseAlert struct {
 }
 
 type PostgresDatabaseAlertRules struct {
-	PostgresInstanceDown         FixedAlert          `json:"postgresInstanceDown"`
-	PostgresRestarted            IntValAlert         `json:"postgresRestarted"`
-	PostgresExporterError        FixedAlert          `json:"postgresExporterError"`
-	PostgresTooManyConnections   IntValAlert         `json:"postgresTooManyConnections"`
-	PostgresNotEnoughConnections IntValAlert         `json:"postgresNotEnoughConnections"`
-	PostgresSlowQueries          FixedAlert          `json:"postgresSlowQueries"`
-	PostgresReplicationLag       StringValAlert      `json:"postgresReplicationLag"`
-	PostgresHighRollbackRate     FloatValAlertConfig `json:"postgresHighRollbackRate"`
-	PostgresSplitBrain           FixedAlert          `json:"postgresSplitBrain"`
-	PostgresTooManyLocksAcquired FloatValAlertConfig `json:"postgresTooManyLocksAcquired"`
-	DiskUsageHigh                IntValAlert         `json:"diskUsageHigh"`
-	DiskAlmostFull               IntValAlert         `json:"diskAlmostFull"`
+	PostgresInstanceDown               FixedAlert          `json:"postgresInstanceDown"`
+	PostgresReplicationSlotLagHigh     IntValAlert         `json:"PostgresReplicationSlotLagHigh"`
+	PostgresReplicationSlotLagCritical IntValAlert         `json:"PostgresReplicationSlotLagCritical"`
+	PostgresRestarted                  IntValAlert         `json:"postgresRestarted"`
+	PostgresExporterError              FixedAlert          `json:"postgresExporterError"`
+	PostgresTooManyConnections         IntValAlert         `json:"postgresTooManyConnections"`
+	PostgresNotEnoughConnections       IntValAlert         `json:"postgresNotEnoughConnections"`
+	PostgresSlowQueries                FixedAlert          `json:"postgresSlowQueries"`
+	PostgresReplicationLag             StringValAlert      `json:"postgresReplicationLag"`
+	PostgresHighRollbackRate           FloatValAlertConfig `json:"postgresHighRollbackRate"`
+	PostgresSplitBrain                 FixedAlert          `json:"postgresSplitBrain"`
+	PostgresTooManyLocksAcquired       FloatValAlertConfig `json:"postgresTooManyLocksAcquired"`
+	DiskUsageHigh                      IntValAlert         `json:"diskUsageHigh"`
+	DiskAlmostFull                     IntValAlert         `json:"diskAlmostFull"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
