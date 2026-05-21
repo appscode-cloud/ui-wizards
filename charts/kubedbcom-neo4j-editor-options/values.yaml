@@ -186,3 +186,94 @@ spec:
       # Prometheus crd will select ServiceMonitor using these labels.
       # Only usable when monitoring agent is `prometheus.io/webhook server`.
       labels: {}
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: prometheus
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          # Resource usage alerts
+          neo4jHighCPUUsage:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 80
+
+          neo4jHighMemoryUsage:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 80
+
+          # Page Cache Alerts (db.page_cache.* metrics)
+          # usage_ratio: The ratio of number of used pages to total number of available pages.
+          # This metric shows what percentage of the allocated page cache is being used.
+          neo4jPageCacheUsageRatioHigh:
+            enabled: true
+            duration: "5m"
+            severity: warning
+            val: 0.85
+
+          # hit_ratio: The ratio of hits to the total number of lookups in the page cache.
+          # Performance relies on efficiently using the page cache, so this should be in 98-100% range.
+          neo4jPageCacheHitRatioLow:
+            enabled: true
+            duration: "5m"
+            severity: warning
+            val: 0.98
+
+          # page_faults: The total number of page faults in the page cache.
+          # If this count keeps increasing, it may indicate more page cache is required.
+          neo4jPageFaultsHigh:
+            enabled: true
+            duration: "5m"
+            severity: warning
+            val: 5000
+
+          # page_fault_failures: Failed page faults in the page cache.
+          # This indicates potential disk I/O issues or corruption.
+          neo4jPageFaultFailuresHigh:
+            enabled: true
+            duration: "5m"
+            severity: critical
+            val: 0
+
+          # Specifies the alert configuration for persistent volume usages.
+          diskUsageHigh:
+            enabled: true
+            val: 80
+            duration: "1m"
+            severity: warning
+
+          diskAlmostFull:
+            enabled: true
+            val: 95
+            duration: "1m"
+            severity: critical
+
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+

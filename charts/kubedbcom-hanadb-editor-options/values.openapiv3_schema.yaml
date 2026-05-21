@@ -1,4 +1,270 @@
 properties:
+  form:
+    properties:
+      alert:
+        properties:
+          additionalRuleLabels:
+            additionalProperties:
+              type: string
+            type: object
+          annotations:
+            additionalProperties:
+              type: string
+            type: object
+          enabled:
+            enum:
+            - none
+            - critical
+            - warning
+            - info
+            type: string
+          groups:
+            properties:
+              database:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      diskAlmostFull:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      diskUsageHigh:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      hanadbHighCPUUsage:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      hanadbHighMemoryUsage:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      hanadbInstanceDown:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      hanadbReplicationNotActive:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      hanadbRestarted:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      hanadbServiceDown:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                    required:
+                    - diskAlmostFull
+                    - diskUsageHigh
+                    - hanadbHighCPUUsage
+                    - hanadbHighMemoryUsage
+                    - hanadbInstanceDown
+                    - hanadbReplicationNotActive
+                    - hanadbRestarted
+                    - hanadbServiceDown
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
+              provisioner:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      appPhaseCritical:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      appPhaseNotReady:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                    required:
+                    - appPhaseCritical
+                    - appPhaseNotReady
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
+            required:
+            - database
+            - provisioner
+            type: object
+          labels:
+            additionalProperties:
+              type: string
+            type: object
+        required:
+        - enabled
+        - groups
+        - labels
+        type: object
+    required:
+    - alert
+    type: object
   metadata:
     properties:
       release:
@@ -1689,5 +1955,6 @@ properties:
     - podResources
     type: object
 required:
+- form
 - spec
 type: object

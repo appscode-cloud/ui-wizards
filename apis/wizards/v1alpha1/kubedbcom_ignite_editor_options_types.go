@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -37,6 +38,7 @@ type KubedbcomIgniteEditorOptions struct {
 type KubedbcomIgniteEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomIgniteEditorOptionsSpecSpec `json:"spec"`
+	Form         IgniteAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomIgniteEditorOptionsSpecSpec struct {
@@ -57,6 +59,10 @@ type KubedbcomIgniteEditorOptionsSpecSpec struct {
 	Monitoring     MonitoringOperator `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+type IgniteAlertsSpecForm struct {
+	Alert alerts.IgniteAlert `json:"alert"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

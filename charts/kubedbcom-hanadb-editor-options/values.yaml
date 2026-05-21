@@ -171,3 +171,64 @@ spec:
       # Prometheus crd will select ServiceMonitor using these labels.
       # Only usable when monitoring agent is `prometheus.io/webhook server`.
       labels: {}
+form:
+  alert:
+    enabled: warning
+    labels:
+      release: kube-prometheus-stack
+    annotations: {}
+    additionalRuleLabels: {}
+    groups:
+      database:
+        enabled: warning
+        rules:
+          hanadbInstanceDown:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          hanadbServiceDown:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          hanadbRestarted:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 180
+          hanadbHighCPUUsage:
+            enabled: true
+            duration: "5m"
+            severity: warning
+            val: 80
+          hanadbHighMemoryUsage:
+            enabled: true
+            duration: "5m"
+            severity: warning
+            val: 80
+          hanadbReplicationNotActive:
+            enabled: true
+            duration: "2m"
+            severity: critical
+          diskUsageHigh:
+            enabled: true
+            val: 80
+            duration: "1m"
+            severity: warning
+          diskAlmostFull:
+            enabled: true
+            val: 95
+            duration: "1m"
+            severity: critical
+
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+

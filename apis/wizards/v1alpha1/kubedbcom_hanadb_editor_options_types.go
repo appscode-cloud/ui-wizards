@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -37,6 +38,7 @@ type KubedbcomHanaDBEditorOptions struct {
 type KubedbcomHanaDBEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomHanaDBEditorOptionsSpecSpec `json:"spec"`
+	Form         HanaDBalertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomHanaDBEditorOptionsSpecSpec struct {
@@ -74,6 +76,10 @@ type HanaDBReplicationMode string
 
 // +kubebuilder:validation:Enum=logreplay;delta_datashipping;logreplay_readaccess
 type HanaDBOperationMode string
+
+type HanaDBalertsSpecForm struct {
+	Alert alerts.HanaDBAlert `json:"alert"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

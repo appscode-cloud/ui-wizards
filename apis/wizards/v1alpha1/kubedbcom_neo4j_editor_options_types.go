@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -37,6 +38,7 @@ type KubedbcomNeo4jEditorOptions struct {
 type KubedbcomNeo4jEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomNeo4jEditorOptionsSpecSpec `json:"spec"`
+	Form         Neo4jAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomNeo4jEditorOptionsSpecSpec struct {
@@ -82,6 +84,10 @@ type Neo4jProtocolTLS struct {
 
 // +kubebuilder:validation:Enum=Disabled;TLS;mTLS
 type Neo4jTLSMode string
+
+type Neo4jAlertsSpecForm struct {
+	Alert alerts.Neo4jAlert `json:"alert"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -37,6 +38,7 @@ type KubedbcomQdrantEditorOptions struct {
 type KubedbcomQdrantEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomQdrantEditorOptionsSpecSpec `json:"spec"`
+	Form         QdrantAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomQdrantEditorOptionsSpecSpec struct {
@@ -77,6 +79,10 @@ type QdrantIssuerRef struct {
 	APIGroup string `json:"apiGroup"`
 	Kind     string `json:"kind"`
 	Name     string `json:"name"`
+}
+
+type QdrantAlertsSpecForm struct {
+	Alert alerts.QdrantAlert `json:"alert"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

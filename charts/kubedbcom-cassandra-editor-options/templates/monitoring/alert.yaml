@@ -1,6 +1,6 @@
 {{ $app := (include "kubedbcom-cassandra-editor-options.fullname" .) }}
 
-{{ if (include "kubedbcom-cassandra-editor-options.alertsEnabled" .Values.form.alert.enabled) }}
+  {{ if (include "kubedbcom-cassandra-editor-options.alertsEnabled" .Values.form.alert.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -9,14 +9,13 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     {{- include "kubedbcom-cassandra-editor-options.selectorLabels" . | nindent 4 }}
-{{- if .Values.form.alert.labels }}
-    {{- toYaml .Values.form.alert.labels | nindent 4 }}
-{{- end }}
-{{- if .Values.form.alert.annotations }}
-  annotations:
-    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
-{{- end }}
-spec:
+  {{- if .Values.form.alert.labels }}
+  {{- toYaml .Values.form.alert.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.form.alert.annotations }}
+annotations:
+  {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+  {{- end }}
 spec:
   groups:
   {{ with .Values.form.alert.groups.database -}}
@@ -25,7 +24,7 @@ spec:
     rules:
     {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraDown.enabled .rules.cassandraDown.severity)) -}}
     - alert: CassandraDown
-      expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) > {{.rules.cassandraDown.duration}}
+      expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) > {{.rules.cassandraDown.val}}
       for: {{ .rules.cassandraDown.duration }}
       labels:
         severity: {{ .rules.cassandraDown.severity }}
