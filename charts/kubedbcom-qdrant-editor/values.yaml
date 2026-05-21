@@ -1,3 +1,73 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          qdrantGrpcResponsesFailHigh:
+            duration: 5m
+            enabled: true
+            severity: critical
+            val: 5
+          qdrantHighCPUUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          qdrantHighMemoryUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          qdrantHighPendingOperations:
+            duration: 5m
+            enabled: true
+            severity: critical
+            val: 10
+          qdrantInstanceDown:
+            duration: 30s
+            enabled: true
+            severity: critical
+          qdrantPhaseCritical:
+            duration: 1m
+            enabled: true
+            severity: warning
+          qdrantRestResponsesFailHigh:
+            duration: 5m
+            enabled: true
+            severity: critical
+            val: 5
+          qdrantRestarted:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 180
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: prometheus
 metadata:
   resource:
     group: kubedb.com
@@ -9,6 +79,31 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComQdrantAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: QdrantAutoscaler
+    metadata:
+      name: qdrant
+      namespace: demo
+    spec:
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        qdrant:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: qdrant
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer

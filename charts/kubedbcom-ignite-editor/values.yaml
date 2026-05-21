@@ -1,3 +1,88 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          igniteClusterNoBaselineNode:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 0
+          igniteDown:
+            duration: 30s
+            enabled: true
+            severity: critical
+          igniteHighCPULoad:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          igniteHighDataregionOffHeapUsed:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          igniteHighHeapMemoryUsed:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          igniteJVMPausesTotalDuration:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 0
+          ignitePhaseCritical:
+            duration: 1m
+            enabled: true
+            severity: warning
+          igniteRestarted:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 180
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com
@@ -9,6 +94,31 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComIgniteAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: IgniteAutoscaler
+    metadata:
+      name: ignite
+      namespace: demo
+    spec:
+      compute:
+        ignite:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: ignite
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
@@ -18,181 +128,6 @@ resources:
     spec:
       ca:
         secretName: ignite-ca
-  coreKubestashComBackupBlueprint: # +doc-gen:break
-    apiVersion: core.kubestash.com/v1alpha1
-    kind: BackupBlueprint
-    metadata:
-      name: ignite
-      namespace: demo
-    spec:
-      backupConfigurationTemplate:
-        backends:
-          - name: ignite-backend
-            retentionPolicy:
-              name: ignite-retention-policy
-              namespace: demo
-            storageRef:
-              name: ignite-storage
-              namespace: demo
-        sessions:
-          - addon:
-              jobTemplate:
-                spec:
-                  containerSecurityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                      drop:
-                        - ALL
-                    runAsGroup: 0
-                    runAsNonRoot: true
-                    runAsUser: 70
-                    seccompProfile:
-                      type: RuntimeDefault
-                  nodeSelector:
-                    kubernetes.io/os: linux
-              name: ignite-addon
-              tasks:
-                - name: logical-backup
-            name: ignite-frequent-backup
-            repositories:
-              - backend: ignite-backend
-                directory: /mongo-repo
-                encryptionSecret:
-                  name: ignite-encryption-secret
-                  namespace: demo
-                name: ignite-repo
-            scheduler:
-              failedJobsHistoryLimit: 4
-              jobTemplate:
-                backoffLimit: 2
-                template:
-                  spec:
-                    containerSecurityContext:
-                      allowPrivilegeEscalation: false
-                      capabilities:
-                        drop:
-                          - ALL
-                      runAsGroup: 0
-                      runAsNonRoot: true
-                      runAsUser: 70
-                      seccompProfile:
-                        type: RuntimeDefault
-                    nodeSelector:
-                      kubernetes.io/os: linux
-              schedule: 0 */2 * * *
-              successfulJobsHistoryLimit: 2
-            sessionHistoryLimit: 3
-      usagePolicy:
-        allowedNamespaces:
-          from: Same
-  coreKubestashComBackupConfiguration: # +doc-gen:break
-    apiVersion: core.kubestash.com/v1alpha1
-    kind: BackupConfiguration
-    metadata:
-      name: ignite
-      namespace: demo
-    spec:
-      backends:
-        - name: ignite-backend
-          retentionPolicy:
-            name: ignite-retention-policy
-            namespace: demo
-          storageRef:
-            name: ignite-storage
-            namespace: demo
-      sessions:
-        - addon:
-            jobTemplate:
-              spec:
-                containerSecurityContext:
-                  allowPrivilegeEscalation: false
-                  capabilities:
-                    drop:
-                      - ALL
-                  runAsGroup: 0
-                  runAsNonRoot: true
-                  runAsUser: 70
-                  seccompProfile:
-                    type: RuntimeDefault
-                nodeSelector:
-                  kubernetes.io/os: linux
-            name: ignite-addon
-            tasks:
-              - name: logical-backup
-          name: ignite-frequent-backup
-          repositories:
-            - backend: ignite-backend
-              directory: /mongo-repo
-              encryptionSecret:
-                name: ignite-encryption-secret
-                namespace: demo
-              name: ignite-repo
-          scheduler:
-            failedJobsHistoryLimit: 4
-            jobTemplate:
-              backoffLimit: 2
-              template:
-                spec:
-                  containerSecurityContext:
-                    allowPrivilegeEscalation: false
-                    capabilities:
-                      drop:
-                        - ALL
-                    runAsGroup: 0
-                    runAsNonRoot: true
-                    runAsUser: 70
-                    seccompProfile:
-                      type: RuntimeDefault
-                  nodeSelector:
-                    kubernetes.io/os: linux
-            schedule: 0 */2 * * *
-            successfulJobsHistoryLimit: 2
-          sessionHistoryLimit: 3
-      target:
-        apiGroup: kubedb.com
-        kind: Ignite
-        name: ignite
-        namespace: demo
-  coreKubestashComRestoreSession: # +doc-gen:break
-    apiVersion: core.kubestash.com/v1alpha1
-    kind: RestoreSession
-    metadata:
-      name: ignite
-      namespace: demo
-    spec:
-      addon:
-        containerRuntimeSettings:
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            runAsGroup: 0
-            runAsNonRoot: true
-            runAsUser: 70
-            seccompProfile:
-              type: RuntimeDefault
-        jobTemplate:
-          spec:
-            nodeSelector:
-              kubernetes.io/os: linux
-            securityContext:
-              runAsGroup: 0
-              runAsUser: 70
-        name: ignite-addon
-        tasks:
-          - name: logical-backup-restore
-      dataSource:
-        encryptionSecret:
-          name: ignite-encryption-secret
-          namespace: demo
-        repository: ignite-repo
-        snapshot: latest
-      target:
-        apiGroup: kubedb.com
-        kind: Ignite
-        name: ignite
-        namespace: demo
   kubedbComIgnite: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Ignite

@@ -1,0 +1,244 @@
+{{ $app := (include "kubedbcom-qdrant-editor.fullname" .) }}
+
+  {{ if (include "kubedbcom-qdrant-editor.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-qdrant-editor.selectorLabels" . | nindent 4 }}
+  {{- if .Values.form.alert.labels }}
+  {{- toYaml .Values.form.alert.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.form.alert.annotations }}
+annotations:
+  {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  groups:
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "kubedbcom-qdrant-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: qdrant.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantInstanceDown.enabled .rules.qdrantInstanceDown.severity)) -}}
+    - alert: QdrantInstanceDown
+      expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.qdrantInstanceDown.duration }}
+      labels:
+        severity: {{ .rules.qdrantInstanceDown.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Qdrant instance down (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Qdrant database instance is down and not accepting connections. Database read/write operations are failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantPhaseCritical.enabled .rules.qdrantPhaseCritical.severity)) -}}
+    - alert: QdrantPhaseCritical
+      expr: kubedb_com_qdrant_status_phase{phase="Critical",app="{{ $.Release.Name }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.qdrantPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.qdrantPhaseCritical.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Qdrant database in Critical phase (qdrant {{`{{`}} $labels.qdrant {{`}}`}})
+        description: "Qdrant database {{`{{`}} $labels.qdrant {{`}}`}} is in Critical phase. One or more database nodes are experiencing issues but the database is still operational.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantRestarted.enabled .rules.qdrantRestarted.severity)) -}}
+    - alert: QdrantRestarted
+      expr: (time() - min(kube_pod_start_time{ namespace="{{ $.Release.Namespace }}", pod=~"{{ $.Release.Name }}-.*"})) < {{.rules.qdrantRestarted.val}}
+      for: {{ .rules.qdrantRestarted.duration }}
+      labels:
+        severity: {{ .rules.qdrantRestarted.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Qdrant service recently restarted (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Qdrant service on pod {{`{{`}} $labels.pod {{`}}`}} has restarted within the last 3 minutes. This may indicate a crash or graceful restart.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantHighCPUUsage.enabled .rules.qdrantHighCPUUsage.severity)) -}}
+    - alert: QdrantHighCPUUsage
+      expr: |
+        (
+          sum by (pod) (
+            irate(container_cpu_usage_seconds_total{
+              image!="",
+              job="kubelet",
+              metrics_path="/metrics/cadvisor",
+              namespace="{{ $.Release.Namespace }}",
+              pod=~"^{{ $.Release.Name }}.*"
+            }[5m])
+          )
+        )
+        /
+        sum by (pod) (
+          kube_pod_container_resource_requests{
+            namespace="{{ $.Release.Namespace }}",
+            pod=~"^{{ $.Release.Name }}.*",
+            resource="cpu"
+          }
+        ) * 100
+        > {{ .rules.qdrantHighCPUUsage.val }}
+      for: {{ .rules.qdrantHighCPUUsage.duration }}
+      labels:
+        severity: {{ .rules.qdrantHighCPUUsage.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Qdrant Pod CPU usage high (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "Qdrant pod CPU usage is above {{ .rules.qdrantHighCPUUsage.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantHighMemoryUsage.enabled .rules.qdrantHighMemoryUsage.severity)) -}}
+    - alert: QdrantHighMemoryUsage
+      expr: |
+        (
+          sum by (pod) (
+            container_memory_working_set_bytes{
+              namespace="{{ $.Release.Namespace }}",
+              pod=~"^{{ $.Release.Name }}.*",
+              container!="",
+              image!=""
+            }
+          )
+        )
+        /
+        sum by (pod) (
+          kube_pod_container_resource_limits{
+            namespace="{{ $.Release.Namespace }}",
+            pod=~"^{{ $.Release.Name }}.*",
+            resource="memory"
+          }
+        ) * 100
+        > {{ .rules.qdrantHighMemoryUsage.val }}
+      for: {{ .rules.qdrantHighMemoryUsage.duration }}
+      labels:
+        severity: {{ .rules.qdrantHighMemoryUsage.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Qdrant Pod Memory usage high (pod {{`{{`}} $labels.pod {{`}}`}})
+        description: "Qdrant pod memory usage is above {{ .rules.qdrantHighMemoryUsage.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantHighPendingOperations.enabled .rules.qdrantHighPendingOperations.severity)) -}}
+    - alert: QdrantHighPendingOperations
+      expr: |
+        sum by (pod) (
+          cluster_pending_operations_total{
+            job=~"{{ $.Release.Name }}-stats",
+            namespace="{{ $.Release.Namespace }}",
+            pod=~"^{{ $.Release.Name }}.*"
+          }
+        ) > {{ .rules.qdrantHighPendingOperations.val }}
+      for: {{ .rules.qdrantHighPendingOperations.duration }}
+      labels:
+        severity: {{ .rules.qdrantHighPendingOperations.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Qdrant pending operations high on pod {{`{{`}} $labels.pod {{`}}`}}
+        description: |
+          Qdrant pod has too many pending operations.
+          VALUE = {{`{{`}} $value {{`}}`}}
+          LABELS = {{`{{`}} $labels {{`}}`}}
+    {{- end }}
+
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantGrpcResponsesFailHigh.enabled .rules.qdrantGrpcResponsesFailHigh.severity)) -}}
+    - alert: QdrantGrpcResponsesFailHigh
+      expr: |
+        sum by (pod) (
+          increase(
+            grpc_responses_fail_total{
+              job=~"{{ $.Release.Name }}-stats",
+              namespace="{{ $.Release.Namespace }}",
+              pod=~"^{{ $.Release.Name }}.*"
+            }[5m]
+          )
+        ) > {{ .rules.qdrantGrpcResponsesFailHigh.val }}
+      for: {{ .rules.qdrantGrpcResponsesFailHigh.duration }}
+      labels:
+        severity: {{ .rules.qdrantGrpcResponsesFailHigh.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Qdrant gRPC fails high on pod {{`{{`}} $labels.pod {{`}}`}}
+        description: |
+          The number of failed gRPC responses for this pod in the last 5m exceeds threshold.
+          VALUE = {{`{{`}} $value {{`}}`}}
+          LABELS = {{`{{`}} $labels {{`}}`}}
+    {{- end }}
+
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantRestResponsesFailHigh.enabled .rules.qdrantRestResponsesFailHigh.severity)) -}}
+    - alert: QdrantRestResponsesFailHigh
+      expr: |
+        sum by (pod) (
+          increase(
+            rest_responses_fail_total{
+              job=~"{{ $.Release.Name }}-stats",
+              namespace="{{ $.Release.Namespace }}",
+              pod=~"^{{ $.Release.Name }}.*"
+            }[5m]
+          )
+        ) > {{ .rules.qdrantRestResponsesFailHigh.val }}
+      for: {{ .rules.qdrantRestResponsesFailHigh.duration }}
+      labels:
+        severity: {{ .rules.qdrantRestResponsesFailHigh.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Qdrant REST fails high on pod {{`{{`}} $labels.pod {{`}}`}}
+        description: |
+          The number of failed REST responses for this pod in the last 5m exceeds threshold.
+          VALUE = {{`{{`}} $value {{`}}`}}
+          LABELS = {{`{{`}} $labels {{`}}`}}
+    {{- end }}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    - alert: DiskUsageHigh
+      expr: ( kubelet_volume_stats_used_bytes{job="kubelet", metrics_path="/metrics"} / kubelet_volume_stats_capacity_bytes{job="kubelet", metrics_path="/metrics"} ) * on (persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{ pod=~"{{ $.Release.Name }}-.+$",namespace="{{ $.Release.Namespace }}"} * 100 > {{ .rules.diskUsageHigh.val }}
+      for: {{ .rules.diskUsageHigh.duration }}
+      labels:
+        severity: {{ .rules.diskUsageHigh.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume usage high for Qdrant (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Persistent Volume usage is above {{ .rules.diskUsageHigh.val }}%. The storage is running low and may need expansion soon.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    - alert: DiskAlmostFull
+      expr: ( kubelet_volume_stats_used_bytes{job="kubelet", metrics_path="/metrics"} / kubelet_volume_stats_capacity_bytes{job="kubelet", metrics_path="/metrics"} ) * on (persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{ pod=~"{{ $.Release.Name }}-.+$",namespace="{{ $.Release.Namespace }}"} * 100 > {{ .rules.diskAlmostFull.val }}
+      for: {{ .rules.diskAlmostFull.duration }}
+      labels:
+        severity: {{ .rules.diskAlmostFull.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume almost full for Qdrant (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Persistent Volume usage is above {{ .rules.diskAlmostFull.val }}%. The storage is critically low and immediate action is required to avoid data loss.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{end -}}
+  {{end -}}
+
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "kubedbcom-qdrant-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: qdrant.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    - alert: KubeDBQdrantPhaseNotReady
+      expr: kubedb_com_qdrant_status_phase{phase="NotReady",app="{{ $.Release.Name }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB Qdrant database in NotReady phase (qdrant {{`{{`}} $labels.qdrant {{`}}`}})
+        description: "KubeDB Qdrant database {{`{{`}} $labels.qdrant {{`}}`}} is in NotReady phase. The database is not accepting connections and requires attention.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    - alert: KubeDBQdrantPhaseCritical
+      expr: kubedb_com_qdrant_status_phase{phase="Critical",app="{{ $.Release.Name }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB Qdrant database in Critical phase (qdrant {{`{{`}} $labels.qdrant {{`}}`}})
+        description: "KubeDB Qdrant database {{`{{`}} $labels.qdrant {{`}}`}} is in Critical phase. One or more nodes are experiencing issues but the database is still operational.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+  {{ end }}

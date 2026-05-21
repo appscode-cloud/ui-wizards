@@ -9,15 +9,31 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  certManagerIoIssuer_ca: # +doc-gen:break
-    apiVersion: cert-manager.io/v1
-    kind: Issuer
+  autoscalingKubedbComWeaviateAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: WeaviateAutoscaler
     metadata:
-      name: weaviate-ca
+      name: weaviate
       namespace: demo
     spec:
-      ca:
-        secretName: weaviate-ca
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        weaviate:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: weaviate
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
   kubedbComWeaviate: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Weaviate
@@ -72,25 +88,6 @@ resources:
         storageClassName: default
       storageType: Durable
       version: 24.4.1
-  monitoringCoreosComServiceMonitor: # +doc-gen:break
-    apiVersion: monitoring.coreos.com/v1
-    kind: ServiceMonitor
-    metadata:
-      name: weaviate
-      namespace: demo
-    spec:
-      endpoints:
-        - honorLabels: true
-          interval: 30s
-          path: /metrics
-          port: metrics
-      namespaceSelector:
-        matchNames:
-          - demo
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: weaviate
-          app.kubernetes.io/name: weaviates.kubedb.com
   secret_auth: # +doc-gen:break
     apiVersion: v1
     kind: Secret

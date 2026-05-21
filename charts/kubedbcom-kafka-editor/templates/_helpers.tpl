@@ -21,11 +21,42 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Common labels
+*/}}
+{{- define "kubedbcom-kafka-editor.labels" -}}
+{{ include "kubedbcom-kafka-editor.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- range $k, $v := .Values.spec.labels }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "kubedbcom-kafka-editor.selectorLabels" -}}
-app.kubernetes.io/name: kafkaes.kubedb.com
+app.kubernetes.io/name: kafkas.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-kafka-editor.fullname" . }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "kubedbcom-kafka-editor.serviceAccountName" -}}
+{{- if .Values.spec.serviceAccount.create }}
+{{- default (include "kubedbcom-kafka-editor.fullname" .) .Values.spec.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.spec.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common annotations
+*/}}
+{{- define "kubedbcom-kafka-editor.annotations" -}}
+{{- range $k, $v := .Values.spec.annotations }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
 {{- end }}
 
 {{/*
@@ -82,3 +113,80 @@ Alert Enabled
 {{- end -}}
 {{- if (and $sev (le $sev $result) $enabled) -}}{{ (mustLast .) }}{{- end -}}
 {{- end }}
+
+{{- define "container.securityContext" -}}
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+  - ALL
+runAsGroup: 0
+runAsNonRoot: true
+runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 1001 }}
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
+
+{{- define "resource-profiles" -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := dict -}}
+
+{{- $res := dict -}}
+{{- $broker_res := dict -}}
+{{- $controller_res := dict -}}
+
+{{- if eq .Values.spec.mode "Topology" }}
+  {{- $broker_res = .Values.spec.topology.broker.podResources.resources -}}
+
+  {{- if and .Values.spec.topology.broker.podResources.machine (hasKey $machines .Values.spec.topology.broker.podResources.machine) }}
+    {{- $broker_res = get (get $machines .Values.spec.topology.broker.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.topology.broker.podResources.machine (eq .id $.Values.spec.topology.broker.podResources.machine) }}
+      {{- $broker_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "broker" .id }}
+    {{- end }}
+  {{- end }}
+
+
+  {{- $controller_res = .Values.spec.topology.controller.podResources.resources -}}
+
+  {{- if and .Values.spec.topology.controller.podResources.machine (hasKey $machines .Values.spec.topology.controller.podResources.machine) }}
+    {{- $controller_res = get (get $machines .Values.spec.topology.controller.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.topology.controller.podResources.machine (eq .id $.Values.spec.topology.controller.podResources.machine) }}
+      {{- $controller_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "controller" .id }}
+    {{- end }}
+  {{- end }}
+
+{{- else }}
+
+  {{- $res = .Values.spec.podResources.resources -}}
+
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+      {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "node" .id }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+
+
+{{- $_ := set . "res" $res -}}
+{{- $_ = set . "broker_res" $broker_res -}}
+{{- $_ = set . "controller_res" $controller_res -}}
+{{- $_ = set . "init_res" $init_res -}}
+{{- $_ = set . "sidecar_res" $sidecar_res -}}
+
+{{- $profiles | toJson -}}
+{{- end -}}

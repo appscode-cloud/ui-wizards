@@ -1,0 +1,195 @@
+{{ $app := (include "kubedbcom-neo4j-editor.fullname" .) }}
+
+{{ if (include "kubedbcom-neo4j-editor.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-neo4j-editor.selectorLabels" . | nindent 4 }}
+    {{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  groups:
+    {{- with .Values.form.alert.groups.database }}
+    {{- if (include "kubedbcom-neo4j-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
+    - name: neo4j.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+      rules:
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jHighCPUUsage.enabled .rules.neo4jHighCPUUsage.severity)) }}
+        - alert: Neo4jHighCPUUsage
+          expr: avg(irate(container_cpu_usage_seconds_total{container!="",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}[5m])) by (pod) * 100 > {{ .rules.neo4jHighCPUUsage.val }}
+          for: {{ .rules.neo4jHighCPUUsage.duration }}
+          labels:
+            severity: {{ .rules.neo4jHighCPUUsage.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: High CPU usage on Neo4j pods (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: |
+              CPU usage percentage is {{`{{`}} $value {{`}}`}}%.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jHighMemoryUsage.enabled .rules.neo4jHighMemoryUsage.severity)) }}
+        - alert: Neo4jHighMemoryUsage
+          expr: avg(container_memory_working_set_bytes{container!="",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) by (pod) / avg(kube_pod_container_resource_limits{resource="memory",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) by (pod) * 100 > {{ .rules.neo4jHighMemoryUsage.val }}
+          for: {{ .rules.neo4jHighMemoryUsage.duration }}
+          labels:
+            severity: {{ .rules.neo4jHighMemoryUsage.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: High memory usage on Neo4j pods (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: |
+              Memory usage percentage is {{`{{`}} $value {{`}}`}}%.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageCacheUsageRatioHigh.enabled .rules.neo4jPageCacheUsageRatioHigh.severity)) }}
+        - alert: Neo4jPageCacheUsageRatioHigh
+          expr: neo4j_dbms_page_cache_usage_ratio{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"} > {{ .rules.neo4jPageCacheUsageRatioHigh.val }}
+          for: {{ .rules.neo4jPageCacheUsageRatioHigh.duration }}
+          labels:
+            severity: {{ .rules.neo4jPageCacheUsageRatioHigh.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Neo4j page cache usage ratio is high (instance {{`{{`}} $labels.instance {{`}}`}})
+            description: |
+              Page cache usage ratio is {{`{{`}} $value {{`}}`}}.
+              This metric shows what percentage of the allocated page cache is being used.
+              If it reaches 100%, the hit ratio will start dropping and more RAM should be allocated.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageCacheHitRatioLow.enabled .rules.neo4jPageCacheHitRatioLow.severity)) }}
+        - alert: Neo4jPageCacheHitRatioLow
+          expr: neo4j_dbms_page_cache_hit_ratio{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"} < {{ .rules.neo4jPageCacheHitRatioLow.val }}
+          for: {{ .rules.neo4jPageCacheHitRatioLow.duration }}
+          labels:
+            severity: {{ .rules.neo4jPageCacheHitRatioLow.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Neo4j page cache hit ratio is low (instance {{`{{`}} $labels.instance {{`}}`}})
+            description: |
+              Page cache hit ratio is {{`{{`}} $value {{`}}`}}.
+              Performance relies on efficiently using the page cache, so this should be in 98-100% range consistently.
+              If much lower than that, the database is going to disk too often.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageFaultsHigh.enabled .rules.neo4jPageFaultsHigh.severity)) }}
+        - alert: Neo4jPageFaultsHigh
+          expr: increase(neo4j_dbms_page_cache_page_faults_total{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.neo4jPageFaultsHigh.val }}
+          for: {{ .rules.neo4jPageFaultsHigh.duration }}
+          labels:
+            severity: {{ .rules.neo4jPageFaultsHigh.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Neo4j page faults are high (instance {{`{{`}} $labels.instance {{`}}`}})
+            description: |
+              Page faults in the last 5 minutes: {{`{{`}} $value {{`}}`}}.
+              If this count keeps increasing over time, it may indicate that more page cache is required.
+              Note: Page faults during startup are normal due to cache warmup.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageFaultFailuresHigh.enabled .rules.neo4jPageFaultFailuresHigh.severity)) }}
+        - alert: Neo4jPageFaultFailuresHigh
+          expr: increase(neo4j_dbms_page_cache_page_fault_failures_total{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.neo4jPageFaultFailuresHigh.val }}
+          for: {{ .rules.neo4jPageFaultFailuresHigh.duration }}
+          labels:
+            severity: {{ .rules.neo4jPageFaultFailuresHigh.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Neo4j page fault failures detected (instance {{`{{`}} $labels.instance {{`}}`}})
+            description: |
+              Page fault failures in the last 5 minutes: {{`{{`}} $value {{`}}`}}.
+              Failed page faults indicate potential disk I/O issues or corruption.
+              Investigate immediately.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) }}
+        - alert: DiskUsageHigh
+          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ .rules.diskUsageHigh.val }}
+          for: {{ .rules.diskUsageHigh.duration }}
+          labels:
+            severity: {{ .rules.diskUsageHigh.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Persistent Volume usage is high (instance {{`{{`}} $labels.instance {{`}}`}})
+            description: |
+              Persistent Volume usage is {{`{{`}} $value {{`}}`}}%.
+              Consider expanding the volume.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) }}
+        - alert: DiskAlmostFull
+          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ .rules.diskAlmostFull.val }}
+          for: {{ .rules.diskAlmostFull.duration }}
+          labels:
+            severity: {{ .rules.diskAlmostFull.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Persistent Volume is almost full (instance {{`{{`}} $labels.instance {{`}}`}})
+            description: |
+              Persistent Volume usage is {{`{{`}} $value {{`}}`}}%.
+              Urgent: Expand the volume immediately.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+    {{- end }}
+    {{- end }}
+
+    {{- with .Values.form.alert.groups.provisioner }}
+    {{- if (include "kubedbcom-neo4j-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
+    - name: neo4j.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+      rules:
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) }}
+        - alert: KubeDBNeo4jPhaseNotReady
+          expr: kubedb_com_neo4j_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+          for: {{ .rules.appPhaseNotReady.duration }}
+          labels:
+            severity: {{ .rules.appPhaseNotReady.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: KubeDB Neo4j Phase NotReady (neo4j {{`{{`}} $labels.neo4j {{`}}`}})
+            description: |
+              KubeDB Neo4j Phase not ready on {{`{{`}} $labels.neo4j {{`}}`}}.
+              The database provisioning or initialization is not complete.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) }}
+        - alert: KubeDBNeo4jPhaseCritical
+          expr: kubedb_com_neo4j_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+          for: {{ .rules.appPhaseCritical.duration }}
+          labels:
+            severity: {{ .rules.appPhaseCritical.severity }}
+            {{- include "kubedbcom-neo4j-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: KubeDB Neo4j Phase Critical (neo4j {{`{{`}} $labels.neo4j {{`}}`}})
+            description: |
+              KubeDB Neo4j is in Critical phase on {{`{{`}} $labels.neo4j {{`}}`}}.
+              One or more nodes are not functioning properly.
+              VALUE = {{`{{`}} $value {{`}}`}}
+              LABELS = {{`{{`}} $labels {{`}}`}}
+        {{- end }}
+    {{- end }}
+    {{- end }}
+
+{{- end }}

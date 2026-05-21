@@ -8,36 +8,36 @@ form:
         enabled: warning
         rules:
           cassandraConnectionTimeouts:
-            duration: 1m
+            duration: 0m
             enabled: true
             severity: warning
             val: 100
           cassandraDown:
-            duration: 1m
+            duration: 0m
             enabled: true
             severity: critical
           cassandraDroppedMessages:
-            duration: 1m
+            duration: 0m
             enabled: true
             severity: warning
             val: 1
           cassandraHighReadLatency:
-            duration: 1m
+            duration: 0m
             enabled: true
             severity: warning
             val: 7000
           cassandraHighWriteLatency:
-            duration: 1m
+            duration: 0m
             enabled: true
             severity: warning
             val: 7000
           cassandraMemoryLimit:
-            duration: 1m
+            duration: 0m
             enabled: true
             severity: critical
             val: 3.3554432e+07
           cassandraServiceRespawn:
-            duration: 1m
+            duration: 0m
             enabled: true
             severity: critical
             val: 180
@@ -86,10 +86,20 @@ resources:
         nodeTopology:
           name: standard-basv2-family
       databaseRef:
-        name: repl
+        name: cassandra
       opsRequestOptions:
         apply: IfReady
         timeout: 10m
+  catalogAppscodeComCassandraBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: CassandraBinding
+    metadata:
+      name: cassandra
+      namespace: demo
+    spec:
+      sourceRef:
+        name: cassandra
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
@@ -137,7 +147,7 @@ resources:
             name: cassandra-frequent-backup
             repositories:
               - backend: cassandra-backend
-                directory: /mongo-repo
+                directory: /cassandra-repo
                 encryptionSecret:
                   name: cassandra-encryption-secret
                   namespace: demo
@@ -203,7 +213,7 @@ resources:
           name: cassandra-frequent-backup
           repositories:
             - backend: cassandra-backend
-              directory: /mongo-repo
+              directory: /cassandra-repo
               encryptionSecret:
                 name: cassandra-encryption-secret
                 namespace: demo
