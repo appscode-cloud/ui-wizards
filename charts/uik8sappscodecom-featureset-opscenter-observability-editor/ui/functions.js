@@ -238,11 +238,19 @@ export const useFunc = (model) => {
       return null
     }
 
+    const getRoute = storeGet('/route')
+    const spokeCluster = getRoute.params?.spoke
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const { data } = await axios.get(
-      `/telemetry/${owner}/${monitoringClusterName}/values/appscode-otel-stack?targetClusterName=${cluster}`,
-    )
+    let url = `/telemetry/${owner}/${monitoringClusterName}/values/appscode-otel-stack`
+    if (cluster) {
+      if (getRoute.fullPath.includes('/hubs/') && spokeCluster) {
+        url += `?targetClusterName=${encodeURIComponent(spokeCluster)}`
+      } else {
+        url += `?targetClusterName=${encodeURIComponent(cluster)}`
+      }
+    }
+    const { data } = await axios.get(url)
     return data
   }
 
@@ -441,9 +449,18 @@ export const useFunc = (model) => {
       return []
     }
 
+    const getRoute = storeGet('/route')
+    const spokeCluster = getRoute.params?.spoke
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    let url = `/telemetry/${owner}/monitoring-clusters?targetClusterName=${cluster}`
+    let url = `/telemetry/${owner}/monitoring-clusters`
+    if (cluster) {
+      if (getRoute.fullPath.includes('/hubs/') && spokeCluster) {
+        url += `?targetClusterName=${encodeURIComponent(spokeCluster)}`
+      } else {
+        url += `?targetClusterName=${encodeURIComponent(cluster)}`
+      }
+    }
     const { data } = await axios.get(url)
 
     return data || []
@@ -461,7 +478,6 @@ export const useFunc = (model) => {
     await onEnabledFeaturesChange()
   }
 
-
   return {
     hideThisElement,
     checkIsResourceLoaded,
@@ -477,6 +493,6 @@ export const useFunc = (model) => {
     fetchFeatureSetOptions,
     checkIsOtelStackEnabled,
     fetchMonitoringClusterOptions,
-    onMonitoringClusterChange
+    onMonitoringClusterChange,
   }
 }
