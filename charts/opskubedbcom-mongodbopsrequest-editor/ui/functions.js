@@ -1882,7 +1882,6 @@ export const useFunc = (model) => {
 
   function isMachineValid(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    console.log(dbDetails)
 
     const limits = (type === 'replicaSet' || type === 'standalone'
       ? dbDetails?.spec?.podTemplate?.spec?.resources?.requests

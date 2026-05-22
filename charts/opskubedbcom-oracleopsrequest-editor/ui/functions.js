@@ -835,7 +835,6 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
     const limits = containers[0]?.resources?.limits || {}
-    console.log(limits)
 
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
