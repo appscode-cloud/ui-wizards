@@ -1096,10 +1096,10 @@ export const useFunc = (model) => {
 
     try {
       const resp = await axios.post(
-        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseconfigurations`,
         {
           apiVersion: 'ui.kubedb.com/v1alpha1',
-          kind: 'DatabaseInfo',
+          kind: 'DatabaseConfiguration',
           request: {
             source: {
               ref: {
