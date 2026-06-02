@@ -96,7 +96,7 @@ step:
       label: Target Version
       loader: getDbVersions
       schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
-      subtitle: Select the desired Cassandra version to which you want to update your
+      subtitle: Select the desired MySQL version to which you want to update your
         database.
       type: select-compare
     - if:
@@ -122,7 +122,7 @@ step:
           type: func
           value: setValueFromDbDetails|/spec/replicas
         label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/node
+        schema: schema/properties/spec/properties/horizontalScaling/properties/member
         subtitle: Define the total number of replicas for the database. Increasing
           replicas improves fault tolerance and load distribution , while reducing
           replicas conserves resources
@@ -131,6 +131,9 @@ step:
         label: Each replica represents an independent copy of your database. For example,
           setting this to 3 creates three copies of the database for better availability.
         type: info
+      if:
+        name: ifDbTypeEqualsTo|cluster|horizontalScaling
+        type: function
       type: horizontal-layout
     fixedBlock: true
     if:
@@ -154,7 +157,7 @@ step:
           name: isMachineValid
           type: custom
         watcher:
-          func: onMachineChange|node|/spec/podTemplate/spec/resources
+          func: onMachineChange|mysql|/spec/podTemplate/spec/resources
           paths:
           - temp/properties/machine
       - elements:
@@ -171,7 +174,7 @@ step:
                 value: LabelSelector
               - text: Taint
                 value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+              schema: schema/properties/spec/properties/verticalScaling/properties/mysql/properties/nodeSelectionPolicy
               type: select
             hideBorder: true
             showLabels: false
@@ -204,7 +207,31 @@ step:
         label: Node Selection
         showLabels: true
         type: block-layout
-      label: Cassandra vertical scaling
+      - elements:
+        - elements:
+          - init:
+              type: func
+              value: setExporter|cpu
+            label: CPU
+            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
+            type: input
+          - init:
+              type: func
+              value: setExporter|memory
+            label: Memory
+            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+            type: input
+            watcher:
+              func: onExporterResourceChange|memory
+              paths:
+              - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+          showLabels: true
+          type: horizontal-layout
+        hideBlock: true
+        label: Exporter
+        showLabels: true
+        type: block-layout
+      label: MySQL vertical scaling
       showLabels: false
       type: block-layout
     if:
@@ -233,21 +260,21 @@ step:
       type: horizontal-layout
     - elements:
       - elements:
-        - header: Cassandra
+        - header: MySQL
           init:
             type: func
             value: setValueFromDbDetails|/spec/storage/resources/requests/storage
           label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/node
+          schema: schema/properties/spec/properties/volumeExpansion/properties/mysql
           subtitle: How much extra storage does your database need? Specify the size(e.g.
             2Gi for 2 gigabytes) so we can allocate it correctly
           type: input-compare
           validation:
-            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/mysql
             type: custom
         type: horizontal-layout
       fixedBlock: true
-      label: Cassandra volume expansion
+      label: MySQL volume expansion
       showLabels: true
       type: block-layout
     if:
@@ -464,6 +491,19 @@ step:
       label: Rotate Certificates
       schema: schema/properties/spec/properties/tls/properties/rotateCertificates
       type: switch
+    - elements:
+      - fullwidth: true
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/tls/requireSSL
+        label: Require SSL
+        schema: schema/properties/spec/properties/tls/properties/requireSSL
+        type: switch
+      if:
+        name: showIssuerRefAndCertificates
+        type: function
+      label: Require SSL
+      type: block-layout
     - elements:
       - disable: true
         init:

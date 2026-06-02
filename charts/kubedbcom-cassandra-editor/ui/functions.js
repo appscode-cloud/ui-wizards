@@ -73,7 +73,7 @@ export const useFunc = (model) => {
       // delete stashAppscodeComBackupConfiguration
       commit('wizard/model$delete', '/resources/stashAppscodeComBackupConfiguration')
       commit('wizard/model$delete', '/resources/stashAppscodeComRepository_repo')
-      // delete annotation from kubedbComMySQL annotation
+      // delete annotation from kubedbComCassandra annotation
       deleteKubeDbComMySqlDbAnnotation(getValue, model, commit)
     } else {
       const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model)
@@ -110,10 +110,10 @@ export const useFunc = (model) => {
       model,
       '/resources/stashAppscodeComBackupConfiguration',
     )
-    const kubedbComMySQLAnnotations =
-      getValue(model, '/resources/kubedbComMySQL/metadata/annotations') || {}
+    const kubedbComCassandraAnnotations =
+      getValue(model, '/resources/kubedbComCassandra/metadata/annotations') || {}
 
-    const isBluePrint = Object.keys(kubedbComMySQLAnnotations).some(
+    const isBluePrint = Object.keys(kubedbComCassandraAnnotations).some(
       (k) =>
         k === 'stash.appscode.com/backup-blueprint' ||
         k === 'stash.appscode.com/schedule' ||
@@ -127,7 +127,7 @@ export const useFunc = (model) => {
   }
 
   function deleteKubeDbComMySqlDbAnnotation(getValue, model, commit) {
-    const annotations = getValue(model, '/resources/kubedbComMySQL/metadata/annotations') || {}
+    const annotations = getValue(model, '/resources/kubedbComCassandra/metadata/annotations') || {}
     const filteredKeyList =
       Object.keys(annotations).filter(
         (k) =>
@@ -140,7 +140,7 @@ export const useFunc = (model) => {
       filteredAnnotations[k] = annotations[k]
     })
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMySQL/metadata/annotations',
+      path: '/resources/kubedbComCassandra/metadata/annotations',
       value: filteredAnnotations,
     })
   }
@@ -176,7 +176,7 @@ export const useFunc = (model) => {
     const { name, cluster, user, group, resource, spoke } = storeGet('/route/params')
     const namespace = storeGet('/route/query/namespace')
     const kind = storeGet('/resource/layout/result/resource/kind')
-    dbResource = getValue(model, '/resources/kubedbComMySQL')
+    dbResource = getValue(model, '/resources/kubedbComCassandra')
     initialDbMetadata = objectCopy(dbResource.metadata)
     initialArchiver = dbResource.spec?.archiver ? objectCopy(dbResource.spec?.archiver) : undefined
 
@@ -334,7 +334,7 @@ export const useFunc = (model) => {
     }
     commit('wizard/model$delete', '/context')
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMySQL',
+      path: '/resources/kubedbComCassandra',
       value: objectCopy(dbResource),
       force: true,
     })
@@ -369,7 +369,7 @@ export const useFunc = (model) => {
 
   function onArchiverChange() {
     const archiverSwitch = getValue(discriminator, '/archiverEnabled')
-    const path = 'resources/kubedbComMySQL/spec/archiver'
+    const path = 'resources/kubedbComCassandra/spec/archiver'
     if (archiverSwitch) {
       commit('wizard/model$update', {
         path: path,
@@ -392,7 +392,7 @@ export const useFunc = (model) => {
     }
 
     commit('wizard/model$update', {
-      path: `/resources/kubedbComMySQL/metadata/${type}`,
+      path: `/resources/kubedbComCassandra/metadata/${type}`,
       value: obj,
       force: true,
     })
@@ -407,7 +407,7 @@ export const useFunc = (model) => {
     } else delete obj['kubedb.com/archiver']
 
     commit('wizard/model$update', {
-      path: `/resources/kubedbComMySQL/metadata/${type}`,
+      path: `/resources/kubedbComCassandra/metadata/${type}`,
       value: obj,
       force: true,
     })
@@ -555,7 +555,7 @@ export const useFunc = (model) => {
     if (isKube) {
       const dbName = storeGet('/route/params/name') || ''
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComMySQLAutoscaler/spec/databaseRef/name',
+        path: '/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name',
         value: dbName,
         force: true,
       })
@@ -567,14 +567,14 @@ export const useFunc = (model) => {
       const date = Math.floor(Date.now() / 1000)
       const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComMySQLAutoscaler/metadata/name',
+        path: '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/name',
         value: modifiedName,
         force: true,
       })
       const namespace = storeGet('/route/query/namespace') || ''
       if (namespace) {
         commit('wizard/model$update', {
-          path: '/resources/autoscalingKubedbComMySQLAutoscaler/metadata/namespace',
+          path: '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/namespace',
           value: namespace,
           force: true,
         })
@@ -611,7 +611,7 @@ export const useFunc = (model) => {
 
   function onNamespaceChange() {
     const namespace = getValue(model, '/metadata/release/namespace')
-    const agent = getValue(model, '/resources/kubedbComMySQL/spec/monitor/agent')
+    const agent = getValue(model, '/resources/kubedbComCassandra/spec/monitor/agent')
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
         path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
@@ -622,17 +622,17 @@ export const useFunc = (model) => {
   }
 
   async function getMysqlDbs() {
-    // watchDependency('model#/resources/autoscalingKubedbComMySQLAutoscaler/metadata/namespace')
+    // watchDependency('model#/resources/autoscalingKubedbComCassandraAutoscaler/metadata/namespace')
     const namespace = getValue(
       model,
-      '/resources/autoscalingKubedbComMySQLAutoscaler/metadata/namespace',
+      '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/namespace',
     )
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const storageEngine = getValue(model, '/resources/kubedbComMySQL/spec/storageEngine')
+    const storageEngine = getValue(model, '/resources/kubedbComCassandra/spec/storageEngine')
     showStoragememory = storageEngine === 'inMemory'
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mysqls`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/cassandras`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -650,7 +650,7 @@ export const useFunc = (model) => {
   }
   function initMetadata() {
     const dbName =
-      getValue(model, '/resources/autoscalingKubedbComMySQLAutoscaler/spec/databaseRef/name') || ''
+      getValue(model, '/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name') || ''
     const type = getValue(discriminator, '/autoscalingType') || ''
     const date = Math.floor(Date.now() / 1000)
     const resource = storeGet('/route/params/resource')
@@ -658,21 +658,21 @@ export const useFunc = (model) => {
     const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
     if (modifiedName)
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComMySQLAutoscaler/metadata/name',
+        path: '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/name',
         value: modifiedName,
         force: true,
       })
 
     // delete the other type object from vuex wizard model
     if (type === 'compute')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComMySQLAutoscaler/spec/storage')
+      commit('wizard/model$delete', '/resources/autoscalingKubedbComCassandraAutoscaler/spec/storage')
     if (type === 'storage')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComMySQLAutoscaler/spec/compute')
+      commit('wizard/model$delete', '/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute')
   }
 
   async function fetchTopologyMachines() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComMySQLAutoscaler/metadata/annotations') || {}
+      getValue(model, '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/annotations') || {}
     instance = annotations['kubernetes.io/instance-type']
     const user = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -698,7 +698,7 @@ export const useFunc = (model) => {
 
   function onTriggerChange(type) {
     const trigger = getValue(discriminator, `/${type}/trigger`)
-    const commitPath = `/resources/autoscalingKubedbComMySQLAutoscaler/spec/${type}/trigger`
+    const commitPath = `/resources/autoscalingKubedbComCassandraAutoscaler/spec/${type}/trigger`
 
     commit('wizard/model$update', {
       path: commitPath,
@@ -709,7 +709,7 @@ export const useFunc = (model) => {
 
   function hasAnnotations() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComMySQLAutoscaler/metadata/annotations') || {}
+      getValue(model, '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/annotations') || {}
     const instance = annotations['kubernetes.io/instance-type']
 
     return !!instance
@@ -776,7 +776,7 @@ export const useFunc = (model) => {
   }
 
   function onMachineChange(type) {
-    const annoPath = '/resources/autoscalingKubedbComMySQLAutoscaler/metadata/annotations'
+    const annoPath = '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/annotations'
     const annotations = getValue(model, annoPath) || {}
     const instance = annotations['kubernetes.io/instance-type']
 
@@ -795,7 +795,7 @@ export const useFunc = (model) => {
     const maxMachineAllocatable = maxMachineObj
       ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory }
       : null
-    const allowedPath = `/resources/autoscalingKubedbComMySQLAutoscaler/spec/compute/${type}`
+    const allowedPath = `/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute/${type}`
 
     if (minMachine && maxMachine && instance !== minMaxMachine) {
       commit('wizard/model$update', {
@@ -822,7 +822,7 @@ export const useFunc = (model) => {
 
   function setControlledResources(type) {
     const list = ['cpu', 'memory']
-    const path = `/resources/autoscalingKubedbComMySQLAutoscaler/spec/compute/${type}/controlledResources`
+    const path = `/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute/${type}/controlledResources`
     commit('wizard/model$update', {
       path: path,
       value: list,
@@ -851,22 +851,22 @@ export const useFunc = (model) => {
 
   function isNodeTopologySelected() {
     // watchDependency(
-    //   'model#/resources/autoscalingKubedbComMySQLAutoscaler/spec/compute/nodeTopology/name',
+    //   'model#/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute/nodeTopology/name',
     // )
     const nodeTopologyName =
       getValue(
         model,
-        '/resources/autoscalingKubedbComMySQLAutoscaler/spec/compute/nodeTopology/name',
+        '/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute/nodeTopology/name',
       ) || ''
     return !!nodeTopologyName.length
   }
 
   function showOpsRequestOptions() {
     if (isKubedb() === true) return true
-    // watchDependency('model#/resources/autoscalingKubedbComMySQLAutoscaler/spec/databaseRef/name')
+    // watchDependency('model#/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name')
     // watchDependency('discriminator#/autoscalingType')
     return (
-      !!getValue(model, '/resources/autoscalingKubedbComMySQLAutoscaler/spec/databaseRef/name') &&
+      !!getValue(model, '/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name') &&
       !!getValue(discriminator, '/autoscalingType')
     )
   }
@@ -947,12 +947,12 @@ export const useFunc = (model) => {
     const configureStatus = getValue(discriminator, '/enableMonitoring')
     if (configureStatus) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComMySQL/spec/monitor',
+        path: '/resources/kubedbComCassandra/spec/monitor',
         value: {},
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/kubedbComMySQL/spec/monitor')
+      commit('wizard/model$delete', '/resources/kubedbComCassandra/spec/monitor')
     }
 
     // update alert value depend on monitoring profile
@@ -973,12 +973,12 @@ export const useFunc = (model) => {
     const configureStatus = getValue(discriminator, '/customizeExporter')
     if (configureStatus) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter',
+        path: '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter',
         value: {},
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter')
+      commit('wizard/model$delete', '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter')
     }
   }
 
@@ -989,7 +989,7 @@ export const useFunc = (model) => {
 
   // function onNamespaceChange() {
   //   const namespace = getValue(model, '/metadata/release/namespace')
-  //   const agent = getValue(model, '/resources/kubedbComMySQL/spec/monitor/agent')
+  //   const agent = getValue(model, '/resources/kubedbComCassandra/spec/monitor/agent')
   //   if (agent === 'prometheus.io') {
   //     commit('wizard/model$update', {
   //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
@@ -1000,9 +1000,9 @@ export const useFunc = (model) => {
   // }
 
   function onLabelChange() {
-    const labels = getValue(model, '/resources/kubedbComMySQL/spec/metadata/labels')
+    const labels = getValue(model, '/resources/kubedbComCassandra/spec/metadata/labels')
 
-    const agent = getValue(model, '/resources/kubedbComMySQL/spec/monitor/agent')
+    const agent = getValue(model, '/resources/kubedbComCassandra/spec/monitor/agent')
 
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
@@ -1014,7 +1014,7 @@ export const useFunc = (model) => {
   }
 
   function onAgentChange() {
-    const agent = getValue(model, '/resources/kubedbComMySQL/spec/monitor/agent')
+    const agent = getValue(model, '/resources/kubedbComCassandra/spec/monitor/agent')
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
         path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
@@ -1048,18 +1048,18 @@ export const useFunc = (model) => {
 
     if (isKube) return pathConstructedForKubedb
     else
-      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/cassandraopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
   }
 
   function onNamespaceChange() {
     const namespace = getValue(
       model,
-      '/resources/autoscalingKubedbComMySQLAutoscaler/metadata/namespace',
+      '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/namespace',
     )
     if (!namespace) {
       commit(
         'wizard/model$delete',
-        '/resources/autoscalingKubedbComMySQLAutoscaler/spec/databaseRef/name',
+        '/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name',
       )
     }
   }
@@ -1162,7 +1162,7 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     const configMapName = getValue(
       model,
-      `/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env/${index}/valueFrom/configMapKeyRef/name`,
+      `/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env/${index}/valueFrom/configMapKeyRef/name`,
     )
 
     // watchDependency('data#/namespace')
@@ -1232,7 +1232,7 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     const secretName = getValue(
       model,
-      `/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env/${index}/valueFrom/secretKeyRef/name`,
+      `/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env/${index}/valueFrom/secretKeyRef/name`,
     )
 
     // watchDependency('data#/namespace')
@@ -1268,7 +1268,7 @@ export const useFunc = (model) => {
   function isBindingAlreadyOn() {
     const value = getValue(model, '/resources')
     const keys = Object.keys(value)
-    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMySQLBinding')
+    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComCassandraBinding')
     return isExposeBinding
   }
 
@@ -1276,10 +1276,10 @@ export const useFunc = (model) => {
     const value = getValue(discriminator, `/binding`)
     const dbName = getValue(model, '/metadata/release/name')
     const dbNamespace = getValue(model, '/metadata/release/namespace')
-    const labels = getValue(model, '/resources/kubedbComMySQL/metadata/labels')
+    const labels = getValue(model, '/resources/kubedbComCassandra/metadata/labels')
     const bindingValues = {
       apiVersion: 'catalog.appscode.com/v1alpha1',
-      kind: 'MySQLBinding',
+      kind: 'CassandraBinding',
       metadata: {
         labels,
         name: dbName,
@@ -1295,12 +1295,12 @@ export const useFunc = (model) => {
 
     if (value) {
       commit('wizard/model$update', {
-        path: '/resources/catalogAppscodeComMySQLBinding',
+        path: '/resources/catalogAppscodeComCassandraBinding',
         value: bindingValues,
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/catalogAppscodeComMySQLBinding')
+      commit('wizard/model$delete', '/resources/catalogAppscodeComCassandraBinding')
     }
   }
 
@@ -1369,14 +1369,14 @@ export const useFunc = (model) => {
 
     if (filteredEnv.length)
       commit('wizard/model$update', {
-        path: '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env',
+        path: '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env',
         value: filteredEnv,
         force: true,
       })
   }
 
   function initEnvArray() {
-    const env = getValue(model, '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env')
+    const env = getValue(model, '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env')
 
     return env || []
   }
@@ -1389,7 +1389,7 @@ export const useFunc = (model) => {
 
   function initMonitoring() {
     const env =
-      getValue(model, '/resources/kubedbComMySQL/spec/monitor/prometheus/exporter/env') || []
+      getValue(model, '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env') || []
     setDiscriminatorValue('/env', env)
     let tempEnv = []
     env.forEach((item) => {
