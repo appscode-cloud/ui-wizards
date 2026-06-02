@@ -128,7 +128,7 @@ seccompProfile:
 
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- $profiles := "" -}}
+{{- $profiles := dict -}}
 {{- $res := dict -}}
 {{- $observer_res := dict -}}
 {{- $res = .Values.spec.podResources.resources -}}
@@ -138,7 +138,7 @@ seccompProfile:
 {{- range .Values.spec.admin.machineProfiles.machines }}
   {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
     {{- $res  = dict "requests" .limits "limits" .limits }}
-    {{- $profiles = .id -}}
+    {{- $_ := set $profiles "node" .id -}}
   {{- end }}
 {{- end }}
 
@@ -148,7 +148,7 @@ seccompProfile:
 {{- end }}
 {{- range .Values.spec.admin.machineProfiles.machines }}
   {{- if and $.Values.spec.dataGuard.observer.podResources.machine (eq .id $.Values.spec.dataGuard.observer.podResources.machine) }}
-    {{- $observer_res  = dict "requests" .limits "limits" .limits }}
+    {{- $observer_res = dict "requests" .limits "limits" .limits }}
     {{- $_ := set $profiles "observer" .id -}}
   {{- end }}
 {{- end }}
