@@ -1719,6 +1719,7 @@ export const useFunc = (model) => {
   function parseSize(sizeStr) {
     const units = {
       '': 1,
+      m: 1e-3,
       K: 1e3,
       M: 1e6,
       G: 1e9,
@@ -1740,7 +1741,7 @@ export const useFunc = (model) => {
     const unit = match[2]
 
     if (!(unit in units))
-      throw new Error('Unrecognized unit. Available units are K, Ki, M, Mi, G, Gi etc')
+      throw new Error('Unrecognized unit. Available units are m, K, Ki, M, Mi, G, Gi etc')
 
     return value * units[unit]
   }
