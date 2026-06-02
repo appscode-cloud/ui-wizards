@@ -1,14 +1,4 @@
-const {
-  axios,
-  useOperator,
-  store,
-  yaml,
-  useResourceInfo,
-  resourceCreate$api,
-  ref,
-  useToast,
-  axiosVue,
-} = window.vueHelpers || {}
+const { axios, useOperator, store, useToast } = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -315,9 +305,8 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
-const configSecretKeys = ['mongod.conf', 'replicaset.json', 'configuration.js']
-
 let machinesFromPreset = []
+const configSecretKeys = ['kubedb-user.cnf']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -360,7 +349,7 @@ export const useFunc = (model) => {
   }
 
   function returnFalse() {
-    return true
+    return false
   }
 
   function isTlsEnabled() {
@@ -408,7 +397,7 @@ export const useFunc = (model) => {
     // watchDependency('model#/metadata/namespace')
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/oracles`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -434,7 +423,7 @@ export const useFunc = (model) => {
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
 
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/oracles/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -445,11 +434,12 @@ export const useFunc = (model) => {
 
   let presetVersions = []
   setDiscriminatorValue('/filteredVersion', [])
-
   async function getDbVersions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
+
     const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+
     let presets = storeGet('/kubedbuiPresets') || {}
     if (!storeGet('/route/params/actions')) {
       try {
@@ -460,8 +450,9 @@ export const useFunc = (model) => {
         presets.status = String(e.status)
       }
     }
+
     try {
-      presetVersions = presets.admin?.databases?.MongoDB?.versions?.available || []
+      presetVersions = presets.admin?.databases?.Oracle?.versions?.available || []
       const queryParams = {
         filter: {
           items: {
@@ -470,24 +461,35 @@ export const useFunc = (model) => {
           },
         },
       }
+
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mongodbversions`,
+        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/oracleversions`,
         {
           params: queryParams,
         },
       )
+
       const resources = (resp && resp.data && resp.data.items) || []
+
       const sortedVersions = resources.sort((a, b) =>
         versionCompare(a.spec.version, b.spec.version),
       )
+
       let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
       const found = sortedVersions.find((item) => item.metadata.name === ver)
+
       if (found) ver = found.spec?.version
-      const allowed = found?.spec?.updateConstraints?.allowlist || []
+
+      const isGroupRepl = !!getValue(discriminator, '/dbDetails/spec/topology')
+      const allowed = isGroupRepl
+        ? found?.spec?.updateConstraints?.allowlist.groupReplication
+        : found?.spec?.updateConstraints?.allowlist.standalone
+
       const limit = allowed.length ? allowed[0] : '0.0'
+
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
       // if presets.status is 404, it means no presets available, no need to filter with presets
-      const filteredDbVersions = sortedVersions.filter((item) => {
+      const filteredOracleVersions = sortedVersions.filter((item) => {
         // default limit 0.0 means no restrictions, show all higher versions
         if (limit === '0.0')
           return (
@@ -516,8 +518,9 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      setDiscriminatorValue('/filteredVersion', filteredDbVersions)
-      return filteredDbVersions.map((item) => {
+      setDiscriminatorValue('/filteredVersion', filteredOracleVersions)
+
+      return filteredOracleVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -529,6 +532,37 @@ export const useFunc = (model) => {
       console.log(e)
       return []
     }
+  }
+
+  function getVersionInfo() {
+    const filteredVersion = getValue(discriminator, '/filteredVersion')
+    if (filteredVersion.length) return ''
+
+    let txt = 'No versions from this list can be selected as the target version: [ '
+
+    presetVersions.forEach((v, idx) => {
+      txt = `${txt}"${v}"`
+      if (idx !== presetVersions.length - 1) txt = txt + ', '
+      else txt = txt + ' ]'
+    })
+
+    return txt
+  }
+
+  function getVersion() {
+    return filteredVersion.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      const specVersion = (item.spec && item.spec.version) || ''
+      return {
+        text: `${name} (${specVersion})`,
+        value: name,
+      }
+    })
+  }
+
+  function isVersionEmpty() {
+    const val = getValue(discriminator, '/filteredVersion')
+    return val.length === 0
   }
 
   function versionCompare(v1, v2) {
@@ -567,37 +601,6 @@ export const useFunc = (model) => {
     return true
   }
 
-  function getVersionInfo() {
-    const filteredVersion = getValue(discriminator, '/filteredVersion')
-    if (filteredVersion.length) return ''
-
-    let txt = 'No versions from this list can be selected as the target version: [ '
-
-    presetVersions.forEach((v, idx) => {
-      txt = `${txt}"${v}"`
-      if (idx !== presetVersions.length - 1) txt = txt + ', '
-      else txt = txt + ' ]'
-    })
-
-    return txt
-  }
-
-  function getVersion() {
-    return filteredVersion.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      const specVersion = (item.spec && item.spec.version) || ''
-      return {
-        text: `${name} (${specVersion})`,
-        value: name,
-      }
-    })
-  }
-
-  function isVersionEmpty() {
-    const val = getValue(discriminator, '/filteredVersion')
-    return val.length === 0
-  }
-
   function ifRequestTypeEqualsTo(type) {
     const selectedType = getValue(model, '/spec/type')
     // watchDependency('model#/spec/type')
@@ -623,6 +626,15 @@ export const useFunc = (model) => {
     })
   }
 
+  function disableOpsRequest() {
+    if (itemCtx.value === 'HorizontalScaling') {
+      const dbType = getDbType()
+
+      if (dbType === 'standalone') return true
+      else return false
+    } else return false
+  }
+
   function getDbTls() {
     // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
@@ -636,26 +648,12 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
 
     const { spec } = dbDetails || {}
-    const { shardTopology, replicaSet } = spec || {}
-    let verd = ''
-    if (shardTopology) {
-      verd = 'sharded'
-    } else {
-      if (replicaSet) {
-        verd = 'replicaSet'
-      } else verd = 'standalone'
-    }
+    const { topology } = spec || {}
+    const { mode } = topology || {}
+
+    const verd = mode ? 'cluster' : 'standalone'
 
     return verd
-  }
-
-  function disableOpsRequest() {
-    if (itemCtx.value === 'HorizontalScaling') {
-      const dbType = getDbType()
-
-      if (dbType === 'standalone') return true
-      else return false
-    } else return false
   }
 
   function initNamespace() {
@@ -667,31 +665,6 @@ export const useFunc = (model) => {
     // watchDependency('model#/metadata/namespace')
     const { name } = route.params || {}
     return name
-  }
-
-  function clearOpsReqSpec(verd, opsReqType) {
-    if (
-      opsReqType === 'verticalScaling' ||
-      opsReqType === 'horizontalScaling' ||
-      opsReqType === 'volumeExpansion' ||
-      opsReqType === 'configuration'
-    ) {
-      if (verd === 'sharded') {
-        commit('wizard/model$delete', `/spec/${opsReqType}/replicaSet`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/replicas`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/standalone`)
-      } else if (verd === 'standalone') {
-        commit('wizard/model$delete', `/spec/${opsReqType}/replicaSet`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/configServer`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/mongos`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/shard`)
-      } else {
-        commit('wizard/model$delete', `/spec/${opsReqType}/standalone`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/configServer`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/mongos`)
-        commit('wizard/model$delete', `/spec/${opsReqType}/shard`)
-      }
-    }
   }
 
   function asDatabaseOperation() {
@@ -796,27 +769,21 @@ export const useFunc = (model) => {
     return !ver
   }
 
-  // // vertical scaling
+  // vertical scaling
   function ifDbTypeEqualsTo(value, opsReqType) {
     const verd = getDbType()
 
-    clearOpsReqSpec(verd, opsReqType)
     return value === verd
   }
 
-  // // machine profile stuffs
+  // machine profile stuffs
   // let machinesFromPreset = []
 
-  function getMachines(type) {
+  function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
-    const limits = (type === 'replicaSet' || type === 'standalone'
-      ? dbDetails?.spec?.podTemplate?.spec?.resources?.requests
-      : dbDetails?.spec?.shardTopology?.[type]?.podTemplate?.spec?.resources?.requests) || {
-      cpu: '',
-      memory: '',
-    }
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const limits = containers[0]?.resources?.limits || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -864,17 +831,14 @@ export const useFunc = (model) => {
     return arr
   }
 
-  function setMachine(type) {
+  function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
-    const limits = (type === 'replicaSet' || type === 'standalone'
-      ? dbDetails?.spec?.podTemplate?.spec?.resources?.requests
-      : dbDetails?.spec?.shardTopology?.[type]?.podTemplate?.spec?.resources?.requests) || {
-      cpu: '',
-      memory: '',
-    }
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const limits = containers[0]?.resources?.limits || {}
+
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
+
     let parsedInstance = {}
     try {
       if (instance) parsedInstance = JSON.parse(instance)
@@ -882,7 +846,8 @@ export const useFunc = (model) => {
       console.log(e)
       parsedInstance = instance || {}
     }
-    const machine = parsedInstance[type] || 'custom'
+
+    const machine = parsedInstance || 'custom'
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) {
@@ -891,12 +856,12 @@ export const useFunc = (model) => {
         cpu: machinePresets.limits.cpu,
         memory: machinePresets.limits.memory,
       }
-    } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
+    } else return { machine: 'custom', cpu: 4, memory: 2 }
   }
 
   function onMachineChange(type, valPath) {
     let selectedMachine = {}
-    selectedMachine = getValue(discriminator, `/machine-${type}`)
+    selectedMachine = getValue(discriminator, '/machine')
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -923,31 +888,18 @@ export const useFunc = (model) => {
 
     // update metadata.annotations
     const annotations = getValue(model, '/metadata/annotations') || {}
-    const instance = annotations['kubernetes.io/instance-type']
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
-    parsedInstance[type] = selectedMachine.machine
-    annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
-
+    annotations['kubernetes.io/instance-type'] = selectedMachine.machine
     if (machinesFromPreset.length)
       commit('wizard/model$update', {
         path: '/metadata/annotations',
         value: annotations,
         force: true,
       })
-
-    if (parsedInstance && Object.keys(parsedInstance).length === 0)
-      commit('wizard/model$delete', '/metadata/annotations')
   }
 
-  function isMachineCustom(path) {
-    // watchDependency(`discriminator#${path}`)
-    const machine = getValue(discriminator, `${path}`)
+  function isMachineCustom() {
+    // watchDependency('discriminator#/machine')
+    const machine = getValue(discriminator, '/machine')
     return machine === 'custom'
   }
 
@@ -971,10 +923,10 @@ export const useFunc = (model) => {
 
     try {
       const resp = await axios.post(
-        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseconfigurations`,
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
         {
           apiVersion: 'ui.kubedb.com/v1alpha1',
-          kind: 'DatabaseConfiguration',
+          kind: 'DatabaseInfo',
           request: {
             source: {
               ref: {
@@ -988,7 +940,7 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
-            keys: ['mongod.conf', 'replicaset.json', 'configuration.js'],
+            keys: ['kubedb-user.cnf'],
           },
         },
       )
@@ -1127,19 +1079,6 @@ export const useFunc = (model) => {
 
     // Convert data object back to YAML string
     return yaml.dump(data)
-  }
-
-  function createSecretUrl() {
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const domain = storeGet('/domain') || ''
-    if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
-    } else {
-      const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
-    }
   }
 
   async function createNewConfigSecret(type) {
@@ -1384,14 +1323,13 @@ export const useFunc = (model) => {
     }
   }
 
-  function onSelectedSecretChange(type, index) {
-    type = type ? type + '/' : ''
-    const secretData = getValue(discriminator, `${type}createSecret/data`) || []
+  function onSelectedSecretChange(index) {
+    const secretData = getValue(discriminator, 'createSecret/data') || []
     const selfSecrets = secretData.map((item) => item.key)
 
     const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
 
-    const selfKey = getValue(discriminator, `${type}createSecret/data/${index}/key`)
+    const selfKey = getValue(discriminator, `createSecret/data/${index}/key`)
     if (selfKey) {
       remainingSecrets.push(selfKey)
     }
@@ -1401,34 +1339,24 @@ export const useFunc = (model) => {
     return resSecret
   }
 
-  function ifReconfigurationTypeEqualsTo(value, property, isShard) {
-    let path = '/reconfigurationType'
-    if (isShard) path += `-${property}`
-    const reconfigurationType = getValue(discriminator, path)
+  let secretArray = []
 
-    const watchPath = `discriminator#${path}`
-    // watchDependency(watchPath)
-    return reconfigurationType === value
+  function createSecretUrl() {
+    const user = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+
+    const domain = storeGet('/domain') || ''
+    if (domain.includes('bb.test')) {
+      return `http://console.bb.test:5990/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
+    } else {
+      const editedDomain = domain.replace('kubedb', 'console')
+      return `${editedDomain}/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
+    }
   }
 
-  function onReconfigurationTypeChange(property, isShard) {
-    setDiscriminatorValue(`/${property}/applyConfig`, [])
-    let path = '/reconfigurationType'
-    if (isShard) path += `-${property}`
-    const reconfigurationType = getValue(discriminator, path)
-    if (reconfigurationType === 'remove') {
-      commit('wizard/model$delete', `/spec/configuration/${property}`)
-
-      commit('wizard/model$update', {
-        path: `/spec/configuration/${property}/removeCustomConfig`,
-        value: true,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', `/spec/configuration/${property}/configSecret`)
-      commit('wizard/model$delete', `/spec/configuration/${property}/applyConfig`)
-      commit('wizard/model$delete', `/spec/configuration/${property}/removeCustomConfig`)
-    }
+  function isConfigSelected() {
+    const secretName = getValue(model, '/spec/configuration/configSecret/name')
+    return !!secretName
   }
 
   function isEqualToValueFromType(value) {
@@ -1530,6 +1458,32 @@ export const useFunc = (model) => {
     })
   }
 
+  // reconfiguration type
+  function ifReconfigurationTypeEqualsTo(value) {
+    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+    // watchDependency('discriminator#/reconfigurationType')
+
+    return reconfigurationType === value
+  }
+
+  function onReconfigurationTypeChange() {
+    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+    setDiscriminatorValue('/applyConfig', [])
+    if (reconfigurationType === 'remove') {
+      commit('wizard/model$delete', `/spec/configuration`)
+
+      commit('wizard/model$update', {
+        path: `/spec/configuration/removeCustomConfig`,
+        value: true,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$delete', `/spec/configuration/configSecret`)
+      commit('wizard/model$delete', `/spec/configuration/applyConfig`)
+      commit('wizard/model$delete', `/spec/configuration/removeCustomConfig`)
+    }
+  }
+
   // for tls
   function hasTlsField() {
     const tls = getDbTls()
@@ -1542,6 +1496,8 @@ export const useFunc = (model) => {
     // watchDependency('model#/spec/tls/issuerRef/kind')
 
     if (kind) {
+      const apiGroup = getValue(discriminator, '/dbDetails/spec/tls/issuerRef/apiGroup')
+      if (apiGroup) return apiGroup
       return 'cert-manager.io'
     } else return undefined
   }
@@ -1614,12 +1570,16 @@ export const useFunc = (model) => {
         value: true,
         force: true,
       })
+      commit('wizard/model$delete', '/spec/tls/certificates')
+      commit('wizard/model$delete', '/spec/tls/remove')
     } else if (tlsOperation === 'remove') {
       commit('wizard/model$update', {
         path: '/spec/tls/remove',
         value: true,
         force: true,
       })
+      commit('wizard/model$delete', '/spec/tls/certificates')
+      commit('wizard/model$delete', '/spec/tls/rotateCertificates')
     }
   }
 
@@ -1643,6 +1603,8 @@ export const useFunc = (model) => {
     return isDbloading ? '' : requestType || ''
   }
 
+  // ************************************** Set db details *****************************************
+
   function isDbDetailsLoading() {
     // watchDependency('discriminator#/dbDetails')
     // watchDependency('model#/spec/databaseRef/name')
@@ -1653,9 +1615,13 @@ export const useFunc = (model) => {
   }
 
   function setValueFromDbDetails(path, commitPath) {
+    // watchDependency('discriminator#/dbDetails')
+
     const retValue = getValue(discriminator, `/dbDetails${path}`)
-    if (commitPath) {
+
+    if (commitPath && retValue) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
+
       // computed called when tls fields is not visible
       if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
 
@@ -1667,7 +1633,24 @@ export const useFunc = (model) => {
         force: true,
       })
     }
+
     return retValue || undefined
+  }
+
+  function setConfigFiles() {
+    // watchDependency('model#/resources/secret_config/stringData')
+    const configFiles = getValue(model, '/resources/secret_config/stringData')
+
+    const files = []
+
+    for (const item in configFiles) {
+      const obj = {}
+      obj.key = item
+      obj.value = configFiles[item]
+      files.push(obj)
+    }
+
+    return files
   }
 
   function getAliasOptions() {
@@ -1697,13 +1680,13 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
-  function isVerticalScaleTopologyRequired(type) {
-    // watchDependency(`discriminator#/topologyKey-${type}`)
-    // watchDependency(`discriminator#/topologyValue-${type}`)
+  function isVerticalScaleTopologyRequired() {
+    // watchDependency('discriminator#/topologyKey')
+    // watchDependency('discriminator#/topologyValue')
 
-    const key = getValue(discriminator, `/topologyKey-${type}`)
-    const value = getValue(discriminator, `/topologyValue-${type}`)
-    const path = `/spec/verticalScaling/${type}/topology`
+    const key = getValue(discriminator, '/topologyKey')
+    const value = getValue(discriminator, '/topologyValue')
+    const path = `/spec/verticalScaling/node/topology`
 
     if (key || value) {
       commit('wizard/model$update', {
@@ -1780,6 +1763,13 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
+  function getSelectedConfigSecret(type) {
+    const path = `/spec/configuration/configSecret/name`
+    const selectedSecret = getValue(model, path)
+    // watchDependency(`model#${path}`)
+    return `You have selected ${selectedSecret} secret` || 'No secret selected'
+  }
+
   function objectToYaml(obj, indent = 0) {
     if (obj === null || obj === undefined) return 'null'
     if (typeof obj !== 'object') return JSON.stringify(obj)
@@ -1815,45 +1805,16 @@ export const useFunc = (model) => {
       .join('\n')
   }
 
-  async function getSelectedConfigSecretValue(type) {
-    const path = `/spec/configuration/${type}/configSecret/name`
+  function getSelectedConfigSecretValue(type) {
+    const path = `/spec/configuration/configSecret/name`
     const selectedSecret = getValue(model, path)
-
-    if (!selectedSecret) {
-      return ''
-    }
-
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
-
-    try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${selectedSecret}`,
-      )
-
-      const secretData = resp.data?.data || {}
-      let data = {}
-      Object.keys(secretData).forEach((item) => {
-        try {
-          // Decode base64 string
-          const decodedString = atob(secretData[item])
-          // Parse YAML string to object
-          const parsedYaml = yaml.load(decodedString)
-          // Store the parsed object with the filename as key
-          data[item] = parsedYaml
-        } catch (e) {
-          console.error(`Error parsing ${item}:`, e)
-          data[item] = atob(secretData[item]) // Fallback to decoded string
-        }
-      })
-
-      // Convert data object back to YAML string
-      return yaml.dump(data)
-    } catch (e) {
-      console.error('Error fetching secret:', e)
-      return ''
-    }
+    let data
+    secretArray.forEach((item) => {
+      if (item.value === selectedSecret) {
+        data = objectToYaml(item.data).trim() || 'No Data Found'
+      }
+    })
+    return data || 'No Data Found'
   }
 
   function setExporter(type) {
@@ -1881,17 +1842,12 @@ export const useFunc = (model) => {
       })
   }
 
-  function isMachineValid(type) {
+  function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const limits = containers[0]?.resources?.limits || {}
 
-    const limits = (type === 'replicaSet' || type === 'standalone'
-      ? dbDetails?.spec?.podTemplate?.spec?.resources?.requests
-      : dbDetails?.spec?.shardTopology?.[type]?.podTemplate?.spec?.resources?.requests) || {
-      cpu: '',
-      memory: '',
-    }
-
-    const selectedMachine = getValue(discriminator, `/machine-${type}`)
+    const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
 
     if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
@@ -1924,7 +1880,6 @@ export const useFunc = (model) => {
     disableOpsRequest,
     initNamespace,
     initDatabaseRef,
-    clearOpsReqSpec,
     showAndInitName,
     showAndInitNamespace,
     showAndInitDatabaseRef,
@@ -1932,7 +1887,8 @@ export const useFunc = (model) => {
     showAndInitOpsRequestType,
     ifDbTypeEqualsTo,
     getConfigSecrets,
-    fetchConfigSecrets,
+    getSelectedConfigSecret,
+    getSelectedConfigSecretValue,
     createSecretUrl,
     isEqualToValueFromType,
     getNamespacedResourceList,
@@ -1953,10 +1909,10 @@ export const useFunc = (model) => {
     isDbDetailsLoading,
     setValueFromDbDetails,
     getAliasOptions,
-    isNamespaceDisabled,
     isDatabaseRefDisabled,
-    onDbChange,
+    isNamespaceDisabled,
     onNamespaceChange,
+    onDbChange,
     setApplyToIfReady,
     isVerticalScaleTopologyRequired,
     getMachines,
@@ -1964,19 +1920,22 @@ export const useFunc = (model) => {
     onMachineChange,
     isMachineCustom,
     checkVolume,
-    getSelectedConfigSecretValue,
-    setApplyConfig,
+    setConfigFiles,
+    isConfigSelected,
+    fetchConfigSecrets,
     getConfigSecretsforAppyConfig,
     getSelectedConfigurationData,
     getSelectedConfigurationName,
     getSelectedConfigurationValueForRemove,
-    onRemoveConfigChange,
-    onNewConfigSecretChange,
     createNewConfigSecret,
+    decodeError,
     isCreateSecret,
     isNotCreateSecret,
     onCreateSecretChange,
     cancelCreateSecret,
+    setApplyConfig,
+    onRemoveConfigChange,
+    onNewConfigSecretChange,
     onSelectedSecretChange,
     isTlsEnabled,
   }
