@@ -401,27 +401,34 @@ export const useFunc = (model) => {
   let allAvailableTypes = [
     'Cassandra',
     'ClickHouse',
+    'DB2',
+    'DocumentDB',
     'Druid',
     'Elasticsearch',
     'FerretDB',
+    'HanaDB',
     'Hazelcast',
     'Ignite',
     'Kafka',
     'MariaDB',
     'Memcached',
+    'Milvus',
     'MSSQLServer',
     'MongoDB',
     'MySQL',
+    'Neo4j',
     'Oracle',
     'PerconaXtraDB',
     'PgBouncer',
     'Pgpool',
     'Postgres',
     'ProxySQL',
+    'Qdrant',
     'RabbitMQ',
     'Redis',
     'Singlestore',
     'Solr',
+    'Weaviate',
     'ZooKeeper',
   ]
   let data = {}
@@ -455,10 +462,8 @@ export const useFunc = (model) => {
         isFetching = 'success'
         if (Object.keys(data).length) {
           enabledTypes = []
-          allAvailableTypes = []
           for (const [key, value] of Object.entries(data)) {
             if (value === true) enabledTypes.push(key)
-            allAvailableTypes.push(key)
           }
         } else
           enabledTypes = [
