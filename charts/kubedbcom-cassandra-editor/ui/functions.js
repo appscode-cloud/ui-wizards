@@ -306,7 +306,7 @@ export const useFunc = (model) => {
       },
     ]
 
-    if ((dbResource?.spec?.replicaSet || dbResource?.spec?.shardTopology) && isArchiverAvailable) {
+    if (dbResource?.spec?.topology && isArchiverAvailable) {
       arr.push({
         description: 'Enable/Disable Archiver',
         text: 'Archiver',
