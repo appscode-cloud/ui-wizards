@@ -74,7 +74,7 @@ export const useFunc = (model) => {
       commit('wizard/model$delete', '/resources/stashAppscodeComBackupConfiguration')
       commit('wizard/model$delete', '/resources/stashAppscodeComRepository_repo')
       // delete annotation from kubedbComCassandra annotation
-      deleteKubeDbComMySqlDbAnnotation(getValue, model, commit)
+      deleteKubeDbComCassandraAnnotation(getValue, model, commit)
     } else {
       const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model)
 
@@ -126,7 +126,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function deleteKubeDbComMySqlDbAnnotation(getValue, model, commit) {
+  function deleteKubeDbComCassandraAnnotation(getValue, model, commit) {
     const annotations = getValue(model, '/resources/kubedbComCassandra/metadata/annotations') || {}
     const filteredKeyList =
       Object.keys(annotations).filter(
@@ -621,7 +621,7 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getMysqlDbs() {
+  async function getCassandraDbs() {
     // watchDependency('model#/resources/autoscalingKubedbComCassandraAutoscaler/metadata/namespace')
     const namespace = getValue(
       model,
@@ -1433,7 +1433,7 @@ export const useFunc = (model) => {
     isConsole,
     getNamespaces,
     isRancherManaged,
-    getMysqlDbs,
+    getCassandraDbs,
     initMetadata,
     fetchTopologyMachines,
     setTrigger,
