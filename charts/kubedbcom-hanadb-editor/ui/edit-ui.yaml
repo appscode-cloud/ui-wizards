@@ -297,6 +297,9 @@ step:
     - description: Scale your CPU Memory based on resource usage
       text: Compute
       value: compute
+    - description: Expand your database size based on volume usage
+      text: Storage
+      value: storage
     schema: temp/properties/autoscalingType
     type: radio
     validation:
@@ -481,5 +484,81 @@ step:
     type: block-layout
   id: compute-autoscaler
   loader: getHanaDBDbs
+  type: single-step-form
+- elements:
+  - elements:
+    - fullwidth: true
+      init:
+        type: func
+        value: setTrigger|autoscalingKubedbComHanaDBAutoscaler/spec/storage/hanadb/trigger
+      label: Trigger
+      schema: temp/properties/storage/properties/hanadb/properties/trigger
+      type: switch
+      watcher:
+        func: onTriggerChange|storage/hanadb
+        paths:
+        - temp/properties/storage/properties/hanadb/properties/trigger
+    - label: Expansion Mode (Online/Offline)
+      subtitle: For Online Mode enables scaling without downtime by dynamically resizing
+        storage while the database remains operational and Offline Mode performs storage
+        scaling during scheduled downtime, ensuring consistency but requiring database
+        restarts.
+      type: label-element
+    - description: Select how the storage expansion should be handled.
+      label: Mode
+      options:
+      - text: Online
+        value: Online
+      - text: Offline
+        value: Offline
+      schema: schema/properties/resources/properties/autoscalingKubedbComHanaDBAutoscaler/properties/spec/properties/storage/properties/hanadb/properties/expansionMode
+      type: select
+    - elements:
+      - label: UsageThreshold (%)
+        schema: schema/properties/resources/properties/autoscalingKubedbComHanaDBAutoscaler/properties/spec/properties/storage/properties/hanadb/properties/usageThreshold
+        subtitle: Set the threshold percentage of storage usage to trigger scaling.
+        type: threshold-input
+      - label: Scaling Rules
+        loader: setValueFromDbDetails|resources/kubedbComHanaDB/spec/storage/resources/requests/storage
+        schema: schema/properties/resources/properties/autoscalingKubedbComHanaDBAutoscaler/properties/spec/properties/storage/properties/hanadb/properties/scalingRules
+        type: scaling-rules
+        watcher:
+          func: handleUnit|autoscalingKubedbComHanaDBAutoscaler/spec/storage/hanadb/scalingRules|scalingRules
+          paths:
+          - schema/properties/resources/properties/autoscalingKubedbComHanaDBAutoscaler/properties/spec/properties/storage/properties/hanadb/properties/scalingRules
+      - label: UpperBound
+        schema: schema/properties/resources/properties/autoscalingKubedbComHanaDBAutoscaler/properties/spec/properties/storage/properties/hanadb/properties/upperBound
+        type: input
+        watcher:
+          func: handleUnit|autoscalingKubedbComHanaDBAutoscaler/spec/storage/hanadb/upperBound
+          paths:
+          - schema/properties/resources/properties/autoscalingKubedbComHanaDBAutoscaler/properties/spec/properties/storage/properties/hanadb/properties/upperBound
+      label: HanaDB
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Timeout
+        schema: schema/properties/resources/properties/autoscalingKubedbComHanaDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: time-picker
+      - init:
+          type: func
+          value: setApplyToIfReady
+        label: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema: schema/properties/resources/properties/autoscalingKubedbComHanaDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if:
+        name: showOpsRequestOptions
+        type: function
+      label: OpsRequest Options
+      showLabels: true
+      type: block-layout
+    showLabels: false
+    type: block-layout
+  id: storage-autoscaler
   type: single-step-form
 type: multi-step-form
