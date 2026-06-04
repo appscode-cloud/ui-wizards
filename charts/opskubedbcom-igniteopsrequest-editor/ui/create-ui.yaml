@@ -123,7 +123,7 @@ step:
           type: func
           value: setValueFromDbDetails|/spec/replicas
         label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/member
+        schema: schema/properties/spec/properties/horizontalScaling/properties/node
         subtitle: Define the total number of replicas for the database. Increasing
           replicas improves fault tolerance and load distribution , while reducing
           replicas conserves resources
@@ -266,12 +266,12 @@ step:
             type: func
             value: setValueFromDbDetails|/spec/storage/resources/requests/storage
           label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/ignite
+          schema: schema/properties/spec/properties/volumeExpansion/properties/node
           subtitle: How much extra storage does your database need? Specify the size(e.g.
             2Gi for 2 gigabytes) so we can allocate it correctly
           type: input-compare
           validation:
-            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/ignite
+            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
             type: custom
         type: horizontal-layout
       fixedBlock: true
@@ -492,19 +492,6 @@ step:
       label: Rotate Certificates
       schema: schema/properties/spec/properties/tls/properties/rotateCertificates
       type: switch
-    - elements:
-      - fullwidth: true
-        init:
-          type: func
-          value: setValueFromDbDetails|/spec/tls/requireSSL
-        label: Require SSL
-        schema: schema/properties/spec/properties/tls/properties/requireSSL
-        type: switch
-      if:
-        name: showIssuerRefAndCertificates
-        type: function
-      label: Require SSL
-      type: block-layout
     - elements:
       - disable: true
         init:
