@@ -11,20 +11,9 @@ export const useFunc = (model) => {
   /********** Initialize Discriminator **************/
 
   setDiscriminatorValue('repoInitialSelectionStatus', '')
-  setDiscriminatorValue('scheduleBackup', 'yes')
-  setDiscriminatorValue('backupType', '')
-  setDiscriminatorValue('isBackupDataLoaded', false)
-  setDiscriminatorValue('backupConfigContext', '')
-  setDiscriminatorValue('config', '')
-  setDiscriminatorValue('paused', false)
-  setDiscriminatorValue('schedule', '')
-  setDiscriminatorValue('blueprintEnabled', false)
-  setDiscriminatorValue('archiverEnabled', false)
 
-  setDiscriminatorValue('binding', false)
   setDiscriminatorValue('hidePreviewFromWizard', undefined)
 
-  setDiscriminatorValue('/enableMonitoring', false)
   setDiscriminatorValue('/customizeExporter', true)
   setDiscriminatorValue('/valueFromType', 'input')
   setDiscriminatorValue('/env', [])
@@ -32,102 +21,13 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-standalone-min', '')
-  setDiscriminatorValue('/allowedMachine-standalone-max', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
-  setDiscriminatorValue('/allowedMachine-shard-min', '')
-  setDiscriminatorValue('/allowedMachine-shard-max', '')
-  setDiscriminatorValue('/allowedMachine-configServer-min', '')
-  setDiscriminatorValue('/allowedMachine-configServer-max', '')
-  setDiscriminatorValue('/allowedMachine-mongos-min', '')
-  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  setDiscriminatorValue('/allowedMachine-min', '')
+  setDiscriminatorValue('/allowedMachine-max', '')
   let showStoragememory = false
-
-  function onScheduleBackupChange() {
-    const scheduleBackup = getValue(discriminator, '/scheduleBackup')
-
-    if (scheduleBackup === 'no') {
-      // delete stashAppscodeComBackupConfiguration
-      commit('wizard/model$delete', '/resources/stashAppscodeComBackupConfiguration')
-      commit('wizard/model$delete', '/resources/stashAppscodeComRepository_repo')
-      // delete annotation from kubedbComWeaviate annotation
-      deleteKubeDbComWeaviateDbAnnotation(getValue, model, commit)
-    } else {
-      const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model)
-
-      // create stashAppscodeComBackupConfiguration and initialize it if not exists
-
-      const dbName = getValue(model, '/metadata/release/name')
-
-      if (
-        !valueExists(model, getValue, '/resources/stashAppscodeComBackupConfiguration') &&
-        !isBluePrint
-      ) {
-        commit('wizard/model$update', {
-          path: '/resources/stashAppscodeComBackupConfiguration',
-          value: stashAppscodeComBackupConfiguration,
-        })
-        commit('wizard/model$update', {
-          path: '/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name',
-          value: dbName,
-          force: true,
-        })
-      }
-    }
-  }
 
   function valueExists(value, getValue, path) {
     const val = getValue(value, path)
     if (val) return true
-    else return false
-  }
-
-  function getBackupConfigsAndAnnotations(getValue, model) {
-    const stashAppscodeComBackupConfiguration = getValue(
-      model,
-      '/resources/stashAppscodeComBackupConfiguration',
-    )
-    const kubedbComWeaviateAnnotations =
-      getValue(model, '/resources/kubedbComWeaviate/metadata/annotations') || {}
-
-    const isBluePrint = Object.keys(kubedbComWeaviateAnnotations).some(
-      (k) =>
-        k === 'stash.appscode.com/backup-blueprint' ||
-        k === 'stash.appscode.com/schedule' ||
-        k.startsWith('params.stash.appscode.com/'),
-    )
-
-    return {
-      stashAppscodeComBackupConfiguration,
-      isBluePrint,
-    }
-  }
-
-  function deleteKubeDbComWeaviateDbAnnotation(getValue, model, commit) {
-    const annotations = getValue(model, '/resources/kubedbComWeaviate/metadata/annotations') || {}
-    const filteredKeyList =
-      Object.keys(annotations).filter(
-        (k) =>
-          k !== 'stash.appscode.com/backup-blueprint' &&
-          k !== 'stash.appscode.com/schedule' &&
-          !k.startsWith('params.stash.appscode.com/'),
-      ) || []
-    const filteredAnnotations = {}
-    filteredKeyList.forEach((k) => {
-      filteredAnnotations[k] = annotations[k]
-    })
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComWeaviate/metadata/annotations',
-      value: filteredAnnotations,
-    })
-  }
-
-  // backup form
-  function showBackupForm() {
-    const scheduleBackup = getValue(discriminator, '/scheduleBackup')
-    // watchDependency('discriminator#/scheduleBackup')
-    if (scheduleBackup === 'yes') return true
     else return false
   }
 
@@ -230,7 +130,8 @@ export const useFunc = (model) => {
   }
   function initMetadata() {
     const dbName =
-      getValue(model, '/resources/autoscalingKubedbComWeaviateAutoscaler/spec/databaseRef/name') || ''
+      getValue(model, '/resources/autoscalingKubedbComWeaviateAutoscaler/spec/databaseRef/name') ||
+      ''
     const type = getValue(discriminator, '/autoscalingType') || ''
     const date = Math.floor(Date.now() / 1000)
     const resource = storeGet('/route/params/resource')
@@ -245,14 +146,21 @@ export const useFunc = (model) => {
 
     // delete the other type object from vuex wizard model
     if (type === 'compute')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComWeaviateAutoscaler/spec/storage')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComWeaviateAutoscaler/spec/storage',
+      )
     if (type === 'storage')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComWeaviateAutoscaler/spec/compute')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComWeaviateAutoscaler/spec/compute',
+      )
   }
 
   async function fetchTopologyMachines() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComWeaviateAutoscaler/metadata/annotations') || {}
+      getValue(model, '/resources/autoscalingKubedbComWeaviateAutoscaler/metadata/annotations') ||
+      {}
     instance = annotations['kubernetes.io/instance-type']
     const user = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -289,7 +197,8 @@ export const useFunc = (model) => {
 
   function hasAnnotations() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComWeaviateAutoscaler/metadata/annotations') || {}
+      getValue(model, '/resources/autoscalingKubedbComWeaviateAutoscaler/metadata/annotations') ||
+      {}
     const instance = annotations['kubernetes.io/instance-type']
 
     return !!instance
@@ -446,8 +355,10 @@ export const useFunc = (model) => {
     // watchDependency('model#/resources/autoscalingKubedbComWeaviateAutoscaler/spec/databaseRef/name')
     // watchDependency('discriminator#/autoscalingType')
     return (
-      !!getValue(model, '/resources/autoscalingKubedbComWeaviateAutoscaler/spec/databaseRef/name') &&
-      !!getValue(discriminator, '/autoscalingType')
+      !!getValue(
+        model,
+        '/resources/autoscalingKubedbComWeaviateAutoscaler/spec/databaseRef/name',
+      ) && !!getValue(discriminator, '/autoscalingType')
     )
   }
 
@@ -513,95 +424,6 @@ export const useFunc = (model) => {
     }
 
     return ans
-  }
-
-  /********** Monitoring **********/
-
-  function showMonitoringSection() {
-    // watchDependency('discriminator#/enableMonitoring')
-    const configureStatus = getValue(discriminator, '/enableMonitoring')
-    return configureStatus
-  }
-
-  function onEnableMonitoringChange() {
-    const configureStatus = getValue(discriminator, '/enableMonitoring')
-    if (configureStatus) {
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComWeaviate/spec/monitor',
-        value: {},
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', '/resources/kubedbComWeaviate/spec/monitor')
-    }
-
-    // update alert value depend on monitoring profile
-    commit('wizard/model$update', {
-      path: '/form/alert/enabled',
-      value: configureStatus ? 'warning' : 'none',
-      force: true,
-    })
-  }
-
-  function showCustomizeExporterSection() {
-    // watchDependency('discriminator#/customizeExporter')
-    const configureStatus = getValue(discriminator, '/customizeExporter')
-    return configureStatus
-  }
-
-  function onCustomizeExporterChange() {
-    const configureStatus = getValue(discriminator, '/customizeExporter')
-    if (configureStatus) {
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComWeaviate/spec/monitor/prometheus/exporter',
-        value: {},
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', '/resources/kubedbComWeaviate/spec/monitor/prometheus/exporter')
-    }
-  }
-
-  // function onNamespaceChange() {
-  //   const namespace = getValue(model, '/metadata/release/namespace')
-  //   const agent = getValue(model, '/resources/kubedbComWeaviate/spec/monitor/agent')
-  //   if (agent === 'prometheus.io') {
-  //     commit('wizard/model$update', {
-  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-  //       value: [namespace],
-  //       force: true,
-  //     })
-  //   }
-  // }
-
-  function onLabelChange() {
-    const labels = getValue(model, '/resources/kubedbComWeaviate/spec/metadata/labels')
-
-    const agent = getValue(model, '/resources/kubedbComWeaviate/spec/monitor/agent')
-
-    if (agent === 'prometheus.io') {
-      commit('wizard/model$update', {
-        path: '/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels',
-        value: labels,
-        force: true,
-      })
-    }
-  }
-
-  function onAgentChange() {
-    const agent = getValue(model, '/resources/kubedbComWeaviate/spec/monitor/agent')
-    if (agent === 'prometheus.io') {
-      commit('wizard/model$update', {
-        path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
-        value: [],
-        force: true,
-      })
-
-      onNamespaceChange()
-      onLabelChange()
-    } else {
-      commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
-    }
   }
 
   function onNamespaceChange() {
@@ -733,9 +555,6 @@ export const useFunc = (model) => {
   }
 
   return {
-    onScheduleBackupChange,
-    showBackupForm,
-
     isKubedb,
     isConsole,
     getNamespaces,
@@ -755,23 +574,14 @@ export const useFunc = (model) => {
     isNodeTopologySelected,
     showOpsRequestOptions,
     setApplyToIfReady,
-
     handleUnit,
-
-    onEnableMonitoringChange,
-    showMonitoringSection,
-    onAgentChange,
     getResources,
     isEqualToModelPathValue,
-    onCustomizeExporterChange,
-    showCustomizeExporterSection,
     onNamespaceChange,
-    onLabelChange,
     resourceNames,
     getSecrets,
     getNamespacedResourceList,
     returnFalse,
-
     setValueFromDbDetails,
     showStorageMemoryOption,
   }
