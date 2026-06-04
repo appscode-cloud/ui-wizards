@@ -306,7 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
-const configSecretKeys = ['kubedb-user.cnf']
+const configSecretKeys = ['hanadb.cnf']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -354,12 +354,7 @@ export const useFunc = (model) => {
 
   function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    return (
-      (dbDetails?.spec?.sslMode &&
-        dbDetails?.spec?.sslMode !== 'disabled' &&
-        dbDetails?.spec?.sslMode !== 'disable') ||
-      dbDetails?.spec?.tls
-    )
+    return !!dbDetails?.spec?.tls
   }
 
   function isRancherManaged() {
@@ -397,7 +392,7 @@ export const useFunc = (model) => {
     // watchDependency('model#/metadata/namespace')
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mysqls`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/hanadbs`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -423,7 +418,7 @@ export const useFunc = (model) => {
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
 
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mysqls/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/hanadbs/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -452,7 +447,7 @@ export const useFunc = (model) => {
     }
 
     try {
-      presetVersions = presets.admin?.databases?.MySQL?.versions?.available || []
+      presetVersions = presets.admin?.databases?.HanaDB?.versions?.available || []
       const queryParams = {
         filter: {
           items: {
@@ -463,7 +458,7 @@ export const useFunc = (model) => {
       }
 
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mysqlversions`,
+        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/hanadbversions`,
         {
           params: queryParams,
         },
@@ -489,7 +484,7 @@ export const useFunc = (model) => {
 
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
       // if presets.status is 404, it means no presets available, no need to filter with presets
-      const filteredMySQLVersions = sortedVersions.filter((item) => {
+      const filteredHanaDBVersions = sortedVersions.filter((item) => {
         // default limit 0.0 means no restrictions, show all higher versions
         if (limit === '0.0')
           return (
@@ -518,9 +513,9 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      setDiscriminatorValue('/filteredVersion', filteredMySQLVersions)
+      setDiscriminatorValue('/filteredVersion', filteredHanaDBVersions)
 
-      return filteredMySQLVersions.map((item) => {
+      return filteredHanaDBVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -611,11 +606,7 @@ export const useFunc = (model) => {
   function onRequestTypeChange() {
     const selectedType = getValue(model, '/spec/type')
     const reqTypeMapping = {
-      Upgrade: 'updateVersion',
-      UpdateVersion: 'updateVersion',
-      HorizontalScaling: 'horizontalScaling',
       VerticalScaling: 'verticalScaling',
-      VolumeExpansion: 'volumeExpansion',
       Restart: 'restart',
       Reconfigure: 'configuration',
       ReconfigureTLS: 'tls',
@@ -743,11 +734,7 @@ export const useFunc = (model) => {
   function showAndInitOpsRequestType() {
     const ver = asDatabaseOperation()
     const opMap = {
-      upgrade: 'UpdateVersion',
-      updateVersion: 'UpdateVersion',
-      horizontalscaling: 'HorizontalScaling',
       verticalscaling: 'VerticalScaling',
-      volumeexpansion: 'VolumeExpansion',
       restart: 'Restart',
       reconfiguretls: 'ReconfigureTLS',
       reconfigure: 'Reconfigure',
@@ -937,7 +924,7 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
-            keys: ['kubedb-user.cnf'],
+            keys: ['hanadb.cnf'],
           },
         },
       )
@@ -1683,7 +1670,7 @@ export const useFunc = (model) => {
 
     const key = getValue(discriminator, '/topologyKey')
     const value = getValue(discriminator, '/topologyValue')
-    const path = `/spec/verticalScaling/mysql/topology`
+    const path = `/spec/verticalScaling/node/topology`
 
     if (key || value) {
       commit('wizard/model$update', {

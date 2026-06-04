@@ -62,18 +62,9 @@ step:
     isHorizontal: true
     label: Type of Ops Request
     options:
-    - description: Update your database to any version
-      text: Update Version
-      value: UpdateVersion
-    - description: Scale up or down pod count
-      text: Horizontal Scaling
-      value: HorizontalScaling
     - description: Manage your CPU resources
       text: Vertical Scaling
       value: VerticalScaling
-    - description: Manage your database size
-      text: Volume Expansion
-      value: VolumeExpansion
     - description: Restart your database
       text: Restart
       value: Restart
@@ -90,59 +81,6 @@ step:
       paths:
       - schema/properties/spec/properties/type
   - elements:
-    - init:
-        type: func
-        value: setValueFromDbDetails|/spec/version
-      label: Target Version
-      loader: getDbVersions
-      schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
-      subtitle: Select the desired MySQL version to which you want to update your
-        database.
-      type: select-compare
-    - if:
-        name: isVersionEmpty
-        type: function
-      label: ""
-      loader:
-        name: getVersionInfo
-        watchPaths:
-        - temp/properties/filteredVersion
-      type: info
-    fixedBlock: true
-    if:
-      name: ifRequestTypeEqualsTo|UpdateVersion
-      type: function
-    label: Version
-    showLabels: true
-    type: block-layout
-  - elements:
-    - elements:
-      - header: Replica
-        init:
-          type: func
-          value: setValueFromDbDetails|/spec/replicas
-        label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/member
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution , while reducing
-          replicas conserves resources
-        type: input-compare
-      - hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|cluster|horizontalScaling
-        type: function
-      type: horizontal-layout
-    fixedBlock: true
-    if:
-      name: ifRequestTypeEqualsTo|HorizontalScaling
-      type: function
-    label: Horizontal Scaling Form
-    showLabels: true
-    type: block-layout
-  - elements:
     - elements:
       - init:
           type: func
@@ -157,7 +95,7 @@ step:
           name: isMachineValid
           type: custom
         watcher:
-          func: onMachineChange|mysql|/spec/podTemplate/spec/resources
+          func: onMachineChange|node|/spec/podTemplate/spec/resources
           paths:
           - temp/properties/machine
       - elements:
@@ -174,7 +112,7 @@ step:
                 value: LabelSelector
               - text: Taint
                 value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/mysql/properties/nodeSelectionPolicy
+              schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
               type: select
             hideBorder: true
             showLabels: false
@@ -207,80 +145,12 @@ step:
         label: Node Selection
         showLabels: true
         type: block-layout
-      - elements:
-        - elements:
-          - init:
-              type: func
-              value: setExporter|cpu
-            label: CPU
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-            type: input
-          - init:
-              type: func
-              value: setExporter|memory
-            label: Memory
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-            type: input
-            watcher:
-              func: onExporterResourceChange|memory
-              paths:
-              - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-          showLabels: true
-          type: horizontal-layout
-        hideBlock: true
-        label: Exporter
-        showLabels: true
-        type: block-layout
-      label: MySQL vertical scaling
+      label: HanaDB vertical scaling
       showLabels: false
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|VerticalScaling
       type: function
-    type: block-layout
-  - elements:
-    - elements:
-      - elements:
-        - label: Mode
-          subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
-            with minimal disruption. Choose Offline Mode if you can afford a brief
-            downtime for added reliability during the volume expansion.
-          type: label-element
-        - label: Mode
-          options:
-          - text: Offline
-            value: Offline
-          - text: Online
-            value: Online
-          schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          type: select
-          validation:
-            type: required
-        type: block-layout
-      type: horizontal-layout
-    - elements:
-      - elements:
-        - header: MySQL
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-          label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/mysql
-          subtitle: How much extra storage does your database need? Specify the size(e.g.
-            2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/mysql
-            type: custom
-        type: horizontal-layout
-      fixedBlock: true
-      label: MySQL volume expansion
-      showLabels: true
-      type: block-layout
-    if:
-      name: ifRequestTypeEqualsTo|VolumeExpansion
-      type: function
-    label: Volume Expansion Form
     type: block-layout
   - elements:
     - elements:
@@ -491,19 +361,6 @@ step:
       label: Rotate Certificates
       schema: schema/properties/spec/properties/tls/properties/rotateCertificates
       type: switch
-    - elements:
-      - fullwidth: true
-        init:
-          type: func
-          value: setValueFromDbDetails|/spec/tls/requireSSL
-        label: Require SSL
-        schema: schema/properties/spec/properties/tls/properties/requireSSL
-        type: switch
-      if:
-        name: showIssuerRefAndCertificates
-        type: function
-      label: Require SSL
-      type: block-layout
     - elements:
       - disable: true
         init:
