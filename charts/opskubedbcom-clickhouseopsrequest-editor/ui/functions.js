@@ -485,7 +485,7 @@ export const useFunc = (model) => {
         ? found?.spec?.updateConstraints?.allowlist.groupReplication
         : found?.spec?.updateConstraints?.allowlist.standalone
 
-      const limit = allowed.length ? allowed[0] : '0.0'
+      const limit = allowed?.length ? allowed[0] : '0.0'
 
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
       // if presets.status is 404, it means no presets available, no need to filter with presets
