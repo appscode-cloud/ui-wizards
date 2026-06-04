@@ -11,6 +11,221 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/valueFromType', 'input')
   setDiscriminatorValue('/env', [])
 
+  let autoscaleType = 'compute'
+  let instance = ''
+  let showStoragememory = false
+
+  // ************************* Autoscaler *************************
+
+  function isKubedb() {
+    return !!storeGet('/route/params/actions')
+  }
+
+  function isConsole() {
+    const isKube = isKubedb()
+    if (isKube) {
+      const dbName = storeGet('/route/params/name') || ''
+      commit('wizard/model$update', {
+        path: '/resources/autoscalingKubedbComHanaDBAutoscaler/spec/databaseRef/name',
+        value: dbName,
+        force: true,
+      })
+      const operation = storeGet('/route/params/actions') || ''
+      if (operation.length) {
+        const splitOp = operation.split('-')
+        if (splitOp.length > 2) autoscaleType = splitOp[2]
+      }
+      const date = Math.floor(Date.now() / 1000)
+      const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
+      commit('wizard/model$update', {
+        path: '/resources/autoscalingKubedbComHanaDBAutoscaler/metadata/name',
+        value: modifiedName,
+        force: true,
+      })
+      const namespace = storeGet('/route/query/namespace') || ''
+      if (namespace) {
+        commit('wizard/model$update', {
+          path: '/resources/autoscalingKubedbComHanaDBAutoscaler/metadata/namespace',
+          value: namespace,
+          force: true,
+        })
+      }
+    }
+    return !isKube
+  }
+
+  async function getHanaDBDbs() {
+    const namespace = getValue(
+      model,
+      '/resources/autoscalingKubedbComHanaDBAutoscaler/metadata/namespace',
+    )
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/hanadbs`,
+      { params: { filter: { items: { metadata: { name: null } } } } },
+    )
+    const resources = (resp && resp.data && resp.data.items) || []
+    return resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return { text: name, value: name }
+    })
+  }
+
+  function initMetadata() {
+    const dbName =
+      getValue(model, '/resources/autoscalingKubedbComHanaDBAutoscaler/spec/databaseRef/name') || ''
+    const type = getValue(discriminator, '/autoscalingType') || ''
+    const date = Math.floor(Date.now() / 1000)
+    const resource = storeGet('/route/params/resource')
+    const scalingName = dbName ? dbName : resource
+    const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
+    if (modifiedName)
+      commit('wizard/model$update', {
+        path: '/resources/autoscalingKubedbComHanaDBAutoscaler/metadata/name',
+        value: modifiedName,
+        force: true,
+      })
+    if (type === 'compute')
+      commit('wizard/model$delete', '/resources/autoscalingKubedbComHanaDBAutoscaler/spec/storage')
+    if (type === 'storage')
+      commit('wizard/model$delete', '/resources/autoscalingKubedbComHanaDBAutoscaler/spec/compute')
+  }
+
+  async function fetchTopologyMachines() {
+    const annotations =
+      getValue(model, '/resources/autoscalingKubedbComHanaDBAutoscaler/metadata/annotations') || {}
+    instance = annotations['kubernetes.io/instance-type']
+    const user = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    if (instance) {
+      try {
+        const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
+        const resp = await axios.get(url)
+        const nodeGroups = resp.data?.spec?.nodeGroups || []
+        setDiscriminatorValue('/topologyMachines', nodeGroups)
+        return nodeGroups
+      } catch (e) {
+        console.log(e)
+        return []
+      }
+    }
+  }
+
+  function setTrigger(path) {
+    let value = getValue(model, `/resources/${path}`)
+    return value === 'On'
+  }
+
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComHanaDBAutoscaler/spec/${type}/trigger`
+    commit('wizard/model$update', { path: commitPath, value: trigger ? 'On' : 'Off', force: true })
+  }
+
+  function hasAnnotations() {
+    const annotations =
+      getValue(model, '/resources/autoscalingKubedbComHanaDBAutoscaler/metadata/annotations') || {}
+    const inst = annotations['kubernetes.io/instance-type']
+    return !!inst
+  }
+
+  function hasNoAnnotations() {
+    return !hasAnnotations()
+  }
+
+  function setAllowedMachine(minmax) {
+    const mx = instance?.includes(',') ? instance.split(',')[1] : ''
+    const mn = instance?.includes(',') ? instance.split(',')[0] : ''
+    const machineName = minmax === 'min' ? mn : mx
+    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+    const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
+    if (machineData) {
+      return { machine: machineName, cpu: machineData.allocatable?.cpu, memory: machineData.allocatable?.memory }
+    }
+    return { machine: machineName || '', cpu: '', memory: '' }
+  }
+
+  function getMachines(minmax) {
+    const depends = minmax === 'min' ? 'max' : 'min'
+    const dependantMachineObj = getValue(discriminator, `/allowedMachine-${depends}`)
+    const dependantMachine = dependantMachineObj?.machine || ''
+    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+    const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
+    const machines = nodeGroups?.map((item) => ({
+      text: item.topologyValue,
+      subtext: `CPU: ${item.allocatable?.cpu}, Memory: ${item.allocatable?.memory}`,
+      value: { machine: item.topologyValue, cpu: item.allocatable?.cpu, memory: item.allocatable?.memory },
+    }))
+    const filteredMachine = machines?.filter((item, ind) =>
+      minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
+    )
+    return dependantIndex === -1 ? machines : filteredMachine
+  }
+
+  function onMachineChange(type) {
+    const annoPath = '/resources/autoscalingKubedbComHanaDBAutoscaler/metadata/annotations'
+    const annotations = getValue(model, annoPath) || {}
+    const inst = annotations['kubernetes.io/instance-type']
+    const minMachineObj = getValue(discriminator, '/allowedMachine-min')
+    const maxMachineObj = getValue(discriminator, '/allowedMachine-max')
+    const minMachine = minMachineObj?.machine || ''
+    const maxMachine = maxMachineObj?.machine || ''
+    const minMaxMachine = `${minMachine},${maxMachine}`
+    annotations['kubernetes.io/instance-type'] = minMaxMachine
+    const minMachineAllocatable = minMachineObj ? { cpu: minMachineObj.cpu, memory: minMachineObj.memory } : null
+    const maxMachineAllocatable = maxMachineObj ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory } : null
+    const allowedPath = `/resources/autoscalingKubedbComHanaDBAutoscaler/spec/compute/${type}`
+    if (minMachine && maxMachine && inst !== minMaxMachine) {
+      commit('wizard/model$update', { path: `${allowedPath}/maxAllowed`, value: maxMachineAllocatable, force: true })
+      commit('wizard/model$update', { path: `${allowedPath}/minAllowed`, value: minMachineAllocatable, force: true })
+      commit('wizard/model$update', { path: annoPath, value: { ...annotations }, force: true })
+    }
+  }
+
+  function setControlledResources(type) {
+    const list = ['cpu', 'memory']
+    const path = `/resources/autoscalingKubedbComHanaDBAutoscaler/spec/compute/${type}/controlledResources`
+    commit('wizard/model$update', { path, value: list, force: true })
+    return list
+  }
+
+  async function fetchNodeTopology() {
+    const owner = storeGet('/route/params/user') || ''
+    const cluster = storeGet('/route/params/cluster') || ''
+    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+    try {
+      const resp = await axios.get(url)
+      const list = (resp && resp.data?.items) || []
+      return list.map((item) => (item.metadata && item.metadata.name) || '')
+    } catch (e) {
+      console.log(e)
+    }
+    return []
+  }
+
+  function isNodeTopologySelected() {
+    const nodeTopologyName =
+      getValue(model, '/resources/autoscalingKubedbComHanaDBAutoscaler/spec/compute/nodeTopology/name') || ''
+    return !!nodeTopologyName.length
+  }
+
+  function showOpsRequestOptions() {
+    if (isKubedb() === true) return true
+    return (
+      !!getValue(model, '/resources/autoscalingKubedbComHanaDBAutoscaler/spec/databaseRef/name') &&
+      !!getValue(discriminator, '/autoscalingType')
+    )
+  }
+
+  function setApplyToIfReady() {
+    return 'IfReady'
+  }
+
+  function showStorageMemoryOption() {
+    return showStoragememory
+  }
+
   // ************************* Monitoring *************************
 
   function showMonitoringSection() {
@@ -312,8 +527,26 @@ export const useFunc = (model) => {
 
   return {
     returnFalse,
+    isKubedb,
+    isConsole,
     isRancherManaged,
     getNamespaces,
+    getHanaDBDbs,
+    initMetadata,
+    fetchTopologyMachines,
+    setTrigger,
+    onTriggerChange,
+    hasAnnotations,
+    hasNoAnnotations,
+    setAllowedMachine,
+    getMachines,
+    onMachineChange,
+    setControlledResources,
+    fetchNodeTopology,
+    isNodeTopologySelected,
+    showOpsRequestOptions,
+    setApplyToIfReady,
+    showStorageMemoryOption,
     resourceNames,
     getConfigMapKeys,
     getSecrets,
