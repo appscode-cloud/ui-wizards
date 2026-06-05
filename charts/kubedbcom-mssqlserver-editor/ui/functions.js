@@ -1159,12 +1159,22 @@ export const useFunc = (model) => {
     const pathPrefix = `${domain}/db${routeRootPath}`
     const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
     const pathConstructedForKubedb = pathSplit + `/${reqType.toLowerCase()}?namespace=${namespace}`
+    const requestTypeMap = {
+      'update-version': 'UpdateVersion',
+      'scale-vertically': 'VerticalScaling',
+      'scale-storage': 'VolumeExpansion',
+      'horizontal-scale': 'HorizontalScaling',
+      restart: 'Restart',
+      reconfigure: 'Reconfigure',
+      'tls-configure': 'ReconfigureTLS',
+    }
+    const requestType = requestTypeMap[reqType] || 'VerticalScaling'
 
     const isKube = !!storeGet('/route/params/actions')
 
     if (isKube) return pathConstructedForKubedb
     else
-      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mssqlserveropsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mssqlserveropsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${requestType}`
   }
 
   function setValueFrom() {
