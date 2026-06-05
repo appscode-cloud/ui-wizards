@@ -58,8 +58,6 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&KubedbcomDruidEditorOptionsList{},
 		&KubedbcomElasticsearchEditorOptions{},
 		&KubedbcomElasticsearchEditorOptionsList{},
-		&KubedbcomFerretdbEditorOptions{},
-		&KubedbcomFerretdbEditorOptionsList{},
 		&KubedbcomKafkaEditorOptions{},
 		&KubedbcomKafkaEditorOptionsList{},
 		&KubedbcomMariadbEditorOptions{},

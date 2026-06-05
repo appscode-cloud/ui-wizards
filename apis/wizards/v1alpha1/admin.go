@@ -103,7 +103,6 @@ type DatabaseProfiles struct {
 	Cassandra     *DatabaseProfile `json:"Cassandra,omitempty"`
 	Druid         *DatabaseProfile `json:"Druid,omitempty"`
 	Elasticsearch *DatabaseProfile `json:"Elasticsearch,omitempty"`
-	FerretDB      *DatabaseProfile `json:"FerretDB,omitempty"`
 	HanaDB        *DatabaseProfile `json:"HanaDB,omitempty"`
 	Hazelcast     *DatabaseProfile `json:"Hazelcast,omitempty"`
 	Ignite        *DatabaseProfile `json:"Ignite,omitempty"`
