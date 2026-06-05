@@ -1614,6 +1614,18 @@ export const useFunc = (model) => {
     return resource[0].resources
   }
 
+  function setConfigFiles() {
+    const configFiles = getValue(model, '/resources/secret_config/stringData')
+    const files = []
+    for (const item in configFiles) {
+      const obj = {}
+      obj.key = item
+      obj.value = configFiles[item]
+      files.push(obj)
+    }
+    return files
+  }
+
   function getAliasOptions() {
     return ['server', 'client', 'metrics-exporter']
   }
@@ -1829,6 +1841,7 @@ export const useFunc = (model) => {
     validateNewCertificates,
     disableAlias,
     setResource,
+    setConfigFiles,
     fetchJsons,
     returnFalse,
     getNamespaces,
