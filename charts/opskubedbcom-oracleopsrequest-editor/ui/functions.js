@@ -480,10 +480,7 @@ export const useFunc = (model) => {
 
       if (found) ver = found.spec?.version
 
-      const isGroupRepl = !!getValue(discriminator, '/dbDetails/spec/topology')
-      const allowed = isGroupRepl
-        ? found?.spec?.updateConstraints?.allowlist.groupReplication
-        : found?.spec?.updateConstraints?.allowlist.standalone
+      const allowed = found?.spec?.updateConstraints?.allowlist || []
 
       const limit = allowed.length ? allowed[0] : '0.0'
 
