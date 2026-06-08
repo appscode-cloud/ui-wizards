@@ -73,10 +73,36 @@ step:
     schema: schema/properties/spec/properties/type
     type: radio
     watcher:
-      func: isDbDetailsLoading
+      func: onRequestTypeChange
       paths:
       - temp/dbDetails
       - schema/properties/spec/properties/databaseRef/properties/name
+  - elements:
+    - init:
+        type: func
+        value: setValueFromDbDetails|/spec/version
+      label: Target Version
+      loader: getDbVersions
+      schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+      subtitle: Select the desired Druid version to which you want to update your
+        database.
+      type: select-compare
+    - if:
+        name: isVersionEmpty
+        type: function
+      label: ""
+      loader:
+        name: getVersionInfo
+        watchPaths:
+        - temp/properties/filteredVersion
+      type: info
+    fixedBlock: true
+    if:
+      name: ifRequestTypeEqualsTo|UpdateVersion
+      type: function
+    label: Version
+    showLabels: true
+    type: block-layout
   - elements:
     - elements:
       - init:

@@ -1,5 +1,151 @@
 step:
 - elements:
+  - if:
+      name: showScheduleBackup
+      type: function
+    init:
+      type: func
+      value: initScheduleBackupForEdit
+    isHorizontal: true
+    label: Schedule a Backup?
+    options:
+    - text: "Yes"
+      value: "yes"
+    - text: "No"
+      value: "no"
+    schema: temp/properties/scheduleBackup
+    type: radio
+    watcher:
+      func: onScheduleBackupChange
+      paths:
+      - temp/properties/scheduleBackup
+  - elements:
+    - if:
+        name: isBackupDataLoadedTrue
+        type: function
+      init:
+        type: func
+        value: setBackupType
+      isHorizontal: true
+      label: Select Backup Type
+      loader: getTypes
+      options:
+      - description: Create, Delete or Modify BackupConfig
+        text: BackupConfig
+        value: BackupConfig
+      - description: Enable/Disable BackupBlueprint
+        text: BackupBlueprint
+        value: BackupBlueprint
+      schema: temp/properties/backupType
+      type: radio
+      watcher:
+        func: onBackupTypeChange
+        paths:
+        - temp/properties/backupType
+    - elements:
+      - label: Select Context
+        loader: getContext
+        schema: temp/properties/backupConfigContext
+        type: select
+        validation:
+          type: required
+        watcher:
+          func: onContextChange
+          paths:
+          - temp/properties/backupConfigContext
+      - if:
+          name: showConfigList
+          type: function
+        label: Select BackupConfig
+        loader: getConfigList
+        schema: temp/properties/config
+        type: select
+        validation:
+          type: required
+        watcher:
+          func: onConfigChange
+          paths:
+          - temp/properties/config
+      - if:
+          name: showSchedule
+          type: function
+        label: Schedule
+        loader:
+          name: getDefaultSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions
+          watchPaths:
+          - temp/properties/config
+        schema: temp/properties/schedule
+        type: input
+        validation:
+          type: required
+        watcher:
+          func: onInputChangeSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions|schedule
+          paths:
+          - temp/properties/schedule
+      - fullwidth: true
+        if:
+          name: showPause
+          type: function
+        init:
+          type: func
+          value: setPausedValue
+        label: Paused
+        schema: schema/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
+        type: switch
+        watcher:
+          func: setPausedValue
+          paths:
+          - temp/properties/config
+      if:
+        name: isBackupType|BackupConfig
+        type: function
+      label: Config
+      type: block-layout
+    - elements:
+      - fullwidth: true
+        init:
+          type: func
+          value: setBlueprintSwitch
+        label: Enable Backup Blueprint
+        schema: temp/properties/blueprintEnabled
+        type: switch
+        watcher:
+          func: onBlueprintChange
+          paths:
+          - temp/properties/blueprintEnabled
+      if:
+        name: isBackupType|BackupBlueprint
+        type: function
+      label: Blueprint
+      type: block-layout
+    - elements:
+      - fullwidth: true
+        init:
+          type: func
+          value: setArchiverSwitch
+        label: Enable Archiver
+        schema: temp/properties/archiverEnabled
+        type: switch
+        watcher:
+          func: onArchiverChange
+          paths:
+          - temp/properties/archiverEnabled
+      if:
+        name: isBackupType|Archiver
+        type: function
+      label: Archiver
+      type: block-layout
+    if:
+      name: showBackupForm
+      type: function
+    label: Backup Form
+    loader: initBackupData
+    showLabels: false
+    type: block-layout
+  id: backupconfiguration
+  schema: schema/
+  type: single-step-form
+- elements:
   - elements:
     - label: Name
       schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/name
