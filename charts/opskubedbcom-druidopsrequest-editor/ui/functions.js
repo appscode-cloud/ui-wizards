@@ -2110,6 +2110,22 @@ export const useFunc = (model) => {
       })
   }
 
+  function isMachineValid(type) {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const containers = dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers || []
+    const kind = dbDetails?.kind
+    const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+    const limits = resource[0]?.resources?.requests || {}
+
+    const selectedMachine = getValue(discriminator, `/machine-${type}`)
+    const selectedLimits = { cpu: selectedMachine?.cpu, memory: selectedMachine?.memory }
+
+    if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
+      return 'Resource limits are same as current machine configuration. Please select different resources or machine preset.'
+    }
+    return false
+  }
+
   // ============================================================
   // RETURN ALL EXPORTED FUNCTIONS
   // ============================================================
@@ -2164,6 +2180,7 @@ export const useFunc = (model) => {
     isVerticalScaleTopologyRequired,
     setExporter,
     onExporterResourceChange,
+    isMachineValid,
 
     // Volume expansion functions
     checkVolume,
