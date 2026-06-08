@@ -77,7 +77,11 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.HanaDB.versions.default | quote }}
+  {{- if eq .Values.spec.mode "Standalone" }}
+  replicas: 1
+  {{- else }}
   replicas: {{ .Values.spec.replicas }}
+  {{- end }}
 {{- if eq .Values.spec.mode "SystemReplication" }}
   topology:
     mode: SystemReplication
