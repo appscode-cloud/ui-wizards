@@ -29,16 +29,8 @@ export const useFunc = (model) => {
   // Compute Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-standalone-min', '')
-  setDiscriminatorValue('/allowedMachine-standalone-max', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
-  setDiscriminatorValue('/allowedMachine-shard-min', '')
-  setDiscriminatorValue('/allowedMachine-shard-max', '')
-  setDiscriminatorValue('/allowedMachine-configServer-min', '')
-  setDiscriminatorValue('/allowedMachine-configServer-max', '')
-  setDiscriminatorValue('/allowedMachine-mongos-min', '')
-  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  setDiscriminatorValue('/allowedMachine-node-min', '')
+  setDiscriminatorValue('/allowedMachine-node-max', '')
 
   // monitoring
 
@@ -877,7 +869,7 @@ export const useFunc = (model) => {
     const labels = getValue(model, '/resources/kubedbComRabbitMQ/metadata/labels')
     const bindingValues = {
       apiVersion: 'catalog.appscode.com/v1alpha1',
-      kind: 'PostgresBinding',
+      kind: 'RabbitMQBinding',
       metadata: {
         labels,
         name: dbName,
