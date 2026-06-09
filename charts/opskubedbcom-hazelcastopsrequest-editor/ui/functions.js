@@ -612,8 +612,6 @@ export const useFunc = (model) => {
       Restart: 'restart',
       Reconfigure: 'configuration',
       ReconfigureTLS: 'tls',
-      RotateAuth: 'authentication',
-      StorageMigration: 'migration',
     }
 
     Object.keys(reqTypeMapping).forEach((key) => {
