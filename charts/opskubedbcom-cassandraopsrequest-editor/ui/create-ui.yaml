@@ -83,6 +83,12 @@ step:
     - description: Reconfigure your database tls configuration
       text: Reconfigure TLS
       value: ReconfigureTLS
+    - description: Rotate your database authentication credentials
+      text: Rotate Auth
+      value: RotateAuth
+    - description: Migrate your database storage to a new storage class
+      text: Storage Migration
+      value: StorageMigration
     schema: schema/properties/spec/properties/type
     type: radio
     watcher:
@@ -204,33 +210,6 @@ step:
         label: Node Selection
         showLabels: true
         type: block-layout
-<<<<<<< Updated upstream
-=======
-      - elements:
-        - elements:
-          - init:
-              type: func
-              value: setExporter|cpu
-            label: CPU
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-            type: input
-          - init:
-              type: func
-              value: setExporter|memory
-            label: Memory
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-            type: input
-            watcher:
-              func: onExporterResourceChange|memory
-              paths:
-              - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-          showLabels: true
-          type: horizontal-layout
-        hideBlock: true
-        label: Exporter
-        showLabels: true
-        type: block-layout
->>>>>>> Stashed changes
       label: Cassandra vertical scaling
       showLabels: false
       type: block-layout
@@ -612,6 +591,39 @@ step:
       name: ifRequestTypeEqualsTo|ReconfigureTLS
       type: function
     label: TLS
+    type: block-layout
+  - elements:
+    - elements:
+      - label: Secret Name
+        schema: schema/properties/spec/properties/authentication/properties/secretRef/properties/name
+        type: input
+        validation:
+          type: required
+      label: Authentication Secret
+      showLabels: true
+      type: block-layout
+    if:
+      name: ifRequestTypeEqualsTo|RotateAuth
+      type: function
+    label: Rotate Auth
+    type: block-layout
+  - elements:
+    - elements:
+      - label: Storage Class Name
+        schema: schema/properties/spec/properties/migration/properties/storageClassName
+        type: input
+        validation:
+          type: required
+      - label: Old PV Reclaim Policy
+        schema: schema/properties/spec/properties/migration/properties/oldPVReclaimPolicy
+        type: input
+      label: Storage Migration
+      showLabels: true
+      type: block-layout
+    if:
+      name: ifRequestTypeEqualsTo|StorageMigration
+      type: function
+    label: Storage Migration
     type: block-layout
   - elements:
     - label: Timeout
