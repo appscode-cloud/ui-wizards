@@ -791,17 +791,7 @@ export const useFunc = (model) => {
     const { spec } = dbDetails || {}
     const { topology } = spec || {}
 
-    if (mode === 'combined') {
-      // For combined mode, check if topology doesn't exist
-      const isCombined = !topology
-
-      // Clear unused topology configurations when in combined mode
-      if (isCombined && section) {
-        clearOpsReqSpec(getValue, commit, 'combined', section)
-      }
-
-      return isCombined
-    } else if (mode === 'topology') {
+    if (mode === 'topology') {
       // For topology mode, check if the specific node type exists
       const hasTopology = !!(topology && topology[type])
 
@@ -1005,6 +995,8 @@ export const useFunc = (model) => {
   function setValueFromDbDetails(watchPath, commitPath) {
     // watchDependency(`discriminator#${watchPath}`)
     const retValue = getValue(discriminator, `/dbDetails${watchPath}`)
+
+    console.log({ retValue })
 
     if (commitPath) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')

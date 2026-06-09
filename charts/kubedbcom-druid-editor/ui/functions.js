@@ -653,10 +653,9 @@ export const useFunc = (model) => {
   }
 
   function showScheduleBackup() {
-    // watchDependency('discriminator#/scheduleBackup')
-    const scheduleBackup = getValue(discriminator, '/scheduleBackup')
-    if (scheduleBackup === 'yes') return true
-    else return false
+    const operationQuery = storeGet('/route/params/actions') || ''
+    const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
+    return !isBackupOperation
   }
 
   // backup configuration form
