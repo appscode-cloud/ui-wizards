@@ -306,7 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
-const configSecretKeys = ['kubedb-user.cnf']
+const configSecretKeys = ['singlestore.cnf']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -354,12 +354,7 @@ export const useFunc = (model) => {
 
   function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    return (
-      (dbDetails?.spec?.sslMode &&
-        dbDetails?.spec?.sslMode !== 'disabled' &&
-        dbDetails?.spec?.sslMode !== 'disable') ||
-      dbDetails?.spec?.tls
-    )
+    return !!dbDetails?.spec?.tls
   }
 
   function isRancherManaged() {
@@ -535,6 +530,7 @@ export const useFunc = (model) => {
   }
 
   function getVersion() {
+    const filteredVersion = getValue(discriminator, '/filteredVersion') || []
     return filteredVersion.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
       const specVersion = (item.spec && item.spec.version) || ''
@@ -841,14 +837,19 @@ export const useFunc = (model) => {
         memory: machinePresets.limits.memory,
       }
     } else {
-      // For coordinator, get limits from containers
+      // For coordinator, find the coordinator sidecar container in the aggregator pod
       if (type === 'coordinator') {
         const containers =
           dbDetails?.spec?.topology?.aggregator?.podTemplate?.spec?.containers || []
-        const kind = dbDetails?.kind
-        const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
-        limits = resource[0]?.resources?.requests || {}
-        console.log({ limits })
+        const resource = containers.find((ele) => ele.name === 'coordinator')
+        limits = resource?.resources?.requests || {}
+        if (!Object.keys(limits).length) {
+          // fallback: check initContainers or top-level containers
+          const initContainers =
+            dbDetails?.spec?.topology?.aggregator?.podTemplate?.spec?.initContainers || []
+          const initResource = initContainers.find((ele) => ele.name === 'coordinator')
+          limits = initResource?.resources?.requests || {}
+        }
       } else if (type === 'node') {
         const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
         const kind = dbDetails?.kind
@@ -967,7 +968,7 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
-            keys: ['kubedb-user.cnf'],
+            keys: ['singlestore.cnf'],
           },
         },
       )
@@ -1552,18 +1553,23 @@ export const useFunc = (model) => {
   function onReconfigurationTypeChange() {
     setDiscriminatorValue('/applyConfig', [])
     const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+    const dbType = getDbType()
+    const nodeTypes = dbType === 'topology' ? ['aggregator', 'leaf'] : ['node']
     if (reconfigurationType === 'remove') {
       commit('wizard/model$delete', `/spec/configuration`)
-
-      commit('wizard/model$update', {
-        path: `/spec/configuration/removeCustomConfig`,
-        value: true,
-        force: true,
+      nodeTypes.forEach((nodeType) => {
+        commit('wizard/model$update', {
+          path: `/spec/configuration/${nodeType}/removeCustomConfig`,
+          value: true,
+          force: true,
+        })
       })
     } else {
-      commit('wizard/model$delete', `/spec/configuration/configSecret`)
-      commit('wizard/model$delete', `/spec/configuration/applyConfig`)
-      commit('wizard/model$delete', `/spec/configuration/removeCustomConfig`)
+      nodeTypes.forEach((nodeType) => {
+        commit('wizard/model$delete', `/spec/configuration/${nodeType}/configSecret`)
+        commit('wizard/model$delete', `/spec/configuration/${nodeType}/applyConfig`)
+        commit('wizard/model$delete', `/spec/configuration/${nodeType}/removeCustomConfig`)
+      })
     }
   }
 
