@@ -427,107 +427,7 @@ export const useFunc = (model) => {
     } else return {}
   }
 
-  let presetVersions = []
   setDiscriminatorValue('/filteredVersion', [])
-  async function getDbVersions() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
-
-    let presets = storeGet('/kubedbuiPresets') || {}
-    if (!storeGet('/route/params/actions')) {
-      try {
-        const presetResp = await axios.get(url)
-        presets = presetResp.data?.spec?.values?.spec
-      } catch (e) {
-        console.log(e)
-        presets.status = String(e.status)
-      }
-    }
-
-    try {
-      presetVersions = presets.admin?.databases?.HanaDB?.versions?.available || []
-      const queryParams = {
-        filter: {
-          items: {
-            metadata: { name: null },
-            spec: { version: null, deprecated: null, updateConstraints: null },
-          },
-        },
-      }
-
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/hanadbversions`,
-        {
-          params: queryParams,
-        },
-      )
-
-      const resources = (resp && resp.data && resp.data.items) || []
-
-      const sortedVersions = resources.sort((a, b) =>
-        versionCompare(a.spec.version, b.spec.version),
-      )
-
-      let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
-      const found = sortedVersions.find((item) => item.metadata.name === ver)
-
-      if (found) ver = found.spec?.version
-
-      const isGroupRepl = !!getValue(discriminator, '/dbDetails/spec/topology')
-      const allowed = isGroupRepl
-        ? found?.spec?.updateConstraints?.allowlist.groupReplication
-        : found?.spec?.updateConstraints?.allowlist.standalone
-
-      const limit = allowed.length ? allowed[0] : '0.0'
-
-      // keep only non deprecated & kubedb-ui-presets & within constraints of current version
-      // if presets.status is 404, it means no presets available, no need to filter with presets
-      const filteredHanaDBVersions = sortedVersions.filter((item) => {
-        // default limit 0.0 means no restrictions, show all higher versions
-        if (limit === '0.0')
-          return (
-            !item.spec?.deprecated &&
-            (presets.status === '404' ||
-              presetVersions.length === 0 ||
-              presetVersions.includes(item.metadata?.name)) &&
-            versionCompare(item.spec?.version, ver) >= 0
-          )
-        // if limit doesn't have any operator, it's a single version
-        else if (!limit.match(/^(>=|<=|>|<)/))
-          return (
-            !item.spec?.deprecated &&
-            (presets.status === '404' ||
-              presetVersions.length === 0 ||
-              presetVersions.includes(item.metadata?.name)) &&
-            item.spec?.version === limit
-          )
-        // if limit has operator, check version with constraints
-        else
-          return (
-            !item.spec?.deprecated &&
-            (presets.status === '404' ||
-              presetVersions.length === 0 ||
-              presetVersions.includes(item.metadata?.name)) &&
-            isVersionWithinConstraints(item.spec?.version, limit)
-          )
-      })
-      setDiscriminatorValue('/filteredVersion', filteredHanaDBVersions)
-
-      return filteredHanaDBVersions.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        const specVersion = (item.spec && item.spec.version) || ''
-        return {
-          text: `${name} (${specVersion})`,
-          value: name,
-        }
-      })
-    } catch (e) {
-      console.log(e)
-      return []
-    }
-  }
 
   function getVersionInfo() {
     const filteredVersion = getValue(discriminator, '/filteredVersion')
@@ -545,6 +445,7 @@ export const useFunc = (model) => {
   }
 
   function getVersion() {
+    const filteredVersion = getValue(discriminator, '/filteredVersion')
     return filteredVersion.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
       const specVersion = (item.spec && item.spec.version) || ''
@@ -618,12 +519,7 @@ export const useFunc = (model) => {
   }
 
   function disableOpsRequest() {
-    if (itemCtx.value === 'HorizontalScaling') {
-      const dbType = getDbType()
-
-      if (dbType === 'standalone') return true
-      else return false
-    } else return false
+    return false
   }
 
   function getDbTls() {
@@ -1851,7 +1747,6 @@ export const useFunc = (model) => {
     getNamespaces,
     getDbs,
     getDbDetails,
-    getDbVersions,
     getVersionInfo,
     isVersionEmpty,
     getVersion,
