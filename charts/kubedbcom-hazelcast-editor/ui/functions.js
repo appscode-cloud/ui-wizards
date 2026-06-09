@@ -32,16 +32,8 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-standalone-min', '')
-  setDiscriminatorValue('/allowedMachine-standalone-max', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
-  setDiscriminatorValue('/allowedMachine-shard-min', '')
-  setDiscriminatorValue('/allowedMachine-shard-max', '')
-  setDiscriminatorValue('/allowedMachine-configServer-min', '')
-  setDiscriminatorValue('/allowedMachine-configServer-max', '')
-  setDiscriminatorValue('/allowedMachine-mongos-min', '')
-  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  setDiscriminatorValue('/allowedMachine-hazelcast-min', '')
+  setDiscriminatorValue('/allowedMachine-hazelcast-max', '')
   let showStoragememory = false
 
   function initScheduleBackupForEdit() {
@@ -1051,7 +1043,7 @@ export const useFunc = (model) => {
       return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/hazelcastopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
   }
 
-  function onNamespaceChange() {
+  function onAutoscalerNamespaceChange() {
     const namespace = getValue(
       model,
       '/resources/autoscalingKubedbComHazelcastAutoscaler/metadata/namespace',
@@ -1461,6 +1453,7 @@ export const useFunc = (model) => {
     onCustomizeExporterChange,
     showCustomizeExporterSection,
     onNamespaceChange,
+    onAutoscalerNamespaceChange,
     onLabelChange,
     setValueFrom,
     onValueFromChange,

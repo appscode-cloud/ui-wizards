@@ -542,6 +542,7 @@ export const useFunc = (model) => {
   }
 
   function getVersion() {
+    const filteredVersion = getValue(discriminator, '/filteredVersion')
     return filteredVersion.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
       const specVersion = (item.spec && item.spec.version) || ''
@@ -611,6 +612,8 @@ export const useFunc = (model) => {
       Restart: 'restart',
       Reconfigure: 'configuration',
       ReconfigureTLS: 'tls',
+      RotateAuth: 'authentication',
+      StorageMigration: 'migration',
     }
 
     Object.keys(reqTypeMapping).forEach((key) => {
@@ -619,12 +622,7 @@ export const useFunc = (model) => {
   }
 
   function disableOpsRequest() {
-    if (itemCtx.value === 'HorizontalScaling') {
-      const dbType = getDbType()
-
-      if (dbType === 'standalone') return true
-      else return false
-    } else return false
+    return false
   }
 
   function getDbTls() {
