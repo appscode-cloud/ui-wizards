@@ -996,8 +996,6 @@ export const useFunc = (model) => {
     // watchDependency(`discriminator#${watchPath}`)
     const retValue = getValue(discriminator, `/dbDetails${watchPath}`)
 
-    console.log({ retValue })
-
     if (commitPath) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
       if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
