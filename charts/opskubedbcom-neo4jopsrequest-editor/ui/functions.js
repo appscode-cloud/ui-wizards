@@ -829,18 +829,20 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const neo4jContainer = containers.find((c) => c.name === 'neo4j')
+    const limits = neo4jContainer?.resources?.requests || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
     let parsedInstance = {}
     try {
-      if (instance) parsedInstance = JSON.parse(instance)
+      if (instance) parsedInstance = JSON.parse(instance) || {}
     } catch (e) {
       console.log(e)
       parsedInstance = instance || {}
     }
-
     const machine = parsedInstance || 'custom'
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
@@ -1837,7 +1839,9 @@ export const useFunc = (model) => {
 
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const neo4jContainer = containers.find((c) => c.name === 'neo4j')
+    const limits = neo4jContainer?.resources?.requests || {}
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
