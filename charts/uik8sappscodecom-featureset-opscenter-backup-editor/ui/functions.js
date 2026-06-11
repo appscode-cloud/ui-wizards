@@ -260,25 +260,11 @@ export const useFunc = (model) => {
 
       if (enabledFeatures.includes(featureName)) {
         const featureSet = storeGet('/route/params/featureset') || ''
-        const chart = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/name')
-        const targetNamespace = getFeaturePropertyValue(
-          storeGet,
-          featureName,
-          getValue,
-          '/spec/chart/namespace',
-        )
-        const sourceRef = getFeaturePropertyValue(
-          storeGet,
-          featureName,
-          getValue,
-          '/spec/chart/sourceRef',
-        )
-        const version = getFeaturePropertyValue(
-          storeGet,
-          featureName,
-          getValue,
-          '/spec/chart/version',
-        )
+        const chart = getFeaturePropertyValue(featureName, '/spec/chart/name')
+
+        const targetNamespace = getFeaturePropertyValue(featureName, '/spec/chart/namespace')
+        const sourceRef = getFeaturePropertyValue(featureName, '/spec/chart/sourceRef')
+        const version = getFeaturePropertyValue(featureName, '/spec/chart/version')
 
         const isEnabled = getFeaturePropertyValue(featureName, '/status/enabled')
         const isManaged = getFeaturePropertyValue(featureName, '/status/managed')
