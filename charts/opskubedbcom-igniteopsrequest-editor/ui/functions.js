@@ -488,11 +488,6 @@ export const useFunc = (model) => {
 
       if (found) ver = found.spec?.version
 
-      const isGroupRepl = !!getValue(discriminator, '/dbDetails/spec/topology')
-      const allowed = isGroupRepl
-        ? found?.spec?.updateConstraints?.allowlist.groupReplication
-        : found?.spec?.updateConstraints?.allowlist.standalone
-
       const limit = allowed?.length ? allowed[0] : '0.0'
 
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
@@ -635,34 +630,12 @@ export const useFunc = (model) => {
     })
   }
 
-  function disableOpsRequest() {
-    if (itemCtx.value === 'HorizontalScaling') {
-      const dbType = getDbType()
-
-      if (dbType === 'standalone') return true
-      else return false
-    } else return false
-  }
-
   function getDbTls() {
     // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
 
     const { spec } = dbDetails || {}
     return spec?.tls || undefined
-  }
-
-  function getDbType() {
-    // watchDependency('discriminator#/dbDetails')
-    const dbDetails = getValue(discriminator, '/dbDetails')
-
-    const { spec } = dbDetails || {}
-    const { topology } = spec || {}
-    const { mode } = topology || {}
-
-    const verd = mode ? 'cluster' : 'standalone'
-
-    return verd
   }
 
   function initNamespace() {
@@ -779,11 +752,6 @@ export const useFunc = (model) => {
   }
 
   // vertical scaling
-  function ifDbTypeEqualsTo(value, opsReqType) {
-    const verd = getDbType()
-
-    return value === verd
-  }
 
   // machine profile stuffs
   // let machinesFromPreset = []
@@ -1884,8 +1852,6 @@ export const useFunc = (model) => {
     ifRequestTypeEqualsTo,
     onRequestTypeChange,
     getDbTls,
-    getDbType,
-    disableOpsRequest,
     initNamespace,
     initDatabaseRef,
     showAndInitName,
@@ -1893,7 +1859,6 @@ export const useFunc = (model) => {
     showAndInitDatabaseRef,
     showConfigureOpsrequestLabel,
     showAndInitOpsRequestType,
-    ifDbTypeEqualsTo,
     getConfigSecrets,
     getSelectedConfigSecret,
     getSelectedConfigSecretValue,
