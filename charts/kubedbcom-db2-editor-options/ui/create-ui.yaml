@@ -26,10 +26,6 @@ step:
     loader: getAdminOptions|databases/DB2/mode
     schema: schema/properties/spec/properties/mode
     type: radio
-    watcher:
-      func: toggleTls
-      paths:
-      - schema/properties/spec/properties/mode
   - if:
       name: isEqualToModelPathValue|Replicaset|/spec/mode
       type: function
@@ -245,65 +241,65 @@ step:
     type: block-layout
   - description: Enable Backup, Monitoring, TLS etc.
     elements:
-    - if:
-        name: isToggleOn|backup
-        type: function
-      init:
-        type: func
-        value: setBackup
-      label: Enable Backup?
-      schema: temp/backup
-      type: switch
-      watcher:
-        func: onBackupSwitch
-        paths:
-        - temp/backup
-    - elements:
-      - disable:
-          name: showArchiverAlert
-          watchPaths:
-          - schema/spec/admin/storageClasses/default
-          - schema/spec/mode
-        label: Enable Archiver?
-        schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
-        type: switch
-        watcher:
-          func: onArchiverChange
-          paths:
-          - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
-      - if:
-          name: showArchiverAlert
-          type: function
-        label: The selected StorageClass does not support Archiver
-        type: warning
-      if:
-        name: returnFalse
-        type: function
-      type: block-layout
-    - elements:
-      - if:
-          name: isToggleOn|tls
-          type: function
-        init:
-          type: func
-          value: checkHostnameOrIP|tls
-        label: Enable TLS?
-        schema: schema/properties/spec/properties/admin/properties/tls/properties/default
-        type: switch
-        watcher:
-          func: checkHostnameOrIP|tls
-          paths:
-          - schema/properties/spec/properties/admin/properties/tls/properties/default
-      - if:
-          name: showIssuer
-          type: function
-        label: Cluster Issuers
-        loader: getAdminOptions|clusterIssuers
-        schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-        type: select
-        validation:
-          type: required
-      type: block-layout
+    # - if:
+    #     name: isToggleOn|backup
+    #     type: function
+    #   init:
+    #     type: func
+    #     value: setBackup
+    #   label: Enable Backup?
+    #   schema: temp/backup
+    #   type: switch
+    #   watcher:
+    #     func: onBackupSwitch
+    #     paths:
+    #     - temp/backup
+    # - elements:
+    #   - disable:
+    #       name: showArchiverAlert
+    #       watchPaths:
+    #       - schema/spec/admin/storageClasses/default
+    #       - schema/spec/mode
+    #     label: Enable Archiver?
+    #     schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+    #     type: switch
+    #     watcher:
+    #       func: onArchiverChange
+    #       paths:
+    #       - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+    #   - if:
+    #       name: showArchiverAlert
+    #       type: function
+    #     label: The selected StorageClass does not support Archiver
+    #     type: warning
+    #   if:
+    #     name: returnFalse
+    #     type: function
+    #   type: block-layout
+    # - elements:
+    #   - if:
+    #       name: isToggleOn|tls
+    #       type: function
+    #     init:
+    #       type: func
+    #       value: checkHostnameOrIP|tls
+    #     label: Enable TLS?
+    #     schema: schema/properties/spec/properties/admin/properties/tls/properties/default
+    #     type: switch
+    #     watcher:
+    #       func: checkHostnameOrIP|tls
+    #       paths:
+    #       - schema/properties/spec/properties/admin/properties/tls/properties/default
+    #   - if:
+    #       name: showIssuer
+    #       type: function
+    #     label: Cluster Issuers
+    #     loader: getAdminOptions|clusterIssuers
+    #     schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+    #     type: select
+    #     validation:
+    #       type: required
+    #   type: block-layout
     - elements:
       - if:
           name: isToggleOn|expose

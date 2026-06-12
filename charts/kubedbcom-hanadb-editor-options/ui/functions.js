@@ -901,6 +901,7 @@ export const useFunc = (model) => {
     return options
   }
 
+  let backupOn = false
   function checkIfFeatureOn(type) {
     let val = getValue(model, `/spec/admin/${type}/toggle`)
     if (type === 'backup' || type === 'archiver') {
@@ -908,7 +909,8 @@ export const useFunc = (model) => {
     }
     const backupVal = getValue(model, '/spec/backup/tool')
     if (type === 'backup') {
-      return features.includes('backup') && backupVal === 'KubeStash' && val
+      if (!backupOn) backupOn = features.includes('backup') && backupVal === 'KubeStash' && val
+      return backupOn
     } else if (type === 'tls') {
       return features.includes('tls') && val
     } else if (type === 'expose') {
@@ -1143,16 +1145,16 @@ export const useFunc = (model) => {
 
   function toggleTls() {
     let modelPathValue = getValue(model, '/spec/mode')
-    commit('wizard/model$update', {
-      path: '/spec/admin/tls/default',
-      value: modelPathValue !== 'Standalone',
-      force: true,
-    })
+    // commit('wizard/model$update', {
+    //   path: '/spec/admin/tls/default',
+    //   value: modelPathValue !== 'Standalone',
+    //   force: true,
+    // })
     commit('wizard/model$update', {
       path: '/spec/admin/tls/toggle',
       value: modelPathValue !== 'Standalone',
-      force: true,
     })
+    return modelPathValue !== 'Standalone'
   }
 
   function showArchiver() {
