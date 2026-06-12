@@ -770,7 +770,9 @@ export const useFunc = (model) => {
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const hazelcastContainer = containers.find((c) => c.name === 'hazelcast')
+    const limits = hazelcastContainer?.resources?.requests || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -820,7 +822,10 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const hazelcastContainer = containers.find((c) => c.name === 'hazelcast')
+    const limits = hazelcastContainer?.resources?.requests || {}
+
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
@@ -1828,7 +1833,9 @@ export const useFunc = (model) => {
 
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const hazelcastContainer = containers.find((c) => c.name === 'hazelcast')
+    const limits = hazelcastContainer?.resources?.requests || {}
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
