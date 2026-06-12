@@ -895,6 +895,7 @@ export const useFunc = (model) => {
     return options
   }
 
+  let backupOn = false
   function checkIfFeatureOn(type) {
     let val = getValue(model, `/spec/admin/${type}/toggle`)
     if (type === 'backup' || type === 'archiver') {
@@ -902,7 +903,8 @@ export const useFunc = (model) => {
     }
     const backupVal = getValue(model, '/spec/backup/tool')
     if (type === 'backup') {
-      return features.includes('backup') && backupVal === 'KubeStash' && val
+      if (!backupOn) backupOn = features.includes('backup') && backupVal === 'KubeStash' && val
+      return backupOn
     } else if (type === 'tls') {
       return features.includes('tls') && val
     } else if (type === 'expose') {

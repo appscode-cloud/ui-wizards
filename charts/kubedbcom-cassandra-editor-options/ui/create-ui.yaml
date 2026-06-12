@@ -26,10 +26,6 @@ step:
     loader: getAdminOptions|databases/Cassandra/mode
     schema: schema/properties/spec/properties/mode
     type: radio
-    watcher:
-      func: toggleTls
-      paths:
-      - schema/properties/spec/properties/mode
   - if:
       name: isEqualToModelPathValue|Topology|/spec/mode
       type: function
@@ -304,9 +300,9 @@ step:
         paths:
         - temp/backup
     - elements:
-      - init:
-          type: func
-          value: toggleTls|true
+      - if:
+          name: isToggleOn|tls
+          type: function
         label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
@@ -319,9 +315,6 @@ step:
         type: select
         validation:
           type: required
-      if:
-        name: isEqualToModelPathValue|Topology|/spec/mode
-        type: function
       type: block-layout
     - if:
         name: isToggleOn|expose

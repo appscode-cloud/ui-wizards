@@ -970,6 +970,13 @@ export const useFunc = (model) => {
     return validType.includes(modelPathValue)
   }
 
+  function showIssuer() {
+    // watchDependency('model#/spec/admin/tls/default')
+    const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
+    const isIssuerToggleEnabled = isToggleOn('clusterIssuers')
+    return isTlsEnabled && isIssuerToggleEnabled
+  }
+
   function updateAlertValue() {
     const isMonitorEnabled = getValue(discriminator, '/monitoring')
     const alert = isMonitorEnabled ? 'warning' : 'none'
@@ -1179,6 +1186,7 @@ export const useFunc = (model) => {
     showReferSecretSwitch,
     showSecretDropdown,
     showStorageSizeField,
+    showIssuer,
     updateAlertValue,
     fetchOptions,
     getAdminOptions,
