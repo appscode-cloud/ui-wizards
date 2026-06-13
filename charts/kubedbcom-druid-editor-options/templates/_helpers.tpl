@@ -103,15 +103,19 @@ Alert Enabled
 */}}
 {{- define "kubedbcom-druid-editor-options.alertEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
-{{- $sev := dig (mustLast .) 0 $ranks -}}
-{{- $flags := mustInitial . -}}
-{{- $enabled := mustLast $flags -}}
-{{- $flags = mustInitial $flags -}}
+{{- $key := mustLast . -}}
+{{- $rest := mustInitial . -}}
+{{- $rules := mustLast $rest -}}
+{{- $flags := mustInitial $rest -}}
+{{- $rule := dig $key (dict) $rules -}}
+{{- $severity := dig "severity" "" $rule -}}
+{{- $enabled := dig "enabled" false $rule -}}
+{{- $sev := dig $severity 0 $ranks -}}
 {{- $result := 3 -}}
 {{- range $x := $flags -}}
 {{- $result = min $result (dig $x 0 $ranks) -}}
 {{- end -}}
-{{- if (and $sev (le $sev $result) $enabled) -}}{{ (mustLast .) }}{{- end -}}
+{{- if (and $sev (le $sev $result) $enabled) -}}{{ $severity }}{{- end -}}
 {{- end }}
 
 {{- define "container.securityContext" -}}

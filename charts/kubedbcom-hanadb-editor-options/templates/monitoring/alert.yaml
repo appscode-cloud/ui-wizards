@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-hanadb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: hanadb.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbInstanceDown.enabled .rules.hanadbInstanceDown.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hanadbInstanceDown")) -}}
     - alert: HanaDBInstanceDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.hanadbInstanceDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: HanaDB instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "HanaDB instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbServiceDown.enabled .rules.hanadbServiceDown.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hanadbServiceDown")) -}}
     - alert: HanaDBServiceDown
       expr: sum by (service) (up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
       for: {{ .rules.hanadbServiceDown.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: HanaDB service down
         description: "All HanaDB scrape targets are down\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbRestarted.enabled .rules.hanadbRestarted.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hanadbRestarted")) -}}
     - alert: HanaDBRestarted
       expr: (time() - min(kube_pod_start_time{namespace="{{ $.Release.Namespace }}", pod=~"{{ $.Release.Name }}(-arbiter)?-.+"})) < {{ .rules.hanadbRestarted.val }}
       for: {{ .rules.hanadbRestarted.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: HanaDB recently restarted (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "HanaDB pod {{`{{`}} $labels.pod {{`}}`}} restarted recently.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbHighCPUUsage.enabled .rules.hanadbHighCPUUsage.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hanadbHighCPUUsage")) -}}
     - alert: HanaDBHighCPUUsage
       expr: avg by (pod) (hanadb_cpu_busy_percent{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{ .rules.hanadbHighCPUUsage.val }}
       for: {{ .rules.hanadbHighCPUUsage.duration }}
@@ -66,7 +66,7 @@ spec:
         summary: HanaDB CPU usage high (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "HanaDB CPU busy percentage is above {{ .rules.hanadbHighCPUUsage.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbHighMemoryUsage.enabled .rules.hanadbHighMemoryUsage.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hanadbHighMemoryUsage")) -}}
     - alert: HanaDBHighMemoryUsage
       expr: |
         100 * (
@@ -89,7 +89,7 @@ spec:
         summary: HanaDB memory usage high (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "HanaDB memory usage is above {{ .rules.hanadbHighMemoryUsage.val }} percent of allocation limit.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.hanadbReplicationNotActive.enabled .rules.hanadbReplicationNotActive.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hanadbReplicationNotActive")) -}}
     - alert: HanaDBReplicationNotActive
       expr: max by (pod) (hanadb_sr_replication_status{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > 0
       for: {{ .rules.hanadbReplicationNotActive.duration }}
@@ -100,7 +100,7 @@ spec:
         summary: HanaDB replication is not active (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "HanaDB system replication status is not ACTIVE.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: |
         100 * (
@@ -127,7 +127,7 @@ spec:
         summary: Persistent volume usage is high
         description: "Persistent volume usage is above {{ .rules.diskUsageHigh.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: |
         100 * (
@@ -161,7 +161,7 @@ spec:
   {{ if (include "kubedbcom-hanadb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: hanadb.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBHanaDBPhaseNotReady
       expr: kubedb_com_hanadb_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -172,7 +172,7 @@ spec:
         summary: KubeDB HanaDB Phase NotReady (hanadb {{`{{`}} $labels.app {{`}}`}})
         description: "KubeDB HanaDB phase is NotReady\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-hanadb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBHanaDBPhaseCritical
       expr: kubedb_com_hanadb_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}

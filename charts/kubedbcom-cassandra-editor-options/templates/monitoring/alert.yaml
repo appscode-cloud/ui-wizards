@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-cassandra-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: cassandra.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraDown.enabled .rules.cassandraDown.severity)) -}}
+    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "cassandraDown")) -}}
     - alert: CassandraDown
       expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) >= 1
       for: {{ .rules.cassandraDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: Cassandra down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Cassandra is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraServiceRespawn.enabled .rules.cassandraServiceRespawn.severity)) -}}
+    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "cassandraServiceRespawn")) -}}
     - alert: CassandraServiceRespawn
       expr: (cassandra_stats{name="java:lang:runtime:uptime"}) < {{.rules.cassandraServiceRespawn.val}}
       for: {{ .rules.cassandraServiceRespawn.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: Cassandra service restart (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Cassandra service restart on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraConnectionTimeouts.enabled .rules.cassandraConnectionTimeouts.severity)) -}}
+    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "cassandraConnectionTimeouts")) -}}
     - alert: ConnectionTimeouts
       expr: increase(cassandra_stats{name="org:apache:cassandra:metrics:connection:totaltimeouts:count",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.cassandraConnectionTimeouts.val}}
       for: {{ .rules.cassandraConnectionTimeouts.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: Cassandra too many connections (> {{.rules.cassandraConnectionTimeouts.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.rules.cassandraConnectionTimeouts.val}}% of Cassandra connections are throttled {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraDroppedMessages.enabled .rules.cassandraDroppedMessages.severity)) -}}
+    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "cassandraDroppedMessages")) -}}
     - alert: DroppedMessages
       expr: cassandra_stats{name=~"org:apache:cassandra:metrics:droppedmessage:.*:count",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
       for: {{ .rules.cassandraDroppedMessages.duration }}
@@ -66,7 +66,7 @@ spec:
         summary: Cassandra has high drop message (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "High drop message for Cassandra {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraHighReadLatency.enabled .rules.cassandraHighReadLatency.severity)) -}}
+    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "cassandraHighReadLatency")) -}}
     - alert: HighReadLatency
       expr: cassandra_stats{name=~"org:apache:cassandra:metrics:table:kubedb_keyspace:healthcheck_table:coordinatorreadlatency:99thpercentile",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 7000
       for: {{ .rules.cassandraHighReadLatency.duration }}
@@ -77,7 +77,7 @@ spec:
         summary: Cassandra has high read latency (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Cassandra has high read latency\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraHighWriteLatency.enabled .rules.cassandraHighWriteLatency.severity)) -}}
+    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "cassandraHighWriteLatency")) -}}
     - alert: HighWriteLatency
       expr: cassandra_stats{name=~"org:apache:cassandra:metrics:table:kubedb_keyspace:healthcheck_table:coordinatorwritelatency:99thpercentile",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 7000
       for: {{ .rules.cassandraHighWriteLatency.duration }}
@@ -95,7 +95,7 @@ spec:
   {{ if (include "kubedbcom-cassandra-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: cassandra.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBCassandraPhaseNotReady
       expr: kubedb_com_cassandra_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -106,7 +106,7 @@ spec:
         summary: KubeDB Cassandra Phase NotReady (cassandra {{`{{`}} $labels.cassandra {{`}}`}})
         description: "KubeDB Cassandra Phase not ready on {{`{{`}} $labels.cassandra {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-cassandra-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBCassandraPhaseCritical
       expr: kubedb_com_cassandra_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
