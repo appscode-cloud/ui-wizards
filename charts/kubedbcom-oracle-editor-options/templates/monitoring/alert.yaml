@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-oracle-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: oracle.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.oracleInstanceDown.enabled .rules.oracleInstanceDown.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "oracleInstanceDown")) -}}
     - alert: OracleInstanceDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.oracleInstanceDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: Oracle instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Oracle instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.oracleServiceDown.enabled .rules.oracleServiceDown.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "oracleServiceDown")) -}}
     - alert: OracleServiceDown
       expr: sum by (service) (up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
       for: {{ .rules.oracleServiceDown.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: Oracle service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Oracle service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.oracleRestarted.enabled .rules.oracleRestarted.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "oracleRestarted")) -}}
     - alert: OracleRestarted
       expr: oracledb_uptime_uptime_seconds{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} < {{ .rules.oracleRestarted.val }}
       for: {{ .rules.oracleRestarted.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: Oracle restarted (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Oracle restarted\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: |
         (kubelet_volume_stats_used_bytes{job=~"kubelet"} / on(persistentvolumeclaim) group_left(pod) (
@@ -70,7 +70,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: |
         (kubelet_volume_stats_used_bytes{job=~"kubelet"} / on(persistentvolumeclaim) group_left(pod) (
@@ -93,7 +93,7 @@ spec:
   {{ if (include "kubedbcom-oracle-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: oracle.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBOraclePhaseNotReady
       expr: kubedb_com_oracle_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -104,7 +104,7 @@ spec:
         summary: KubeDB Oracle Phase NotReady (oracle {{`{{`}} $labels.oracle {{`}}`}})
         description: "KubeDB Oracle Phase not ready on {{`{{`}} $labels.oracle {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBOraclePhaseCritical
       expr: kubedb_com_oracle_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
@@ -123,7 +123,7 @@ spec:
   {{ if (include "kubedbcom-oracle-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: oracle.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestOnProgress")) -}}
     - alert: KubeDBOracleOpsRequestOnProgress
       expr: ops_kubedb_com_oracleopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestOnProgress.duration }}
@@ -134,7 +134,7 @@ spec:
         summary: OracleOpsRequest on progress (oracleopsrequest {{`{{`}} $labels.oracleopsrequest {{`}}`}})
         description: "OracleOpsRequest {{`{{`}} $labels.oracleopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestStatusProgressingToLong")) -}}
     - alert: KubeDBOracleOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_oracleopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
@@ -145,7 +145,7 @@ spec:
         summary: OracleOpsRequest is in progressing status for too long (oracleopsrequest {{`{{`}} $labels.oracleopsrequest {{`}}`}})
         description: "OracleOpsRequest {{`{{`}} $labels.oracleopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ if (include "kubedbcom-oracle-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestFailed")) -}}
     - alert: KubeDBOracleOpsRequestFailed
       expr: ops_kubedb_com_oracleopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestFailed.duration }}
