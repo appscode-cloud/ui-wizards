@@ -22,6 +22,10 @@ step:
     type: select
     validation:
       type: required
+    watcher:
+      func: onNamespaceChange
+      paths:
+      - schema/properties/metadata/properties/namespace
   - disable: isDatabaseRefDisabled
     if:
       name: showAndInitDatabaseRef
@@ -58,10 +62,16 @@ step:
     isHorizontal: true
     label: Type of Ops Request
     options:
+    - description: Update your database to any version
+      text: Update Version
+      value: UpdateVersion
+    - description: Scale up or down pod count
+      text: Horizontal Scaling
+      value: HorizontalScaling
     - description: Manage your CPU resources
       text: Vertical Scaling
       value: VerticalScaling
-    - description: Expand your database volume
+    - description: Manage your database size
       text: Volume Expansion
       value: VolumeExpansion
     - description: Restart your database
@@ -70,13 +80,15 @@ step:
     - description: Reconfigure your database
       text: Reconfigure
       value: Reconfigure
+    - description: Reconfigure your database tls configuration
+      text: Reconfigure TLS
+      value: ReconfigureTLS
     schema: schema/properties/spec/properties/type
     type: radio
     watcher:
       func: onRequestTypeChange
       paths:
-      - temp/dbDetails
-      - schema/properties/spec/properties/databaseRef/properties/name
+      - schema/properties/spec/properties/type
   - elements:
     - init:
         type: func
@@ -84,7 +96,7 @@ step:
       label: Target Version
       loader: getDbVersions
       schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
-      subtitle: Select the desired Druid version to which you want to update your
+      subtitle: Select the desired Ignite version to which you want to update your
         database.
       type: select-compare
     - if:
@@ -101,16 +113,17 @@ step:
       name: ifRequestTypeEqualsTo|UpdateVersion
       type: function
     label: Version
+    loader: fetchPresets
     showLabels: true
     type: block-layout
   - elements:
     - elements:
-      - header: Brokers
+      - header: Replica
         init:
           type: func
-          value: setValueFromDbDetails|/spec/topology/brokers/replicas
+          value: setValueFromDbDetails|/spec/replicas
         label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/brokers
+        schema: schema/properties/spec/properties/horizontalScaling/properties/node
         subtitle: Define the total number of replicas for the database. Increasing
           replicas improves fault tolerance and load distribution , while reducing
           replicas conserves resources
@@ -119,104 +132,6 @@ step:
         label: Each replica represents an independent copy of your database. For example,
           setting this to 3 creates three copies of the database for better availability.
         type: info
-      if:
-        name: ifDbTypeEqualsTo|brokers|topology|horizontalScaling
-        type: function
-      type: horizontal-layout
-    - elements:
-      - header: Coordinators
-        init:
-          type: func
-          value: setValueFromDbDetails|/spec/topology/coordinators/replicas
-        label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/coordinators
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution , while reducing
-          replicas conserves resources
-        type: input-compare
-      - hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|coordinators|topology|horizontalScaling
-        type: function
-      type: horizontal-layout
-    - elements:
-      - header: Historicals
-        init:
-          type: func
-          value: setValueFromDbDetails|/spec/topology/historicals/replicas
-        label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/historicals
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution , while reducing
-          replicas conserves resources
-        type: input-compare
-      - hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|historicals|topology|horizontalScaling
-        type: function
-      type: horizontal-layout
-    - elements:
-      - header: Middle Managers
-        init:
-          type: func
-          value: setValueFromDbDetails|/spec/topology/middleManagers/replicas
-        label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution , while reducing
-          replicas conserves resources
-        type: input-compare
-      - hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|middleManagers|topology|horizontalScaling
-        type: function
-      type: horizontal-layout
-    - elements:
-      - header: Overlords
-        init:
-          type: func
-          value: setValueFromDbDetails|/spec/topology/overlords/replicas
-        label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution , while reducing
-          replicas conserves resources
-        type: input-compare
-      - hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|overlords|topology|horizontalScaling
-        type: function
-      type: horizontal-layout
-    - elements:
-      - header: Routers
-        init:
-          type: func
-          value: setValueFromDbDetails|/spec/topology/routers/replicas
-        label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution , while reducing
-          replicas conserves resources
-        type: input-compare
-      - hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|routers|topology|horizontalScaling
-        type: function
       type: horizontal-layout
     fixedBlock: true
     if:
@@ -229,20 +144,20 @@ step:
     - elements:
       - init:
           type: func
-          value: setMachine|middleManagers
+          value: setMachine
         label: Resources
-        loader: getMachines|middleManagers
-        schema: temp/properties/machine-middleManagers
+        loader: getMachines
+        schema: temp/properties/machine
         subtitle: Compare your current machine configuration with the proposed memory
           adjustments and make informed decisions for your database setup
         type: machine-compare
         validation:
-          name: isMachineValid|middleManagers
+          name: isMachineValid
           type: custom
         watcher:
-          func: onMachineChange|middleManagers|/spec/topology/middleManagers/podTemplate/spec/containers
+          func: onMachineChange|ignite|/spec/podTemplate/spec/resources
           paths:
-          - temp/properties/machine-middleManagers
+          - temp/properties/machine
       - elements:
         - elements:
           - elements:
@@ -257,7 +172,7 @@ step:
                 value: LabelSelector
               - text: Taint
                 value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/middleManagers/properties/nodeSelectionPolicy
+              schema: schema/properties/spec/properties/verticalScaling/properties/ignite/properties/nodeSelectionPolicy
               type: select
             hideBorder: true
             showLabels: false
@@ -275,229 +190,51 @@ step:
           type: label-element
         - elements:
           - label: Key
-            schema: schema/properties/spec/properties/verticalScaling/properties/middleManagers/properties/topology/properties/key
+            schema: temp/topologyKey
             type: input
+            validation:
+              name: isVerticalScaleTopologyRequired
+              type: custom
           - label: Value
-            schema: schema/properties/spec/properties/verticalScaling/properties/middleManagers/properties/topology/properties/value
+            schema: temp/topologyValue
             type: input
+            validation:
+              name: isVerticalScaleTopologyRequired
+              type: custom
           type: horizontal-layout
         label: Node Selection
         showLabels: true
         type: block-layout
-      label: Middle Managers
-      showLabels: true
-      type: block-layout
-    - elements:
-      - init:
-          type: func
-          value: setMachine|historicals
-        label: Resources
-        loader: getMachines|historicals
-        schema: temp/properties/machine-historicals
-        subtitle: Compare your current machine configuration with the proposed memory
-          adjustments and make informed decisions for your database setup
-        type: machine-compare
-        validation:
-          name: isMachineValid|historicals
-          type: custom
-        watcher:
-          func: onMachineChange|historicals|/spec/topology/historicals/podTemplate/spec/containers
-          paths:
-          - temp/properties/machine-historicals
       - elements:
         - elements:
-          - elements:
-            - label: Node Selection Policy
-              subtitle: Control where your workloads runs by configuring node selection
-                criteria. Use label selectors to match specific nodes or taints to
-                avoid unsuitable nodes
-              type: label-element
-            - label: Node Selection Policy
-              options:
-              - text: LabelSelector
-                value: LabelSelector
-              - text: Taint
-                value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/historicals/properties/nodeSelectionPolicy
-              type: select
-            hideBorder: true
-            showLabels: false
-            type: block-layout
-          - customClass: mt-20
-            label: <b> Label Selector:</b> Specify key-value pairs to target nodes
-              that match your workload's requirements. <br/><b> Taints:</b> Define
-              tolerations for node taints to ensure your workload runs only on compatible
-              nodes
-            type: info
-          type: horizontal-layout
-        - label: Topology
-          subtitle: Define node topology preferences, such as zone or region. For
-            example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-          type: label-element
-        - elements:
-          - label: Key
-            schema: schema/properties/spec/properties/verticalScaling/properties/historicals/properties/topology/properties/key
+          - init:
+              type: func
+              value: setExporter|cpu
+            label: CPU
+            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
             type: input
-          - label: Value
-            schema: schema/properties/spec/properties/verticalScaling/properties/historicals/properties/topology/properties/value
+          - init:
+              type: func
+              value: setExporter|memory
+            label: Memory
+            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
             type: input
+            watcher:
+              func: onExporterResourceChange|memory
+              paths:
+              - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
+          showLabels: true
           type: horizontal-layout
-        label: Node Selection
+        hideBlock: true
+        label: Exporter
         showLabels: true
         type: block-layout
-      label: Historicals
-      showLabels: true
-      type: block-layout
-    - elements:
-      - init:
-          type: func
-          value: setMachine|brokers
-        label: Resources
-        loader: getMachines|brokers
-        schema: temp/properties/machine-brokers
-        subtitle: Compare your current machine configuration with the proposed memory
-          adjustments and make informed decisions for your database setup
-        type: machine-compare
-        validation:
-          name: isMachineValid|brokers
-          type: custom
-        watcher:
-          func: onMachineChange|brokers|/spec/topology/brokers/podTemplate/spec/containers
-          paths:
-          - temp/properties/machine-brokers
-      - elements:
-        - elements:
-          - elements:
-            - label: Node Selection Policy
-              subtitle: Control where your workloads runs by configuring node selection
-                criteria. Use label selectors to match specific nodes or taints to
-                avoid unsuitable nodes
-              type: label-element
-            - label: Node Selection Policy
-              options:
-              - text: LabelSelector
-                value: LabelSelector
-              - text: Taint
-                value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/brokers/properties/nodeSelectionPolicy
-              type: select
-            hideBorder: true
-            showLabels: false
-            type: block-layout
-          - customClass: mt-20
-            label: <b> Label Selector:</b> Specify key-value pairs to target nodes
-              that match your workload's requirements. <br/><b> Taints:</b> Define
-              tolerations for node taints to ensure your workload runs only on compatible
-              nodes
-            type: info
-          type: horizontal-layout
-        - label: Topology
-          subtitle: Define node topology preferences, such as zone or region. For
-            example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-          type: label-element
-        - elements:
-          - label: Key
-            schema: schema/properties/spec/properties/verticalScaling/properties/brokers/properties/topology/properties/key
-            type: input
-          - label: Value
-            schema: schema/properties/spec/properties/verticalScaling/properties/brokers/properties/topology/properties/value
-            type: input
-          type: horizontal-layout
-        label: Node Selection
-        showLabels: true
-        type: block-layout
-      label: Broker
-      showLabels: true
-      type: block-layout
-    - elements:
-      - init:
-          type: func
-          value: setMachine|coordinators
-        label: Resources
-        loader: getMachines|coordinators
-        schema: temp/properties/machine-coordinators
-        subtitle: Compare your current machine configuration with the proposed memory
-          adjustments and make informed decisions for your database setup
-        type: machine-compare
-        validation:
-          name: isMachineValid|coordinators
-          type: custom
-        watcher:
-          func: onMachineChange|coordinators|/spec/topology/coordinators/podTemplate/spec/containers
-          paths:
-          - temp/properties/machine-coordinators
-      - elements:
-        - elements:
-          - elements:
-            - label: Node Selection Policy
-              subtitle: Control where your workloads runs by configuring node selection
-                criteria. Use label selectors to match specific nodes or taints to
-                avoid unsuitable nodes
-              type: label-element
-            - label: Node Selection Policy
-              options:
-              - text: LabelSelector
-                value: LabelSelector
-              - text: Taint
-                value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/coordinators/properties/nodeSelectionPolicy
-              type: select
-            hideBorder: true
-            showLabels: false
-            type: block-layout
-          - customClass: mt-20
-            label: <b> Label Selector:</b> Specify key-value pairs to target nodes
-              that match your workload's requirements. <br/><b> Taints:</b> Define
-              tolerations for node taints to ensure your workload runs only on compatible
-              nodes
-            type: info
-          type: horizontal-layout
-        - label: Topology
-          subtitle: Define node topology preferences, such as zone or region. For
-            example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-          type: label-element
-        - elements:
-          - label: Key
-            schema: schema/properties/spec/properties/verticalScaling/properties/coordinators/properties/topology/properties/key
-            type: input
-          - label: Value
-            schema: schema/properties/spec/properties/verticalScaling/properties/coordinators/properties/topology/properties/value
-            type: input
-          type: horizontal-layout
-        label: Node Selection
-        showLabels: true
-        type: block-layout
-      label: Coordinators
-      showLabels: true
-      type: block-layout
-    - elements:
-      - elements:
-        - init:
-            type: func
-            value: setExporter|cpu
-          label: CPU
-          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-          type: input
-        - init:
-            type: func
-            value: setExporter|memory
-          label: Memory
-          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-          type: input
-          watcher:
-            func: onExporterResourceChange|memory
-            paths:
-            - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-        showLabels: true
-        type: horizontal-layout
-      hideBlock: true
-      label: Exporter
-      showLabels: true
+      label: Ignite vertical scaling
+      showLabels: false
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|VerticalScaling
       type: function
-    label: Druid vertical scaling
     type: block-layout
   - elements:
     - elements:
@@ -521,46 +258,21 @@ step:
       type: horizontal-layout
     - elements:
       - elements:
-        - init:
+        - header: Ignite
+          init:
             type: func
-            value: setValueFromDbDetails|/spec/topology/historicals/storage/resources/requests/storage
+            value: setValueFromDbDetails|/spec/storage/resources/requests/storage
           label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/historicals
-          subtitle: How much extra storage does your database need? Specify the size(e.g.,
+          schema: schema/properties/spec/properties/volumeExpansion/properties/node
+          subtitle: How much extra storage does your database need? Specify the size(e.g.
             2Gi for 2 gigabytes) so we can allocate it correctly
           type: input-compare
           validation:
-            name: checkVolume|/spec/topology/historicals/storage/resources/requests/storage|/spec/volumeExpansion/historicals
+            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
             type: custom
-        - hasIcon: true
-          label: Historicals nodes store historical data segments. Increasing storage
-            allows for more historical data retention.
-          type: info
         type: horizontal-layout
       fixedBlock: true
-      label: Historicals
-      showLabels: true
-      type: block-layout
-    - elements:
-      - elements:
-        - init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/middleManagers/storage/resources/requests/storage
-          label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/middleManagers
-          subtitle: How much extra storage does your database need? Specify the size(e.g.,
-            2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/middleManagers/storage/resources/requests/storage|/spec/volumeExpansion/middleManagers
-            type: custom
-        - hasIcon: true
-          label: Middle Managers handle real-time ingestion tasks. More storage enables
-            larger batch processing capabilities.
-          type: info
-        type: horizontal-layout
-      fixedBlock: true
-      label: Middle Managers
+      label: Ignite volume expansion
       showLabels: true
       type: block-layout
     if:
@@ -757,12 +469,12 @@ step:
         value: rotate
       - text: Remove
         value: remove
-      schema: temp/tlsOperation
+      schema: temp/properties/tlsOperation
       type: radio
       watcher:
         func: onTlsOperationChange
         paths:
-        - temp/tlsOperation
+        - temp/properties/tlsOperation
     - fullwidth: true
       if:
         name: isTlsEnabled
@@ -870,7 +582,7 @@ step:
           label: Provinces
           schema: subject/properties/provinces
           type: array-item-form
-        - buttonClass: is-light is-outlined
+        - buttonClass: is-light  is-outlined
           element:
             label: DNS Name
             type: input
@@ -890,10 +602,8 @@ step:
       if:
         name: showIssuerRefAndCertificates
         type: function
-      init:
-        type: func
-        value: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
       label: Certificates
+      loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
       showLabels: false
       type: block-layout
     if:
@@ -904,8 +614,8 @@ step:
   - elements:
     - label: Timeout
       schema: schema/properties/spec/properties/timeout
-      subtitle: Specify the maximum time allowed for the scaling operation to complete.
-        Use formats like 30sec, 1min(1 minute) or 2h(2 hours).
+      subtitle: Specify the maximum time allowed for the operation to complete before
+        it times out
       type: time-picker
     - init:
         type: func
