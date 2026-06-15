@@ -786,7 +786,7 @@ export const useFunc = (model) => {
       )
   }
 
-  function onAutoscalerNamespaceChange({ model, getValue, commit }) {
+  function onAutoscalerNamespaceChange() {
     const namespace = getValue(
       model,
       '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace',
