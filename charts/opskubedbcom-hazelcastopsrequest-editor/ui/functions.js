@@ -306,7 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
-const configSecretKeys = ['mssql.conf']
+const configSecretKeys = ['hazelcast.cnf']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -318,7 +318,6 @@ export const useFunc = (model) => {
   )
 
   showAndInitOpsRequestType()
-
   async function fetchJsons({ axios, itemCtx }) {
     let ui = {}
     let language = {}
@@ -350,7 +349,12 @@ export const useFunc = (model) => {
   }
 
   function returnFalse() {
-    return true
+    return false
+  }
+
+  function isTlsEnabled() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    return !!dbDetails?.spec?.tls
   }
 
   function isRancherManaged() {
@@ -388,7 +392,7 @@ export const useFunc = (model) => {
     // watchDependency('model#/metadata/namespace')
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mssqlservers`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/hazelcasts`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -414,7 +418,7 @@ export const useFunc = (model) => {
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
 
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mssqlservers/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/hazelcasts/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -428,7 +432,9 @@ export const useFunc = (model) => {
   async function getDbVersions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
+
     const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+
     let presets = storeGet('/kubedbuiPresets') || {}
     if (!storeGet('/route/params/actions')) {
       try {
@@ -439,8 +445,9 @@ export const useFunc = (model) => {
         presets.status = String(e.status)
       }
     }
+
     try {
-      presetVersions = presets.admin?.databases?.MSSQLServer?.versions?.available || []
+      presetVersions = presets.admin?.databases?.Hazelcast?.versions?.available || []
       const queryParams = {
         filter: {
           items: {
@@ -449,24 +456,32 @@ export const useFunc = (model) => {
           },
         },
       }
+
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mssqlserverversions`,
+        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/hazelcastversions`,
         {
           params: queryParams,
         },
       )
+
       const resources = (resp && resp.data && resp.data.items) || []
+
       const sortedVersions = resources.sort((a, b) =>
         versionCompare(a.spec.version, b.spec.version),
       )
+
       let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
       const found = sortedVersions.find((item) => item.metadata.name === ver)
+
       if (found) ver = found.spec?.version
+
       const allowed = found?.spec?.updateConstraints?.allowlist || []
+
       const limit = allowed.length ? allowed[0] : '0.0'
+
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
       // if presets.status is 404, it means no presets available, no need to filter with presets
-      const filteredMSSQLServerVersions = sortedVersions.filter((item) => {
+      const filteredHazelcastVersions = sortedVersions.filter((item) => {
         // default limit 0.0 means no restrictions, show all higher versions
         if (limit === '0.0')
           return (
@@ -495,8 +510,9 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      setDiscriminatorValue('/filteredVersion', filteredMSSQLServerVersions)
-      return filteredMSSQLServerVersions.map((item) => {
+      setDiscriminatorValue('/filteredVersion', filteredHazelcastVersions)
+
+      return filteredHazelcastVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -602,6 +618,15 @@ export const useFunc = (model) => {
     })
   }
 
+  function disableOpsRequest() {
+    if (itemCtx.value === 'HorizontalScaling') {
+      const dbType = getDbType()
+
+      if (dbType === 'standalone') return true
+      else return false
+    } else return false
+  }
+
   function getDbTls() {
     // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
@@ -613,19 +638,14 @@ export const useFunc = (model) => {
   function getDbType() {
     // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
+
     const { spec } = dbDetails || {}
     const { topology } = spec || {}
-    if (topology) return 'Topology'
-    else return 'Combined'
-  }
+    const { mode } = topology || {}
 
-  function disableOpsRequest() {
-    if (itemCtx.value === 'HorizontalScaling') {
-      const dbType = getDbType()
+    const verd = mode ? 'cluster' : 'standalone'
 
-      if (dbType === 'Standalone') return true
-      else return false
-    } else return false
+    return verd
   }
 
   function initNamespace() {
@@ -717,7 +737,6 @@ export const useFunc = (model) => {
     const opMap = {
       upgrade: 'UpdateVersion',
       updateVersion: 'UpdateVersion',
-      'update-version': 'UpdateVersion',
       horizontalscaling: 'HorizontalScaling',
       verticalscaling: 'VerticalScaling',
       volumeexpansion: 'VolumeExpansion',
@@ -727,6 +746,7 @@ export const useFunc = (model) => {
     }
     if (ver) {
       const operation = storeGet('/resource/activeActionItem/result/operationId') || ''
+
       const match = /^(.*)-opsrequest-(.*)$/.exec(operation)
       if (match) {
         const opstype = match[2]
@@ -744,16 +764,17 @@ export const useFunc = (model) => {
   // vertical scaling
   function ifDbTypeEqualsTo(value, opsReqType) {
     const verd = getDbType()
+
     return value === verd
   }
 
   // machine profile stuffs
+  // let machinesFromPreset = []
+
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const mssqlContainer = containers.find((c) => c.name === 'mssql')
-    const limits = mssqlContainer?.resources?.requests || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -803,9 +824,7 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const mssqlContainer = containers.find((c) => c.name === 'mssql')
-    const limits = mssqlContainer?.resources?.requests || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
@@ -867,9 +886,9 @@ export const useFunc = (model) => {
       })
   }
 
-  function isMachineCustom(path) {
-    // watchDependency(`discriminator#${path}`)
-    const machine = getValue(discriminator, `${path}`)
+  function isMachineCustom() {
+    // watchDependency('discriminator#/machine')
+    const machine = getValue(discriminator, '/machine')
     return machine === 'custom'
   }
 
@@ -893,10 +912,10 @@ export const useFunc = (model) => {
 
     try {
       const resp = await axios.post(
-        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseconfigurations`,
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
         {
           apiVersion: 'ui.kubedb.com/v1alpha1',
-          kind: 'DatabaseConfiguration',
+          kind: 'DatabaseInfo',
           request: {
             source: {
               ref: {
@@ -910,7 +929,7 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
-            keys: ['mssql.conf'],
+            keys: ['hazelcast.cnf'],
           },
         },
       )
@@ -1324,6 +1343,11 @@ export const useFunc = (model) => {
     }
   }
 
+  function isConfigSelected() {
+    const secretName = getValue(model, '/spec/configuration/configSecret/name')
+    return !!secretName
+  }
+
   function isEqualToValueFromType(value) {
     // watchDependency('discriminator#/valueFromType')
     const valueFrom = getValue(discriminator, '/valueFromType')
@@ -1352,7 +1376,6 @@ export const useFunc = (model) => {
 
     return ans
   }
-
   async function getResourceList({ group, version, resource }) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1375,7 +1398,6 @@ export const useFunc = (model) => {
 
     return ans
   }
-
   async function resourceNames(group, version, resource) {
     const namespace = getValue(model, '/metadata/namespace')
     // watchDependency('model#/metadata/namespace')
@@ -1402,7 +1424,6 @@ export const useFunc = (model) => {
       }
     })
   }
-
   async function unNamespacedResourceNames(group, version, resource) {
     let resources = await getResourceList({
       group,
@@ -1464,6 +1485,8 @@ export const useFunc = (model) => {
     // watchDependency('model#/spec/tls/issuerRef/kind')
 
     if (kind) {
+      const apiGroup = getValue(discriminator, '/dbDetails/spec/tls/issuerRef/apiGroup')
+      if (apiGroup) return apiGroup
       return 'cert-manager.io'
     } else return undefined
   }
@@ -1525,7 +1548,6 @@ export const useFunc = (model) => {
   function initTlsOperation() {
     return 'update'
   }
-
   function onTlsOperationChange() {
     const tlsOperation = getValue(discriminator, '/tlsOperation')
 
@@ -1537,12 +1559,16 @@ export const useFunc = (model) => {
         value: true,
         force: true,
       })
+      commit('wizard/model$delete', '/spec/tls/certificates')
+      commit('wizard/model$delete', '/spec/tls/remove')
     } else if (tlsOperation === 'remove') {
       commit('wizard/model$update', {
         path: '/spec/tls/remove',
         value: true,
         force: true,
       })
+      commit('wizard/model$delete', '/spec/tls/certificates')
+      commit('wizard/model$delete', '/spec/tls/rotateCertificates')
     }
   }
 
@@ -1566,6 +1592,8 @@ export const useFunc = (model) => {
     return isDbloading ? '' : requestType || ''
   }
 
+  // ************************************** Set db details *****************************************
+
   function isDbDetailsLoading() {
     // watchDependency('discriminator#/dbDetails')
     // watchDependency('model#/spec/databaseRef/name')
@@ -1577,10 +1605,12 @@ export const useFunc = (model) => {
 
   function setValueFromDbDetails(path, commitPath) {
     // watchDependency('discriminator#/dbDetails')
+
     const retValue = getValue(discriminator, `/dbDetails${path}`)
 
-    if (commitPath) {
+    if (commitPath && retValue) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
+
       // computed called when tls fields is not visible
       if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
 
@@ -1592,14 +1622,24 @@ export const useFunc = (model) => {
         force: true,
       })
     }
+
     return retValue || undefined
   }
 
-  function setResource(path) {
-    // watchDependency('discriminator#/dbDetails')
-    const containers = getValue(discriminator, `/dbDetails${path}`) || []
-    const resource = containers.filter((ele) => ele.name === 'mssql')
-    return resource[0]?.resources
+  function setConfigFiles() {
+    // watchDependency('model#/resources/secret_config/stringData')
+    const configFiles = getValue(model, '/resources/secret_config/stringData')
+
+    const files = []
+
+    for (const item in configFiles) {
+      const obj = {}
+      obj.key = item
+      obj.value = configFiles[item]
+      files.push(obj)
+    }
+
+    return files
   }
 
   function getAliasOptions() {
@@ -1630,12 +1670,12 @@ export const useFunc = (model) => {
   }
 
   function isVerticalScaleTopologyRequired() {
-    // watchDependency(`discriminator#/topologyKey`)
-    // watchDependency(`discriminator#/topologyValue`)
+    // watchDependency('discriminator#/topologyKey')
+    // watchDependency('discriminator#/topologyValue')
 
     const key = getValue(discriminator, '/topologyKey')
     const value = getValue(discriminator, '/topologyValue')
-    const path = `/spec/verticalScaling/mssqlserver/topology`
+    const path = `/spec/verticalScaling/hazelcast/topology`
 
     if (key || value) {
       commit('wizard/model$update', {
@@ -1694,8 +1734,25 @@ export const useFunc = (model) => {
     return value * units[unit]
   }
 
-  function getSelectedConfigSecret() {
-    const path = '/spec/configuration/configSecret/name'
+  function fetchAliasOptions() {
+    return getAliasOptions ? getAliasOptions() : []
+  }
+
+  function validateNewCertificates({ itemCtx }) {
+    const addedAliases = (model && model.map((item) => item.alias)) || []
+
+    if (addedAliases.includes(itemCtx.alias) && itemCtx.isCreate) {
+      return { isInvalid: true, message: 'Alias already exists' }
+    }
+    return {}
+  }
+
+  function disableAlias() {
+    return !!(model && model.alias)
+  }
+
+  function getSelectedConfigSecret(type) {
+    const path = `/spec/configuration/configSecret/name`
     const selectedSecret = getValue(model, path)
     // watchDependency(`model#${path}`)
     return `You have selected ${selectedSecret} secret` || 'No secret selected'
@@ -1736,8 +1793,8 @@ export const useFunc = (model) => {
       .join('\n')
   }
 
-  function getSelectedConfigSecretValue() {
-    const path = '/spec/configuration/configSecret/name'
+  function getSelectedConfigSecretValue(type) {
+    const path = `/spec/configuration/configSecret/name`
     const selectedSecret = getValue(model, path)
     let data
     secretArray.forEach((item) => {
@@ -1775,9 +1832,7 @@ export const useFunc = (model) => {
 
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const mssqlContainer = containers.find((c) => c.name === 'mssql')
-    const limits = mssqlContainer?.resources?.requests || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
@@ -1790,10 +1845,10 @@ export const useFunc = (model) => {
 
   return {
     isMachineValid,
+    fetchAliasOptions,
+    validateNewCertificates,
+    disableAlias,
     isRancherManaged,
-    setExporter,
-    onExporterResourceChange,
-    setResource,
     fetchJsons,
     returnFalse,
     getNamespaces,
@@ -1807,6 +1862,7 @@ export const useFunc = (model) => {
     onRequestTypeChange,
     getDbTls,
     getDbType,
+    disableOpsRequest,
     initNamespace,
     initDatabaseRef,
     showAndInitName,
@@ -1820,7 +1876,6 @@ export const useFunc = (model) => {
     getSelectedConfigSecretValue,
     createSecretUrl,
     isEqualToValueFromType,
-    disableOpsRequest,
     getNamespacedResourceList,
     getResourceList,
     resourceNames,
@@ -1839,8 +1894,8 @@ export const useFunc = (model) => {
     isDbDetailsLoading,
     setValueFromDbDetails,
     getAliasOptions,
-    isNamespaceDisabled,
     isDatabaseRefDisabled,
+    isNamespaceDisabled,
     onNamespaceChange,
     onDbChange,
     setApplyToIfReady,
@@ -1850,6 +1905,8 @@ export const useFunc = (model) => {
     onMachineChange,
     isMachineCustom,
     checkVolume,
+    setConfigFiles,
+    isConfigSelected,
     fetchConfigSecrets,
     getConfigSecretsforAppyConfig,
     getSelectedConfigurationData,
@@ -1865,5 +1922,6 @@ export const useFunc = (model) => {
     onRemoveConfigChange,
     onNewConfigSecretChange,
     onSelectedSecretChange,
+    isTlsEnabled,
   }
 }
