@@ -233,19 +233,19 @@ step:
             type: function
           init:
             type: func
-            value: setAllowedMachine|zookeeper|min
+            value: setAllowedMachine|min
           label: Min Allowed Profile
           loader:
-            name: getMachines|zookeeper|min
+            name: getMachines|min
             watchPaths:
             - temp/properties/topologyMachines
-            - temp/properties/allowedMachine-zookeeper-max
-          schema: temp/properties/allowedMachine-zookeeper-min
+            - temp/properties/allowedMachine-max
+          schema: temp/properties/allowedMachine-min
           type: machine-compare
           watcher:
-            func: onMachineChange|zookeeper
+            func: onMachineChange
             paths:
-            - temp/properties/allowedMachine-zookeeper-min
+            - temp/properties/allowedMachine-min
         - elements:
           - label: Cpu
             schema: schema/properties/resources/properties/autoscalingKubedbComZooKeeperAutoscaler/properties/spec/properties/compute/properties/zookeeper/properties/minAllowed/properties/cpu
@@ -266,19 +266,19 @@ step:
             type: function
           init:
             type: func
-            value: setAllowedMachine|zookeeper|max
+            value: setAllowedMachine|max
           label: Max Allowed Profile
           loader:
-            name: getMachines|zookeeper|max
+            name: getMachines|max
             watchPaths:
             - temp/properties/topologyMachines
-            - temp/properties/allowedMachine-zookeeper-min
-          schema: temp/properties/allowedMachine-zookeeper-max
+            - temp/properties/allowedMachine-min
+          schema: temp/properties/allowedMachine-max
           type: machine-compare
           watcher:
-            func: onMachineChange|zookeeper
+            func: onMachineChange
             paths:
-            - temp/properties/allowedMachine-zookeeper-max
+            - temp/properties/allowedMachine-max
         - elements:
           - label: Cpu
             schema: schema/properties/resources/properties/autoscalingKubedbComZooKeeperAutoscaler/properties/spec/properties/compute/properties/zookeeper/properties/maxAllowed/properties/cpu
@@ -296,7 +296,7 @@ step:
         showLabels: false
         type: block-layout
       - label: Controlled Resources
-        loader: setControlledResources|zookeeper
+        loader: setControlledResources
         multiple: true
         schema: schema/properties/resources/properties/autoscalingKubedbComZooKeeperAutoscaler/properties/spec/properties/compute/properties/zookeeper/properties/controlledResources
         type: select

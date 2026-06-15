@@ -292,12 +292,21 @@ step:
         paths:
         - temp/backup
     - elements:
-      - label: Expose via Gateway?
-        schema: schema/properties/spec/properties/admin/properties/expose/properties/default
+      - if:
+          name: isToggleOn|tls
+          type: function
+        label: Enable TLS?
+        schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
-      if:
-        name: isToggleOn|expose
-        type: function
+      - if:
+          name: showIssuer
+          type: function
+        label: Cluster Issuers
+        loader: getAdminOptions|clusterIssuers
+        schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+        type: select
+        validation:
+          type: required
       type: block-layout
     if:
       name: showAdditionalSettings

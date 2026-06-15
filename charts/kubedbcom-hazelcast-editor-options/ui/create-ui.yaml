@@ -26,10 +26,6 @@ step:
     loader: getAdminOptions|databases/Hazelcast/mode
     schema: schema/properties/spec/properties/mode
     type: radio
-    watcher:
-      func: toggleTls
-      paths:
-      - schema/properties/spec/properties/mode
   - if:
       name: isEqualToModelPathValue|Replicaset|/spec/mode
       type: function
@@ -242,6 +238,21 @@ step:
     type: block-layout
   - description: Enable Backup, Monitoring, TLS etc.
     elements:
+    - elements:
+      - init:
+          type: func
+          value: setMonitoring
+        label: Enable Monitoring?
+        schema: temp/monitoring
+        type: switch
+        watcher:
+          func: updateAlertValue
+          paths:
+          - temp/monitoring
+      if:
+        name: isToggleOn|monitoring
+        type: function
+      type: block-layout
     - if:
         name: returnFalse
         type: function

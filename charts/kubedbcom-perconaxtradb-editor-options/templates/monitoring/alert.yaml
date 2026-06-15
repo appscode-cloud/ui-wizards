@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-perconaxtradb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: perconaxtradb.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlInstanceDown.enabled .rules.mysqlInstanceDown.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlInstanceDown")) -}}
     - alert: PerconaXtraDBInstanceDown
       expr: mysql_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.mysqlInstanceDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: PerconaXtraDB instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PerconaXtraDB instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlServiceDown.enabled .rules.mysqlServiceDown.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlServiceDown")) -}}
     - alert: PerconaXtraDBServiceDown
       expr: sum by (service) (mysql_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
       for: {{ .rules.mysqlServiceDown.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: PerconaXtraDB service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PerconaXtraDB service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlTooManyConnections.enabled .rules.mysqlTooManyConnections.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlTooManyConnections")) -}}
     - alert: PerconaXtraDBTooManyConnections
       expr: max_over_time(mysql_global_status_threads_connected{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / mysql_global_variables_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.mysqlTooManyConnections.val}}
       for: {{ .rules.mysqlTooManyConnections.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: PerconaXtraDB too many connections (> {{.rules.mysqlTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.rules.mysqlTooManyConnections.val}}% of PerconaXtraDB connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighThreadsRunning.enabled .rules.mysqlHighThreadsRunning.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighThreadsRunning")) -}}
     - alert: PerconaXtraDBHighThreadsRunning
       expr: max_over_time(mysql_global_status_threads_running{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / mysql_global_variables_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.mysqlHighThreadsRunning.val}}
       for: {{ .rules.mysqlHighThreadsRunning.duration }}
@@ -66,7 +66,7 @@ spec:
         summary: PerconaXtraDB high threads running (> {{.rules.mysqlHighThreadsRunning.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.rules.mysqlHighThreadsRunning.val}}% of PerconaXtraDB threads are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlSlowQueries.enabled .rules.mysqlSlowQueries.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlSlowQueries")) -}}
     - alert: PerconaXtraDBSlowQueries
       expr: increase(mysql_global_status_slow_queries{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > 0
       for: {{ .rules.mysqlSlowQueries.duration }}
@@ -77,7 +77,7 @@ spec:
         summary: PerconaXtraDB slow queries on (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PerconaXtraDB server perconaxtradb has some new slow query.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlInnoDBLogWaits.enabled .rules.mysqlInnoDBLogWaits.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlInnoDBLogWaits")) -}}
     - alert: PerconaXtraDBInnoDBLogWaits
       expr: rate(mysql_global_status_innodb_log_waits{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[15m]) > {{.rules.mysqlInnoDBLogWaits.val}}
       for: {{ .rules.mysqlInnoDBLogWaits.duration }}
@@ -88,7 +88,7 @@ spec:
         summary: PerconaXtraDB InnoDB log waits (> {{.rules.mysqlInnoDBLogWaits.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PerconaXtraDB innodb log writes stalling\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlRestarted.enabled .rules.mysqlRestarted.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlRestarted")) -}}
     - alert: PerconaXtraDBRestarted
       expr: mysql_global_status_uptime{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{.rules.mysqlRestarted.val}}
       for: {{ .rules.mysqlRestarted.duration }}
@@ -99,7 +99,7 @@ spec:
         summary: PerconaXtraDB restarted ({{.rules.mysqlRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PerconaXtraDB restarted\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighQPS.enabled .rules.mysqlHighQPS.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighQPS")) -}}
     - alert: PerconaXtraDBHighQPS
       expr: rate(mysql_global_status_queries{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.mysqlHighQPS.val}}
       for: {{ .rules.mysqlHighQPS.duration }}
@@ -110,7 +110,7 @@ spec:
         summary: PerconaXtraDB has high queries per second (> {{.rules.mysqlHighQPS.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PerconaXtraDB has high QPS on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighIncomingBytes.enabled .rules.mysqlHighIncomingBytes.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighIncomingBytes")) -}}
     - alert: PerconaXtraDBHighIncomingBytes
       expr: rate(mysql_global_status_bytes_received{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.mysqlHighIncomingBytes.val}}
       for: {{ .rules.mysqlHighIncomingBytes.duration }}
@@ -121,7 +121,7 @@ spec:
         summary: PerconaXtraDB has high incoming bytes second (> {{.rules.mysqlHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PerconaXtraDB has high incoming bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighOutgoingBytes.enabled .rules.mysqlHighOutgoingBytes.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighOutgoingBytes")) -}}
     - alert: PerconaXtraDBHighOutgoingBytes
       expr: rate(mysql_global_status_bytes_sent{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.mysqlHighOutgoingBytes.val}}
       for: {{ .rules.mysqlHighOutgoingBytes.duration }}
@@ -132,7 +132,7 @@ spec:
         summary: PerconaXtraDB has high outgoing bytes second (> {{.rules.mysqlHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PerconaXtraDB has high outgoing bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlTooManyOpenFiles.enabled .rules.mysqlTooManyOpenFiles.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlTooManyOpenFiles")) -}}
     - alert: PerconaXtraDBTooManyOpenFiles
       expr: max_over_time(mysql_global_status_open_files{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / mysql_global_variables_open_files_limit{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.mysqlTooManyOpenFiles.val}}
       for: {{ .rules.mysqlTooManyOpenFiles.duration }}
@@ -144,7 +144,7 @@ spec:
         description: "PerconaXtraDB too many opened files on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskUsageHigh.val }}
@@ -156,7 +156,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskAlmostFull.val }}
@@ -176,7 +176,7 @@ spec:
   {{ if (include "kubedbcom-perconaxtradb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: perconaxtradb.cluster.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.galeraReplicationLatencyTooLong.enabled .rules.galeraReplicationLatencyTooLong.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "galeraReplicationLatencyTooLong")) -}}
     - alert: GaleraReplicationLatencyTooLong
       expr: mysql_galera_evs_repl_latency_avg_seconds{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.galeraReplicationLatencyTooLong.val}}
       for: {{ .rules.galeraReplicationLatencyTooLong.duration }}
@@ -195,7 +195,7 @@ spec:
   {{ if (include "kubedbcom-perconaxtradb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: perconaxtradb.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBPerconaXtraDBPhaseNotReady
       expr: kubedb_com_perconaxtradb_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -206,7 +206,7 @@ spec:
         summary: KubeDB PerconaXtraDB Phase NotReady (perconaxtradb {{`{{`}} $labels.perconaxtradb {{`}}`}})
         description: "KubeDB PerconaXtraDB Phase not ready on {{`{{`}} $labels.perconaxtradb {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBPerconaXtraDBPhaseCritical
       expr: kubedb_com_perconaxtradb_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
@@ -225,7 +225,7 @@ spec:
   {{ if (include "kubedbcom-perconaxtradb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: perconaxtradb.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestOnProgress")) -}}
     - alert: KubeDBPerconaXtraDBOpsRequestOnProgress
       expr: ops_kubedb_com_perconaxtradbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestOnProgress.duration }}
@@ -236,7 +236,7 @@ spec:
         summary: PerconaXtraDBOpsRequest on progress (perconaxtradbopsrequest {{`{{`}} $labels.perconaxtradbopsrequest {{`}}`}})
         description: "PerconaXtraDBOpsRequest {{`{{`}} $labels.perconaxtradbopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestStatusProgressingToLong")) -}}
     - alert: KubeDBPerconaXtraDBOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_perconaxtradbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
@@ -247,7 +247,7 @@ spec:
         summary: PerconaXtraDBOpsRequest is in progressing status for too long (perconaxtradbopsrequest {{`{{`}} $labels.perconaxtradbopsrequest {{`}}`}})
         description: "PerconaXtraDBOpsRequest {{`{{`}} $labels.perconaxtradbopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestFailed")) -}}
     - alert: KubeDBPerconaXtraDBOpsRequestFailed
       expr: ops_kubedb_com_perconaxtradbopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestFailed.duration }}
@@ -266,7 +266,7 @@ spec:
   {{ if (include "kubedbcom-perconaxtradb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: perconaxtradb.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: PerconaXtraDBStashBackupSessionFailed
       expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.backupSessionFailed.duration }}
@@ -277,7 +277,7 @@ spec:
         summary: PerconaXtraDB Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PerconaXtraDB Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: PerconaXtraDBStashRestoreSessionFailed
       expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -288,7 +288,7 @@ spec:
         summary: PerconaXtraDB Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PerconaXtraDB Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: PerconaXtraDBStashNoBackupSessionForTooLong
       expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -299,7 +299,7 @@ spec:
         summary: PerconaXtraDB Stash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PerconaXtraDB Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: PerconaXtraDBStashRepositoryCorrupted
       expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -310,7 +310,7 @@ spec:
         summary: PerconaXtraDB Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PerconaXtraDB Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: PerconaXtraDBStashRepositoryStorageRunningLow
       expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -321,7 +321,7 @@ spec:
         summary: PerconaXtraDB Stash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PerconaXtraDB Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: PerconaXtraDBStashBackupSessionPeriodTooLong
       expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -332,7 +332,7 @@ spec:
         summary:  PerconaXtraDB Stash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PerconaXtraDB Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: PerconaXtraDBStashRestoreSessionPeriodTooLong
       expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}
@@ -351,7 +351,7 @@ spec:
   {{ if (include "kubedbcom-perconaxtradb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: perconaxtradb.schemaManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaPendingForTooLong.enabled .rules.schemaPendingForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaPendingForTooLong")) -}}
     - alert: KubeDBPerconaXtraDBSchemaPendingForTooLong
       expr: schema_kubedb_com_perconaxtradbdatabase_status_phase{phase="Pending",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaPendingForTooLong.duration }}
@@ -362,7 +362,7 @@ spec:
         summary: KubeDB schema pending for too long for (perconaxtradbdatabase {{`{{`}} $labels.perconaxtradbdatabase {{`}}`}})
         description: "KubeDB schema pending for too long.\n {{`{{`}} $labels.perconaxtradbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaInProgressForTooLong.enabled .rules.schemaInProgressForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaInProgressForTooLong")) -}}
     - alert: KubeDBPerconaXtraDBSchemaInProgressForTooLong
       expr: schema_kubedb_com_perconaxtradbdatabase_status_phase{phase="InProgress",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaInProgressForTooLong.duration }}
@@ -373,7 +373,7 @@ spec:
         summary: KubeDB schema is in progress for too long for (perconaxtradbdatabase {{`{{`}} $labels.perconaxtradbdatabase {{`}}`}})
         description: "KubeDB schema is in progress for too long.\n {{`{{`}} $labels.perconaxtradbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaTerminatingForTooLong.enabled .rules.schemaTerminatingForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaTerminatingForTooLong")) -}}
     - alert: KubeDBPerconaXtraDBSchemaTerminatingForTooLong
       expr: schema_kubedb_com_perconaxtradbdatabase_status_phase{phase="Terminating",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaTerminatingForTooLong.duration }}
@@ -384,7 +384,7 @@ spec:
         summary: KubeDB schema terminating for too long for (perconaxtradbdatabase {{`{{`}} $labels.perconaxtradbdatabase {{`}}`}})
         description: "KubeDB schema terminating for too long.\n {{`{{`}} $labels.perconaxtradbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaFailed.enabled .rules.schemaFailed.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaFailed")) -}}
     - alert: KubeDBPerconaXtraDBSchemaFailed
       expr: schema_kubedb_com_perconaxtradbdatabase_status_phase{phase="Failed",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaFailed.duration }}
@@ -395,7 +395,7 @@ spec:
         summary: KubeDB schema failed for (perconaxtradbdatabase {{`{{`}} $labels.perconaxtradbdatabase {{`}}`}})
         description: "KubeDB schema failed.\n {{`{{`}} $labels.perconaxtradbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaExpired.enabled .rules.schemaExpired.severity)) -}}
+    {{ if (include "kubedbcom-perconaxtradb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaExpired")) -}}
     - alert: KubeDBPerconaXtraDBSchemaExpired
       expr: schema_kubedb_com_perconaxtradbdatabase_status_phase{phase="Expired",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaExpired.duration }}

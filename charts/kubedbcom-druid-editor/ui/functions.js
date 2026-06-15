@@ -653,10 +653,9 @@ export const useFunc = (model) => {
   }
 
   function showScheduleBackup() {
-    // watchDependency('discriminator#/scheduleBackup')
-    const scheduleBackup = getValue(discriminator, '/scheduleBackup')
-    if (scheduleBackup === 'yes') return true
-    else return false
+    const operationQuery = storeGet('/route/params/actions') || ''
+    const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
+    return !isBackupOperation
   }
 
   // backup configuration form
@@ -1049,6 +1048,16 @@ export const useFunc = (model) => {
     const contex = getValue(discriminator, '/backupConfigContext')
     const configName = getValue(discriminator, '/config')
     return !!configName && contex === 'Modify'
+  }
+
+  function setPausedValue() {
+    const backupConfig = storeGet('backup/backupConfigurations') || []
+    const selectedConfigName = getValue(discriminator, '/config')
+    const namespace = storeGet('/route/query/namespace')
+    const selectedConfig = backupConfig.find(
+      (item) => item.metadata.name === selectedConfigName && item.metadata.namespace === namespace,
+    )
+    return !!selectedConfig?.spec?.paused
   }
 
   function showConfigList() {
@@ -2057,6 +2066,7 @@ export const useFunc = (model) => {
     initRepositoryChoiseForEdit,
     onRepositoryChoiseChange,
     onRepositoryNameChange,
+    setPausedValue,
 
     // KubeStash Backup Functions
     initBackupData,

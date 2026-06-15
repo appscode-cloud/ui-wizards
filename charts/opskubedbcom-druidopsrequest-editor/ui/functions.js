@@ -465,6 +465,7 @@ export const useFunc = (model) => {
       dbDetails?.spec?.tls
     )
   }
+  setDiscriminatorValue('/filteredVersion', [])
 
   async function getDbVersions() {
     const owner = storeGet('/route/params/user')
@@ -532,6 +533,8 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
+      setDiscriminatorValue('/filteredVersion', filteredDruidVersions)
+
       return filteredDruidVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
@@ -629,6 +632,26 @@ export const useFunc = (model) => {
     Object.keys(reqTypeMapping).forEach((key) => {
       if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
     })
+  }
+
+  function isVersionEmpty() {
+    const val = getValue(discriminator, '/filteredVersion')
+    return val.length === 0
+  }
+
+  function getVersionInfo() {
+    const filteredVersion = getValue(discriminator, '/filteredVersion')
+    if (filteredVersion.length) return ''
+
+    let txt = 'No versions from this list can be selected as the target version: [ '
+
+    presetVersions.forEach((v, idx) => {
+      txt = `${txt}"${v}"`
+      if (idx !== presetVersions.length - 1) txt = txt + ', '
+      else txt = txt + ' ]'
+    })
+
+    return txt
   }
 
   function ifRequestTypeEqualsTo(type) {
@@ -768,17 +791,7 @@ export const useFunc = (model) => {
     const { spec } = dbDetails || {}
     const { topology } = spec || {}
 
-    if (mode === 'combined') {
-      // For combined mode, check if topology doesn't exist
-      const isCombined = !topology
-
-      // Clear unused topology configurations when in combined mode
-      if (isCombined && section) {
-        clearOpsReqSpec(getValue, commit, 'combined', section)
-      }
-
-      return isCombined
-    } else if (mode === 'topology') {
+    if (mode === 'topology') {
       // For topology mode, check if the specific node type exists
       const hasTopology = !!(topology && topology[type])
 
@@ -2087,6 +2100,22 @@ export const useFunc = (model) => {
       })
   }
 
+  function isMachineValid(type) {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const containers = dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers || []
+    const kind = dbDetails?.kind
+    const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+    const limits = resource[0]?.resources?.requests || {}
+
+    const selectedMachine = getValue(discriminator, `/machine-${type}`)
+    const selectedLimits = { cpu: selectedMachine?.cpu, memory: selectedMachine?.memory }
+
+    if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
+      return 'Resource limits are same as current machine configuration. Please select different resources or machine preset.'
+    }
+    return false
+  }
+
   // ============================================================
   // RETURN ALL EXPORTED FUNCTIONS
   // ============================================================
@@ -2120,6 +2149,8 @@ export const useFunc = (model) => {
     isNamespaceDisabled,
     isDatabaseRefDisabled,
     isDbDetailsLoading,
+    isVersionEmpty,
+    getVersionInfo,
 
     // Database type functions
     getDbType,
@@ -2139,6 +2170,7 @@ export const useFunc = (model) => {
     isVerticalScaleTopologyRequired,
     setExporter,
     onExporterResourceChange,
+    isMachineValid,
 
     // Volume expansion functions
     checkVolume,

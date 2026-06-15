@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-redis-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: redis.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisDown.enabled .rules.redisDown.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "redisDown")) -}}
     - alert: RedisDown
       expr: redis_up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.redisDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: Redis instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Redis instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisMissingMaster.enabled .rules.redisMissingMaster.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "redisMissingMaster")) -}}
     - alert: RedisMissingMaster
       expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}) or vector(0)) < {{.rules.redisMissingMaster.val}}
       for: {{ .rules.redisMissingMaster.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: Redis missing master (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Redis cluster has less than expected amount of node marked as master\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisTooManyConnections.enabled .rules.redisTooManyConnections.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "redisTooManyConnections")) -}}
     - alert: RedisTooManyConnections
       expr: redis_connected_clients{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.redisTooManyConnections.val}}
       for: {{ .rules.redisTooManyConnections.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: Redis too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Redis instance has too many connections . More than {{.rules.redisTooManyConnections.val}} of Redis connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisTooManyMasters.enabled .rules.redisTooManyMasters.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "redisTooManyMasters")) -}}
     - alert: RedisTooManyMasters
       expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"})) > {{.rules.redisTooManyMasters.val}}
       for: {{ .rules.redisTooManyMasters.duration }}
@@ -66,7 +66,7 @@ spec:
         summary: Redis too many master nodes (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Redis cluster has too many nodes marked as master. \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.redisDisconnectedSlaves.enabled .rules.redisDisconnectedSlaves.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "redisDisconnectedSlaves")) -}}
     - alert: RedisDisconnectedSlaves
       expr: count without (instance) (redis_connected_slaves{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}) - sum without (instance) (redis_connected_slaves{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}) - 1 > {{.rules.redisDisconnectedSlaves.val}}
       for: {{ .rules.redisDisconnectedSlaves.duration }}
@@ -78,7 +78,7 @@ spec:
         description: "Redis not replicating for all slaves. Consider reviewing the redis replication status.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskUsageHigh.val }}
@@ -90,7 +90,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskAlmostFull.val }}
@@ -110,7 +110,7 @@ spec:
   {{ if (include "kubedbcom-redis-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: redis.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBRedisPhaseNotReady
       expr: kubedb_com_redis_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -121,7 +121,7 @@ spec:
         summary: KubeDB Redis Phase NotReady (redis {{`{{`}} $labels.redis {{`}}`}})
         description: "KubeDB Redis Phase not ready on {{`{{`}} $labels.redis {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBRedisPhaseCritical
       expr: kubedb_com_redis_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
@@ -140,7 +140,7 @@ spec:
   {{ if (include "kubedbcom-redis-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: redis.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestOnProgress")) -}}
     - alert: KubeDBRedisOpsRequestOnProgress
       expr: ops_kubedb_com_redisopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestOnProgress.duration }}
@@ -151,7 +151,7 @@ spec:
         summary: RedisOpsRequest on progress (redisopsrequest {{`{{`}} $labels.redisopsrequest {{`}}`}})
         description: "RedisOpsRequest {{`{{`}} $labels.redisopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestStatusProgressingToLong")) -}}
     - alert: KubeDBRedisOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_redisopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
@@ -162,7 +162,7 @@ spec:
         summary: RedisOpsRequest is in progressing status for too long (redisopsrequest {{`{{`}} $labels.redisopsrequest {{`}}`}})
         description: "RedisOpsRequest {{`{{`}} $labels.redisopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestFailed")) -}}
     - alert: KubeDBRedisOpsRequestFailed
       expr: ops_kubedb_com_redisopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestFailed.duration }}
@@ -181,7 +181,7 @@ spec:
   {{ if (include "kubedbcom-redis-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: redis.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: RedisStashBackupSessionFailed
       expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.backupSessionFailed.duration }}
@@ -192,7 +192,7 @@ spec:
         summary: Redis Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: RedisStashRestoreSessionFailed
       expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -203,7 +203,7 @@ spec:
         summary: Redis Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: RedisStashNoBackupSessionForTooLong
       expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -214,7 +214,7 @@ spec:
         summary: Redis Stash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: RedisStashRepositoryCorrupted
       expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -225,7 +225,7 @@ spec:
         summary: Redis Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: RedisStashRepositoryStorageRunningLow
       expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -236,7 +236,7 @@ spec:
         summary: Redis Stash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: RedisStashBackupSessionPeriodTooLong
       expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -247,7 +247,7 @@ spec:
         summary:  Redis Stash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: RedisStashRestoreSessionPeriodTooLong
       expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}
@@ -266,7 +266,7 @@ spec:
   {{ if (include "kubedbcom-redis-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: redis.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: RedisKubeStashBackupSessionFailed
       expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Redis", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.backupSessionFailed.duration }}
@@ -277,7 +277,7 @@ spec:
         summary: Redis KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: RedisKubeStashRestoreSessionFailed
       expr: core_kubestash_com_restoresession_phase{target_kind="Redis", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -288,7 +288,7 @@ spec:
         summary: Redis KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: RedisKubeStashNoBackupSessionForTooLong
       expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Redis", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -299,7 +299,7 @@ spec:
         summary: Redis KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: RedisKubeStashRepositoryCorrupted
       expr: storage_kubestash_com_repository_info{target_kind="Redis", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -310,7 +310,7 @@ spec:
         summary: Redis KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: RedisKubeStashRepositoryStorageRunningLow
       expr: storage_kubestash_com_repository_size_bytes{target_kind="Redis", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -321,7 +321,7 @@ spec:
         summary: Redis KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: RedisKubeStashBackupSessionPeriodTooLong
       expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Redis", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -332,7 +332,7 @@ spec:
         summary:  Redis KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-redis-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: RedisKubeStashRestoreSessionPeriodTooLong
       expr: core_kubestash_com_restoresession_duration_seconds{target_kind="Redis", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}
