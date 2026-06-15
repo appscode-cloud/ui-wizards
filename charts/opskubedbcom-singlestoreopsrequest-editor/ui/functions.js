@@ -306,7 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
-const configSecretKeys = ['singlestore.cnf']
+const configSecretKeys = ['kubedb-user.cnf']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -968,7 +968,7 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
-            keys: ['singlestore.cnf'],
+            keys: ['kubedb-user.cnf'],
           },
         },
       )
