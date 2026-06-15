@@ -306,7 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
-const configSecretKeys = ['cassandra.cnf']
+const configSecretKeys = ['cassandra.yaml']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -770,7 +770,8 @@ export const useFunc = (model) => {
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const spec = dbDetails?.spec?.podTemplate?.spec
+    const limits = spec?.resources?.requests || spec?.containers?.[0]?.resources?.requests || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -908,10 +909,10 @@ export const useFunc = (model) => {
 
     try {
       const resp = await axios.post(
-        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseinfos`,
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseconfigurations`,
         {
           apiVersion: 'ui.kubedb.com/v1alpha1',
-          kind: 'DatabaseInfo',
+          kind: 'DatabaseConfiguration',
           request: {
             source: {
               ref: {
@@ -925,7 +926,7 @@ export const useFunc = (model) => {
                 version: dbVersion,
               },
             },
-            keys: ['cassandra.cnf'],
+            keys: ['cassandra.yaml'],
           },
         },
       )
@@ -1816,7 +1817,8 @@ export const useFunc = (model) => {
 
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const spec = dbDetails?.spec?.podTemplate?.spec
+    const limits = spec?.resources?.requests || spec?.containers?.[0]?.resources?.requests || {}
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
