@@ -708,6 +708,22 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
+    // Commit versions to model so spec.admin.databases.DocumentDB is never nil
+    // when resourcecalculator fires (triggered by insights panel on form open).
+    commit('wizard/model$update', {
+      path: '/spec/admin/databases/DocumentDB/versions/available',
+      value: versions,
+      force: true,
+    })
+    const currentVersion = getValue(model, '/spec/admin/databases/DocumentDB/versions/default') || ''
+    if (!currentVersion && versions.length >= 1) {
+      commit('wizard/model$update', {
+        path: '/spec/admin/databases/DocumentDB/versions/default',
+        value: versions[0],
+        force: true,
+      })
+    }
+
     commit('wizard/model$update', {
       path: '/spec/deletionPolicy',
       value: getDefault('deletionPolicy'),
