@@ -32,12 +32,17 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-aggregator-min', '')
-  setDiscriminatorValue('/allowedMachine-aggregator-max', '')
-  setDiscriminatorValue('/allowedMachine-leaf-min', '')
-  setDiscriminatorValue('/allowedMachine-leaf-max', '')
-  setDiscriminatorValue('/allowedMachine-node-min', '')
-  setDiscriminatorValue('/allowedMachine-node-max', '')
+  setDiscriminatorValue('/allowedMachine-standalone-min', '')
+  setDiscriminatorValue('/allowedMachine-standalone-max', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
+  setDiscriminatorValue('/allowedMachine-shard-min', '')
+  setDiscriminatorValue('/allowedMachine-shard-max', '')
+  setDiscriminatorValue('/allowedMachine-configServer-min', '')
+  setDiscriminatorValue('/allowedMachine-configServer-max', '')
+  setDiscriminatorValue('/allowedMachine-mongos-min', '')
+  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  let showStoragememory = false
 
   function initScheduleBackupForEdit() {
     const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
@@ -68,8 +73,8 @@ export const useFunc = (model) => {
       // delete stashAppscodeComBackupConfiguration
       commit('wizard/model$delete', '/resources/stashAppscodeComBackupConfiguration')
       commit('wizard/model$delete', '/resources/stashAppscodeComRepository_repo')
-      // delete annotation from kubedbComSinglestore annotation
-      deleteKubeDbComSinglestoreDbAnnotation(getValue, model, commit)
+      // delete annotation from kubedbComCassandra annotation
+      deleteKubeDbComCassandraAnnotation(getValue, model, commit)
     } else {
       const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model)
 
@@ -105,31 +110,10 @@ export const useFunc = (model) => {
       model,
       '/resources/stashAppscodeComBackupConfiguration',
     )
+    const kubedbComCassandraAnnotations =
+      getValue(model, '/resources/kubedbComCassandra/metadata/annotations') || {}
 
-    const coreKubestashComBackupConfiguration = getValue(
-      model,
-      '/resources/coreKubestashComBackupConfiguration',
-    )
-    const kubeStashTarget = coreKubestashComBackupConfiguration?.spec?.target
-
-    const singlestoreDb = getValue(model, '/resources/kubedbComSinglestore')
-    const singlestoreApiGroup = singlestoreDb?.apiVersion?.split('/')?.at(0)
-
-    let isKubeStash = false
-    if (
-      kubeStashTarget &&
-      singlestoreDb?.kind === kubeStashTarget?.kind &&
-      singlestoreDb?.metadata?.name === kubeStashTarget?.name &&
-      singlestoreDb?.metadata?.namespace === kubeStashTarget?.namespace &&
-      singlestoreApiGroup === kubeStashTarget?.apiGroup
-    ) {
-      isKubeStash = true
-    }
-
-    const kubedbComSinglestoreAnnotations =
-      getValue(model, '/resources/kubedbComSinglestore/metadata/annotations') || {}
-
-    const isBluePrint = Object.keys(kubedbComSinglestoreAnnotations).some(
+    const isBluePrint = Object.keys(kubedbComCassandraAnnotations).some(
       (k) =>
         k === 'stash.appscode.com/backup-blueprint' ||
         k === 'stash.appscode.com/schedule' ||
@@ -139,13 +123,11 @@ export const useFunc = (model) => {
     return {
       stashAppscodeComBackupConfiguration,
       isBluePrint,
-      isKubeStash,
     }
   }
 
-  function deleteKubeDbComSinglestoreDbAnnotation(getValue, model, commit) {
-    const annotations =
-      getValue(model, '/resources/kubedbComSinglestore/metadata/annotations') || {}
+  function deleteKubeDbComCassandraAnnotation(getValue, model, commit) {
+    const annotations = getValue(model, '/resources/kubedbComCassandra/metadata/annotations') || {}
     const filteredKeyList =
       Object.keys(annotations).filter(
         (k) =>
@@ -158,7 +140,7 @@ export const useFunc = (model) => {
       filteredAnnotations[k] = annotations[k]
     })
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/metadata/annotations',
+      path: '/resources/kubedbComCassandra/metadata/annotations',
       value: filteredAnnotations,
     })
   }
@@ -182,7 +164,6 @@ export const useFunc = (model) => {
   let initialArchiver = {}
   let isArchiverAvailable = false
   let archiverObjectToCommit = {}
-  let instance = {}
 
   async function initBackupData() {
     // set initial model for further usage
@@ -195,7 +176,7 @@ export const useFunc = (model) => {
     const { name, cluster, user, group, resource, spoke } = storeGet('/route/params')
     const namespace = storeGet('/route/query/namespace')
     const kind = storeGet('/resource/layout/result/resource/kind')
-    dbResource = getValue(model, '/resources/kubedbComSinglestore')
+    dbResource = getValue(model, '/resources/kubedbComCassandra')
     initialDbMetadata = objectCopy(dbResource.metadata)
     initialArchiver = dbResource.spec?.archiver ? objectCopy(dbResource.spec?.archiver) : undefined
 
@@ -353,7 +334,7 @@ export const useFunc = (model) => {
     }
     commit('wizard/model$delete', '/context')
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore',
+      path: '/resources/kubedbComCassandra',
       value: objectCopy(dbResource),
       force: true,
     })
@@ -388,7 +369,7 @@ export const useFunc = (model) => {
 
   function onArchiverChange() {
     const archiverSwitch = getValue(discriminator, '/archiverEnabled')
-    const path = 'resources/kubedbComSinglestore/spec/archiver'
+    const path = 'resources/kubedbComCassandra/spec/archiver'
     if (archiverSwitch) {
       commit('wizard/model$update', {
         path: path,
@@ -411,7 +392,7 @@ export const useFunc = (model) => {
     }
 
     commit('wizard/model$update', {
-      path: `/resources/kubedbComSinglestore/metadata/${type}`,
+      path: `/resources/kubedbComCassandra/metadata/${type}`,
       value: obj,
       force: true,
     })
@@ -426,7 +407,7 @@ export const useFunc = (model) => {
     } else delete obj['kubedb.com/archiver']
 
     commit('wizard/model$update', {
-      path: `/resources/kubedbComSinglestore/metadata/${type}`,
+      path: `/resources/kubedbComCassandra/metadata/${type}`,
       value: obj,
       force: true,
     })
@@ -553,54 +534,20 @@ export const useFunc = (model) => {
     }
   }
 
-  function addOrRemoveBinding() {
-    const value = getValue(discriminator, `/binding`)
-    const dbName = getValue(model, '/metadata/release/name')
-    const dbNamespace = getValue(model, '/metadata/release/namespace')
-    const labels = getValue(model, '/resources/kubedbComSinglestore/metadata/labels')
-    const bindingValues = {
-      apiVersion: 'catalog.appscode.com/v1alpha1',
-      kind: 'SinglestoreBinding',
-      metadata: {
-        labels,
-        name: dbName,
-        namespace: dbNamespace,
-      },
-      spec: {
-        sourceRef: {
-          name: dbName,
-          namespace: dbNamespace,
-        },
-      },
-    }
-
-    if (value) {
-      commit('wizard/model$update', {
-        path: '/resources/catalogAppscodeComSinglestoreBinding',
-        value: bindingValues,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', '/resources/catalogAppscodeComSinglestoreBinding')
-    }
-  }
-
-  function isBindingAlreadyOn() {
-    const value = getValue(model, '/resources')
-    const keys = Object.keys(value)
-    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComSinglestoreBinding')
-    return isExposeBinding
-  }
-
   function objectCopy(obj) {
     const temp = JSON.stringify(obj)
     return JSON.parse(temp)
   }
 
-  /********** Compute Autoscaling ********** */
+  /*********** Compute Autoscaling ************/
 
   let autoscaleType = ''
   let dbDetails = {}
+  let instance = ''
+
+  function isKubedb() {
+    return !!storeGet('/route/params/actions')
+  }
 
   function isConsole() {
     const isKube = isKubedb()
@@ -608,7 +555,7 @@ export const useFunc = (model) => {
     if (isKube) {
       const dbName = storeGet('/route/params/name') || ''
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
+        path: '/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name',
         value: dbName,
         force: true,
       })
@@ -620,14 +567,14 @@ export const useFunc = (model) => {
       const date = Math.floor(Date.now() / 1000)
       const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/name',
+        path: '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/name',
         value: modifiedName,
         force: true,
       })
       const namespace = storeGet('/route/query/namespace') || ''
       if (namespace) {
         commit('wizard/model$update', {
-          path: '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace',
+          path: '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/namespace',
           value: namespace,
           force: true,
         })
@@ -635,24 +582,6 @@ export const useFunc = (model) => {
     }
 
     return !isKube
-  }
-
-  function isKubedb() {
-    return !!storeGet('/route/params/actions')
-  }
-
-  function showOpsRequestOptions() {
-    if (isKubedb() === true) return true
-    // watchDependency(
-    //   'model#/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
-    // )
-    // watchDependency('discriminator#/autoscalingType')
-    return (
-      !!getValue(
-        model,
-        '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
-      ) && !!getValue(discriminator, '/autoscalingType')
-    )
   }
 
   async function getNamespaces() {
@@ -674,17 +603,36 @@ export const useFunc = (model) => {
     })
   }
 
-  async function getDbs() {
-    // watchDependency('model#/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace')
+  function isRancherManaged() {
+    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+    const found = managers.find((item) => item === 'Rancher')
+    return !!found
+  }
+
+  function onNamespaceChange() {
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const agent = getValue(model, '/resources/kubedbComCassandra/spec/monitor/agent')
+    if (agent === 'prometheus.io') {
+      commit('wizard/model$update', {
+        path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
+        value: [namespace],
+        force: true,
+      })
+    }
+  }
+
+  async function getCassandraDbs() {
+    // watchDependency('model#/resources/autoscalingKubedbComCassandraAutoscaler/metadata/namespace')
     const namespace = getValue(
       model,
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace',
+      '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/namespace',
     )
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-
+    const storageEngine = getValue(model, '/resources/kubedbComCassandra/spec/storageEngine')
+    showStoragememory = storageEngine === 'inMemory'
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/singlestores`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/cassandras`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -700,67 +648,9 @@ export const useFunc = (model) => {
       }
     })
   }
-
-  async function getDbDetails() {
-    const annotations = getValue(
-      model,
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/annotations',
-    )
-    instance = annotations['kubernetes.io/instance-type']
-    const owner = storeGet('/route/params/user') || ''
-    const cluster = storeGet('/route/params/cluster') || ''
-    const namespace =
-      storeGet('/route/query/namespace') ||
-      getValue(model, '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace') ||
-      ''
-    const name =
-      storeGet('/route/params/name') ||
-      getValue(
-        model,
-        '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
-      ) ||
-      ''
-
-    if (namespace && name) {
-      try {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/singlestores/${name}`,
-        )
-        dbDetails = resp.data || {}
-        setDiscriminatorValue('/dbDetails', true)
-      } catch (e) {
-        console.log(e)
-      }
-    }
-
-    commit('wizard/model$update', {
-      path: `/metadata/release/name`,
-      value: name,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: `/metadata/release/namespace`,
-      value: namespace,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name`,
-      value: name,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: `/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/labels`,
-      value: dbDetails.metadata.labels,
-      force: true,
-    })
-  }
-
   function initMetadata() {
     const dbName =
-      getValue(
-        model,
-        '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
-      ) || ''
+      getValue(model, '/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name') || ''
     const type = getValue(discriminator, '/autoscalingType') || ''
     const date = Math.floor(Date.now() / 1000)
     const resource = storeGet('/route/params/resource')
@@ -768,36 +658,179 @@ export const useFunc = (model) => {
     const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
     if (modifiedName)
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/name',
+        path: '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/name',
         value: modifiedName,
         force: true,
       })
 
-    // delete the other type object from model
+    // delete the other type object from vuex wizard model
     if (type === 'compute')
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/storage',
-      )
+      commit('wizard/model$delete', '/resources/autoscalingKubedbComCassandraAutoscaler/spec/storage')
     if (type === 'storage')
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute',
-      )
+      commit('wizard/model$delete', '/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute')
   }
 
-  function onAutoscalerNamespaceChange() {
-    const namespace = getValue(
-      model,
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace',
-    )
-    if (!namespace) {
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
-      )
+  async function fetchTopologyMachines() {
+    const annotations =
+      getValue(model, '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/annotations') || {}
+    instance = annotations['kubernetes.io/instance-type']
+    const user = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    if (instance) {
+      try {
+        const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
+        const resp = await axios.get(url)
+
+        const nodeGroups = resp.data?.spec?.nodeGroups || []
+        setDiscriminatorValue('/topologyMachines', nodeGroups)
+        return nodeGroups
+      } catch (e) {
+        console.log(e)
+        return []
+      }
     }
   }
+
+  function setTrigger(path) {
+    let value = getValue(model, `/resources/${path}`)
+    return value === 'On'
+  }
+
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComCassandraAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
+  }
+
+  function hasAnnotations() {
+    const annotations =
+      getValue(model, '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/annotations') || {}
+    const instance = annotations['kubernetes.io/instance-type']
+
+    return !!instance
+  }
+
+  function setAllowedMachine(minmax) {
+    const mx = instance?.includes(',') ? instance.split(',')[1] : ''
+    const mn = instance?.includes(',') ? instance.split(',')[0] : ''
+    const machineName = minmax === 'min' ? mn : mx
+
+    // Find the machine details from topologyMachines
+    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+    const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
+
+    // Return object with machine, cpu, memory (expected format for machine-compare init)
+    if (machineData) {
+      return {
+        machine: machineName,
+        cpu: machineData.allocatable?.cpu,
+        memory: machineData.allocatable?.memory,
+      }
+    }
+    // Return empty object if no machine found
+    return {
+      machine: machineName || '',
+      cpu: '',
+      memory: '',
+    }
+  }
+
+  function getMachines(minmax) {
+    // watchDependency('discriminator#/topologyMachines')
+    const depends = minmax === 'min' ? 'max' : 'min'
+    const dependantPath = `/allowedMachine-${depends}`
+
+    // watchDependency(`discriminator#${dependantPath}`)
+    const dependantMachineObj = getValue(discriminator, dependantPath)
+    const dependantMachine = dependantMachineObj?.machine || ''
+
+    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+
+    const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
+
+    // Return array with text and value object (expected format for machine-compare loader)
+    const machines = nodeGroups?.map((item) => {
+      const text = item.topologyValue
+      const subtext = `CPU: ${item.allocatable?.cpu}, Memory: ${item.allocatable?.memory}`
+      return {
+        text,
+        subtext,
+        value: {
+          machine: item.topologyValue,
+          cpu: item.allocatable?.cpu,
+          memory: item.allocatable?.memory,
+        },
+      }
+    })
+
+    const filteredMachine = machines?.filter((item, ind) =>
+      minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
+    )
+
+    return dependantIndex === -1 ? machines : filteredMachine
+  }
+
+  function onMachineChange(type) {
+    const annoPath = '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/annotations'
+    const annotations = getValue(model, annoPath) || {}
+    const instance = annotations['kubernetes.io/instance-type']
+
+    // Now discriminator values are objects with { machine, cpu, memory }
+    const minMachineObj = getValue(discriminator, '/allowedMachine-min')
+    const maxMachineObj = getValue(discriminator, '/allowedMachine-max')
+    const minMachine = minMachineObj?.machine || ''
+    const maxMachine = maxMachineObj?.machine || ''
+    const minMaxMachine = `${minMachine},${maxMachine}`
+    annotations['kubernetes.io/instance-type'] = minMaxMachine
+
+    // Use cpu/memory directly from the machine objects
+    const minMachineAllocatable = minMachineObj
+      ? { cpu: minMachineObj.cpu, memory: minMachineObj.memory }
+      : null
+    const maxMachineAllocatable = maxMachineObj
+      ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory }
+      : null
+    const allowedPath = `/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute/${type}`
+
+    if (minMachine && maxMachine && instance !== minMaxMachine) {
+      commit('wizard/model$update', {
+        path: `${allowedPath}/maxAllowed`,
+        value: maxMachineAllocatable,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `${allowedPath}/minAllowed`,
+        value: minMachineAllocatable,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: annoPath,
+        value: { ...annotations },
+        force: true,
+      })
+    }
+  }
+
+  function hasNoAnnotations() {
+    return !hasAnnotations()
+  }
+
+  function setControlledResources(type) {
+    const list = ['cpu', 'memory']
+    const path = `/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute/${type}/controlledResources`
+    commit('wizard/model$update', {
+      path: path,
+      value: list,
+      force: true,
+    })
+    return list
+  }
+
   async function fetchNodeTopology() {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
@@ -818,196 +851,28 @@ export const useFunc = (model) => {
 
   function isNodeTopologySelected() {
     // watchDependency(
-    //   'model#/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute/nodeTopology/name',
+    //   'model#/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute/nodeTopology/name',
     // )
     const nodeTopologyName =
       getValue(
         model,
-        '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute/nodeTopology/name',
+        '/resources/autoscalingKubedbComCassandraAutoscaler/spec/compute/nodeTopology/name',
       ) || ''
     return !!nodeTopologyName.length
   }
 
-  function setControlledResources(type) {
-    const list = ['cpu', 'memory']
-    const path = `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute/${type}/controlledResources`
-    commit('wizard/model$update', {
-      path: path,
-      value: list,
-      force: true,
-    })
-    return list
-  }
-
-  function setTrigger(path) {
-    let value = getValue(model, `/resources/${path}`)
-    return value === 'On'
-  }
-
-  function setValueFromDbDetails(path) {
-    const value = getValue(model, path)
-    return value
+  function showOpsRequestOptions() {
+    if (isKubedb() === true) return true
+    // watchDependency('model#/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name')
+    // watchDependency('discriminator#/autoscalingType')
+    return (
+      !!getValue(model, '/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name') &&
+      !!getValue(discriminator, '/autoscalingType')
+    )
   }
 
   function setApplyToIfReady() {
     return 'IfReady'
-  }
-
-  function setMetadata() {
-    const dbname = storeGet('/route/params/name') || ''
-    const namespace = storeGet('/route/query/namespace') || ''
-    const routeMode = storeGet('/route/params/mode') || ''
-    if (routeMode === 'standalone-step') {
-      commit('wizard/model$update', {
-        path: '/metadata/release/name',
-        value: dbname,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/metadata/release/namespace',
-        value: namespace,
-        force: true,
-      })
-    }
-  }
-
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
-  }
-
-  function hasAnnotations() {
-    const annotations = getValue(
-      model,
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/annotations',
-    )
-    const instance = annotations['kubernetes.io/instance-type']
-
-    return !!instance
-  }
-
-  function hasNoAnnotations() {
-    return !hasAnnotations()
-  }
-
-  function dbTypeEqualsTo(type) {
-    // watchDependency('discriminator#/dbDetails')
-
-    const { spec } = dbDetails || {}
-    const { topology } = spec || {}
-    let verd = ''
-    if (topology) verd = 'topology'
-    else {
-      verd = 'standalone'
-    }
-    clearSpecModel(verd)
-    return type === verd && spec
-  }
-
-  function clearSpecModel(dbtype) {
-    if (dbtype === 'standalone') {
-      // SingleStore standalone uses 'node'; clear topology-specific paths
-      commit(
-        'wizard/model$delete',
-        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/aggregator`,
-      )
-      commit(
-        'wizard/model$delete',
-        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/leaf`,
-      )
-    } else if (dbtype === 'topology') {
-      // SingleStore topology uses 'aggregator' + 'leaf'; clear standalone path
-      commit(
-        'wizard/model$delete',
-        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/node`,
-      )
-    }
-  }
-
-  function onMachineChange(type) {
-    const annoPath = '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/annotations'
-    const annotations = getValue(model, annoPath) || {}
-    const instance = annotations['kubernetes.io/instance-type']
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
-
-    // Now discriminator values are objects with { machine, cpu, memory }
-    const minMachineObj = getValue(discriminator, `/allowedMachine-${type}-min`)
-    const maxMachineObj = getValue(discriminator, `/allowedMachine-${type}-max`)
-    const minMachine = minMachineObj?.machine || ''
-    const maxMachine = maxMachineObj?.machine || ''
-    const minMaxMachine = `${minMachine},${maxMachine}`
-
-    parsedInstance[type] = minMaxMachine
-    const instanceString = JSON.stringify(parsedInstance)
-    annotations['kubernetes.io/instance-type'] = instanceString
-
-    // Use cpu/memory directly from the machine objects
-    const minMachineAllocatable = minMachineObj
-      ? { cpu: minMachineObj.cpu, memory: minMachineObj.memory }
-      : null
-    const maxMachineAllocatable = maxMachineObj
-      ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory }
-      : null
-    const allowedPath = `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute/${type}`
-
-    if (minMachine && maxMachine && instance !== instanceString) {
-      commit('wizard/model$update', {
-        path: `${allowedPath}/maxAllowed`,
-        value: maxMachineAllocatable,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: `${allowedPath}/minAllowed`,
-        value: minMachineAllocatable,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: annoPath,
-        value: annotations,
-        force: true,
-      })
-    }
-  }
-
-  function handleUnit(path, type = 'bound') {
-    let value = getValue(model, `/resources/${path}`)
-    if (type === 'scalingRules') {
-      const updatedValue = []
-      value?.forEach((ele) => {
-        let appliesUpto = ele['appliesUpto']
-        let threshold = ele['threshold']
-        if (appliesUpto && !isNaN(appliesUpto)) {
-          appliesUpto += 'Gi'
-        }
-        if (!isNaN(threshold)) {
-          threshold += 'pc'
-        }
-        updatedValue.push({ threshold, appliesUpto })
-      })
-      if (JSON.stringify(updatedValue) !== JSON.stringify(value)) {
-        commit('wizard/model$update', {
-          path: `/resources/${path}`,
-          value: updatedValue,
-          force: true,
-        })
-      }
-    } else {
-      if (!isNaN(value)) {
-        value += 'Gi'
-        commit('wizard/model$update', {
-          path: `/resources/${path}`,
-          value: value,
-          force: true,
-        })
-      }
-    }
   }
 
   function isEqualToModelPathValue(value, modelPath) {
@@ -1070,7 +935,7 @@ export const useFunc = (model) => {
     return ans
   }
 
-  /****** Monitoring *********/
+  /********** Monitoring **********/
 
   function showMonitoringSection() {
     // watchDependency('discriminator#/enableMonitoring')
@@ -1082,12 +947,12 @@ export const useFunc = (model) => {
     const configureStatus = getValue(discriminator, '/enableMonitoring')
     if (configureStatus) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComSinglestore/spec/monitor',
+        path: '/resources/kubedbComCassandra/spec/monitor',
         value: {},
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/monitor')
+      commit('wizard/model$delete', '/resources/kubedbComCassandra/spec/monitor')
     }
 
     // update alert value depend on monitoring profile
@@ -1108,15 +973,12 @@ export const useFunc = (model) => {
     const configureStatus = getValue(discriminator, '/customizeExporter')
     if (configureStatus) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComSinglestore/spec/monitor/prometheus/exporter',
+        path: '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter',
         value: {},
         force: true,
       })
     } else {
-      commit(
-        'wizard/model$delete',
-        '/resources/kubedbComSinglestore/spec/monitor/prometheus/exporter',
-      )
+      commit('wizard/model$delete', '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter')
     }
   }
 
@@ -1125,22 +987,22 @@ export const useFunc = (model) => {
     return !!modelValue
   }
 
-  function onNamespaceChange() {
-    const namespace = getValue(model, '/metadata/release/namespace')
-    const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
-    if (agent === 'prometheus.io') {
-      commit('wizard/model$update', {
-        path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-        value: [namespace],
-        force: true,
-      })
-    }
-  }
+  // function onNamespaceChange() {
+  //   const namespace = getValue(model, '/metadata/release/namespace')
+  //   const agent = getValue(model, '/resources/kubedbComCassandra/spec/monitor/agent')
+  //   if (agent === 'prometheus.io') {
+  //     commit('wizard/model$update', {
+  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
+  //       value: [namespace],
+  //       force: true,
+  //     })
+  //   }
+  // }
 
   function onLabelChange() {
-    const labels = getValue(model, '/resources/kubedbComSinglestore/metadata/labels')
+    const labels = getValue(model, '/resources/kubedbComCassandra/spec/metadata/labels')
 
-    const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
+    const agent = getValue(model, '/resources/kubedbComCassandra/spec/monitor/agent')
 
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
@@ -1152,7 +1014,7 @@ export const useFunc = (model) => {
   }
 
   function onAgentChange() {
-    const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
+    const agent = getValue(model, '/resources/kubedbComCassandra/spec/monitor/agent')
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
         path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
@@ -1186,7 +1048,20 @@ export const useFunc = (model) => {
 
     if (isKube) return pathConstructedForKubedb
     else
-      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/singlestoreopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/cassandraopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+  }
+
+  function onNamespaceChange() {
+    const namespace = getValue(
+      model,
+      '/resources/autoscalingKubedbComCassandraAutoscaler/metadata/namespace',
+    )
+    if (!namespace) {
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComCassandraAutoscaler/spec/databaseRef/name',
+      )
+    }
   }
 
   function setValueFrom() {
@@ -1287,7 +1162,7 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     const configMapName = getValue(
       model,
-      `/resources/kubedbComSinglestore/spec/monitor/prometheus/exporter/env/${index}/valueFrom/configMapKeyRef/name`,
+      `/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env/${index}/valueFrom/configMapKeyRef/name`,
     )
 
     // watchDependency('data#/namespace')
@@ -1357,7 +1232,7 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     const secretName = getValue(
       model,
-      `/resources/kubedbComSinglestore/spec/monitor/prometheus/exporter/env/${index}/valueFrom/secretKeyRef/name`,
+      `/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env/${index}/valueFrom/secretKeyRef/name`,
     )
 
     // watchDependency('data#/namespace')
@@ -1388,105 +1263,87 @@ export const useFunc = (model) => {
     return false
   }
 
-  function onTriggerChange(type) {
-    const trigger = getValue(discriminator, `/${type}/trigger`)
-    const commitPath = `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${type}/trigger`
+  /********** Binding **********/
 
-    commit('wizard/model$update', {
-      path: commitPath,
-      value: trigger ? 'On' : 'Off',
-      force: true,
-    })
+  function isBindingAlreadyOn() {
+    const value = getValue(model, '/resources')
+    const keys = Object.keys(value)
+    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComCassandraBinding')
+    return isExposeBinding
   }
 
-  async function fetchTopologyMachines() {
-    const annotations = getValue(
-      model,
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/annotations',
-    )
-    const instance = annotations['kubernetes.io/instance-type']
-
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    if (instance) {
-      try {
-        const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
-        const resp = await axios.get(url)
-
-        const nodeGroups = resp.data?.spec?.nodeGroups || []
-        setDiscriminatorValue('/topologyMachines', nodeGroups)
-      } catch (e) {
-        console.log(e)
-        setDiscriminatorValue('/topologyMachines', [])
-      }
-    }
-  }
-
-  function setAllowedMachine(type, minmax) {
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
-
-    const machine = parsedInstance[type] || ''
-    const mx = machine?.includes(',') ? machine.split(',')[1] : ''
-    const mn = machine?.includes(',') ? machine.split(',')[0] : ''
-    const machineName = minmax === 'min' ? mn : mx
-
-    // Find the machine details from topologyMachines
-    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
-    const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
-
-    // Return object with machine, cpu, memory (expected format for machine-compare init)
-    if (machineData) {
-      return {
-        machine: machineName,
-        cpu: machineData.allocatable?.cpu,
-        memory: machineData.allocatable?.memory,
-      }
-    }
-    // Return empty object if no machine found
-    return {
-      machine: machineName || '',
-      cpu: '',
-      memory: '',
-    }
-  }
-
-  function getMachines(type, minmax) {
-    const depends = minmax === 'min' ? 'max' : 'min'
-    const dependantPath = `/allowedMachine-${type}-${depends}`
-
-    const dependantMachineObj = getValue(discriminator, dependantPath)
-    const dependantMachine = dependantMachineObj?.machine || ''
-
-    const nodeGroups = getValue(discriminator, '/topologyMachines') || []
-
-    const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
-
-    // Return array with text and value object (expected format for machine-compare loader)
-    const machines = nodeGroups?.map((item) => {
-      const text = item.topologyValue
-      const subtext = `CPU: ${item.allocatable?.cpu}, Memory: ${item.allocatable?.memory}`
-      return {
-        text,
-        subtext,
-        value: {
-          machine: item.topologyValue,
-          cpu: item.allocatable?.cpu,
-          memory: item.allocatable?.memory,
+  function addOrRemoveBinding() {
+    const value = getValue(discriminator, `/binding`)
+    const dbName = getValue(model, '/metadata/release/name')
+    const dbNamespace = getValue(model, '/metadata/release/namespace')
+    const labels = getValue(model, '/resources/kubedbComCassandra/metadata/labels')
+    const bindingValues = {
+      apiVersion: 'catalog.appscode.com/v1alpha1',
+      kind: 'CassandraBinding',
+      metadata: {
+        labels,
+        name: dbName,
+        namespace: dbNamespace,
+      },
+      spec: {
+        sourceRef: {
+          name: dbName,
+          namespace: dbNamespace,
         },
+      },
+    }
+
+    if (value) {
+      commit('wizard/model$update', {
+        path: '/resources/catalogAppscodeComCassandraBinding',
+        value: bindingValues,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$delete', '/resources/catalogAppscodeComCassandraBinding')
+    }
+  }
+
+  function handleUnit(path, type = 'bound') {
+    let value = getValue(model, `/resources/${path}`)
+    if (type === 'scalingRules') {
+      const updatedValue = []
+      value?.forEach((ele) => {
+        let appliesUpto = ele['appliesUpto']
+        let threshold = ele['threshold']
+        if (appliesUpto && !isNaN(appliesUpto)) {
+          appliesUpto += 'Gi'
+        }
+        if (!isNaN(threshold)) {
+          threshold += 'pc'
+        }
+        updatedValue.push({ threshold, appliesUpto })
+      })
+      if (JSON.stringify(updatedValue) !== JSON.stringify(value)) {
+        commit('wizard/model$update', {
+          path: `/resources/${path}`,
+          value: updatedValue,
+          force: true,
+        })
       }
-    })
+    } else {
+      if (!isNaN(value)) {
+        value += 'Gi'
+        commit('wizard/model$update', {
+          path: `/resources/${path}`,
+          value: value,
+          force: true,
+        })
+      }
+    }
+  }
 
-    const filteredMachine = machines?.filter((item, ind) =>
-      minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
-    )
-
-    return dependantIndex === -1 ? machines : filteredMachine
+  function setValueFromDbDetails(path) {
+    const value = getValue(model, path)
+    return value
+  }
+  function showStorageMemoryOption() {
+    return showStoragememory
   }
 
   function onEnvArrayChange() {
@@ -1512,17 +1369,14 @@ export const useFunc = (model) => {
 
     if (filteredEnv.length)
       commit('wizard/model$update', {
-        path: '/resources/kubedbComSinglestore/spec/monitor/prometheus/exporter/env',
+        path: '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env',
         value: filteredEnv,
         force: true,
       })
   }
 
   function initEnvArray() {
-    const env = getValue(
-      model,
-      '/resources/kubedbComSinglestore/spec/monitor/prometheus/exporter/env',
-    )
+    const env = getValue(model, '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env')
 
     return env || []
   }
@@ -1535,7 +1389,7 @@ export const useFunc = (model) => {
 
   function initMonitoring() {
     const env =
-      getValue(model, '/resources/kubedbComSinglestore/spec/monitor/prometheus/exporter/env') || []
+      getValue(model, '/resources/kubedbComCassandra/spec/monitor/prometheus/exporter/env') || []
     setDiscriminatorValue('/env', env)
     let tempEnv = []
     env.forEach((item) => {
@@ -1575,27 +1429,27 @@ export const useFunc = (model) => {
     onInputChangeSchedule,
     setPausedValue,
 
-    isConsole,
     isKubedb,
-    showOpsRequestOptions,
+    isConsole,
     getNamespaces,
-    getDbs,
-    getDbDetails,
+    isRancherManaged,
+    getCassandraDbs,
     initMetadata,
-    onNamespaceChange,
-    onAutoscalerNamespaceChange,
-    fetchNodeTopology,
-    isNodeTopologySelected,
-    setControlledResources,
+    fetchTopologyMachines,
     setTrigger,
     onTriggerChange,
-    setApplyToIfReady,
-    setMetadata,
-    isRancherManaged,
-    dbTypeEqualsTo,
+    hasAnnotations,
+    setAllowedMachine,
+    getMachines,
     onMachineChange,
+    hasNoAnnotations,
+    setControlledResources,
+    fetchNodeTopology,
+    isNodeTopologySelected,
+    showOpsRequestOptions,
+    setApplyToIfReady,
+
     handleUnit,
-    setValueFromDbDetails,
 
     getOpsRequestUrl,
     isValueExistInModel,
@@ -1606,6 +1460,7 @@ export const useFunc = (model) => {
     isEqualToModelPathValue,
     onCustomizeExporterChange,
     showCustomizeExporterSection,
+    onNamespaceChange,
     onLabelChange,
     setValueFrom,
     onValueFromChange,
@@ -1617,17 +1472,15 @@ export const useFunc = (model) => {
     isSecretTypeValueFrom,
     getNamespacedResourceList,
     returnFalse,
-    initMonitoring,
     onEnvArrayChange,
     initEnvArray,
     isEqualToTemp,
+    initMonitoring,
 
     isBindingAlreadyOn,
     addOrRemoveBinding,
-    hasAnnotations,
-    hasNoAnnotations,
-    fetchTopologyMachines,
-    setAllowedMachine,
-    getMachines,
+
+    setValueFromDbDetails,
+    showStorageMemoryOption,
   }
 }

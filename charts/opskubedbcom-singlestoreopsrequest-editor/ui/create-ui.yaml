@@ -79,6 +79,12 @@ step:
     - description: Reconfigure your database tls configuration
       text: Reconfigure TLS
       value: ReconfigureTLS
+    - description: Rotate authentication credentials
+      text: Rotate Auth
+      value: RotateAuth
+    - description: Migrate storage to a different storage class
+      text: Storage Migration
+      value: StorageMigration
     schema: schema/properties/spec/properties/type
     type: radio
     watcher:
@@ -399,9 +405,11 @@ step:
             - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
         showLabels: true
         type: horizontal-layout
-      hideBlock: true
       label: Exporter
       showLabels: true
+      if:
+        name: returnFalse
+        type: function
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|VerticalScaling
@@ -513,7 +521,7 @@ step:
           - customClass: mb-2
             init:
               type: func
-              value: setValueFromDbDetails|/spec/configSecret/name
+              value: setValueFromDbDetails|/spec/topology/node/configSecret/name
             label: Config Secret
             loader:
               name: getConfigSecrets
@@ -521,7 +529,7 @@ step:
               - schema/properties/metadata/properties/namespace
               - temp/properties/createSecret/properties/status
             refresh: fetchConfigSecrets
-            schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+            schema: schema/properties/spec/properties/configuration/properties/node/properties/configSecret/properties/name
             type: select
             watcher:
               func: onCreateSecretChange
@@ -576,7 +584,7 @@ step:
             loader:
               name: onNewConfigSecretChange
               watchPaths:
-              - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
+              - schema/properties/spec/properties/configuration/properties/node/properties/configSecret/properties/name
             readonly: true
             schema: temp/properties/newConfigSecret
             type: multi-file-editor
@@ -660,7 +668,334 @@ step:
           value: remove
         schema: temp/properties/reconfigurationType
         type: tab-layout
-      label: Configuration
+      if:
+        name: ifDbTypeEqualsTo|standalone|Reconfigure
+        type: function
+      label: Node Configuration
+      type: block-layout
+    - elements:
+      - label: ""
+        subtitle: Select a new configuration secret, apply a custom configuration,
+          or remove an existing setup to update your Aggregator node settings
+        type: label-element
+      - elements:
+        - elements:
+          - customClass: mb-15
+            label: Aggregator Config Secret
+            subtitle: Select an existing secret or create a new one to apply to your
+              Aggregator node configuration.
+            type: label-element
+          - customClass: mb-2
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/aggregator/configSecret/name
+            label: Config Secret
+            loader:
+              name: getConfigSecrets
+              watchPaths:
+              - schema/properties/metadata/properties/namespace
+              - temp/properties/aggregator/createSecret/properties/status
+            refresh: fetchConfigSecrets
+            schema: schema/properties/spec/properties/configuration/properties/aggregator/properties/configSecret/properties/name
+            type: select
+            watcher:
+              func: onCreateSecretChange|aggregator
+              paths:
+              - temp/properties/aggregator/createSecret/properties/status
+          - customClass: mt-15
+            elements:
+            - label: ""
+              subtitle: Enter a <b>unique name</b> to identify this secret.
+              type: label-element
+            - label: Secret Name
+              schema: temp/properties/aggregator/createSecret/properties/name
+              type: input
+              validation:
+                type: required
+            - buttonClass: is-light is-outlined
+              elements:
+              - label: Key
+                loader:
+                  name: onSelectedSecretChange
+                  watchPaths:
+                  - temp/properties/aggregator/createSecret/properties/data
+                schema: key
+                type: select
+                validation:
+                  type: required
+              - height: 120px
+                label: Value
+                schema: value
+                type: textarea
+              keepInitial: true
+              label: String Data
+              schema: temp/properties/aggregator/createSecret/properties/data
+              type: array-object-form
+              validation:
+                type: required
+            hasButton:
+              action: createNewConfigSecret|aggregator
+              hasCancel: cancelCreateSecret|aggregator
+              text: Save
+            if:
+              name: isCreateSecret|aggregator
+              type: function
+            label: Create a New Config Secret
+            showLabels: true
+            type: block-layout
+          - editorHeight: 500px
+            hideFormatButton: true
+            if:
+              name: isNotCreateSecret|aggregator
+              type: function
+            loader:
+              name: onNewConfigSecretChange|aggregator
+              watchPaths:
+              - schema/properties/spec/properties/configuration/properties/aggregator/properties/configSecret/properties/name
+            readonly: true
+            schema: temp/properties/newConfigSecret
+            type: multi-file-editor
+            validateContent: false
+          if:
+            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            type: function
+          label: Aggregator Config Secret
+          type: block-layout
+        - elements:
+          - customClass: mb-15
+            label: New Apply Config
+            subtitle: Define custom configurations for your Aggregator node using key-value
+              pairs. These parameters will overwrite existing settings.
+            type: label-element
+          - customClass: mb-2
+            label: Configuration
+            loader: getConfigSecretsforAppyConfig
+            refresh: fetchConfigSecrets
+            schema: temp/properties/aggregator/selectedConfiguration
+            type: select
+          - editorHeight: 500px
+            hideFormatButton: true
+            loader:
+              name: setApplyConfig|aggregator
+              watchPaths:
+              - temp/properties/aggregator/selectedConfiguration
+            schema: temp/properties/aggregator/applyConfig
+            type: multi-file-editor
+            validateContent: false
+            watcher:
+              func: onApplyconfigChange|aggregator
+              paths:
+              - temp/properties/aggregator/applyConfig
+          if:
+            name: ifReconfigurationTypeEqualsTo|applyConfig
+            type: function
+          label: ApplyConfig
+          type: block-layout
+        - elements:
+          - customClass: mb-15
+            label: Remove Aggregator Config
+            subtitle: Select a configuration secret to remove from the Aggregator node.
+            type: label-element
+          - customClass: mb-2
+            label: Configuration
+            loader:
+              name: getConfigSecretsforAppyConfig
+              watchPaths:
+              - schema/properties/metadata/properties/namespace
+            refresh: fetchConfigSecrets
+            schema: temp/properties/aggregator/selectedConfigurationRemove
+            type: select
+          - editorHeight: 500px
+            hideFormatButton: true
+            init:
+              type: func
+              value: onRemoveConfigChange|aggregator
+            readonly: true
+            schema: temp/properties/aggregator/removeConfig
+            type: multi-file-editor
+            validateContent: false
+            watcher:
+              func: onRemoveConfigChange|aggregator
+              paths:
+              - temp/properties/aggregator/selectedConfigurationRemove
+          if:
+            name: ifReconfigurationTypeEqualsTo|remove
+            type: function
+          label: Remove
+          type: block-layout
+        label: Aggregator Config Secret
+        options:
+        - text: NEW CONFIG SECRET
+          value: selectNewConfigSecret
+        - text: APPLY CONFIG
+          value: applyConfig
+        - text: REMOVE
+          value: remove
+        schema: temp/properties/reconfigurationType
+        type: tab-layout
+      label: Aggregator Configuration
+      type: block-layout
+    - elements:
+      - label: ""
+        subtitle: Select a new configuration secret, apply a custom configuration,
+          or remove an existing setup to update your Leaf node settings
+        type: label-element
+      - elements:
+        - elements:
+          - customClass: mb-15
+            label: Leaf Config Secret
+            subtitle: Select an existing secret or create a new one to apply to your
+              Leaf node configuration.
+            type: label-element
+          - customClass: mb-2
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/leaf/configSecret/name
+            label: Config Secret
+            loader:
+              name: getConfigSecrets
+              watchPaths:
+              - schema/properties/metadata/properties/namespace
+              - temp/properties/leaf/createSecret/properties/status
+            refresh: fetchConfigSecrets
+            schema: schema/properties/spec/properties/configuration/properties/leaf/properties/configSecret/properties/name
+            type: select
+            watcher:
+              func: onCreateSecretChange|leaf
+              paths:
+              - temp/properties/leaf/createSecret/properties/status
+          - customClass: mt-15
+            elements:
+            - label: ""
+              subtitle: Enter a <b>unique name</b> to identify this secret.
+              type: label-element
+            - label: Secret Name
+              schema: temp/properties/leaf/createSecret/properties/name
+              type: input
+              validation:
+                type: required
+            - buttonClass: is-light is-outlined
+              elements:
+              - label: Key
+                loader:
+                  name: onSelectedSecretChange
+                  watchPaths:
+                  - temp/properties/leaf/createSecret/properties/data
+                schema: key
+                type: select
+                validation:
+                  type: required
+              - height: 120px
+                label: Value
+                schema: value
+                type: textarea
+              keepInitial: true
+              label: String Data
+              schema: temp/properties/leaf/createSecret/properties/data
+              type: array-object-form
+              validation:
+                type: required
+            hasButton:
+              action: createNewConfigSecret|leaf
+              hasCancel: cancelCreateSecret|leaf
+              text: Save
+            if:
+              name: isCreateSecret|leaf
+              type: function
+            label: Create a New Config Secret
+            showLabels: true
+            type: block-layout
+          - editorHeight: 500px
+            hideFormatButton: true
+            if:
+              name: isNotCreateSecret|leaf
+              type: function
+            loader:
+              name: onNewConfigSecretChange|leaf
+              watchPaths:
+              - schema/properties/spec/properties/configuration/properties/leaf/properties/configSecret/properties/name
+            readonly: true
+            schema: temp/properties/newConfigSecret
+            type: multi-file-editor
+            validateContent: false
+          if:
+            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            type: function
+          label: Leaf Config Secret
+          type: block-layout
+        - elements:
+          - customClass: mb-15
+            label: New Apply Config
+            subtitle: Define custom configurations for your Leaf node using key-value
+              pairs. These parameters will overwrite existing settings.
+            type: label-element
+          - customClass: mb-2
+            label: Configuration
+            loader: getConfigSecretsforAppyConfig
+            refresh: fetchConfigSecrets
+            schema: temp/properties/leaf/selectedConfiguration
+            type: select
+          - editorHeight: 500px
+            hideFormatButton: true
+            loader:
+              name: setApplyConfig|leaf
+              watchPaths:
+              - temp/properties/leaf/selectedConfiguration
+            schema: temp/properties/leaf/applyConfig
+            type: multi-file-editor
+            validateContent: false
+            watcher:
+              func: onApplyconfigChange|leaf
+              paths:
+              - temp/properties/leaf/applyConfig
+          if:
+            name: ifReconfigurationTypeEqualsTo|applyConfig
+            type: function
+          label: ApplyConfig
+          type: block-layout
+        - elements:
+          - customClass: mb-15
+            label: Remove Leaf Config
+            subtitle: Select a configuration secret to remove from the Leaf node.
+            type: label-element
+          - customClass: mb-2
+            label: Configuration
+            loader:
+              name: getConfigSecretsforAppyConfig
+              watchPaths:
+              - schema/properties/metadata/properties/namespace
+            refresh: fetchConfigSecrets
+            schema: temp/properties/leaf/selectedConfigurationRemove
+            type: select
+          - editorHeight: 500px
+            hideFormatButton: true
+            init:
+              type: func
+              value: onRemoveConfigChange|leaf
+            readonly: true
+            schema: temp/properties/leaf/removeConfig
+            type: multi-file-editor
+            validateContent: false
+            watcher:
+              func: onRemoveConfigChange|leaf
+              paths:
+              - temp/properties/leaf/selectedConfigurationRemove
+          if:
+            name: ifReconfigurationTypeEqualsTo|remove
+            type: function
+          label: Remove
+          type: block-layout
+        label: Leaf Config Secret
+        options:
+        - text: NEW CONFIG SECRET
+          value: selectNewConfigSecret
+        - text: APPLY CONFIG
+          value: applyConfig
+        - text: REMOVE
+          value: remove
+        schema: temp/properties/reconfigurationType
+        type: tab-layout
+      label: Leaf Configuration
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|Reconfigure
@@ -827,6 +1162,91 @@ step:
       name: ifRequestTypeEqualsTo|ReconfigureTLS
       type: function
     label: TLS
+    type: block-layout
+  - elements:
+    - label: ""
+      subtitle: Specify the secret containing the new authentication credentials
+        for the database.
+      type: label-element
+    - label: Authentication Secret Name
+      schema: schema/properties/spec/properties/authentication/properties/secretRef/properties/name
+      type: input
+      validation:
+        type: required
+    if:
+      name: ifRequestTypeEqualsTo|RotateAuth
+      type: function
+    label: Rotate Authentication Credentials
+    type: block-layout
+  - elements:
+    - elements:
+      - label: ""
+        subtitle: Configure storage migration for Aggregator and Leaf nodes. Specify
+          the target storage class and the reclaim policy for the old PersistentVolumes.
+        type: label-element
+      - label: Aggregator Storage Class Name
+        schema: schema/properties/spec/properties/migration/properties/aggregator/properties/storageClassName
+        type: input
+        validation:
+          type: required
+      - label: Aggregator Old PV Reclaim Policy
+        options:
+        - text: Delete
+          value: Delete
+        - text: Retain
+          value: Retain
+        schema: schema/properties/spec/properties/migration/properties/aggregator/properties/oldPVReclaimPolicy
+        type: radio
+      if:
+        name: ifDbTypeEqualsTo|topology|StorageMigration
+        type: function
+      label: Aggregator Migration
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Leaf Storage Class Name
+        schema: schema/properties/spec/properties/migration/properties/leaf/properties/storageClassName
+        type: input
+        validation:
+          type: required
+      - label: Leaf Old PV Reclaim Policy
+        options:
+        - text: Delete
+          value: Delete
+        - text: Retain
+          value: Retain
+        schema: schema/properties/spec/properties/migration/properties/leaf/properties/oldPVReclaimPolicy
+        type: radio
+      if:
+        name: ifDbTypeEqualsTo|topology|StorageMigration
+        type: function
+      label: Leaf Migration
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Node Storage Class Name
+        schema: schema/properties/spec/properties/migration/properties/node/properties/storageClassName
+        type: input
+        validation:
+          type: required
+      - label: Node Old PV Reclaim Policy
+        options:
+        - text: Delete
+          value: Delete
+        - text: Retain
+          value: Retain
+        schema: schema/properties/spec/properties/migration/properties/node/properties/oldPVReclaimPolicy
+        type: radio
+      if:
+        name: ifDbTypeEqualsTo|standalone|StorageMigration
+        type: function
+      label: Node Migration
+      showLabels: true
+      type: block-layout
+    if:
+      name: ifRequestTypeEqualsTo|StorageMigration
+      type: function
+    label: Storage Migration
     type: block-layout
   - elements:
     - label: Timeout
