@@ -29,16 +29,8 @@ export const useFunc = (model) => {
   // Compute Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-standalone-min', '')
-  setDiscriminatorValue('/allowedMachine-standalone-max', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
-  setDiscriminatorValue('/allowedMachine-shard-min', '')
-  setDiscriminatorValue('/allowedMachine-shard-max', '')
-  setDiscriminatorValue('/allowedMachine-configServer-min', '')
-  setDiscriminatorValue('/allowedMachine-configServer-max', '')
-  setDiscriminatorValue('/allowedMachine-mongos-min', '')
-  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  setDiscriminatorValue('/allowedMachine-node-min', '')
+  setDiscriminatorValue('/allowedMachine-node-max', '')
 
   // monitoring
 
@@ -211,11 +203,22 @@ export const useFunc = (model) => {
     const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
     const pathConstructedForKubedb = pathSplit + `/${reqType.toLowerCase()}?namespace=${namespace}`
 
+    const requestTypeMap = {
+      'update-version': 'UpdateVersion',
+      'scale-vertically': 'VerticalScaling',
+      'scale-storage': 'VolumeExpansion',
+      'horizontal-scale': 'HorizontalScaling',
+      restart: 'Restart',
+      reconfigure: 'Reconfigure',
+      'tls-configure': 'ReconfigureTLS',
+    }
+    const requestType = requestTypeMap[reqType] || 'VerticalScaling'
+
     const isKube = !!storeGet('/route/params/actions')
 
     if (isKube) return pathConstructedForKubedb
     else
-      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/rabbitmqopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/rabbitmqopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${requestType}`
   }
 
   function onNamespaceChange() {
@@ -866,7 +869,7 @@ export const useFunc = (model) => {
     const labels = getValue(model, '/resources/kubedbComRabbitMQ/metadata/labels')
     const bindingValues = {
       apiVersion: 'catalog.appscode.com/v1alpha1',
-      kind: 'PostgresBinding',
+      kind: 'RabbitMQBinding',
       metadata: {
         labels,
         name: dbName,
