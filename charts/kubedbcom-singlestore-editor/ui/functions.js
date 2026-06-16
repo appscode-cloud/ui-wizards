@@ -112,15 +112,16 @@ export const useFunc = (model) => {
     )
     const kubeStashTarget = coreKubestashComBackupConfiguration?.spec?.target
 
-    const mongoDB = getValue(model, '/resources/kubedbComSinglestore')
-    const mongoDbKind = mongoDB?.apiVersion?.split('/')?.at(0)
+    const singlestoreDb = getValue(model, '/resources/kubedbComSinglestore')
+    const singlestoreApiGroup = singlestoreDb?.apiVersion?.split('/')?.at(0)
 
     let isKubeStash = false
     if (
-      mongoDB?.kind === kubeStashTarget.kind &&
-      mongoDB?.metadata?.name === kubeStashTarget?.name &&
-      mongoDB?.metadata?.namespace === kubeStashTarget?.namespace &&
-      mongoDbKind === kubeStashTarget?.apiGroup
+      kubeStashTarget &&
+      singlestoreDb?.kind === kubeStashTarget?.kind &&
+      singlestoreDb?.metadata?.name === kubeStashTarget?.name &&
+      singlestoreDb?.metadata?.namespace === kubeStashTarget?.namespace &&
+      singlestoreApiGroup === kubeStashTarget?.apiGroup
     ) {
       isKubeStash = true
     }
@@ -324,7 +325,7 @@ export const useFunc = (model) => {
       },
     ]
 
-    if ((dbResource?.spec?.replicaSet || dbResource?.spec?.shardTopology) && isArchiverAvailable) {
+    if (dbResource?.spec?.topology && isArchiverAvailable) {
       arr.push({
         description: 'Enable/Disable Archiver',
         text: 'Archiver',
@@ -785,7 +786,7 @@ export const useFunc = (model) => {
       )
   }
 
-  function onNamespaceChange({ model, getValue, commit }) {
+  function onAutoscalerNamespaceChange() {
     const namespace = getValue(
       model,
       '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace',
@@ -855,7 +856,8 @@ export const useFunc = (model) => {
   function setMetadata() {
     const dbname = storeGet('/route/params/name') || ''
     const namespace = storeGet('/route/query/namespace') || ''
-    if (mode === 'standalone-step') {
+    const routeMode = storeGet('/route/params/mode') || ''
+    if (routeMode === 'standalone-step') {
       commit('wizard/model$update', {
         path: '/metadata/release/name',
         value: dbname,
@@ -905,31 +907,20 @@ export const useFunc = (model) => {
 
   function clearSpecModel(dbtype) {
     if (dbtype === 'standalone') {
+      // SingleStore standalone uses 'node'; clear topology-specific paths
       commit(
         'wizard/model$delete',
-        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/cluster`,
+        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/aggregator`,
       )
       commit(
         'wizard/model$delete',
-        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/sentinel`,
+        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/leaf`,
       )
-    } else if (dbtype === 'cluster') {
+    } else if (dbtype === 'topology') {
+      // SingleStore topology uses 'aggregator' + 'leaf'; clear standalone path
       commit(
         'wizard/model$delete',
-        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/standalone`,
-      )
-      commit(
-        'wizard/model$delete',
-        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/sentinel`,
-      )
-    } else if (dbtype === 'sentinel') {
-      commit(
-        'wizard/model$delete',
-        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/standalone`,
-      )
-      commit(
-        'wizard/model$delete',
-        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/cluster`,
+        `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/node`,
       )
     }
   }
@@ -1134,20 +1125,20 @@ export const useFunc = (model) => {
     return !!modelValue
   }
 
-  // function onNamespaceChange({ commit, model, getValue }) {
-  //   const namespace = getValue(model, '/metadata/release/namespace')
-  //   const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
-  //   if (agent === 'prometheus.io') {
-  //     commit('wizard/model$update', {
-  //       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
-  //       value: [namespace],
-  //       force: true,
-  //     })
-  //   }
-  // }
+  function onNamespaceChange() {
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
+    if (agent === 'prometheus.io') {
+      commit('wizard/model$update', {
+        path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
+        value: [namespace],
+        force: true,
+      })
+    }
+  }
 
   function onLabelChange() {
-    const labels = getValue(model, '/resources/kubedbComSinglestore/spec/metadata/labels')
+    const labels = getValue(model, '/resources/kubedbComSinglestore/metadata/labels')
 
     const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
 
@@ -1173,19 +1164,6 @@ export const useFunc = (model) => {
       onLabelChange()
     } else {
       commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
-    }
-  }
-
-  function onNamespaceChange() {
-    const namespace = getValue(
-      model,
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace',
-    )
-    if (!namespace) {
-      commit(
-        'wizard/model$delete',
-        '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
-      )
     }
   }
 
@@ -1410,50 +1388,6 @@ export const useFunc = (model) => {
     return false
   }
 
-  function isBindingAlreadyOn() {
-    const value = getValue(model, '/resources')
-    const keys = Object.keys(value)
-    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComSinglestoreBinding')
-    return isExposeBinding
-  }
-
-  function addOrRemoveBinding() {
-    const value = getValue(discriminator, `/binding`)
-    const dbName = getValue(model, '/metadata/release/name')
-    const dbNamespace = getValue(model, '/metadata/release/namespace')
-    const labels = getValue(model, '/resources/kubedbComSinglestore/metadata/labels')
-    const bindingValues = {
-      apiVersion: 'catalog.appscode.com/v1alpha1',
-      kind: 'SinglestoreBinding',
-      metadata: {
-        labels,
-        name: dbName,
-        namespace: dbNamespace,
-      },
-      spec: {
-        sourceRef: {
-          name: dbName,
-          namespace: dbNamespace,
-        },
-      },
-    }
-
-    if (value) {
-      commit('wizard/model$update', {
-        path: '/resources/catalogAppscodeComSinglestoreBinding',
-        value: bindingValues,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', '/resources/catalogAppscodeComSinglestoreBinding')
-    }
-  }
-
-  function setValueFromDbDetails(path) {
-    const value = getValue(model, path)
-    return value
-  }
-
   function onTriggerChange(type) {
     const trigger = getValue(discriminator, `/${type}/trigger`)
     const commitPath = `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${type}/trigger`
@@ -1649,6 +1583,7 @@ export const useFunc = (model) => {
     getDbDetails,
     initMetadata,
     onNamespaceChange,
+    onAutoscalerNamespaceChange,
     fetchNodeTopology,
     isNodeTopologySelected,
     setControlledResources,
@@ -1689,7 +1624,6 @@ export const useFunc = (model) => {
 
     isBindingAlreadyOn,
     addOrRemoveBinding,
-    setValueFromDbDetails,
     hasAnnotations,
     hasNoAnnotations,
     fetchTopologyMachines,
