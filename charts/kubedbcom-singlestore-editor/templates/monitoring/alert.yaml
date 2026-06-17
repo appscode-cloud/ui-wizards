@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-singlestore-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: singlestore.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreInstanceDown.enabled .rules.singlestoreInstanceDown.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "singlestoreInstanceDown")) -}}
     - alert: SinglestoreInstanceDown
       expr: memsql_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.singlestoreInstanceDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: Singlestore instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreServiceDown.enabled .rules.singlestoreServiceDown.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "singlestoreServiceDown")) -}}
     - alert: SinglestoreServiceDown
       expr: sum by (service) (memsql_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
       for: {{ .rules.singlestoreServiceDown.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: Singlestore service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreTooManyConnections.enabled .rules.singlestoreTooManyConnections.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "singlestoreTooManyConnections")) -}}
     - alert: SinglestoreTooManyConnections
       expr: max_over_time(memsql_status_threads_connected{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / memsql_variable_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.singlestoreTooManyConnections.val}}
       for: {{ .rules.singlestoreTooManyConnections.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: Singlestore too many connections (> {{.rules.singlestoreTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.rules.singlestoreTooManyConnections.val}}% of Singlestore connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreHighThreadsRunning.enabled .rules.singlestoreHighThreadsRunning.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "singlestoreHighThreadsRunning")) -}}
     - alert: SinglestoreHighThreadsRunning
       expr: max_over_time(memsql_status_threads_running{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / memsql_variable_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.singlestoreHighThreadsRunning.val}}
       for: {{ .rules.singlestoreHighThreadsRunning.duration }}
@@ -66,7 +66,7 @@ spec:
         summary: Singlestore high threads running (> {{.rules.singlestoreHighThreadsRunning.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.rules.singlestoreHighThreadsRunning.val}}% of Singlestore threads are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreRestarted.enabled .rules.singlestoreRestarted.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "singlestoreRestarted")) -}}
     - alert: SinglestoreRestarted
       expr: memsql_status_uptime{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{.rules.singlestoreRestarted.val}}
       for: {{ .rules.singlestoreRestarted.duration }}
@@ -77,7 +77,7 @@ spec:
         summary: Singlestore restarted ({{.rules.singlestoreRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore restarted\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreHighQPS.enabled .rules.singlestoreHighQPS.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "singlestoreHighQPS")) -}}
     - alert: SinglestoreHighQPS
       expr: rate(memsql_status_queries{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.singlestoreHighQPS.val}}
       for: {{ .rules.singlestoreHighQPS.duration }}
@@ -88,7 +88,7 @@ spec:
         summary: Singlestore has high queries per second (> {{.rules.singlestoreHighQPS.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore has high QPS on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreHighIncomingBytes.enabled .rules.singlestoreHighIncomingBytes.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "singlestoreHighIncomingBytes")) -}}
     - alert: SinglestoreHighIncomingBytes
       expr: rate(memsql_status_bytes_received{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.singlestoreHighIncomingBytes.val}}
       for: {{ .rules.singlestoreHighIncomingBytes.duration }}
@@ -99,7 +99,7 @@ spec:
         summary: Singlestore has high incoming bytes second (> {{.rules.singlestoreHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Singlestore has high incoming bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.singlestoreHighOutgoingBytes.enabled .rules.singlestoreHighOutgoingBytes.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "singlestoreHighOutgoingBytes")) -}}
     - alert: SinglestoreHighOutgoingBytes
       expr: rate(memsql_status_bytes_sent{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.singlestoreHighOutgoingBytes.val}}
       for: {{ .rules.singlestoreHighOutgoingBytes.duration }}
@@ -111,7 +111,7 @@ spec:
         description: "Singlestore has high outgoing bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskUsageHigh.val }}
@@ -123,7 +123,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskAlmostFull.val }}
@@ -143,7 +143,7 @@ spec:
   {{ if (include "kubedbcom-singlestore-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: singlestore.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBSinglestorePhaseNotReady
       expr: kubedb_com_singlestore_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -154,7 +154,7 @@ spec:
         summary: KubeDB Singlestore Phase NotReady (singlestore {{`{{`}} $labels.singlestore {{`}}`}})
         description: "KubeDB Singlestore Phase not ready on {{`{{`}} $labels.singlestore {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBSinglestorePhaseCritical
       expr: kubedb_com_singlestore_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
@@ -173,7 +173,7 @@ spec:
   {{ if (include "kubedbcom-singlestore-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: singlestore.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: SinglestoreKubeStashBackupSessionFailed
       expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.backupSessionFailed.duration }}
@@ -184,7 +184,7 @@ spec:
         summary: Singlestore KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: SinglestoreKubeStashRestoreSessionFailed
       expr: core_kubestash_com_restoresession_phase{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -195,7 +195,7 @@ spec:
         summary: Singlestore KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: SinglestoreKubeStashNoBackupSessionForTooLong
       expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -206,7 +206,7 @@ spec:
         summary: Singlestore KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: SinglestoreKubeStashRepositoryCorrupted
       expr: storage_kubestash_com_repository_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -217,7 +217,7 @@ spec:
         summary: Singlestore KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: SinglestoreKubeStashRepositoryStorageRunningLow
       expr: storage_kubestash_com_repository_size_bytes{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -228,7 +228,7 @@ spec:
         summary: Singlestore KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: SinglestoreKubeStashBackupSessionPeriodTooLong
       expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -239,7 +239,7 @@ spec:
         summary: Singlestore KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Singlestore KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-singlestore-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: SinglestoreKubeStashRestoreSessionPeriodTooLong
       expr: core_kubestash_com_restoresession_duration_seconds{target_kind="Singlestore", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}

@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-rabbitmq-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: rabbitmq.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqFileDescriptorsNearLimit.enabled .rules.rabbitmqFileDescriptorsNearLimit.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "rabbitmqFileDescriptorsNearLimit")) -}}
     - alert: RabbitmqFileDescriptorsNearLimit
       expr: sum by(namespace, rabbitmq_cluster, pod, rabbitmq_node) (max_over_time(rabbitmq_process_open_fds{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster, rabbitmq_node, pod) rabbitmq_identity_info) / sum by(namespace, rabbitmq_cluster, pod, rabbitmq_node) (rabbitmq_process_max_fds{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}  * on(instance) group_left(rabbitmq_cluster, rabbitmq_node, pod) rabbitmq_identity_info) > 0.8
       for: {{ .rules.rabbitmqFileDescriptorsNearLimit.duration }}
@@ -36,7 +36,7 @@ spec:
           See https://www.rabbitmq.com/production-checklist.html#resource-limits-file-handle-limit. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "file descriptors of file descriptor limit are used in RabbitMQ node.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqQueueIsGrowing.enabled .rules.rabbitmqQueueIsGrowing.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "rabbitmqQueueIsGrowing")) -}}
     - alert: RabbitmqQueueIsGrowing
       expr: |
         (
@@ -50,7 +50,7 @@ spec:
         summary: Queue size is steadily growing over time. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Over the last 10 minutes, A queue in rabbitmq is growing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqUnroutableMessages.enabled .rules.rabbitmqUnroutableMessages.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "rabbitmqUnroutableMessages")) -}}
     - alert: RabbitmqUnroutableMessages
       expr:  |
         sum by(namespace, rabbitmq_cluster) (increase(rabbitmq_channel_messages_unroutable_dropped_total{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info)
@@ -72,7 +72,7 @@ spec:
         description: " There were `{{`{{`}} $value {{`}}`}}` unroutable messages within the last
           5 minutes in RabbitMQ cluster.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqTCPSocketsNearLimit.enabled .rules.rabbitmqTCPSocketsNearLimit.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "rabbitmqTCPSocketsNearLimit")) -}}
     - alert: RabbitmqTCPSocketsNearLimit
       expr:  |
         sum by(namespace, rabbitmq_cluster, pod, rabbitmq_node) (max_over_time(rabbitmq_process_open_tcp_sockets{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster, rabbitmq_node, pod) rabbitmq_identity_info)
@@ -90,7 +90,7 @@ spec:
           See https://www.rabbitmq.com/networking.html. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "{{`{{`}} $value | humanizePercentage {{`}}`}} TCP sockets of TCP socket limit are open in RabbitMQ node. \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqLowDiskWatermarkPredicted.enabled .rules.rabbitmqLowDiskWatermarkPredicted.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "rabbitmqLowDiskWatermarkPredicted")) -}}
     - alert: RabbitmqLowDiskWatermarkPredicted
       expr: |
         (
@@ -120,7 +120,7 @@ spec:
           https://www.rabbitmq.com/connection-blocked.html. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "The predicted free disk space in 24 hours from now is `{{`{{`}} $value | humanize1024 {{`}}`}}B`.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqInsufficientEstablishedErlangDistributionLinks.enabled .rules.rabbitmqInsufficientEstablishedErlangDistributionLinks.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "rabbitmqInsufficientEstablishedErlangDistributionLinks")) -}}
     - alert: RabbitmqInsufficientEstablishedErlangDistributionLinks
       # erlang_vm_dist_node_state: 1=pending, 2=up_pending, 3=up
       expr: count by (namespace, rabbitmq_cluster) (erlang_vm_dist_node_state{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"} * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info == 3)
@@ -143,7 +143,7 @@ spec:
           of the Grafana dashboard `Erlang-Distribution`. (instance {{`{{`}} $labels.instance {{`}}`}})
         description: " There are only `{{`{{`}} $value {{`}}`}}` established Erlang distribution links in RabbitMQ cluster.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqHighConnectionChurn.enabled .rules.rabbitmqHighConnectionChurn.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "rabbitmqHighConnectionChurn")) -}}
     - alert: RabbitmqHighConnectionChurn
       expr: (sum(rate(rabbitmq_connections_closed_total{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster, rabbitmq_node) rabbitmq_identity_info) by(namespace, rabbitmq_cluster) + sum(rate(rabbitmq_connections_opened_total{job=~"{{ $app }}-stats",namespace=~"{{ $.Release.Namespace }}"}[5m]) * on(instance) group_left(rabbitmq_cluster, rabbitmq_node) rabbitmq_identity_info) by(namespace, rabbitmq_cluster)) / sum (rabbitmq_connections * on(instance) group_left(rabbitmq_cluster) rabbitmq_identity_info) by (namespace, rabbitmq_cluster) > 0.1
       for: {{ .rules.rabbitmqHighConnectionChurn.duration }}
@@ -157,7 +157,7 @@ spec:
         description: "Over the last 5 minutes, `{{`{{`}} $value | humanizePercentage {{`}}`}}`
           of total connections are closed or opened per second in RabbitMQ cluster.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqPhaseCritical.enabled .rules.rabbitmqPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "rabbitmqPhaseCritical")) -}}
     - alert: RabbitMQPhaseCritical
       expr: kubedb_com_rabbitmq_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="Critical"} >= 1
       for: {{ .rules.rabbitmqPhaseCritical.duration }}
@@ -169,7 +169,7 @@ spec:
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
 
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.rabbitmqDown.enabled .rules.rabbitmqDown.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "rabbitmqDown")) -}}
     - alert: RabbitMQDown
       expr: kubedb_com_rabbitmq_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="NotReady"} >= 1
       for: {{ .rules.rabbitmqDown.duration }}
@@ -181,7 +181,7 @@ spec:
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskUsageHigh.val }}
@@ -193,7 +193,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskAlmostFull.val }}
@@ -213,7 +213,7 @@ spec:
   {{ if (include "kubedbcom-rabbitmq-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: rabbitmq.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBRabbitMQPhaseNotReady
       expr: kubedb_com_rabbitmq_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -224,7 +224,7 @@ spec:
         summary: KubeDB RabbitMQ Phase NotReady (rabbitmq {{`{{`}} $labels.rabbitmq {{`}}`}})
         description: "KubeDB RabbitMQ Phase not ready on {{`{{`}} $labels.rabbitmq {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-rabbitmq-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBRabbitMQPhaseCritical
       expr: kubedb_com_rabbitmq_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}

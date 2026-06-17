@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-mongodb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbVirtualMemoryUsage.enabled .rules.mongodbVirtualMemoryUsage.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbVirtualMemoryUsage")) -}}
     - alert: MongodbVirtualMemoryUsage
       expr: sum(mongodb_ss_mem_virtual{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) BY (job) > {{ .rules.mongodbVirtualMemoryUsage.val }}
       for: {{ .rules.mongodbVirtualMemoryUsage.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: MongoDB virtual memory usage (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "High memory usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbReplicationLag.enabled .rules.mongodbReplicationLag.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbReplicationLag")) -}}
     - alert: MongodbReplicationLag
       expr: mongodb_mongod_replset_member_replication_lag{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.mongodbReplicationLag.val }}
       for: {{ .rules.mongodbReplicationLag.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: MongoDB database has replication lag (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Mongodb replication lag is more than {{ .rules.mongodbReplicationLag.val }}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbNumberCursorsOpen.enabled .rules.mongodbNumberCursorsOpen.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbNumberCursorsOpen")) -}}
     - alert: MongodbNumberCursorsOpen
       expr: mongodb_ss_metrics_cursor_open{csr_type="total",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.mongodbNumberCursorsOpen.val }}
       for: {{ .rules.mongodbNumberCursorsOpen.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: MongoDB number cursors open (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Too many cursors opened by MongoDB for clients (> 10k)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbCursorsTimeouts.enabled .rules.mongodbCursorsTimeouts.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbCursorsTimeouts")) -}}
     - alert: MongodbCursorsTimeouts
       expr: increase(mongodb_ss_metrics_cursor_timedOut{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{ .rules.mongodbCursorsTimeouts.val }}
       for: {{ .rules.mongodbCursorsTimeouts.duration }}
@@ -66,7 +66,7 @@ spec:
         summary: MongoDB cursors timeouts (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Too many cursors are timing out\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbTooManyConnections.enabled .rules.mongodbTooManyConnections.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbTooManyConnections")) -}}
     - alert: MongodbTooManyConnections
       expr: avg by(instance) (rate(mongodb_ss_connections{conn_type="current",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m])) / avg by(instance) (sum (mongodb_ss_connections) by (instance)) * 100 > {{ .rules.mongodbTooManyConnections.val }}
       for: {{ .rules.mongodbTooManyConnections.duration }}
@@ -77,7 +77,7 @@ spec:
         summary: MongoDB too many connections (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Too many connections (> 80%)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongoDBPhaseCritical.enabled .rules.mongoDBPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongoDBPhaseCritical")) -}}
     - alert: MongoDBPhaseCritical
       expr: kubedb_com_mongodb_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="Critical"} >= 1
       for: {{ .rules.mongoDBPhaseCritical.duration }}
@@ -88,7 +88,7 @@ spec:
         summary: MongoDB database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongoDBDown.enabled .rules.mongoDBDown.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongoDBDown")) -}}
     - alert: MongoDBDown
       expr: kubedb_com_mongodb_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="NotReady"} >= 1
       for: {{ .rules.mongoDBDown.duration }}
@@ -99,7 +99,7 @@ spec:
         summary: MongoDB database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbHighLatency.enabled .rules.mongodbHighLatency.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbHighLatency")) -}}
     - alert: MongoDBHighLatency
       expr: |
         rate(mongodb_ss_opLatencies_latency{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) /
@@ -112,7 +112,7 @@ spec:
         summary: High latency in mongodb instances {{`{{`}} $labels.instance {{`}}`}}
         description: "High latency in instances\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbHighTicketUtilization.enabled .rules.mongodbHighTicketUtilization.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbHighTicketUtilization")) -}}
     - alert: MongoDBHighTicketUtilization
       expr: |
         (mongodb_ss_wt_concurrentTransactions_out{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} /
@@ -126,7 +126,7 @@ spec:
         summary: Ticket usage over 75% {{`{{`}} $labels.instance {{`}}`}}
         description: "Ticket usage over 75%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbRecurrentCursorTimeout.enabled .rules.mongodbRecurrentCursorTimeout.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbRecurrentCursorTimeout")) -}}
     - alert: MongoDBRecurrentCursorTimeout
       expr: rate(mongodb_ss_metrics_cursor_timedOut{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.mongodbRecurrentCursorTimeout.val }}
       for: {{ .rules.mongodbRecurrentCursorTimeout.duration }}
@@ -137,7 +137,7 @@ spec:
         summary: Recurrent cursors timeout in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Recurrent cursors timeout\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbRecurrentMemoryPageFaults.enabled .rules.mongodbRecurrentMemoryPageFaults.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbRecurrentMemoryPageFaults")) -}}
     - alert: MongoDBRecurrentMemoryPageFaults
       expr: rate(mongodb_ss_extra_info_page_faults{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.mongodbRecurrentMemoryPageFaults.val }}
       for: {{ .rules.mongodbRecurrentMemoryPageFaults.duration }}
@@ -149,7 +149,7 @@ spec:
         description: "Recurrent memory page faults\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
 
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskUsageHigh.val }}
@@ -161,7 +161,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskAlmostFull.val }}
@@ -181,7 +181,7 @@ spec:
   {{ if (include "kubedbcom-mongodb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBMongoDBPhaseNotReady
       expr: kubedb_com_mongodb_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -192,7 +192,7 @@ spec:
         summary: KubeDB MongoDB Phase NotReady (mongodb {{`{{`}} $labels.mongodb {{`}}`}})
         description: "KubeDB MongoDB Phase not ready on {{`{{`}} $labels.mongodb {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBMongoDBPhaseCritical
       expr: kubedb_com_mongodb_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
@@ -211,7 +211,7 @@ spec:
   {{ if (include "kubedbcom-mongodb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestOnProgress")) -}}
     - alert: KubeDBMongoDBOpsRequestOnProgress
       expr: ops_kubedb_com_mongodbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestOnProgress.duration }}
@@ -222,7 +222,7 @@ spec:
         summary: MongoDBOpsRequest on progress (mongodbopsrequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}})
         description: "MongoDBOpsRequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestStatusProgressingToLong")) -}}
     - alert: KubeDBMongoDBOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_mongodbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
@@ -233,7 +233,7 @@ spec:
         summary: MongoDBOpsRequest is in progressing status for too long (mongodbopsrequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}})
         description: "MongoDBOpsRequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestFailed")) -}}
     - alert: KubeDBMongoDBOpsRequestFailed
       expr: ops_kubedb_com_mongodbopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestFailed.duration }}
@@ -252,7 +252,7 @@ spec:
   {{ if (include "kubedbcom-mongodb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: MongoDBStashBackupSessionFailed
       expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.backupSessionFailed.duration }}
@@ -263,7 +263,7 @@ spec:
         summary: MongoDB Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: MongoDBStashRestoreSessionFailed
       expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -274,7 +274,7 @@ spec:
         summary: MongoDB Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: MongoDBStashNoBackupSessionForTooLong
       expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -285,7 +285,7 @@ spec:
         summary: MongoDB Stash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: MongoDBStashRepositoryCorrupted
       expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -296,7 +296,7 @@ spec:
         summary: MongoDB Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: MongoDBStashRepositoryStorageRunningLow
       expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -307,7 +307,7 @@ spec:
         summary: MongoDB Stash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: MongoDBStashBackupSessionPeriodTooLong
       expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -318,7 +318,7 @@ spec:
         summary:  MongoDB Stash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: MongoDBStashRestoreSessionPeriodTooLong
       expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}
@@ -337,7 +337,7 @@ spec:
   {{ if (include "kubedbcom-mongodb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: MongoDBKubeStashBackupSessionFailed
       expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.backupSessionFailed.duration }}
@@ -348,7 +348,7 @@ spec:
         summary: MongoDB KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: MongoDBKubeStashRestoreSessionFailed
       expr: core_kubestash_com_restoresession_phase{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -359,7 +359,7 @@ spec:
         summary: MongoDB KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: MongoDBKubeStashNoBackupSessionForTooLong
       expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -370,7 +370,7 @@ spec:
         summary: MongoDB KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: MongoDBKubeStashRepositoryCorrupted
       expr: storage_kubestash_com_repository_info{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -381,7 +381,7 @@ spec:
         summary: MongoDB KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: MongoDBKubeStashRepositoryStorageRunningLow
       expr: storage_kubestash_com_repository_size_bytes{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -392,7 +392,7 @@ spec:
         summary: MongoDB KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: MongoDBKubeStashBackupSessionPeriodTooLong
       expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -403,7 +403,7 @@ spec:
         summary: MongoDB KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: MongoDBKubeStashRestoreSessionPeriodTooLong
       expr: core_kubestash_com_restoresession_duration_seconds{target_kind="MongoDB", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}
@@ -422,7 +422,7 @@ spec:
   {{ if (include "kubedbcom-mongodb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.schemaManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaPendingForTooLong.enabled .rules.schemaPendingForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaPendingForTooLong")) -}}
     - alert: KubeDBMongoDBSchemaPendingForTooLong
       expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="Pending",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaPendingForTooLong.duration }}
@@ -433,7 +433,7 @@ spec:
         summary: KubeDB schema pending for too long for (mongodbdatabase {{`{{`}} $labels.mongodbdatabase {{`}}`}})
         description: "KubeDB schema pending for too long.\n {{`{{`}} $labels.mongodbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaInProgressForTooLong.enabled .rules.schemaInProgressForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaInProgressForTooLong")) -}}
     - alert: KubeDBMongoDBSchemaInProgressForTooLong
       expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="InProgress",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaInProgressForTooLong.duration }}
@@ -444,7 +444,7 @@ spec:
         summary: KubeDB schema is in progress for too long for (mongodbdatabase {{`{{`}} $labels.mongodbdatabase {{`}}`}})
         description: "KubeDB schema is in progress for too long.\n {{`{{`}} $labels.mongodbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaTerminatingForTooLong.enabled .rules.schemaTerminatingForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaTerminatingForTooLong")) -}}
     - alert: KubeDBMongoDBSchemaTerminatingForTooLong
       expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="Terminating",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaTerminatingForTooLong.duration }}
@@ -455,7 +455,7 @@ spec:
         summary: KubeDB schema terminating for too long for (mongodbdatabase {{`{{`}} $labels.mongodbdatabase {{`}}`}})
         description: "KubeDB schema terminating for too long.\n {{`{{`}} $labels.mongodbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaFailed.enabled .rules.schemaFailed.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaFailed")) -}}
     - alert: KubeDBMongoDBSchemaFailed
       expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="Failed",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaFailed.duration }}
@@ -466,7 +466,7 @@ spec:
         summary: KubeDB schema failed for (mongodbdatabase {{`{{`}} $labels.mongodbdatabase {{`}}`}})
         description: "KubeDB schema failed.\n {{`{{`}} $labels.mongodbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaExpired.enabled .rules.schemaExpired.severity)) -}}
+    {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaExpired")) -}}
     - alert: KubeDBMongoDBSchemaExpired
       expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="Expired",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaExpired.duration }}

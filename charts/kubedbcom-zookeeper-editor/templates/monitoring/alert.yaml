@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-zookeeper-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: zookeeper.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperDown.enabled .rules.zookeeperDown.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperDown")) -}}
     - alert: ZooKeeperDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.zookeeperDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: ZooKeeper instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ZooKeeper instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyNodes.enabled .rules.zookeeperTooManyNodes.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperTooManyNodes")) -}}
     - alert: ZooKeeperTooManyNodes
       expr: znode_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}  > {{.rules.zookeeperTooManyNodes.val}}
       for: {{ .rules.zookeeperTooManyNodes.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: ZooKeeper missing master (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ZooKeeper ensemble has too many znodes\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyConnections.enabled .rules.zookeeperTooManyConnections.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperTooManyConnections")) -}}
     - alert: ZooKeeperTooManyConnections
       expr: num_alive_connections{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.zookeeperTooManyConnections.val}}
       for: {{ .rules.zookeeperTooManyConnections.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: ZooKeeper too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ZooKeeper instance has too many connections . More than {{.rules.zookeeperTooManyConnections.val}} of ZooKeeper connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooBigMemory.enabled .rules.zookeeperTooBigMemory.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperTooBigMemory")) -}}
     - alert: ZooKeeperTooBigMemory
       expr: (approximate_data_size{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}) /1024 /1024 > {{.rules.zookeeperTooBigMemory.val}} * 1024
       for: {{ .rules.zookeeperTooBigMemory.duration }}
@@ -66,7 +66,7 @@ spec:
         summary: total occupied memory is too big for znode in (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ZooKeeper ensemble's znode total occupied memory is too big. \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyWatch.enabled .rules.zookeeperTooManyWatch.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperTooManyWatch")) -}}
     - alert: ZooKeeperTooManyWatch
       expr: watch_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.zookeeperTooManyWatch.val}}
       for: {{ .rules.zookeeperTooManyWatch.duration }}
@@ -77,7 +77,7 @@ spec:
         summary: Too many watch is set (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many watch is set .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperLeaderElection.enabled .rules.zookeeperLeaderElection.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperLeaderElection")) -}}
     - alert: ZooKeeperLeaderElection
       expr:  increase(election_time_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
       for: {{ .rules.zookeeperLeaderElection.duration }}
@@ -88,7 +88,7 @@ spec:
         summary: A leader election happened (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "A leader election happened.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyOpenFiles.enabled .rules.zookeeperTooManyOpenFiles.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperTooManyOpenFiles")) -}}
     - alert: ZooKeeperTooManyOpenFiles
       expr: open_file_descriptor_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.zookeeperTooManyOpenFiles.val}}
       for: {{ .rules.zookeeperTooManyOpenFiles.duration }}
@@ -99,7 +99,7 @@ spec:
         summary: Too many files is open (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many files is open .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooLongFsyncTime.enabled .rules.zookeeperTooLongFsyncTime.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperTooLongFsyncTime")) -}}
     - alert: ZooKeeperTooLongFsyncTime
       expr: rate(fsynctime_sum{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.zookeeperTooLongFsyncTime.val}}
       for: {{ .rules.zookeeperTooLongFsyncTime.duration }}
@@ -110,7 +110,7 @@ spec:
         summary: Too long fsync time (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too long fsync time .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooLongSnapshotTime.enabled .rules.zookeeperTooLongSnapshotTime.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperTooLongSnapshotTime")) -}}
     - alert: ZooKeeperTooLongSnapshotTime
       expr: rate(snapshottime_sum{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{.rules.zookeeperTooLongSnapshotTime.val}}
       for: {{ .rules.zookeeperTooLongSnapshotTime.duration }}
@@ -121,7 +121,7 @@ spec:
         summary: Time taken for snapshotting is too long (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too long snapshot time .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooHighAvgLatency.enabled .rules.zookeeperTooHighAvgLatency.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperTooHighAvgLatency")) -}}
     - alert: ZooKeeperTooHighAvgLatency
       expr: avg_latency{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.zookeeperTooHighAvgLatency.val}}
       for: {{ .rules.zookeeperTooHighAvgLatency.duration }}
@@ -132,7 +132,7 @@ spec:
         summary: Average Latency is too high (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Average Latency is too high .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperJvmMemoryFilingUp.enabled .rules.zookeeperJvmMemoryFilingUp.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "zookeeperJvmMemoryFilingUp")) -}}
     - alert: ZooKeeperJvmMemoryFilingUp
       expr: jvm_memory_bytes_used{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} / jvm_memory_bytes_max{area="heap",job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}  > {{.rules.zookeeperJvmMemoryFilingUp.val}}
       for: {{ .rules.zookeeperJvmMemoryFilingUp.duration }}
@@ -144,7 +144,7 @@ spec:
         description: "Jvm memory is filling up .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskUsageHigh.val }}
@@ -156,7 +156,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskAlmostFull.val }}
@@ -176,7 +176,7 @@ spec:
   {{ if (include "kubedbcom-zookeeper-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: zookeeper.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBZooKeeperPhaseNotReady
       expr: kubedb_com_zookeeper_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -187,7 +187,7 @@ spec:
         summary: KubeDB ZooKeeper Phase NotReady (zookeeper {{`{{`}} $labels.zookeeper {{`}}`}})
         description: "KubeDB ZooKeeper Phase not ready on {{`{{`}} $labels.zookeeper {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBZooKeeperPhaseCritical
       expr: kubedb_com_zookeeper_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
