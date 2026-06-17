@@ -397,7 +397,7 @@ export const useFunc = (model) => {
     // watchDependency('model#/metadata/namespace')
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/oracles`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/neo4js`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -423,7 +423,7 @@ export const useFunc = (model) => {
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
 
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/oracles/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/neo4js/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -452,7 +452,7 @@ export const useFunc = (model) => {
     }
 
     try {
-      presetVersions = presets.admin?.databases?.Oracle?.versions?.available || []
+      presetVersions = presets.admin?.databases?.Neo4j?.versions?.available || []
       const queryParams = {
         filter: {
           items: {
@@ -463,7 +463,7 @@ export const useFunc = (model) => {
       }
 
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/oracleversions`,
+        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/neo4jversions`,
         {
           params: queryParams,
         },
@@ -482,11 +482,11 @@ export const useFunc = (model) => {
 
       const allowed = found?.spec?.updateConstraints?.allowlist || []
 
-      const limit = allowed.length ? allowed[0] : '0.0'
+      const limit = allowed?.length ? allowed[0] : '0.0'
 
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
       // if presets.status is 404, it means no presets available, no need to filter with presets
-      const filteredOracleVersions = sortedVersions.filter((item) => {
+      const filteredNeo4jVersions = sortedVersions.filter((item) => {
         // default limit 0.0 means no restrictions, show all higher versions
         if (limit === '0.0')
           return (
@@ -515,9 +515,9 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      setDiscriminatorValue('/filteredVersion', filteredOracleVersions)
+      setDiscriminatorValue('/filteredVersion', filteredNeo4jVersions)
 
-      return filteredOracleVersions.map((item) => {
+      return filteredNeo4jVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -779,8 +779,7 @@ export const useFunc = (model) => {
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = containers[0]?.resources?.limits || {}
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -830,20 +829,20 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = containers[0]?.resources?.limits || {}
 
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const neo4jContainer = containers.find((c) => c.name === 'neo4j')
+    const limits = neo4jContainer?.resources?.requests || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
     let parsedInstance = {}
     try {
-      if (instance) parsedInstance = JSON.parse(instance)
+      if (instance) parsedInstance = JSON.parse(instance) || {}
     } catch (e) {
       console.log(e)
       parsedInstance = instance || {}
     }
-
     const machine = parsedInstance || 'custom'
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
@@ -853,7 +852,7 @@ export const useFunc = (model) => {
         cpu: machinePresets.limits.cpu,
         memory: machinePresets.limits.memory,
       }
-    } else return { machine: 'custom', cpu: 4, memory: 2 }
+    } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
   function onMachineChange(type, valPath) {
@@ -1683,7 +1682,7 @@ export const useFunc = (model) => {
 
     const key = getValue(discriminator, '/topologyKey')
     const value = getValue(discriminator, '/topologyValue')
-    const path = `/spec/verticalScaling/node/topology`
+    const path = `/spec/verticalScaling/neo4j/topology`
 
     if (key || value) {
       commit('wizard/model$update', {
@@ -1716,7 +1715,6 @@ export const useFunc = (model) => {
   function parseSize(sizeStr) {
     const units = {
       '': 1,
-      m: 1e-3,
       K: 1e3,
       M: 1e6,
       G: 1e9,
@@ -1738,7 +1736,7 @@ export const useFunc = (model) => {
     const unit = match[2]
 
     if (!(unit in units))
-      throw new Error('Unrecognized unit. Available units are m, K, Ki, M, Mi, G, Gi etc')
+      throw new Error('Unrecognized unit. Available units are K, Ki, M, Mi, G, Gi etc')
 
     return value * units[unit]
   }
@@ -1842,7 +1840,8 @@ export const useFunc = (model) => {
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = containers[0]?.resources?.limits || {}
+    const neo4jContainer = containers.find((c) => c.name === 'neo4j')
+    const limits = neo4jContainer?.resources?.requests || {}
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
