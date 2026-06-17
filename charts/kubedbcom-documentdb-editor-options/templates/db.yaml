@@ -95,13 +95,13 @@ spec:
       securityContext:
         fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
       containers:
-        - name: mongodb
+        - name: documentdb
           resources:
             {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
       initContainers:
-        - name: mongodb-init
+        - name: documentdb-init
           resources:
             {{- toYaml .init_res | nindent 12 }}
           securityContext:
