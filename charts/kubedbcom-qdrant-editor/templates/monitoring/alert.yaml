@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-qdrant-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: qdrant.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantInstanceDown.enabled .rules.qdrantInstanceDown.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "qdrantInstanceDown")) -}}
     - alert: QdrantInstanceDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.qdrantInstanceDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: Qdrant instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Qdrant database instance is down and not accepting connections. Database read/write operations are failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantPhaseCritical.enabled .rules.qdrantPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "qdrantPhaseCritical")) -}}
     - alert: QdrantPhaseCritical
       expr: kubedb_com_qdrant_status_phase{phase="Critical",app="{{ $.Release.Name }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.qdrantPhaseCritical.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: Qdrant database in Critical phase (qdrant {{`{{`}} $labels.qdrant {{`}}`}})
         description: "Qdrant database {{`{{`}} $labels.qdrant {{`}}`}} is in Critical phase. One or more database nodes are experiencing issues but the database is still operational.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantRestarted.enabled .rules.qdrantRestarted.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "qdrantRestarted")) -}}
     - alert: QdrantRestarted
       expr: (time() - min(kube_pod_start_time{ namespace="{{ $.Release.Namespace }}", pod=~"{{ $.Release.Name }}-.*"})) < {{.rules.qdrantRestarted.val}}
       for: {{ .rules.qdrantRestarted.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: Qdrant service recently restarted (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Qdrant service on pod {{`{{`}} $labels.pod {{`}}`}} has restarted within the last 3 minutes. This may indicate a crash or graceful restart.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantHighCPUUsage.enabled .rules.qdrantHighCPUUsage.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "qdrantHighCPUUsage")) -}}
     - alert: QdrantHighCPUUsage
       expr: |
         (
@@ -86,7 +86,7 @@ spec:
         summary: Qdrant Pod CPU usage high (pod {{`{{`}} $labels.pod {{`}}`}})
         description: "Qdrant pod CPU usage is above {{ .rules.qdrantHighCPUUsage.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantHighMemoryUsage.enabled .rules.qdrantHighMemoryUsage.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "qdrantHighMemoryUsage")) -}}
     - alert: QdrantHighMemoryUsage
       expr: |
         (
@@ -117,7 +117,7 @@ spec:
         description: "Qdrant pod memory usage is above {{ .rules.qdrantHighMemoryUsage.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
 
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantHighPendingOperations.enabled .rules.qdrantHighPendingOperations.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "qdrantHighPendingOperations")) -}}
     - alert: QdrantHighPendingOperations
       expr: |
         sum by (pod) (
@@ -139,7 +139,7 @@ spec:
           LABELS = {{`{{`}} $labels {{`}}`}}
     {{- end }}
 
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantGrpcResponsesFailHigh.enabled .rules.qdrantGrpcResponsesFailHigh.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "qdrantGrpcResponsesFailHigh")) -}}
     - alert: QdrantGrpcResponsesFailHigh
       expr: |
         sum by (pod) (
@@ -163,7 +163,7 @@ spec:
           LABELS = {{`{{`}} $labels {{`}}`}}
     {{- end }}
 
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.qdrantRestResponsesFailHigh.enabled .rules.qdrantRestResponsesFailHigh.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "qdrantRestResponsesFailHigh")) -}}
     - alert: QdrantRestResponsesFailHigh
       expr: |
         sum by (pod) (
@@ -186,7 +186,7 @@ spec:
           VALUE = {{`{{`}} $value {{`}}`}}
           LABELS = {{`{{`}} $labels {{`}}`}}
     {{- end }}
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: ( kubelet_volume_stats_used_bytes{job="kubelet", metrics_path="/metrics"} / kubelet_volume_stats_capacity_bytes{job="kubelet", metrics_path="/metrics"} ) * on (persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{ pod=~"{{ $.Release.Name }}-.+$",namespace="{{ $.Release.Namespace }}"} * 100 > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
@@ -197,7 +197,7 @@ spec:
         summary: Persistent Volume usage high for Qdrant (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Persistent Volume usage is above {{ .rules.diskUsageHigh.val }}%. The storage is running low and may need expansion soon.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: ( kubelet_volume_stats_used_bytes{job="kubelet", metrics_path="/metrics"} / kubelet_volume_stats_capacity_bytes{job="kubelet", metrics_path="/metrics"} ) * on (persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{ pod=~"{{ $.Release.Name }}-.+$",namespace="{{ $.Release.Namespace }}"} * 100 > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
@@ -216,7 +216,7 @@ spec:
   {{ if (include "kubedbcom-qdrant-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: qdrant.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBQdrantPhaseNotReady
       expr: kubedb_com_qdrant_status_phase{phase="NotReady",app="{{ $.Release.Name }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -227,7 +227,7 @@ spec:
         summary: KubeDB Qdrant database in NotReady phase (qdrant {{`{{`}} $labels.qdrant {{`}}`}})
         description: "KubeDB Qdrant database {{`{{`}} $labels.qdrant {{`}}`}} is in NotReady phase. The database is not accepting connections and requires attention.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBQdrantPhaseCritical
       expr: kubedb_com_qdrant_status_phase{phase="Critical",app="{{ $.Release.Name }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
