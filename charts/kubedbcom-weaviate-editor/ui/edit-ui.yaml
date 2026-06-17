@@ -1,0 +1,305 @@
+step:
+- elements:
+  - elements:
+    - label: Name
+      schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/metadata/properties/name
+      type: input
+    - if:
+        name: isRancherManaged
+        type: function
+      label: Select Namespace
+      loader: getNamespaces
+      schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/metadata/properties/namespace
+      type: select
+      watcher:
+        func: onNamespaceChange
+        paths:
+        - schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/metadata/properties/namespace
+    - label: Select Db
+      loader: getWeaviateDbs
+      refresh: true
+      schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/databaseRef/properties/name
+      type: select
+      validation:
+        type: required
+      watcher:
+        func: initMetadata
+        paths:
+        - schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/databaseRef/properties/name
+    if:
+      name: isConsole
+      type: function
+    type: block-layout
+  - if:
+      name: isConsole
+      type: function
+    label: Select Type
+    options:
+    - description: Scale your CPU Memory based on resource usage
+      text: Compute
+      value: compute
+    - description: Expand your database size based on volume usage
+      text: Storage
+      value: storage
+    schema: temp/properties/autoscalingType
+    type: radio
+    validation:
+      type: required
+    watcher:
+      func: initMetadata
+      paths:
+      - temp/properties/autoscalingType
+  - elements:
+    - fullwidth: true
+      init:
+        type: func
+        value: setTrigger|autoscalingKubedbComWeaviateAutoscaler/spec/compute/weaviate/trigger
+      label: Trigger
+      schema: temp/properties/compute/properties/weaviate/properties/trigger
+      type: switch
+      watcher:
+        func: onTriggerChange|compute/weaviate
+        paths:
+        - temp/properties/compute/properties/weaviate/properties/trigger
+    - label: Pod lifetime threshold
+      subtitle: Specifies the duration a pod can exist before using considered for
+        scaling decisions, ensuring resource optimization and workload stability
+      type: label-element
+    - customClass: width-300
+      label: Pod LifeTime Threshold (e.g., 10m 30s)
+      schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/podLifeTimeThreshold
+      type: input
+    - elements:
+      - customClass: width-300
+        label: ResourceDiff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/resourceDiffPercentage
+        type: threshold-input
+      - label: Resource Configuration
+        subtitle: Define minimum and maximum allowed resources to ensure optimal database
+          performance
+        type: label-element
+      - elements:
+        - header: Minimum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|weaviate|min
+          label: Min Allowed Profile
+          loader:
+            name: getMachines|weaviate|min
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-max
+          schema: temp/properties/allowedMachine-min
+          type: machine-compare
+          watcher:
+            func: onMachineChange|weaviate
+            paths:
+            - temp/properties/allowedMachine-min
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/minAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/minAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Min Allowed
+          showLabels: true
+          type: block-layout
+        - header: Maximum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|weaviate|max
+          label: Max Allowed Profile
+          loader:
+            name: getMachines|weaviate|max
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-min
+          schema: temp/properties/allowedMachine-max
+          type: machine-compare
+          watcher:
+            func: onMachineChange|weaviate
+            paths:
+            - temp/properties/allowedMachine-max
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/maxAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/maxAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Max Allowed
+          showLabels: true
+          type: block-layout
+        showLabels: false
+        type: block-layout
+      - label: Controlled Resources
+        loader: setControlledResources|weaviate
+        multiple: true
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/controlledResources
+        type: select
+      - label: Container Controlled Values
+        options:
+        - text: Requests And Limits
+          value: RequestsAndLimits
+        - text: Requests Only
+          value: RequestsOnly
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/containerControlledValues
+        type: select
+      - elements:
+        - label: Scaling Factor Percentage
+          schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/inMemoryStorage/properties/scalingFactorPercentage
+          type: threshold-input
+        - label: Usage Threshold Percentage
+          schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/weaviate/properties/inMemoryStorage/properties/usageThresholdPercentage
+          type: threshold-input
+        if:
+          name: showStorageMemoryOption
+          type: function
+        label: In Memory Storage
+        showLabels: true
+        type: block-layout
+      label: Weaviate
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Select NodeTopology
+        loader: fetchNodeTopology
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+        type: select
+      - if:
+          name: isNodeTopologySelected
+          type: function
+        label: ScaleUp Diff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+        type: threshold-input
+      - if:
+          name: isNodeTopologySelected
+          type: function
+        label: ScaleDown Diff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+        type: threshold-input
+      if:
+        name: hasNoAnnotations
+        type: function
+      label: Node Topology
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Timeout
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: time-picker
+      - init:
+          type: func
+          value: setApplyToIfReady
+        label: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if:
+        name: showOpsRequestOptions
+        type: function
+      label: Ops Request Options
+      showLabels: true
+      type: block-layout
+    loader: fetchTopologyMachines
+    showLabels: false
+    type: block-layout
+  id: compute-autoscaler
+  loader: getWeaviateDbs
+  type: single-step-form
+- elements:
+  - elements:
+    - fullwidth: true
+      init:
+        type: func
+        value: setTrigger|autoscalingKubedbComWeaviateAutoscaler/spec/storage/weaviate/trigger
+      label: Trigger
+      schema: temp/properties/storage/properties/weaviate/properties/trigger
+      type: switch
+      watcher:
+        func: onTriggerChange|storage/weaviate
+        paths:
+        - temp/properties/storage/properties/weaviate/properties/trigger
+    - label: Expansion Mode (Online/Offline)
+      subtitle: For Online Mode enables scaling without downtime by dynamically resizing
+        storage while the database remains operational and Offline Mode performs storage
+        scaling during scheduled downtime, ensuring consistency but requiring database
+        restarts.
+      type: label-element
+    - description: Select how the storage expansion should be handled.
+      label: Mode
+      options:
+      - text: Online
+        value: Online
+      - text: Offline
+        value: Offline
+      schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/storage/properties/weaviate/properties/expansionMode
+      type: select
+    - elements:
+      - label: UsageThreshold (%)
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/storage/properties/weaviate/properties/usageThreshold
+        subtitle: Set the threshold percentage of storage usage to trigger scaling.
+        type: threshold-input
+      - label: Scaling Rules
+        loader: setValueFromDbDetails|resources/kubedbComWeaviate/spec/storage/resources/requests/storage
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/storage/properties/weaviate/properties/scalingRules
+        type: scaling-rules
+        watcher:
+          func: handleUnit|autoscalingKubedbComWeaviateAutoscaler/spec/storage/weaviate/scalingRules|scalingRules
+          paths:
+          - schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/storage/properties/weaviate/properties/scalingRules
+      - label: UpperBound
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/storage/properties/weaviate/properties/upperBound
+        type: input
+        watcher:
+          func: handleUnit|autoscalingKubedbComWeaviateAutoscaler/spec/storage/weaviate/upperBound
+          paths:
+          - schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/storage/properties/weaviate/properties/upperBound
+      label: Weaviate
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Timeout
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: time-picker
+      - init:
+          type: func
+          value: setApplyToIfReady
+        label: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema: schema/properties/resources/properties/autoscalingKubedbComWeaviateAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if:
+        name: showOpsRequestOptions
+        type: function
+      label: OpsRequest Options
+      showLabels: true
+      type: block-layout
+    showLabels: false
+    type: block-layout
+  id: storage-autoscaler
+  type: single-step-form
+type: multi-step-form
