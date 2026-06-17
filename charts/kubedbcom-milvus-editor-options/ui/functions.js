@@ -1203,6 +1203,42 @@ export const useFunc = (model) => {
     return getValue(model, '/spec/metaStorage/externallyManaged')
   }
 
+  async function getSecrets() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    // watchDependency('model#/metadata/release/namespace')
+
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+        {
+          params: {
+            filter: { items: { metadata: { name: null }, type: null } },
+          },
+        },
+      )
+
+      const secrets = (resp && resp.data && resp.data.items) || []
+
+      const filteredSecrets = secrets.filter((item) => {
+        const validType = ['kubernetes.io/service-account-token', 'Opaque']
+        return validType.includes(item.type)
+      })
+
+      filteredSecrets.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return filteredSecrets
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
   return {
     onReferSecretChange,
     showReferSecretSwitch,
@@ -1254,5 +1290,6 @@ export const useFunc = (model) => {
     showArchiverAlert,
     showArchiver,
     isMetaStorageExternallyManaged,
+    getSecrets,
   }
 }
