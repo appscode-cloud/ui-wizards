@@ -905,7 +905,7 @@ export const useFunc = (model) => {
     }
     if (!features.includes('binding')) {
       commit('wizard/model$update', {
-        path: '/spec/admin/expose/default',
+        path: '/spec/admin/expose/enable/default',
         value: false,
         force: true,
       })
@@ -986,7 +986,7 @@ export const useFunc = (model) => {
 
   function checkIfFeatureOn(type) {
     let val = getValue(model, `/spec/admin/${type}/toggle`)
-    if (type === 'backup' || type === 'archiver') {
+    if (type === 'backup' || type === 'archiver' || type === 'expose') {
       val = getValue(model, `/spec/admin/${type}/enable/toggle`)
     }
     const backupVal = getValue(model, '/spec/backup/tool')
