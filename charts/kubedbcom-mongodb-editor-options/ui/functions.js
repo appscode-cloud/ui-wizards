@@ -940,7 +940,7 @@ export const useFunc = (model) => {
     }
     if (!features.includes('binding')) {
       commit('wizard/model$update', {
-        path: '/spec/admin/expose/default',
+        path: '/spec/admin/expose/enable/default',
         value: false,
         force: true,
       })
@@ -1133,7 +1133,7 @@ export const useFunc = (model) => {
   let backupToolInitialValue = ''
   function checkIfFeatureOn(type) {
     let val = getValue(model, `/spec/admin/${type}/toggle`)
-    if (type === 'backup' || type === 'archiver') {
+    if (type === 'backup' || type === 'archiver' || type === 'expose') {
       val = getValue(model, `/spec/admin/${type}/enable/toggle`)
     }
     const backupVal = getValue(model, '/spec/backup/tool')
@@ -1327,7 +1327,7 @@ export const useFunc = (model) => {
 
   function checkHostnameOrIP() {
     const tls = getValue(model, '/spec/admin/tls/default')
-    const expose = getValue(model, '/spec/admin/expose/default')
+    const expose = getValue(model, '/spec/admin/expose/enable/default')
     if (tls && expose) {
       if (hostName) {
         commit('wizard/model$update', {
@@ -1517,10 +1517,10 @@ export const useFunc = (model) => {
   // horizon stuffs
   function isTlsOn() {
     // watchDependency('model#/spec/admin/tls/default')
-    // watchDependency('model#/spec/admin/expose/default')
+    // watchDependency('model#/spec/admin/expose/enable/default')
 
     const tls = getValue(model, '/spec/admin/tls/default')
-    const expose = getValue(model, '/spec/admin/expose/default')
+    const expose = getValue(model, '/spec/admin/expose/enable/default')
     return tls && expose
   }
 
