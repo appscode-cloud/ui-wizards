@@ -148,7 +148,7 @@ step:
       schema: temp/createAuthSecret
       type: switch
       watcher:
-        func: onAuthChange
+        func: onCreateAuthSecretChange
         paths:
         - temp/createAuthSecret
     - if:
@@ -169,7 +169,7 @@ step:
       schema: schema/properties/spec/properties/authSecret/properties/name
       type: select
     - if:
-        name: showReferSecret
+        name: showAuthPasswordField
         type: function
       label: Password
       schema: schema/properties/spec/properties/authSecret/properties/password
@@ -385,12 +385,12 @@ step:
           type: func
           value: checkHostnameOrIP
         label: Expose via Gateway?
-        schema: schema/properties/spec/properties/admin/properties/expose/properties/default
+        schema: schema/properties/spec/properties/admin/properties/expose/properties/enable/properties/default
         type: switch
         watcher:
           func: checkHostnameOrIP
           paths:
-          - schema/properties/spec/properties/admin/properties/expose/properties/default
+          - schema/properties/spec/properties/admin/properties/expose/properties/enable/properties/default
       type: block-layout
     if:
       name: showAdditionalSettings
