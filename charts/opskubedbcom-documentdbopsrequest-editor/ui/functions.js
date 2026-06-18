@@ -397,7 +397,7 @@ export const useFunc = (model) => {
     // watchDependency('model#/metadata/namespace')
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mysqls`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/documentdbs`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -423,7 +423,7 @@ export const useFunc = (model) => {
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
 
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mysqls/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/documentdbs/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -452,7 +452,7 @@ export const useFunc = (model) => {
     }
 
     try {
-      presetVersions = presets.admin?.databases?.MySQL?.versions?.available || []
+      presetVersions = presets.admin?.databases?.DocumentDB?.versions?.available || []
       const queryParams = {
         filter: {
           items: {
@@ -463,7 +463,7 @@ export const useFunc = (model) => {
       }
 
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mysqlversions`,
+        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/documentdbversions`,
         {
           params: queryParams,
         },
@@ -489,7 +489,7 @@ export const useFunc = (model) => {
 
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
       // if presets.status is 404, it means no presets available, no need to filter with presets
-      const filteredMySQLVersions = sortedVersions.filter((item) => {
+      const filteredDocumentDBVersions = sortedVersions.filter((item) => {
         // default limit 0.0 means no restrictions, show all higher versions
         if (limit === '0.0')
           return (
@@ -518,9 +518,9 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      setDiscriminatorValue('/filteredVersion', filteredMySQLVersions)
+      setDiscriminatorValue('/filteredVersion', filteredDocumentDBVersions)
 
-      return filteredMySQLVersions.map((item) => {
+      return filteredDocumentDBVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -782,7 +782,8 @@ export const useFunc = (model) => {
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const container = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const limits = container[0]?.resources?.limits || {}
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -832,7 +833,8 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const container = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const limits = container[0]?.resources?.limits || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
@@ -1683,7 +1685,7 @@ export const useFunc = (model) => {
 
     const key = getValue(discriminator, '/topologyKey')
     const value = getValue(discriminator, '/topologyValue')
-    const path = `/spec/verticalScaling/mysql/topology`
+    const path = `/spec/verticalScaling/documentdb/topology`
 
     if (key || value) {
       commit('wizard/model$update', {
@@ -1840,7 +1842,8 @@ export const useFunc = (model) => {
 
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const container = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const limits = container[0]?.resources?.limits || {}
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
