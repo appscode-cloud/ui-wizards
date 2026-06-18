@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlInstanceDown.enabled .rules.mysqlInstanceDown.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlInstanceDown")) -}}
     - alert: MySQLInstanceDown
       expr: mysql_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.mysqlInstanceDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: MySQL instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlServiceDown.enabled .rules.mysqlServiceDown.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlServiceDown")) -}}
     - alert: MySQLServiceDown
       expr: sum by (service) (mysql_up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
       for: {{ .rules.mysqlServiceDown.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: MySQL service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlTooManyConnections.enabled .rules.mysqlTooManyConnections.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlTooManyConnections")) -}}
     - alert: MySQLTooManyConnections
       expr: max_over_time(mysql_global_status_threads_connected{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / mysql_global_variables_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.mysqlTooManyConnections.val}}
       for: {{ .rules.mysqlTooManyConnections.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: MySQL too many connections (> {{.rules.mysqlTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.rules.mysqlTooManyConnections.val}}% of MySQL connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighThreadsRunning.enabled .rules.mysqlHighThreadsRunning.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighThreadsRunning")) -}}
     - alert: MySQLHighThreadsRunning
       expr: max_over_time(mysql_global_status_threads_running{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / mysql_global_variables_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.mysqlHighThreadsRunning.val}}
       for: {{ .rules.mysqlHighThreadsRunning.duration }}
@@ -66,7 +66,7 @@ spec:
         summary: MySQL high threads running (> {{.rules.mysqlHighThreadsRunning.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.rules.mysqlHighThreadsRunning.val}}% of MySQL threads are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlSlowQueries.enabled .rules.mysqlSlowQueries.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlSlowQueries")) -}}
     - alert: MySQLSlowQueries
       expr: increase(mysql_global_status_slow_queries{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > 0
       for: {{ .rules.mysqlSlowQueries.duration }}
@@ -77,7 +77,7 @@ spec:
         summary: MySQL slow queries on (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL server mysql has some new slow query.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlInnoDBLogWaits.enabled .rules.mysqlInnoDBLogWaits.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlInnoDBLogWaits")) -}}
     - alert: MySQLInnoDBLogWaits
       expr: rate(mysql_global_status_innodb_log_waits{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[15m]) > {{.rules.mysqlInnoDBLogWaits.val}}
       for: {{ .rules.mysqlInnoDBLogWaits.duration }}
@@ -88,7 +88,7 @@ spec:
         summary: MySQL InnoDB log waits (> {{.rules.mysqlInnoDBLogWaits.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL innodb log writes stalling\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlRestarted.enabled .rules.mysqlRestarted.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlRestarted")) -}}
     - alert: MySQLRestarted
       expr: mysql_global_status_uptime{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{.rules.mysqlRestarted.val}}
       for: {{ .rules.mysqlRestarted.duration }}
@@ -99,7 +99,7 @@ spec:
         summary: MySQL restarted ({{.rules.mysqlRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL restarted\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighQPS.enabled .rules.mysqlHighQPS.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighQPS")) -}}
     - alert: MySQLHighQPS
       expr: rate(mysql_global_status_queries{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.mysqlHighQPS.val}}
       for: {{ .rules.mysqlHighQPS.duration }}
@@ -110,7 +110,7 @@ spec:
         summary: MySQL has high queries per second (> {{.rules.mysqlHighQPS.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL has high QPS on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighIncomingBytes.enabled .rules.mysqlHighIncomingBytes.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighIncomingBytes")) -}}
     - alert: MySQLHighIncomingBytes
       expr: rate(mysql_global_status_bytes_received{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.mysqlHighIncomingBytes.val}}
       for: {{ .rules.mysqlHighIncomingBytes.duration }}
@@ -121,7 +121,7 @@ spec:
         summary: MySQL has high incoming bytes second (> {{.rules.mysqlHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL has high incoming bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighOutgoingBytes.enabled .rules.mysqlHighOutgoingBytes.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighOutgoingBytes")) -}}
     - alert: MySQLHighOutgoingBytes
       expr: rate(mysql_global_status_bytes_sent{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.mysqlHighOutgoingBytes.val}}
       for: {{ .rules.mysqlHighOutgoingBytes.duration }}
@@ -132,7 +132,7 @@ spec:
         summary: MySQL has high outgoing bytes second (> {{.rules.mysqlHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL has high outgoing bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlTooManyOpenFiles.enabled .rules.mysqlTooManyOpenFiles.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlTooManyOpenFiles")) -}}
     - alert: MySQLTooManyOpenFiles
       expr: max_over_time(mysql_global_status_open_files{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / mysql_global_variables_open_files_limit{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.mysqlTooManyOpenFiles.val}}
       for: {{ .rules.mysqlTooManyOpenFiles.duration }}
@@ -144,7 +144,7 @@ spec:
         description: "MySQL too many opened files on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskUsageHigh.val }}
@@ -156,7 +156,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskAlmostFull.val }}
@@ -176,7 +176,7 @@ spec:
   {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.group.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighReplicationDelay.enabled .rules.mysqlHighReplicationDelay.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighReplicationDelay")) -}}
     - alert: MySQLHighReplicationDelay
       expr: max by (pod) (mysql_perf_schema_replication_group_worker_apply_time_seconds{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{.rules.mysqlHighReplicationDelay.val}}
       for: {{ .rules.mysqlHighReplicationDelay.duration }}
@@ -187,7 +187,7 @@ spec:
         summary: MySQL Group Replication delay too high ( > {{.rules.mysqlHighReplicationDelay.val}} second) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL Group Replication delay too high {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighReplicationTransportTime.enabled .rules.mysqlHighReplicationTransportTime.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighReplicationTransportTime")) -}}
     - alert: MySQLHighReplicationTransportTime
       expr: max by (pod) (mysql_perf_schema_replication_group_worker_transport_time_seconds{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{.rules.mysqlHighReplicationTransportTime.val}}
       for: {{ .rules.mysqlHighReplicationTransportTime.duration }}
@@ -198,7 +198,7 @@ spec:
         summary: MySQL Group Replication transport time too high ( > {{.rules.mysqlHighReplicationTransportTime.val}} second) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL Group Replication transport time too high {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighReplicationApplyTime.enabled .rules.mysqlHighReplicationApplyTime.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlHighReplicationApplyTime")) -}}
     - alert: MySQLHighReplicationApplyTime
       expr: max by (pod) (mysql_perf_schema_replication_group_worker_apply_time_seconds{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{.rules.mysqlHighReplicationApplyTime.val}}
       for: {{ .rules.mysqlHighReplicationApplyTime.duration }}
@@ -209,7 +209,7 @@ spec:
         summary: MySQL Group Replication apply time too high ( > {{.rules.mysqlHighReplicationApplyTime.val}} second) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL Group Replication apply time too high {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlReplicationHighTransactionTime.enabled .rules.mysqlReplicationHighTransactionTime.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mysqlReplicationHighTransactionTime")) -}}
     - alert: MySQLReplicationHighTransactionTime
       expr: max by (pod) (mysql_perf_schema_replication_group_worker_time_RL_seconds{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) > {{.rules.mysqlReplicationHighTransactionTime.val}}
       for: {{ .rules.mysqlReplicationHighTransactionTime.duration }}
@@ -228,7 +228,7 @@ spec:
   {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBMySQLPhaseNotReady
       expr: kubedb_com_mysql_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -239,7 +239,7 @@ spec:
         summary: KubeDB MySQL Phase NotReady (mysql {{`{{`}} $labels.mysql {{`}}`}})
         description: "KubeDB MySQL Phase not ready on {{`{{`}} $labels.mysql {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBMySQLPhaseCritical
       expr: kubedb_com_mysql_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
@@ -258,7 +258,7 @@ spec:
   {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestOnProgress")) -}}
     - alert: KubeDBMySQLOpsRequestOnProgress
       expr: ops_kubedb_com_mysqlopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestOnProgress.duration }}
@@ -269,7 +269,7 @@ spec:
         summary: MySQLOpsRequest on progress (mysqlopsrequest {{`{{`}} $labels.mysqlopsrequest {{`}}`}})
         description: "MySQLOpsRequest {{`{{`}} $labels.mysqlopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestStatusProgressingToLong")) -}}
     - alert: KubeDBMySQLOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_mysqlopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
@@ -280,7 +280,7 @@ spec:
         summary: MySQLOpsRequest is in progressing status for too long (mysqlopsrequest {{`{{`}} $labels.mysqlopsrequest {{`}}`}})
         description: "MySQLOpsRequest {{`{{`}} $labels.mysqlopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestFailed")) -}}
     - alert: KubeDBMySQLOpsRequestFailed
       expr: ops_kubedb_com_mysqlopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestFailed.duration }}
@@ -299,7 +299,7 @@ spec:
   {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: MySQLStashBackupSessionFailed
       expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.backupSessionFailed.duration }}
@@ -310,7 +310,7 @@ spec:
         summary: MySQL Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: MySQLStashRestoreSessionFailed
       expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -321,7 +321,7 @@ spec:
         summary: MySQL Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: MySQLStashNoBackupSessionForTooLong
       expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -332,7 +332,7 @@ spec:
         summary: MySQL Stash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: MySQLStashRepositoryCorrupted
       expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -343,7 +343,7 @@ spec:
         summary: MySQL Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: MySQLStashRepositoryStorageRunningLow
       expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -354,7 +354,7 @@ spec:
         summary: MySQL Stash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: MySQLStashBackupSessionPeriodTooLong
       expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -365,7 +365,7 @@ spec:
         summary:  MySQL Stash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: MySQLStashRestoreSessionPeriodTooLong
       expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}
@@ -383,7 +383,7 @@ spec:
   {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: MySQLKubeStashBackupSessionFailed
       expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="MySQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.backupSessionFailed.duration }}
@@ -394,7 +394,7 @@ spec:
         summary: MySQL KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: MySQLKubeStashRestoreSessionFailed
       expr: core_kubestash_com_restoresession_phase{target_kind="MySQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -405,7 +405,7 @@ spec:
         summary: MySQL KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: MySQLKubeStashNoBackupSessionForTooLong
       expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="MySQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -416,7 +416,7 @@ spec:
         summary: MySQL KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: MySQLKubeStashRepositoryCorrupted
       expr: storage_kubestash_com_repository_info{target_kind="MySQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -427,7 +427,7 @@ spec:
         summary: MySQL KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: MySQLKubeStashRepositoryStorageRunningLow
       expr: storage_kubestash_com_repository_size_bytes{target_kind="MySQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -438,7 +438,7 @@ spec:
         summary: MySQL KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: MySQLKubeStashBackupSessionPeriodTooLong
       expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="MySQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -449,7 +449,7 @@ spec:
         summary:  MySQL KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MySQL KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: MySQLKubeStashRestoreSessionPeriodTooLong
       expr: core_kubestash_com_restoresession_duration_seconds{target_kind="MySQL", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}
@@ -468,7 +468,7 @@ spec:
   {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.schemaManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaPendingForTooLong.enabled .rules.schemaPendingForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaPendingForTooLong")) -}}
     - alert: KubeDBMySQLSchemaPendingForTooLong
       expr: schema_kubedb_com_mysqldatabase_status_phase{phase="Pending",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaPendingForTooLong.duration }}
@@ -479,7 +479,7 @@ spec:
         summary: KubeDB schema pending for too long for (mysqldatabase {{`{{`}} $labels.mysqldatabase {{`}}`}})
         description: "KubeDB schema pending for too long.\n {{`{{`}} $labels.mysqldatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaInProgressForTooLong.enabled .rules.schemaInProgressForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaInProgressForTooLong")) -}}
     - alert: KubeDBMySQLSchemaInProgressForTooLong
       expr: schema_kubedb_com_mysqldatabase_status_phase{phase="InProgress",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaInProgressForTooLong.duration }}
@@ -490,7 +490,7 @@ spec:
         summary: KubeDB schema is in progress for too long for (mysqldatabase {{`{{`}} $labels.mysqldatabase {{`}}`}})
         description: "KubeDB schema is in progress for too long.\n {{`{{`}} $labels.mysqldatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaTerminatingForTooLong.enabled .rules.schemaTerminatingForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaTerminatingForTooLong")) -}}
     - alert: KubeDBMySQLSchemaTerminatingForTooLong
       expr: schema_kubedb_com_mysqldatabase_status_phase{phase="Terminating",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaTerminatingForTooLong.duration }}
@@ -501,7 +501,7 @@ spec:
         summary: KubeDB schema terminating for too long for (mysqldatabase {{`{{`}} $labels.mysqldatabase {{`}}`}})
         description: "KubeDB schema terminating for too long.\n {{`{{`}} $labels.mysqldatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaFailed.enabled .rules.schemaFailed.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaFailed")) -}}
     - alert: KubeDBMySQLSchemaFailed
       expr: schema_kubedb_com_mysqldatabase_status_phase{phase="Failed",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaFailed.duration }}
@@ -512,7 +512,7 @@ spec:
         summary: KubeDB schema failed for (mysqldatabase {{`{{`}} $labels.mysqldatabase {{`}}`}})
         description: "KubeDB schema failed.\n {{`{{`}} $labels.mysqldatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaExpired.enabled .rules.schemaExpired.severity)) -}}
+    {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "schemaExpired")) -}}
     - alert: KubeDBMySQLSchemaExpired
       expr: schema_kubedb_com_mysqldatabase_status_phase{phase="Expired",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.schemaExpired.duration }}

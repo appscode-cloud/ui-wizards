@@ -27,7 +27,7 @@ step:
     schema: schema/properties/spec/properties/mode
     type: radio
   - if:
-      name: isEqualToModelPathValue|Standalone|/spec/mode
+      name: isEqualToModelPathValue|Distributed|/spec/mode
       type: function
     label: Replicas
     schema: schema/properties/spec/properties/replicas
@@ -132,11 +132,11 @@ step:
         files and index files. Provide the name of a Kubernetes secret that contains
         the MinIO or S3-compatible storage configuration.
       type: label-element
-    - label: Config Secret Name
+    - label: Config Secret
+      loader: getSecrets
+      refresh: true
       schema: schema/properties/spec/properties/objectStorage/properties/configSecretName
-      type: input
-      validation:
-        type: required
+      type: select
     label: Object Storage
     showLabels: true
     type: block-layout
@@ -584,43 +584,11 @@ step:
         name: isToggleOn|monitoring
         type: function
       type: block-layout
-    - if:
-        name: isToggleOn|backup
-        type: function
-      init:
-        type: func
-        value: setBackup
-      label: Enable Backup?
-      schema: temp/backup
-      type: switch
-      watcher:
-        func: onBackupSwitch
-        paths:
-        - temp/backup
     - elements:
-      - disable:
-          name: showArchiverAlert
-          watchPaths:
-          - schema/spec/admin/storageClasses/default
-          - schema/spec/mode
-        label: Enable Archiver?
-        schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
-        type: switch
-        watcher:
-          func: onArchiverChange
-          paths:
-          - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
       - if:
-          name: showArchiverAlert
+          name: isToggleOn|tls
           type: function
-        label: The selected StorageClass does not support Archiver
-        type: warning
-      if:
-        name: showArchiver
-        type: function
-      type: block-layout
-    - elements:
-      - label: Enable TLS?
+        label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
       - if:
@@ -634,14 +602,6 @@ step:
           type: required
       if:
         name: isToggleOn|tls
-        type: function
-      type: block-layout
-    - elements:
-      - label: Expose via Gateway?
-        schema: schema/properties/spec/properties/admin/properties/expose/properties/default
-        type: switch
-      if:
-        name: isToggleOn|expose
         type: function
       type: block-layout
     if:

@@ -1,4 +1,4 @@
-{{- if .Values.spec.admin.expose.default }}
+{{- if .Values.spec.admin.expose.enable.default }}
 apiVersion: catalog.appscode.com/v1alpha1
 kind: PostgresBinding
 metadata:
@@ -10,4 +10,7 @@ spec:
   sourceRef:
     name: {{ include "kubedbcom-postgres-editor-options.fullname" . }}
     namespace: {{ .Release.Namespace }}
+  uiExposure:
+    disableUI: {{ .Values.spec.admin.expose.uiExposure.disableUI }}
+    disableCostEfficiency: {{ .Values.spec.admin.expose.uiExposure.disableCostEfficiency }}
 {{- end }}

@@ -1066,20 +1066,13 @@ export const useFunc = (model) => {
     }
   }
 
-  function setAllowedMachine(type, minmax) {
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
+  function setAllowedMachine(minmax) {
+    const machine = instance
 
-    const machine = parsedInstance[type] || ''
     const mx = machine?.includes(',') ? machine.split(',')[1] : ''
     const mn = machine?.includes(',') ? machine.split(',')[0] : ''
     const machineName = minmax === 'min' ? mn : mx
-
+    console.log({ machine, mx, mn, machineName })
     // Find the machine details from topologyMachines
     const nodeGroups = getValue(discriminator, '/topologyMachines') || []
     const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
@@ -1100,9 +1093,9 @@ export const useFunc = (model) => {
     }
   }
 
-  function getMachines(type, minmax) {
+  function getMachines(minmax) {
     const depends = minmax === 'min' ? 'max' : 'min'
-    const dependantPath = `/allowedMachine-${type}-${depends}`
+    const dependantPath = `/allowedMachine-${depends}`
 
     const dependantMachineObj = getValue(discriminator, dependantPath)
     const dependantMachine = dependantMachineObj?.machine || ''
@@ -1151,24 +1144,14 @@ export const useFunc = (model) => {
     const annoPath = '/resources/autoscalingKubedbComZooKeeperAutoscaler/metadata/annotations'
     const annotations = getValue(model, annoPath) || {}
     const instance = annotations['kubernetes.io/instance-type']
-    let parsedInstance = {}
-    try {
-      if (instance) parsedInstance = JSON.parse(instance)
-    } catch (e) {
-      console.log(e)
-      parsedInstance = {}
-    }
 
     // Now discriminator values are objects with { machine, cpu, memory }
-    const minMachineObj = getValue(discriminator, `/allowedMachine-${type}-min`)
-    const maxMachineObj = getValue(discriminator, `/allowedMachine-${type}-max`)
+    const minMachineObj = getValue(discriminator, '/allowedMachine-min')
+    const maxMachineObj = getValue(discriminator, '/allowedMachine-max')
     const minMachine = minMachineObj?.machine || ''
     const maxMachine = maxMachineObj?.machine || ''
     const minMaxMachine = `${minMachine},${maxMachine}`
-
-    parsedInstance[type] = minMaxMachine
-    const instanceString = JSON.stringify(parsedInstance)
-    annotations['kubernetes.io/instance-type'] = instanceString
+    annotations['kubernetes.io/instance-type'] = minMaxMachine
 
     // Use cpu/memory directly from the machine objects
     const minMachineAllocatable = minMachineObj
@@ -1179,7 +1162,7 @@ export const useFunc = (model) => {
       : null
     const allowedPath = `/resources/autoscalingKubedbComZooKeeperAutoscaler/spec/compute/${type}`
 
-    if (minMachine && maxMachine && instance !== instanceString) {
+    if (minMachine && maxMachine && instance !== minMaxMachine) {
       commit('wizard/model$update', {
         path: `${allowedPath}/maxAllowed`,
         value: maxMachineAllocatable,
@@ -1192,7 +1175,7 @@ export const useFunc = (model) => {
       })
       commit('wizard/model$update', {
         path: annoPath,
-        value: annotations,
+        value: { ...annotations },
         force: true,
       })
     }

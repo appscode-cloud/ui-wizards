@@ -364,6 +364,22 @@ step:
           paths:
           - temp/monitoring
       type: block-layout
+    - customClass: mt-10
+      if:
+        name: showAlerts
+        type: function
+      label: Alert Options
+      options:
+      - text: None
+        value: none
+      - text: Critical
+        value: critical
+      - text: Warning
+        value: warning
+      - text: Info
+        value: info
+      schema: schema/properties/form/properties/alert/properties/enabled
+      type: select
     - if:
         name: isToggleOn|backup
         type: function
@@ -399,12 +415,23 @@ step:
         name: showArchiver
         type: function
       type: block-layout
-    - if:
-        name: isToggleOn|tls
-        type: function
-      label: Enable TLS?
-      schema: schema/properties/spec/properties/admin/properties/tls/properties/default
-      type: switch
+    - elements:
+      - if:
+          name: isToggleOn|tls
+          type: function
+        label: Enable TLS?
+        schema: schema/properties/spec/properties/admin/properties/tls/properties/default
+        type: switch
+      - if:
+          name: showIssuer
+          type: function
+        label: Cluster Issuers
+        loader: getAdminOptions|clusterIssuers
+        schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+        type: select
+        validation:
+          type: required
+      type: block-layout
     - elements:
       - label: Expose via Gateway?
         schema: schema/properties/spec/properties/admin/properties/expose/properties/default

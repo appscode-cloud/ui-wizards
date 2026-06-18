@@ -22,7 +22,7 @@ spec:
     {{- if (include "kubedbcom-neo4j-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
     - name: neo4j.database.{{ $.Release.Namespace }}.{{ $app }}.rules
       rules:
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jHighCPUUsage.enabled .rules.neo4jHighCPUUsage.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "neo4jHighCPUUsage")) }}
         - alert: Neo4jHighCPUUsage
           expr: avg(irate(container_cpu_usage_seconds_total{container!="",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}[5m])) by (pod) * 100 > {{ .rules.neo4jHighCPUUsage.val }}
           for: {{ .rules.neo4jHighCPUUsage.duration }}
@@ -37,7 +37,7 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jHighMemoryUsage.enabled .rules.neo4jHighMemoryUsage.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "neo4jHighMemoryUsage")) }}
         - alert: Neo4jHighMemoryUsage
           expr: avg(container_memory_working_set_bytes{container!="",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) by (pod) / avg(kube_pod_container_resource_limits{resource="memory",pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) by (pod) * 100 > {{ .rules.neo4jHighMemoryUsage.val }}
           for: {{ .rules.neo4jHighMemoryUsage.duration }}
@@ -52,7 +52,7 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageCacheUsageRatioHigh.enabled .rules.neo4jPageCacheUsageRatioHigh.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "neo4jPageCacheUsageRatioHigh")) }}
         - alert: Neo4jPageCacheUsageRatioHigh
           expr: neo4j_dbms_page_cache_usage_ratio{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"} > {{ .rules.neo4jPageCacheUsageRatioHigh.val }}
           for: {{ .rules.neo4jPageCacheUsageRatioHigh.duration }}
@@ -69,7 +69,7 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageCacheHitRatioLow.enabled .rules.neo4jPageCacheHitRatioLow.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "neo4jPageCacheHitRatioLow")) }}
         - alert: Neo4jPageCacheHitRatioLow
           expr: neo4j_dbms_page_cache_hit_ratio{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"} < {{ .rules.neo4jPageCacheHitRatioLow.val }}
           for: {{ .rules.neo4jPageCacheHitRatioLow.duration }}
@@ -86,7 +86,7 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageFaultsHigh.enabled .rules.neo4jPageFaultsHigh.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "neo4jPageFaultsHigh")) }}
         - alert: Neo4jPageFaultsHigh
           expr: increase(neo4j_dbms_page_cache_page_faults_total{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.neo4jPageFaultsHigh.val }}
           for: {{ .rules.neo4jPageFaultsHigh.duration }}
@@ -103,7 +103,7 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.neo4jPageFaultFailuresHigh.enabled .rules.neo4jPageFaultFailuresHigh.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "neo4jPageFaultFailuresHigh")) }}
         - alert: Neo4jPageFaultFailuresHigh
           expr: increase(neo4j_dbms_page_cache_page_fault_failures_total{container=~"{{ $.Release.Name }}.*",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.neo4jPageFaultFailuresHigh.val }}
           for: {{ .rules.neo4jPageFaultFailuresHigh.duration }}
@@ -120,7 +120,7 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) }}
         - alert: DiskUsageHigh
           expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ .rules.diskUsageHigh.val }}
           for: {{ .rules.diskUsageHigh.duration }}
@@ -136,7 +136,7 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) }}
         - alert: DiskAlmostFull
           expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ .rules.diskAlmostFull.val }}
           for: {{ .rules.diskAlmostFull.duration }}
@@ -158,7 +158,7 @@ spec:
     {{- if (include "kubedbcom-neo4j-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
     - name: neo4j.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
       rules:
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) }}
         - alert: KubeDBNeo4jPhaseNotReady
           expr: kubedb_com_neo4j_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
           for: {{ .rules.appPhaseNotReady.duration }}
@@ -174,7 +174,7 @@ spec:
               LABELS = {{`{{`}} $labels {{`}}`}}
         {{- end }}
 
-        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) }}
+        {{- if (include "kubedbcom-neo4j-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) }}
         - alert: KubeDBNeo4jPhaseCritical
           expr: kubedb_com_neo4j_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
           for: {{ .rules.appPhaseCritical.duration }}

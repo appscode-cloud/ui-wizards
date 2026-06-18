@@ -77,7 +77,11 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.Neo4j.versions.default | quote }}
+  {{- if eq .Values.spec.mode "Standalone" }}
+  replicas: 1
+  {{- else }}
   replicas: {{ .Values.spec.replicas }}
+  {{- end }}
   {{- if .Values.spec.storageType }}
   storageType: {{ .Values.spec.storageType }}
   {{- end }}

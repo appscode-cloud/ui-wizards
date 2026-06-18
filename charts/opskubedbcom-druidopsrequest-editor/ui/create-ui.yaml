@@ -73,10 +73,158 @@ step:
     schema: schema/properties/spec/properties/type
     type: radio
     watcher:
-      func: isDbDetailsLoading
+      func: onRequestTypeChange
       paths:
       - temp/dbDetails
       - schema/properties/spec/properties/databaseRef/properties/name
+  - elements:
+    - init:
+        type: func
+        value: setValueFromDbDetails|/spec/version
+      label: Target Version
+      loader: getDbVersions
+      schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
+      subtitle: Select the desired Druid version to which you want to update your
+        database.
+      type: select-compare
+    - if:
+        name: isVersionEmpty
+        type: function
+      label: ""
+      loader:
+        name: getVersionInfo
+        watchPaths:
+        - temp/properties/filteredVersion
+      type: info
+    fixedBlock: true
+    if:
+      name: ifRequestTypeEqualsTo|UpdateVersion
+      type: function
+    label: Version
+    showLabels: true
+    type: block-layout
+  - elements:
+    - elements:
+      - header: Brokers
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/brokers/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/brokers
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution , while reducing
+          replicas conserves resources
+        type: input-compare
+      - hasIcon: true
+        label: Each replica represents an independent copy of your database. For example,
+          setting this to 3 creates three copies of the database for better availability.
+        type: info
+      if:
+        name: ifDbTypeEqualsTo|brokers|topology|horizontalScaling
+        type: function
+      type: horizontal-layout
+    - elements:
+      - header: Coordinators
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/coordinators/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/coordinators
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution , while reducing
+          replicas conserves resources
+        type: input-compare
+      - hasIcon: true
+        label: Each replica represents an independent copy of your database. For example,
+          setting this to 3 creates three copies of the database for better availability.
+        type: info
+      if:
+        name: ifDbTypeEqualsTo|coordinators|topology|horizontalScaling
+        type: function
+      type: horizontal-layout
+    - elements:
+      - header: Historicals
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/historicals/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/historicals
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution , while reducing
+          replicas conserves resources
+        type: input-compare
+      - hasIcon: true
+        label: Each replica represents an independent copy of your database. For example,
+          setting this to 3 creates three copies of the database for better availability.
+        type: info
+      if:
+        name: ifDbTypeEqualsTo|historicals|topology|horizontalScaling
+        type: function
+      type: horizontal-layout
+    - elements:
+      - header: Middle Managers
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/middleManagers/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution , while reducing
+          replicas conserves resources
+        type: input-compare
+      - hasIcon: true
+        label: Each replica represents an independent copy of your database. For example,
+          setting this to 3 creates three copies of the database for better availability.
+        type: info
+      if:
+        name: ifDbTypeEqualsTo|middleManagers|topology|horizontalScaling
+        type: function
+      type: horizontal-layout
+    - elements:
+      - header: Overlords
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/overlords/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution , while reducing
+          replicas conserves resources
+        type: input-compare
+      - hasIcon: true
+        label: Each replica represents an independent copy of your database. For example,
+          setting this to 3 creates three copies of the database for better availability.
+        type: info
+      if:
+        name: ifDbTypeEqualsTo|overlords|topology|horizontalScaling
+        type: function
+      type: horizontal-layout
+    - elements:
+      - header: Routers
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/routers/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution , while reducing
+          replicas conserves resources
+        type: input-compare
+      - hasIcon: true
+        label: Each replica represents an independent copy of your database. For example,
+          setting this to 3 creates three copies of the database for better availability.
+        type: info
+      if:
+        name: ifDbTypeEqualsTo|routers|topology|horizontalScaling
+        type: function
+      type: horizontal-layout
+    fixedBlock: true
+    if:
+      name: ifRequestTypeEqualsTo|HorizontalScaling
+      type: function
+    label: Horizontal Scaling Form
+    showLabels: true
+    type: block-layout
   - elements:
     - elements:
       - init:
@@ -88,6 +236,9 @@ step:
         subtitle: Compare your current machine configuration with the proposed memory
           adjustments and make informed decisions for your database setup
         type: machine-compare
+        validation:
+          name: isMachineValid|middleManagers
+          type: custom
         watcher:
           func: onMachineChange|middleManagers|/spec/topology/middleManagers/podTemplate/spec/containers
           paths:
@@ -146,6 +297,9 @@ step:
         subtitle: Compare your current machine configuration with the proposed memory
           adjustments and make informed decisions for your database setup
         type: machine-compare
+        validation:
+          name: isMachineValid|historicals
+          type: custom
         watcher:
           func: onMachineChange|historicals|/spec/topology/historicals/podTemplate/spec/containers
           paths:
@@ -204,6 +358,9 @@ step:
         subtitle: Compare your current machine configuration with the proposed memory
           adjustments and make informed decisions for your database setup
         type: machine-compare
+        validation:
+          name: isMachineValid|brokers
+          type: custom
         watcher:
           func: onMachineChange|brokers|/spec/topology/brokers/podTemplate/spec/containers
           paths:
@@ -262,6 +419,9 @@ step:
         subtitle: Compare your current machine configuration with the proposed memory
           adjustments and make informed decisions for your database setup
         type: machine-compare
+        validation:
+          name: isMachineValid|coordinators
+          type: custom
         watcher:
           func: onMachineChange|coordinators|/spec/topology/coordinators/podTemplate/spec/containers
           paths:
@@ -311,122 +471,6 @@ step:
       showLabels: true
       type: block-layout
     - elements:
-      - init:
-          type: func
-          value: setMachine|overlords
-        label: Resources
-        loader: getMachines|overlords
-        schema: temp/properties/machine-overlords
-        subtitle: Compare your current machine configuration with the proposed memory
-          adjustments and make informed decisions for your database setup
-        type: machine-compare
-        watcher:
-          func: onMachineChange|overlords|/spec/topology/overlords/podTemplate/spec/containers
-          paths:
-          - temp/properties/machine-overlords
-      - elements:
-        - elements:
-          - elements:
-            - label: Node Selection Policy
-              subtitle: Control where your workloads runs by configuring node selection
-                criteria. Use label selectors to match specific nodes or taints to
-                avoid unsuitable nodes
-              type: label-element
-            - label: Node Selection Policy
-              options:
-              - text: LabelSelector
-                value: LabelSelector
-              - text: Taint
-                value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/overlords/properties/nodeSelectionPolicy
-              type: select
-            hideBorder: true
-            showLabels: false
-            type: block-layout
-          - customClass: mt-20
-            label: <b> Label Selector:</b> Specify key-value pairs to target nodes
-              that match your workload's requirements. <br/><b> Taints:</b> Define
-              tolerations for node taints to ensure your workload runs only on compatible
-              nodes
-            type: info
-          type: horizontal-layout
-        - label: Topology
-          subtitle: Define node topology preferences, such as zone or region. For
-            example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-          type: label-element
-        - elements:
-          - label: Key
-            schema: schema/properties/spec/properties/verticalScaling/properties/overlords/properties/topology/properties/key
-            type: input
-          - label: Value
-            schema: schema/properties/spec/properties/verticalScaling/properties/overlords/properties/topology/properties/value
-            type: input
-          type: horizontal-layout
-        label: Node Selection
-        showLabels: true
-        type: block-layout
-      label: Overlords
-      showLabels: true
-      type: block-layout
-    - elements:
-      - init:
-          type: func
-          value: setMachine|routers
-        label: Resources
-        loader: getMachines|routers
-        schema: temp/properties/machine-routers
-        subtitle: Compare your current machine configuration with the proposed memory
-          adjustments and make informed decisions for your database setup
-        type: machine-compare
-        watcher:
-          func: onMachineChange|routers|/spec/topology/routers/podTemplate/spec/containers
-          paths:
-          - temp/properties/machine-routers
-      - elements:
-        - elements:
-          - elements:
-            - label: Node Selection Policy
-              subtitle: Control where your workloads runs by configuring node selection
-                criteria. Use label selectors to match specific nodes or taints to
-                avoid unsuitable nodes
-              type: label-element
-            - label: Node Selection Policy
-              options:
-              - text: LabelSelector
-                value: LabelSelector
-              - text: Taint
-                value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/routers/properties/nodeSelectionPolicy
-              type: select
-            hideBorder: true
-            showLabels: false
-            type: block-layout
-          - customClass: mt-20
-            label: <b> Label Selector:</b> Specify key-value pairs to target nodes
-              that match your workload's requirements. <br/><b> Taints:</b> Define
-              tolerations for node taints to ensure your workload runs only on compatible
-              nodes
-            type: info
-          type: horizontal-layout
-        - label: Topology
-          subtitle: Define node topology preferences, such as zone or region. For
-            example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
-          type: label-element
-        - elements:
-          - label: Key
-            schema: schema/properties/spec/properties/verticalScaling/properties/routers/properties/topology/properties/key
-            type: input
-          - label: Value
-            schema: schema/properties/spec/properties/verticalScaling/properties/routers/properties/topology/properties/value
-            type: input
-          type: horizontal-layout
-        label: Node Selection
-        showLabels: true
-        type: block-layout
-      label: Routers
-      showLabels: true
-      type: block-layout
-    - elements:
       - elements:
         - init:
             type: func
@@ -453,6 +497,7 @@ step:
     if:
       name: ifRequestTypeEqualsTo|VerticalScaling
       type: function
+    label: Druid vertical scaling
     type: block-layout
   - elements:
     - elements:
@@ -740,6 +785,10 @@ step:
         label: API Group
         schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
         type: input
+        watcher:
+          func: initIssuerRefApiGroup
+          paths:
+          - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
       - init:
           type: func
           value: setValueFromDbDetails|/spec/tls/issuerRef/kind
@@ -771,6 +820,8 @@ step:
       if:
         name: showIssuerRefAndCertificates
         type: function
+      label: Issuer Reference
+      showLabels: true
       type: block-layout
     - elements:
       - buttonClass: is-light is-outlined

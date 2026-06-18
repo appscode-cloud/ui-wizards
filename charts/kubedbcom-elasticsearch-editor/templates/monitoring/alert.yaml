@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchHeapUsageTooHigh.enabled .rules.elasticsearchHeapUsageTooHigh.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchHeapUsageTooHigh")) -}}
     - alert: ElasticsearchHeapUsageTooHigh
       expr: (elasticsearch_jvm_memory_used_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_jvm_memory_max_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{ .rules.elasticsearchHeapUsageTooHigh.val }}
       for: {{ .rules.elasticsearchHeapUsageTooHigh.duration }}
@@ -35,7 +35,7 @@ spec:
         description: "The heap usage is over {{ .rules.elasticsearchHeapUsageTooHigh.val -}}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchHeapUsageWarning.enabled .rules.elasticsearchHeapUsageWarning.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchHeapUsageWarning")) -}}
     - alert: ElasticsearchHeapUsageWarning
       expr: (elasticsearch_jvm_memory_used_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_jvm_memory_max_bytes{area="heap",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100 > {{ .rules.elasticsearchHeapUsageWarning.val }}
       for: {{ .rules.elasticsearchHeapUsageWarning.duration }}
@@ -48,7 +48,7 @@ spec:
         description: "The heap usage is over {{ .rules.elasticsearchHeapUsageWarning.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchDiskOutOfSpace.enabled .rules.elasticsearchDiskOutOfSpace.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchDiskOutOfSpace")) -}}
     - alert: ElasticsearchDiskOutOfSpace
       expr: elasticsearch_filesystem_data_available_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_filesystem_data_size_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 < {{ sub 100 .rules.elasticsearchDiskOutOfSpace.val }}
       for: {{ .rules.elasticsearchDiskOutOfSpace.duration }}
@@ -61,7 +61,7 @@ spec:
         description: "The disk usage is over {{ .rules.elasticsearchDiskOutOfSpace.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchDiskSpaceLow.enabled .rules.elasticsearchDiskSpaceLow.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchDiskSpaceLow")) -}}
     - alert: ElasticsearchDiskSpaceLow
       expr: elasticsearch_filesystem_data_available_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / elasticsearch_filesystem_data_size_bytes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 < {{ sub 100 .rules.elasticsearchDiskSpaceLow.val }}
       for: {{ .rules.elasticsearchDiskSpaceLow.duration }}
@@ -74,7 +74,7 @@ spec:
         description: "The disk usage is over {{ .rules.elasticsearchDiskSpaceLow.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchClusterRed.enabled .rules.elasticsearchClusterRed.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchClusterRed")) -}}
     - alert: ElasticsearchClusterRed
       expr: elasticsearch_cluster_health_status{color="red",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.elasticsearchClusterRed.duration }}
@@ -87,7 +87,7 @@ spec:
         description: "Elastic Cluster Red status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchClusterYellow.enabled .rules.elasticsearchClusterYellow.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchClusterYellow")) -}}
     - alert: ElasticsearchClusterYellow
       expr: elasticsearch_cluster_health_status{color="yellow",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.elasticsearchClusterYellow.duration }}
@@ -100,7 +100,7 @@ spec:
         description: "Elastic Cluster Yellow status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchHealthyNodes.enabled .rules.elasticsearchHealthyNodes.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchHealthyNodes")) -}}
     - alert: ElasticsearchHealthyNodes
       expr: elasticsearch_cluster_health_number_of_nodes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{ .rules.elasticsearchHealthyNodes.val }}
       for: {{ .rules.elasticsearchHealthyNodes.duration }}
@@ -113,7 +113,7 @@ spec:
         description: "Missing node in Elasticsearch cluster\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchHealthyDataNodes.enabled .rules.elasticsearchHealthyDataNodes.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchHealthyDataNodes")) -}}
     - alert: ElasticsearchHealthyDataNodes
       expr: elasticsearch_cluster_health_number_of_data_nodes{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{ .rules.elasticsearchHealthyDataNodes.val }}
       for: {{ .rules.elasticsearchHealthyDataNodes.duration }}
@@ -126,7 +126,7 @@ spec:
         description: "Missing data node in Elasticsearch cluster\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchRelocatingShards.enabled .rules.elasticsearchRelocatingShards.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchRelocatingShards")) -}}
     - alert: ElasticsearchRelocatingShards
       expr: elasticsearch_cluster_health_relocating_shards{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
       for: {{ .rules.elasticsearchRelocatingShards.duration }}
@@ -139,7 +139,7 @@ spec:
         description: "Elasticsearch is relocating shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchInitializingShards.enabled .rules.elasticsearchInitializingShards.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchInitializingShards")) -}}
     - alert: ElasticsearchInitializingShards
       expr: elasticsearch_cluster_health_initializing_shards{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
       for: {{ .rules.elasticsearchInitializingShards.duration }}
@@ -152,7 +152,7 @@ spec:
         description: "Elasticsearch is initializing shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchUnassignedShards.enabled .rules.elasticsearchUnassignedShards.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchUnassignedShards")) -}}
     - alert: ElasticsearchUnassignedShards
       expr: elasticsearch_cluster_health_unassigned_shards{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
       for: {{ .rules.elasticsearchUnassignedShards.duration }}
@@ -165,7 +165,7 @@ spec:
         description: "Elasticsearch has unassigned shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchPendingTasks.enabled .rules.elasticsearchPendingTasks.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchPendingTasks")) -}}
     - alert: ElasticsearchPendingTasks
       expr: elasticsearch_cluster_health_number_of_pending_tasks{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
       for: {{ .rules.elasticsearchPendingTasks.duration }}
@@ -178,7 +178,7 @@ spec:
         description: "Elasticsearch has pending tasks. Cluster works slowly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchNoNewDocuments10m.enabled .rules.elasticsearchNoNewDocuments10m.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "elasticsearchNoNewDocuments10m")) -}}
     - alert: ElasticsearchNoNewDocuments10m
       expr: increase(elasticsearch_indices_docs{es_data_node="true",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[10m]) < 1
       for: {{ .rules.elasticsearchNoNewDocuments10m.duration }}
@@ -191,7 +191,7 @@ spec:
         description: "No new documents for 10 min!\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskUsageHigh.val }}
@@ -203,7 +203,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
         * 100 > {{ .rules.diskAlmostFull.val }}
@@ -223,7 +223,7 @@ spec:
   {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBElasticsearchPhaseNotReady
       expr: kubedb_com_elasticsearch_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -234,7 +234,7 @@ spec:
         summary: KubeDB Elasticsearch Phase NotReady (elasticsearch {{`{{`}} $labels.elasticsearch {{`}}`}})
         description: "KubeDB Elasticsearch Phase not ready on {{`{{`}} $labels.elasticsearch {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBElasticsearchPhaseCritical
       expr: kubedb_com_elasticsearch_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
@@ -253,7 +253,7 @@ spec:
   {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestOnProgress")) -}}
     - alert: KubeDBElasticsearchOpsRequestOnProgress
       expr: ops_kubedb_com_elasticsearchopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestOnProgress.duration }}
@@ -264,7 +264,7 @@ spec:
         summary: ElasticsearchOpsRequest on progress (elasticsearchopsrequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}})
         description: "ElasticsearchOpsRequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestStatusProgressingToLong")) -}}
     - alert: KubeDBElasticsearchOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_elasticsearchopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
@@ -275,7 +275,7 @@ spec:
         summary: ElasticsearchOpsRequest is in progressing status for too long (elasticsearchopsrequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}})
         description: "ElasticsearchOpsRequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestFailed")) -}}
     - alert: KubeDBElasticsearchOpsRequestFailed
       expr: ops_kubedb_com_elasticsearchopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestFailed.duration }}
@@ -294,7 +294,7 @@ spec:
   {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: ElasticsearchStashBackupSessionFailed
       expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.backupSessionFailed.duration }}
@@ -305,7 +305,7 @@ spec:
         summary: Elasticsearch Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: ElasticsearchStashRestoreSessionFailed
       expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -316,7 +316,7 @@ spec:
         summary: Elasticsearch Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: ElasticsearchStashNoBackupSessionForTooLong
       expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -327,7 +327,7 @@ spec:
         summary: Elasticsearch Stash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: ElasticsearchStashRepositoryCorrupted
       expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -338,7 +338,7 @@ spec:
         summary: Elasticsearch Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: ElasticsearchStashRepositoryStorageRunningLow
       expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -349,7 +349,7 @@ spec:
         summary: Elasticsearch Stash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: ElasticsearchStashBackupSessionPeriodTooLong
       expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -360,7 +360,7 @@ spec:
         summary:  Elasticsearch Stash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: ElasticsearchStashRestoreSessionPeriodTooLong
       expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}
@@ -379,7 +379,7 @@ spec:
   {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
     - alert: ElasticsearchKubeStashBackupSessionFailed
       expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.backupSessionFailed.duration }}
@@ -390,7 +390,7 @@ spec:
         summary: Elasticsearch KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
     - alert: ElasticsearchKubeStashRestoreSessionFailed
       expr: core_kubestash_com_restoresession_phase{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
       for: {{ .rules.restoreSessionFailed.duration }}
@@ -401,7 +401,7 @@ spec:
         summary: Elasticsearch KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
     - alert: ElasticsearchKubeStashNoBackupSessionForTooLong
       expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
       for: {{ .rules.noBackupSessionForTooLong.duration }}
@@ -412,7 +412,7 @@ spec:
         summary: Elasticsearch KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
     - alert: ElasticsearchKubeStashRepositoryCorrupted
       expr: storage_kubestash_com_repository_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
       for: {{ .rules.repositoryCorrupted.duration }}
@@ -423,7 +423,7 @@ spec:
         summary: Elasticsearch KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
     - alert: ElasticsearchKubeStashRepositoryStorageRunningLow
       expr: storage_kubestash_com_repository_size_bytes{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
       for: {{ .rules.repositoryStorageRunningLow.duration }}
@@ -434,7 +434,7 @@ spec:
         summary: Elasticsearch KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
     - alert: ElasticsearchKubeStashBackupSessionPeriodTooLong
       expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
       for: {{ .rules.backupSessionPeriodTooLong.duration }}
@@ -445,7 +445,7 @@ spec:
         summary: Elasticsearch KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
     - alert: ElasticsearchKubeStashRestoreSessionPeriodTooLong
       expr: core_kubestash_com_restoresession_duration_seconds{target_kind="Elasticsearch", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
       for: {{ .rules.restoreSessionPeriodTooLong.duration }}

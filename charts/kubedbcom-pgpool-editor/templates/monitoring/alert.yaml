@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-pgpool-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: pgpool.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolTooManyConnections.enabled .rules.pgpoolTooManyConnections.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "pgpoolTooManyConnections")) -}}
     - alert: PgpoolTooManyConnections
       expr: (sum by (pod) (pgpool2_backend_by_process_total{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"}) / sum by (pod) (pgpool2_backend_total{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"})) > {{ .rules.pgpoolTooManyConnections.val }}
       for: {{ .rules.pgpoolTooManyConnections.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: Pgpool too many connection usage (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Pgpool {{`{{`}} $labels.pod {{`}}`}} high connection usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolPostgresHealthCheckFailure.enabled .rules.pgpoolPostgresHealthCheckFailure.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "pgpoolPostgresHealthCheckFailure")) -}}
     - alert: PgpoolPostgresHealthCheckFailure
       expr: pgpool2_pool_health_check_stats_fail_count{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgpoolPostgresHealthCheckFailure.val }}
       for: {{ .rules.pgpoolPostgresHealthCheckFailure.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: Pgpool health check failed for backend PostgreSQL  (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
         description: "Pgpool {{`{{`}} $labels.pod {{`}}`}}  health check failure for backend PosgreSQL {{`{{`}} $labels.role {{`}}`}} server\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolExporterLastScrapeError.enabled .rules.pgpoolExporterLastScrapeError.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "pgpoolExporterLastScrapeError")) -}}
     - alert: PgpoolExporterLastScrapeError
       expr: pgpool2_last_scrape_error{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > 0
       for: {{ .rules.pgpoolExporterLastScrapeError.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: Pgpool exporter error (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Pgpool exporter is showing errors.\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolBackendPanicMessageCount.enabled .rules.pgpoolBackendPanicMessageCount.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "pgpoolBackendPanicMessageCount")) -}}
     - alert: PgpoolBackendPanicMessageCount
       expr: pgpool2_pool_backend_stats_panic_cnt{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgpoolBackendPanicMessageCount.val }}
       for: {{ .rules.pgpoolBackendPanicMessageCount.duration }}
@@ -66,7 +66,7 @@ spec:
         summary: Pgpool backend panic message (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
         description: "Panic messages returned from postgres backend {{`{{`}} $labels.role {{`}}`}} of pgpool {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolBackendFatalMessageCount.enabled .rules.pgpoolBackendFatalMessageCount.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "pgpoolBackendFatalMessageCount")) -}}
     - alert: PgpoolBackendFatalMessageCount
       expr: pgpool2_pool_backend_stats_fatal_cnt{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgpoolBackendFatalMessageCount.val }}
       for: {{ .rules.pgpoolBackendPanicMessageCount.duration }}
@@ -77,7 +77,7 @@ spec:
         summary: Pgpool backend fatal message (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
         description: "Fatal messages returned from postgres backend {{`{{`}} $labels.role {{`}}`}} of pgpool {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolBackendErrorMessageCount.enabled .rules.pgpoolBackendErrorMessageCount.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "pgpoolBackendErrorMessageCount")) -}}
     - alert: PgpoolBackendErrorMessageCount
       expr: pgpool2_pool_backend_stats_error_cnt{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.pgpoolBackendErrorMessageCount.val }}
       for: {{ .rules.pgpoolBackendErrorMessageCount.duration }}
@@ -88,7 +88,7 @@ spec:
         summary: Pgpool backend error message (instance {{`{{`}} $labels.pod {{`}}`}}  {{`{{`}} $labels.role {{`}}`}})
         description: "Error messages returned from postgres backend {{`{{`}} $labels.role {{`}}`}} of pgpool {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolLowCacheMemory.enabled .rules.pgpoolLowCacheMemory.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "pgpoolLowCacheMemory")) -}}
     - alert: PgpoolLowCacheMemory
       expr: pgpool2_pool_cache_free_cache_entries_size{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / 1000000 < {{ .rules.pgpoolLowCacheMemory.val }}
       for: {{ .rules.pgpoolLowCacheMemory.duration }}
@@ -99,7 +99,7 @@ spec:
         summary: Low cache memory (instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Pgpool have low cache memory remaining {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.pgpoolDown.enabled .rules.pgpoolDown.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "pgpoolDown")) -}}
     - alert: PgpoolDown
       expr: pgpool2_up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.pgpoolDown.duration }}
@@ -118,7 +118,7 @@ spec:
   {{ if (include "kubedbcom-pgpool-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: pgpool.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBPgpoolPhaseNotReady
       expr: kubedb_com_pgpool_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -129,7 +129,7 @@ spec:
         summary: KubeDB Pgpool Phase NotReady (pgpool {{`{{`}} $labels.pgpool {{`}}`}})
         description: "KubeDB Pgpool Phase not ready on {{`{{`}} $labels.pgpool {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBPgpoolPhaseCritical
       expr: kubedb_com_pgpool_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}

@@ -22,7 +22,7 @@ spec:
   {{ if (include "kubedbcom-mssqlserver-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mssqlserver.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverInstanceDown.enabled .rules.mssqlserverInstanceDown.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mssqlserverInstanceDown")) -}}
     - alert: MSSQLServerInstanceDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.mssqlserverInstanceDown.duration }}
@@ -33,7 +33,7 @@ spec:
         summary: MSSQLServer instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MSSQLServer instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverServiceDown.enabled .rules.mssqlserverServiceDown.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mssqlserverServiceDown")) -}}
     - alert: MSSQLServerServiceDown
       expr: sum by (service) (up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
       for: {{ .rules.mssqlserverServiceDown.duration }}
@@ -44,7 +44,7 @@ spec:
         summary: MSSQLServer service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MSSQLServer service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverRestarted.enabled .rules.mssqlserverRestarted.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mssqlserverRestarted")) -}}
     - alert: MSSQLServerRestarted
       expr: mssql_uptime_seconds{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} < {{ .rules.mssqlserverRestarted.val }}
       for: {{ .rules.mssqlserverRestarted.duration }}
@@ -55,7 +55,7 @@ spec:
         summary: MSSQLServer restarted (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MSSQLServer restarted\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
       expr: |
         (kubelet_volume_stats_used_bytes{job=~"kubelet"} / on(persistentvolumeclaim) group_left(pod) (
@@ -70,7 +70,7 @@ spec:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
       expr: |
         (kubelet_volume_stats_used_bytes{job=~"kubelet"} / on(persistentvolumeclaim) group_left(pod) (
@@ -93,7 +93,7 @@ spec:
   {{ if (include "kubedbcom-mssqlserver-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mssqlserver.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
     - alert: KubeDBMSSQLServerPhaseNotReady
       expr: kubedb_com_mssqlserver_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
@@ -104,7 +104,7 @@ spec:
         summary: KubeDB MSSQLServer Phase NotReady (mssqlserver {{`{{`}} $labels.mssqlserver {{`}}`}})
         description: "KubeDB MSSQLServer Phase not ready on {{`{{`}} $labels.mssqlserver {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
     - alert: KubeDBMSSQLServerPhaseCritical
       expr: kubedb_com_mssqlserver_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
@@ -123,7 +123,7 @@ spec:
   {{ if (include "kubedbcom-mssqlserver-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mssqlserver.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestOnProgress")) -}}
     - alert: KubeDBMSSQLServerOpsRequestOnProgress
       expr: ops_kubedb_com_mssqlserveropsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestOnProgress.duration }}
@@ -134,7 +134,7 @@ spec:
         summary: MSSQLServerOpsRequest on progress (mssqlserveropsrequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}})
         description: "MSSQLServerOpsRequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestStatusProgressingToLong")) -}}
     - alert: KubeDBMSSQLServerOpsRequestStatusProgressingToLong
       expr: ops_kubedb_com_mssqlserveropsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
@@ -145,7 +145,7 @@ spec:
         summary: MSSQLServerOpsRequest is in progressing status for too long (mssqlserveropsrequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}})
         description: "MSSQLServerOpsRequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    {{ if (include "kubedbcom-mssqlserver-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestFailed")) -}}
     - alert: KubeDBMSSQLServerOpsRequestFailed
       expr: ops_kubedb_com_mssqlserveropsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.opsRequestFailed.duration }}

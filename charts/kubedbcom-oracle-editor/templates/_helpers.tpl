@@ -103,15 +103,19 @@ Alert Enabled
 */}}
 {{- define "kubedbcom-oracle-editor.alertEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
-{{- $sev := dig (mustLast .) 0 $ranks -}}
-{{- $flags := mustInitial . -}}
-{{- $enabled := mustLast $flags -}}
-{{- $flags = mustInitial $flags -}}
+{{- $key := mustLast . -}}
+{{- $rest := mustInitial . -}}
+{{- $rules := mustLast $rest -}}
+{{- $flags := mustInitial $rest -}}
+{{- $rule := dig $key (dict) $rules -}}
+{{- $severity := dig "severity" "" $rule -}}
+{{- $enabled := dig "enabled" false $rule -}}
+{{- $sev := dig $severity 0 $ranks -}}
 {{- $result := 3 -}}
 {{- range $x := $flags -}}
 {{- $result = min $result (dig $x 0 $ranks) -}}
 {{- end -}}
-{{- if (and $sev (le $sev $result) $enabled) -}}{{ (mustLast .) }}{{- end -}}
+{{- if (and $sev (le $sev $result) $enabled) -}}{{ $severity }}{{- end -}}
 {{- end }}
 
 {{- define "container.securityContext" -}}
@@ -128,7 +132,7 @@ seccompProfile:
 
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- $profiles := "" -}}
+{{- $profiles := dict -}}
 {{- $res := dict -}}
 {{- $observer_res := dict -}}
 {{- $res = .Values.spec.podResources.resources -}}
@@ -138,7 +142,7 @@ seccompProfile:
 {{- range .Values.spec.admin.machineProfiles.machines }}
   {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
     {{- $res  = dict "requests" .limits "limits" .limits }}
-    {{- $profiles = .id -}}
+    {{- $_ := set $profiles "node" .id -}}
   {{- end }}
 {{- end }}
 
@@ -148,7 +152,7 @@ seccompProfile:
 {{- end }}
 {{- range .Values.spec.admin.machineProfiles.machines }}
   {{- if and $.Values.spec.dataGuard.observer.podResources.machine (eq .id $.Values.spec.dataGuard.observer.podResources.machine) }}
-    {{- $observer_res  = dict "requests" .limits "limits" .limits }}
+    {{- $observer_res = dict "requests" .limits "limits" .limits }}
     {{- $_ := set $profiles "observer" .id -}}
   {{- end }}
 {{- end }}

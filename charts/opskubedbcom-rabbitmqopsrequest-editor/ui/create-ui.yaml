@@ -82,10 +82,9 @@ step:
     schema: schema/properties/spec/properties/type
     type: radio
     watcher:
-      func: isDbDetailsLoading
+      func: onRequestTypeChange
       paths:
-      - temp/dbDetails
-      - schema/properties/spec/properties/databaseRef/properties/name
+      - schema/properties/spec/properties/type
   - elements:
     - init:
         type: func
@@ -192,43 +191,19 @@ step:
           type: label-element
         - elements:
           - label: Key
-            schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
+            schema: temp/topologyKey
             type: input
             validation:
               name: isVerticalScaleTopologyRequired
               type: custom
           - label: Value
-            schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/value
+            schema: temp/topologyValue
             type: input
             validation:
               name: isVerticalScaleTopologyRequired
               type: custom
           type: horizontal-layout
         label: Node Selection
-        showLabels: true
-        type: block-layout
-      - elements:
-        - elements:
-          - init:
-              type: func
-              value: setExporter|cpu
-            label: CPU
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-            type: input
-          - init:
-              type: func
-              value: setExporter|memory
-            label: Memory
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-            type: input
-            watcher:
-              func: onExporterResourceChange|memory
-              paths:
-              - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-          showLabels: true
-          type: horizontal-layout
-        hideBlock: true
-        label: Exporter
         showLabels: true
         type: block-layout
       label: Node

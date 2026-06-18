@@ -64,7 +64,7 @@ type AdminOptions struct {
 
 	TLS            ToggleProfileOnBoolean `json:"tls"`
 	ClusterIssuers ClusterScopedProfile   `json:"clusterIssuers"`
-	Expose         ToggleProfileOnBoolean `json:"expose"`
+	Expose         ExposeOption           `json:"expose"`
 
 	Monitoring Monitoring `json:"monitoring"`
 	Alert      Alert      `json:"alert"`
@@ -103,7 +103,6 @@ type DatabaseProfiles struct {
 	Cassandra     *DatabaseProfile `json:"Cassandra,omitempty"`
 	Druid         *DatabaseProfile `json:"Druid,omitempty"`
 	Elasticsearch *DatabaseProfile `json:"Elasticsearch,omitempty"`
-	FerretDB      *DatabaseProfile `json:"FerretDB,omitempty"`
 	HanaDB        *DatabaseProfile `json:"HanaDB,omitempty"`
 	Hazelcast     *DatabaseProfile `json:"Hazelcast,omitempty"`
 	Ignite        *DatabaseProfile `json:"Ignite,omitempty"`
@@ -155,6 +154,15 @@ type ArchiverProfile struct {
 }
 
 // *** Backup-related ends *** //
+type ExposeOption struct {
+	Enable     ToggleProfileOnBoolean `json:"enable"`
+	UIExposure *UIExposureSpec        `json:"uiExposure,omitempty"`
+}
+
+type UIExposureSpec struct {
+	DisableUI             bool `json:"disableUI"`
+	DisableCostEfficiency bool `json:"disableCostEfficiency"`
+}
 
 type MachineProfiles struct {
 	Machines  []Machine `json:"machines"`

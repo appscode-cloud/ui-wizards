@@ -26,10 +26,6 @@ step:
     loader: getAdminOptions|databases/Weaviate/mode
     schema: schema/properties/spec/properties/mode
     type: radio
-    watcher:
-      func: toggleTls
-      paths:
-      - schema/properties/spec/properties/mode
   - if:
       name: isEqualToModelPathValue|Replicaset|/spec/mode
       type: function
@@ -95,10 +91,7 @@ step:
       loader: getAdminOptions|storageClasses
       schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
-    - if:
-        name: showStorageSizeField
-        type: function
-      label: Storage Size
+    - label: Storage Size
       schema: schema/properties/spec/properties/persistence/properties/size
       type: input
     showLabels: true
@@ -326,7 +319,7 @@ step:
           - schema/properties/spec/properties/admin/properties/expose/properties/default
       type: block-layout
     if:
-      name: showAdditionalSettings
+      name: returnFalse
       type: function
     label: Additional Options
     showLabels: true
