@@ -8,6 +8,7 @@ export const useFunc = (model) => {
 
   setDiscriminatorValue('/enabledFeatures', [])
   setDiscriminatorValue('/isResourceLoaded', false)
+  const appsCodeOtelStack = 'appscode-otel-stack'
   let resources = {}
 
   // get specific feature details
@@ -210,12 +211,57 @@ export const useFunc = (model) => {
     return resourceValuePath
   }
 
-  function onEnabledFeaturesChange() {
+  function deepMergeValues(existingValues, newValues) {
+    if (!newValues) return existingValues
+    if (!existingValues) return newValues
+
+    const merged = { ...existingValues }
+
+    Object.keys(newValues).forEach((key) => {
+      if (
+        typeof newValues[key] === 'object' &&
+        newValues[key] !== null &&
+        !Array.isArray(newValues[key])
+      ) {
+        merged[key] = deepMergeValues(existingValues[key], newValues[key])
+      } else {
+        merged[key] = newValues[key]
+      }
+    })
+
+    return merged
+  }
+
+  // fetch monitoring cluster configuration
+  async function fetchMonitoringClusterConfig(monitoringClusterName) {
+    if (!monitoringClusterName) {
+      return null
+    }
+
+    const getRoute = storeGet('/route')
+    const spokeCluster = getRoute.params?.spoke
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    let url = `/telemetry/${owner}/${monitoringClusterName}/values/appscode-otel-stack`
+    if (cluster) {
+      if (getRoute.fullPath.includes('/hubs/') && spokeCluster) {
+        url += `?targetClusterName=${encodeURIComponent(spokeCluster)}`
+      } else {
+        url += `?targetClusterName=${encodeURIComponent(cluster)}`
+      }
+    }
+    const { data } = await axios.get(url)
+    return data
+  }
+
+  async function onEnabledFeaturesChange() {
     const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    const monitoringClusterName = getValue(discriminator, '/monitoringClusterName')
+    let monitoringClusterConfig = getValue(discriminator, '/monitoringClusterConfig')
 
     const allFeatures = storeGet('/cluster/features/result') || []
 
-    allFeatures.forEach((item) => {
+    for (const item of allFeatures) {
       const featureName = item?.metadata?.name || ''
       const resourceValuePath = getResourceValuePathFromFeature(item)
 
@@ -233,6 +279,23 @@ export const useFunc = (model) => {
         if (isEnabled && !isManaged) {
           commit('wizard/model$delete', `/resources/${resourceValuePath}`)
         } else {
+          // Merge existing values with otelStack data only for appscode-otel-stack feature
+          const initialResourceValues = resources?.[resourceValuePath]?.spec?.values
+          let mergedResourceValues = initialResourceValues
+
+          let finalSourceRef = sourceRef
+          if (
+            featureName === appsCodeOtelStack &&
+            monitoringClusterName &&
+            monitoringClusterConfig
+          ) {
+            mergedResourceValues = deepMergeValues(initialResourceValues, monitoringClusterConfig)
+            finalSourceRef = {
+              ...sourceRef,
+              monitoringCluster: monitoringClusterName,
+            }
+          }
+
           commit('wizard/model$update', {
             path: `/resources/${resourceValuePath}`,
             value: {
@@ -247,10 +310,11 @@ export const useFunc = (model) => {
               },
               spec: {
                 ...resources?.[resourceValuePath]?.spec,
+                values: mergedResourceValues,
                 chart: {
                   spec: {
                     chart,
-                    sourceRef,
+                    sourceRef: finalSourceRef,
                     version,
                   },
                 },
@@ -263,7 +327,7 @@ export const useFunc = (model) => {
       } else {
         commit('wizard/model$delete', `/resources/${resourceValuePath}`)
       }
-    })
+    }
   }
 
   function returnFalse() {
@@ -359,12 +423,59 @@ export const useFunc = (model) => {
 
   // this computed's main purpose is to watch isResourceLoaded flag
   // and fire the onEnabledFeatureChange function when it's true
-  function checkIsResourceLoaded() {
+  async function checkIsResourceLoaded() {
     // watchDependency('discriminator#/isResourceLoaded')
     const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
     if (isResourceLoaded) {
-      onEnabledFeaturesChange()
+      await onEnabledFeaturesChange()
     }
+  }
+
+  //this function is used to check if AppsCode OpenTelemetry Stack is enabled
+  //it is the condition to show monitoring cluster dropdown
+  function checkIsOtelStackEnabled() {
+    // watchDependency('discriminator#/enabledFeatures')
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    if (enabledFeatures.includes(appsCodeOtelStack)) {
+      return true
+    }
+    return false
+  }
+
+  //this function is used to fetch monitoring cluster options from dropdown
+  async function fetchMonitoringClusterOptions() {
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    if (!enabledFeatures.includes(appsCodeOtelStack)) {
+      return []
+    }
+
+    const getRoute = storeGet('/route')
+    const spokeCluster = getRoute.params?.spoke
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    let url = `/telemetry/${owner}/monitoring-clusters`
+    if (cluster) {
+      if (getRoute.fullPath.includes('/hubs/') && spokeCluster) {
+        url += `?targetClusterName=${encodeURIComponent(spokeCluster)}`
+      } else {
+        url += `?targetClusterName=${encodeURIComponent(cluster)}`
+      }
+    }
+    const { data } = await axios.get(url)
+
+    return data || []
+  }
+
+  async function onMonitoringClusterChange() {
+    const monitoringClusterName = getValue(discriminator, '/monitoringClusterName')
+    if (!monitoringClusterName) {
+      return
+    }
+
+    const data = await fetchMonitoringClusterConfig(monitoringClusterName)
+
+    setDiscriminatorValue('/monitoringClusterConfig', data)
+    await onEnabledFeaturesChange()
   }
 
   return {
@@ -380,5 +491,8 @@ export const useFunc = (model) => {
     returnFalse,
     setReleaseNameAndNamespaceAndInitializeValues,
     fetchFeatureSetOptions,
+    checkIsOtelStackEnabled,
+    fetchMonitoringClusterOptions,
+    onMonitoringClusterChange,
   }
 }
