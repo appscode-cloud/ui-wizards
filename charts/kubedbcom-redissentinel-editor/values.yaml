@@ -9,6 +9,31 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComRedisSentinelAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: RedisSentinelAutoscaler
+    metadata:
+      name: redissentinel
+      namespace: demo
+    spec:
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        sentinel:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: redissentinel
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
   certManagerIoIssuer_redis_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer

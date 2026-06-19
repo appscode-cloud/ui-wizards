@@ -552,6 +552,52 @@ properties:
         required:
         - spec
         type: object
+      catalogAppscodeComZooKeeperBinding:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+              name:
+                type: string
+              namespace:
+                type: string
+            type: object
+          spec:
+            properties:
+              sourceRef:
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                type: object
+              uiExposure:
+                properties:
+                  disableCostEfficiency:
+                    type: boolean
+                  disableUI:
+                    type: boolean
+                required:
+                - disableCostEfficiency
+                - disableUI
+                type: object
+            required:
+            - sourceRef
+            type: object
+        type: object
       certManagerIoIssuer_ca:
         properties:
           apiVersion:
@@ -36331,6 +36377,54 @@ properties:
                 type: object
               manifestOptions:
                 properties:
+                  clickhouse:
+                    properties:
+                      archiver:
+                        default: false
+                        type: boolean
+                      archiverRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      authSecret:
+                        default: true
+                        type: boolean
+                      authSecretName:
+                        type: string
+                      configSecret:
+                        default: true
+                        type: boolean
+                      configSecretName:
+                        type: string
+                      db:
+                        default: true
+                        type: boolean
+                      dbName:
+                        type: string
+                      initScript:
+                        default: true
+                        type: boolean
+                      restoreNamespace:
+                        type: string
+                      tlsIssuerRef:
+                        properties:
+                          apiGroup:
+                            type: string
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                        required:
+                        - kind
+                        - name
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
                   druid:
                     properties:
                       authSecret:

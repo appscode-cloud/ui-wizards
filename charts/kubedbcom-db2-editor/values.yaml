@@ -9,6 +9,31 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComDB2Autoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: DB2Autoscaler
+    metadata:
+      name: db2
+      namespace: default
+    spec:
+      compute:
+        db2:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: db2
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
   kubedbComDB2: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: DB2
