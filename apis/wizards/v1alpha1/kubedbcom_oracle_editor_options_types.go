@@ -43,9 +43,10 @@ type KubedbcomOracleEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels    map[string]string `json:"labels"`
-	Mode      OracleMode        `json:"mode"`
-	DataGuard *DataGuardSpec    `json:"dataGuard,omitempty"`
+	Labels         map[string]string `json:"labels"`
+	Mode           OracleMode        `json:"mode"`
+	DataGuard      *DataGuardSpec    `json:"dataGuard,omitempty"`
+	RegistrySecret RegistrySecret    `json:"registrySecret"`
 	// +optional
 	Replicas       int                `json:"replicas,omitempty"`
 	Persistence    Persistence        `json:"persistence"`
@@ -74,6 +75,10 @@ type DataGuardSpec struct {
 	StandbyType       StandbyType     `json:"standbyType,omitempty"`
 	ApplyLagThreshold *int32          `json:"applyLagThreshold,omitempty"`
 	Observer          *OracleObserver `json:"observer,omitempty"`
+}
+
+type RegistrySecret struct {
+	Name string `json:"name"`
 }
 
 // +kubebuilder:validation:Enum=MaximumAvailability;MaximumPerformance;MaximumProtection
