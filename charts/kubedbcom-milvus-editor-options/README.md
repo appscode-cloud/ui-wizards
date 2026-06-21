@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/kubedbcom-milvus-editor-options --version=v0.34.0
-$ helm upgrade -i kubedbcom-milvus-editor-options appscode/kubedbcom-milvus-editor-options -n kube-system --create-namespace --version=v0.34.0
+$ helm search repo appscode/kubedbcom-milvus-editor-options --version=v0.35.0
+$ helm upgrade -i kubedbcom-milvus-editor-options appscode/kubedbcom-milvus-editor-options -n kube-system --create-namespace --version=v0.35.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Milvus Editor UI Options on a [Kubernetes](http://kubernete
 To install/upgrade the chart with the release name `kubedbcom-milvus-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-milvus-editor-options appscode/kubedbcom-milvus-editor-options -n kube-system --create-namespace --version=v0.34.0
+$ helm upgrade -i kubedbcom-milvus-editor-options appscode/kubedbcom-milvus-editor-options -n kube-system --create-namespace --version=v0.35.0
 ```
 
 The command deploys a Milvus Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -49,7 +49,7 @@ The following table lists the configurable parameters of the `kubedbcom-milvus-e
 |------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
 | metadata.resource.group                                                |                                                                                                                                                                           | <code>kubedb.com</code>                                                               |
 | metadata.resource.kind                                                 |                                                                                                                                                                           | <code>Milvus</code>                                                                   |
-| metadata.resource.name                                                 |                                                                                                                                                                           | <code>milvuss</code>                                                                  |
+| metadata.resource.name                                                 |                                                                                                                                                                           | <code>milvuses</code>                                                                 |
 | metadata.resource.scope                                                |                                                                                                                                                                           | <code>Namespaced</code>                                                               |
 | metadata.resource.version                                              |                                                                                                                                                                           | <code>v1alpha2</code>                                                                 |
 | metadata.release.name                                                  | Release name                                                                                                                                                              | <code>""</code>                                                                       |
@@ -221,12 +221,12 @@ The following table lists the configurable parameters of the `kubedbcom-milvus-e
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-milvus-editor-options appscode/kubedbcom-milvus-editor-options -n kube-system --create-namespace --version=v0.34.0 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-milvus-editor-options appscode/kubedbcom-milvus-editor-options -n kube-system --create-namespace --version=v0.35.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-milvus-editor-options appscode/kubedbcom-milvus-editor-options -n kube-system --create-namespace --version=v0.34.0 --values values.yaml
+$ helm upgrade -i kubedbcom-milvus-editor-options appscode/kubedbcom-milvus-editor-options -n kube-system --create-namespace --version=v0.35.0 --values values.yaml
 ```

@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/kubedbcom-aerospike-editor --version=v0.34.0
-$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.34.0
+$ helm search repo appscode/kubedbcom-aerospike-editor --version=v0.35.0
+$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.35.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Aerospike Editor on a [Kubernetes](http://kubernetes.io) cl
 To install/upgrade the chart with the release name `kubedbcom-aerospike-editor`:
 
 ```bash
-$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.34.0
+$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.35.0
 ```
 
 The command deploys a Aerospike Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -45,23 +45,29 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `kubedbcom-aerospike-editor` chart and their default values.
 
-|     Parameter      | Description |             Default              |
-|--------------------|-------------|----------------------------------|
-| apiVersion         |             | <code>kubedb.com/v1alpha2</code> |
-| kind               |             | <code>Aerospike</code>           |
-| metadata.name      |             | <code>aerospike</code>           |
-| metadata.namespace |             | <code>default</code>             |
+|                     Parameter                     | Description |                                                                                                                                                                                                                                        Default                                                                                                                                                                                                                                         |
+|---------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| metadata.resource.group                           |             | <code>kubedb.com</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| metadata.resource.version                         |             | <code>v1alpha2</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| metadata.resource.name                            |             | <code>aerospikes</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| metadata.resource.kind                            |             | <code>Aerospike</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| metadata.resource.scope                           |             | <code>Namespaced</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| metadata.release.name                             |             | <code>RELEASE-NAME</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| metadata.release.namespace                        |             | <code>default</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| resources.autoscalingKubedbComAerospikeAutoscaler |             | <code>{"apiVersion":"autoscaling.kubedb.com/v1alpha1","kind":"AerospikeAutoscaler","metadata":{"name":"aerospike","namespace":"demo"},"spec":{"compute":{"aerospike":{"maxAllowed":{"cpu":1,"memory":"2Gi"},"minAllowed":{"cpu":"400m","memory":"400Mi"},"podLifeTimeThreshold":"10m","resourceDiffPercentage":20,"trigger":"On"},"nodeTopology":{"name":"standard-basv2-family"}},"databaseRef":{"name":"aerospike"},"opsRequestOptions":{"apply":"IfReady","timeout":"10m"}}}</code> |
+| resources.kubedbComAerospike                      |             | <code>{"apiVersion":"kubedb.com/v1alpha2","kind":"Aerospike","metadata":{"name":"aerospike","namespace":"demo"},"spec":{"authSecret":{"name":"aerospike-auth"},"cluster":{"replicas":3,"replicationFactor":2},"deletionPolicy":"WipeOut","mode":"Cluster","version":"7.2.0.7"}}</code>                                                                                                                                                                                                 |
+| resources.secret_auth                             |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"aerospike-auth","namespace":"demo"},"stringData":{"password":"thisIs1StrongPassword","username":"root"},"type":"Opaque"}</code>                                                                                                                                                                                                                                                                                           |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.34.0 --set apiVersion=kubedb.com/v1alpha2
+$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.35.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.34.0 --values values.yaml
+$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.35.0 --values values.yaml
 ```
