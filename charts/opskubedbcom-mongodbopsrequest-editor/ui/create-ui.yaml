@@ -720,6 +720,20 @@ step:
       subtitle: Select a new configuration secret, apply a custom configuration, or
         remove an existing setup to update your database settings
       type: label-element
+    - type: editor
+      label: Current Configuration
+      schema: temp/properties/currentConfig
+      readonly: true
+      editorHeight: 120px
+      validateContent: false
+      if:
+        name: getCurrentConfig
+        type: function
+      loader:
+        name: getCurrentConfig
+        watchPaths:
+        - schema/properties/metadata/properties/namespace
+        - temp/properties/standalone/properties/createSecret/properties/status
     - elements:
       - elements:
         - elements:
@@ -850,15 +864,6 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/standalone/selectedConfigurationRemove
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            init:
-              type: func
-              value: onRemoveConfigChange|standalone
-            readonly: true
-            schema: temp/properties/standalone/removeConfig
-            type: multi-file-editor
-            validateContent: false
             watcher:
               func: onRemoveConfigChange|standalone
               paths:
@@ -1013,27 +1018,6 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/replicaSet/selectedConfigurationRemove
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            init:
-              type: func
-              value: onRemoveConfigChange|replicaSet
-            readonly: true
-            schema: temp/properties/replicaSet/removeConfig
-            type: multi-file-editor
-            validateContent: false
-            watcher:
-              func: onRemoveConfigChange|replicaSet
-              paths:
-              - temp/properties/replicaSet/selectedConfigurationRemove
-          if:
-            name: ifReconfigurationTypeEqualsTo|remove
-            type: function
-          label: Remove
-          type: block-layout
-        label: New Config Secret
-        options:
-        - text: NEW CONFIG SECRET
           value: selectNewConfigSecret
         - text: APPLY CONFIG
           value: applyConfig
@@ -1178,27 +1162,6 @@ step:
               refresh: fetchConfigSecrets
               schema: temp/properties/configServer/selectedConfigurationRemove
               type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              init:
-                type: func
-                value: onRemoveConfigChange|configServer
-              readonly: true
-              schema: temp/properties/configServer/removeConfig
-              type: multi-file-editor
-              validateContent: false
-              watcher:
-                func: onRemoveConfigChange|configServer
-                paths:
-                - temp/properties/configServer/selectedConfigurationRemove
-            if:
-              name: ifReconfigurationTypeEqualsTo|remove|configServer|true
-              type: function
-            label: Remove
-            type: block-layout
-          label: New Config Secret
-          options:
-          - text: NEW CONFIG SECRET
             value: selectNewConfigSecret
           - text: APPLY CONFIG
             value: applyConfig
@@ -1339,27 +1302,6 @@ step:
               refresh: fetchConfigSecrets
               schema: temp/properties/mongos/selectedConfigurationRemove
               type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              init:
-                type: func
-                value: onRemoveConfigChange|mongos
-              readonly: true
-              schema: temp/properties/mongos/removeConfig
-              type: multi-file-editor
-              validateContent: false
-              watcher:
-                func: onRemoveConfigChange|mongos
-                paths:
-                - temp/properties/mongos/selectedConfigurationRemove
-            if:
-              name: ifReconfigurationTypeEqualsTo|remove|mongos|true
-              type: function
-            label: Remove
-            type: block-layout
-          label: New Config Secret
-          options:
-          - text: NEW CONFIG SECRET
             value: selectNewConfigSecret
           - text: APPLY CONFIG
             value: applyConfig
@@ -1500,27 +1442,6 @@ step:
               refresh: fetchConfigSecrets
               schema: temp/properties/shard/selectedConfigurationRemove
               type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              init:
-                type: func
-                value: onRemoveConfigChange|shard
-              readonly: true
-              schema: temp/properties/shard/removeConfig
-              type: multi-file-editor
-              validateContent: false
-              watcher:
-                func: onRemoveConfigChange|shard
-                paths:
-                - temp/properties/shard/selectedConfigurationRemove
-            if:
-              name: ifReconfigurationTypeEqualsTo|remove|shard|true
-              type: function
-            label: Remove
-            type: block-layout
-          label: New Config Secret
-          options:
-          - text: NEW CONFIG SECRET
             value: selectNewConfigSecret
           - text: APPLY CONFIG
             value: applyConfig

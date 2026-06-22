@@ -630,6 +630,20 @@ step:
       subtitle: Select a new configuration secret, apply a custom configuration, or
         remove an existing setup to update your database settings
       type: label-element
+    - type: editor
+      label: Current Configuration
+      schema: temp/properties/currentConfig
+      readonly: true
+      editorHeight: 120px
+      validateContent: false
+      if:
+        name: getCurrentConfig
+        type: function
+      loader:
+        name: getCurrentConfig
+        watchPaths:
+        - schema/properties/metadata/properties/namespace
+        - temp/properties/standalone/properties/createSecret/properties/status
     - elements:
       - elements:
         - elements:
@@ -760,15 +774,6 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/node/selectedConfigurationRemove
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            init:
-              type: func
-              value: onRemoveConfigChange|node
-            readonly: true
-            schema: temp/properties/node/removeConfig
-            type: multi-file-editor
-            validateContent: false
             watcher:
               func: onRemoveConfigChange|node
               paths:
@@ -924,15 +929,6 @@ step:
               refresh: fetchConfigSecrets
               schema: temp/properties/coordinator/selectedConfigurationRemove
               type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              init:
-                type: func
-                value: onRemoveConfigChange|coordinator
-              readonly: true
-              schema: temp/properties/coordinator/removeConfig
-              type: multi-file-editor
-              validateContent: false
               watcher:
                 func: onRemoveConfigChange|coordinator
                 paths:
@@ -1085,15 +1081,6 @@ step:
               refresh: fetchConfigSecrets
               schema: temp/properties/data/selectedConfigurationRemove
               type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              init:
-                type: func
-                value: onRemoveConfigChange|data
-              readonly: true
-              schema: temp/properties/data/removeConfig
-              type: multi-file-editor
-              validateContent: false
               watcher:
                 func: onRemoveConfigChange|data
                 paths:
@@ -1246,15 +1233,6 @@ step:
               refresh: fetchConfigSecrets
               schema: temp/properties/overseer/selectedConfigurationRemove
               type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              init:
-                type: func
-                value: onRemoveConfigChange|overseer
-              readonly: true
-              schema: temp/properties/overseer/removeConfig
-              type: multi-file-editor
-              validateContent: false
               watcher:
                 func: onRemoveConfigChange|overseer
                 paths:
