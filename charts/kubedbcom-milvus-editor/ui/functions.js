@@ -332,6 +332,38 @@ export const useFunc = (model) => {
     return discriminatorValue === value
   }
 
+  function isValueExistInModel(path) {
+    const modelValue = getValue(model, path) || null
+    return !!modelValue
+  }
+
+  function getOpsRequestUrl(reqType) {
+    const cluster = storeGet('/route/params/cluster')
+    const domain = storeGet('/domain') || ''
+    const owner = storeGet('/route/params/user')
+    const dbname = getValue(model, '/metadata/release/name')
+    const group = getValue(model, '/metadata/resource/group')
+    const kind = getValue(model, '/metadata/resource/kind')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const resource = getValue(model, '/metadata/resource/name')
+    const version = getValue(model, '/metadata/resource/version')
+    const routeRootPath = storeGet('/route/path')
+    const pathPrefix = `${domain}/db${routeRootPath}`
+    const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
+    const pathConstructedForKubedb = pathSplit + `/${reqType.toLowerCase()}?namespace=${namespace}`
+    const isKube = !!storeGet('/route/params/actions')
+    if (isKube) return pathConstructedForKubedb
+    else
+      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/milvusopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+  }
+
+  function initMonitoring() {
+    const exporter = getValue(model, '/resources/kubedbComMilvus/spec/monitor/prometheus/exporter')
+    if (!exporter) {
+      setDiscriminatorValue('/customizeExporter', false)
+    }
+  }
+
   async function resourceNames(group, version, resource) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -408,6 +440,9 @@ export const useFunc = (model) => {
     disableLableChecker,
     isEqualToModelPathValue,
     isEqualToDiscriminatorPath,
+    isValueExistInModel,
+    getOpsRequestUrl,
+    initMonitoring,
     getCreateAuthSecret,
     onCreateAuthSecretChange,
     showExistingSecretSection,
