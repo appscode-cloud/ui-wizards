@@ -812,7 +812,9 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const igniteContainer = containers.find((c) => c.name === 'ignite')
+    const limits = igniteContainer?.resources?.requests || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
@@ -1820,7 +1822,9 @@ export const useFunc = (model) => {
 
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    let limits = setMachine()
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const igniteContainer = containers.find((c) => c.name === 'ignite')
+    const limits = igniteContainer?.resources?.requests || {}
     delete limits.machine
 
     const selectedMachine = getValue(discriminator, '/machine')
