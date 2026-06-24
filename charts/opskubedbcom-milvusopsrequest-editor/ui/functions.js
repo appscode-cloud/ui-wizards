@@ -488,12 +488,8 @@ export const useFunc = (model) => {
 
   function getDbType() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-
-    const { spec } = dbDetails || {}
-    const { topology } = spec || {}
-    const { mode } = topology || {}
-
-    return mode ? 'distributed' : 'standalone'
+    const distributed = dbDetails?.spec?.topology?.distributed
+    return distributed ? 'distributed' : 'standalone'
   }
 
   function initNamespace() {
@@ -610,10 +606,17 @@ export const useFunc = (model) => {
     return value === verd
   }
 
-  function getMachines() {
+  function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    let limits = {}
+    if (type === 'node' || !type) {
+      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || { cpu: '', memory: '' }
+    } else {
+      limits =
+        dbDetails?.spec?.topology?.distributed?.[type]?.podTemplate?.spec?.resources?.requests ||
+        { cpu: '', memory: '' }
+    }
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -661,21 +664,28 @@ export const useFunc = (model) => {
     return arr
   }
 
-  function setMachine() {
+  function setMachine(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    let limits = {}
+    if (type === 'node' || !type) {
+      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || { cpu: '', memory: '' }
+    } else {
+      limits =
+        dbDetails?.spec?.topology?.distributed?.[type]?.podTemplate?.spec?.resources?.requests ||
+        { cpu: '', memory: '' }
+    }
+
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
-
     let parsedInstance = {}
     try {
       if (instance) parsedInstance = JSON.parse(instance)
     } catch (e) {
       console.log(e)
-      parsedInstance = instance || {}
+      parsedInstance = {}
     }
 
-    const machine = parsedInstance || 'custom'
+    const machine = parsedInstance[type] || 'custom'
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) {
@@ -688,8 +698,7 @@ export const useFunc = (model) => {
   }
 
   function onMachineChange(type, valPath) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, '/machine')
+    const selectedMachine = getValue(discriminator, `/machine-${type}`)
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -715,7 +724,16 @@ export const useFunc = (model) => {
       })
 
     const annotations = getValue(model, '/metadata/annotations') || {}
-    annotations['kubernetes.io/instance-type'] = selectedMachine.machine
+    const instance = annotations['kubernetes.io/instance-type']
+    let parsedInstance = {}
+    try {
+      if (instance) parsedInstance = JSON.parse(instance)
+    } catch (e) {
+      parsedInstance = {}
+    }
+    parsedInstance[type] = selectedMachine.machine
+    annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
+
     if (machinesFromPreset.length)
       commit('wizard/model$update', {
         path: '/metadata/annotations',
@@ -725,7 +743,7 @@ export const useFunc = (model) => {
   }
 
   function isMachineCustom() {
-    const machine = getValue(discriminator, '/machine')
+    const machine = getValue(discriminator, '/machine-node')
     return machine === 'custom'
   }
 
@@ -1487,14 +1505,21 @@ export const useFunc = (model) => {
       })
   }
 
-  function isMachineValid() {
+  function isMachineValid(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    let limits = {}
+    if (type === 'node' || !type) {
+      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    } else {
+      limits =
+        dbDetails?.spec?.topology?.distributed?.[type]?.podTemplate?.spec?.resources?.requests ||
+        {}
+    }
 
-    const selectedMachine = getValue(discriminator, '/machine')
-    const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
+    const selectedMachine = getValue(discriminator, `/machine-${type}`)
+    const selectedLimits = { cpu: selectedMachine?.cpu, memory: selectedMachine?.memory }
 
-    if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
+    if (Object.keys(limits).length && JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
       return 'Resource limits are same as current machine configuration. Please select different resources or machine preset.'
     }
     return false
