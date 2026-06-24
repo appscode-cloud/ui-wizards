@@ -1423,6 +1423,8 @@ export const useFunc = (model) => {
     const volume = getValue(discriminator, `/dbDetails${initpath}`)
     const input = getValue(model, path)
 
+    if (!volume) return
+
     try {
       const sizeInBytes = parseSize(volume)
       const inputSizeInBytes = parseSize(input)
