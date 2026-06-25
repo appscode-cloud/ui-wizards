@@ -1,5 +1,876 @@
 step:
 - elements:
+  - elements:
+    - label: Name
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/metadata/properties/name
+      type: input
+    - if:
+        name: isRancherManaged
+        type: function
+      label: Select Namespace
+      loader: getNamespaces
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/metadata/properties/namespace
+      type: select
+      watcher:
+        func: onNamespaceChange
+        paths:
+        - schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/metadata/properties/namespace
+    - label: Select Db
+      loader: getMilvusDbs
+      refresh: true
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/databaseRef/properties/name
+      type: select
+      validation:
+        type: required
+    if:
+      name: isConsole
+      type: function
+    type: block-layout
+  - if:
+      name: isConsole
+      type: function
+    label: Select Type
+    options:
+    - description: Scale your CPU Memory based on resource usage
+      text: Compute
+      value: compute
+    - description: Expand your database size based on volume usage
+      text: Storage
+      value: storage
+    schema: temp/properties/autoscalingType
+    type: radio
+    validation:
+      type: required
+    watcher:
+      func: initAutoscalerMetadata
+      paths:
+      - temp/properties/autoscalingType
+  - elements:
+    - fullwidth: true
+      init:
+        type: func
+        value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/node/trigger
+      label: Trigger
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
+      type: switch
+    - label: Pod lifetime threshold
+      subtitle: Specifies the duration a pod can exist before being considered for
+        scaling decisions, ensuring resource optimization and workload stability
+      type: label-element
+    - customClass: width-300
+      label: Pod LifeTime Threshold (e.g., 10m 30s)
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+      type: input
+    - elements:
+      - customClass: width-300
+        label: ResourceDiff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+        type: threshold-input
+      - label: Resource Configuration
+        subtitle: Define minimum and maximum allowed resources to ensure optimal database
+          performance
+        type: label-element
+      - elements:
+        - header: Minimum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|node|min
+          label: Min Allowed Profile
+          loader:
+            name: getMachines|node|min
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-node-max
+          schema: temp/properties/allowedMachine-node-min
+          type: machine-compare
+          watcher:
+            func: onMachineChange|node
+            paths:
+            - temp/properties/allowedMachine-node-min
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Min Allowed
+          showLabels: true
+          type: block-layout
+        - header: Maximum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|node|max
+          label: Max Allowed Profile
+          loader:
+            name: getMachines|node|max
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-node-min
+          schema: temp/properties/allowedMachine-node-max
+          type: machine-compare
+          watcher:
+            func: onMachineChange|node
+            paths:
+            - temp/properties/allowedMachine-node-max
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Max Allowed
+          showLabels: true
+          type: block-layout
+        showLabels: false
+        type: block-layout
+      - label: Controlled Resources
+        loader: setControlledResources|node
+        multiple: true
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+        type: select
+      label: Node
+      showLabels: true
+      type: block-layout
+    if:
+      name: isMilvusStandalone
+      type: function
+    label: Node
+    showLabels: true
+    type: block-layout
+  - elements:
+    - fullwidth: true
+      init:
+        type: func
+        value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/datanode/trigger
+      label: Trigger
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/trigger
+      type: switch
+    - label: Pod lifetime threshold
+      subtitle: Specifies the duration a pod can exist before being considered for
+        scaling decisions, ensuring resource optimization and workload stability
+      type: label-element
+    - customClass: width-300
+      label: Pod LifeTime Threshold (e.g., 10m 30s)
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/podLifeTimeThreshold
+      type: input
+    - elements:
+      - customClass: width-300
+        label: ResourceDiff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/resourceDiffPercentage
+        type: threshold-input
+      - label: Resource Configuration
+        subtitle: Define minimum and maximum allowed resources to ensure optimal database
+          performance
+        type: label-element
+      - elements:
+        - header: Minimum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|datanode|min
+          label: Min Allowed Profile
+          loader:
+            name: getMachines|datanode|min
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-datanode-max
+          schema: temp/properties/allowedMachine-datanode-min
+          type: machine-compare
+          watcher:
+            func: onMachineChange|datanode
+            paths:
+            - temp/properties/allowedMachine-datanode-min
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/minAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/minAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Min Allowed
+          showLabels: true
+          type: block-layout
+        - header: Maximum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|datanode|max
+          label: Max Allowed Profile
+          loader:
+            name: getMachines|datanode|max
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-datanode-min
+          schema: temp/properties/allowedMachine-datanode-max
+          type: machine-compare
+          watcher:
+            func: onMachineChange|datanode
+            paths:
+            - temp/properties/allowedMachine-datanode-max
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/maxAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/maxAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Max Allowed
+          showLabels: true
+          type: block-layout
+        showLabels: false
+        type: block-layout
+      - label: Controlled Resources
+        loader: setControlledResources|datanode
+        multiple: true
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/controlledResources
+        type: select
+      label: DataNode
+      showLabels: true
+      type: block-layout
+    if:
+      name: isMilvusDistributed
+      type: function
+    label: DataNode
+    showLabels: true
+    type: block-layout
+  - elements:
+    - fullwidth: true
+      init:
+        type: func
+        value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/mixcoord/trigger
+      label: Trigger
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/trigger
+      type: switch
+    - label: Pod lifetime threshold
+      subtitle: Specifies the duration a pod can exist before being considered for
+        scaling decisions, ensuring resource optimization and workload stability
+      type: label-element
+    - customClass: width-300
+      label: Pod LifeTime Threshold (e.g., 10m 30s)
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/podLifeTimeThreshold
+      type: input
+    - elements:
+      - customClass: width-300
+        label: ResourceDiff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/resourceDiffPercentage
+        type: threshold-input
+      - label: Resource Configuration
+        subtitle: Define minimum and maximum allowed resources to ensure optimal database
+          performance
+        type: label-element
+      - elements:
+        - header: Minimum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|mixcoord|min
+          label: Min Allowed Profile
+          loader:
+            name: getMachines|mixcoord|min
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-mixcoord-max
+          schema: temp/properties/allowedMachine-mixcoord-min
+          type: machine-compare
+          watcher:
+            func: onMachineChange|mixcoord
+            paths:
+            - temp/properties/allowedMachine-mixcoord-min
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/minAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/minAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Min Allowed
+          showLabels: true
+          type: block-layout
+        - header: Maximum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|mixcoord|max
+          label: Max Allowed Profile
+          loader:
+            name: getMachines|mixcoord|max
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-mixcoord-min
+          schema: temp/properties/allowedMachine-mixcoord-max
+          type: machine-compare
+          watcher:
+            func: onMachineChange|mixcoord
+            paths:
+            - temp/properties/allowedMachine-mixcoord-max
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/maxAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/maxAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Max Allowed
+          showLabels: true
+          type: block-layout
+        showLabels: false
+        type: block-layout
+      - label: Controlled Resources
+        loader: setControlledResources|mixcoord
+        multiple: true
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/controlledResources
+        type: select
+      label: MixCoord
+      showLabels: true
+      type: block-layout
+    if:
+      name: isMilvusDistributed
+      type: function
+    label: MixCoord
+    showLabels: true
+    type: block-layout
+  - elements:
+    - fullwidth: true
+      init:
+        type: func
+        value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/proxy/trigger
+      label: Trigger
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/trigger
+      type: switch
+    - label: Pod lifetime threshold
+      subtitle: Specifies the duration a pod can exist before being considered for
+        scaling decisions, ensuring resource optimization and workload stability
+      type: label-element
+    - customClass: width-300
+      label: Pod LifeTime Threshold (e.g., 10m 30s)
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/podLifeTimeThreshold
+      type: input
+    - elements:
+      - customClass: width-300
+        label: ResourceDiff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/resourceDiffPercentage
+        type: threshold-input
+      - label: Resource Configuration
+        subtitle: Define minimum and maximum allowed resources to ensure optimal database
+          performance
+        type: label-element
+      - elements:
+        - header: Minimum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|proxy|min
+          label: Min Allowed Profile
+          loader:
+            name: getMachines|proxy|min
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-proxy-max
+          schema: temp/properties/allowedMachine-proxy-min
+          type: machine-compare
+          watcher:
+            func: onMachineChange|proxy
+            paths:
+            - temp/properties/allowedMachine-proxy-min
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/minAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/minAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Min Allowed
+          showLabels: true
+          type: block-layout
+        - header: Maximum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|proxy|max
+          label: Max Allowed Profile
+          loader:
+            name: getMachines|proxy|max
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-proxy-min
+          schema: temp/properties/allowedMachine-proxy-max
+          type: machine-compare
+          watcher:
+            func: onMachineChange|proxy
+            paths:
+            - temp/properties/allowedMachine-proxy-max
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/maxAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/maxAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Max Allowed
+          showLabels: true
+          type: block-layout
+        showLabels: false
+        type: block-layout
+      - label: Controlled Resources
+        loader: setControlledResources|proxy
+        multiple: true
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/controlledResources
+        type: select
+      label: Proxy
+      showLabels: true
+      type: block-layout
+    if:
+      name: isMilvusDistributed
+      type: function
+    label: Proxy
+    showLabels: true
+    type: block-layout
+  - elements:
+    - fullwidth: true
+      init:
+        type: func
+        value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/querynode/trigger
+      label: Trigger
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/trigger
+      type: switch
+    - label: Pod lifetime threshold
+      subtitle: Specifies the duration a pod can exist before being considered for
+        scaling decisions, ensuring resource optimization and workload stability
+      type: label-element
+    - customClass: width-300
+      label: Pod LifeTime Threshold (e.g., 10m 30s)
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/podLifeTimeThreshold
+      type: input
+    - elements:
+      - customClass: width-300
+        label: ResourceDiff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/resourceDiffPercentage
+        type: threshold-input
+      - label: Resource Configuration
+        subtitle: Define minimum and maximum allowed resources to ensure optimal database
+          performance
+        type: label-element
+      - elements:
+        - header: Minimum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|querynode|min
+          label: Min Allowed Profile
+          loader:
+            name: getMachines|querynode|min
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-querynode-max
+          schema: temp/properties/allowedMachine-querynode-min
+          type: machine-compare
+          watcher:
+            func: onMachineChange|querynode
+            paths:
+            - temp/properties/allowedMachine-querynode-min
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/minAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/minAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Min Allowed
+          showLabels: true
+          type: block-layout
+        - header: Maximum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|querynode|max
+          label: Max Allowed Profile
+          loader:
+            name: getMachines|querynode|max
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-querynode-min
+          schema: temp/properties/allowedMachine-querynode-max
+          type: machine-compare
+          watcher:
+            func: onMachineChange|querynode
+            paths:
+            - temp/properties/allowedMachine-querynode-max
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/maxAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/maxAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Max Allowed
+          showLabels: true
+          type: block-layout
+        showLabels: false
+        type: block-layout
+      - label: Controlled Resources
+        loader: setControlledResources|querynode
+        multiple: true
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/controlledResources
+        type: select
+      label: QueryNode
+      showLabels: true
+      type: block-layout
+    if:
+      name: isMilvusDistributed
+      type: function
+    label: QueryNode
+    showLabels: true
+    type: block-layout
+  - elements:
+    - fullwidth: true
+      init:
+        type: func
+        value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/streamingnode/trigger
+      label: Trigger
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/trigger
+      type: switch
+    - label: Pod lifetime threshold
+      subtitle: Specifies the duration a pod can exist before being considered for
+        scaling decisions, ensuring resource optimization and workload stability
+      type: label-element
+    - customClass: width-300
+      label: Pod LifeTime Threshold (e.g., 10m 30s)
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/podLifeTimeThreshold
+      type: input
+    - elements:
+      - customClass: width-300
+        label: ResourceDiff Percentage
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/resourceDiffPercentage
+        type: threshold-input
+      - label: Resource Configuration
+        subtitle: Define minimum and maximum allowed resources to ensure optimal database
+          performance
+        type: label-element
+      - elements:
+        - header: Minimum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|streamingnode|min
+          label: Min Allowed Profile
+          loader:
+            name: getMachines|streamingnode|min
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-streamingnode-max
+          schema: temp/properties/allowedMachine-streamingnode-min
+          type: machine-compare
+          watcher:
+            func: onMachineChange|streamingnode
+            paths:
+            - temp/properties/allowedMachine-streamingnode-min
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/minAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/minAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Min Allowed
+          showLabels: true
+          type: block-layout
+        - header: Maximum Resource Limit
+          if:
+            name: hasAnnotations
+            type: function
+          init:
+            type: func
+            value: setAllowedMachine|streamingnode|max
+          label: Max Allowed Profile
+          loader:
+            name: getMachines|streamingnode|max
+            watchPaths:
+            - temp/properties/topologyMachines
+            - temp/properties/allowedMachine-streamingnode-min
+          schema: temp/properties/allowedMachine-streamingnode-max
+          type: machine-compare
+          watcher:
+            func: onMachineChange|streamingnode
+            paths:
+            - temp/properties/allowedMachine-streamingnode-max
+        - elements:
+          - label: Cpu
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/maxAllowed/properties/cpu
+            type: input-compare
+          - label: Memory
+            schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/maxAllowed/properties/memory
+            type: input-compare
+          fixedBlock: true
+          if:
+            name: hasNoAnnotations
+            type: function
+          label: Max Allowed
+          showLabels: true
+          type: block-layout
+        showLabels: false
+        type: block-layout
+      - label: Controlled Resources
+        loader: setControlledResources|streamingnode
+        multiple: true
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/controlledResources
+        type: select
+      label: StreamingNode
+      showLabels: true
+      type: block-layout
+    if:
+      name: isMilvusDistributed
+      type: function
+    label: StreamingNode
+    showLabels: true
+    type: block-layout
+  - elements:
+    - label: Select NodeTopology
+      loader: fetchNodeTopology
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+      type: select
+    - if:
+        name: isNodeTopologySelected
+        type: function
+      label: ScaleUp Diff Percentage
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+      type: threshold-input
+    - if:
+        name: isNodeTopologySelected
+        type: function
+      label: ScaleDown Diff Percentage
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+      type: threshold-input
+    if:
+      name: hasNoAnnotations
+      type: function
+    label: Node Topology
+    showLabels: true
+    type: block-layout
+  - elements:
+    - label: Timeout
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+      type: time-picker
+    - init:
+        type: func
+        value: setApplyToIfReady
+      label: Apply
+      options:
+      - text: IfReady (OpsRequest will be applied if database is ready)
+        value: IfReady
+      - text: Always (OpsRequest will always be applied)
+        value: Always
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+      type: radio
+    if:
+      name: showOpsRequestOptions
+      type: function
+    label: Ops Request Options
+    showLabels: true
+    type: block-layout
+  id: compute-autoscaler
+  loader: getMilvusDbDetails
+  type: single-step-form
+- elements:
+  - elements:
+    - elements:
+      - fullwidth: true
+        init:
+          type: func
+          value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/storage/node/trigger
+        label: Trigger
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
+        type: switch
+      - label: Expansion Mode (Online/Offline)
+        subtitle: Online Mode enables scaling without downtime by dynamically resizing
+          storage while the database remains operational. Offline Mode performs storage
+          scaling during scheduled downtime, ensuring consistency but requiring database
+          restarts.
+        type: label-element
+      - description: Select how the storage expansion should be handled.
+        label: Mode
+        options:
+        - text: Online
+          value: Online
+        - text: Offline
+          value: Offline
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
+        type: select
+      - elements:
+        - label: UsageThreshold (%)
+          schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
+          subtitle: Set the threshold percentage of storage usage to trigger scaling.
+          type: threshold-input
+        - label: Scaling Rules
+          loader: setValueFromDbDetails|resources/kubedbComMilvus/spec/storage/resources/requests/storage
+          schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+          type: scaling-rules
+          watcher:
+            func: handleUnit|autoscalingKubedbComMilvusAutoscaler/spec/storage/node/scalingRules|scalingRules
+            paths:
+            - schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+        - label: UpperBound
+          schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+          type: input
+          watcher:
+            func: handleUnit|autoscalingKubedbComMilvusAutoscaler/spec/storage/node/upperBound
+            paths:
+            - schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
+        label: Node
+        showLabels: true
+        type: block-layout
+      if:
+        name: isMilvusStandalone
+        type: function
+      showLabels: false
+      type: block-layout
+    - elements:
+      - fullwidth: true
+        init:
+          type: func
+          value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/storage/streamingnode/trigger
+        label: Trigger
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/trigger
+        type: switch
+      - label: Expansion Mode (Online/Offline)
+        subtitle: Online Mode enables scaling without downtime by dynamically resizing
+          storage while the database remains operational. Offline Mode performs storage
+          scaling during scheduled downtime, ensuring consistency but requiring database
+          restarts.
+        type: label-element
+      - description: Select how the storage expansion should be handled.
+        label: Mode
+        options:
+        - text: Online
+          value: Online
+        - text: Offline
+          value: Offline
+        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/expansionMode
+        type: select
+      - elements:
+        - label: UsageThreshold (%)
+          schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/usageThreshold
+          subtitle: Set the threshold percentage of storage usage to trigger scaling.
+          type: threshold-input
+        - label: Scaling Rules
+          loader: setValueFromDbDetails|resources/kubedbComMilvus/spec/topology/distributed/streamingnode/storage/resources/requests/storage
+          schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/scalingRules
+          type: scaling-rules
+          watcher:
+            func: handleUnit|autoscalingKubedbComMilvusAutoscaler/spec/storage/streamingnode/scalingRules|scalingRules
+            paths:
+            - schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/scalingRules
+        - label: UpperBound
+          schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/upperBound
+          type: input
+          watcher:
+            func: handleUnit|autoscalingKubedbComMilvusAutoscaler/spec/storage/streamingnode/upperBound
+            paths:
+            - schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/upperBound
+        label: StreamingNode
+        showLabels: true
+        type: block-layout
+      if:
+        name: isMilvusDistributed
+        type: function
+      showLabels: false
+      type: block-layout
+    showLabels: false
+    type: block-layout
+  - elements:
+    - label: Timeout
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+      type: time-picker
+    - init:
+        type: func
+        value: setApplyToIfReady
+      label: Apply
+      options:
+      - text: IfReady (OpsRequest will be applied if database is ready)
+        value: IfReady
+      - text: Always (OpsRequest will always be applied)
+        value: Always
+      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+      type: radio
+    if:
+      name: showOpsRequestOptions
+      type: function
+    label: OpsRequest Options
+    showLabels: true
+    type: block-layout
+  id: storage-autoscaler
+  loader: getMilvusDbDetails
+  type: single-step-form
+- elements:
   - label: To update Exporter Resource section click on Create OpsRequest
     type: label-element
   - init:
