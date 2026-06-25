@@ -343,6 +343,104 @@ step:
             type: block-layout
           - elements:
             - elements:
+              - label: Can user modify DB2 Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/versions/properties/toggle
+                type: switch
+              - label: Available Versions
+                loader:
+                  name: FetchDbVersions|DB2
+                  watchPaths:
+                  - temp/allDbVersions
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/versions/properties/available
+                type: select
+                watcher:
+                  func: clearDefaultVersion|DB2
+                  paths:
+                  - schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/versions/properties/available
+              - label: Default Version
+                loader:
+                  name: availableVersions|DB2
+                  watchPaths:
+                  - schema/spec/admin/databases/DB2/versions/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/versions/properties/default
+                type: select
+              type: block-layout
+            - elements:
+              - label: Can user modify DB2 Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/mode/properties/toggle
+                type: switch
+              - label: Available Modes
+                loader: fetchModes|DB2
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/mode/properties/available
+                type: select
+              - init:
+                  type: func
+                  value: setDefaultMode|DB2
+                label: Default Mode
+                loader:
+                  name: availableModes|DB2
+                  watchPaths:
+                  - schema/spec/admin/databases/DB2/mode/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/mode/properties/default
+                type: select
+              type: block-layout
+            hideBlock: true
+            label: DB2
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify DocumentDB Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/versions/properties/toggle
+                type: switch
+              - label: Available Versions
+                loader:
+                  name: FetchDbVersions|DocumentDB
+                  watchPaths:
+                  - temp/allDbVersions
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/versions/properties/available
+                type: select
+                watcher:
+                  func: clearDefaultVersion|DocumentDB
+                  paths:
+                  - schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/versions/properties/available
+              - label: Default Version
+                loader:
+                  name: availableVersions|DocumentDB
+                  watchPaths:
+                  - schema/spec/admin/databases/DocumentDB/versions/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/versions/properties/default
+                type: select
+              type: block-layout
+            - elements:
+              - label: Can user modify DocumentDB Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/mode/properties/toggle
+                type: switch
+              - label: Available Modes
+                loader: fetchModes|DocumentDB
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/mode/properties/available
+                type: select
+              - init:
+                  type: func
+                  value: setDefaultMode|DocumentDB
+                label: Default Mode
+                loader:
+                  name: availableModes|DocumentDB
+                  watchPaths:
+                  - schema/spec/admin/databases/DocumentDB/mode/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/mode/properties/default
+                type: select
+              type: block-layout
+            hideBlock: true
+            label: DocumentDB
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
               - label: Can user modify Druid Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/toggle
                 type: switch
@@ -437,6 +535,55 @@ step:
               type: block-layout
             hideBlock: true
             label: Elasticsearch
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify HanaDB Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/versions/properties/toggle
+                type: switch
+              - label: Available Versions
+                loader:
+                  name: FetchDbVersions|HanaDB
+                  watchPaths:
+                  - temp/allDbVersions
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/versions/properties/available
+                type: select
+                watcher:
+                  func: clearDefaultVersion|HanaDB
+                  paths:
+                  - schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/versions/properties/available
+              - label: Default Version
+                loader:
+                  name: availableVersions|HanaDB
+                  watchPaths:
+                  - schema/spec/admin/databases/HanaDB/versions/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/versions/properties/default
+                type: select
+              type: block-layout
+            - elements:
+              - label: Can user modify HanaDB Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/mode/properties/toggle
+                type: switch
+              - label: Available Modes
+                loader: fetchModes|HanaDB
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/mode/properties/available
+                type: select
+              - init:
+                  type: func
+                  value: setDefaultMode|HanaDB
+                label: Default Mode
+                loader:
+                  name: availableModes|HanaDB
+                  watchPaths:
+                  - schema/spec/admin/databases/HanaDB/mode/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/mode/properties/default
+                type: select
+              type: block-layout
+            hideBlock: true
+            label: HanaDB
             showLabels: true
             type: block-layout
           - elements:
@@ -735,6 +882,55 @@ step:
             type: block-layout
           - elements:
             - elements:
+              - label: Can user modify Milvus Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/versions/properties/toggle
+                type: switch
+              - label: Available Versions
+                loader:
+                  name: FetchDbVersions|Milvus
+                  watchPaths:
+                  - temp/allDbVersions
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/versions/properties/available
+                type: select
+                watcher:
+                  func: clearDefaultVersion|Milvus
+                  paths:
+                  - schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/versions/properties/available
+              - label: Default Version
+                loader:
+                  name: availableVersions|Milvus
+                  watchPaths:
+                  - schema/spec/admin/databases/Milvus/versions/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/versions/properties/default
+                type: select
+              type: block-layout
+            - elements:
+              - label: Can user modify Milvus Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/mode/properties/toggle
+                type: switch
+              - label: Available Modes
+                loader: fetchModes|Milvus
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/mode/properties/available
+                type: select
+              - init:
+                  type: func
+                  value: setDefaultMode|Milvus
+                label: Default Mode
+                loader:
+                  name: availableModes|Milvus
+                  watchPaths:
+                  - schema/spec/admin/databases/Milvus/mode/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/mode/properties/default
+                type: select
+              type: block-layout
+            hideBlock: true
+            label: Milvus
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
               - label: Can user modify MongoDB Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/toggle
                 type: switch
@@ -829,6 +1025,55 @@ step:
               type: block-layout
             hideBlock: true
             label: MySQL
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Neo4j Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/versions/properties/toggle
+                type: switch
+              - label: Available Versions
+                loader:
+                  name: FetchDbVersions|Neo4j
+                  watchPaths:
+                  - temp/allDbVersions
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/versions/properties/available
+                type: select
+                watcher:
+                  func: clearDefaultVersion|Neo4j
+                  paths:
+                  - schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/versions/properties/available
+              - label: Default Version
+                loader:
+                  name: availableVersions|Neo4j
+                  watchPaths:
+                  - schema/spec/admin/databases/Neo4j/versions/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/versions/properties/default
+                type: select
+              type: block-layout
+            - elements:
+              - label: Can user modify Neo4j Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/mode/properties/toggle
+                type: switch
+              - label: Available Modes
+                loader: fetchModes|Neo4j
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/mode/properties/available
+                type: select
+              - init:
+                  type: func
+                  value: setDefaultMode|Neo4j
+                label: Default Mode
+                loader:
+                  name: availableModes|Neo4j
+                  watchPaths:
+                  - schema/spec/admin/databases/Neo4j/mode/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/mode/properties/default
+                type: select
+              type: block-layout
+            hideBlock: true
+            label: Neo4j
             showLabels: true
             type: block-layout
           - elements:
@@ -1127,6 +1372,55 @@ step:
             type: block-layout
           - elements:
             - elements:
+              - label: Can user modify Qdrant Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/versions/properties/toggle
+                type: switch
+              - label: Available Versions
+                loader:
+                  name: FetchDbVersions|Qdrant
+                  watchPaths:
+                  - temp/allDbVersions
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/versions/properties/available
+                type: select
+                watcher:
+                  func: clearDefaultVersion|Qdrant
+                  paths:
+                  - schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/versions/properties/available
+              - label: Default Version
+                loader:
+                  name: availableVersions|Qdrant
+                  watchPaths:
+                  - schema/spec/admin/databases/Qdrant/versions/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/versions/properties/default
+                type: select
+              type: block-layout
+            - elements:
+              - label: Can user modify Qdrant Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/mode/properties/toggle
+                type: switch
+              - label: Available Modes
+                loader: fetchModes|Qdrant
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/mode/properties/available
+                type: select
+              - init:
+                  type: func
+                  value: setDefaultMode|Qdrant
+                label: Default Mode
+                loader:
+                  name: availableModes|Qdrant
+                  watchPaths:
+                  - schema/spec/admin/databases/Qdrant/mode/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/mode/properties/default
+                type: select
+              type: block-layout
+            hideBlock: true
+            label: Qdrant
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
               - label: Can user modify RabbitMQ Version?
                 schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
                 type: switch
@@ -1319,6 +1613,55 @@ step:
               type: block-layout
             hideBlock: true
             label: Solr
+            showLabels: true
+            type: block-layout
+          - elements:
+            - elements:
+              - label: Can user modify Weaviate Version?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/versions/properties/toggle
+                type: switch
+              - label: Available Versions
+                loader:
+                  name: FetchDbVersions|Weaviate
+                  watchPaths:
+                  - temp/allDbVersions
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/versions/properties/available
+                type: select
+                watcher:
+                  func: clearDefaultVersion|Weaviate
+                  paths:
+                  - schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/versions/properties/available
+              - label: Default Version
+                loader:
+                  name: availableVersions|Weaviate
+                  watchPaths:
+                  - schema/spec/admin/databases/Weaviate/versions/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/versions/properties/default
+                type: select
+              type: block-layout
+            - elements:
+              - label: Can user modify Weaviate Mode?
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/mode/properties/toggle
+                type: switch
+              - label: Available Modes
+                loader: fetchModes|Weaviate
+                multiple: true
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/mode/properties/available
+                type: select
+              - init:
+                  type: func
+                  value: setDefaultMode|Weaviate
+                label: Default Mode
+                loader:
+                  name: availableModes|Weaviate
+                  watchPaths:
+                  - schema/spec/admin/databases/Weaviate/mode/available
+                schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/mode/properties/default
+                type: select
+              type: block-layout
+            hideBlock: true
+            label: Weaviate
             showLabels: true
             type: block-layout
           - elements:

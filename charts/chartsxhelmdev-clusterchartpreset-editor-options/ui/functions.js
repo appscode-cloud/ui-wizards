@@ -331,6 +331,14 @@ export const useFunc = (model) => {
       availableModes: ['Standalone', 'Topology'],
       default: 'Topology',
     },
+    DB2: {
+      availableModes: ['Standalone'],
+      default: 'Standalone',
+    },
+    DocumentDB: {
+      availableModes: ['Standalone', 'ReplicaSet'],
+      default: 'ReplicaSet',
+    },
     Druid: {
       availableModes: ['Topology'],
       default: 'Topology',
@@ -339,9 +347,9 @@ export const useFunc = (model) => {
       availableModes: ['Combined', 'Topology'],
       default: 'Topology',
     },
-    FerretDB: {
-      availableModes: ['PrimaryOnly', 'PrimaryAndSecondary'],
-      default: 'PrimaryAndSecondary',
+    HanaDB: {
+      availableModes: ['Standalone', 'SystemReplication'],
+      default: 'Standalone',
     },
     Kafka: {
       availableModes: ['Combined', 'Topology'],
@@ -367,6 +375,10 @@ export const useFunc = (model) => {
       availableModes: ['Standalone', 'Replicaset'],
       default: 'Replicaset',
     },
+    Milvus: {
+      availableModes: ['Standalone', 'Distributed'],
+      default: 'Standalone',
+    },
     MongoDB: {
       availableModes: ['Standalone', 'Replicaset', 'Sharded'],
       default: 'Replicaset',
@@ -380,6 +392,10 @@ export const useFunc = (model) => {
         'SemiSync',
       ],
       default: 'GroupReplication',
+    },
+    Neo4j: {
+      availableModes: ['Standalone', 'Replicaset'],
+      default: 'Replicaset',
     },
     Oracle: {
       availableModes: ['Standalone', 'DataGuard'],
@@ -405,6 +421,10 @@ export const useFunc = (model) => {
       availableModes: ['Standalone', 'Replicaset'],
       default: 'Replicaset',
     },
+    Qdrant: {
+      availableModes: ['Standalone', 'Distributed'],
+      default: 'Standalone',
+    },
     RabbitMQ: {
       availableModes: ['Standalone', 'Replicaset'],
       default: 'Replicaset',
@@ -420,6 +440,10 @@ export const useFunc = (model) => {
     Solr: {
       availableModes: ['Standalone', 'Replicaset', 'Topology'],
       default: 'Topology',
+    },
+    Weaviate: {
+      availableModes: ['Standalone', 'Replicaset'],
+      default: 'Replicaset',
     },
     ZooKeeper: {
       availableModes: ['Standalone', 'Replicaset'],
