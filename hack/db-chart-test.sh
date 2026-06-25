@@ -14,6 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-for db in Cassandra ClickHouse Druid Elasticsearch FerretDB Kafka MariaDB Memcached MongoDB MSSQLServer MySQL PerconaXtraDB PgBouncer Pgpool Postgres ProxySQL RabbitMQ Redis Singlestore Solr ZooKeeper; do
+for db in Cassandra ClickHouse DB2 DocumentDB Druid Elasticsearch HanaDB Hazelcast Ignite Kafka MariaDB Memcached Milvus MongoDB MSSQLServer MySQL Neo4j Oracle PerconaXtraDB PgBouncer Pgpool Postgres ProxySQL Qdrant Rabbitmq Redis Singlestore Solr Weaviate ZooKeeper; do
     make ct CT_COMMAND=lint TEST_CHARTS=charts/kubedbcom-$(echo "$db" | tr '[:upper:]' '[:lower:]')-editor-options
 done
