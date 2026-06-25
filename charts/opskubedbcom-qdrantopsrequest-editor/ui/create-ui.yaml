@@ -122,7 +122,7 @@ step:
           type: func
           value: setValueFromDbDetails|/spec/replicas
         label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/member
+        schema: schema/properties/spec/properties/horizontalScaling/properties/node
         subtitle: Define the total number of replicas for the database. Increasing
           replicas improves fault tolerance and load distribution , while reducing
           replicas conserves resources
@@ -131,9 +131,6 @@ step:
         label: Each replica represents an independent copy of your database. For example,
           setting this to 3 creates three copies of the database for better availability.
         type: info
-      if:
-        name: ifDbTypeEqualsTo|cluster|horizontalScaling
-        type: function
       type: horizontal-layout
     fixedBlock: true
     if:
@@ -157,7 +154,7 @@ step:
           name: isMachineValid
           type: custom
         watcher:
-          func: onMachineChange|qdrant|/spec/podTemplate/spec/resources
+          func: onMachineChange|node|/spec/podTemplate/spec/resources
           paths:
           - temp/properties/machine
       - elements:
@@ -174,7 +171,7 @@ step:
                 value: LabelSelector
               - text: Taint
                 value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/qdrant/properties/nodeSelectionPolicy
+              schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
               type: select
             hideBorder: true
             showLabels: false
@@ -205,30 +202,6 @@ step:
               type: custom
           type: horizontal-layout
         label: Node Selection
-        showLabels: true
-        type: block-layout
-      - elements:
-        - elements:
-          - init:
-              type: func
-              value: setExporter|cpu
-            label: CPU
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-            type: input
-          - init:
-              type: func
-              value: setExporter|memory
-            label: Memory
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-            type: input
-            watcher:
-              func: onExporterResourceChange|memory
-              paths:
-              - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-          showLabels: true
-          type: horizontal-layout
-        hideBlock: true
-        label: Exporter
         showLabels: true
         type: block-layout
       label: Qdrant vertical scaling
@@ -265,12 +238,12 @@ step:
             type: func
             value: setValueFromDbDetails|/spec/storage/resources/requests/storage
           label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/qdrant
+          schema: schema/properties/spec/properties/volumeExpansion/properties/node
           subtitle: How much extra storage does your database need? Specify the size(e.g.
             2Gi for 2 gigabytes) so we can allocate it correctly
           type: input-compare
           validation:
-            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/qdrant
+            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
             type: custom
         type: horizontal-layout
       fixedBlock: true
