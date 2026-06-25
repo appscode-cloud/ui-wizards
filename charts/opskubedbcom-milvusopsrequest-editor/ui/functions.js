@@ -611,10 +611,11 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
     let limits = {}
     if (type === 'node' || !type) {
-      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || { cpu: '', memory: '' }
+      limits =
+        dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests || { cpu: '', memory: '' }
     } else {
       limits =
-        dbDetails?.spec?.topology?.distributed?.[type]?.podTemplate?.spec?.resources?.requests ||
+        dbDetails?.spec?.topology?.distributed?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests ||
         { cpu: '', memory: '' }
     }
 
@@ -668,10 +669,11 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
     let limits = {}
     if (type === 'node' || !type) {
-      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || { cpu: '', memory: '' }
+      limits =
+        dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests || { cpu: '', memory: '' }
     } else {
       limits =
-        dbDetails?.spec?.topology?.distributed?.[type]?.podTemplate?.spec?.resources?.requests ||
+        dbDetails?.spec?.topology?.distributed?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests ||
         { cpu: '', memory: '' }
     }
 
@@ -1511,10 +1513,10 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
     let limits = {}
     if (type === 'node' || !type) {
-      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+      limits = dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests || {}
     } else {
       limits =
-        dbDetails?.spec?.topology?.distributed?.[type]?.podTemplate?.spec?.resources?.requests ||
+        dbDetails?.spec?.topology?.distributed?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests ||
         {}
     }
 
