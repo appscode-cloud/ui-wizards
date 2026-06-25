@@ -154,7 +154,7 @@ step:
           name: isMachineValid
           type: custom
         watcher:
-          func: onMachineChange|qdrant|/spec/podTemplate/spec/resources
+          func: onMachineChange|node|/spec/podTemplate/spec/resources
           paths:
           - temp/properties/machine
       - elements:
@@ -171,7 +171,7 @@ step:
                 value: LabelSelector
               - text: Taint
                 value: Taint
-              schema: schema/properties/spec/properties/verticalScaling/properties/qdrant/properties/nodeSelectionPolicy
+              schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
               type: select
             hideBorder: true
             showLabels: false
@@ -238,12 +238,12 @@ step:
             type: func
             value: setValueFromDbDetails|/spec/storage/resources/requests/storage
           label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/qdrant
+          schema: schema/properties/spec/properties/volumeExpansion/properties/node
           subtitle: How much extra storage does your database need? Specify the size(e.g.
             2Gi for 2 gigabytes) so we can allocate it correctly
           type: input-compare
           validation:
-            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/qdrant
+            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
             type: custom
         type: horizontal-layout
       fixedBlock: true
