@@ -754,15 +754,10 @@ export const useFunc = (model) => {
   // vertical scaling
 
   // machine profile stuffs
-  // let machinesFromPreset = []
 
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits =
-      dbDetails?.spec?.podTemplate?.spec?.resources?.requests ??
-      (containers[0]?.resources?.limits || {})
+    const limits = getLimits()
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -812,9 +807,8 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const igniteContainer = containers.find((c) => c.name === 'ignite')
-    const limits = igniteContainer?.resources?.requests || {}
+    const limits = getLimits()
+    console.log(limits)
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
@@ -830,6 +824,7 @@ export const useFunc = (model) => {
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) {
+      console.log('machinePresets', machinePresets, machine)
       return {
         machine: machine,
         cpu: machinePresets.limits.cpu,
@@ -1801,11 +1796,18 @@ export const useFunc = (model) => {
       })
   }
 
-  function isMachineValid() {
+  function getLimits() {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const igniteContainer = containers.find((c) => c.name === 'ignite')
-    const limits = igniteContainer?.resources?.requests || {}
+    const kind = dbDetails?.kind
+    const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+    const limits = resource[0]?.resources?.requests || {}
+    return limits
+  }
+
+  function isMachineValid() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    let limits = getLimits()
     delete limits.machine
 
     const selectedMachine = getValue(discriminator, '/machine')
