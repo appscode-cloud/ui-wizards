@@ -1707,5 +1707,6 @@ export const useFunc = (model) => {
     onNewConfigSecretChange,
     onSelectedSecretChange,
     isTlsEnabled,
+    getCurrentConfig,
   }
 }
