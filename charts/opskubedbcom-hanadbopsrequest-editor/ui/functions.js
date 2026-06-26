@@ -664,8 +664,7 @@ export const useFunc = (model) => {
 
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const limits = getLimits()
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -714,9 +713,8 @@ export const useFunc = (model) => {
   }
 
   function setMachine() {
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
-    const annotations = dbDetails?.metadata?.annotations || {}
+    const limits = getLimits()
+    const annotations = getValue(discriminator, '/dbDetails/metadata/annotations') || {}
     const instance = annotations['kubernetes.io/instance-type']
 
     let parsedInstance = {}
@@ -1702,9 +1700,17 @@ export const useFunc = (model) => {
       })
   }
 
-  function isMachineValid() {
+  function getLimits() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    const kind = dbDetails?.kind
+    const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+    const limits = resource[0]?.resources?.requests || {}
+    return limits
+  }
+
+  function isMachineValid() {
+    const limits = getLimits()
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
