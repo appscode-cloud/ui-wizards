@@ -135,169 +135,51 @@ resources:
     metadata:
       name: vault
       namespace: default
-    spec:
-      allowedSecretEngines:
-        namespaces:
-          from: Same
-      authMethods:
-        - path: kubernetes
-          type: kubernetes
-      backend:
-        s3:
-          bucket: eks-uat-vault
-          region: eu-west-1
-      deletionPolicy: Delete
-      healthChecker:
-        failureThreshold: 1
-        periodSeconds: 10
-        timeoutSeconds: 10
-      monitor:
-        agent: prometheus.io
-        prometheus:
-          exporter:
-            port: 56790
-            resources: {}
-      podTemplate:
-        controller: {}
-        metadata: {}
-        spec:
-          resources: {}
-      replicas: 1
-      tls:
-        certificates:
-          - alias: ca
-            secretName: vault-ca-certs
-          - alias: server
-            duration: 8760h
-            secretName: vault-server-certs
-          - alias: client
-            duration: 8760h
-            secretName: vault-client-certs
-        issuerRef:
-          apiGroup: cert-manager.io
-          kind: Issuer
-          name: vault-issuer
-      unsealer:
-        mode:
-          awsKmsSsm:
-            kmsKeyID: f62a0db9-b550-4cfb-8537-b93978fc5395
-            region: eu-west-1
-        secretShares: 1
-        secretThreshold: 1
-      version: 0.11.5
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor
     metadata:
       name: vault
       namespace: default
-    spec:
-      endpoints:
-        - honorLabels: true
-          interval: 30s
-          path: /metrics
-          port: metrics
-      namespaceSelector:
-        matchNames:
-          - demo
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: redis
-          app.kubernetes.io/name: redises.kubedb.com
   secret_backend_creds: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
       name: vault-backend-creds
       namespace: demo
-    stringData:
-      aclToken: <acl-token>
-    type: Opaque
   secret_backend_tls: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
       name: vault-backend-tls
       namespace: demo
-    stringData:
-      ca.crt: <ca-cert>
-      client.crt: <client-cert>
-      client.key: <client-key>
-    type: Opaque
   secret_config: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
       name: vault-config
       namespace: demo
-    stringData:
-      vault.hcl: <data>
-    type: Opaque
   secret_repo_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
       name: vault-repo-cred
       namespace: default
-    stringData:
-      password: thisIs1StrongPassword
-      username: root
-    type: Opaque
   secret_unsealer_creds: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
       name: vault-unsealer-creds
       namespace: demo
-    stringData:
-      access_key: <access_key>
-      secret_key: <secret_key>
-    type: Opaque
   stashAppscodeComBackupConfiguration: # +doc-gen:break
     apiVersion: stash.appscode.com/v1beta1
     kind: BackupConfiguration
     metadata:
       name: vault
       namespace: default
-    spec:
-      interimVolumeTemplate:
-        metadata:
-          name: elasticsearch-backup-tmp-storage
-        spec:
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: 1Gi
-          storageClassName: linode-block-storage
-      repository:
-        name: elasticsearch-repo
-      retentionPolicy:
-        keepLast: 5
-        name: keep-last-5
-        prune: true
-      runtimeSettings:
-        container:
-          securityContext:
-            runAsGroup: 0
-            runAsUser: 0
-      schedule: '*/5 * * * *'
-      target:
-        ref:
-          apiVersion: appcatalog.appscode.com/v1alpha1
-          kind: AppBinding
-          name: elasticsearch
-      task:
-        name: elasticsearch-backup-7.3.2
   stashAppscodeComRepository_repo: # +doc-gen:break
     apiVersion: stash.appscode.com/v1alpha1
     kind: Repository
     metadata:
       name: vault-repo
       namespace: default
-    spec:
-      backend:
-        gcs:
-          bucket: stash-testing
-          prefix: /demo/mariadb/mariadb
-        storageSecretName: gcs-secret

@@ -17,26 +17,3 @@ resources:
         app.kubernetes.io/component: cluster-manager-spoke
       name: cluster-manager-spoke
       namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: cluster-manager-spoke
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2026.2.16
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: cluster-manager-spoke
-      storageNamespace: open-cluster-management
-      targetNamespace: open-cluster-management
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1

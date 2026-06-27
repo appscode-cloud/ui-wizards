@@ -15,23 +15,3 @@ resources:
     metadata:
       name: restore-app
       namespace: demo
-    spec:
-      addon:
-        jobTemplate:
-          spec:
-            securityContext:
-              runAsUser: 1001880000
-        name: mongodb-addon
-        tasks:
-          - name: logical-backup-restore
-      dataSource:
-        encryptionSecret:
-          name: encrypt-secret
-          namespace: demo
-        repository: full-repo
-        snapshot: full-repo-mg-backup-full-mongo-1723451040
-      target:
-        apiGroup: kubedb.com
-        kind: MongoDB
-        name: app
-        namespace: demo

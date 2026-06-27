@@ -17,29 +17,6 @@ resources:
         app.kubernetes.io/component: crossplane
       name: crossplane
       namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: crossplane
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: 1.14.0
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: crossplane
-      storageNamespace: crossplane-system
-      targetNamespace: crossplane-system
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_kubedb_provider_aws: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -48,29 +25,6 @@ resources:
         app.kubernetes.io/component: kubedb-provider-aws
       name: kubedb-provider-aws
       namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: kubedb-provider-aws
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2024.1.31
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: kubedb-provider-aws
-      storageNamespace: crossplane-system
-      targetNamespace: crossplane-system
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_kubedb_provider_azure: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -79,29 +33,6 @@ resources:
         app.kubernetes.io/component: kubedb-provider-azure
       name: kubedb-provider-azure
       namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: kubedb-provider-azure
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2024.1.31
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: kubedb-provider-azure
-      storageNamespace: crossplane-system
-      targetNamespace: crossplane-system
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_kubedb_provider_gcp: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -110,26 +41,3 @@ resources:
         app.kubernetes.io/component: kubedb-provider-gcp
       name: kubedb-provider-gcp
       namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: kubedb-provider-gcp
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2024.1.31
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: kubedb-provider-gcp
-      storageNamespace: crossplane-system
-      targetNamespace: crossplane-system
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1

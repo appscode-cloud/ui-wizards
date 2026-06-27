@@ -130,153 +130,33 @@ resources:
     metadata:
       name: kafka
       namespace: demo
-    spec:
-      compute:
-        node:
-          maxAllowed:
-            cpu: 1
-            memory: 2Gi
-          minAllowed:
-            cpu: 400m
-            memory: 400Mi
-          podLifeTimeThreshold: 10m
-          resourceDiffPercentage: 20
-          trigger: "On"
-        nodeTopology:
-          name: standard-basv2-family
-      databaseRef:
-        name: repl
-      opsRequestOptions:
-        apply: IfReady
-        timeout: 10m
   catalogAppscodeComKafkaBinding: # +doc-gen:break
     apiVersion: catalog.appscode.com/v1alpha1
     kind: KafkaBinding
     metadata:
       name: kafka
       namespace: demo
-    spec:
-      sourceRef:
-        name: kafka
-        namespace: demo
   gitopsKubedbComKafka: # +doc-gen:break
     apiVersion: gitops.kubedb.com/v1alpha1
     kind: Kafka
     metadata:
       name: kafka
       namespace: demo
-    spec:
-      authSecret:
-        name: kafka-admin-cred
-      deletionPolicy: WipeOut
-      enableSSL: true
-      monitor:
-        agent: prometheus.io/operator
-        prometheus:
-          exporter:
-            port: 9091
-          serviceMonitor:
-            interval: 10s
-            labels:
-              release: prometheus
-      storageType: Ephemeral
-      tls:
-        issuerRef:
-          apiGroup: cert-manager.io
-          kind: Issuer
-          name: kafka-ca
-      topology:
-        broker:
-          replicas: 3
-          storage:
-            accessModes:
-              - ReadWriteOnce
-            resources:
-              requests:
-                storage: 1Gi
-            storageClassName: standard
-        controller:
-          replicas: 2
-          storage:
-            accessModes:
-              - ReadWriteOnce
-            resources:
-              requests:
-                storage: 1Gi
-            storageClassName: standard
-      version: 3.3.2
   kubedbComKafka: # +doc-gen:break
     apiVersion: kubedb.com/v1
     kind: Kafka
     metadata:
       name: kafka
       namespace: demo
-    spec:
-      authSecret:
-        name: kafka-admin-cred
-      deletionPolicy: WipeOut
-      enableSSL: true
-      monitor:
-        agent: prometheus.io/operator
-        prometheus:
-          exporter:
-            port: 9091
-          serviceMonitor:
-            interval: 10s
-            labels:
-              release: prometheus
-      storageType: Ephemeral
-      tls:
-        issuerRef:
-          apiGroup: cert-manager.io
-          kind: Issuer
-          name: kafka-ca
-      topology:
-        broker:
-          replicas: 3
-          storage:
-            accessModes:
-              - ReadWriteOnce
-            resources:
-              requests:
-                storage: 1Gi
-            storageClassName: standard
-        controller:
-          replicas: 2
-          storage:
-            accessModes:
-              - ReadWriteOnce
-            resources:
-              requests:
-                storage: 1Gi
-            storageClassName: standard
-      version: 3.3.2
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor
     metadata:
       name: kafka
       namespace: demo
-    spec:
-      endpoints:
-        - honorLabels: true
-          interval: 10s
-          path: /metrics
-          port: metrics
-      namespaceSelector:
-        matchNames:
-          - demo
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: kafka
-          app.kubernetes.io/name: kafkas.kubedb.com
   secret_admin_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
       name: kafka-admin-cred
       namespace: demo
-    stringData:
-      password: WeakPassword
-      username: admin
-    type: kubernetes.io/basic-auth

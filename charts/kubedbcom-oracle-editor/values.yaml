@@ -75,131 +75,39 @@ resources:
     metadata:
       name: oracle
       namespace: demo
-    spec:
-      compute:
-        nodeTopology:
-          name: standard-basv2-family
-        oracle:
-          maxAllowed:
-            cpu: 1
-            memory: 2Gi
-          minAllowed:
-            cpu: 400m
-            memory: 400Mi
-          podLifeTimeThreshold: 10m
-          resourceDiffPercentage: 20
-          trigger: "On"
-      databaseRef:
-        name: oracle
-      opsRequestOptions:
-        apply: IfReady
-        timeout: 10m
   catalogAppscodeComOracleBinding: # +doc-gen:break
     apiVersion: catalog.appscode.com/v1alpha1
     kind: OracleBinding
     metadata:
       name: oracle
       namespace: demo
-    spec:
-      sourceRef:
-        name: oracle
-        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
     metadata:
       name: oracle-ca
       namespace: demo
-    spec:
-      ca:
-        secretName: oracle-ca
   kubedbComOracle: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Oracle
     metadata:
       name: oracle
       namespace: oracle
-    spec:
-      deletionPolicy: Halt
-      podTemplate:
-        spec:
-          containers:
-            - name: oracle
-              resources:
-                requests:
-                  cpu: 700m
-                  memory: 1200Mi
-          nodeSelector:
-            app: kubedb
-            component: oracle-database
-            instance: oracle
-          tolerations:
-            - effect: NoSchedule
-              key: app
-              operator: Equal
-              value: kubedb
-            - effect: NoSchedule
-              key: instance
-              operator: Equal
-              value: oracle
-            - effect: NoSchedule
-              key: component
-              operator: Equal
-              value: oracle-database
-            - effect: NoSchedule
-              key: nodepool_type
-              operator: Equal
-              value: n2-standard-2
-      replicas: 3
-      serviceTemplates:
-        - alias: primary
-          spec:
-            type: LoadBalancer
-      storage:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 100Mi
-      version: 3.8.3
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor
     metadata:
       name: oracle
       namespace: demo
-    spec:
-      endpoints:
-        - honorLabels: true
-          interval: 30s
-          path: /metrics
-          port: metrics
-      namespaceSelector:
-        matchNames:
-          - demo
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: oracle
-          app.kubernetes.io/name: oracles.kubedb.com
   secret_auth: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
       name: oracle-auth
       namespace: demo
-    stringData:
-      password: thisIs1StrongPassword
-      username: root
-    type: Opaque
   secret_config: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
       name: oracle-config
       namespace: demo
-    stringData:
-      oracle.cnf: |
-        [mysqld]
-        max_connections = 200
-        read_buffer_size = 1048576
-    type: Opaque
