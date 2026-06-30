@@ -1135,7 +1135,7 @@ export const useFunc = (model) => {
         .map((endpoint) => endpoint.trim())
         .filter((endpoint) => endpoint)
       if (endpoints.length !== replicas) {
-        return `Shard should have ${replicas} comma-separated endpoints, but found ${endpoints.length}.`
+        return `Each Shard should have ${replicas} comma-separated endpoints, but found ${endpoints.length}.`
       }
     }
   }
