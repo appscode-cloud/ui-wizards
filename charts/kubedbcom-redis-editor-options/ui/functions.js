@@ -1100,6 +1100,46 @@ export const useFunc = (model) => {
     })
   }
 
+  function setAnnounceShards() {
+    const shards = getValue(model, '/spec/cluster/announce/shards') || []
+    return shards.map((shard) => (shard?.endpoints || []).join(','))
+  }
+
+  function onAnnounceShardsChange() {
+    const shards = getValue(discriminator, '/announceShards') || []
+    const transformed = shards.map((shard) => ({
+      endpoints: (shard || '')
+        .split(',')
+        .map((endpoint) => endpoint.trim())
+        .filter((endpoint) => endpoint),
+    }))
+
+    commit('wizard/model$update', {
+      path: '/spec/cluster/announce/shards',
+      value: transformed,
+      force: true,
+    })
+  }
+
+  function validateAnnounceShards() {
+    const shards = getValue(discriminator, '/announceShards') || []
+    const master = getValue(model, '/spec/cluster/master') || 0
+    const replicas = getValue(model, '/spec/cluster/replicas') || 0
+    if (shards.length !== master) {
+      return `Shards Length should be equal to master(${master})`
+    }
+    for (let i = 0; i < shards.length; i++) {
+      const shard = shards[i]
+      const endpoints = shard
+        .split(',')
+        .map((endpoint) => endpoint.trim())
+        .filter((endpoint) => endpoint)
+      if (endpoints.length !== replicas) {
+        return `Each Shard should have ${replicas} comma-separated endpoints, but found ${endpoints.length}.`
+      }
+    }
+  }
+
   function setBackup() {
     const backup = getValue(model, '/spec/backup/tool')
     const val = getValue(model, '/spec/admin/backup/enable/default')
@@ -1427,6 +1467,8 @@ export const useFunc = (model) => {
     isToggleOn,
     isVariantAvailable,
     notEqualToDatabaseMode,
+    onAnnounceShardsChange,
+    validateAnnounceShards,
     onAuthChange,
     onBackupSwitch,
     onCreateSentinelChange,
@@ -1434,6 +1476,7 @@ export const useFunc = (model) => {
     returnFalse,
     returnTrue,
     setAnnounce,
+    setAnnounceShards,
     setBackup,
     setLimits,
     setMachineToCustom,
