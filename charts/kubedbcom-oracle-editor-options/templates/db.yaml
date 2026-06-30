@@ -99,6 +99,10 @@ spec:
       storageType: Durable
       podTemplate:
         spec:
+          {{- if .Values.spec.registrySecret.name }}
+          imagePullSecrets:
+            - name: {{ .Values.spec.registrySecret.name }}
+          {{- end }}
           securityContext:
             fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 54321 }}
           containers:
@@ -129,6 +133,10 @@ spec:
   storageType: Durable
   podTemplate:
     spec:
+      {{- if .Values.spec.registrySecret.name }}
+      imagePullSecrets:
+        - name: {{ .Values.spec.registrySecret.name }}
+      {{- end }}
       securityContext:
         fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 54321 }}
       containers:
