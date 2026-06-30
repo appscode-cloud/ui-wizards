@@ -1,0 +1,72 @@
+{{- if eq .Values.spec.backup.tool "KubeStash" -}}
+
+apiVersion: core.kubestash.com/v1alpha1
+kind: BackupConfiguration
+metadata:
+  name: {{ include "kubevaultcom-vaultserver-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubevaultcom-vaultserver-editor-options.labels" . | nindent 4 }}
+spec:
+  target:
+    apiGroup: kubevault.com
+    kind: VaultServer
+    name: {{ include "kubevaultcom-vaultserver-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+  backends:
+    - name: default-backend
+      storageRef:
+        name: {{ .Values.spec.backup.kubestash.storageRef.name }}
+        namespace: {{ .Values.spec.backup.kubestash.storageRef.namespace }}
+      retentionPolicy:
+        name: {{ .Values.spec.backup.kubestash.retentionPolicy.name }}
+        namespace: {{ .Values.spec.backup.kubestash.retentionPolicy.namespace }}
+  sessions:
+    - name: full-backup
+      sessionHistoryLimit: 3
+      scheduler:
+        schedule: {{ .Values.spec.backup.kubestash.schedule | quote }}
+        jobTemplate:
+          template:
+            spec:
+              containerSecurityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                  - ALL
+                runAsNonRoot: true
+                runAsUser: 65534
+                runAsGroup: 65534
+                seccompProfile:
+                  type: RuntimeDefault
+              nodeSelector:
+                kubernetes.io/os: linux
+          backoffLimit: 2
+        successfulJobsHistoryLimit: 2
+        failedJobsHistoryLimit: 4
+      repositories:
+        - name: {{ include "kubevaultcom-vaultserver-editor-options.fullname" . }}
+          backend: default-backend
+          directory: {{ .Release.Namespace }}/{{ include "kubevaultcom-vaultserver-editor-options.fullname" . }}
+          encryptionSecret:
+            name: {{ .Values.spec.backup.kubestash.encryptionSecret.name }}
+            namespace: {{ .Values.spec.backup.kubestash.encryptionSecret.namespace }}
+      addon:
+        name: vaultserver-addon
+        tasks:
+          - name: logical-backup
+        jobTemplate:
+          spec:
+            containerSecurityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+              runAsNonRoot: true
+              runAsUser: 65534
+              runAsGroup: 65534
+              seccompProfile:
+                type: RuntimeDefault
+            nodeSelector:
+              kubernetes.io/os: linux
+{{- end }}
