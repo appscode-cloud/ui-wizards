@@ -1100,6 +1100,26 @@ export const useFunc = (model) => {
     })
   }
 
+  function setAnnounceShards() {
+    const shards = getValue(model, '/spec/cluster/announce/shards') || []
+    return shards.map((shard) => (shard?.endpoints || []).join(','))
+  }
+
+  function onAnnounceShardsChange() {
+    const shards = getValue(discriminator, '/announceShards') || []
+    const transformed = shards.map((shard) => ({
+      endpoints: (shard || '')
+        .split(',')
+        .map((endpoint) => endpoint.trim())
+        .filter((endpoint) => endpoint),
+    }))
+    commit('wizard/model$update', {
+      path: '/spec/cluster/announce/shards',
+      value: transformed,
+      force: true,
+    })
+  }
+
   function setBackup() {
     const backup = getValue(model, '/spec/backup/tool')
     const val = getValue(model, '/spec/admin/backup/enable/default')
@@ -1427,6 +1447,7 @@ export const useFunc = (model) => {
     isToggleOn,
     isVariantAvailable,
     notEqualToDatabaseMode,
+    onAnnounceShardsChange,
     onAuthChange,
     onBackupSwitch,
     onCreateSentinelChange,
@@ -1434,6 +1455,7 @@ export const useFunc = (model) => {
     returnFalse,
     returnTrue,
     setAnnounce,
+    setAnnounceShards,
     setBackup,
     setLimits,
     setMachineToCustom,
