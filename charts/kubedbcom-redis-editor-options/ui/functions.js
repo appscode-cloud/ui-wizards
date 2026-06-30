@@ -1113,11 +1113,21 @@ export const useFunc = (model) => {
         .map((endpoint) => endpoint.trim())
         .filter((endpoint) => endpoint),
     }))
+
     commit('wizard/model$update', {
       path: '/spec/cluster/announce/shards',
       value: transformed,
       force: true,
     })
+  }
+
+  function validateAnnounceShards() {
+    const shards = getValue(discriminator, '/announceShards') || []
+    const master = getValue(model, '/spec/cluster/master') || 0
+
+    if (shards.length !== master) {
+      return `Shards Length should be equal to master(${master})`
+    }
   }
 
   function setBackup() {
@@ -1448,6 +1458,7 @@ export const useFunc = (model) => {
     isVariantAvailable,
     notEqualToDatabaseMode,
     onAnnounceShardsChange,
+    validateAnnounceShards,
     onAuthChange,
     onBackupSwitch,
     onCreateSentinelChange,
