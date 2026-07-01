@@ -857,7 +857,7 @@ export const useFunc = (model) => {
     } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
-  function onMachineChange(type, valPath) {
+  function onMachineChange(type) {
     let selectedMachine = {}
     selectedMachine = getValue(discriminator, '/machine')
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
