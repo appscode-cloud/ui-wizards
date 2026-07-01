@@ -867,8 +867,7 @@ export const useFunc = (model) => {
   }
 
   function onMachineChange(type) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, `/machine-${type}`)
+    const selectedMachine = getValue(discriminator, `/machine-${type}`) || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
