@@ -422,9 +422,10 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
+    const version = storeGet('/route/params/version')
 
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/kafkas/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/kafkas/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -789,13 +790,7 @@ export const useFunc = (model) => {
   function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
-    const limits = (type && type !== 'node'
-      ? dbDetails?.spec?.topology?.[type]?.resources?.requests
-      : dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests) || {
-      cpu: '',
-      memory: '',
-    }
+    const limits = getLimits(type)
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -845,13 +840,7 @@ export const useFunc = (model) => {
 
   function setMachine(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
-    const limits = (type && type !== 'node'
-      ? dbDetails?.spec?.topology?.[type]?.resources?.requests
-      : dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests) || {
-      cpu: '',
-      memory: '',
-    }
+    const limits = getLimits(type)
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
@@ -873,9 +862,8 @@ export const useFunc = (model) => {
     } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
-  function onMachineChange(type, valPath) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, `/machine-${type}`)
+  function onMachineChange(type) {
+    const selectedMachine = getValue(discriminator, `/machine-${type}`) || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -1788,36 +1776,11 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  function setExporter(type) {
-    let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
-    const limitVal = getValue(discriminator, path)
-
-    if (!limitVal) {
-      path = `/dbDetails/spec/monitor/prometheus/exporter/resources/requests/${type}`
-      const reqVal = getValue(discriminator, path)
-
-      if (reqVal) return reqVal
-    }
-    return limitVal
-  }
-
-  function onExporterResourceChange(type) {
-    const commitPath = `/spec/verticalScaling/exporter/resources/requests/${type}`
-    const valPath = `/spec/verticalScaling/exporter/resources/limits/${type}`
-    const val = getValue(model, valPath)
-    if (val)
-      commit('wizard/model$update', {
-        path: commitPath,
-        value: val,
-        force: true,
-      })
-  }
-
-  function isMachineValid() {
+  function isMachineValid(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const limits = getLimits(type)
 
-    const selectedMachine = getValue(discriminator, '/machine-node') || {}
+    const selectedMachine = getValue(discriminator, `/machine-${type}`) || {}
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
 
     if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
@@ -1826,10 +1789,22 @@ export const useFunc = (model) => {
     return false
   }
 
+  function getLimits(type) {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const isTopology = !!dbDetails?.spec?.topology
+
+    const spec = isTopology ? dbDetails?.spec?.topology?.[type] : dbDetails?.spec?.podTemplate?.spec
+    let containers = spec?.containers ?? []
+
+    if (containers.length === 0) {
+      containers = spec?.podTemplate?.spec?.containers ?? []
+    }
+    const kind = dbDetails?.kind?.toLowerCase()
+    return containers.find((container) => container.name === kind)?.resources?.requests ?? {}
+  }
+
   return {
     isMachineValid,
-    setExporter,
-    onExporterResourceChange,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,

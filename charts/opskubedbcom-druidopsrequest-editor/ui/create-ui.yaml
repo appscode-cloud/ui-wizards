@@ -240,7 +240,7 @@ step:
           name: isMachineValid|middleManagers
           type: custom
         watcher:
-          func: onMachineChange|middleManagers|/spec/topology/middleManagers/podTemplate/spec/containers
+          func: onMachineChange|middleManagers
           paths:
           - temp/properties/machine-middleManagers
       - elements:
@@ -301,7 +301,7 @@ step:
           name: isMachineValid|historicals
           type: custom
         watcher:
-          func: onMachineChange|historicals|/spec/topology/historicals/podTemplate/spec/containers
+          func: onMachineChange|historicals
           paths:
           - temp/properties/machine-historicals
       - elements:
@@ -362,7 +362,7 @@ step:
           name: isMachineValid|brokers
           type: custom
         watcher:
-          func: onMachineChange|brokers|/spec/topology/brokers/podTemplate/spec/containers
+          func: onMachineChange|brokers
           paths:
           - temp/properties/machine-brokers
       - elements:
@@ -423,7 +423,7 @@ step:
           name: isMachineValid|coordinators
           type: custom
         watcher:
-          func: onMachineChange|coordinators|/spec/topology/coordinators/podTemplate/spec/containers
+          func: onMachineChange|coordinators
           paths:
           - temp/properties/machine-coordinators
       - elements:
@@ -468,30 +468,6 @@ step:
         showLabels: true
         type: block-layout
       label: Coordinators
-      showLabels: true
-      type: block-layout
-    - elements:
-      - elements:
-        - init:
-            type: func
-            value: setExporter|cpu
-          label: CPU
-          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-          type: input
-        - init:
-            type: func
-            value: setExporter|memory
-          label: Memory
-          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-          type: input
-          watcher:
-            func: onExporterResourceChange|memory
-            paths:
-            - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-        showLabels: true
-        type: horizontal-layout
-      hideBlock: true
-      label: Exporter
       showLabels: true
       type: block-layout
     if:
