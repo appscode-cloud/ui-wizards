@@ -840,7 +840,7 @@ export const useFunc = (model) => {
       parsedInstance = instance || {}
     }
 
-    const machine = type ? parsedInstance[type] : parsedInstance || 'custom'
+    const machine = type && parsedInstance[type] ? parsedInstance[type] : parsedInstance || 'custom'
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) {
