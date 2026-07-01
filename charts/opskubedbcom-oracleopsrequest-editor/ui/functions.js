@@ -853,8 +853,7 @@ export const useFunc = (model) => {
   }
 
   function onMachineChange(type) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, '/machine')
+    const selectedMachine = getValue(discriminator, '/machine') || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -1791,31 +1790,6 @@ export const useFunc = (model) => {
     return data || 'No Data Found'
   }
 
-  function setExporter(type) {
-    let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
-    const limitVal = getValue(discriminator, path)
-
-    if (!limitVal) {
-      path = `/dbDetails/spec/monitor/prometheus/exporter/resources/requests/${type}`
-      const reqVal = getValue(discriminator, path)
-
-      if (reqVal) return reqVal
-    }
-    return limitVal
-  }
-
-  function onExporterResourceChange(type) {
-    const commitPath = `/spec/verticalScaling/exporter/resources/requests/${type}`
-    const valPath = `/spec/verticalScaling/exporter/resources/limits/${type}`
-    const val = getValue(model, valPath)
-    if (val)
-      commit('wizard/model$update', {
-        path: commitPath,
-        value: val,
-        force: true,
-      })
-  }
-
   function getLimits() {
     const dbDetails = getValue(discriminator, '/dbDetails')
     let limits = {}
@@ -1845,8 +1819,6 @@ export const useFunc = (model) => {
 
   return {
     isMachineValid,
-    setExporter,
-    onExporterResourceChange,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,

@@ -754,8 +754,7 @@ export const useFunc = (model) => {
 
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const limits = getLimits()
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -805,7 +804,7 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const limits = getLimits()
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
@@ -829,9 +828,8 @@ export const useFunc = (model) => {
     } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
-  function onMachineChange(type, valPath) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, `/machine`)
+  function onMachineChange(type) {
+    const selectedMachine = getValue(discriminator, `/machine`) || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -1569,7 +1567,6 @@ export const useFunc = (model) => {
         force: true,
       })
     }
-    console.log({ retValue })
     return retValue || undefined
   }
 
@@ -1582,10 +1579,6 @@ export const useFunc = (model) => {
     const kind = getValue(discriminator, '/dbDetails/kind')
     const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
     return resource[0]?.resources || {}
-  }
-
-  function getAliasOptions() {
-    return ['server', 'client', 'metrics-exporter']
   }
 
   function isNamespaceDisabled() {
@@ -1699,21 +1692,23 @@ export const useFunc = (model) => {
     return limitVal
   }
 
-  function onExporterResourceChange(type) {
-    const commitPath = `/spec/verticalScaling/exporter/resources/requests/${type}`
-    const valPath = `/spec/verticalScaling/exporter/resources/limits/${type}`
-    const val = getValue(model, valPath)
-    if (val)
-      commit('wizard/model$update', {
-        path: commitPath,
-        value: val,
-        force: true,
-      })
+  function getLimits() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    let limits = {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    if (containers.length === 0)
+      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    else {
+      const kind = dbDetails?.kind
+      const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+      limits = resource[0]?.resources?.requests || {}
+    }
+
+    return limits
   }
 
   function isMachineValid() {
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const limits = getLimits()
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
@@ -1727,8 +1722,6 @@ export const useFunc = (model) => {
   return {
     isMachineValid,
     setExporter,
-    onExporterResourceChange,
-    fetchAliasOptions: getAliasOptions,
     isRancherManaged,
     fetchJsons,
     returnFalse,
@@ -1775,7 +1768,6 @@ export const useFunc = (model) => {
     isDbDetailsLoading,
     setValueFromDbDetails,
     setResource,
-    getAliasOptions,
     isNamespaceDisabled,
     isDatabaseRefDisabled,
     onDbChange,
