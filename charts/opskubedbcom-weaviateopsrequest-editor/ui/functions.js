@@ -421,9 +421,9 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
-
+    const version = storeGet('/route/params/version')
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/weaviates/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/weaviates/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -857,9 +857,8 @@ export const useFunc = (model) => {
     } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
-  function onMachineChange(type, valPath) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, '/machine')
+  function onMachineChange(type) {
+    const selectedMachine = getValue(discriminator, '/machine') || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -1616,26 +1615,6 @@ export const useFunc = (model) => {
     return retValue || undefined
   }
 
-  function setConfigFiles() {
-    // watchDependency('model#/resources/secret_config/stringData')
-    const configFiles = getValue(model, '/resources/secret_config/stringData')
-
-    const files = []
-
-    for (const item in configFiles) {
-      const obj = {}
-      obj.key = item
-      obj.value = configFiles[item]
-      files.push(obj)
-    }
-
-    return files
-  }
-
-  function getAliasOptions() {
-    return ['server', 'client', 'metrics-exporter']
-  }
-
   function isNamespaceDisabled() {
     const { namespace } = route.query || {}
     return !!namespace
@@ -1724,30 +1703,6 @@ export const useFunc = (model) => {
     return value * units[unit]
   }
 
-  function fetchAliasOptions() {
-    return getAliasOptions ? getAliasOptions() : []
-  }
-
-  function validateNewCertificates({ itemCtx }) {
-    const addedAliases = (model && model.map((item) => item.alias)) || []
-
-    if (addedAliases.includes(itemCtx.alias) && itemCtx.isCreate) {
-      return { isInvalid: true, message: 'Alias already exists' }
-    }
-    return {}
-  }
-
-  function disableAlias() {
-    return !!(model && model.alias)
-  }
-
-  function getSelectedConfigSecret(type) {
-    const path = `/spec/configuration/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    // watchDependency(`model#${path}`)
-    return `You have selected ${selectedSecret} secret` || 'No secret selected'
-  }
-
   function objectToYaml(obj, indent = 0) {
     if (obj === null || obj === undefined) return 'null'
     if (typeof obj !== 'object') return JSON.stringify(obj)
@@ -1783,49 +1738,18 @@ export const useFunc = (model) => {
       .join('\n')
   }
 
-  function getSelectedConfigSecretValue(type) {
-    const path = `/spec/configuration/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    let data
-    secretArray.forEach((item) => {
-      if (item.value === selectedSecret) {
-        data = objectToYaml(item.data).trim() || 'No Data Found'
-      }
-    })
-    return data || 'No Data Found'
-  }
-
-  function setExporter(type) {
-    let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
-    const limitVal = getValue(discriminator, path)
-
-    if (!limitVal) {
-      path = `/dbDetails/spec/monitor/prometheus/exporter/resources/requests/${type}`
-      const reqVal = getValue(discriminator, path)
-
-      if (reqVal) return reqVal
-    }
-    return limitVal
-  }
-
-  function onExporterResourceChange(type) {
-    const commitPath = `/spec/verticalScaling/exporter/resources/requests/${type}`
-    const valPath = `/spec/verticalScaling/exporter/resources/limits/${type}`
-    const val = getValue(model, valPath)
-    if (val)
-      commit('wizard/model$update', {
-        path: commitPath,
-        value: val,
-        force: true,
-      })
-  }
-
   function getLimits() {
     const dbDetails = getValue(discriminator, '/dbDetails')
+    let limits = {}
     const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const kind = dbDetails?.kind
-    const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
-    const limits = resource[0]?.resources?.requests || {}
+    if (containers.length === 0)
+      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    else {
+      const kind = dbDetails?.kind
+      const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+      limits = resource[0]?.resources?.requests || {}
+    }
+
     return limits
   }
 
@@ -1843,11 +1767,6 @@ export const useFunc = (model) => {
 
   return {
     isMachineValid,
-    setExporter,
-    onExporterResourceChange,
-    fetchAliasOptions,
-    validateNewCertificates,
-    disableAlias,
     isRancherManaged,
     fetchJsons,
     returnFalse,
@@ -1872,8 +1791,6 @@ export const useFunc = (model) => {
     showAndInitOpsRequestType,
     ifDbTypeEqualsTo,
     getConfigSecrets,
-    getSelectedConfigSecret,
-    getSelectedConfigSecretValue,
     createSecretUrl,
     isEqualToValueFromType,
     getNamespacedResourceList,
@@ -1893,7 +1810,6 @@ export const useFunc = (model) => {
     getRequestTypeFromRoute,
     isDbDetailsLoading,
     setValueFromDbDetails,
-    getAliasOptions,
     isDatabaseRefDisabled,
     isNamespaceDisabled,
     onNamespaceChange,
@@ -1905,7 +1821,6 @@ export const useFunc = (model) => {
     onMachineChange,
     isMachineCustom,
     checkVolume,
-    setConfigFiles,
     isConfigSelected,
     fetchConfigSecrets,
     getCurrentConfig,

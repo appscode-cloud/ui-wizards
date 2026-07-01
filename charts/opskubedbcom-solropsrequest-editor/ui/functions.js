@@ -425,9 +425,9 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
-
+    const version = storeGet('/route/params/version')
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/solrs/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/solrs/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -780,18 +780,15 @@ export const useFunc = (model) => {
   }
 
   // // machine profile stuffs
-  // let machinesFromPreset = []
 
   function getMachines(type) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
-    const limits = (type && type !== 'node'
-      ? dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests
-      : dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests) || {
-      cpu: '',
-      memory: '',
-    }
+    let limits = {}
+    if (type && type !== 'node')
+      limits =
+        dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests
+    else limits = dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -841,13 +838,11 @@ export const useFunc = (model) => {
 
   function setMachine(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
-    const limits = (type && type !== 'node'
-      ? dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests
-      : dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests) || {
-      cpu: '',
-      memory: '',
-    }
+    let limits = {}
+    if (type && type !== 'node')
+      limits =
+        dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests
+    else limits = dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
@@ -869,9 +864,8 @@ export const useFunc = (model) => {
     } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
-  function onMachineChange(type, valPath) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, `/machine-${type}`)
+  function onMachineChange(type) {
+    const selectedMachine = getValue(discriminator, `/machine-${type}`) || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -1791,35 +1785,25 @@ export const useFunc = (model) => {
     return data || 'No Data Found'
   }
 
-  function setExporter(type) {
-    let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
-    const limitVal = getValue(discriminator, path)
-
-    if (!limitVal) {
-      path = `/dbDetails/spec/monitor/prometheus/exporter/resources/requests/${type}`
-      const reqVal = getValue(discriminator, path)
-
-      if (reqVal) return reqVal
+  function getLimits() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    let limits = {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    if (containers.length === 0)
+      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    else {
+      const kind = dbDetails?.kind
+      const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+      limits = resource[0]?.resources?.requests || {}
     }
-    return limitVal
-  }
 
-  function onExporterResourceChange(type) {
-    const commitPath = `/spec/verticalScaling/exporter/resources/requests/${type}`
-    const valPath = `/spec/verticalScaling/exporter/resources/limits/${type}`
-    const val = getValue(model, valPath)
-    if (val)
-      commit('wizard/model$update', {
-        path: commitPath,
-        value: val,
-        force: true,
-      })
+    return limits
   }
 
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const container = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = container[0]?.resources?.limits || {}
+    const limits = getLimits()
 
     const selectedMachine = getValue(discriminator, '/machine-node') || {}
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
@@ -1832,8 +1816,6 @@ export const useFunc = (model) => {
 
   return {
     isMachineValid,
-    setExporter,
-    onExporterResourceChange,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,
