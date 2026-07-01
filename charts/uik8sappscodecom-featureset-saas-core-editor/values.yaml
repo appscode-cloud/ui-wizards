@@ -17,6 +17,29 @@ resources:
         app.kubernetes.io/component: catalog-manager
       name: catalog-manager
       namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: catalog-manager
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2026.6.19
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: catalog-manager
+      storageNamespace: ace
+      targetNamespace: ace
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_service_backend: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -25,6 +48,29 @@ resources:
         app.kubernetes.io/component: service-backend
       name: service-backend
       namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: service-backend
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2026.6.19
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: service-backend
+      storageNamespace: ace
+      targetNamespace: ace
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_service_gateway_presets: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -33,6 +79,29 @@ resources:
         app.kubernetes.io/component: service-gateway-presets
       name: service-gateway-presets
       namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: service-gateway-presets
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2026.6.19
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: service-gateway-presets
+      storageNamespace: ace
+      targetNamespace: ace
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_service_provider: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -41,3 +110,26 @@ resources:
         app.kubernetes.io/component: service-provider
       name: service-provider
       namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: service-provider
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2026.6.19
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: service-provider
+      storageNamespace: ace
+      targetNamespace: ace
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
