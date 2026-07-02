@@ -169,10 +169,10 @@ step:
           adjustments and make informed decisions for your database setup
         type: machine-compare
         validation:
-          name: isMachineValid
+          name: isMachineValid|node
           type: custom
         watcher:
-          func: onMachineChange|node|/spec/podTemplate/spec/containers
+          func: onMachineChange|node
           paths:
           - temp/properties/machine-node
       - elements:
@@ -239,8 +239,11 @@ step:
           subtitle: Compare your current machine configuration with the proposed memory
             adjustments and make informed decisions for your database setup
           type: machine-compare
+          validation:
+            name: isMachineValid|broker
+            type: custom
           watcher:
-            func: onMachineChange|broker|/spec/topology/broker/resources
+            func: onMachineChange|broker
             paths:
             - temp/properties/machine-broker
         - elements:
@@ -303,8 +306,11 @@ step:
           subtitle: Compare your current machine configuration with the proposed memory
             adjustments and make informed decisions for your database setup
           type: machine-compare
+          validation:
+            name: isMachineValid|controller
+            type: custom
           watcher:
-            func: onMachineChange|controller|/spec/topology/controller/resources
+            func: onMachineChange|controller
             paths:
             - temp/properties/machine-controller
         - elements:
@@ -355,30 +361,6 @@ step:
           showLabels: true
           type: block-layout
         label: Controller Vertical Scaling
-        showLabels: true
-        type: block-layout
-      - elements:
-        - elements:
-          - init:
-              type: func
-              value: setExporter|cpu
-            label: CPU
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-            type: input
-          - init:
-              type: func
-              value: setExporter|memory
-            label: Memory
-            schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-            type: input
-            watcher:
-              func: onExporterResourceChange|memory
-              paths:
-              - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-          showLabels: true
-          type: horizontal-layout
-        hideBlock: true
-        label: Exporter
         showLabels: true
         type: block-layout
       if:

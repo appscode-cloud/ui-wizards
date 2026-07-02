@@ -138,7 +138,7 @@ step:
           name: isMachineValid
           type: custom
         watcher:
-          func: onMachineChange|memcached|/spec/podTemplate/spec/resources
+          func: onMachineChange|memcached
           paths:
           - temp/properties/machine
       - elements:
@@ -199,20 +199,16 @@ step:
       - elements:
         - init:
             type: func
-            value: setExporter|memcached|cpu
+            value: setExporter|cpu
           label: CPU
           schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
           type: input
         - init:
             type: func
-            value: setExporter|memcached|memory
+            value: setExporter|memory
           label: Memory
           schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/memory
           type: input
-          watcher:
-            func: onExporterResourceChange|memcached
-            paths:
-            - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/memory
         showLabels: true
         type: horizontal-layout
       hideBlock: true
