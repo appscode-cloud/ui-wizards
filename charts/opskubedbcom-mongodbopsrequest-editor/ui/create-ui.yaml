@@ -238,7 +238,7 @@ step:
           name: isMachineValid|standalone
           type: custom
         watcher:
-          func: onMachineChange|standalone|/spec/podTemplate/spec/resources
+          func: onMachineChange|standalone
           paths:
           - temp/properties/machine-standalone
       - elements:
@@ -307,7 +307,7 @@ step:
           name: isMachineValid|replicaSet
           type: custom
         watcher:
-          func: onMachineChange|replicaSet|/spec/podTemplate/spec/resources
+          func: onMachineChange|replicaSet
           paths:
           - temp/properties/machine-replicaSet
       - elements:
@@ -376,8 +376,11 @@ step:
           subtitle: Compare your current machine configuration with the proposed memory
             adjustments and make informed decisions for your database setup
           type: machine-compare
+          validation:
+            name: isMachineValid|configServer
+            type: custom
           watcher:
-            func: onMachineChange|configServer|/spec/shardTopology/configServer/podTemplate/spec/resources
+            func: onMachineChange|configServer
             paths:
             - temp/properties/machine-configServer
         - elements:
@@ -441,8 +444,11 @@ step:
           subtitle: Compare your current machine configuration with the proposed memory
             adjustments and make informed decisions for your database setup
           type: machine-compare
+          validation:
+            name: isMachineValid|mongos
+            type: custom
           watcher:
-            func: onMachineChange|mongos|/spec/shardTopology/mongos/podTemplate/spec/resources
+            func: onMachineChange|mongos
             paths:
             - temp/properties/machine-mongos
         - elements:
@@ -506,8 +512,11 @@ step:
           subtitle: Compare your current machine configuration with the proposed memory
             adjustments and make informed decisions for your database setup
           type: machine-compare
+          validation:
+            name: isMachineValid|shard
+            type: custom
           watcher:
-            func: onMachineChange|shard|/spec/shardTopology/shard/podTemplate/spec/resources
+            func: onMachineChange|shard
             paths:
             - temp/properties/machine-shard
         - elements:
@@ -581,10 +590,6 @@ step:
           label: Memory
           schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
           type: input
-          watcher:
-            func: onExporterResourceChange|memory
-            paths:
-            - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
         showLabels: true
         type: horizontal-layout
       hideBlock: true
