@@ -153,7 +153,7 @@ step:
         name: isMachineValid
         type: custom
       watcher:
-        func: onMachineChange|node|/spec/podTemplate/spec/containers
+        func: onMachineChange|node
         paths:
         - temp/properties/machine
     - elements:
@@ -200,30 +200,6 @@ step:
             type: custom
         type: horizontal-layout
       label: Node Selection
-      showLabels: true
-      type: block-layout
-    - elements:
-      - elements:
-        - init:
-            type: func
-            value: setExporter|cpu
-          label: CPU
-          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/requests/properties/cpu
-          type: input
-        - init:
-            type: func
-            value: setExporter|memory
-          label: Memory
-          schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-          type: input
-          watcher:
-            func: onExporterResourceChange|memory
-            paths:
-            - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
-        showLabels: true
-        type: horizontal-layout
-      hideBlock: true
-      label: Exporter
       showLabels: true
       type: block-layout
     if:

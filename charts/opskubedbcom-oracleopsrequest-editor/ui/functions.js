@@ -421,9 +421,9 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
-
+    const version = storeGet('/route/params/version')
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/oracles/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/oracles/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -778,9 +778,7 @@ export const useFunc = (model) => {
 
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = containers[0]?.resources?.limits || {}
+    const limits = getLimits()
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -828,14 +826,12 @@ export const useFunc = (model) => {
     return arr
   }
 
-  function setMachine() {
+  function setMachine(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = containers[0]?.resources?.limits || {}
+    const limits = getLimits()
 
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
-
     let parsedInstance = {}
     try {
       if (instance) parsedInstance = JSON.parse(instance)
@@ -844,7 +840,7 @@ export const useFunc = (model) => {
       parsedInstance = instance || {}
     }
 
-    const machine = parsedInstance || 'custom'
+    const machine = type && parsedInstance[type] ? parsedInstance[type] : parsedInstance || 'custom'
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) {
@@ -853,12 +849,11 @@ export const useFunc = (model) => {
         cpu: machinePresets.limits.cpu,
         memory: machinePresets.limits.memory,
       }
-    } else return { machine: 'custom', cpu: 4, memory: 2 }
+    } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
-  function onMachineChange(type, valPath) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, '/machine')
+  function onMachineChange(type) {
+    const selectedMachine = getValue(discriminator, '/machine') || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -1795,35 +1790,23 @@ export const useFunc = (model) => {
     return data || 'No Data Found'
   }
 
-  function setExporter(type) {
-    let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
-    const limitVal = getValue(discriminator, path)
-
-    if (!limitVal) {
-      path = `/dbDetails/spec/monitor/prometheus/exporter/resources/requests/${type}`
-      const reqVal = getValue(discriminator, path)
-
-      if (reqVal) return reqVal
+  function getLimits() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    let limits = {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    if (containers.length === 0)
+      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    else {
+      const kind = dbDetails?.kind
+      const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+      limits = resource[0]?.resources?.requests || {}
     }
-    return limitVal
-  }
 
-  function onExporterResourceChange(type) {
-    const commitPath = `/spec/verticalScaling/exporter/resources/requests/${type}`
-    const valPath = `/spec/verticalScaling/exporter/resources/limits/${type}`
-    const val = getValue(model, valPath)
-    if (val)
-      commit('wizard/model$update', {
-        path: commitPath,
-        value: val,
-        force: true,
-      })
+    return limits
   }
 
   function isMachineValid() {
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = containers[0]?.resources?.limits || {}
+    const limits = getLimits()
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
@@ -1836,8 +1819,6 @@ export const useFunc = (model) => {
 
   return {
     isMachineValid,
-    setExporter,
-    onExporterResourceChange,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,

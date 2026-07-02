@@ -151,7 +151,7 @@ step:
           name: isMachineValid
           type: custom
         watcher:
-          func: onMachineChange|mssqlserver|/spec/podTemplate/spec/containers
+          func: onMachineChange|mssqlserver
           paths:
           - temp/properties/machine
       - elements:
@@ -217,44 +217,12 @@ step:
           label: Memory
           schema: schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
           type: input
-          watcher:
-            func: onExporterResourceChange|memory
-            paths:
-            - schema/properties/spec/properties/verticalScaling/properties/exporter/properties/resources/properties/limits/properties/memory
         showLabels: true
         type: horizontal-layout
       hideBlock: true
       label: Exporter
       showLabels: true
       type: block-layout
-    - elements:
-      - init:
-          type: func
-          value: setValueFromDbDetails|/spec/coordinator/podTemplate/spec/resources/requests/cpu|/spec/verticalScaling/coordinator/resources/requests/cpu
-        label: CPU Requests
-        schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/requests/cpu
-        type: input
-      - init:
-          type: func
-          value: setValueFromDbDetails|/spec/coordinator/podTemplate/spec/resources/limits/cpu|/spec/verticalScaling/coordinator/resources/limits/cpu
-        label: CPU Limits
-        schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/cpu
-        type: input
-      - init:
-          type: func
-          value: setValueFromDbDetails|/spec/coordinator/podTemplate/spec/resources/requests/memory|/spec/verticalScaling/coordinator/resources/requests/memory
-        label: Memory Requests
-        schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/requests/memory
-        type: input
-      - init:
-          type: func
-          value: setValueFromDbDetails|/spec/coordinator/podTemplate/spec/resources/limits/memory|/spec/verticalScaling/coordinator/resources/limits/memory
-        label: Memory Limits
-        schema: schema/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources/properties/limits/memory
-        type: input
-      label: Coordinator
-      showLabels: true
-      type: horizontal-layout
     if:
       name: ifRequestTypeEqualsTo|VerticalScaling
       type: function

@@ -423,9 +423,9 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
-
+    const version = storeGet('/route/params/version')
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/pgpools/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/pgpools/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -840,9 +840,8 @@ export const useFunc = (model) => {
     } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
-  function onMachineChange(type, valPath) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, '/machine')
+  function onMachineChange(type) {
+    const selectedMachine = getValue(discriminator, '/machine') || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -1725,37 +1724,8 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  function setExporter(type) {
-    let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
-    const limitVal = getValue(discriminator, path)
-
-    if (!limitVal) {
-      path = `/dbDetails/spec/monitor/prometheus/exporter/resources/requests/${type}`
-      const reqVal = getValue(discriminator, path)
-
-      if (reqVal) return reqVal
-    }
-    return limitVal
-  }
-
-  function onExporterResourceChange(type) {
-    const commitPath = `/spec/verticalScaling/exporter/resources/requests/${type}`
-    const valPath = `/spec/verticalScaling/exporter/resources/limits/${type}`
-    const val = getValue(model, valPath)
-    if (val)
-      commit('wizard/model$update', {
-        path: commitPath,
-        value: val,
-        force: true,
-      })
-  }
-
   function isMachineValid() {
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const kind = dbDetails?.kind
-    const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
-    const limits = resource[0]?.resources?.requests || {}
+    const limits = getLimits()
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
@@ -1766,10 +1736,23 @@ export const useFunc = (model) => {
     return false
   }
 
+  function getLimits() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    let limits = {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    if (containers.length === 0)
+      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    else {
+      const kind = dbDetails?.kind
+      const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+      limits = resource[0]?.resources?.requests || {}
+    }
+
+    return limits
+  }
+
   return {
     isMachineValid,
-    setExporter,
-    onExporterResourceChange,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,
