@@ -762,12 +762,7 @@ export const useFunc = (model) => {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
     // const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
-    const limits = (type && type !== 'node'
-      ? dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources?.requests
-      : dbDetails?.spec?.podTemplate?.spec?.containers?.[0]?.resources?.requests) || {
-      cpu: '',
-      memory: '',
-    }
+    const limits = getLimits(type)
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -817,7 +812,7 @@ export const useFunc = (model) => {
 
   function setMachine(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    let limits = {}
+    let limits = getLimits(type)
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
     let parsedInstance = {}
@@ -837,31 +832,6 @@ export const useFunc = (model) => {
         memory: machinePresets.limits.memory,
       }
     } else {
-      // For coordinator, find the coordinator sidecar container in the aggregator pod
-      if (type === 'coordinator') {
-        const containers =
-          dbDetails?.spec?.topology?.aggregator?.podTemplate?.spec?.containers || []
-        const resource = containers.find((ele) => ele.name === 'coordinator')
-        limits = resource?.resources?.requests || {}
-        if (!Object.keys(limits).length) {
-          // fallback: check initContainers or top-level containers
-          const initContainers =
-            dbDetails?.spec?.topology?.aggregator?.podTemplate?.spec?.initContainers || []
-          const initResource = initContainers.find((ele) => ele.name === 'coordinator')
-          limits = initResource?.resources?.requests || {}
-        }
-      } else if (type === 'node') {
-        const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-        const kind = dbDetails?.kind
-        const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
-        limits = resource[0]?.resources?.requests || {}
-      } else {
-        // For aggregator and leaf
-        const topologyLimits =
-          dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources
-            ?.requests || {}
-        limits = topologyLimits
-      }
       return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
     }
   }
@@ -1815,6 +1785,27 @@ export const useFunc = (model) => {
       return 'Resource limits are same as current machine configuration. Please select different resources or machine preset.'
     }
     return false
+  }
+
+  function getLimits(type) {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    let limits = {}
+    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
+    if (type === 'node') {
+      const kind = dbDetails?.kind
+      const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+      limits = resource[0]?.resources?.requests || {}
+    } else {
+      // For aggregator and leaf
+      const topologyLimits =
+        dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources
+          ?.requests || {}
+      limits = topologyLimits
+    }
+    if (containers.length === 0)
+      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+
+    return limits
   }
 
   return {
