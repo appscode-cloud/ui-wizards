@@ -412,9 +412,9 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
-
+    const version = storeGet('/route/params/version')
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/pgbouncers/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/pgbouncers/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
