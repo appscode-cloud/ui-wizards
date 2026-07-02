@@ -421,9 +421,10 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
+    const version = storeGet('/route/params/version')
 
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/clickhouses/${name}`
+      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/clickhouses/${name}`
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -782,8 +783,7 @@ export const useFunc = (model) => {
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = containers[0]?.resources?.limits || {}
+    const limits = getLimits()
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -833,10 +833,10 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = containers[0]?.resources?.limits || {}
+    const limits = getLimits()
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
+    const type = dbDetails?.spec?.clusterTopology ? 'cluster' : 'standalone'
 
     let parsedInstance = {}
     try {
@@ -845,8 +845,7 @@ export const useFunc = (model) => {
       console.log(e)
       parsedInstance = instance || {}
     }
-
-    const machine = parsedInstance || 'custom'
+    const machine = parsedInstance[type] || 'custom'
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) {
@@ -858,9 +857,8 @@ export const useFunc = (model) => {
     } else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
-  function onMachineChange(type, valPath) {
-    let selectedMachine = {}
-    selectedMachine = getValue(discriminator, '/machine')
+  function onMachineChange(type) {
+    const selectedMachine = getValue(discriminator, '/machine') || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -1796,35 +1794,9 @@ export const useFunc = (model) => {
     return data || 'No Data Found'
   }
 
-  function setExporter(type) {
-    let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
-    const limitVal = getValue(discriminator, path)
-
-    if (!limitVal) {
-      path = `/dbDetails/spec/monitor/prometheus/exporter/resources/requests/${type}`
-      const reqVal = getValue(discriminator, path)
-
-      if (reqVal) return reqVal
-    }
-    return limitVal
-  }
-
-  function onExporterResourceChange(type) {
-    const commitPath = `/spec/verticalScaling/exporter/resources/requests/${type}`
-    const valPath = `/spec/verticalScaling/exporter/resources/limits/${type}`
-    const val = getValue(model, valPath)
-    if (val)
-      commit('wizard/model$update', {
-        path: commitPath,
-        value: val,
-        force: true,
-      })
-  }
-
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    const limits = containers[0]?.resources?.limits || {}
+    const limits = getLimits()
 
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
@@ -1835,10 +1807,25 @@ export const useFunc = (model) => {
     return false
   }
 
+  function getLimits() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const isTopology = !!dbDetails?.spec?.clusterTopology
+
+    const spec = isTopology
+      ? dbDetails?.spec?.clusterTopology?.cluster?.podTemplate?.spec
+      : dbDetails?.spec?.podTemplate?.spec
+
+    const containers = spec?.containers ?? []
+
+    if (containers.length === 0) {
+      return spec?.resources?.requests ?? {}
+    }
+    const kind = dbDetails?.kind?.toLowerCase()
+    return containers.find((container) => container.name === kind)?.resources?.requests ?? {}
+  }
+
   return {
     isMachineValid,
-    setExporter,
-    onExporterResourceChange,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,
