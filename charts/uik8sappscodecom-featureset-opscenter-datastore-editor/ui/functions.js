@@ -405,7 +405,6 @@ export const useFunc = (model) => {
     'DocumentDB',
     'Druid',
     'Elasticsearch',
-    'FerretDB',
     'HanaDB',
     'Hazelcast',
     'Ignite',
