@@ -1533,7 +1533,7 @@ export const useFunc = (model) => {
   function onHorizonsChange() {
     const val = getValue(discriminator, '/enableHorizons')
     if (!val) {
-      commit({
+      commit('wizard/model$update', {
         path: '/spec/replicaSet/horizons',
         value: [],
         force: true,
@@ -1594,7 +1594,7 @@ export const useFunc = (model) => {
 
     const common = getCommonPostfix(horizons)
     if (!common) return 'Horizons must have a common dot (.) seperated suffix'
-    return true
+    return
   }
 
   return {
