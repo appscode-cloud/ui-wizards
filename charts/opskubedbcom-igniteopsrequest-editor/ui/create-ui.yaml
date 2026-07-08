@@ -262,20 +262,20 @@ step:
         subtitle: Select a new configuration secret, apply a custom configuration,
           or remove an existing setup to update your database settings
         type: label-element
-      - type: editor
-        label: Current Configuration
-        schema: temp/properties/currentConfig
-        readonly: true
-        editorHeight: 120px
-        validateContent: false
+      - editorHeight: 120px
         if:
           name: getCurrentConfig
           type: function
+        label: Current Configuration
         loader:
           name: getCurrentConfig
           watchPaths:
           - schema/properties/metadata/properties/namespace
           - temp/properties/createSecret/properties/status
+        readonly: true
+        schema: temp/properties/currentConfig
+        type: editor
+        validateContent: false
       - elements:
         - elements:
           - customClass: mb-15
@@ -378,10 +378,10 @@ step:
               name: setApplyConfig
               watchPaths:
               - temp/properties/selectedConfiguration
+            placeholder: Add config parameters...
             schema: temp/properties/applyConfig
             type: multi-file-editor
             validateContent: false
-            placeholder: Add config parameters...
             watcher:
               func: onApplyconfigChange
               paths:

@@ -48,8 +48,8 @@ The following table lists the configurable parameters of the `uikubedbcom-databa
 |     Parameter      | Description |               Default               |
 |--------------------|-------------|-------------------------------------|
 | apiVersion         |             | <code>ui.kubedb.com/v1alpha1</code> |
-| kind               |             | <code>DatabaseConfiguration</code>  |
-| metadata.name      |             | <code>databaseconfiguration</code>  |
+| kind               |             | <code>DatabaseInfo</code>           |
+| metadata.name      |             | <code>databaseinfo</code>           |
 | metadata.namespace |             | <code>default</code>                |
 
 
