@@ -381,6 +381,37 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
+  helmToolkitFluxcdIoHelmRelease_storage_metrics_server: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: storage-metrics-server
+      name: storage-metrics-server
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: storage-metrics-server
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2026.7.8
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: storage-metrics-server
+      storageNamespace: monitoring
+      targetNamespace: monitoring
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_tenant_operator: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
