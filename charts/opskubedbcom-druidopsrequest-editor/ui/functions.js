@@ -929,14 +929,16 @@ export const useFunc = (model) => {
       }
     }
 
-    const specPath = `/spec/verticalScaling/${type}/resources`
+    const path = `/spec/verticalScaling/${type}/resources`
 
-    if (obj && Object.keys(obj).length)
+    if (obj && Object.keys(obj).length) {
       commit('wizard/model$update', {
-        path: specPath,
+        path: path,
         value: obj,
-        force: true,
       })
+    } else {
+      commit('wizard/model$delete', `/spec/verticalScaling/${type}`)
+    }
 
     // Update metadata.annotations
     const annotations = getValue(model, '/metadata/annotations') || {}
