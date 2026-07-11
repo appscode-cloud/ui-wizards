@@ -26,7 +26,8 @@ import (
 )
 
 func TestDefaultValues(t *testing.T) {
-	checker := schemachecker.New(os.DirFS("../../.."),
+	checker := schemachecker.New(
+		os.DirFS("../../.."),
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomElasticsearchEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomMariadbEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomMemcachedEditorOptionsSpec{}},
