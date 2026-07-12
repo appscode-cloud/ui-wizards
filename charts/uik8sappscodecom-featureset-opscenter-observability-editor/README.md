@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/uik8sappscodecom-featureset-opscenter-observability-editor --version=v0.35.0
-$ helm upgrade -i uik8sappscodecom-featureset-opscenter-observability-editor appscode/uik8sappscodecom-featureset-opscenter-observability-editor -n default --create-namespace --version=v0.35.0
+$ helm search repo appscode/uik8sappscodecom-featureset-opscenter-observability-editor --version=v0.36.0
+$ helm upgrade -i uik8sappscodecom-featureset-opscenter-observability-editor appscode/uik8sappscodecom-featureset-opscenter-observability-editor -n default --create-namespace --version=v0.36.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a FeatureSet Editor on a [Kubernetes](http://kubernetes.io) c
 To install/upgrade the chart with the release name `uik8sappscodecom-featureset-opscenter-observability-editor`:
 
 ```bash
-$ helm upgrade -i uik8sappscodecom-featureset-opscenter-observability-editor appscode/uik8sappscodecom-featureset-opscenter-observability-editor -n default --create-namespace --version=v0.35.0
+$ helm upgrade -i uik8sappscodecom-featureset-opscenter-observability-editor appscode/uik8sappscodecom-featureset-opscenter-observability-editor -n default --create-namespace --version=v0.36.0
 ```
 
 The command deploys a FeatureSet Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -66,7 +66,7 @@ The following table lists the configurable parameters of the `uik8sappscodecom-f
 | resources.helmToolkitFluxcdIoHelmRelease_panopticon              |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"panopticon"},"name":"panopticon","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"panopticon","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v2026.6.22"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"panopticon","storageNamespace":"monitoring","targetNamespace":"monitoring","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>                                                     |
 | resources.helmToolkitFluxcdIoHelmRelease_prom_label_proxy        |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"prom-label-proxy"},"name":"prom-label-proxy","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"prom-label-proxy","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v2026.6.2"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"prom-label-proxy","storageNamespace":"monitoring","targetNamespace":"monitoring","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>                              |
 | resources.helmToolkitFluxcdIoHelmRelease_prometheus_adapter      |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"prometheus-adapter"},"name":"prometheus-adapter","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"prometheus-adapter","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"4.9.0"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"prometheus-adapter","storageNamespace":"monitoring","targetNamespace":"monitoring","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>                          |
-| resources.helmToolkitFluxcdIoHelmRelease_storage_metrics_server  |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"storage-metrics-server"},"name":"storage-metrics-server","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"storage-metrics-server","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v2026.7.8"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"storage-metrics-server","storageNamespace":"monitoring","targetNamespace":"monitoring","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>      |
+| resources.helmToolkitFluxcdIoHelmRelease_storage_metrics_server  |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"storage-metrics-server"},"name":"storage-metrics-server","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"storage-metrics-server","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v0.1.0"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"storage-metrics-server","storageNamespace":"monitoring","targetNamespace":"monitoring","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>         |
 | resources.helmToolkitFluxcdIoHelmRelease_tenant_operator         |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"tenant-operator"},"name":"tenant-operator","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"tenant-operator","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v2026.6.2"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"tenant-operator","storageNamespace":"monitoring","targetNamespace":"monitoring","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>                                  |
 | resources.helmToolkitFluxcdIoHelmRelease_thanos_operator         |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"thanos-operator"},"name":"thanos-operator","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"thanos-operator","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v2026.6.2"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"thanos-operator","storageNamespace":"monitoring","targetNamespace":"monitoring","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>                                  |
 
@@ -74,12 +74,12 @@ The following table lists the configurable parameters of the `uik8sappscodecom-f
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i uik8sappscodecom-featureset-opscenter-observability-editor appscode/uik8sappscodecom-featureset-opscenter-observability-editor -n default --create-namespace --version=v0.35.0 --set metadata.resource.group=ui.k8s.appscode.com
+$ helm upgrade -i uik8sappscodecom-featureset-opscenter-observability-editor appscode/uik8sappscodecom-featureset-opscenter-observability-editor -n default --create-namespace --version=v0.36.0 --set metadata.resource.group=ui.k8s.appscode.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i uik8sappscodecom-featureset-opscenter-observability-editor appscode/uik8sappscodecom-featureset-opscenter-observability-editor -n default --create-namespace --version=v0.35.0 --values values.yaml
+$ helm upgrade -i uik8sappscodecom-featureset-opscenter-observability-editor appscode/uik8sappscodecom-featureset-opscenter-observability-editor -n default --create-namespace --version=v0.36.0 --values values.yaml
 ```
