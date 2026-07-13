@@ -769,7 +769,7 @@ export const useFunc = (model) => {
   function isBindingAlreadyOn() {
     const value = getValue(model, '/resources')
     const keys = Object.keys(value)
-    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMariaDBBinding')
+    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMilvusBinding')
     return isExposeBinding
   }
 
@@ -777,10 +777,10 @@ export const useFunc = (model) => {
     const value = getValue(discriminator, `/binding`)
     const dbName = getValue(model, '/metadata/release/name')
     const dbNamespace = getValue(model, '/metadata/release/namespace')
-    const labels = getValue(model, '/resources/kubedbComMariaDB/metadata/labels')
+    const labels = getValue(model, '/resources/kubedbComMilvus/metadata/labels')
     const bindingValues = {
       apiVersion: 'catalog.appscode.com/v1alpha1',
-      kind: 'MariaDBBinding',
+      kind: 'MilvusBinding',
       metadata: {
         labels,
         name: dbName,
@@ -796,12 +796,12 @@ export const useFunc = (model) => {
 
     if (value) {
       commit('wizard/model$update', {
-        path: '/resources/catalogAppscodeComMariaDBBinding',
+        path: '/resources/catalogAppscodeComMilvusBinding',
         value: bindingValues,
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/catalogAppscodeComMariaDBBinding')
+      commit('wizard/model$delete', '/resources/catalogAppscodeComMilvusBinding')
     }
   }
 

@@ -333,20 +333,21 @@ export const useFunc = (model) => {
     const stashPreset = storeGet('/backup/stashPresets')
     if (stashPreset) {
       const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
+      console.log(valuesFromWizard)
 
-      const tempBackends = valuesFromWizard.spec?.backends
-      tempBackends[0]['storageRef'] = storageRef
-      tempBackends[0]['retentionPolicy'] = retentionPolicy
+      const tempBackends = valuesFromWizard.spec?.backends || []
+      tempBackends[0]?.['storageRef'] = storageRef
+      tempBackends[0]?.['retentionPolicy'] = retentionPolicy
       valuesFromWizard.spec['backends'] = tempBackends
 
-      const tempSessions = valuesFromWizard.spec?.sessions
-      const tempRepositories = valuesFromWizard.spec?.sessions[0]?.repositories
-      tempRepositories[0]['encryptionSecret'] = encryptionSecret
-      tempRepositories[0].name = name
-      tempRepositories[0]['directory'] = `${namespace}/${name}`
+      const tempSessions = valuesFromWizard.spec?.sessions || []
+      const tempRepositories = valuesFromWizard.spec?.sessions[0]?.repositories || []
+      tempRepositories[0]?.['encryptionSecret'] = encryptionSecret
+      tempRepositories[0]?.name = name
+      tempRepositories[0]?.['directory'] = `${namespace}/${name}`
 
-      tempSessions[0]['repositories'] = tempRepositories
-      tempSessions[0]['scheduler']['schedule'] = schedule
+      tempSessions[0]?.['repositories'] = tempRepositories
+      tempSessions[0]?.['scheduler']['schedule'] = schedule
       valuesFromWizard.spec['sessions'] = tempSessions
     }
 
