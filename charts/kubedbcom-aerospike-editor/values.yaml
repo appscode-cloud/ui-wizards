@@ -1,5 +1,29 @@
-apiVersion: kubedb.com/v1alpha2
-kind: Aerospike
 metadata:
-  name: aerospike
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: aerospikes
+    kind: Aerospike
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  autoscalingKubedbComAerospikeAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: AerospikeAutoscaler
+    metadata:
+      name: aerospike
+      namespace: demo
+  kubedbComAerospike: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Aerospike
+    metadata:
+      name: aerospike
+      namespace: demo
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: aerospike-auth
+      namespace: demo

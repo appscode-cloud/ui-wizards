@@ -1,0 +1,150 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: branches.courier.kubedb.com
+spec:
+  group: courier.kubedb.com
+  names:
+    kind: Branch
+    listKind: BranchList
+    plural: branches
+    singular: branch
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              dataMassageImage:
+                type: string
+              deletionPolicy:
+                default: Delete
+                enum:
+                - Delete
+                - Orphan
+                type: string
+              historyLimit:
+                properties:
+                  failed:
+                    default: 2
+                    format: int32
+                    type: integer
+                  success:
+                    default: 3
+                    format: int32
+                    type: integer
+                type: object
+              resetRootPassword:
+                type: boolean
+              schedule:
+                properties:
+                  cron:
+                    type: string
+                required:
+                - cron
+                type: object
+              source:
+                properties:
+                  databaseRef:
+                    properties:
+                      apiGroup:
+                        type: string
+                      kind:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - kind
+                    - name
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  namespace:
+                    type: string
+                required:
+                - databaseRef
+                type: object
+              target:
+                properties:
+                  clusterName:
+                    type: string
+                  issuerRef:
+                    properties:
+                      apiGroup:
+                        type: string
+                      kind:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - kind
+                    - name
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                  resources:
+                    properties:
+                      claims:
+                        items:
+                          properties:
+                            name:
+                              type: string
+                            request:
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        type: object
+                    type: object
+                  storageClassName:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              volumeSnapshotClassName:
+                type: string
+            required:
+            - source
+            - target
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null
