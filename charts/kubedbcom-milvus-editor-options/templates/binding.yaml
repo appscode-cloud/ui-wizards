@@ -1,0 +1,16 @@
+{{- if .Values.spec.admin.expose.enable.default }}
+apiVersion: catalog.appscode.com/v1alpha1
+kind: MilvusBinding
+metadata:
+  name: {{ include "kubedbcom-milvus-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-milvus-editor-options.labels" . | nindent 4 }}
+spec:
+  sourceRef:
+    name: {{ include "kubedbcom-milvus-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+  uiExposure:
+    disableUI: {{ .Values.spec.admin.expose.uiExposure.disableUI }}
+    disableCostEfficiency: {{ .Values.spec.admin.expose.uiExposure.disableCostEfficiency }}
+{{- end }}
