@@ -160,7 +160,106 @@ export const useFunc = (model) => {
   let initialDbMetadata = {}
   let namespaceList = []
   let backupConfigurationsFromStore = {}
-  let valuesFromWizard = {}
+  let valuesFromWizard = {
+    apiVersion: 'core.kubestash.com/v1alpha1',
+    kind: 'BackupConfiguration',
+    metadata: {
+      name: 'postgres',
+      namespace: 'demo',
+    },
+    spec: {
+      backends: [
+        {
+          name: 'postgres-backend',
+          retentionPolicy: {
+            name: 'postgres-retention-policy',
+            namespace: 'demo',
+          },
+          storageRef: {
+            name: 'postgres-storage',
+            namespace: 'demo',
+          },
+        },
+      ],
+      sessions: [
+        {
+          addon: {
+            jobTemplate: {
+              spec: {
+                containerSecurityContext: {
+                  allowPrivilegeEscalation: false,
+                  capabilities: {
+                    drop: ['ALL'],
+                  },
+                  runAsGroup: 0,
+                  runAsNonRoot: true,
+                  runAsUser: 999,
+                  seccompProfile: {
+                    type: 'RuntimeDefault',
+                  },
+                },
+                nodeSelector: {
+                  'kubernetes.io/os': 'linux',
+                },
+              },
+            },
+            name: 'postgres-addon',
+            tasks: [
+              {
+                name: 'logical-backup',
+              },
+            ],
+          },
+          name: 'postgres-frequent-backup',
+          repositories: [
+            {
+              backend: 'postgres-backend',
+              directory: '/postgres-repo',
+              encryptionSecret: {
+                name: 'postgres-encryption-secret',
+                namespace: 'demo',
+              },
+              name: 'postgres-repo',
+            },
+          ],
+          scheduler: {
+            failedJobsHistoryLimit: 4,
+            jobTemplate: {
+              backoffLimit: 2,
+              template: {
+                spec: {
+                  containerSecurityContext: {
+                    allowPrivilegeEscalation: false,
+                    capabilities: {
+                      drop: ['ALL'],
+                    },
+                    runAsGroup: 0,
+                    runAsNonRoot: true,
+                    runAsUser: 999,
+                    seccompProfile: {
+                      type: 'RuntimeDefault',
+                    },
+                  },
+                  nodeSelector: {
+                    'kubernetes.io/os': 'linux',
+                  },
+                },
+              },
+            },
+            schedule: '0 */2 * * *',
+            successfulJobsHistoryLimit: 2,
+          },
+          sessionHistoryLimit: 3,
+        },
+      ],
+      target: {
+        apiGroup: 'kubedb.com',
+        kind: 'Postgres',
+        name: 'postgres',
+        namespace: 'demo',
+      },
+    },
+  }
   let initialArchiver = {}
   let isArchiverAvailable = false
   let archiverObjectToCommit = {}
@@ -182,27 +281,6 @@ export const useFunc = (model) => {
     initialArchiver = dbResource.spec?.archiver ? objectCopy(dbResource.spec?.archiver) : undefined
 
     // get values.yaml to populate data when backup-config is being created
-    try {
-      const actionArray = storeGet('/resource/actions/result')
-      const editorDetails = actionArray[0]?.items[0]?.editor
-      const chartName = editorDetails?.name
-      const sourceApiGroup = editorDetails?.sourceRef?.apiGroup
-      const sourceKind = editorDetails?.sourceRef?.kind
-      const sourceNamespace = editorDetails?.sourceRef?.namespace
-      const sourceName = editorDetails?.sourceRef?.name
-      const chartVersion = editorDetails?.version
-
-      let url = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
-
-      if (spoke)
-        url = `/clusters/${user}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
-
-      const resp = await axios.get(url)
-
-      valuesFromWizard = objectCopy(resp.data?.resources?.coreKubestashComBackupConfiguration) || {}
-    } catch (e) {
-      console.log(e)
-    }
 
     // check storageclass archiver annotation
     if (initialArchiver) {
@@ -256,13 +334,17 @@ export const useFunc = (model) => {
     if (stashPreset) {
       const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
 
-      const tempBackends = valuesFromWizard.spec?.backends
+      const tempBackends = valuesFromWizard.spec?.backends || []
+      console.log(tempBackends)
+
       tempBackends[0]['storageRef'] = storageRef
       tempBackends[0]['retentionPolicy'] = retentionPolicy
       valuesFromWizard.spec['backends'] = tempBackends
 
-      const tempSessions = valuesFromWizard.spec?.sessions
-      const tempRepositories = valuesFromWizard.spec?.sessions[0]?.repositories
+      const tempSessions = valuesFromWizard.spec?.sessions || []
+      console.log(tempSessions)
+
+      const tempRepositories = valuesFromWizard.spec?.sessions[0]?.repositories || []
       tempRepositories[0]['encryptionSecret'] = encryptionSecret
       tempRepositories[0].name = name
       tempRepositories[0]['directory'] = `${namespace}/${name}`

@@ -159,7 +159,106 @@ export const useFunc = (model) => {
   let initialDbMetadata = {}
   let namespaceList = []
   let backupConfigurationsFromStore = {}
-  let valuesFromWizard = {}
+  let valuesFromWizard = {
+    apiVersion: 'core.kubestash.com/v1alpha1',
+    kind: 'BackupConfiguration',
+    metadata: {
+      name: 'redis',
+      namespace: 'demo',
+    },
+    spec: {
+      backends: [
+        {
+          name: 'redis-backend',
+          retentionPolicy: {
+            name: 'redis-retention-policy',
+            namespace: 'demo',
+          },
+          storageRef: {
+            name: 'redis-storage',
+            namespace: 'demo',
+          },
+        },
+      ],
+      sessions: [
+        {
+          addon: {
+            jobTemplate: {
+              spec: {
+                containerSecurityContext: {
+                  allowPrivilegeEscalation: false,
+                  capabilities: {
+                    drop: ['ALL'],
+                  },
+                  runAsGroup: 0,
+                  runAsNonRoot: true,
+                  runAsUser: 999,
+                  seccompProfile: {
+                    type: 'RuntimeDefault',
+                  },
+                },
+                nodeSelector: {
+                  'kubernetes.io/os': 'linux',
+                },
+              },
+            },
+            name: 'redis-addon',
+            tasks: [
+              {
+                name: 'logical-backup',
+              },
+            ],
+          },
+          name: 'redis-frequent-backup',
+          repositories: [
+            {
+              backend: 'redis-backend',
+              directory: '/redis-repo',
+              encryptionSecret: {
+                name: 'redis-encryption-secret',
+                namespace: 'demo',
+              },
+              name: 'redis-repo',
+            },
+          ],
+          scheduler: {
+            failedJobsHistoryLimit: 4,
+            jobTemplate: {
+              backoffLimit: 2,
+              template: {
+                spec: {
+                  containerSecurityContext: {
+                    allowPrivilegeEscalation: false,
+                    capabilities: {
+                      drop: ['ALL'],
+                    },
+                    runAsGroup: 0,
+                    runAsNonRoot: true,
+                    runAsUser: 999,
+                    seccompProfile: {
+                      type: 'RuntimeDefault',
+                    },
+                  },
+                  nodeSelector: {
+                    'kubernetes.io/os': 'linux',
+                  },
+                },
+              },
+            },
+            schedule: '0 */2 * * *',
+            successfulJobsHistoryLimit: 2,
+          },
+          sessionHistoryLimit: 3,
+        },
+      ],
+      target: {
+        apiGroup: 'kubedb.com',
+        kind: 'Redis',
+        name: 'redis',
+        namespace: 'demo',
+      },
+    },
+  }
   let initialArchiver = {}
   let isArchiverAvailable = false
   let archiverObjectToCommit = {}
@@ -180,27 +279,6 @@ export const useFunc = (model) => {
     initialArchiver = dbResource.spec?.archiver ? objectCopy(dbResource.spec?.archiver) : undefined
 
     // get values.yaml to populate data when backup-config is being created
-    try {
-      const actionArray = storeGet('/resource/actions/result')
-      const editorDetails = actionArray[0]?.items[0]?.editor
-      const chartName = editorDetails?.name
-      const sourceApiGroup = editorDetails?.sourceRef?.apiGroup
-      const sourceKind = editorDetails?.sourceRef?.kind
-      const sourceNamespace = editorDetails?.sourceRef?.namespace
-      const sourceName = editorDetails?.sourceRef?.name
-      const chartVersion = editorDetails?.version
-
-      let url = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
-
-      if (spoke)
-        url = `/clusters/${user}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
-
-      const resp = await axios.get(url)
-
-      valuesFromWizard = objectCopy(resp.data?.resources?.coreKubestashComBackupConfiguration) || {}
-    } catch (e) {
-      console.log(e)
-    }
 
     // check storageclass archiver annotation
     if (initialArchiver) {
@@ -257,6 +335,8 @@ export const useFunc = (model) => {
       const tempBackends = valuesFromWizard.spec?.backends
       tempBackends[0]['storageRef'] = storageRef
       tempBackends[0]['retentionPolicy'] = retentionPolicy
+      console.log(tempBackends)
+
       valuesFromWizard.spec['backends'] = tempBackends
 
       const tempSessions = valuesFromWizard.spec?.sessions
