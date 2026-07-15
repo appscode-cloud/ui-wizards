@@ -302,6 +302,57 @@ step:
       schema: schema/properties/spec/properties/configuration
       type: textarea
     - if:
+        name: isToggleOn|pointInTimeRecovery
+        type: function
+      init:
+        type: func
+        value: getDefault|pointInTimeRecovery
+      label: Point in-time Recovery?
+      schema: temp/recovery
+      type: switch
+    - elements:
+      - label: ""
+        subtitle: Configure point-in-time recovery to restore your database to a specific
+          moment. Specify the source database namespace, name, and the exact timestamp
+          for recovery.
+        type: label-element
+      - elements:
+        - forceRequired: true
+          label: Namespace
+          schema: temp/refNamespace
+          type: input
+          validation:
+            type: required
+          watcher:
+            func: setPointInTimeRecovery
+            paths:
+            - temp/refNamespace
+        - label: Name
+          schema: temp/refDBName
+          type: input
+          validation:
+            type: required
+          watcher:
+            func: setPointInTimeRecovery
+            paths:
+            - temp/refDBName
+        showLabels: true
+        type: horizontal-layout
+      - customClass: mt-10
+        label: Recovery Timestamp
+        schema: schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
+        type: date-time
+        watcher:
+          func: onTimestampChange
+          paths:
+          - schema/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
+      if:
+        name: showRecovery
+        type: function
+      label: Point in-time Recovery
+      showLabels: true
+      type: block-layout
+    - if:
         name: isToggleOn|deployment
         type: function
       label: Deployment name
@@ -377,6 +428,28 @@ step:
         func: onBackupSwitch
         paths:
         - temp/backup
+    - elements:
+      - disable:
+          name: showArchiverAlert
+          watchPaths:
+          - schema/spec/admin/storageClasses/default
+          - schema/spec/mode
+        label: Enable Archiver?
+        schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+        type: switch
+        watcher:
+          func: onArchiverChange
+          paths:
+          - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+      - if:
+          name: showArchiverAlert
+          type: function
+        label: The selected StorageClass does not support Archiver
+        type: warning
+      if:
+        name: showArchiver
+        type: function
+      type: block-layout
     - elements:
       - if:
           name: isToggleOn|tls

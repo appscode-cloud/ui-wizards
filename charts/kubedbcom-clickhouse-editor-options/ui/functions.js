@@ -1308,6 +1308,121 @@ export const useFunc = (model) => {
     return (val && expected === 'true') || (!val && expected === 'false')
   }
 
+  function showRecovery() {
+    // watchDependency('discriminator#/recovery')
+    const isRecoveryOn = getValue(discriminator, '/recovery') || ''
+    return isRecoveryOn
+  }
+
+  async function setPointInTimeRecovery() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const refNamespace = getValue(discriminator, '/refNamespace')
+    const refDBName = getValue(discriminator, '/refDBName')
+
+    try {
+      const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}-full`
+      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
+      const repositoriesResp = await axios.get(repositoriesUrl)
+      const snapshotsResp = await axios.get(snapshotsUrl)
+
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/encryptionSecret/name`,
+        value: repositoriesResp.data?.spec.encryptionSecret.name,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/encryptionSecret/namespace`,
+        value: repositoriesResp.data?.spec.encryptionSecret.namespace,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/fullDBRepository/name`,
+        value: `${refDBName}-full`,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/fullDBRepository/namespace`,
+        value: `${refNamespace}`,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/manifestRepository/name`,
+        value: `${refDBName}-manifest`,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/manifestRepository/namespace`,
+        value: `${refNamespace}`,
+        force: true,
+      })
+
+      const resp = getComponentLogStats(snapshotsResp.data)
+
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/recoveryTimestamp`,
+        value: convertToUTC(resp?.end),
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/minDate`,
+        value: convertToUTC(resp?.start),
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/maxDate`,
+        value: convertToUTC(resp?.end),
+        force: true,
+      })
+    } catch (e) {
+      pointIntimeError =
+        e.response?.data?.message || 'Invalid name / namespace for recovery timestamp'
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/recoveryTimestamp`,
+        value: '',
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/minDate`,
+        value: '',
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/maxDate`,
+        value: '',
+        force: true,
+      })
+      commit('wizard/model$delete', '/spec/init/archiver/encryptionSecret')
+      commit('wizard/model$delete', '/spec/init/archiver/fullDBRepository')
+      commit('wizard/model$delete', '/spec/init/archiver/manifestRepository')
+      console.log(e)
+    }
+  }
+
+  function convertToUTC(localTime) {
+    const date = new Date(localTime)
+    if (isNaN(date.getTime())) return
+
+    const utcString = date.toISOString()
+    return utcString
+  }
+
+  function onTimestampChange() {
+    const localTime = getValue(model, '/spec/init/archiver/recoveryTimestamp')
+    if (!localTime) return
+
+    const utcString = convertToUTC(localTime)
+
+    // Only update if the value is valid & not already in UTC format
+    if (utcString && localTime !== utcString) {
+      commit('wizard/model$update', {
+        path: '/spec/init/archiver/recoveryTimestamp',
+        value: utcString,
+        force: true,
+      })
+    }
+  }
+
   return {
     isExternallyManaged,
     showReferSecretSwitch,
@@ -1367,5 +1482,8 @@ export const useFunc = (model) => {
     onModeChange,
     setBackup,
     getDefault,
+    setPointInTimeRecovery,
+    onTimestampChange,
+    showRecovery,
   }
 }
