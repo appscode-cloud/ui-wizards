@@ -1,0 +1,16 @@
+{{- if .Values.spec.admin.expose.enable.default }}
+apiVersion: catalog.appscode.com/v1alpha1
+kind: QdrantBinding
+metadata:
+  name: {{ include "kubedbcom-qdrant-editor.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-qdrant-editor.labels" . | nindent 4 }}
+spec:
+  sourceRef:
+    name: {{ include "kubedbcom-qdrant-editor.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+  uiExposure:
+    disableUI: {{ .Values.spec.admin.expose.uiExposure.disableUI }}
+    disableCostEfficiency: {{ .Values.spec.admin.expose.uiExposure.disableCostEfficiency }}
+{{- end }}
