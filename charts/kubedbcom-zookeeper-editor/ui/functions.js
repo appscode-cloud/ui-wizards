@@ -69,7 +69,106 @@ export const useFunc = (model) => {
   let dbResource = {}
   let initialDbMetadata = {}
   let backupConfigurationsFromStore = {}
-  let valuesFromWizard = {}
+  let valuesFromWizard = {
+    apiVersion: 'core.kubestash.com/v1alpha1',
+    kind: 'BackupConfiguration',
+    metadata: {
+      name: 'zookeeper',
+      namespace: 'demo',
+    },
+    spec: {
+      backends: [
+        {
+          name: 'zookeeper-backend',
+          retentionPolicy: {
+            name: 'zookeeper-retention-policy',
+            namespace: 'demo',
+          },
+          storageRef: {
+            name: 'zookeeper-storage',
+            namespace: 'demo',
+          },
+        },
+      ],
+      sessions: [
+        {
+          addon: {
+            jobTemplate: {
+              spec: {
+                containerSecurityContext: {
+                  allowPrivilegeEscalation: false,
+                  capabilities: {
+                    drop: ['ALL'],
+                  },
+                  runAsGroup: 0,
+                  runAsNonRoot: true,
+                  runAsUser: 999,
+                  seccompProfile: {
+                    type: 'RuntimeDefault',
+                  },
+                },
+                nodeSelector: {
+                  'kubernetes.io/os': 'linux',
+                },
+              },
+            },
+            name: 'zookeeper-addon',
+            tasks: [
+              {
+                name: 'logical-backup',
+              },
+            ],
+          },
+          name: 'zookeeper-frequent-backup',
+          repositories: [
+            {
+              backend: 'zookeeper-backend',
+              directory: '/zookeeper-repo',
+              encryptionSecret: {
+                name: 'zookeeper-encryption-secret',
+                namespace: 'demo',
+              },
+              name: 'zookeeper-repo',
+            },
+          ],
+          scheduler: {
+            failedJobsHistoryLimit: 4,
+            jobTemplate: {
+              backoffLimit: 2,
+              template: {
+                spec: {
+                  containerSecurityContext: {
+                    allowPrivilegeEscalation: false,
+                    capabilities: {
+                      drop: ['ALL'],
+                    },
+                    runAsGroup: 0,
+                    runAsNonRoot: true,
+                    runAsUser: 999,
+                    seccompProfile: {
+                      type: 'RuntimeDefault',
+                    },
+                  },
+                  nodeSelector: {
+                    'kubernetes.io/os': 'linux',
+                  },
+                },
+              },
+            },
+            schedule: '0 */2 * * *',
+            successfulJobsHistoryLimit: 2,
+          },
+          sessionHistoryLimit: 3,
+        },
+      ],
+      target: {
+        apiGroup: 'kubedb.com',
+        kind: 'ZooKeeper',
+        name: 'zookeeper',
+        namespace: 'demo',
+      },
+    },
+  }
   let initialArchiver = {}
   let isArchiverAvailable = false
   let archiverObjectToCommit = {}
@@ -91,27 +190,6 @@ export const useFunc = (model) => {
     initialArchiver = dbResource.spec?.archiver ? objectCopy(dbResource.spec?.archiver) : undefined
 
     // get values.yaml to populate data when backup-config is being created
-    try {
-      const actionArray = storeGet('/resource/actions/result')
-      const editorDetails = actionArray[0]?.items[0]?.editor
-      const chartName = editorDetails?.name
-      const sourceApiGroup = editorDetails?.sourceRef?.apiGroup
-      const sourceKind = editorDetails?.sourceRef?.kind
-      const sourceNamespace = editorDetails?.sourceRef?.namespace
-      const sourceName = editorDetails?.sourceRef?.name
-      const chartVersion = editorDetails?.version
-
-      let url = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
-
-      if (spoke)
-        url = `/clusters/${user}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
-
-      const resp = await axios.get(url)
-
-      valuesFromWizard = objectCopy(resp.data?.resources?.coreKubestashComBackupConfiguration) || {}
-    } catch (e) {
-      console.log(e)
-    }
 
     // check storageclass archiver annotation
     if (initialArchiver) {

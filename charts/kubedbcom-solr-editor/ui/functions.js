@@ -157,7 +157,106 @@ export const useFunc = (model) => {
   let dbResource = {}
   let initialDbMetadata = {}
   let backupConfigurationsFromStore = {}
-  let valuesFromWizard = {}
+  let valuesFromWizard = {
+    apiVersion: 'core.kubestash.com/v1alpha1',
+    kind: 'BackupConfiguration',
+    metadata: {
+      name: 'solr',
+      namespace: 'demo',
+    },
+    spec: {
+      backends: [
+        {
+          name: 'solr-backend',
+          retentionPolicy: {
+            name: 'solr-retention-policy',
+            namespace: 'demo',
+          },
+          storageRef: {
+            name: 'solr-storage',
+            namespace: 'demo',
+          },
+        },
+      ],
+      sessions: [
+        {
+          addon: {
+            jobTemplate: {
+              spec: {
+                containerSecurityContext: {
+                  allowPrivilegeEscalation: false,
+                  capabilities: {
+                    drop: ['ALL'],
+                  },
+                  runAsGroup: 0,
+                  runAsNonRoot: true,
+                  runAsUser: 999,
+                  seccompProfile: {
+                    type: 'RuntimeDefault',
+                  },
+                },
+                nodeSelector: {
+                  'kubernetes.io/os': 'linux',
+                },
+              },
+            },
+            name: 'solr-addon',
+            tasks: [
+              {
+                name: 'logical-backup',
+              },
+            ],
+          },
+          name: 'solr-frequent-backup',
+          repositories: [
+            {
+              backend: 'solr-backend',
+              directory: '/solr-repo',
+              encryptionSecret: {
+                name: 'solr-encryption-secret',
+                namespace: 'demo',
+              },
+              name: 'solr-repo',
+            },
+          ],
+          scheduler: {
+            failedJobsHistoryLimit: 4,
+            jobTemplate: {
+              backoffLimit: 2,
+              template: {
+                spec: {
+                  containerSecurityContext: {
+                    allowPrivilegeEscalation: false,
+                    capabilities: {
+                      drop: ['ALL'],
+                    },
+                    runAsGroup: 0,
+                    runAsNonRoot: true,
+                    runAsUser: 999,
+                    seccompProfile: {
+                      type: 'RuntimeDefault',
+                    },
+                  },
+                  nodeSelector: {
+                    'kubernetes.io/os': 'linux',
+                  },
+                },
+              },
+            },
+            schedule: '0 */2 * * *',
+            successfulJobsHistoryLimit: 2,
+          },
+          sessionHistoryLimit: 3,
+        },
+      ],
+      target: {
+        apiGroup: 'kubedb.com',
+        kind: 'Solr',
+        name: 'solr',
+        namespace: 'demo',
+      },
+    },
+  }
 
   async function initBackupData() {
     initialModel = getValue(model, '/resources/coreKubestashComBackupConfiguration')
@@ -170,29 +269,6 @@ export const useFunc = (model) => {
     const kind = storeGet('/resource/layout/result/resource/kind')
     dbResource = getValue(model, '/resources/kubedbComSolr')
     initialDbMetadata = objectCopy(dbResource.metadata)
-
-    try {
-      const actionArray = storeGet('/resource/actions/result')
-      const editorDetails = actionArray[0]?.items[0]?.editor
-      const chartName = editorDetails?.name
-      const sourceApiGroup = editorDetails?.sourceRef?.apiGroup
-      const sourceKind = editorDetails?.sourceRef?.kind
-      const sourceNamespace = editorDetails?.sourceRef?.namespace
-      const sourceName = editorDetails?.sourceRef?.name
-      const chartVersion = editorDetails?.version
-
-      let url = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
-
-      if (spoke)
-        url = `/clusters/${user}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
-
-      const resp = await axios.get(url)
-
-      valuesFromWizard = objectCopy(resp.data?.resources?.coreKubestashComBackupConfiguration) || {}
-      valuesFromWizard.spec = valuesFromWizard.spec || {}
-    } catch (e) {
-      console.log(e)
-    }
 
     let config = configs?.find(
       (item) =>
