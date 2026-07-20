@@ -1390,24 +1390,23 @@ export const useFunc = (model) => {
     return data || 'No Data Found'
   }
 
-  function isVerticalScaleTopologyRequired(type) {
-    const key = getValue(model, `/temp/topologyKey-${type}`)
-    const value = getValue(model, `/temp/topologyValue-${type}`)
+  function isVerticalScaleTopologyRequired(type, mode) {
+    // watchDependency(`discriminator#/topologyKey`)
+    // watchDependency(`discriminator#/topologyValue`)
+    const path = `/spec/verticalScaling/${type}/topology`
 
-    if ((key && !value) || (!key && value)) {
-      return 'Both Key and Value are required for topology'
+    const key = String(getValue(model, `${path}/key`) ?? '').trim()
+    const value = String(getValue(model, `${path}/value`) ?? '').trim()
+
+    if (!key && !value) {
+      commit('wizard/model$delete', path)
     }
-
-    if (key && value) {
-      const topologyPath = `/spec/verticalScaling/${type}/topology`
-      commit('wizard/model$update', {
-        path: topologyPath,
-        value: { key, value },
-        force: true,
-      })
+    const missingPair = mode === 'key' ? !key && value : key && !value
+    if (missingPair) {
+      return mode === 'key'
+        ? 'Key is required when Value is provided'
+        : 'Value is required when Key is provided'
     }
-
-    return undefined
   }
 
   function createSecretUrl() {

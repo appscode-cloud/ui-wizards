@@ -1651,24 +1651,22 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
-  function isVerticalScaleTopologyRequired(type) {
-    // watchDependency(`discriminator#/topologyKey-${type}`)
-    // watchDependency(`discriminator#/topologyValue-${type}`)
-
-    const key = getValue(discriminator, `/topologyKey-${type}`)
-    const value = getValue(discriminator, `/topologyValue-${type}`)
+  function isVerticalScaleTopologyRequired(type, mode) {
+    // watchDependency(`discriminator#/topologyKey`)
+    // watchDependency(`discriminator#/topologyValue`)
     const path = `/spec/verticalScaling/${type}/topology`
 
-    if (key || value) {
-      commit('wizard/model$update', {
-        path: path,
-        value: { key, value },
-        force: true,
-      })
-      return ''
-    } else {
+    const key = String(getValue(model, `${path}/key`) ?? '').trim()
+    const value = String(getValue(model, `${path}/value`) ?? '').trim()
+
+    if (!key && !value) {
       commit('wizard/model$delete', path)
-      return false
+    }
+    const missingPair = mode === 'key' ? !key && value : key && !value
+    if (missingPair) {
+      return mode === 'key'
+        ? 'Key is required when Value is provided'
+        : 'Value is required when Key is provided'
     }
   }
 

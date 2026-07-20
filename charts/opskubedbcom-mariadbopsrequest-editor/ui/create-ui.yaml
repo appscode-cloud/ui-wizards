@@ -194,18 +194,22 @@ step:
           'zone=us-central1-a' ensures workloads are deployed in that zone.
         type: label-element
       - elements:
-        - label: Key
-          schema: temp/topologyKey
-          type: input
+        - type: input
+          label: Key
+          schema: schema/properties/spec/properties/verticalScaling/properties/mariadb/properties/topology/properties/key
           validation:
-            name: isVerticalScaleTopologyRequired
             type: custom
-        - label: Value
-          schema: temp/topologyValue
-          type: input
+            name: isVerticalScaleTopologyRequired|mariadb|key
+            watchPaths:
+              - schema/properties/spec/properties/verticalScaling/properties/mariadb/properties/topology/properties/value
+        - type: input
+          label: Value
+          schema: schema/properties/spec/properties/verticalScaling/properties/mariadb/properties/topology/properties/value
           validation:
-            name: isVerticalScaleTopologyRequired
             type: custom
+            name: isVerticalScaleTopologyRequired|mariadb|value
+            watchPaths:
+              - schema/properties/spec/properties/verticalScaling/properties/mariadb/properties/topology/properties/key
         type: horizontal-layout
       label: Node Selection
       showLabels: true

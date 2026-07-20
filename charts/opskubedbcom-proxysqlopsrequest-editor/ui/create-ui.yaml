@@ -191,18 +191,22 @@ step:
           'zone=us-central1-a' ensures workloads are deployed in that zone.
         type: label-element
       - elements:
-        - label: Key
-          schema: temp/topologyKey-proxysql
-          type: input
+        - type: input
+          label: Key
+          schema: schema/properties/spec/properties/verticalScaling/properties/proxysql/properties/topology/properties/key
           validation:
-            name: isVerticalScaleTopologyRequired|proxysql
             type: custom
-        - label: Value
-          schema: temp/topologyValue-proxysql
-          type: input
+            name: isVerticalScaleTopologyRequired|proxysql|key
+            watchPaths:
+              - schema/properties/spec/properties/verticalScaling/properties/proxysql/properties/topology/properties/value
+        - type: input
+          label: Value
+          schema: schema/properties/spec/properties/verticalScaling/properties/proxysql/properties/topology/properties/value
           validation:
-            name: isVerticalScaleTopologyRequired|proxysql
             type: custom
+            name: isVerticalScaleTopologyRequired|proxysql|value
+            watchPaths:
+              - schema/properties/spec/properties/verticalScaling/properties/proxysql/properties/topology/properties/key
         type: horizontal-layout
       label: Node Selection
       showLabels: true

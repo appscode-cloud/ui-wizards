@@ -206,12 +206,22 @@ step:
             pod distribution across zones or regions
           type: label-element
         - elements:
-          - label: Key
-            schema: temp/topologyKey
-            type: input
-          - label: Value
-            schema: temp/topologyValue
-            type: input
+          - type: input
+            label: Key
+            schema: schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/key
+            validation:
+              type: custom
+              name: isVerticalScaleTopologyRequired|redis|key
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/value
+          - type: input
+            label: Value
+            schema: schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/value
+            validation:
+              type: custom
+              name: isVerticalScaleTopologyRequired|redis|value
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/key
           type: horizontal-layout
         label: Node Selection
         showLabels: true
