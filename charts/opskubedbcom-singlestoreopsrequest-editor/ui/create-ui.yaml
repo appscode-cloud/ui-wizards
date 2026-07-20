@@ -211,18 +211,22 @@ step:
             example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
           type: label-element
         - elements:
-          - label: Key
-            schema: temp/topologyKey-aggregator
-            type: input
+          - type: input
+            label: Key
+            schema: schema/properties/spec/properties/verticalScaling/properties/aggregator/properties/topology/properties/key
             validation:
-              name: isVerticalScaleTopologyRequired|aggregator
               type: custom
-          - label: Value
-            schema: temp/topologyValue-aggregator
-            type: input
+              name: isVerticalScaleTopologyRequired|aggregator|key
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/aggregator/properties/topology/properties/value
+          - type: input
+            label: Value
+            schema: schema/properties/spec/properties/verticalScaling/properties/aggregator/properties/topology/properties/value
             validation:
-              name: isVerticalScaleTopologyRequired|aggregator
               type: custom
+              name: isVerticalScaleTopologyRequired|aggregator|value
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/aggregator/properties/topology/properties/key
           type: horizontal-layout
         label: Node Selection
         showLabels: true
@@ -277,25 +281,26 @@ step:
             example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
           type: label-element
         - elements:
-          - label: Key
-            schema: temp/topologyKey-leaf
-            type: input
+          - type: input
+            label: Key
+            schema: schema/properties/spec/properties/verticalScaling/properties/leaf/properties/topology/properties/key
             validation:
-              name: isVerticalScaleTopologyRequired|leaf
               type: custom
-          - label: Value
-            schema: temp/topologyValue-leaf
-            type: input
+              name: isVerticalScaleTopologyRequired|leaf|key
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/leaf/properties/topology/properties/value
+          - type: input
+            label: Value
+            schema: schema/properties/spec/properties/verticalScaling/properties/leaf/properties/topology/properties/value
             validation:
-              name: isVerticalScaleTopologyRequired|leaf
               type: custom
+              name: isVerticalScaleTopologyRequired|leaf|value
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/leaf/properties/topology/properties/key
           type: horizontal-layout
         label: Node Selection
         showLabels: true
         type: block-layout
-      if:
-        name: ifDbTypeEqualsTo|Topology|VerticalScaling
-        type: function
       label: Leaf Vertical Scaling
       type: block-layout
     - elements:
@@ -346,25 +351,26 @@ step:
             example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
           type: label-element
         - elements:
-          - label: Key
-            schema: temp/topologyKey-node
-            type: input
+          - type: input
+            label: Key
+            schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
             validation:
-              name: isVerticalScaleTopologyRequired|node
               type: custom
-          - label: Value
-            schema: temp/topologyValue-node
-            type: input
+              name: isVerticalScaleTopologyRequired|node|key
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/value
+          - type: input
+            label: Value
+            schema: schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/value
             validation:
-              name: isVerticalScaleTopologyRequired|node
               type: custom
+              name: isVerticalScaleTopologyRequired|node|value
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
           type: horizontal-layout
         label: Node Selection
         showLabels: true
         type: block-layout
-      if:
-        name: ifDbTypeEqualsTo|Combined|VerticalScaling
-        type: function
       label: Node Vertical Scaling
       type: block-layout
     if:

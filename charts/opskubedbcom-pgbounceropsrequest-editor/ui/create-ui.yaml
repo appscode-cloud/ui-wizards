@@ -183,18 +183,22 @@ step:
             example, 'zone=us-central1-a' ensures workloads are deployed in that zone.
           type: label-element
         - elements:
-          - label: Key
-            schema: temp/topologyKey-pgbouncer
-            type: input
+          - type: input
+            label: Key
+            schema: schema/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/key
             validation:
-              name: isVerticalScaleTopologyRequired|pgbouncer
               type: custom
-          - label: Value
-            schema: temp/topologyValue-pgbouncer
-            type: input
+              name: isVerticalScaleTopologyRequired|pgbouncer|key
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/value
+          - type: input
+            label: Value
+            schema: schema/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/value
             validation:
-              name: isVerticalScaleTopologyRequired|pgbouncer
               type: custom
+              name: isVerticalScaleTopologyRequired|pgbouncer|value
+              watchPaths:
+                - schema/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/key
           type: horizontal-layout
         label: Node Selection
         showLabels: true
