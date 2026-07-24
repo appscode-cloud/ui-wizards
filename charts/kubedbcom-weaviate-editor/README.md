@@ -55,6 +55,7 @@ The following table lists the configurable parameters of the `kubedbcom-weaviate
 | metadata.release.name                            |             | <code>RELEASE-NAME</code>                                                                                                                   |
 | metadata.release.namespace                       |             | <code>default</code>                                                                                                                        |
 | resources.autoscalingKubedbComWeaviateAutoscaler |             | <code>{"apiVersion":"autoscaling.kubedb.com/v1alpha1","kind":"WeaviateAutoscaler","metadata":{"name":"weaviate","namespace":"demo"}}</code> |
+| resources.catalogAppscodeComWeaviateBinding      |             | <code>{"apiVersion":"catalog.appscode.com/v1alpha1","kind":"WeaviateBinding","metadata":{"name":"weaviate","namespace":"demo"}}</code>      |
 | resources.kubedbComWeaviate                      |             | <code>{"apiVersion":"kubedb.com/v1alpha2","kind":"Weaviate","metadata":{"name":"weaviate","namespace":"default"}}</code>                    |
 | resources.secret_auth                            |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"weaviate-auth","namespace":"demo"}}</code>                                     |
 | resources.secret_config                          |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"weaviate-config","namespace":"demo"}}</code>                                   |
