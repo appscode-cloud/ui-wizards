@@ -151,14 +151,14 @@ step:
     showLabels: true
     type: block-layout
   - elements:
-    - type: select
-      label: Mode
+    - label: Mode
       options:
       - text: Restart
         value: Restart
       - text: InPlace
         value: InPlace
       schema: schema/properties/spec/properties/verticalScaling/properties/mode
+      type: select
     - elements:
       - init:
           type: func
@@ -206,22 +206,22 @@ step:
             pod distribution across zones or regions
           type: label-element
         - elements:
-          - type: input
-            label: Key
+          - label: Key
             schema: schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/key
+            type: input
             validation:
-              type: custom
               name: isVerticalScaleTopologyRequired|redis|key
-              watchPaths:
-                - schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/value
-          - type: input
-            label: Value
-            schema: schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/value
-            validation:
               type: custom
-              name: isVerticalScaleTopologyRequired|redis|value
               watchPaths:
-                - schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/key
+              - schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/value
+          - label: Value
+            schema: schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/value
+            type: input
+            validation:
+              name: isVerticalScaleTopologyRequired|redis|value
+              type: custom
+              watchPaths:
+              - schema/properties/spec/properties/verticalScaling/properties/redis/properties/topology/properties/key
           type: horizontal-layout
         label: Node Selection
         showLabels: true
