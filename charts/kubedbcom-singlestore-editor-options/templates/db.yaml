@@ -71,6 +71,7 @@ spec:
   version: {{ .Values.spec.admin.databases.Singlestore.versions.default | quote }}
   licenseSecret:
     name: {{ .Values.spec.licenseSecret.name }}
+    kind: Secret
 {{- if eq .Values.spec.mode "Topology" }}
   topology:
     aggregator:
@@ -142,11 +143,6 @@ spec:
         - name: singlestore
           resources:
             {{- toYaml .res | nindent 12 }}
-        - name: singlestore-coordinator
-          resources:
-          {{- toYaml .sidecar_res | nindent 12 }}
-          securityContext:
-          {{- include "container.securityContext" . | nindent 12 }}
       initContainers:
         - name: singlestore-init
           resources:
