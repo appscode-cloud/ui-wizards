@@ -42,6 +42,7 @@
     {{- $_ = set $instanceMap "middleManagers" (printf "%s,%s" $minMachine $maxMachine) }}
     {{- $_ = set $instanceMap "historicals" (printf "%s,%s" $minMachine $maxMachine) }}
     {{- $_ = set $instanceMap "brokers" (printf "%s,%s" $minMachine $maxMachine) }}
+    {{- $_ = set $instanceMap "routers" (printf "%s,%s" $minMachine $maxMachine) }}
 
     {{- $instanceMap | toJson | trim -}}
   {{- else }}
@@ -76,6 +77,8 @@ spec:
     historicals:
       {{- $commonCompute | toYaml | nindent 6 }}
     brokers:
+      {{- $commonCompute | toYaml | nindent 6 }}
+    routers:
       {{- $commonCompute | toYaml | nindent 6 }}
 {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
     nodeTopology:

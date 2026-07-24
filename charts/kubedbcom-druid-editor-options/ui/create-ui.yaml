@@ -244,6 +244,60 @@ step:
       label: Coordinators
       showLabels: true
       type: block-layout
+    - elements:
+      - label: ""
+        subtitle: Router nodes provide a unified API gateway that routes queries and
+          requests to brokers, coordinators, and overlords. Configure replicas and
+          resource allocation for reliable request routing.
+        type: label-element
+      - label: Replicaset Number
+        schema: schema/properties/spec/properties/topology/properties/routers/properties/replicas
+        type: input
+      - elements:
+        - init:
+            type: func
+            value: setMachineToCustom
+          label: Machine
+          loader: getMachineListForOptions
+          schema: schema/properties/spec/properties/topology/properties/routers/properties/podResources/properties/machine
+          type: select
+        - disable:
+            name: isMachineNotCustom|topology/routers
+            watchPaths:
+            - schema/properties/spec/properties/topology/properties/routers/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|cpu|topology/routers
+          label: CPU
+          loader: setLimits|cpu|topology/routers
+          schema: schema/properties/spec/properties/topology/properties/routers/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+          watcher:
+            func: setRequests|cpu|topology/routers
+            paths:
+            - schema/properties/spec/properties/topology/properties/routers/properties/podResources/properties/resources/properties/requests/properties/cpu
+            - schema/properties/spec/properties/topology/properties/routers/properties/podResources/properties/machine
+        - disable:
+            name: isMachineNotCustom|topology/routers
+            watchPaths:
+            - schema/properties/spec/properties/topology/properties/routers/properties/podResources/properties/machine
+          init:
+            type: func
+            value: setLimits|memory|topology/routers
+          label: Memory
+          loader: setLimits|memory|topology/routers
+          schema: schema/properties/spec/properties/topology/properties/routers/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+          watcher:
+            func: setRequests|memory|topology/routers
+            paths:
+            - schema/properties/spec/properties/topology/properties/routers/properties/podResources/properties/resources/properties/requests/properties/memory
+            - schema/properties/spec/properties/topology/properties/routers/properties/podResources/properties/machine
+        showLabels: true
+        type: horizontal-layout
+      label: Routers
+      showLabels: true
+      type: block-layout
     type: block-layout
   - elements:
     - if:
