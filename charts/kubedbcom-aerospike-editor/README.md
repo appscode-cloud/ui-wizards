@@ -45,18 +45,24 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `kubedbcom-aerospike-editor` chart and their default values.
 
-|     Parameter      | Description |             Default              |
-|--------------------|-------------|----------------------------------|
-| apiVersion         |             | <code>kubedb.com/v1alpha2</code> |
-| kind               |             | <code>Aerospike</code>           |
-| metadata.name      |             | <code>aerospike</code>           |
-| metadata.namespace |             | <code>default</code>             |
+|                     Parameter                     | Description |                                                                    Default                                                                    |
+|---------------------------------------------------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| metadata.resource.group                           |             | <code>kubedb.com</code>                                                                                                                       |
+| metadata.resource.version                         |             | <code>v1alpha2</code>                                                                                                                         |
+| metadata.resource.name                            |             | <code>aerospikes</code>                                                                                                                       |
+| metadata.resource.kind                            |             | <code>Aerospike</code>                                                                                                                        |
+| metadata.resource.scope                           |             | <code>Namespaced</code>                                                                                                                       |
+| metadata.release.name                             |             | <code>RELEASE-NAME</code>                                                                                                                     |
+| metadata.release.namespace                        |             | <code>default</code>                                                                                                                          |
+| resources.autoscalingKubedbComAerospikeAutoscaler |             | <code>{"apiVersion":"autoscaling.kubedb.com/v1alpha1","kind":"AerospikeAutoscaler","metadata":{"name":"aerospike","namespace":"demo"}}</code> |
+| resources.kubedbComAerospike                      |             | <code>{"apiVersion":"kubedb.com/v1alpha2","kind":"Aerospike","metadata":{"name":"aerospike","namespace":"demo"}}</code>                       |
+| resources.secret_auth                             |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"aerospike-auth","namespace":"demo"}}</code>                                      |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.36.0 --set apiVersion=kubedb.com/v1alpha2
+$ helm upgrade -i kubedbcom-aerospike-editor appscode/kubedbcom-aerospike-editor -n default --create-namespace --version=v0.36.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
