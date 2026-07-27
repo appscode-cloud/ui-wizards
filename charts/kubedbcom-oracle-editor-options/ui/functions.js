@@ -419,7 +419,6 @@ export const useFunc = (model) => {
             params: {
               filter: {
                 items: {
-                  data: { username: null, password: null },
                   metadata: { name: null },
                   type: null,
                 },
@@ -431,11 +430,7 @@ export const useFunc = (model) => {
         const secrets = (resp && resp.data && resp.data.items) || []
 
         const filteredSecrets = secrets.filter((item) => {
-          const validType = [
-            'kubernetes.io/service-account-token',
-            'Opaque',
-            'kubernetes.io/basic-auth',
-          ]
+          const validType = ['kubernetes.io/dockercfg', 'kubernetes.io/dockerconfigjson']
           return validType.includes(item.type)
         })
 

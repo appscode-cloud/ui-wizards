@@ -586,7 +586,6 @@ export const useFunc = (model) => {
             params: {
               filter: {
                 items: {
-                  data: { username: null, password: null },
                   metadata: { name: null },
                   type: null,
                 },
