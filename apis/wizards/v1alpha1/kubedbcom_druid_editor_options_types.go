@@ -75,6 +75,7 @@ type DruidTopology struct {
 	MiddleManagers *DruidDataNode `json:"middleManagers"`
 	Historicals    *DruidDataNode `json:"historicals"`
 	Brokers        *DruidNode     `json:"brokers"`
+	Routers        *DruidNode     `json:"routers"`
 }
 
 type DruidDeepStorage struct {
