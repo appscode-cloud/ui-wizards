@@ -1,0 +1,122 @@
+# Default values for monitoringk8sappscodecom-telemetrystack-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: monitoring.k8s.appscode.com
+    kind: TelemetryStack
+    name: telemetrystacks
+    scope: Cluster
+    version: v1alpha1
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  metrics:
+    thanos:
+      compact:
+        storageSize: 2Gi
+        retentionConfig:
+        - raw: 30d
+          oneHour: 90d
+          fiveMinutes: 60d
+      store:
+        storageSize: 2Gi
+        ignoreDeletionMarksDelay: 24h
+        shardingStrategy:
+          type: block
+          shards: 1
+      query:
+        replicas: 1
+      receive:
+        ingesterSpec:
+          name: default
+          replicas: 1
+          storageSize: 2Gi
+          tsdbRetention: 24h
+          tenancyConfig:
+            tenantMatcherType: exact
+            tenantHeader: THANOS-TENANT
+            defaultTenantID: default
+            tenantLabelName: tenant_id
+        routerSpec:
+          replicas: 1
+          replicationFactor: 1
+          externalLabels: {}
+      ruler:
+        replicas: 1
+        storageSize: 2Gi
+        alertmanagerURL: ""
+        additionalConfig:
+          additionalArgs: []
+          additionalVolumes: []
+          additionalVolumeMounts: []
+      s3:
+        bucket: ""
+        endpoint: ""
+        region: ""
+        prefix: ""
+        accessKey: ""
+        secretKey: ""
+
+  logs:
+    enabled: true
+    deploymentMode: Standalone
+    version: 24.4.1
+    deletionPolicy: Delete
+    storage:
+      storageClassName: ""
+      size: 2Gi
+    clientCaCertificates: []
+    clusterTopology:
+      cluster:
+        name: ""
+        replicas: 3
+        shards: 2
+        persistence:
+          size: 2Gi
+      clickHouseKeeper:
+        externallyManaged: false
+        replicas: 3
+        persistence:
+          size: 2Gi
+    s3:
+      bucket: ""
+      endpoint: ""
+      region: ""
+      prefix: ""
+      accessKey: ""
+      secretKey: ""
+
+  traces:
+    enabled: false
+    deploymentMode: Standalone
+    version: 24.4.1
+    deletionPolicy: Delete
+    storage:
+      storageClassName: ""
+      size: 2Gi
+    clientCaCertificates: []
+    clusterTopology:
+      cluster:
+        name: ""
+        replicas: 3
+        shards: 2
+        persistence:
+          size: 2Gi
+      clickHouseKeeper:
+        externallyManaged: false
+        replicas: 3
+        persistence:
+          size: 2Gi
+    s3:
+      bucket: ""
+      endpoint: ""
+      region: ""
+      prefix: ""
+      accessKey: ""
+      secretKey: ""

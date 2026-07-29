@@ -1,0 +1,466 @@
+properties:
+  metadata:
+    properties:
+      release:
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+        - name
+        - namespace
+        type: object
+      resource:
+        properties:
+          group:
+            type: string
+          kind:
+            type: string
+          name:
+            type: string
+          scope:
+            type: string
+          version:
+            type: string
+        required:
+        - group
+        type: object
+    required:
+    - release
+    - resource
+    type: object
+  spec:
+    properties:
+      logs:
+        properties:
+          clientCaCertificates:
+            items:
+              properties:
+                key:
+                  type: string
+                name:
+                  type: string
+              required:
+              - key
+              - name
+              type: object
+            type: array
+          clusterTopology:
+            properties:
+              clickHouseKeeper:
+                properties:
+                  externallyManaged:
+                    type: boolean
+                  persistence:
+                    properties:
+                      size:
+                        type: string
+                    required:
+                    - size
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                required:
+                - persistence
+                - replicas
+                type: object
+              cluster:
+                properties:
+                  name:
+                    type: string
+                  persistence:
+                    properties:
+                      size:
+                        type: string
+                    required:
+                    - size
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                  shards:
+                    format: int32
+                    type: integer
+                required:
+                - name
+                - persistence
+                - replicas
+                - shards
+                type: object
+            required:
+            - clickHouseKeeper
+            - cluster
+            type: object
+          deletionPolicy:
+            enum:
+            - Halt
+            - Delete
+            - WipeOut
+            - DoNotTerminate
+            type: string
+          deploymentMode:
+            enum:
+            - Standalone
+            - ClusterTopology
+            type: string
+          enabled:
+            type: boolean
+          s3:
+            properties:
+              accessKey:
+                type: string
+              bucket:
+                type: string
+              endpoint:
+                type: string
+              prefix:
+                type: string
+              region:
+                type: string
+              secretKey:
+                type: string
+            required:
+            - accessKey
+            - bucket
+            - endpoint
+            - region
+            - secretKey
+            type: object
+          storage:
+            properties:
+              size:
+                type: string
+              storageClassName:
+                type: string
+            required:
+            - size
+            - storageClassName
+            type: object
+          version:
+            type: string
+        required:
+        - deletionPolicy
+        - deploymentMode
+        - enabled
+        - s3
+        - storage
+        - version
+        type: object
+      metrics:
+        properties:
+          thanos:
+            properties:
+              compact:
+                properties:
+                  retentionConfig:
+                    items:
+                      properties:
+                        fiveMinutes:
+                          type: string
+                        oneHour:
+                          type: string
+                        raw:
+                          type: string
+                      type: object
+                    type: array
+                  storageSize:
+                    type: string
+                required:
+                - storageSize
+                type: object
+              query:
+                properties:
+                  replicas:
+                    format: int32
+                    type: integer
+                type: object
+              receive:
+                properties:
+                  ingesterSpec:
+                    properties:
+                      name:
+                        type: string
+                      replicas:
+                        format: int32
+                        type: integer
+                      storageSize:
+                        type: string
+                      tenancyConfig:
+                        properties:
+                          defaultTenantID:
+                            type: string
+                          tenantHeader:
+                            type: string
+                          tenantLabelName:
+                            type: string
+                          tenantMatcherType:
+                            enum:
+                            - exact
+                            - glob
+                            type: string
+                        type: object
+                      tsdbRetention:
+                        type: string
+                    required:
+                    - name
+                    - replicas
+                    - storageSize
+                    type: object
+                  routerSpec:
+                    properties:
+                      externalLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                      replicationFactor:
+                        format: int32
+                        type: integer
+                    required:
+                    - replicas
+                    - replicationFactor
+                    type: object
+                required:
+                - ingesterSpec
+                - routerSpec
+                type: object
+              ruler:
+                properties:
+                  additionalConfig:
+                    properties:
+                      additionalArgs:
+                        items:
+                          type: string
+                        type: array
+                      additionalVolumeMounts:
+                        items:
+                          properties:
+                            mountPath:
+                              type: string
+                            name:
+                              type: string
+                            readOnly:
+                              type: boolean
+                          required:
+                          - mountPath
+                          - name
+                          type: object
+                        type: array
+                      additionalVolumes:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            mode:
+                              format: int32
+                              type: integer
+                            name:
+                              type: string
+                            path:
+                              type: string
+                            secretName:
+                              type: string
+                            volumeType:
+                              enum:
+                              - Secret
+                              - ConfigMap
+                              type: string
+                          required:
+                          - name
+                          - volumeType
+                          type: object
+                        type: array
+                    type: object
+                  alertmanagerURL:
+                    type: string
+                  replicas:
+                    format: int32
+                    type: integer
+                  storageSize:
+                    type: string
+                required:
+                - alertmanagerURL
+                - replicas
+                - storageSize
+                type: object
+              s3:
+                properties:
+                  accessKey:
+                    type: string
+                  bucket:
+                    type: string
+                  endpoint:
+                    type: string
+                  prefix:
+                    type: string
+                  region:
+                    type: string
+                  secretKey:
+                    type: string
+                required:
+                - accessKey
+                - bucket
+                - endpoint
+                - region
+                - secretKey
+                type: object
+              store:
+                properties:
+                  ignoreDeletionMarksDelay:
+                    type: string
+                  shardingStrategy:
+                    properties:
+                      shards:
+                        format: int32
+                        type: integer
+                      type:
+                        type: string
+                    required:
+                    - shards
+                    - type
+                    type: object
+                  storageSize:
+                    type: string
+                required:
+                - shardingStrategy
+                - storageSize
+                type: object
+            required:
+            - compact
+            - query
+            - receive
+            - ruler
+            - s3
+            - store
+            type: object
+        required:
+        - thanos
+        type: object
+      traces:
+        properties:
+          clientCaCertificates:
+            items:
+              properties:
+                key:
+                  type: string
+                name:
+                  type: string
+              required:
+              - key
+              - name
+              type: object
+            type: array
+          clusterTopology:
+            properties:
+              clickHouseKeeper:
+                properties:
+                  externallyManaged:
+                    type: boolean
+                  persistence:
+                    properties:
+                      size:
+                        type: string
+                    required:
+                    - size
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                required:
+                - persistence
+                - replicas
+                type: object
+              cluster:
+                properties:
+                  name:
+                    type: string
+                  persistence:
+                    properties:
+                      size:
+                        type: string
+                    required:
+                    - size
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                  shards:
+                    format: int32
+                    type: integer
+                required:
+                - name
+                - persistence
+                - replicas
+                - shards
+                type: object
+            required:
+            - clickHouseKeeper
+            - cluster
+            type: object
+          deletionPolicy:
+            enum:
+            - Halt
+            - Delete
+            - WipeOut
+            - DoNotTerminate
+            type: string
+          deploymentMode:
+            enum:
+            - Standalone
+            - ClusterTopology
+            type: string
+          enabled:
+            type: boolean
+          s3:
+            properties:
+              accessKey:
+                type: string
+              bucket:
+                type: string
+              endpoint:
+                type: string
+              prefix:
+                type: string
+              region:
+                type: string
+              secretKey:
+                type: string
+            required:
+            - accessKey
+            - bucket
+            - endpoint
+            - region
+            - secretKey
+            type: object
+          storage:
+            properties:
+              size:
+                type: string
+              storageClassName:
+                type: string
+            required:
+            - size
+            - storageClassName
+            type: object
+          version:
+            type: string
+        required:
+        - deletionPolicy
+        - deploymentMode
+        - enabled
+        - s3
+        - storage
+        - version
+        type: object
+    required:
+    - logs
+    - metrics
+    - traces
+    type: object
+required:
+- spec
+type: object
