@@ -506,11 +506,20 @@ export const useFunc = (model) => {
     const kubedbValue = resources['helmToolkitFluxcdIoHelmRelease_kubedb']
     if (kubedbValue) {
       const featureSet = storeGet('/route/params/featureset') || ''
-      const formattedValue = generatePresetValued('kubedb', featureSet, storeGet)
+      const formattedValue = generatePresetValued('kubedb', featureSet)
       formattedValue.spec.values.global.featureGates = convertFromArray
       commit('wizard/model$update', {
         path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb',
         value: formattedValue,
+        force: true,
+      })
+    }
+    const opscenterValue = resources['helmToolkitFluxcdIoHelmRelease_kubedb_opscenter']
+    if (opscenterValue) {
+      opscenterValue.spec.values.global.featureGates = convertFromArray
+      commit('wizard/model$update', {
+        path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb_opscenter',
+        value: opscenterValue,
         force: true,
       })
     }
