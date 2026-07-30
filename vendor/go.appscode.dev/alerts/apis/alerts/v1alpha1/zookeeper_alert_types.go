@@ -28,7 +28,7 @@ const (
 	ResourceZookeeperAlertss    = "zookeeperalertss"
 )
 
-// ZookeeperAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// ZookeeperAlerts defines the schema for ZooKeeper Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type ZookeeperAlerts struct {
 	Spec              ZookeeperAlertsSpec `json:"spec,omitempty"`
 }
 
-// ZookeeperAlertsSpec is the schema for kubedb-autoscaler chart values file
+// ZookeeperAlertsSpec is the schema for ZooKeeper alerts chart values file
 type ZookeeperAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         ZookeeperAlertsSpecForm `json:"form"`
@@ -73,6 +73,8 @@ type ZookeeperDatabaseAlert struct {
 }
 
 type ZookeeperDatabaseAlertRules struct {
+	DiskAlmostFull               IntValAlert         `json:"diskAlmostFull"`
+	DiskUsageHigh                IntValAlert         `json:"diskUsageHigh"`
 	ZookeeperDown                FixedAlert          `json:"zookeeperDown"`
 	ZookeeperTooManyNodes        IntValAlert         `json:"zookeeperTooManyNodes"`
 	ZookeeperTooBigMemory        IntValAlert         `json:"zookeeperTooBigMemory"`

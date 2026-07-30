@@ -35,9 +35,10 @@ spec:
     {{end -}}
     {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "postgresSplitBrain")) -}}
     - alert: PostgresqlSplitBrain
-      expr: count(pg_replication_is_replica{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0) != 1
+      expr: count(pg_replication_is_replica{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0) != 1 and count(pg_up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 1) > 0
       for: {{ .rules.postgresSplitBrain.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.postgresSplitBrain.severity }}
         {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
@@ -57,7 +58,7 @@ spec:
     {{end -}}
     {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "PostgresReplicationSlotLagHigh")) -}}
     - alert: PostgresReplicationSlotLagHigh
-      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff[{{ .rules.PostgresReplicationSlotLagHigh.duration }}]) > {{ .rules.PostgresReplicationSlotLagHigh.val }}
+      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[{{ .rules.PostgresReplicationSlotLagHigh.duration }}]) > {{ .rules.PostgresReplicationSlotLagHigh.val }}
       for: {{ .rules.PostgresReplicationSlotLagHigh.duration }}
       labels:
         severity: {{ .rules.PostgresReplicationSlotLagHigh.severity }}
@@ -68,7 +69,7 @@ spec:
     {{end -}}
     {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "PostgresReplicationSlotLagCritical")) -}}
     - alert: PostgresReplicationSlotLagCritical
-      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff[{{ .rules.PostgresReplicationSlotLagCritical.duration }}]) > {{ .rules.PostgresReplicationSlotLagCritical.val }}
+      expr: max_over_time(pg_replication_slots_pg_wal_lsn_diff{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[{{ .rules.PostgresReplicationSlotLagCritical.duration }}]) > {{ .rules.PostgresReplicationSlotLagCritical.val }}
       for: {{ .rules.PostgresReplicationSlotLagCritical.duration }}
       labels:
         severity: {{ .rules.PostgresReplicationSlotLagCritical.severity }}
@@ -101,14 +102,30 @@ spec:
     {{end -}}
     {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "postgresHighRollbackRate")) -}}
     - alert: PostgresqlHighRollbackRate
-      expr: rate(pg_stat_database_xact_rollback{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[3m]) / rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[3m]) > {{ .rules.postgresHighRollbackRate.val }}
+      expr: >-
+        (
+          sum by (pod) (
+            rate(pg_stat_database_xact_rollback{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m])
+          )
+          /
+          clamp_min(
+            sum by (pod) (
+              rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m])
+            ),
+            1
+          )
+        ) > {{ .rules.postgresHighRollbackRate.val }}
+        and
+        sum by (pod) (
+          rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m])
+        ) > 1
       for: {{ .rules.postgresHighRollbackRate.duration }}
       labels:
         severity: {{ .rules.postgresHighRollbackRate.severity }}
         {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Postgresql high rollback rate (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Ratio of transactions being aborted compared to committed is hign. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Transaction rollback rate is above {{ .rules.postgresHighRollbackRate.val }} on {{`{{`}} $labels.pod {{`}}`}} with enough commit volume to make the ratio meaningful."
     {{end -}}
     {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "postgresTooManyConnections")) -}}
     - alert: PostgresTooManyConnections
@@ -119,32 +136,63 @@ spec:
         {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Postgresql too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "PostgreSQL instance has too many connections . {{.rules.postgresTooManyConnections.val}}% of Postgres connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "PostgreSQL instance is using at least {{.rules.postgresTooManyConnections.val}}% of available connections on {{`{{`}} $labels.pod {{`}}`}}."
     {{- end }}
-    
+    {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "postgresSlowQueries")) -}}
+    - alert: PostgresqlSlowQueries
+      expr: pg_stat_activity_max_tx_duration{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",state="active"} > {{ .rules.postgresSlowQueries.val }}
+      for: {{ .rules.postgresSlowQueries.duration }}
+      labels:
+        severity: {{ .rules.postgresSlowQueries.severity }}
+        {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Postgresql slow queries (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PostgreSQL has a transaction running longer than {{ .rules.postgresSlowQueries.val }}s on {{`{{`}} $labels.pod {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+
     {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
+      expr: >-
+        (
+          100 * kubelet_volume_stats_used_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+          /
+          on(namespace, persistentvolumeclaim)
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+        )
+        * on(namespace, persistentvolumeclaim) group_left(pod)
+        max by (namespace, persistentvolumeclaim, pod) (
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+$"}
+        )
+        > {{ .rules.diskUsageHigh.val }} < {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
-        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
+        description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the warning threshold."
     {{- end }}
     {{ if (include "kubedbcom-postgres-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
+      expr: >-
+        (
+          100 * kubelet_volume_stats_used_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+          /
+          on(namespace, persistentvolumeclaim)
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+        )
+        * on(namespace, persistentvolumeclaim) group_left(pod)
+        max by (namespace, persistentvolumeclaim, pod) (
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+$"}
+        )
+        > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "kubedbcom-postgres-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
-        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
+        description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the critical threshold."
     {{- end }}
   {{ end -}}
   {{ end -}}

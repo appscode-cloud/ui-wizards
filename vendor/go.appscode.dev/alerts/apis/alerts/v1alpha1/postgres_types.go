@@ -28,7 +28,7 @@ const (
 	ResourcePostgresAlertss    = "postgresalertss"
 )
 
-// PostgresAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// PostgresAlerts defines the schema for Postgres Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type PostgresAlerts struct {
 	Spec              PostgresAlertsSpec `json:"spec,omitempty"`
 }
 
-// PostgresAlertsSpec is the schema for kubedb-autoscaler chart values file
+// PostgresAlertsSpec is the schema for Postgres alerts chart values file
 type PostgresAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PostgresAlertsSpecForm `json:"form"`
@@ -57,8 +57,10 @@ type PostgresAlert struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	AdditionalRuleLabels map[string]string   `json:"additionalRuleLabels"`
-	Groups               PostgresAlertGroups `json:"groups"`
+	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
+	// +optional
+	AppSuffix string              `json:"appSuffix"`
+	Groups    PostgresAlertGroups `json:"groups"`
 }
 
 type PostgresAlertGroups struct {
@@ -80,11 +82,9 @@ type PostgresDatabaseAlertRules struct {
 	PostgresReplicationSlotLagHigh     IntValAlert         `json:"PostgresReplicationSlotLagHigh"`
 	PostgresReplicationSlotLagCritical IntValAlert         `json:"PostgresReplicationSlotLagCritical"`
 	PostgresRestarted                  IntValAlert         `json:"postgresRestarted"`
+	PostgresSlowQueries                IntValAlert         `json:"postgresSlowQueries"`
 	PostgresExporterError              FixedAlert          `json:"postgresExporterError"`
 	PostgresTooManyConnections         IntValAlert         `json:"postgresTooManyConnections"`
-	PostgresNotEnoughConnections       IntValAlert         `json:"postgresNotEnoughConnections"`
-	PostgresSlowQueries                FixedAlert          `json:"postgresSlowQueries"`
-	PostgresReplicationLag             StringValAlert      `json:"postgresReplicationLag"`
 	PostgresHighRollbackRate           FloatValAlertConfig `json:"postgresHighRollbackRate"`
 	PostgresSplitBrain                 FixedAlert          `json:"postgresSplitBrain"`
 	PostgresTooManyLocksAcquired       FloatValAlertConfig `json:"postgresTooManyLocksAcquired"`

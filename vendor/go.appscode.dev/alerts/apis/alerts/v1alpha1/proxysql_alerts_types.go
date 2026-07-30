@@ -28,7 +28,7 @@ const (
 	ResourceProxysqlAlertss    = "proxysqlalertss"
 )
 
-// ProxysqlAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// ProxysqlAlerts defines the schema for ProxySQL Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type ProxysqlAlerts struct {
 	Spec              ProxysqlAlertsSpec `json:"spec,omitempty"`
 }
 
-// ProxysqlAlertsSpec is the schema for kubedb-autoscaler chart values file
+// ProxysqlAlertsSpec is the schema for ProxySQL alerts chart values file
 type ProxysqlAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         ProxysqlAlertsSpecForm `json:"form"`

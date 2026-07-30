@@ -65,8 +65,8 @@ type B3AlertGroups struct {
 	Process  B3ProcessAlert  `json:"process"`
 	HTTP     B3HTTPAlert     `json:"http"`
 	Database B3DatabaseAlert `json:"database"`
-	Auth     B3AuthAlert     `json:"auth"`
 	Storage  B3StorageAlert  `json:"storage"`
+	Auth     B3AuthAlert     `json:"auth"`
 	Proxy    B3ProxyAlert    `json:"proxy"`
 }
 
@@ -79,7 +79,6 @@ type B3ProcessAlert struct {
 type B3ProcessAlertRules struct {
 	B3Down                    FixedAlert          `json:"b3Down"`
 	B3ReplicasNotReady        FixedAlert          `json:"b3ReplicasNotReady"`
-	B3HighGoroutineCount      IntValAlert         `json:"b3HighGoroutineCount"`
 	B3HighGcPauseDuration     FloatValAlertConfig `json:"b3HighGcPauseDuration"`
 	B3HighFileDescriptorUsage IntValAlert         `json:"b3HighFileDescriptorUsage"`
 }
@@ -91,9 +90,8 @@ type B3HTTPAlert struct {
 }
 
 type B3HTTPAlertRules struct {
-	B3HighHttpErrorRate  IntValAlert         `json:"b3HighHttpErrorRate"`
-	B3HighHttpLatency    FloatValAlertConfig `json:"b3HighHttpLatency"`
-	B3HighActiveRequests IntValAlert         `json:"b3HighActiveRequests"`
+	B3HighHttpErrorRate IntValAlert         `json:"b3HighHttpErrorRate"`
+	B3HighHttpLatency   FloatValAlertConfig `json:"b3HighHttpLatency"`
 }
 
 // Database alerts
@@ -109,17 +107,6 @@ type B3DatabaseAlertRules struct {
 	B3HighDatabaseConnectionPoolUsage IntValAlert         `json:"b3HighDatabaseConnectionPoolUsage"`
 }
 
-// Authentication/Authorization alerts
-type B3AuthAlert struct {
-	Enabled mona.SeverityFlag `json:"enabled"`
-	Rules   B3AuthAlertRules  `json:"rules"`
-}
-
-type B3AuthAlertRules struct {
-	B3HighAuthFailureRate IntValAlert `json:"b3HighAuthFailureRate"`
-	B3HighAuthzDenialRate IntValAlert `json:"b3HighAuthzDenialRate"`
-}
-
 // Storage/BlobFS alerts
 type B3StorageAlert struct {
 	Enabled mona.SeverityFlag   `json:"enabled"`
@@ -128,6 +115,16 @@ type B3StorageAlert struct {
 
 type B3StorageAlertRules struct {
 	B3HighBlobStorageErrorRate IntValAlert `json:"b3HighBlobStorageErrorRate"`
+}
+
+// AuthZ alerts
+type B3AuthAlert struct {
+	Enabled mona.SeverityFlag `json:"enabled"`
+	Rules   B3AuthAlertRules  `json:"rules"`
+}
+
+type B3AuthAlertRules struct {
+	B3HighAuthzDenialRate IntValAlert `json:"b3HighAuthzDenialRate"`
 }
 
 // Proxy/K8s Operations alerts

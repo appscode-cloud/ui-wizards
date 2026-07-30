@@ -28,7 +28,7 @@ const (
 	ResourceKafkaAlertss    = "kafkaalertss"
 )
 
-// KafkaAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// KafkaAlerts defines the schema for Kafka Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type KafkaAlerts struct {
 	Spec              KafkaAlertsSpec `json:"spec,omitempty"`
 }
 
-// KafkaAlertsSpec is the schema for kubedb-autoscaler chart values file
+// KafkaAlertsSpec is the schema for Kafka alerts chart values file
 type KafkaAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         KafkaAlertsSpecForm `json:"form"`

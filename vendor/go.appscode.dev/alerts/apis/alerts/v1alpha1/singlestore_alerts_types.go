@@ -28,7 +28,7 @@ const (
 	ResourceSinglestoreAlertss    = "singlestorealertss"
 )
 
-// SinglestoreAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// SinglestoreAlerts defines the schema for SingleStore Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type SinglestoreAlerts struct {
 	Spec              SinglestoreAlertsSpec `json:"spec,omitempty"`
 }
 
-// SinglestoreAlertsSpec is the schema for kubedb-autoscaler chart values file
+// SinglestoreAlertsSpec is the schema for SingleStore alerts chart values file
 type SinglestoreAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         SinglestoreAlertsSpecForm `json:"form"`

@@ -28,7 +28,7 @@ const (
 	ResourceOracleAlertss    = "oraclealertss"
 )
 
-// OracleAlerts defines the schema for KubeDB Ops Manager Operator Installer.
+// OracleAlerts defines the schema for Oracle Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type OracleAlerts struct {
 	Spec              OracleAlertsSpec `json:"spec,omitempty"`
 }
 
-// OracleAlertsSpec is the schema for kubedb-autoscaler chart values file
+// OracleAlertsSpec is the schema for Oracle alerts chart values file
 type OracleAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         OracleAlertsSpecForm `json:"form"`
@@ -64,7 +64,7 @@ type OracleAlert struct {
 type OracleAlertGroups struct {
 	Database    OracleDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert    `json:"provisioner"`
-	KubeStash   KubeStashAlert      `json:"kubeStash"`
+	OpsManager  OpsManagerAlert     `json:"opsManager"`
 }
 
 type OracleDatabaseAlert struct {
@@ -73,12 +73,11 @@ type OracleDatabaseAlert struct {
 }
 
 type OracleDatabaseAlertRules struct {
-	OracleInstanceDown       FixedAlert  `json:"oracleInstanceDown"`
-	OracleServiceDown        FixedAlert  `json:"oracleServiceDown"`
-	OracleRestarted          IntValAlert `json:"oracleRestarted"`
-	OracleTooManyConnections IntValAlert `json:"oracleTooManyConnections"`
-	DiskUsageHigh            IntValAlert `json:"diskUsageHigh"`
-	DiskAlmostFull           IntValAlert `json:"diskAlmostFull"`
+	OracleInstanceDown FixedAlert  `json:"oracleInstanceDown"`
+	OracleServiceDown  FixedAlert  `json:"oracleServiceDown"`
+	OracleRestarted    IntValAlert `json:"oracleRestarted"`
+	DiskUsageHigh      IntValAlert `json:"diskUsageHigh"`
+	DiskAlmostFull     IntValAlert `json:"diskAlmostFull"`
 }
 
 type OracleGrafana struct {

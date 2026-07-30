@@ -28,7 +28,7 @@ const (
 	ResourceSolrAlertss    = "solralertss"
 )
 
-// SolrAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// SolrAlerts defines the schema for Solr Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type SolrAlerts struct {
 	Spec              SolrAlertsSpec `json:"spec,omitempty"`
 }
 
-// SolrAlertsSpec is the schema for kubedb-autoscaler chart values file
+// SolrAlertsSpec is the schema for Solr alerts chart values file
 type SolrAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         SolrAlertsSpecForm `json:"form"`

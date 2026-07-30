@@ -28,7 +28,7 @@ const (
 	ResourceHazelcastAlertss    = "hazelcastalertss"
 )
 
-// HazelcastAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// HazelcastAlerts defines the schema for Hazelcast Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type HazelcastAlerts struct {
 	Spec              HazelcastAlertsSpec `json:"spec,omitempty"`
 }
 
-// HazelcastAlertsSpec is the schema for kubedb-autoscaler chart values file
+// HazelcastAlertsSpec is the schema for Hazelcast alerts chart values file
 type HazelcastAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         HazelcastAlertsSpecForm `json:"form"`
@@ -73,14 +73,16 @@ type HazelcastDatabaseAlert struct {
 }
 
 type HazelcastDatabaseAlertRules struct {
-	HazelcastPartitionCountExceed    IntValAlert `json:"hazelcastPartitionCountExceed"`
-	HazelcastHighHeapPercentage      IntValAlert `json:"hazelcastHighHeapPercentage"`
-	HazelcastHighMemoryUsage         IntValAlert `json:"hazelcastHighMemoryUsage"`
-	HazelcastHighPhysicalMemoryUsage IntValAlert `json:"hazelcastHighPhysicalMemoryUsage"`
-	HazelcastHighLatency             IntValAlert `json:"hazelcastHighLatency"`
-	HazelcastSystemCPULoadExceed     IntValAlert `json:"hazelcastSystemCPULoadExceed"`
-	DiskUsageHigh                    IntValAlert `json:"diskUsageHigh"`
-	DiskAlmostFull                   IntValAlert `json:"diskAlmostFull"`
+	HazelcastPhaseCritical           FixedAlert          `json:"hazelcastPhaseCritical"`
+	HazelcastDown                    FixedAlert          `json:"hazelcastDown"`
+	HazelcastPartitionCountExceed    IntValAlert         `json:"hazelcastPartitionCountExceed"`
+	HazelcastHighHeapPercentage      IntValAlert         `json:"hazelcastHighHeapPercentage"`
+	HazelcastHighMemoryUsage         IntValAlert         `json:"hazelcastHighMemoryUsage"`
+	HazelcastHighPhysicalMemoryUsage IntValAlert         `json:"hazelcastHighPhysicalMemoryUsage"`
+	HazelcastHighLatency             FloatValAlertConfig `json:"hazelcastHighLatency"`
+	HazelcastSystemCPULoadExceed     IntValAlert         `json:"hazelcastSystemCPULoadExceed"`
+	DiskUsageHigh                    IntValAlert         `json:"diskUsageHigh"`
+	DiskAlmostFull                   IntValAlert         `json:"diskAlmostFull"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

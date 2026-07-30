@@ -3,7 +3,7 @@ module go.bytebuilders.dev/ui-wizards
 go 1.25.0
 
 require (
-	go.appscode.dev/alerts v0.2.1-0.20260516020454-00c8e56b1991
+	go.appscode.dev/alerts v0.2.1-0.20260730041744-7c9476ac73c7
 	k8s.io/api v0.34.3
 	k8s.io/apimachinery v0.34.3
 	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912

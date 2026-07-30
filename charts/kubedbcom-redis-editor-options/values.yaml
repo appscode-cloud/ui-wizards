@@ -184,12 +184,17 @@ spec:
 
 form:
   alert:
+    ## Suffix appended to .Release.Name to form the application name ($app).
+    ## Leave empty for standalone deployments. Set when deployed as a subchart
+    ## to match the KubeDB resource suffix (e.g. "-cache" for Redis).
+    appSuffix: ""
+
     ## Enable PrometheusRule alerts
     enabled: warning
 
     ## Labels for default rules
     labels: # +doc-gen:break
-      release: prometheus
+      release: kube-prometheus-stack
 
     ## Annotations for default rules
     annotations: {}
@@ -206,11 +211,11 @@ form:
         rules:
           redisDown:
             enabled: true
-            duration: "0m"
+            duration: "2m"
             severity: critical
           redisMissingMaster:
             enabled: true
-            duration: "0m"
+            duration: "2m"
             val: 1
             severity: critical
           redisTooManyMasters:
@@ -226,7 +231,7 @@ form:
           redisTooManyConnections:
             enabled: true
             duration: "2m"
-            val: 100
+            val: 80
             severity: warning
           redisRejectedConnections:
             enabled: true
@@ -237,12 +242,12 @@ form:
           diskUsageHigh:
             enabled: true
             val: 80
-            duration: "1m"
+            duration: "5m"
             severity: warning
           diskAlmostFull:
             enabled: true
             val: 95
-            duration: "1m"
+            duration: "5m"
             severity: critical
       provisioner:
         enabled: warning

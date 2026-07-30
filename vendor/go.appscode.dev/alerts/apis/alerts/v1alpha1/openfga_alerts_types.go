@@ -28,6 +28,8 @@ const (
 	ResourceOpenFGAAlertss    = "openfgaalertss"
 )
 
+// OpenFGAAlerts defines the schema for OpenFGA Alerting Rules
+//
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
@@ -38,6 +40,7 @@ type OpenFGAAlerts struct {
 	Spec              OpenFGAAlertsSpec `json:"spec,omitempty"`
 }
 
+// OpenFGAAlertsSpec is the schema for OpenFGA alerts chart values file
 type OpenFGAAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         OpenFGAAlertsSpecForm `json:"form"`
@@ -68,11 +71,10 @@ type OpenFGACoreAlert struct {
 }
 
 type OpenFGACoreAlertRules struct {
-	Down                  FixedAlert          `json:"down"`
-	HighRequestLatency    FloatValAlertConfig `json:"highRequestLatency"`
-	HighErrorRate         FloatValAlertConfig `json:"highErrorRate"`
-	LowCheckCacheHitRatio FloatValAlertConfig `json:"lowCheckCacheHitRatio"`
-	HighSQLConnections    FloatValAlertConfig `json:"highSQLConnections"`
+	Down               FixedAlert          `json:"down"`
+	HighRequestLatency FloatValAlertConfig `json:"highRequestLatency"`
+	HighErrorRate      FloatValAlertConfig `json:"highErrorRate"`
+	HighSQLConnections FloatValAlertConfig `json:"highSQLConnections"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -60,7 +60,7 @@ spec:
             severity: {{ .rules.diskUsageHigh.severity }}
             {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
-            summary: Persistent Volume usage is high (instance {{`{{`}} $labels.instance {{`}}`}})
+            summary: Persistent Volume usage is high (instance {{`{{`}} $labels.pod {{`}}`}})
             description: |
               Persistent Volume usage is {{`{{`}} $value {{`}}`}}%.
               Consider expanding the volume.
@@ -76,7 +76,7 @@ spec:
             severity: {{ .rules.diskAlmostFull.severity }}
             {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
-            summary: Persistent Volume is almost full (instance {{`{{`}} $labels.instance {{`}}`}})
+            summary: Persistent Volume is almost full (instance {{`{{`}} $labels.pod {{`}}`}})
             description: |
               Persistent Volume usage is {{`{{`}} $value {{`}}`}}%.
               Urgent: Expand the volume immediately.
@@ -129,7 +129,7 @@ spec:
             {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
             summary: Milvus high goroutine count (instance {{`{{`}} $labels.pod {{`}}`}})
-            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.instance {{`}}`}}) has a high number of goroutines. This may indicate excessive concurrency or a possible goroutine leak.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.pod {{`}}`}}) has a high number of goroutines. This may indicate excessive concurrency or a possible goroutine leak.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
         {{- end }}
 
         {{ if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "milvusHighThreadPressure")) -}}
@@ -141,7 +141,7 @@ spec:
             {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
             summary: Milvus high thread count (instance {{`{{`}} $labels.pod {{`}}`}})
-            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.instance {{`}}`}}) has a high number of OS threads. This may indicate heavy parallel workload or thread contention.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.pod {{`}}`}}) has a high number of OS threads. This may indicate heavy parallel workload or thread contention.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
         {{- end }}
 
         {{ if (include "kubedbcom-milvus-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "milvusHighFDsUsage")) -}}
@@ -153,7 +153,7 @@ spec:
             {{- include "kubedbcom-milvus-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
             summary: Milvus high open file descriptors (instance {{`{{`}} $labels.pod {{`}}`}})
-            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.instance {{`}}`}}) has a high number of open file descriptors. This may indicate too many open files or network connections.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+            description: "Milvus process on pod {{`{{`}} $labels.pod {{`}}`}} ({{`{{`}} $labels.pod {{`}}`}}) has a high number of open file descriptors. This may indicate too many open files or network connections.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
         {{- end }}
     {{- end }}
     {{- end }}

@@ -25,7 +25,7 @@ const (
 	ResourceMilvusAlertss    = "milvusalertss"
 )
 
-// MilvusAlerts defines the schema for KubeDB Ops Manager Operator Installer.
+// MilvusAlerts defines the schema for Milvus Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -37,7 +37,7 @@ type MilvusAlerts struct {
 	Spec              MilvusAlertsSpec `json:"spec,omitempty"`
 }
 
-// MilvusAlertsSpec is the schema for kubedb-autoscaler chart values file
+// MilvusAlertsSpec is the schema for Milvus alerts chart values file
 type MilvusAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MilvusAlertsSpecForm `json:"form"`
@@ -73,7 +73,7 @@ type MilvusDatabaseAlertRules struct {
 	MilvusHighMemoryUsage        IntValAlert `json:"milvusHighMemoryUsage"`
 	DiskUsageHigh                IntValAlert `json:"diskUsageHigh"`
 	DiskAlmostFull               IntValAlert `json:"diskAlmostFull"`
-	MilvusInstanceDown           IntValAlert `json:"milvusInstanceDown"`
+	MilvusInstanceDown           FixedAlert  `json:"milvusInstanceDown"`
 	MilvusRestarted              IntValAlert `json:"milvusRestarted"`
 	MilvusHighProcessMemoryUsage IntValAlert `json:"milvusHighProcessMemoryUsage"`
 	MilvusGoroutinesExplosion    IntValAlert `json:"milvusGoroutinesExplosion"`

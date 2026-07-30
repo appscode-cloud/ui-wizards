@@ -28,7 +28,7 @@ const (
 	ResourceMariadbAlertss    = "mariadbalertss"
 )
 
-// MariadbAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// MariadbAlerts defines the schema for MariaDB Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type MariadbAlerts struct {
 	Spec              MariadbAlertsSpec `json:"spec,omitempty"`
 }
 
-// MariadbAlertsSpec is the schema for kubedb-autoscaler chart values file
+// MariadbAlertsSpec is the schema for MariaDB alerts chart values file
 type MariadbAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MariadbAlertsSpecForm `json:"form"`

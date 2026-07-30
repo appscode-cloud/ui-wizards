@@ -28,7 +28,7 @@ const (
 	ResourcePgbouncerAlertss    = "pgbounceralertss"
 )
 
-// PgbouncerAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// PgbouncerAlerts defines the schema for PgBouncer Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type PgbouncerAlerts struct {
 	Spec              PgbouncerAlertsSpec `json:"spec,omitempty"`
 }
 
-// PgbouncerAlertsSpec is the schema for kubedb-autoscaler chart values file
+// PgbouncerAlertsSpec is the schema for PgBouncer alerts chart values file
 type PgbouncerAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PgbouncerAlertsSpecForm `json:"form"`

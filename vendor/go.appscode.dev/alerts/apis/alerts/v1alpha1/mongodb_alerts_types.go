@@ -28,7 +28,7 @@ const (
 	ResourceMongodbAlertss    = "mongodbalertss"
 )
 
-// MongodbAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// MongodbAlerts defines the schema for MongoDB Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type MongodbAlerts struct {
 	Spec              MongodbAlertsSpec `json:"spec,omitempty"`
 }
 
-// MongodbAlertsSpec is the schema for kubedb-autoscaler chart values file
+// MongodbAlertsSpec is the schema for MongoDB alerts chart values file
 type MongodbAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MongodbAlertsSpecForm `json:"form"`
