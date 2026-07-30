@@ -28,7 +28,7 @@ const (
 	ResourceDruidAlertss    = "druidalertss"
 )
 
-// DruidAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// DruidAlerts defines the schema for Druid Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type DruidAlerts struct {
 	Spec              DruidAlertsSpec `json:"spec,omitempty"`
 }
 
-// DruidAlertsSpec is the schema for kubedb-autoscaler chart values file
+// DruidAlertsSpec is the schema for Druid alerts chart values file
 type DruidAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         DruidAlertsSpecForm `json:"form"`

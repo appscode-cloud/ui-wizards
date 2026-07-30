@@ -28,7 +28,7 @@ const (
 	ResourceMysqlAlertss    = "mysqlalertss"
 )
 
-// MysqlAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// MysqlAlerts defines the schema for MySQL Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type MysqlAlerts struct {
 	Spec              MysqlAlertsSpec `json:"spec,omitempty"`
 }
 
-// MysqlAlertsSpec is the schema for kubedb-autoscaler chart values file
+// MysqlAlertsSpec is the schema for MySQL alerts chart values file
 type MysqlAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MysqlAlertsSpecForm `json:"form"`

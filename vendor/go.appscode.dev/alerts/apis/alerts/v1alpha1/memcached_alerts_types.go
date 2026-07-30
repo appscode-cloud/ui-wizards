@@ -25,7 +25,7 @@ const (
 	ResourceMemcachedAlertss    = "memcachedalertss"
 )
 
-// MemcachedAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// MemcachedAlerts defines the schema for Memcached Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -37,7 +37,7 @@ type MemcachedAlerts struct {
 	Spec              MemcachedAlertsSpec `json:"spec,omitempty"`
 }
 
-// MemcachedAlertsSpec is the schema for kubedb-autoscaler chart values file
+// MemcachedAlertsSpec is the schema for Memcached alerts chart values file
 type MemcachedAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MemcachedAlertsSpecForm `json:"form"`

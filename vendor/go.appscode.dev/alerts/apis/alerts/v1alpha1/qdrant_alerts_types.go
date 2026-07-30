@@ -28,7 +28,7 @@ const (
 	ResourceQdrantAlertss    = "qdrantalertss"
 )
 
-// QdrantAlerts defines the schema for KubeDB Ops Manager Operator Installer.
+// QdrantAlerts defines the schema for Qdrant Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type QdrantAlerts struct {
 	Spec              QdrantAlertsSpec `json:"spec,omitempty"`
 }
 
-// QdrantAlertsSpec is the schema for kubedb-autoscaler chart values file
+// QdrantAlertsSpec is the schema for Qdrant alerts chart values file
 type QdrantAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         QdrantAlertsSpecForm `json:"form"`

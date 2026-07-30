@@ -28,7 +28,7 @@ const (
 	ResourceHanaDBAlertss    = "hanadbalertss"
 )
 
-// HanaDBAlerts defines the schema for KubeDB Ops Manager Operator Installer.
+// HanaDBAlerts defines the schema for SAP HanaDB Alerting Rules
 //
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 //
@@ -40,6 +40,7 @@ type HanaDBAlerts struct {
 	Spec              HanadbAlertsSpec `json:"spec,omitempty"`
 }
 
+// HanadbAlertsSpec is the schema for SAP HanaDB alerts chart values file
 type HanadbAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         HanadbAlertsSpecForm `json:"form"`

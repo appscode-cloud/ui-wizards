@@ -28,7 +28,7 @@ const (
 	ResourceVaultserverAlertss    = "vaultserveralertss"
 )
 
-// VaultserverAlerts defines the schama for KubeVault Operator Installer.
+// VaultserverAlerts defines the schema for Vault Server Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type VaultserverAlerts struct {
 	Spec              VaultserverAlertsSpec `json:"spec,omitempty"`
 }
 
-// VaultserverAlertsSpec is the schema for kubedb-autoscaler chart values file
+// VaultserverAlertsSpec is the schema for Vault Server alerts chart values file
 type VaultserverAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         VaultserverAlertsSpecForm `json:"form"`

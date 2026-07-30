@@ -195,6 +195,11 @@ spec:
 
 form:
   alert:
+    ## Suffix appended to .Release.Name to form the application name ($app).
+    ## Leave empty for standalone deployments. Set when deployed as a subchart
+    ## to match the KubeDB resource suffix (e.g. "-db" for Postgres).
+    appSuffix: ""
+
     ## Enable PrometheusRule alerts
     enabled: warning
 
@@ -217,7 +222,7 @@ form:
         rules:
           postgresInstanceDown:
             enabled: true
-            duration: "0m"
+            duration: "1m"
             severity: critical
           postgresRestarted:
             enabled: true
@@ -230,31 +235,22 @@ form:
             severity: warning
           postgresTooManyConnections:
             enabled: true
-            duration: "2m"
-            val: 80
-            severity: warning
-          postgresNotEnoughConnections:
-            enabled: true
-            duration: "2m"
-            val: 5
-            severity: warning
+            duration: "5m"
+            val: 95
+            severity: critical
           postgresSlowQueries:
             enabled: true
-            duration: "2m"
+            duration: "1m"
+            val: 60
             severity: warning
-          postgresReplicationLag:
-            enabled: true
-            duration: "0m"
-            val: 30s
-            severity: critical
           postgresHighRollbackRate:
             enabled: true
-            duration: "0m"
-            val: 0.02
+            duration: "5m"
+            val: 0.05
             severity: warning
           postgresSplitBrain:
             enabled: true
-            duration: "0m"
+            duration: "2m"
             severity: critical
           postgresTooManyLocksAcquired:
             enabled: true
@@ -275,12 +271,12 @@ form:
           diskUsageHigh:
             enabled: true
             val: 80
-            duration: "1m"
+            duration: "5m"
             severity: warning
           diskAlmostFull:
             enabled: true
             val: 95
-            duration: "1m"
+            duration: "5m"
             severity: critical
       provisioner:
         enabled: warning

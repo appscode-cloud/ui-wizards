@@ -25,7 +25,7 @@ const (
 	ResourceCassandraAlertss    = "cassandraalertss"
 )
 
-// CassandraAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// CassandraAlerts defines the schema for Cassandra Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -37,7 +37,7 @@ type CassandraAlerts struct {
 	Spec              CassandraAlertsSpec `json:"spec,omitempty"`
 }
 
-// CassandraAlertsSpec is the schema for kubedb-autoscaler chart values file
+// CassandraAlertsSpec is the schema for Cassandra alerts chart values file
 type CassandraAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         CassandraAlertsSpecForm `json:"form"`

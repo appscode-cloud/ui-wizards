@@ -177,3 +177,137 @@ spec:
       # Prometheus crd will select ServiceMonitor using these labels.
       # Only usable when monitoring agent is `prometheus.io/webhook server`.
       labels: {}
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: prometheus
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          # Specifies the alert configuration for Weaviate metrics scrape failure.
+          weaviateInstanceDown:
+            enabled: true
+            duration: 30s
+            severity: critical
+          # Specifies the alert configuration for Weaviate pod restarts.
+          weaviateRestarted:
+            enabled: true
+            duration: 1m
+            severity: warning
+            val: 180
+          # Specifies the alert configuration for Weaviate CPU usage percentage against requests.
+          weaviateHighCPUUsage:
+            enabled: true
+            duration: 1m
+            severity: warning
+            val: 80
+          # Specifies the alert configuration for Weaviate memory usage percentage against limits.
+          weaviateHighMemoryUsage:
+            enabled: true
+            duration: 1m
+            severity: warning
+            val: 80
+          # Specifies the alert configuration for Weaviate process resident memory usage in bytes.
+          weaviateHighProcessMemoryUsage:
+            enabled: true
+            duration: 5m
+            severity: warning
+            val: 1073741824
+          # Specifies the alert configuration for high Go goroutine count.
+          weaviateGoroutinesExplosion:
+            enabled: true
+            duration: 5m
+            severity: warning
+            val: 1000
+          # Specifies the alert configuration for high Go thread count.
+          weaviateHighThreadPressure:
+            enabled: true
+            duration: 5m
+            severity: warning
+            val: 100
+          # Specifies the alert configuration for high process open file descriptor usage percentage.
+          weaviateHighFDsUsage:
+            enabled: true
+            duration: 5m
+            severity: warning
+            val: 80
+          # Specifies the alert configuration for persistent volume usage.
+          diskUsageHigh:
+            enabled: true
+            val: 80
+            duration: 1m
+            severity: warning
+          # Specifies the alert configuration for critically high persistent volume usage.
+          diskAlmostFull:
+            enabled: true
+            val: 95
+            duration: 1m
+            severity: critical
+          # Specifies the alert configuration for high HTTP error percentage.
+          weaviateHTTPErrorRateHigh:
+            enabled: true
+            val: 5
+            duration: 5m
+            severity: warning
+          # Specifies the alert configuration for high HTTP p95 latency in seconds.
+          weaviateHTTPP95LatencyHigh:
+            enabled: true
+            val: 1
+            duration: 5m
+            severity: warning
+          # Specifies the alert configuration for high gRPC error percentage.
+          weaviateGRPCErrorRateHigh:
+            enabled: true
+            val: 5
+            duration: 5m
+            severity: warning
+          # Specifies the alert configuration for high gRPC p95 latency in seconds.
+          weaviateGRPCP95LatencyHigh:
+            enabled: true
+            val: 1
+            duration: 5m
+            severity: warning
+          # Specifies the alert configuration for replication engine running status.
+          weaviateReplicationEngineDown:
+            enabled: true
+            duration: 1m
+            severity: critical
+          # Specifies the alert configuration for replication pending operations.
+          weaviateReplicationQueueHigh:
+            enabled: true
+            val: 10
+            duration: 5m
+            severity: warning
+          # Specifies the alert configuration for replication failures.
+          weaviateReplicationFailuresHigh:
+            enabled: true
+            val: 0
+            duration: 5m
+            severity: warning
+
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: 1m
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: 15m
+            severity: warning

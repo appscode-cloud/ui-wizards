@@ -28,7 +28,7 @@ const (
 	ResourceConnectClusterAlertss    = "connectclusteralertss"
 )
 
-// ConnectClusterAlerts defines the schema for KubeDB Ops Manager Operator Installer.
+// ConnectClusterAlerts defines the schema for Kafka ConnectCluster Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type ConnectClusterAlerts struct {
 	Spec              ConnectClusterAlertsSpec `json:"spec,omitempty"`
 }
 
-// ConnectClusterAlertsSpec is the schema for kubedb-autoscaler chart values file
+// ConnectClusterAlertsSpec is the schema for Kafka ConnectCluster alerts chart values file
 type ConnectClusterAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         ConnectClusterAlertsSpecForm `json:"form"`

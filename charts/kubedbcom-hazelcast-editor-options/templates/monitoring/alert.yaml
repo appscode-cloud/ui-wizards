@@ -41,7 +41,7 @@ spec:
         severity: {{ .rules.hazelcastHighHeapPercentage.severity }}
       {{- include "kubedbcom-hazelcast-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Hazelcast heap size keeps changing (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Hazelcast heap size keeps changing (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Hazelcast heap size keeps changing \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-hazelcast-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hazelcastHighMemoryUsage")) -}}
@@ -52,7 +52,7 @@ spec:
         severity: {{ .rules.hazelcastHighMemoryUsage.severity }}
       {{- include "kubedbcom-hazelcast-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Memory usage should not exceed 80% (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Memory usage should not exceed 80% (instance {{`{{`}} $labels.pod {{`}}`}})
         description: " Memory usage should not exceed 80%"
     {{- end }}
     {{ if (include "kubedbcom-hazelcast-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hazelcastHighPhysicalMemoryUsage")) -}}
@@ -63,7 +63,7 @@ spec:
         severity: {{ .rules.hazelcastHighPhysicalMemoryUsage.severity }}
       {{- include "kubedbcom-hazelcast-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary:  More than 50% of physical memory should not be occupied (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary:  More than 50% of physical memory should not be occupied (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than 50% of physical memory should not be occupied \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-hazelcast-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hazelcastHighLatency")) -}}
@@ -74,7 +74,7 @@ spec:
         severity: {{ .rules.hazelcastHighLatency.severity }}
       {{- include "kubedbcom-hazelcast-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary:  Get latency should be less than 2.5 (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary:  Get latency should be less than 2.5 (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Getlatency should be less than 2.5\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-hazelcast-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hazelcastSystemCPULoadExceed")) -}}
@@ -85,7 +85,7 @@ spec:
         severity: {{ .rules.hazelcastSystemCPULoadExceed.severity }}
       {{- include "kubedbcom-hazelcast-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Hazelcast system cpu load should not exceed 5 (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Hazelcast system cpu load should not exceed 5 (instance {{`{{`}} $labels.pod {{`}}`}})
         description: " Hazelcast system cpu load should not exceed 5\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-hazelcast-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hazelcastPhaseCritical")) -}}
@@ -96,7 +96,7 @@ spec:
         severity: {{ .rules.hazelcastPhaseCritical.severity }}
         {{- include "kubedbcom-hazelcast-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: hazelcast database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: hazelcast database is in Critical state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-hazelcast-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "hazelcastDown")) -}}
@@ -107,31 +107,31 @@ spec:
         severity: {{ .rules.hazelcastDown.severity }}
         {{- include "kubedbcom-hazelcast-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: hazelcast database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: hazelcast database is in NotReady state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-hazelcast-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "kubedbcom-hazelcast-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-hazelcast-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "kubedbcom-hazelcast-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{end -}}

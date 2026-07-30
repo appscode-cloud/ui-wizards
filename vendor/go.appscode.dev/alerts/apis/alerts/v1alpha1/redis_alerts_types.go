@@ -28,7 +28,7 @@ const (
 	ResourceRedisAlertss    = "redisalertss"
 )
 
-// RedisAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// RedisAlerts defines the schema for Redis Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type RedisAlerts struct {
 	Spec              RedisAlertsSpec `json:"spec,omitempty"`
 }
 
-// RedisAlertsSpec is the schema for kubedb-autoscaler chart values file
+// RedisAlertsSpec is the schema for Redis alerts chart values file
 type RedisAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         RedisAlertsSpecForm `json:"form"`
@@ -58,7 +58,9 @@ type RedisAlert struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
-	Groups               RedisAlertGroups  `json:"groups"`
+	// +optional
+	AppSuffix string           `json:"appSuffix"`
+	Groups    RedisAlertGroups `json:"groups"`
 }
 
 type RedisAlertGroups struct {

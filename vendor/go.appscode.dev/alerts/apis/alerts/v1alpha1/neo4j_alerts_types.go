@@ -25,7 +25,7 @@ const (
 	ResourceNeo4jAlertss    = "neo4jalertss"
 )
 
-// Neo4jAlerts defines the schema for KubeDB Ops Manager Operator Installer.
+// Neo4jAlerts defines the schema for Neo4j Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -37,7 +37,7 @@ type Neo4jAlerts struct {
 	Spec              Neo4jAlertsSpec `json:"spec,omitempty"`
 }
 
-// Neo4jAlertsSpec is the schema for kubedb-autoscaler chart values file
+// Neo4jAlertsSpec is the schema for Neo4j alerts chart values file
 type Neo4jAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         Neo4jAlertsSpecForm `json:"form"`
@@ -69,16 +69,14 @@ type Neo4jDatabaseAlert struct {
 }
 
 type Neo4jDatabaseAlertRules struct {
-	Neo4jHighCPUUsage             IntValAlert `json:"neo4jHighCPUUsage"`
-	Neo4jHighMemoryUsage          IntValAlert `json:"neo4jHighMemoryUsage"`
-	Neo4jPageCacheUsageRatioHigh  IntValAlert `json:"neo4jPageCacheUsageRatioHigh"`
-	Neo4jPageCacheHitRatioLow     IntValAlert `json:"neo4jPageCacheHitRatioLow"`
-	Neo4jPageFaultsHigh           IntValAlert `json:"neo4jPageFaultsHigh"`
-	Neo4jPageEvictionsHigh        IntValAlert `json:"neo4jPageEvictionsHigh"`
-	Neo4jCooperativeEvictionsHigh IntValAlert `json:"neo4jCooperativeEvictionsHigh"`
-	Neo4jPageFaultFailuresHigh    IntValAlert `json:"neo4jPageFaultFailuresHigh"`
-	DiskUsageHigh                 IntValAlert `json:"diskUsageHigh"`
-	DiskAlmostFull                IntValAlert `json:"diskAlmostFull"`
+	Neo4jHighCPUUsage            IntValAlert         `json:"neo4jHighCPUUsage"`
+	Neo4jHighMemoryUsage         IntValAlert         `json:"neo4jHighMemoryUsage"`
+	Neo4jPageCacheUsageRatioHigh FloatValAlertConfig `json:"neo4jPageCacheUsageRatioHigh"`
+	Neo4jPageCacheHitRatioLow    FloatValAlertConfig `json:"neo4jPageCacheHitRatioLow"`
+	Neo4jPageFaultsHigh          IntValAlert         `json:"neo4jPageFaultsHigh"`
+	Neo4jPageFaultFailuresHigh   IntValAlert         `json:"neo4jPageFaultFailuresHigh"`
+	DiskUsageHigh                IntValAlert         `json:"diskUsageHigh"`
+	DiskAlmostFull               IntValAlert         `json:"diskAlmostFull"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

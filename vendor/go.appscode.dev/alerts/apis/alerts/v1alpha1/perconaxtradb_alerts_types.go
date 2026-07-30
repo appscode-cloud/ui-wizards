@@ -28,7 +28,7 @@ const (
 	ResourcePerconaxtradbAlertss    = "perconaxtradbalertss"
 )
 
-// PerconaxtradbAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// PerconaxtradbAlerts defines the schema for Percona XtraDB Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type PerconaxtradbAlerts struct {
 	Spec              PerconaxtradbAlertsSpec `json:"spec,omitempty"`
 }
 
-// PerconaxtradbAlertsSpec is the schema for kubedb-autoscaler chart values file
+// PerconaxtradbAlertsSpec is the schema for Percona XtraDB alerts chart values file
 type PerconaxtradbAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PerconaxtradbAlertsSpecForm `json:"form"`

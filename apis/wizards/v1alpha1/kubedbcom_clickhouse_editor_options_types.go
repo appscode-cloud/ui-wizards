@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -37,6 +38,7 @@ type KubedbcomClickhouseEditorOptions struct {
 type KubedbcomClickhouseEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomClickhouseEditorOptionsSpecSpec `json:"spec"`
+	Form         ClickhouseAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomClickhouseEditorOptionsSpecSpec struct {
@@ -83,6 +85,10 @@ type ClickHouseKeeperSpec struct {
 	Replicas     int32        `json:"replicas"`
 	Persistence  Persistence  `json:"persistence"`
 	PodResources PodResources `json:"podResources"`
+}
+
+type ClickhouseAlertsSpecForm struct {
+	Alert alerts.ClickhouseAlert `json:"alert"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -28,7 +28,7 @@ const (
 	ResourceMSSQLServerAlertss    = "mssqlserveralertss"
 )
 
-// MSSQLServerAlerts defines the schema for KubeDB Ops Manager Operator Installer.
+// MSSQLServerAlerts defines the schema for MSSQLServer Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type MSSQLServerAlerts struct {
 	Spec              MSSQLServerAlertsSpec `json:"spec,omitempty"`
 }
 
-// MSSQLServerAlertsSpec is the schema for kubedb-autoscaler chart values file
+// MSSQLServerAlertsSpec is the schema for MSSQLServer alerts chart values file
 type MSSQLServerAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MSSQLServerAlertsSpecForm `json:"form"`

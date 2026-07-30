@@ -28,7 +28,7 @@ const (
 	ResourceElasticsearchAlertss    = "elasticsearchalertss"
 )
 
-// ElasticsearchAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// ElasticsearchAlerts defines the schema for Elasticsearch Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type ElasticsearchAlerts struct {
 	Spec              ElasticsearchAlertsSpec `json:"spec,omitempty"`
 }
 
-// ElasticsearchAlertsSpec is the schema for kubedb-autoscaler chart values file
+// ElasticsearchAlertsSpec is the schema for Elasticsearch alerts chart values file
 type ElasticsearchAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         ElasticsearchAlertsSpecForm `json:"form"`

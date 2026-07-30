@@ -28,7 +28,7 @@ const (
 	ResourceIgniteAlertss    = "ignitealertss"
 )
 
-// IgniteAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// IgniteAlerts defines the schema for Ignite Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type IgniteAlerts struct {
 	Spec              IgniteAlertsSpec `json:"spec,omitempty"`
 }
 
-// IgniteAlertsSpec is the schema for kubedb-autoscaler chart values file
+// IgniteAlertsSpec is the schema for Ignite alerts chart values file
 type IgniteAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         IgniteAlertsSpecForm `json:"form"`
@@ -75,12 +75,12 @@ type IgniteDatabaseAlert struct {
 type IgniteDatabaseAlertRules struct {
 	IgniteDown                      FixedAlert  `json:"igniteDown"`
 	IgnitePhaseCritical             FixedAlert  `json:"ignitePhaseCritical"`
-	IgniteClusterNoBaselineNode     FixedAlert  `json:"igniteClusterNoBaselineNode"`
+	IgniteClusterNoBaselineNode     IntValAlert `json:"igniteClusterNoBaselineNode"`
 	IgniteRestarted                 IntValAlert `json:"igniteRestarted"`
-	IgniteHighCPULoad               FixedAlert  `json:"igniteHighCPULoad"`
-	IgniteHighHeapMemoryUsed        FixedAlert  `json:"igniteHighHeapMemoryUsed"`
-	IgniteHighDataregionOffHeapUsed FixedAlert  `json:"igniteHighDataregionOffHeapUsed"`
-	IgniteJVMPausesTotalDuration    FixedAlert  `json:"igniteJVMPausesTotalDuration"`
+	IgniteHighCPULoad               IntValAlert `json:"igniteHighCPULoad"`
+	IgniteHighHeapMemoryUsed        IntValAlert `json:"igniteHighHeapMemoryUsed"`
+	IgniteHighDataregionOffHeapUsed IntValAlert `json:"igniteHighDataregionOffHeapUsed"`
+	IgniteJVMPausesTotalDuration    IntValAlert `json:"igniteJVMPausesTotalDuration"`
 	DiskUsageHigh                   IntValAlert `json:"diskUsageHigh"`
 	DiskAlmostFull                  IntValAlert `json:"diskAlmostFull"`
 }

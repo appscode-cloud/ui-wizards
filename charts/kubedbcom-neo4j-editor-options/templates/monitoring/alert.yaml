@@ -60,7 +60,7 @@ spec:
             severity: {{ .rules.neo4jPageCacheUsageRatioHigh.severity }}
             {{- include "kubedbcom-neo4j-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
-            summary: Neo4j page cache usage ratio is high (instance {{`{{`}} $labels.instance {{`}}`}})
+            summary: Neo4j page cache usage ratio is high (instance {{`{{`}} $labels.pod {{`}}`}})
             description: |
               Page cache usage ratio is {{`{{`}} $value {{`}}`}}.
               This metric shows what percentage of the allocated page cache is being used.
@@ -77,7 +77,7 @@ spec:
             severity: {{ .rules.neo4jPageCacheHitRatioLow.severity }}
             {{- include "kubedbcom-neo4j-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
-            summary: Neo4j page cache hit ratio is low (instance {{`{{`}} $labels.instance {{`}}`}})
+            summary: Neo4j page cache hit ratio is low (instance {{`{{`}} $labels.pod {{`}}`}})
             description: |
               Page cache hit ratio is {{`{{`}} $value {{`}}`}}.
               Performance relies on efficiently using the page cache, so this should be in 98-100% range consistently.
@@ -94,7 +94,7 @@ spec:
             severity: {{ .rules.neo4jPageFaultsHigh.severity }}
             {{- include "kubedbcom-neo4j-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
-            summary: Neo4j page faults are high (instance {{`{{`}} $labels.instance {{`}}`}})
+            summary: Neo4j page faults are high (instance {{`{{`}} $labels.pod {{`}}`}})
             description: |
               Page faults in the last 5 minutes: {{`{{`}} $value {{`}}`}}.
               If this count keeps increasing over time, it may indicate that more page cache is required.
@@ -111,7 +111,7 @@ spec:
             severity: {{ .rules.neo4jPageFaultFailuresHigh.severity }}
             {{- include "kubedbcom-neo4j-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
-            summary: Neo4j page fault failures detected (instance {{`{{`}} $labels.instance {{`}}`}})
+            summary: Neo4j page fault failures detected (instance {{`{{`}} $labels.pod {{`}}`}})
             description: |
               Page fault failures in the last 5 minutes: {{`{{`}} $value {{`}}`}}.
               Failed page faults indicate potential disk I/O issues or corruption.
@@ -122,13 +122,13 @@ spec:
 
         {{- if (include "kubedbcom-neo4j-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) }}
         - alert: DiskUsageHigh
-          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ .rules.diskUsageHigh.val }}
+          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) * 100 > {{ .rules.diskUsageHigh.val }}
           for: {{ .rules.diskUsageHigh.duration }}
           labels:
             severity: {{ .rules.diskUsageHigh.severity }}
             {{- include "kubedbcom-neo4j-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
-            summary: Persistent Volume usage is high (instance {{`{{`}} $labels.instance {{`}}`}})
+            summary: Persistent Volume usage is high (instance {{`{{`}} $labels.pod {{`}}`}})
             description: |
               Persistent Volume usage is {{`{{`}} $value {{`}}`}}%.
               Consider expanding the volume.
@@ -138,13 +138,13 @@ spec:
 
         {{- if (include "kubedbcom-neo4j-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) }}
         - alert: DiskAlmostFull
-          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) ) * 100 > {{ .rules.diskAlmostFull.val }}
+          expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) * 100 > {{ .rules.diskAlmostFull.val }}
           for: {{ .rules.diskAlmostFull.duration }}
           labels:
             severity: {{ .rules.diskAlmostFull.severity }}
             {{- include "kubedbcom-neo4j-editor-options.alertLabels" $ | nindent 12 }}
           annotations:
-            summary: Persistent Volume is almost full (instance {{`{{`}} $labels.instance {{`}}`}})
+            summary: Persistent Volume is almost full (instance {{`{{`}} $labels.pod {{`}}`}})
             description: |
               Persistent Volume usage is {{`{{`}} $value {{`}}`}}%.
               Urgent: Expand the volume immediately.

@@ -28,7 +28,7 @@ const (
 	ResourcePgpoolAlertss    = "pgpoolalertss"
 )
 
-// PgpoolAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// PgpoolAlerts defines the schema for Pgpool Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type PgpoolAlerts struct {
 	Spec              PgpoolAlertsSpec `json:"spec,omitempty"`
 }
 
-// PgpoolAlertsSpec is the schema for kubedb-autoscaler chart values file
+// PgpoolAlertsSpec is the schema for Pgpool alerts chart values file
 type PgpoolAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PgpoolAlertsSpecForm `json:"form"`

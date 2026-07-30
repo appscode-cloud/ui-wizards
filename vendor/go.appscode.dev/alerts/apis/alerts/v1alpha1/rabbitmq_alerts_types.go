@@ -28,7 +28,7 @@ const (
 	ResourceRabbitmqAlertss    = "rabbitmqalertss"
 )
 
-// RabbitmqAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// RabbitmqAlerts defines the schema for RabbitMQ Alerting Rules
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -40,7 +40,7 @@ type RabbitmqAlerts struct {
 	Spec              RabbitmqAlertsSpec `json:"spec,omitempty"`
 }
 
-// RabbitmqAlertsSpec is the schema for kubedb-autoscaler chart values file
+// RabbitmqAlertsSpec is the schema for RabbitMQ alerts chart values file
 type RabbitmqAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         RabbitmqAlertsSpecForm `json:"form"`
