@@ -4,10 +4,22 @@ on:
   push:
     tags:
       - "*.*"
+    # git tag -fa v0.36.1 -m "v0.36.1" -m "Charts: kubedbcom-*-editor-options"
   workflow_dispatch:
     inputs:
+      # single `find -name` glob, so no brace expansion; anchor on the group
+      # prefix -- `*-editor` matches 824 charts, not just the db editors.
+      # counts below were taken when this was written; they drift as charts land.
+      #   kubedbcom-*-editor-options   30   db options only
+      #   kubedbcom-*                  63   db editors + options
+      #   <empty>                     886   every chart
+      #   *-editor-options             39   options charts of every group
+      #   kubedbcom-mongodb-*           2   one db, editor + options
+      #   opskubedbcom-*               33   ops-request editors
+      #   *kubestashcom-*              19   kubestash core + storage + addons
+      # dry-run locally: make stage-charts CHARTS_PATTERN='<glob>'
       charts_pattern:
-        description: "Glob of chart dirs to publish: kubedbcom-*-editor-options | kubedbcom-* | empty = all"
+        description: "Chart dir glob; Use patterns like 'kubedbcom-*-editor-options' or 'kubedbcom-*' etc"
         required: false
         default: "kubedbcom-*-editor-options"
 
