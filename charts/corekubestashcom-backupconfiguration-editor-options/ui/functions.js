@@ -268,9 +268,17 @@ export const useFunc = (model) => {
   async function getData(ctx, type) {
     const user = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/${
-      type === 'retentionPolicy' ? 'retentionpolicies' : 'backupstorages'
-    }`
+    const namespace =
+      getValue(model, '/metadata/release/namespace') || storeGet('/route/query/namespace') || ''
+    const activeOrg = storeGet('/activeOrganization') || ''
+    const orgList = storeGet('/organizations') || []
+    const orgType = orgList.find((item) => item.username === activeOrg)?.orgType
+
+    const resource = type === 'retentionPolicy' ? 'retentionpolicies' : 'backupstorages'
+    let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/${resource}`
+    if (orgType === 3 && namespace) {
+      url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/${resource}`
+    }
     try {
       const data = await axios.get(url)
       const items = data.data?.items || []
