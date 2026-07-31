@@ -5,6 +5,11 @@ on:
     tags:
       - "*.*"
   workflow_dispatch:
+    inputs:
+      charts_pattern:
+        description: "Glob of chart dirs to publish: kubedbcom-*-editor-options | kubedbcom-* | empty = all"
+        required: false
+        default: "kubedbcom-*-editor-options"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}-release
@@ -43,12 +48,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.LGTM_GITHUB_TOKEN }}
           CHART_REPOSITORY: ${{ secrets.CHART_REPOSITORY }}
+          CHARTS_PATTERN: ${{ inputs.charts_pattern }}
         run: |
-          cd $RUNNER_WORKSPACE/$(basename $CHART_REPOSITORY)
           GIT_TAG=${GITHUB_REF#"refs/tags/"}
+          # tag pushes carry no inputs; an annotated tag can scope itself with a
+          # "Charts: <glob>" body marker, same convention as ProductLine/Release
+          if [ -z "$CHARTS_PATTERN" ]; then
+            CHARTS_PATTERN=$(git -C $GITHUB_WORKSPACE tag -l --format='%(body)' "$GIT_TAG" |
+              sed -n 's/^Charts:[[:space:]]*//p' | tr -d '\r\t' | head -1)
+          fi
+          echo "publishing charts matching: ${CHARTS_PATTERN:-<all>}"
+          CHARTS_DIR=charts
+          if [ -n "$CHARTS_PATTERN" ]; then
+            make -C $GITHUB_WORKSPACE stage-charts CHARTS_PATTERN="$CHARTS_PATTERN" STAGE_DIR=.charts-subset
+            CHARTS_DIR=.charts-subset
+          fi
+          cd $RUNNER_WORKSPACE/$(basename $CHART_REPOSITORY)
           if [[ $GIT_TAG =~ "-alpha." ]] || [[ $GIT_TAG =~ "-beta." ]]; then
             export REPO_DIR=ui-testing
           else
             export REPO_DIR=ui
           fi
-          ./hack/scripts/open-pr.sh $GITHUB_WORKSPACE
+          ./hack/scripts/open-pr.sh $GITHUB_WORKSPACE $CHARTS_DIR

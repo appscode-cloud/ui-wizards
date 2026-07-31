@@ -276,6 +276,16 @@ contents-%:
 		yq -y --indentless -i '.appVersion="$(APP_VERSION)"' ./charts/$*/Chart.yaml; \
 	fi
 
+STAGE_DIR      ?= .charts-subset
+CHARTS_PATTERN ?= kubedbcom-*-editor-options
+
+.PHONY: stage-charts
+stage-charts:
+	@rm -rf $(STAGE_DIR)
+	@mkdir -p $(STAGE_DIR)
+	@find charts -maxdepth 1 -mindepth 1 -type d -name '$(CHARTS_PATTERN)' -exec cp -r {} $(STAGE_DIR)/ \;
+	@echo "staged $$(ls -1 $(STAGE_DIR) | wc -l) chart(s) matching '$(CHARTS_PATTERN)' in $(STAGE_DIR)"
+
 .PHONY: package-charts
 package-charts:
 	@docker run                                                 \
