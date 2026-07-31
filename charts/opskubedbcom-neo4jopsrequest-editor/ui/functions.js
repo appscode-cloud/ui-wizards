@@ -983,52 +983,6 @@ export const useFunc = (model) => {
     return secrets
   }
 
-  function getSelectedConfigurationData(type) {
-    type = type ? type + '/' : ''
-    const path = `/${type}selectedConfiguration`
-    const selectedConfiguration = getValue(discriminator, path)
-
-    if (!selectedConfiguration) {
-      return []
-    }
-
-    const configuration = secretConfigData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return []
-    }
-
-    const result = []
-    // Decode base64 and format as array of objects with name and content
-    Object.keys(configuration.data).forEach((fileName) => {
-      try {
-        // Decode base64 string
-        const decodedContent = atob(configuration.data[fileName])
-        result.push({
-          name: fileName,
-          content: decodedContent,
-        })
-      } catch (e) {
-        console.error(`Error decoding ${fileName}:`, e)
-        result.push({
-          name: fileName,
-          content: configuration.data[fileName], // Fallback to original if decode fails
-        })
-      }
-    })
-
-    // Set the value to the model
-    commit('wizard/model$update', {
-      path: `/temp/${type}applyConfig`,
-      value: result,
-      force: true,
-    })
-
-    return result
-  }
-
   function getSelectedConfigurationName(configType, type) {
     type = type ? type + '/' : ''
     let path = ''
@@ -1087,8 +1041,8 @@ export const useFunc = (model) => {
     const url = `/clusters/${user}/${cluster}/resources`
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const secretName = getValue(discriminator, `${type}createSecret/name`)
-    const secretData = getValue(discriminator, `${type}createSecret/data`)
-    const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
+    const secretData = getValue(discriminator, `${type}createSecret/data/value`)
+    // const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
 
     // Check uniqueness of secret name
     if (existingSecrets.includes(secretName)) {
@@ -1101,7 +1055,7 @@ export const useFunc = (model) => {
     try {
       const res = await axios.post(url, {
         apiVersion: 'v1',
-        stringData: secretDataObj,
+        stringData: secretData,
         kind: 'Secret',
         metadata: {
           name: secretName,
@@ -1179,58 +1133,35 @@ export const useFunc = (model) => {
   }
 
   async function onApplyconfigChange(type) {
-    type = type ? type + '/' : ''
-    const configValue = getValue(discriminator, `${type}applyConfig`)
+    const prefix = type ? `${type}/` : ''
+    const path = `/spec/configuration/${prefix}applyConfig`
+    const configValue = getValue(discriminator, `${prefix}applyConfig`)
+    const configObj = configValue?.[0]?.content
 
-    if (!configValue) {
-      commit('wizard/model$delete', `/spec/configuration/${type}applyConfig`)
+    if (!configObj) {
+      commit('wizard/model$delete', path)
       return
     }
-    const tempConfigObj = {}
-    configValue.forEach((item) => {
-      if (item.name && item.content) {
-        tempConfigObj[item.name] = item.content
-      }
-    })
-    if (Object.keys(tempConfigObj).length === 0) {
-      commit('wizard/model$delete', `/spec/configuration/${type}applyConfig`)
-      return
-    }
-    commit('wizard/model$update', {
-      path: `/spec/configuration/${type}applyConfig`,
-      value: tempConfigObj,
-    })
+
+    commit('wizard/model$update', { path, value: configObj })
   }
 
   function setApplyConfig(type) {
-    type = type ? type + '/' : ''
-    const configPath = `/${type}selectedConfiguration`
+    const prefix = type ? `${type}/` : ''
+    const configPath = `/${prefix}selectedConfiguration`
     const selectedConfig = getValue(discriminator, configPath)
+
     if (!selectedConfig) {
       return [{ name: '', content: '' }]
     }
-    const applyconfigData = secretConfigData.find((item) => {
-      if (item.componentName === selectedConfig) {
-        return item
-      }
-    })
-    const { applyConfig } = applyconfigData
-    const configObj = []
 
-    if (applyConfig) {
-      Object.keys(applyConfig).forEach((fileName) => {
-        configObj.push({
-          name: fileName,
-          content: applyConfig[fileName],
-        })
-      })
-    }
-    configSecretKeys.forEach((key) => {
-      if (!configObj.find((item) => item.name === key)) {
-        configObj.push({ name: key, content: '' })
-      }
-    })
-    return configObj
+    const applyconfigData = secretConfigData.find((item) => item.componentName === selectedConfig)
+
+    const mergedContent = applyconfigData?.applyConfig
+      ? Object.values(applyconfigData.applyConfig).join('\n')
+      : ''
+
+    return [{ name: 'Config Parameters', content: mergedContent }]
   }
 
   function onRemoveConfigChange(type) {
@@ -1269,48 +1200,31 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${selectedSecret}`,
       )
 
-      const secretData = secretResp.data?.data || {}
+      const secretData = secretResp.data?.data || ''
       const configObj = []
 
-      // Decode base64 and format as array of objects with name and content
-      Object.keys(secretData).forEach((fileName) => {
+      if (secretData) {
+        // Format as array of objects with name and content
         try {
           // Decode base64 string
-          const decodedString = atob(secretData[fileName])
+          const decodedString = atob(secretData)
           configObj.push({
-            name: fileName,
+            name: selectedSecret,
             content: decodedString,
           })
         } catch (e) {
-          console.error(`Error decoding ${fileName}:`, e)
+          console.error(`Error decoding ${selectedSecret}:`, e)
           configObj.push({
-            name: fileName,
-            content: secretData[fileName], // Fallback to original if decode fails
+            name: selectedSecret,
+            content: secretData, // Fallback to original if decode fails
           })
         }
-      })
-
+      }
       return configObj
     } catch (e) {
       console.error('Error fetching secret:', e)
       return [{ name: '', content: '' }]
     }
-  }
-
-  function onSelectedSecretChange(index) {
-    const secretData = getValue(discriminator, 'createSecret/data') || []
-    const selfSecrets = secretData.map((item) => item.key)
-
-    const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
-
-    const selfKey = getValue(discriminator, `createSecret/data/${index}/key`)
-    if (selfKey) {
-      remainingSecrets.push(selfKey)
-    }
-    const resSecret = remainingSecrets.map((item) => {
-      return { text: item, value: item }
-    })
-    return resSecret
   }
 
   let secretArray = []
@@ -1882,7 +1796,6 @@ export const useFunc = (model) => {
     fetchConfigSecrets,
     getCurrentConfig,
     getConfigSecretsforAppyConfig,
-    getSelectedConfigurationData,
     getSelectedConfigurationName,
     getSelectedConfigurationValueForRemove,
     createNewConfigSecret,
@@ -1894,7 +1807,6 @@ export const useFunc = (model) => {
     setApplyConfig,
     onRemoveConfigChange,
     onNewConfigSecretChange,
-    onSelectedSecretChange,
     isTlsEnabled,
   }
 }
