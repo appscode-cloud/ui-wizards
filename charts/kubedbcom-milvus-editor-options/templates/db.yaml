@@ -214,6 +214,8 @@ spec:
 {{- if or .Values.spec.authSecret.name .Values.spec.authSecret.password .Values.spec.authSecret.externallyManaged }}
   authSecret:
     name: {{ .Values.spec.authSecret.name | default (printf "%s-auth" (include "kubedbcom-milvus-editor-options.fullname" .)) }}
+    apiGroup: ""
+    kind: Secret
     {{- if .Values.spec.authSecret.externallyManaged }}
     externallyManaged: true
     {{- end }}

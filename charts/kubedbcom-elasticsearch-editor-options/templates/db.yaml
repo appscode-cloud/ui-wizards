@@ -141,6 +141,8 @@ spec:
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
+    apiGroup: ""
+    kind: Secret
 {{- end }}
 {{- if not (eq .Values.spec.authPlugin "X-Pack") }}
   internalUsers:
@@ -179,10 +181,14 @@ spec:
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
+    apiGroup: ""
+    kind: Secret
 {{- end }}
 {{- if .Values.spec.authSecret.password }}
   authSecret:
     name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-auth
+    apiGroup: ""
+    kind: Secret
 {{- end }}
 {{- if .Values.spec.configuration }}
   configSecret:
