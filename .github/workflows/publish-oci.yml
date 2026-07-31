@@ -4,7 +4,24 @@ on:
   push:
     tags:
       - "*.*"
+    # git tag -fa v0.36.1 -m "v0.36.1" -m "Charts: kubedbcom-*-editor-options"
   workflow_dispatch:
+    inputs:
+      # single `find -name` glob, so no brace expansion; anchor on the group
+      # prefix -- `*-editor` matches 824 charts, not just the db editors.
+      # counts below were taken when this was written; they drift as charts land.
+      #   kubedbcom-*-editor-options   30   db options only
+      #   kubedbcom-*                  63   db editors + options
+      #   <empty>                     886   every chart
+      #   *-editor-options             39   options charts of every group
+      #   kubedbcom-mongodb-*           2   one db, editor + options
+      #   opskubedbcom-*               33   ops-request editors
+      #   *kubestashcom-*              19   kubestash core + storage + addons
+      # dry-run locally: make stage-charts CHARTS_PATTERN='<glob>'
+      charts_pattern:
+        description: "Chart dir glob; Use patterns like 'kubedbcom-*-editor-options' or 'kubedbcom-*' etc"
+        required: false
+        default: "kubedbcom-*-editor-options"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}-oci
@@ -58,6 +75,20 @@ jobs:
           GITHUB_USER: 1gtm
           GITHUB_TOKEN: ${{ secrets.LGTM_GITHUB_TOKEN }}
           CHART_REPOSITORY: ${{ secrets.CHART_REPOSITORY }}
+          CHARTS_PATTERN: ${{ inputs.charts_pattern }}
         run: |
+          GIT_TAG=${GITHUB_REF#"refs/tags/"}
+          # tag pushes carry no inputs; an annotated tag can scope itself with a
+          # "Charts: <glob>" body marker, same convention as ProductLine/Release
+          if [ -z "$CHARTS_PATTERN" ]; then
+            CHARTS_PATTERN=$(git -C $GITHUB_WORKSPACE tag -l --format='%(body)' "$GIT_TAG" |
+              sed -n 's/^Charts:[[:space:]]*//p' | tr -d '\r\t' | head -1)
+          fi
+          echo "publishing charts matching: ${CHARTS_PATTERN:-<all>}"
+          CHARTS_DIR=charts
+          if [ -n "$CHARTS_PATTERN" ]; then
+            make -C $GITHUB_WORKSPACE stage-charts CHARTS_PATTERN="$CHARTS_PATTERN" STAGE_DIR=.charts-subset
+            CHARTS_DIR=.charts-subset
+          fi
           export REGISTRY_0=oci://ghcr.io/appscode-charts
-          $RUNNER_WORKSPACE/$(basename $CHART_REPOSITORY)/hack/scripts/publish-oci-charts.sh $(pwd)
+          $RUNNER_WORKSPACE/$(basename $CHART_REPOSITORY)/hack/scripts/publish-oci-charts.sh $(pwd) $CHARTS_DIR
