@@ -78,7 +78,7 @@ Alerts Enabled
 */}}
 {{- define "kubedbcom-db2-editor.alertsEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
-{{- $result := dig . 0 $ranks -}}
+{{- $result := dig (. | default "none") 0 $ranks -}}
 {{- if $result -}}{{ . }}{{- end -}}
 {{- end }}
 
@@ -88,11 +88,11 @@ Alert Group Enabled
 {{- define "kubedbcom-db2-editor.alertGroupEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $flags := (mustLast .) -}}
-{{- $group := dig (mustFirst .) 0 $ranks -}}
-{{- $group = min $group (dig $flags.enabled 0 $ranks) -}}
+{{- $group := dig (mustFirst . | default "none") 0 $ranks -}}
+{{- $group = min $group (dig ($flags.enabled | default "none") 0 $ranks) -}}
 {{- $hasRules := false -}}
 {{- range $k, $v := $flags.rules -}}
-{{- $sev := dig $v.severity 0 $ranks -}}
+{{- $sev := dig ($v.severity | default "none") 0 $ranks -}}
 {{- if (and $sev (le $sev $group) $v.enabled) -}}{{ $hasRules = true }}{{- end -}}
 {{- end -}}
 {{- if (and $group $hasRules) -}}{{ $flags.enabled }}{{- end -}}
@@ -103,13 +103,13 @@ Alert Enabled
 */}}
 {{- define "kubedbcom-db2-editor.alertEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
-{{- $sev := dig (mustLast .) 0 $ranks -}}
+{{- $sev := dig (mustLast . | default "none") 0 $ranks -}}
 {{- $flags := mustInitial . -}}
 {{- $enabled := mustLast $flags -}}
 {{- $flags = mustInitial $flags -}}
 {{- $result := 3 -}}
 {{- range $x := $flags -}}
-{{- $result = min $result (dig $x 0 $ranks) -}}
+{{- $result = min $result (dig ($x | default "none") 0 $ranks) -}}
 {{- end -}}
 {{- if (and $sev (le $sev $result) $enabled) -}}{{ (mustLast .) }}{{- end -}}
 {{- end }}
