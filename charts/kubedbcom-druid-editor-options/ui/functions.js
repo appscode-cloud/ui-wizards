@@ -697,6 +697,17 @@ export const useFunc = (model) => {
   async function getAppBindings(type) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
+    const namespace =
+      getValue(model, '/metadata/release/namespace') || storeGet('/route/query/namespace') || ''
+    const activeOrg = storeGet('/activeOrganization') || ''
+    const orgList = storeGet('/organizations') || []
+    const orgType = orgList.find((item) => item.username === activeOrg)?.orgType
+
+    let url = `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`
+    if (orgType === 3 && namespace) {
+      url = `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/namespaces/${namespace}/appbindings`
+    }
+
     const queryParams = {
       filter: {
         items: {
@@ -706,10 +717,7 @@ export const useFunc = (model) => {
       },
     }
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
-        queryParams,
-      )
+      const resp = await axios.get(url, queryParams)
       const resources = (resp && resp.data && resp.data.items) || []
 
       const fileredResources = resources
