@@ -284,7 +284,13 @@ stage-charts:
 	@rm -rf $(STAGE_DIR)
 	@mkdir -p $(STAGE_DIR)
 	@find charts -maxdepth 1 -mindepth 1 -type d -name '$(CHARTS_PATTERN)' -exec cp -r {} $(STAGE_DIR)/ \;
-	@echo "staged $$(ls -1 $(STAGE_DIR) | wc -l) chart(s) matching '$(CHARTS_PATTERN)' in $(STAGE_DIR)"
+	@n=$$(ls -1 $(STAGE_DIR) | wc -l | tr -d ' '); \
+	if [ "$$n" -eq 0 ]; then \
+	  echo "no charts matched '$(CHARTS_PATTERN)'"; \
+	  rm -rf $(STAGE_DIR); \
+	  exit 1; \
+	fi; \
+	echo "staged $$n chart(s) matching '$(CHARTS_PATTERN)' in $(STAGE_DIR)"
 
 .PHONY: package-charts
 package-charts:
