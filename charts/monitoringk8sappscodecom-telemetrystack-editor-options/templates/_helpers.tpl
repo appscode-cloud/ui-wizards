@@ -44,6 +44,7 @@ Call with a dict: {"root": $, "pillar": .Values.spec.logs}
 {{- $root := .root -}}
 {{- $pillar := .pillar -}}
 enabled: {{ $pillar.enabled }}
+{{- if $pillar.enabled }}
 deploymentMode: {{ $pillar.deploymentMode }}
 version: {{ $pillar.version | quote }}
 deletionPolicy: {{ $pillar.deletionPolicy }}
@@ -86,5 +87,6 @@ clusterTopology:
       resources:
         requests:
           storage: {{ $pillar.clusterTopology.clickHouseKeeper.persistence.size }}
+{{- end }}
 {{- end }}
 {{- end }}
