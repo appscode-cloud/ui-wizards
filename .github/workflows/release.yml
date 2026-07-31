@@ -62,13 +62,27 @@ jobs:
           CHART_REPOSITORY: ${{ secrets.CHART_REPOSITORY }}
           CHARTS_PATTERN: ${{ inputs.charts_pattern }}
         run: |
-          GIT_TAG=${GITHUB_REF#"refs/tags/"}
+          GIT_TAG=""
+          case "$GITHUB_REF" in refs/tags/*) GIT_TAG=${GITHUB_REF#refs/tags/} ;; esac
           # tag pushes carry no inputs; an annotated tag can scope itself with a
           # "Charts: <glob>" body marker, same convention as ProductLine/Release
-          if [ -z "$CHARTS_PATTERN" ]; then
-            CHARTS_PATTERN=$(git -C $GITHUB_WORKSPACE tag -l --format='%(body)' "$GIT_TAG" |
-              sed -n 's/^Charts:[[:space:]]*//p' | tr -d '\r\t' | head -1)
+          if [ -z "$CHARTS_PATTERN" ] && [ -n "$GIT_TAG" ]; then
+            # actions/checkout fetches the tag by sha, leaving refs/tags/$GIT_TAG
+            # lightweight; without the real tag object %(body) yields the commit
+            # message and the marker matches wrapped prose in it
+            git -C $GITHUB_WORKSPACE fetch --force origin "refs/tags/$GIT_TAG:refs/tags/$GIT_TAG" || true
+            if [ "$(git -C $GITHUB_WORKSPACE cat-file -t "$GIT_TAG" 2>/dev/null)" = tag ]; then
+              CHARTS_PATTERN=$(git -C $GITHUB_WORKSPACE tag -l --format='%(body)' "$GIT_TAG" |
+                sed -n 's/^Charts:[[:space:]]*//p' | tr -d '\r\t' | head -1)
+            fi
           fi
+          # a glob is one shell word; whitespace means the marker matched prose
+          case "$CHARTS_PATTERN" in
+            *[[:space:]]*)
+              echo "::error::ignoring non-glob Charts marker: $CHARTS_PATTERN"
+              exit 1
+              ;;
+          esac
           echo "publishing charts matching: ${CHARTS_PATTERN:-<all>}"
           CHARTS_DIR=charts
           if [ -n "$CHARTS_PATTERN" ]; then
