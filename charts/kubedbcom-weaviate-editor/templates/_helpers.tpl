@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "kubedbcom-qdrant-editor.name" -}}
+{{- define "kubedbcom-weaviate-editor.name" -}}
 {{- .Chart.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -9,22 +9,22 @@ Expand the name of the chart.
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
-{{- define "kubedbcom-qdrant-editor.fullname" -}}
+{{- define "kubedbcom-weaviate-editor.fullname" -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "kubedbcom-qdrant-editor.chart" -}}
+{{- define "kubedbcom-weaviate-editor.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "kubedbcom-qdrant-editor.labels" -}}
-{{ include "kubedbcom-qdrant-editor.selectorLabels" . }}
+{{- define "kubedbcom-weaviate-editor.labels" -}}
+{{ include "kubedbcom-weaviate-editor.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- range $k, $v := .Values.spec.labels }}
 {{ $k }}: "{{ $v }}"
@@ -34,17 +34,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "kubedbcom-qdrant-editor.selectorLabels" -}}
-app.kubernetes.io/name: qdrants.kubedb.com
-app.kubernetes.io/instance: {{ include "kubedbcom-qdrant-editor.fullname" . }}
+{{- define "kubedbcom-weaviate-editor.selectorLabels" -}}
+app.kubernetes.io/name: weaviates.kubedb.com
+app.kubernetes.io/instance: {{ include "kubedbcom-weaviate-editor.fullname" . }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "kubedbcom-qdrant-editor.serviceAccountName" -}}
+{{- define "kubedbcom-weaviate-editor.serviceAccountName" -}}
 {{- if .Values.spec.serviceAccount.create }}
-{{- default (include "kubedbcom-qdrant-editor.fullname" .) .Values.spec.serviceAccount.name }}
+{{- default (include "kubedbcom-weaviate-editor.fullname" .) .Values.spec.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.spec.serviceAccount.name }}
 {{- end }}
@@ -53,7 +53,7 @@ Create the name of the service account to use
 {{/*
 Common annotations
 */}}
-{{- define "kubedbcom-qdrant-editor.annotations" -}}
+{{- define "kubedbcom-weaviate-editor.annotations" -}}
 {{- range $k, $v := .Values.spec.annotations }}
 {{ $k }}: "{{ $v }}"
 {{- end -}}
@@ -62,11 +62,11 @@ Common annotations
 {{/*
 Alert labels
 */}}
-{{- define "kubedbcom-qdrant-editor.alertLabels" -}}
+{{- define "kubedbcom-weaviate-editor.alertLabels" -}}
 k8s_group: {{ .Values.metadata.resource.group }}
 k8s_kind: {{ .Values.metadata.resource.kind }}
 k8s_resource: {{ .Values.metadata.resource.name }}
-app: {{ include "kubedbcom-qdrant-editor.fullname" . }}
+app: {{ include "kubedbcom-weaviate-editor.fullname" . }}
 app_namespace: {{ .Release.Namespace }}
 {{- if .Values.form.alert.additionalRuleLabels }}
 {{ toYaml .Values.form.alert.additionalRuleLabels }}
@@ -76,7 +76,7 @@ app_namespace: {{ .Release.Namespace }}
 {{/*
 Alerts Enabled
 */}}
-{{- define "kubedbcom-qdrant-editor.alertsEnabled" -}}
+{{- define "kubedbcom-weaviate-editor.alertsEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $result := dig (. | default "none") 0 $ranks -}}
 {{- if $result -}}{{ . }}{{- end -}}
@@ -85,7 +85,7 @@ Alerts Enabled
 {{/*
 Alert Group Enabled
 */}}
-{{- define "kubedbcom-qdrant-editor.alertGroupEnabled" -}}
+{{- define "kubedbcom-weaviate-editor.alertGroupEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $flags := (mustLast .) -}}
 {{- $group := dig (mustFirst . | default "none") 0 $ranks -}}
@@ -101,7 +101,7 @@ Alert Group Enabled
 {{/*
 Alert Enabled
 */}}
-{{- define "kubedbcom-qdrant-editor.alertEnabled" -}}
+{{- define "kubedbcom-weaviate-editor.alertEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $key := mustLast . -}}
 {{- $rest := mustInitial . -}}
@@ -124,8 +124,8 @@ capabilities:
   drop:
   - ALL
 runAsGroup: 0
-runAsNonRoot: true
-runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 1000 }}
+runAsNonRoot: {{ $.Values.spec.openshift.securityContext.runAsNonRoot }}
+runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 54321 }}
 seccompProfile:
   type: RuntimeDefault
 {{- end }}

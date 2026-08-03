@@ -103,13 +103,101 @@ Alert Enabled
 */}}
 {{- define "kubedbcom-clickhouse-editor.alertEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
-{{- $sev := dig (mustLast . | default "none") 0 $ranks -}}
-{{- $flags := mustInitial . -}}
-{{- $enabled := mustLast $flags -}}
-{{- $flags = mustInitial $flags -}}
+{{- $key := mustLast . -}}
+{{- $rest := mustInitial . -}}
+{{- $rules := mustLast $rest -}}
+{{- $flags := mustInitial $rest -}}
+{{- $rule := dig $key (dict) $rules -}}
+{{- $severity := dig "severity" "" $rule -}}
+{{- $enabled := dig "enabled" false $rule -}}
+{{- $sev := dig ($severity | default "none") 0 $ranks -}}
 {{- $result := 3 -}}
 {{- range $x := $flags -}}
 {{- $result = min $result (dig ($x | default "none") 0 $ranks) -}}
 {{- end -}}
-{{- if (and $sev (le $sev $result) $enabled) -}}{{ (mustLast .) }}{{- end -}}
+{{- if (and $sev (le $sev $result) $enabled) -}}{{ $severity }}{{- end -}}
 {{- end }}
+
+{{- define "container.securityContext" -}}
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+  - ALL
+runAsGroup: 101
+runAsNonRoot: true
+runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 101 }}
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
+
+
+
+
+
+
+
+
+{{- define "resource-profiles" -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := dict -}}
+
+{{- $res := dict -}}
+{{- $cluster_res := list }}
+{{- $keeper_res := list }}
+
+{{- if eq .Values.spec.mode "Topology" }}
+
+  {{- $cluster_res = .Values.spec.podResources.resources -}}
+  {{- $keeper_res = .Values.spec.topology.clickHouseKeeper.spec.podResources.resources -}}
+
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $cluster_res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- if and .Values.spec.topology.clickHouseKeeper.spec.podResources.machine (hasKey $machines .Values.spec.topology.clickHouseKeeper.spec.podResources.machine) }}
+    {{- $keeper_res = get (get $machines .Values.spec.topology.clickHouseKeeper.spec.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+      {{- $cluster_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "cluster" .id }}
+    {{- end }}
+    {{- if and $.Values.spec.topology.clickHouseKeeper.spec.podResources.machine (eq .id $.Values.spec.topology.clickHouseKeeper.spec.podResources.machine) }}
+      {{- $keeper_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "keeper" .id }}
+    {{- end }}
+  {{- end }}
+{{- else }}
+
+  {{- $res = .Values.spec.podResources.resources -}}
+
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+      {{- $res = dict "requests" .limits "limits" .limits }}
+      {{- if eq $.Values.spec.mode "Replicaset" }}
+        {{- $_ := set $profiles "replicaSet" .id }}
+      {{- end }}
+      {{- if eq $.Values.spec.mode "Standalone" }}
+        {{- $_ := set $profiles "standalone" .id }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+{{- end }}
+
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+
+{{- $_ := set . "res" $res -}}
+{{- $_ = set . "cluster_res" $cluster_res -}}
+{{- $_ = set . "keeper_res" $keeper_res -}}
+{{- $_ = set . "init_res" $init_res -}}
+{{- $_ = set . "sidecar_res" $sidecar_res -}}
+
+{{- $profiles | toJson -}}
+{{- end -}}

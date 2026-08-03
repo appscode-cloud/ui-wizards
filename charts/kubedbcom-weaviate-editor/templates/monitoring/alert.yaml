@@ -1,0 +1,320 @@
+{{ $app := (include "kubedbcom-weaviate-editor.fullname" .) }}
+
+{{ if (include "kubedbcom-weaviate-editor.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-weaviate-editor.selectorLabels" . | nindent 4 }}
+    {{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  groups:
+    {{- with .Values.form.alert.groups.database }}
+    {{- if (include "kubedbcom-weaviate-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
+    - name: weaviate.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+      rules:
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateInstanceDown")) }}
+        - alert: WeaviateInstanceDown
+          expr: up{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"} == 0
+          for: {{ .rules.weaviateInstanceDown.duration }}
+          labels:
+            severity: {{ .rules.weaviateInstanceDown.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate instance down (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Weaviate metrics scrape is down. The pod may be unavailable or the stats endpoint may be unreachable.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateRestarted")) }}
+        - alert: WeaviateRestarted
+          expr: (time() - min by (pod) (kube_pod_start_time{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+"})) < {{ .rules.weaviateRestarted.val }}
+          for: {{ .rules.weaviateRestarted.duration }}
+          labels:
+            severity: {{ .rules.weaviateRestarted.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate pod recently restarted (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Weaviate pod {{`{{`}} $labels.pod {{`}}`}} restarted within the configured window.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateHighCPUUsage")) }}
+        - alert: WeaviateHighCPUUsage
+          expr: |
+            (
+              sum by (pod) (
+                irate(container_cpu_usage_seconds_total{image!="",container!="POD",job="kubelet",metrics_path="/metrics/cadvisor",namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+"}[5m])
+              )
+              /
+              sum by (pod) (
+                kube_pod_container_resource_requests{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+",resource="cpu"}
+              )
+            ) * 100 > {{ .rules.weaviateHighCPUUsage.val }}
+          for: {{ .rules.weaviateHighCPUUsage.duration }}
+          labels:
+            severity: {{ .rules.weaviateHighCPUUsage.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate pod CPU usage high (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Weaviate pod CPU usage is above {{ .rules.weaviateHighCPUUsage.val }} percent of requested CPU.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateHighMemoryUsage")) }}
+        - alert: WeaviateHighMemoryUsage
+          expr: |
+            (
+              sum by (pod) (
+                container_memory_working_set_bytes{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+",container!="",image!=""}
+              )
+              /
+              sum by (pod) (
+                kube_pod_container_resource_limits{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+",resource="memory"}
+              )
+            ) * 100 > {{ .rules.weaviateHighMemoryUsage.val }}
+          for: {{ .rules.weaviateHighMemoryUsage.duration }}
+          labels:
+            severity: {{ .rules.weaviateHighMemoryUsage.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate pod memory usage high (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Weaviate pod memory usage is above {{ .rules.weaviateHighMemoryUsage.val }} percent of the memory limit.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateHighProcessMemoryUsage")) }}
+        - alert: WeaviateHighProcessMemoryUsage
+          expr: process_resident_memory_bytes{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"} > {{ .rules.weaviateHighProcessMemoryUsage.val }}
+          for: {{ .rules.weaviateHighProcessMemoryUsage.duration }}
+          labels:
+            severity: {{ .rules.weaviateHighProcessMemoryUsage.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate process memory usage high (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Weaviate process resident memory is above the configured threshold.\n  VALUE = {{`{{`}} $value {{`}}`}} bytes\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateGoroutinesExplosion")) }}
+        - alert: WeaviateGoroutinesExplosion
+          expr: go_goroutines{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"} > {{ .rules.weaviateGoroutinesExplosion.val }}
+          for: {{ .rules.weaviateGoroutinesExplosion.duration }}
+          labels:
+            severity: {{ .rules.weaviateGoroutinesExplosion.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate goroutine count high (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Weaviate has a high number of goroutines.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateHighThreadPressure")) }}
+        - alert: WeaviateHighThreadPressure
+          expr: go_threads{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"} > {{ .rules.weaviateHighThreadPressure.val }}
+          for: {{ .rules.weaviateHighThreadPressure.duration }}
+          labels:
+            severity: {{ .rules.weaviateHighThreadPressure.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate thread count high (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Weaviate has a high number of OS threads.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateHighFDsUsage")) }}
+        - alert: WeaviateHighFDsUsage
+          expr: (process_open_fds{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"} / process_max_fds{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}) * 100 > {{ .rules.weaviateHighFDsUsage.val }}
+          for: {{ .rules.weaviateHighFDsUsage.duration }}
+          labels:
+            severity: {{ .rules.weaviateHighFDsUsage.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate open file descriptors high (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Weaviate open file descriptor usage is above {{ .rules.weaviateHighFDsUsage.val }} percent of the process limit.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) }}
+        - alert: DiskUsageHigh
+          expr: (kubelet_volume_stats_used_bytes{job="kubelet",metrics_path="/metrics"} / kubelet_volume_stats_capacity_bytes{job="kubelet",metrics_path="/metrics"}) * on (persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+"} * 100 > {{ .rules.diskUsageHigh.val }}
+          for: {{ .rules.diskUsageHigh.duration }}
+          labels:
+            severity: {{ .rules.diskUsageHigh.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Persistent volume usage high for Weaviate (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Persistent volume usage is above {{ .rules.diskUsageHigh.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) }}
+        - alert: DiskAlmostFull
+          expr: (kubelet_volume_stats_used_bytes{job="kubelet",metrics_path="/metrics"} / kubelet_volume_stats_capacity_bytes{job="kubelet",metrics_path="/metrics"}) * on (persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+"} * 100 > {{ .rules.diskAlmostFull.val }}
+          for: {{ .rules.diskAlmostFull.duration }}
+          labels:
+            severity: {{ .rules.diskAlmostFull.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Persistent volume almost full for Weaviate (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Persistent volume usage is above {{ .rules.diskAlmostFull.val }} percent. Immediate action is required.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateHTTPErrorRateHigh")) }}
+        - alert: WeaviateHTTPErrorRateHigh
+          expr: |
+            100 * (
+              (
+                sum(rate(weaviate_http_request_duration_seconds_count{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats",status_code=~"4..|5.."}[5m]))
+                or
+                sum(rate(http_request_duration_seconds_count{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats",status_code=~"4..|5.."}[5m]))
+              )
+              /
+              clamp_min(
+                (
+                  sum(rate(weaviate_http_request_duration_seconds_count{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m]))
+                  or
+                  sum(rate(http_request_duration_seconds_count{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m]))
+                ),
+                1
+              )
+            ) > {{ .rules.weaviateHTTPErrorRateHigh.val }}
+          for: {{ .rules.weaviateHTTPErrorRateHigh.duration }}
+          labels:
+            severity: {{ .rules.weaviateHTTPErrorRateHigh.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate HTTP error rate high
+            description: "Weaviate HTTP 4xx/5xx request percentage is above {{ .rules.weaviateHTTPErrorRateHigh.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateHTTPP95LatencyHigh")) }}
+        - alert: WeaviateHTTPP95LatencyHigh
+          expr: |
+            (
+              histogram_quantile(0.95, sum by (le, route) (rate(weaviate_http_request_duration_seconds_bucket{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m])))
+              or
+              histogram_quantile(0.95, sum by (le, route) (rate(http_request_duration_seconds_bucket{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m])))
+            ) > {{ .rules.weaviateHTTPP95LatencyHigh.val }}
+          for: {{ .rules.weaviateHTTPP95LatencyHigh.duration }}
+          labels:
+            severity: {{ .rules.weaviateHTTPP95LatencyHigh.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate HTTP p95 latency high (route {{`{{`}} $labels.route {{`}}`}})
+            description: "Weaviate HTTP p95 latency is above {{ .rules.weaviateHTTPP95LatencyHigh.val }} seconds.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateGRPCErrorRateHigh")) }}
+        - alert: WeaviateGRPCErrorRateHigh
+          expr: |
+            100 * (
+              (
+                sum(rate(weaviate_grpc_server_request_duration_seconds_count{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats",status!="OK"}[5m]))
+                or
+                sum(rate(grpc_server_request_duration_seconds_count{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats",status!="OK"}[5m]))
+              )
+              /
+              clamp_min(
+                (
+                  sum(rate(weaviate_grpc_server_request_duration_seconds_count{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m]))
+                  or
+                  sum(rate(grpc_server_request_duration_seconds_count{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m]))
+                ),
+                1
+              )
+            ) > {{ .rules.weaviateGRPCErrorRateHigh.val }}
+          for: {{ .rules.weaviateGRPCErrorRateHigh.duration }}
+          labels:
+            severity: {{ .rules.weaviateGRPCErrorRateHigh.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate gRPC error rate high (pod {{`{{`}} $labels.pod {{`}}`}})
+            description: "Weaviate gRPC non-OK request percentage is above {{ .rules.weaviateGRPCErrorRateHigh.val }} percent.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateGRPCP95LatencyHigh")) }}
+        - alert: WeaviateGRPCP95LatencyHigh
+          expr: |
+            (
+              histogram_quantile(0.95, sum by (le, grpc_service, method) (rate(weaviate_grpc_server_request_duration_seconds_bucket{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m])))
+              or
+              histogram_quantile(0.95, sum by (le, grpc_service, method) (rate(grpc_server_request_duration_seconds_bucket{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m])))
+            ) > {{ .rules.weaviateGRPCP95LatencyHigh.val }}
+          for: {{ .rules.weaviateGRPCP95LatencyHigh.duration }}
+          labels:
+            severity: {{ .rules.weaviateGRPCP95LatencyHigh.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate gRPC p95 latency high (method {{`{{`}} $labels.method {{`}}`}})
+            description: "Weaviate gRPC p95 latency is above {{ .rules.weaviateGRPCP95LatencyHigh.val }} seconds.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateReplicationEngineDown")) }}
+        - alert: WeaviateReplicationEngineDown
+          expr: min by (pod, node) (weaviate_replication_engine_running_status{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}) == 0
+          for: {{ .rules.weaviateReplicationEngineDown.duration }}
+          labels:
+            severity: {{ .rules.weaviateReplicationEngineDown.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate replication engine down (pod {{`{{`}} $labels.pod {{`}}`}}, node {{`{{`}} $labels.node {{`}}`}})
+            description: "Weaviate replication engine running status is down.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateReplicationQueueHigh")) }}
+        - alert: WeaviateReplicationQueueHigh
+          expr: sum by (node) (weaviate_replication_pending_operations{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}) > {{ .rules.weaviateReplicationQueueHigh.val }}
+          for: {{ .rules.weaviateReplicationQueueHigh.duration }}
+          labels:
+            severity: {{ .rules.weaviateReplicationQueueHigh.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate replication queue high (node {{`{{`}} $labels.node {{`}}`}})
+            description: "Weaviate has too many pending replication operations.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "weaviateReplicationFailuresHigh")) }}
+        - alert: WeaviateReplicationFailuresHigh
+          expr: sum by (node) (rate(weaviate_replication_failed_operations{namespace="{{ $.Release.Namespace }}",service="{{ $app }}-stats"}[5m])) > {{ .rules.weaviateReplicationFailuresHigh.val }}
+          for: {{ .rules.weaviateReplicationFailuresHigh.duration }}
+          labels:
+            severity: {{ .rules.weaviateReplicationFailuresHigh.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Weaviate replication failures detected (node {{`{{`}} $labels.node {{`}}`}})
+            description: "Weaviate replication failures were observed in the last 5 minutes.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+    {{- end }}
+    {{- end }}
+
+    {{- with .Values.form.alert.groups.provisioner }}
+    {{- if (include "kubedbcom-weaviate-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
+    - name: weaviate.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+      rules:
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) }}
+        - alert: KubeDBWeaviatePhaseNotReady
+          expr: (kubedb_com_weaviate_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} or kubedb_com_weaviate_status_phase{phase="NotReady",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"}) == 1
+          for: {{ .rules.appPhaseNotReady.duration }}
+          labels:
+            severity: {{ .rules.appPhaseNotReady.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: KubeDB Weaviate database in NotReady phase (weaviate {{`{{`}} $labels.weaviate {{`}}`}})
+            description: "KubeDB Weaviate database {{`{{`}} $labels.weaviate {{`}}`}} is in NotReady phase.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-weaviate-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) }}
+        - alert: KubeDBWeaviatePhaseCritical
+          expr: (kubedb_com_weaviate_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} or kubedb_com_weaviate_status_phase{phase="Critical",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"}) == 1
+          for: {{ .rules.appPhaseCritical.duration }}
+          labels:
+            severity: {{ .rules.appPhaseCritical.severity }}
+            {{- include "kubedbcom-weaviate-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: KubeDB Weaviate database in Critical phase (weaviate {{`{{`}} $labels.weaviate {{`}}`}})
+            description: "KubeDB Weaviate database {{`{{`}} $labels.weaviate {{`}}`}} is in Critical phase.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}

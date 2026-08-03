@@ -35,36 +35,38 @@ spec:
     {{end -}}
     {{ if (include "kubedbcom-redis-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "redisMissingMaster")) -}}
     - alert: RedisMissingMaster
-      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}) or vector(0)) < {{.rules.redisMissingMaster.val}}
+      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",role="master"}) or vector(0)) < {{.rules.redisMissingMaster.val}}
       for: {{ .rules.redisMissingMaster.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.redisMissingMaster.severity }}
         {{- include "kubedbcom-redis-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Redis missing master (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Redis cluster has less than expected amount of node marked as master\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Redis missing master (component {{`{{`}} $labels.job {{`}}`}})
+        description: "Redis cluster has less than expected amount of nodes marked as master for {{`{{`}} $labels.job {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
     {{ if (include "kubedbcom-redis-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "redisTooManyConnections")) -}}
     - alert: RedisTooManyConnections
-      expr: redis_connected_clients{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.redisTooManyConnections.val}}
+      expr: redis_connected_clients{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} / redis_config_maxclients{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.redisTooManyConnections.val}}
       for: {{ .rules.redisTooManyConnections.duration }}
       labels:
         severity: {{ .rules.redisTooManyConnections.severity }}
         {{- include "kubedbcom-redis-editor.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Redis too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Redis instance has too many connections . More than {{.rules.redisTooManyConnections.val}} of Redis connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Redis instance has too many connections . More than {{.rules.redisTooManyConnections.val}}% of maxclients are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if (include "kubedbcom-redis-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "redisTooManyMasters")) -}}
     - alert: RedisTooManyMasters
-      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"})) > {{.rules.redisTooManyMasters.val}}
+      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}",role="master"})) > {{.rules.redisTooManyMasters.val}}
       for: {{ .rules.redisTooManyMasters.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.redisTooManyMasters.severity }}
         {{- include "kubedbcom-redis-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Redis too many master nodes (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Redis cluster has too many nodes marked as master. \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Redis too many master nodes (component {{`{{`}} $labels.job {{`}}`}})
+        description: "Redis cluster has too many nodes marked as master for {{`{{`}} $labels.job {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if (include "kubedbcom-redis-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "redisDisconnectedSlaves")) -}}
     - alert: RedisDisconnectedSlaves
@@ -80,26 +82,46 @@ spec:
     
     {{ if (include "kubedbcom-redis-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
+      expr: >-
+        (
+          100 * kubelet_volume_stats_used_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+          /
+          on(namespace, persistentvolumeclaim)
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+        )
+        * on(namespace, persistentvolumeclaim) group_left(pod)
+        max by (namespace, persistentvolumeclaim, pod) (
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+$"}
+        )
+        > {{ .rules.diskUsageHigh.val }} < {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "kubedbcom-redis-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-redis-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
+      expr: >-
+        (
+          100 * kubelet_volume_stats_used_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+          /
+          on(namespace, persistentvolumeclaim)
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+        )
+        * on(namespace, persistentvolumeclaim) group_left(pod)
+        max by (namespace, persistentvolumeclaim, pod) (
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-[0-9]+$"}
+        )
+        > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "kubedbcom-redis-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{end -}}

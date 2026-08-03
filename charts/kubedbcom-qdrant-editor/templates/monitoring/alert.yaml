@@ -194,7 +194,7 @@ spec:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume usage high for Qdrant (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Persistent Volume usage high for Qdrant (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Persistent Volume usage is above {{ .rules.diskUsageHigh.val }}%. The storage is running low and may need expansion soon.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-qdrant-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
@@ -205,7 +205,7 @@ spec:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "kubedbcom-qdrant-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume almost full for Qdrant (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Persistent Volume almost full for Qdrant (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Persistent Volume usage is above {{ .rules.diskAlmostFull.val }}%. The storage is critically low and immediate action is required to avoid data loss.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{end -}}

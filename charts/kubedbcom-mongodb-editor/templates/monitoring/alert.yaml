@@ -30,7 +30,7 @@ spec:
         severity: {{ .rules.mongodbVirtualMemoryUsage.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB virtual memory usage (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB virtual memory usage (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "High memory usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbReplicationLag")) -}}
@@ -41,7 +41,7 @@ spec:
         severity: {{ .rules.mongodbReplicationLag.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB database has replication lag (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB database has replication lag (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Mongodb replication lag is more than {{ .rules.mongodbReplicationLag.val }}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbNumberCursorsOpen")) -}}
@@ -52,7 +52,7 @@ spec:
         severity: {{ .rules.mongodbNumberCursorsOpen.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB number cursors open (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB number cursors open (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many cursors opened by MongoDB for clients (> 10k)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbCursorsTimeouts")) -}}
@@ -63,7 +63,7 @@ spec:
         severity: {{ .rules.mongodbCursorsTimeouts.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB cursors timeouts (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB cursors timeouts (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many cursors are timing out\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbTooManyConnections")) -}}
@@ -74,7 +74,7 @@ spec:
         severity: {{ .rules.mongodbTooManyConnections.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB too many connections (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many connections (> 80%)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongoDBPhaseCritical")) -}}
@@ -85,7 +85,7 @@ spec:
         severity: {{ .rules.mongoDBPhaseCritical.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB database is in Critical state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongoDBDown")) -}}
@@ -96,7 +96,7 @@ spec:
         severity: {{ .rules.mongoDBDown.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: MongoDB database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: MongoDB database is in NotReady state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbHighLatency")) -}}
@@ -109,7 +109,7 @@ spec:
         severity: {{ .rules.mongodbHighLatency.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: High latency in mongodb instances {{`{{`}} $labels.instance {{`}}`}}
+        summary: High latency in mongodb instances {{`{{`}} $labels.pod {{`}}`}}
         description: "High latency in instances\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbHighTicketUtilization")) -}}
@@ -123,7 +123,7 @@ spec:
         severity: {{ .rules.mongodbHighTicketUtilization.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Ticket usage over 75% {{`{{`}} $labels.instance {{`}}`}}
+        summary: Ticket usage over 75% {{`{{`}} $labels.pod {{`}}`}}
         description: "Ticket usage over 75%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbRecurrentCursorTimeout")) -}}
@@ -134,7 +134,7 @@ spec:
         severity: {{ .rules.mongodbRecurrentCursorTimeout.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Recurrent cursors timeout in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Recurrent cursors timeout in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Recurrent cursors timeout\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "mongodbRecurrentMemoryPageFaults")) -}}
@@ -145,32 +145,32 @@ spec:
         severity: {{ .rules.mongodbRecurrentMemoryPageFaults.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Recurrent memory page faults in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Recurrent memory page faults in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Recurrent memory page faults\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
 
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mongodb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "kubedbcom-mongodb-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{end -}}

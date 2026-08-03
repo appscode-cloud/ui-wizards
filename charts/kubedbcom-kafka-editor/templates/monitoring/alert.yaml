@@ -30,7 +30,7 @@ spec:
         severity: {{ .rules.kafkaUnderReplicatedPartitions.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka under replicated partitions (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka under replicated partitions (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There are {{`{{`}} $value {{`}}`}} under replicated partitions.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaAbnormalControllerState")) -}}
@@ -41,7 +41,7 @@ spec:
         severity: {{ .rules.kafkaAbnormalControllerState.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: At least one active controller must be acting (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: At least one active controller must be acting (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There are {{`{{`}} $value {{`}}`}} active controllers.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaOfflinePartitions")) -}}
@@ -52,7 +52,7 @@ spec:
         severity: {{ .rules.kafkaOfflinePartitions.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka offline partitions (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka offline partitions (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "One or more partitions have no leader.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaUnderMinIsrPartitionCount")) -}}
@@ -63,7 +63,7 @@ spec:
         severity: {{ .rules.kafkaUnderMinIsrPartitionCount.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka under min ISR partitions (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka under min ISR partitions (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There are {{`{{`}} $value {{`}}`}} partitions under the min ISR.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaOfflineLogDirectoryCount")) -}}
@@ -74,7 +74,7 @@ spec:
         severity: {{ .rules.kafkaOfflineLogDirectoryCount.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka offline log directories (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka offline log directories (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "There are {{`{{`}} $value {{`}}`}} offline log directories.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaISRExpandRate")) -}}
@@ -85,7 +85,7 @@ spec:
         severity: {{ .rules.kafkaISRExpandRate.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka ISR Expansion Rate (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka ISR Expansion Rate (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "If a broker goes down, ISR for some of the partitions shrink. When that broker is up again, ISRs are expanded once the replicas are fully caught up. Other than that, the expected value for ISR expansion rate is 0. If ISR is expanding and shrinking frequently, adjust Allowed replica lag..\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaISRShrinkRate")) -}}
@@ -96,7 +96,7 @@ spec:
         severity: {{ .rules.kafkaISRShrinkRate.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka ISR Shrink Rate (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka ISR Shrink Rate (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "If a broker goes down, ISR for some of the partitions shrink. When that broker is up again, ISRs are expanded once the replicas are fully caught up. Other than that, the expected value for ISR shrink rate is 0. If ISR is expanding and shrinking frequently, adjust Allowed replica lag.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaBrokerCount")) -}}
@@ -104,10 +104,11 @@ spec:
       expr: count(kafka_server_kafkaserver_brokerstate{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == {{ .rules.kafkaBrokerCount.val }}
       for: {{ .rules.kafkaBrokerCount.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.kafkaBrokerCount.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: No Kafka Brokers online! (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: No Kafka Brokers online! (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Broker count is 0.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaNetworkProcessorIdlePercent")) -}}
@@ -118,7 +119,7 @@ spec:
         severity: {{ .rules.kafkaNetworkProcessorIdlePercent.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka Network Processor Idle Percent is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka Network Processor Idle Percent is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The average fraction of time the network processors are idle. A lower value {{`{{`}} $value {{`}}`}} indicates that the network workload of the broker is very high.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaRequestHandlerIdlePercent")) -}}
@@ -129,7 +130,7 @@ spec:
         severity: {{ .rules.kafkaRequestHandlerIdlePercent.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka Request Handler Idle Percent is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka Request Handler Idle Percent is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The average fraction of time the request handler threads (IO) are idle. A lower value indicates that the workload of a broker is very high.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaReplicaFetcherManagerMaxLag")) -}}
@@ -140,7 +141,7 @@ spec:
         severity: {{ .rules.kafkaReplicaFetcherManagerMaxLag.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Replica Fetcher Manager Max Lag is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Replica Fetcher Manager Max Lag is {{`{{`}} $value {{`}}`}} (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The maximum lag between the time that messages are received by the leader replica and by the follower replicas.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaTopicCount")) -}}
@@ -148,10 +149,11 @@ spec:
       expr: count(count(kafka_server_brokertopicmetrics_messagesin_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) by (topic,service)) by (service) > {{ .rules.kafkaTopicCount.val }}
       for: {{ .rules.kafkaTopicCount.duration }}
       labels:
+        job: {{ $app }}-stats
         severity: {{ .rules.kafkaTopicCount.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka 1000 topics reached (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka 1000 topics reached (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The number of active topics in the cluster has reached 1000.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
 
@@ -164,7 +166,7 @@ spec:
         severity: {{ .rules.kafkaPhaseCritical.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka database is in Critical state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "kafkaDown")) -}}
@@ -175,32 +177,32 @@ spec:
         severity: {{ .rules.kafkaDown.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Kafka database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Kafka database is in NotReady state (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-kafka-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "kubedbcom-kafka-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{end -}}

@@ -11,6 +11,8 @@ properties:
             additionalProperties:
               type: string
             type: object
+          appSuffix:
+            type: string
           enabled:
             enum:
             - none
@@ -166,46 +168,6 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      postgresNotEnoughConnections:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      postgresReplicationLag:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                       postgresRestarted:
                         properties:
                           duration:
@@ -238,10 +200,13 @@ properties:
                             - warning
                             - info
                             type: string
+                          val:
+                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
+                        - val
                         type: object
                       postgresSplitBrain:
                         properties:
@@ -309,8 +274,6 @@ properties:
                     - postgresExporterError
                     - postgresHighRollbackRate
                     - postgresInstanceDown
-                    - postgresNotEnoughConnections
-                    - postgresReplicationLag
                     - postgresRestarted
                     - postgresSlowQueries
                     - postgresSplitBrain

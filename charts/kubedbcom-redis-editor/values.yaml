@@ -2,18 +2,19 @@ form:
   alert:
     additionalRuleLabels: {}
     annotations: {}
+    appSuffix: ""
     enabled: warning
     groups:
       database:
         enabled: warning
         rules:
           diskAlmostFull:
-            duration: 1m
+            duration: 5m
             enabled: true
             severity: critical
             val: 95
           diskUsageHigh:
-            duration: 1m
+            duration: 5m
             enabled: true
             severity: warning
             val: 80
@@ -23,11 +24,11 @@ form:
             severity: warning
             val: 1
           redisDown:
-            duration: 0m
+            duration: 2m
             enabled: true
             severity: critical
           redisMissingMaster:
-            duration: 0m
+            duration: 2m
             enabled: true
             severity: critical
             val: 1
@@ -40,7 +41,7 @@ form:
             duration: 2m
             enabled: true
             severity: warning
-            val: 100
+            val: 80
           redisTooManyMasters:
             duration: 2m
             enabled: true
@@ -143,7 +144,7 @@ form:
             severity: warning
             val: 1800
     labels:
-      release: prometheus
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com
