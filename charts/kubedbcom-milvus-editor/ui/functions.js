@@ -102,7 +102,7 @@ export const useFunc = (model) => {
       )
       const items = (resp && resp.data && resp.data.items) || []
       return items
-        .filter((item) => ['kubernetes.io/service-account-token', 'Opaque'].includes(item.type))
+        .filter((item) => ['Opaque'].includes(item.type))
         .map((item) => {
           const name = (item.metadata && item.metadata.name) || ''
           return { text: name, value: name }
