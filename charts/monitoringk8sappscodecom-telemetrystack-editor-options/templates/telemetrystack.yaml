@@ -1,0 +1,74 @@
+apiVersion: monitoring.k8s.appscode.com/v1alpha1
+kind: TelemetryStack
+metadata:
+  name: {{ include "monitoringk8sappscodecom-telemetrystack-editor-options.fullname" . }}
+  labels:
+    {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.labels" . | nindent 4 }}
+spec:
+  metrics:
+    thanos:
+      compact:
+        storageSize: {{ .Values.spec.metrics.thanos.compact.storageSize }}
+        {{- if .Values.spec.metrics.thanos.compact.retentionConfig }}
+        retentionConfig:
+          {{- toYaml .Values.spec.metrics.thanos.compact.retentionConfig | nindent 10 }}
+        {{- end }}
+      store:
+        storageSize: {{ .Values.spec.metrics.thanos.store.storageSize }}
+        {{- if .Values.spec.metrics.thanos.store.ignoreDeletionMarksDelay }}
+        ignoreDeletionMarksDelay: {{ .Values.spec.metrics.thanos.store.ignoreDeletionMarksDelay }}
+        {{- end }}
+        shardingStrategy:
+          type: {{ .Values.spec.metrics.thanos.store.shardingStrategy.type }}
+          shards: {{ .Values.spec.metrics.thanos.store.shardingStrategy.shards }}
+      query:
+        {{- if .Values.spec.metrics.thanos.query.replicas }}
+        replicas: {{ .Values.spec.metrics.thanos.query.replicas }}
+        {{- end }}
+      receive:
+        ingesterSpec:
+          hashrings:
+          - name: {{ .Values.spec.metrics.thanos.receive.ingesterSpec.name }}
+            replicas: {{ .Values.spec.metrics.thanos.receive.ingesterSpec.replicas }}
+            storageSize: {{ .Values.spec.metrics.thanos.receive.ingesterSpec.storageSize }}
+            {{- if .Values.spec.metrics.thanos.receive.ingesterSpec.tsdbRetention }}
+            tsdbConfig:
+              retention: {{ .Values.spec.metrics.thanos.receive.ingesterSpec.tsdbRetention }}
+            {{- end }}
+            {{- with .Values.spec.metrics.thanos.receive.ingesterSpec.tenancyConfig }}
+            tenancyConfig:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+        routerSpec:
+          replicas: {{ .Values.spec.metrics.thanos.receive.routerSpec.replicas }}
+          replicationFactor: {{ .Values.spec.metrics.thanos.receive.routerSpec.replicationFactor }}
+          {{- if .Values.spec.metrics.thanos.receive.routerSpec.externalLabels }}
+          externalLabels:
+            {{- toYaml .Values.spec.metrics.thanos.receive.routerSpec.externalLabels | nindent 12 }}
+          {{- end }}
+      ruler:
+        replicas: {{ .Values.spec.metrics.thanos.ruler.replicas }}
+        storageSize: {{ .Values.spec.metrics.thanos.ruler.storageSize }}
+        alertmanagerURL: {{ .Values.spec.metrics.thanos.ruler.alertmanagerURL | quote }}
+        {{- if .Values.spec.metrics.thanos.ruler.additionalConfig.additionalArgs }}
+        additionalArgs:
+          {{- toYaml .Values.spec.metrics.thanos.ruler.additionalConfig.additionalArgs | nindent 10 }}
+        {{- end }}
+        {{- if .Values.spec.metrics.thanos.ruler.additionalConfig.additionalVolumes }}
+        additionalVolumes:
+          {{- toYaml .Values.spec.metrics.thanos.ruler.additionalConfig.additionalVolumes | nindent 10 }}
+        {{- end }}
+        {{- if .Values.spec.metrics.thanos.ruler.additionalConfig.additionalVolumeMounts }}
+        additionalVolumeMounts:
+          {{- toYaml .Values.spec.metrics.thanos.ruler.additionalConfig.additionalVolumeMounts | nindent 10 }}
+        {{- end }}
+      {{- if .Values.spec.metrics.thanos.s3.bucket }}
+      s3:
+        {{- toYaml .Values.spec.metrics.thanos.s3 | nindent 8 }}
+      {{- end }}
+  logs:
+    clickhouse:
+      {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.clickhouse" (dict "root" $ "pillar" .Values.spec.logs) | nindent 6 }}
+  traces:
+    clickhouse:
+      {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.clickhouse" (dict "root" $ "pillar" .Values.spec.traces) | nindent 6 }}
