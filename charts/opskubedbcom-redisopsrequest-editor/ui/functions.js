@@ -1210,6 +1210,26 @@ export const useFunc = (model) => {
   function initTlsOperation() {
     return 'update'
   }
+  function onTlsOperationChange() {
+    const tlsOperation = getValue(discriminator, '/tlsOperation')
+
+    commit('wizard/model$delete', '/spec/tls')
+
+    if (tlsOperation === 'rotate') {
+      commit('wizard/model$update', {
+        path: '/spec/tls/rotateCertificates',
+        value: true,
+        force: true,
+      })
+    } else if (tlsOperation === 'remove') {
+      commit('wizard/model$update', {
+        path: '/spec/tls/remove',
+        value: true,
+        force: true,
+      })
+    }
+  }
+
   function showIssuerRefAndCertificates() {
     const tlsOperation = getValue(discriminator, '/tlsOperation')
     // watchDependency('discriminator#/tlsOperation')
@@ -1445,6 +1465,7 @@ export const useFunc = (model) => {
     initIssuerRefApiGroup,
     getIssuerRefsName,
     initTlsOperation,
+    onTlsOperationChange,
     showIssuerRefAndCertificates,
     isIssuerRefRequired,
     getRequestTypeFromRoute,
