@@ -850,6 +850,21 @@ export const useFunc = (model) => {
     return !!agent
   }
 
+  function onBackupSwitch() {
+    const isBackupOn = getValue(discriminator, '/backup')
+    commit('wizard/model$update', {
+      path: '/spec/backup/tool',
+      value: isBackupOn ? 'KubeStash' : '',
+      force: true,
+    })
+  }
+
+  function setBackup() {
+    const backup = getValue(model, '/spec/backup/tool')
+    const val = getValue(model, '/spec/admin/backup/enable/default')
+    return backup === 'KubeStash' && features.includes('backup') && val
+  }
+
   function setRequests(resource, type) {
     const modelPath = type
       ? `/spec/${type}/podResources/resources/requests/${resource}`
@@ -1178,8 +1193,10 @@ export const useFunc = (model) => {
     isRancherManaged,
     isVariantAvailable,
     onAuthChange,
+    onBackupSwitch,
     onReferSecretChange,
     returnFalse,
+    setBackup,
     setLimits,
     setMachineToCustom,
     setMonitoring,
