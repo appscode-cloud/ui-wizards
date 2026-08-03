@@ -74,6 +74,9 @@ step:
           - schema/properties/spec/properties/podResources/properties/machine
       showLabels: true
       type: horizontal-layout
+    if:
+      name: isEqualToModelPathValue|Standalone|/spec/mode
+      type: function
     label: Machine Profile
     showLabels: true
     type: block-layout
@@ -86,7 +89,10 @@ step:
         loader: getAdminOptions|storageClasses
         schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
         type: select
-      - label: Storage Size
+      - if:
+          name: isEqualToModelPathValue|Standalone|/spec/mode
+          type: function
+        label: Storage Size
         schema: schema/properties/spec/properties/persistence/properties/size
         type: input
         validation:
