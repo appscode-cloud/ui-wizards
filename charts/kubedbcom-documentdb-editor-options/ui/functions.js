@@ -387,10 +387,6 @@ export const useFunc = (model) => {
     return modelPathValue === value
   }
 
-  function showStorageSizeField() {
-    return true
-  }
-
   async function getNamespaces() {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
@@ -661,10 +657,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function returnFalse() {
-    return false
-  }
-
   let placement = []
   let versions = []
   let storageClass = []
@@ -791,10 +783,6 @@ export const useFunc = (model) => {
     setDiscriminatorValue('/bundleApiLoaded', true)
   }
 
-  function fetchNamespaces() {
-    return namespaces
-  }
-
   function fetchOptions(type) {
     const kind = getValue(model, '/metadata/resource/kind')
 
@@ -914,28 +902,6 @@ export const useFunc = (model) => {
     else onArchiverChange()
 
     return show
-  }
-
-  async function getRecoveryNames(type) {
-    const params = storeGet('/route/params')
-    const { user, cluster } = params
-    const namespace = getValue(model, `/spec/init/archiver/${type}/namespace`)
-    let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`
-    if (type === 'encryptionSecret')
-      url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
-    const options = []
-    if (namespace) {
-      try {
-        const resp = await axios.get(url)
-        const items = resp.data?.items
-        items.forEach((ele) => {
-          options.push(ele.metadata?.name)
-        })
-      } catch (e) {
-        console.log(e)
-      }
-    }
-    return options
   }
 
   let backupToolInitialValue = ''
@@ -1093,19 +1059,6 @@ export const useFunc = (model) => {
     const backup = getValue(model, '/spec/backup/tool')
     const val = getValue(model, '/spec/admin/backup/enable/default')
     return backup === 'KubeStash' && features.includes('backup') && val
-  }
-
-  function onAuthChange() {
-    commit('wizard/model$update', {
-      path: '/spec/authSecret/name',
-      value: '',
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/spec/authSecret/password',
-      value: '',
-      force: true,
-    })
   }
 
   function onReferSecretChange() {
@@ -1293,11 +1246,6 @@ export const useFunc = (model) => {
   }
 
   let pointIntimeError = ''
-  function pointInTimeErrorCheck() {
-    if (pointIntimeError.length) return pointIntimeError
-    return
-  }
-
   return {
     onReferSecretChange,
     showReferSecretSwitch,
@@ -1306,17 +1254,12 @@ export const useFunc = (model) => {
     showReferSecret,
     getReferSecrets,
     setPointInTimeRecovery,
-    pointInTimeErrorCheck,
     checkHostnameOrIP,
-    getRecoveryNames,
-    fetchNamespaces,
     showRecovery,
     showAdditionalSettings,
-    returnFalse,
     initBundle,
     showAuthPasswordField,
     isEqualToModelPathValue,
-    showStorageSizeField,
     getNamespaces,
     onCreateAuthSecretChange,
     isMachineNotCustom,
@@ -1337,7 +1280,6 @@ export const useFunc = (model) => {
     setMonitoring,
     getNodeTopology,
     filterNodeTopology,
-    onAuthChange,
     setBackup,
     getDefault,
     onArchiverChange,

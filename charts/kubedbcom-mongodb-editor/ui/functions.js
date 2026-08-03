@@ -136,10 +136,6 @@ export const useFunc = (model) => {
     return !!(valueFrom && valueFrom.secretKeyRef)
   }
 
-  function isInputTypeValueFrom() {
-    return !isConfigMapTypeValueFrom() && !isSecretTypeValueFrom()
-  }
-
   function onValueFromChange() {
     const valueFrom = getValue(discriminator, '/valueFromType')
     if (valueFrom === 'input') {
@@ -186,10 +182,6 @@ export const useFunc = (model) => {
     watchDependency('discriminator#' + discriminatorPath)
     const discriminatorValue = getValue(discriminator, discriminatorPath)
     return discriminatorValue === value
-  }
-
-  function setValueFromModel({ getValue, model }, path) {
-    return getValue(model, path)
   }
 
   function isEqualToTemp(value, index) {
@@ -373,50 +365,7 @@ export const useFunc = (model) => {
   }
 
   // ************************* Auth Secret Field ******************************************
-  function showAuthPasswordField({ model, getValue, watchDependency }) {
-    watchDependency('model#/resources')
-    const modelPathValue = getValue(model, '/resources')
-    return !!(
-      modelPathValue &&
-      modelPathValue.secret &&
-      modelPathValue.secret.metadata &&
-      modelPathValue.secret.metadata.name &&
-      !showAuthSecretField({ model, getValue, watchDependency })
-    )
-  }
-
-  function showAuthSecretField({ model, getValue, watchDependency }) {
-    watchDependency('model#/resources/kubedbComMongoDB/spec')
-    const modelPathValue = getValue(model, '/resources/kubedbComMongoDB/spec')
-    return !!(modelPathValue && modelPathValue.authSecret && modelPathValue.authSecret.name)
-  }
-
-  function showNewSecretCreateField({ model, getValue, watchDependency, commit }) {
-    const resp =
-      !showAuthSecretField({ model, getValue, watchDependency }) &&
-      !showAuthPasswordField({ model, getValue, watchDependency })
-    const secret = getValue(model, '/resources/secret_auth')
-    if (resp && !secret) {
-      commit('wizard/model$update', {
-        path: '/resources/secret_auth',
-        value: {
-          data: {
-            password: '',
-          },
-        },
-        force: true,
-      })
-    }
-    return resp
-  }
-
   // ********************* Database Mode ***********************
-  function isNotStandaloneMode({ discriminator, getValue, watchDependency }) {
-    watchDependency('discriminator#/activeDatabaseMode')
-    const mode = getValue(discriminator, '/activeDatabaseMode')
-    return mode !== 'Standalone'
-  }
-
   function showCommonStorageClassAndSizeField({ discriminator, getValue, watchDependency }) {
     watchDependency('discriminator#/activeDatabaseMode')
     const mode = getValue(discriminator, '/activeDatabaseMode')
@@ -692,30 +641,6 @@ export const useFunc = (model) => {
     }
   }
 
-  async function hasIssuerRefName({ axios, storeGet, getValue, model, watchDependency }) {
-    const resp = await getIssuerRefsName({
-      axios,
-      storeGet,
-      getValue,
-      model,
-      watchDependency,
-    })
-
-    return !!(resp && resp.length)
-  }
-
-  async function hasNoIssuerRefName({ axios, storeGet, getValue, model, watchDependency }) {
-    const resp = await hasIssuerRefName({
-      axios,
-      storeGet,
-      getValue,
-      model,
-      watchDependency,
-    })
-
-    return !resp
-  }
-
   function setClusterAuthMode({ model, getValue }) {
     const val = getValue(model, '/resources/kubedbComMongoDB/spec/clusterAuthMode')
     return val || 'x509'
@@ -920,30 +845,10 @@ export const useFunc = (model) => {
     },
   }
 
-  function disableInitializationSection({ model, getValue, watchDependency }) {
-    const initialized = getValue(model, '/resources/kubedbComMongoDB/spec/init/initialized')
-    watchDependency('model#/resources/kubedbComMongoDB/spec/init/initialized')
-    return !!initialized
-  }
-
   function valueExists(value, getValue, path) {
     const val = getValue(value, path)
     if (val) return true
     else return false
-  }
-
-  function initPrePopulateDatabase({ getValue, model }) {
-    const waitForInitialRestore = getValue(
-      model,
-      '/resources/kubedbComMongoDB/spec/init/waitForInitialRestore',
-    )
-    const stashAppscodeComRestoreSession_init = getValue(
-      model,
-      '/resources/stashAppscodeComRestoreSession_init',
-    )
-    const script = getValue(model, '/resources/kubedbComMongoDB/spec/init/script')
-
-    return waitForInitialRestore || !!stashAppscodeComRestoreSession_init || !!script ? 'yes' : 'no'
   }
 
   function onPrePopulateDatabaseChange({ commit, getValue, discriminator, model }) {
@@ -1085,11 +990,6 @@ export const useFunc = (model) => {
   }
 
   // for stash backup
-  function initializeNamespace({ getValue, model }) {
-    const namespace = getValue(model, '/metadata/release/namespace')
-    return namespace
-  }
-
   function showRepositorySelectOrCreate({ getValue, discriminator, watchDependency }, value) {
     const repositoryChoise = getValue(discriminator, '/repositoryChoise')
     watchDependency('discriminator#/repositoryChoise')
@@ -1205,155 +1105,6 @@ export const useFunc = (model) => {
     return customizeRestoreJobRuntimeSettings === value
   }
 
-  async function getImagePullSecrets({ getValue, model, watchDependency, axios, storeGet }) {
-    const namespace = getValue(model, '/metadata/release/namespace')
-    watchDependency('model#/metadata/release/namespace')
-
-    let resources = await getNamespacedResourceList(axios, storeGet, {
-      namespace,
-      group: 'core',
-      version: 'v1',
-      resource: 'secrets',
-    })
-
-    resources = resources.filter((item) => {
-      const validType = ['kubernetes.io/dockerconfigjson']
-      return validType.includes(item.type)
-    })
-
-    return resources.map((resource) => {
-      const name = (resource.metadata && resource.metadata.name) || ''
-      return {
-        text: name,
-        value: { name: name },
-      }
-    })
-  }
-
-  function showBackupOptions({ discriminator, getValue, watchDependency }, backup) {
-    const backupEnabled = getValue(discriminator, '/backupEnabled')
-    if (backupEnabled) {
-      if (backup === 'alert') return true
-      else return false
-    } else {
-      if (backup === 'alert') return false
-      else return true
-    }
-  }
-
-  function isBlueprintOption({ discriminator, getValue, watchDependency }, value) {
-    watchDependency('discriminator#/blueprintOptions')
-    const blueprintOptions = getValue(discriminator, '/blueprintOptions')
-    return blueprintOptions === value
-  }
-
-  function ifUsagePolicy({ discriminator, getValue, watchDependency, model }, value) {
-    watchDependency(
-      'model#/resources/coreKubestashComBackupBlueprint/spec/usagePolicy/allowedNamespaces/from/default',
-    )
-    const usagePolicy = getValue(
-      model,
-      '/resources/coreKubestashComBackupBlueprint/spec/usagePolicy/allowedNamespaces/from/default',
-    )
-    return usagePolicy === value
-  }
-
-  async function getBlueprints(
-    { getValue, model, setDiscriminatorValue, axios, storeGet },
-    backup,
-  ) {
-    const username = storeGet('/route/params/user')
-    const clusterName = storeGet('/route/params/cluster')
-    const url = `clusters/${username}/${clusterName}/proxy/core.kubestash.com/v1alpha1/backupblueprints`
-
-    try {
-      const resp = await axios.get(url)
-      let data = resp.data.items
-      return data
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  function isRancherManaged({ storeGet }) {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
-  }
-
-  async function fetchNamespaces({ axios, storeGet }) {
-    const username = storeGet('/route/params/user')
-    const clusterName = storeGet('/route/params/cluster')
-    const group = storeGet('/route/params/group')
-    const version = storeGet('/route/params/version')
-    const resource = storeGet('/route/params/resource')
-
-    const url = `clusters/${username}/${clusterName}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`
-
-    try {
-      const resp = await axios.post(url, {
-        _recurringCall: false,
-        apiVersion: 'identity.k8s.appscode.com/v1alpha1',
-        kind: 'SelfSubjectNamespaceAccessReview',
-        spec: {
-          resourceAttributes: [
-            {
-              verb: 'create',
-              group: group,
-              version: version,
-              resource: resource,
-            },
-          ],
-        },
-      })
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
-        let projectsNamespace = []
-        projectsNamespace = Object.keys(projects).map((project) => ({
-          project: project,
-          namespaces: projects[project].map((namespace) => ({
-            text: namespace,
-            value: namespace,
-          })),
-        }))
-        return projectsNamespace
-      } else {
-        return resp.data?.status?.namespaces || []
-      }
-    } catch (e) {
-      console.log(e)
-    }
-    return []
-  }
-
-  async function fetchNames(
-    { getValue, axios, storeGet, watchDependency, discriminator },
-    version,
-    type,
-    discriminatorName,
-  ) {
-    watchDependency(`discriminator#/${discriminatorName}`)
-    const username = storeGet('/route/params/user')
-    const clusterName = storeGet('/route/params/cluster')
-    const namespace = getValue(discriminator, `${discriminatorName}`)
-    const url =
-      type !== 'secrets'
-        ? `clusters/${username}/${clusterName}/proxy/storage.kubestash.com/${version}/namespaces/${namespace}/${type}`
-        : `clusters/${username}/${clusterName}/proxy/core/${version}/namespaces/${namespace}/${type}`
-    try {
-      if (namespace) {
-        const resp = await axios.get(url)
-        let data = resp.data.items
-        if (type === 'secrets') data = data.filter((ele) => !!ele.data['RESTIC_PASSWORD'])
-        data = data.map((ele) => ele.metadata.name)
-        return data
-      }
-    } catch (e) {
-      console.log(e)
-    }
-    return []
-  }
-
   // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // FOR Backup Configuration
@@ -1449,16 +1200,6 @@ export const useFunc = (model) => {
     else return 'no'
   }
 
-  function initScheduleBackup({ getValue, model }) {
-    const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
-      getValue,
-      model,
-    )
-
-    if (stashAppscodeComBackupConfiguration || isBluePrint) return 'yes'
-    else return 'no'
-  }
-
   function onScheduleBackupChange() {
     const scheduleBackup = getValue(discriminator, '/scheduleBackup')
 
@@ -1501,13 +1242,6 @@ export const useFunc = (model) => {
   }
 
   // backup configuration form
-  function initalizeTargetReferenceName({ getValue, model, watchDependency }) {
-    const databaseName = getValue(model, '/metadata/release/name')
-    watchDependency('model#/metadata/release/name')
-
-    return databaseName
-  }
-
   // restore session repository
   function setInitialRestoreSessionRepo({ getValue, model }) {
     const value = getValue(model, 'resources/stashAppscodeComRepository_init_repo')
@@ -1560,44 +1294,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function onRepositoryNameChange({ getValue, model, commit }) {
-    const repositoryName = getValue(
-      model,
-      'resources/stashAppscodeComRepository_repo/metadata/name',
-    )
-    // set this name in stashAppscodeComRestoreSession_init
-    commit('wizard/model$update', {
-      path: '/resources/stashAppscodeComBackupConfiguration/spec/repository/name',
-      value: repositoryName,
-    })
-  }
-
-  function onInputChange(
-    { getValue, discriminator, watchDependency, commit, model },
-    modelPath,
-    field,
-    subfield,
-    discriminatorName,
-  ) {
-    const value = getValue(discriminator, `/${discriminatorName}`)
-    const backends = getValue(model, modelPath) || []
-    if (field !== 'encryptionSecret') backends[0][field][subfield] = value
-    else backends[0]['repositories'][0][field][subfield] = value
-    commit('wizard/model$update', {
-      path: modelPath,
-      value: backends,
-    })
-  }
-  function setFileValueFromStash({ getValue, commit, model }, modelPath, field, subfield, value) {
-    const backends = getValue(model, modelPath)
-    if (field !== 'encryptionSecret') backends[0][field][subfield] = value
-    else backends[0]['repositories'][0][field][subfield] = value
-    commit('wizard/model$update', {
-      path: modelPath,
-      value: backends,
-    })
-  }
-
   function onInputChangeSchedule(modelPath, discriminatorName) {
     const value = getValue(discriminator, `/${discriminatorName}`)
     const session = getValue(model, modelPath) || []
@@ -1608,27 +1304,6 @@ export const useFunc = (model) => {
         value: session,
         force: true,
       })
-    }
-  }
-
-  function setInitSchedule(
-    { getValue, discriminator, watchDependency, commit, model },
-    modelPath,
-    value,
-  ) {
-    const session = getValue(model, modelPath)
-    session[0].scheduler.schedule = value
-    commit('wizard/model$update', {
-      path: modelPath,
-      value: session,
-    })
-  }
-
-  function getDefault({ getValue, model }, modelPath, field, subfield) {
-    const backends = getValue(model, modelPath)
-    if (field !== 'encryptionSecret') return backends[0][field][subfield]
-    else {
-      return backends[0]['repositories'][0][field][subfield]
     }
   }
 
@@ -1646,7 +1321,6 @@ export const useFunc = (model) => {
   let isBackupOnModel = false
   let dbResource = {}
   let initialDbMetadata = {}
-  let namespaceList = []
   let backupConfigurationsFromStore = {}
   let valuesFromWizard = {
     apiVersion: 'core.kubestash.com/v1alpha1',
@@ -2064,10 +1738,6 @@ export const useFunc = (model) => {
     else return !!configName
   }
 
-  function getNamespaceArray() {
-    return namespaceList
-  }
-
   // backup blueprint form
   function getMongoAnnotations(getValue, model) {
     const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations')
@@ -2425,11 +2095,6 @@ export const useFunc = (model) => {
 
   //////////////////// service monitor ///////////////////
 
-  function isEqualToServiceMonitorType({ rootModel, watchDependency }, value) {
-    watchDependency('rootModel#/spec/type')
-    return rootModel && rootModel.spec && rootModel.spec.type === value
-  }
-
   //////////////////// custom config /////////////////
   function onConfigurationSourceChange({ getValue, discriminator, commit, model }) {
     const configurationSource = getValue(discriminator, '/configurationSource')
@@ -2474,12 +2139,6 @@ export const useFunc = (model) => {
       return 'create-new-config'
     }
     return 'use-existing-config'
-  }
-
-  function setSecretConfigNamespace({ getValue, model, watchDependency }) {
-    watchDependency('model#/metadata/release/namespace')
-    const namespace = getValue(model, '/metadata/release/namespace')
-    return namespace
   }
 
   //////////////////// custom config for sharded topology /////////////////
@@ -2753,26 +2412,6 @@ export const useFunc = (model) => {
   function setConfigurationMongos({ model, getValue }) {
     const value = getValue(model, '/resources/secret_mongos_config/stringData/mongod.conf')
     return value
-  }
-
-  function setConfigurationFiles({ model, getValue }) {
-    const value = getValue(model, '/resources/secret_config/data/mongod.conf')
-    return atob(value)
-  }
-
-  function setConfigurationFilesShard({ model, getValue }) {
-    const value = getValue(model, '/resources/secret_shard_config/data/mongod.conf')
-    return atob(value)
-  }
-
-  function setConfigurationFilesConfigServer({ model, getValue }) {
-    const value = getValue(model, '/resources/secret_configserver_config/data/mongod.conf')
-    return atob(value)
-  }
-
-  function setConfigurationFilesMongos({ model, getValue }) {
-    const value = getValue(model, '/resources/secret_mongos_config/data/mongod.conf')
-    return atob(value)
   }
 
   function onSetCustomConfigChange({ discriminator, getValue, commit }) {
@@ -3400,18 +3039,8 @@ export const useFunc = (model) => {
     onTriggerChange,
     setApplyToIfReady,
     showOpsRequestOptions,
-    setInitSchedule,
-    fetchNames,
-    isRancherManaged,
-    fetchNamespaces,
     onInputChangeSchedule,
     getDefaultSchedule,
-    getBlueprints,
-    ifUsagePolicy,
-    isBlueprintOption,
-    getDefault,
-    onInputChange,
-    showBackupOptions,
     showScheduleBackup,
     isVariantAvailable,
     fetchJsons,
@@ -3419,7 +3048,6 @@ export const useFunc = (model) => {
     isEqualToModelPathValue,
     getResources,
     isEqualToDiscriminatorPath,
-    setValueFromModel,
     isNotShardModeSelected,
     isShardModeSelected,
     getNamespacedResourceList,
@@ -3429,10 +3057,6 @@ export const useFunc = (model) => {
     returnTrue,
     returnStringYes,
     getMongoDbVersions,
-    showAuthPasswordField,
-    showAuthSecretField,
-    showNewSecretCreateField,
-    isNotStandaloneMode,
     showCommonStorageClassAndSizeField,
     setDatabaseMode,
     getStorageClassNames,
@@ -3441,8 +3065,6 @@ export const useFunc = (model) => {
     isEqualToDatabaseMode,
     setApiGroup,
     getIssuerRefsName,
-    hasIssuerRefName,
-    hasNoIssuerRefName,
     setClusterAuthMode,
     setSSLMode,
     showTlsConfigureSection,
@@ -3452,9 +3074,7 @@ export const useFunc = (model) => {
     onEnableMonitoringChange,
     showCustomizeExporterSection,
     onCustomizeExporterChange,
-    disableInitializationSection,
     valueExists,
-    initPrePopulateDatabase,
     onPrePopulateDatabaseChange,
     initDataSource,
     onDataSourceChange,
@@ -3463,7 +3083,6 @@ export const useFunc = (model) => {
     showInitializationForm,
     showScriptOrStashForm,
     showConfigMapOrSecretName,
-    initializeNamespace,
     showRepositorySelectOrCreate,
     onInitRepositoryChoiseChange,
     initCustomizeRestoreJobRuntimeSettings,
@@ -3471,20 +3090,16 @@ export const useFunc = (model) => {
     onCustomizeRestoreJobRuntimeSettingsChange,
     onCustomizeRestoreJobRuntimeSettingsChangeForBackup,
     showRuntimeForm,
-    getImagePullSecrets,
     getBackupConfigsAndAnnotations,
     deleteKubeDbComMongDbAnnotation,
     addKubeDbComMongDbAnnotation,
-    initScheduleBackup,
     initScheduleBackupForEdit,
     onScheduleBackupChange,
     showBackupForm,
-    initalizeTargetReferenceName,
     setInitialRestoreSessionRepo,
     initRepositoryChoise,
     initRepositoryChoiseForEdit,
     onRepositoryChoiseChange,
-    onRepositoryNameChange,
     getMongoAnnotations,
     initFromAnnotationValue,
     onBackupBlueprintNameChange,
@@ -3506,11 +3121,9 @@ export const useFunc = (model) => {
     decodePassword,
     onCreateAuthSecretChange,
     getSecrets,
-    isEqualToServiceMonitorType,
     onConfigurationSourceChange,
     onConfigurationChange,
     setConfigurationSource,
-    setSecretConfigNamespace,
     setConfigurationSourceShard,
     setConfigurationSourceConfigServer,
     setConfigurationSourceMongos,
@@ -3525,10 +3138,6 @@ export const useFunc = (model) => {
     setConfigurationShard,
     setConfigurationConfigServer,
     setConfigurationMongos,
-    setConfigurationFiles,
-    setConfigurationFilesShard,
-    setConfigurationFilesConfigServer,
-    setConfigurationFilesMongos,
     onSetCustomConfigChange,
     getCreateNameSpaceUrl,
     updateConfigServerStorageClass,
@@ -3536,7 +3145,6 @@ export const useFunc = (model) => {
     isBackupDataLoadedTrue,
     setBackupType,
     getTypes,
-    getNamespaceArray,
     isBackupType,
     getContext,
     onContextChange,
@@ -3561,7 +3169,6 @@ export const useFunc = (model) => {
     onValueFromChange,
     getConfigMapKeys,
     setValueFrom,
-    isInputTypeValueFrom,
     getSecretKeys,
     setValueFromDbDetails,
     isHidden,

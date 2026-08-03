@@ -520,19 +520,6 @@ export const useFunc = (model) => {
     return machine || 'custom'
   }
 
-  function getCreateNameSpaceUrl() {
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const domain = storeGet('/domain') || ''
-    if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    } else {
-      const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    }
-  }
-
   const ifCapiProviderIsNotEmpty = () => {
     // watchDependency('model#/form/capi/provider')
     const val = getValue(model, '/form/capi/provider')
@@ -578,60 +565,6 @@ export const useFunc = (model) => {
     if (!zones.length) commit('wizard/model$delete', 'form/capi/sku')
   }
 
-  async function getZones() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const isDedicated = getValue(model, 'form/capi/dedicated')
-    if (isDedicated) {
-      try {
-        const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`)
-        const val = resp.data.map((item) => {
-          return { value: item, text: item }
-        })
-        return val
-      } catch (e) {
-        console.log(e)
-        return []
-      }
-    }
-  }
-
-  async function getSKU() {
-    // watchDependency('model#/form/capi/zones')
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const zones = getValue(model, 'form/capi/zones') || []
-    if (zones.length) {
-      try {
-        let url = `clustersv2/${owner}/${cluster}/vms?`
-        if (typeof zones === 'string') {
-          url += `zones=${encodeURIComponent(zones)}`
-        } else {
-          zones.forEach((item) => {
-            url += `zones=${encodeURIComponent(item)}&`
-          })
-          url = url.slice(0, -1)
-        }
-        const resp = await axios.get(url)
-        const val = resp.data.map((item) => {
-          return {
-            value: item.name,
-            text: `${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `,
-          }
-        })
-        return val
-      } catch (e) {
-        console.log(e)
-        return []
-      }
-    }
-  }
-
-  function isVariantAvailable() {
-    const variant = storeGet('/route/query/variant')
-    return variant ? true : false
-  }
-
   function setStorageClass() {
     const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
     let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
@@ -658,12 +591,6 @@ export const useFunc = (model) => {
         force: true,
       })
     }
-  }
-
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
   }
 
   async function getNamespaces() {
@@ -893,34 +820,6 @@ export const useFunc = (model) => {
     }
     namespaces = getNamespaces()
     setDiscriminatorValue('/bundleApiLoaded', true)
-  }
-
-  function fetchNamespaces() {
-    // watchDependency('discriminator#/bundleApiLoaded')
-    return namespaces
-  }
-
-  async function getRecoveryNames(type) {
-    // watchDependency(`model#/spec/init/archiver/${type}/namespace`)
-    const params = storeGet('/route/params')
-    const { user, cluster } = params
-    const namespace = getValue(model, `/spec/init/archiver/${type}/namespace`)
-    let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`
-    if (type === 'encryptionSecret')
-      url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
-    const options = []
-    if (namespace) {
-      try {
-        const resp = await axios.get(url)
-        const items = resp.data?.items
-        items.forEach((ele) => {
-          options.push(ele.metadata?.name)
-        })
-      } catch (e) {
-        console.log(e)
-      }
-    }
-    return options
   }
 
   function fetchOptions(type) {
@@ -1192,10 +1091,6 @@ export const useFunc = (model) => {
     } else return filteredlist
   }
 
-  function returnFalse() {
-    return false
-  }
-
   function showAdditionalSettings() {
     // watchDependency('discriminator#/bundleApiLoaded')
     return features.length
@@ -1232,16 +1127,6 @@ export const useFunc = (model) => {
       value: customPid,
       force: true,
     })
-  }
-
-  function convertToLocal(input) {
-    const date = new Date(input)
-
-    if (isNaN(date.getTime())) {
-      return null
-    }
-
-    return date.toString()
   }
 
   function convertToUTC(localTime) {
@@ -1377,11 +1262,6 @@ export const useFunc = (model) => {
   }
 
   let pointIntimeError = ''
-  function pointInTimeErrorCheck() {
-    if (pointIntimeError.length) return pointIntimeError
-    return
-  }
-
   async function getReferSecrets() {
     const referSecret = getValue(discriminator, '/referSecret')
     if (!referSecret) {
@@ -1410,12 +1290,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
     return options
-  }
-
-  function showAuthPasswordField() {
-    const modelPathValue = getValue(discriminator, '/referSecret')
-    // watchDependency('discriminator#/referSecret')
-    return !modelPathValue && showReferSecret()
   }
 
   function showSecretDropdown() {
@@ -1453,20 +1327,13 @@ export const useFunc = (model) => {
     showReferSecretSwitch,
     onReferSecretChange,
     getDefaultValue,
-    isRancherManaged,
     showSecretDropdown,
     showReferSecret,
     getReferSecrets,
     setPointInTimeRecovery,
-    pointInTimeErrorCheck,
-    getRecoveryNames,
-    fetchNamespaces,
     showRecovery,
     showAdditionalSettings,
     initBundle,
-    returnFalse,
-    isVariantAvailable,
-    showAuthPasswordField,
     isEqualToModelPathValue,
     showStorageSizeField,
     onModeChange,
@@ -1474,14 +1341,11 @@ export const useFunc = (model) => {
     setLimits,
     setRequests,
     setMachineToCustom,
-    getCreateNameSpaceUrl,
     ifCapiProviderIsNotEmpty,
     ifDedicated,
     dedicatedOnChange,
     ifZones,
     zonesOnChange,
-    getZones,
-    getSKU,
     showMultiselectZone,
     showSelectZone,
     setStorageClass,

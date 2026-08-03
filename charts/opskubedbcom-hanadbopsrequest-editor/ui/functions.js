@@ -318,40 +318,6 @@ export const useFunc = (model) => {
   )
 
   showAndInitOpsRequestType()
-  async function fetchJsons({ axios, itemCtx }) {
-    let ui = {}
-    let language = {}
-    let functions = {}
-    const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
-
-    try {
-      ui = await axios.get(
-        `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      language = await axios.get(
-        `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      const functionString = await axios.get(
-        `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-      )
-      // declare evaluate the functionString to get the functions Object
-      const evalFunc = new Function(functionString.data || '')
-      functions = evalFunc()
-    } catch (e) {
-      console.log(e)
-    }
-
-    return {
-      ui: ui.data || {},
-      language: language.data || {},
-      functions,
-    }
-  }
-
-  function returnFalse() {
-    return false
-  }
-
   function isTlsEnabled() {
     const dbDetails = getValue(discriminator, '/dbDetails')
     return !!dbDetails?.spec?.tls
@@ -430,74 +396,6 @@ export const useFunc = (model) => {
 
   setDiscriminatorValue('/filteredVersion', [])
 
-  function getVersionInfo() {
-    const filteredVersion = getValue(discriminator, '/filteredVersion')
-    if (filteredVersion.length) return ''
-
-    let txt = 'No versions from this list can be selected as the target version: [ '
-
-    presetVersions.forEach((v, idx) => {
-      txt = `${txt}"${v}"`
-      if (idx !== presetVersions.length - 1) txt = txt + ', '
-      else txt = txt + ' ]'
-    })
-
-    return txt
-  }
-
-  function getVersion() {
-    const filteredVersion = getValue(discriminator, '/filteredVersion')
-    return filteredVersion.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      const specVersion = (item.spec && item.spec.version) || ''
-      return {
-        text: `${name} (${specVersion})`,
-        value: name,
-      }
-    })
-  }
-
-  function isVersionEmpty() {
-    const val = getValue(discriminator, '/filteredVersion')
-    return val.length === 0
-  }
-
-  function versionCompare(v1, v2) {
-    const arr1 = v1.split('.').map(Number)
-    const arr2 = v2.split('.').map(Number)
-
-    for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
-      const num1 = arr1[i] || 0
-      const num2 = arr2[i] || 0
-
-      if (num1 > num2) return 1 // v1 is higher
-      if (num1 < num2) return -1 // v2 is higher
-    }
-    return 0 // versions are equal
-  }
-
-  function isVersionWithinConstraints(version, constraints) {
-    let constraintsArr = []
-    if (constraints.includes(',')) constraintsArr = constraints?.split(',')?.map((c) => c.trim())
-    else constraintsArr = [constraints]
-
-    for (let constraint of constraintsArr) {
-      let match = constraint.match(/^(>=|<=|>|<)/)
-      let operator = match ? match[0] : ''
-      let constraintVersion = constraint.replace(/^(>=|<=|>|<)/, '').trim()
-
-      let comparison = versionCompare(version, constraintVersion)
-      if (
-        (operator === '>=' && comparison < 0) ||
-        (operator === '<=' && comparison > 0) ||
-        (operator === '>' && comparison <= 0) ||
-        (operator === '<' && comparison >= 0)
-      )
-        return false
-    }
-    return true
-  }
-
   function ifRequestTypeEqualsTo(type) {
     const selectedType = getValue(model, '/spec/type')
     // watchDependency('model#/spec/type')
@@ -519,29 +417,12 @@ export const useFunc = (model) => {
     })
   }
 
-  function disableOpsRequest() {
-    return false
-  }
-
   function getDbTls() {
     // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
 
     const { spec } = dbDetails || {}
     return spec?.tls || undefined
-  }
-
-  function getDbType() {
-    // watchDependency('discriminator#/dbDetails')
-    const dbDetails = getValue(discriminator, '/dbDetails')
-
-    const { spec } = dbDetails || {}
-    const { topology } = spec || {}
-    const { mode } = topology || {}
-
-    const verd = mode ? 'cluster' : 'standalone'
-
-    return verd
   }
 
   function initNamespace() {
@@ -654,12 +535,6 @@ export const useFunc = (model) => {
   }
 
   // vertical scaling
-  function ifDbTypeEqualsTo(value, opsReqType) {
-    const verd = getDbType()
-
-    return value === verd
-  }
-
   // machine profile stuffs
   // let machinesFromPreset = []
 
@@ -777,12 +652,6 @@ export const useFunc = (model) => {
       })
   }
 
-  function isMachineCustom() {
-    // watchDependency('discriminator#/machine')
-    const machine = getValue(discriminator, '/machine')
-    return machine === 'custom'
-  }
-
   // Fetch and store database Infos
   // for secret configurations in reconfigure
   let configSecrets = []
@@ -868,104 +737,6 @@ export const useFunc = (model) => {
       return { text: item.componentName, value: item.componentName }
     })
     return secrets
-  }
-
-  function getSelectedConfigurationData(type) {
-    type = type ? type + '/' : ''
-    const path = `/${type}selectedConfiguration`
-    const selectedConfiguration = getValue(discriminator, path)
-
-    if (!selectedConfiguration) {
-      return []
-    }
-
-    const configuration = secretConfigData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return []
-    }
-
-    const result = []
-    // Decode base64 and format as array of objects with name and content
-    Object.keys(configuration.data).forEach((fileName) => {
-      try {
-        // Decode base64 string
-        const decodedContent = atob(configuration.data[fileName])
-        result.push({
-          name: fileName,
-          content: decodedContent,
-        })
-      } catch (e) {
-        console.error(`Error decoding ${fileName}:`, e)
-        result.push({
-          name: fileName,
-          content: configuration.data[fileName], // Fallback to original if decode fails
-        })
-      }
-    })
-
-    // Set the value to the model
-    commit('wizard/model$update', {
-      path: `/temp/${type}applyConfig`,
-      value: result,
-      force: true,
-    })
-
-    return result
-  }
-
-  function getSelectedConfigurationName(configType, type) {
-    type = type ? type + '/' : ''
-    let path = ''
-    if (configType === 'create') path = `/spec/configuration/${type}/configSecret/name`
-    else if (configType === 'apply') path = `/${type}selectedConfiguration`
-    else if (configType === 'remove') path = `/${type}selectedConfigurationRemove`
-
-    const selectedConfiguration =
-      configType === 'create' ? getValue(model, path) : getValue(discriminator, path)
-
-    if (selectedConfiguration)
-      return { subtitle: ` You have selected <b>${selectedConfiguration}</b> secret` }
-    else return { subtitle: 'No secret selected' }
-  }
-
-  function getSelectedConfigurationValueForRemove(type) {
-    type = type ? type + '/' : ''
-    const path = `/${type}selectedConfigurationRemove`
-    const selectedConfiguration = getValue(discriminator, path)
-
-    if (!selectedConfiguration) {
-      return ''
-    }
-
-    const configuration = secretConfigData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return ''
-    }
-
-    let data = {}
-    // Decode base64 and parse YAML for each key in the secret data
-    Object.keys(configuration.data).forEach((item) => {
-      try {
-        // Decode base64 string
-        const decodedString = atob(configuration.data[item])
-        // Parse YAML string to object
-        const parsedYaml = yaml.load(decodedString)
-        // Store the parsed object with the filename as key
-        data[item] = parsedYaml
-      } catch (e) {
-        console.error(`Error parsing ${item}:`, e)
-        data[item] = atob(configuration.data[item]) // Fallback to decoded string
-      }
-    })
-
-    // Convert data object back to YAML string
-    return yaml.dump(data)
   }
 
   async function createNewConfigSecret(type) {
@@ -1200,124 +971,6 @@ export const useFunc = (model) => {
     return resSecret
   }
 
-  let secretArray = []
-
-  function createSecretUrl() {
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const domain = storeGet('/domain') || ''
-    if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
-    } else {
-      const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
-    }
-  }
-
-  function isConfigSelected() {
-    const secretName = getValue(model, '/spec/configuration/configSecret/name')
-    return !!secretName
-  }
-
-  function isEqualToValueFromType(value) {
-    // watchDependency('discriminator#/valueFromType')
-    const valueFrom = getValue(discriminator, '/valueFromType')
-    return valueFrom === value
-  }
-
-  async function getNamespacedResourceList({ namespace, group, version, resource }) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
-
-    let ans = []
-    try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      })
-
-      const items = (resp && resp.data && resp.data.items) || []
-      ans = items
-    } catch (e) {
-      console.log(e)
-    }
-
-    return ans
-  }
-  async function getResourceList({ group, version, resource }) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`
-
-    let ans = []
-    try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      })
-
-      const items = (resp && resp.data && resp.data.items) || []
-      ans = items
-    } catch (e) {
-      console.log(e)
-    }
-
-    return ans
-  }
-  async function resourceNames(group, version, resource) {
-    const namespace = getValue(model, '/metadata/namespace')
-    // watchDependency('model#/metadata/namespace')
-
-    let resources = await getNamespacedResourceList({
-      namespace,
-      group,
-      version,
-      resource,
-    })
-
-    if (resource === 'secrets') {
-      resources = resources.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
-        return validType.includes(item.type)
-      })
-    }
-
-    return resources.map((resource) => {
-      const name = (resource.metadata && resource.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
-  async function unNamespacedResourceNames(group, version, resource) {
-    let resources = await getResourceList({
-      group,
-      version,
-      resource,
-    })
-
-    if (resource === 'secrets') {
-      resources = resources.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
-        return validType.includes(item.type)
-      })
-    }
-
-    return resources.map((resource) => {
-      const name = (resource.metadata && resource.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
 
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {
@@ -1325,24 +978,6 @@ export const useFunc = (model) => {
     // watchDependency('discriminator#/reconfigurationType')
 
     return reconfigurationType === value
-  }
-
-  function onReconfigurationTypeChange() {
-    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
-    setDiscriminatorValue('/applyConfig', [])
-    if (reconfigurationType === 'remove') {
-      commit('wizard/model$delete', `/spec/configuration`)
-
-      commit('wizard/model$update', {
-        path: `/spec/configuration/removeCustomConfig`,
-        value: true,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', `/spec/configuration/configSecret`)
-      commit('wizard/model$delete', `/spec/configuration/applyConfig`)
-      commit('wizard/model$delete', `/spec/configuration/removeCustomConfig`)
-    }
   }
 
   // for tls
@@ -1498,22 +1133,6 @@ export const useFunc = (model) => {
     return retValue || undefined
   }
 
-  function setConfigFiles() {
-    // watchDependency('model#/resources/secret_config/stringData')
-    const configFiles = getValue(model, '/resources/secret_config/stringData')
-
-    const files = []
-
-    for (const item in configFiles) {
-      const obj = {}
-      obj.key = item
-      obj.value = configFiles[item]
-      files.push(obj)
-    }
-
-    return files
-  }
-
   function getAliasOptions() {
     return ['server', 'client', 'metrics-exporter']
   }
@@ -1560,119 +1179,12 @@ export const useFunc = (model) => {
     }
   }
 
-  function checkVolume(initpath, path) {
-    const volume = getValue(discriminator, `/dbDetails${initpath}`)
-    const input = getValue(model, path)
-
-    try {
-      const sizeInBytes = parseSize(volume)
-      const inputSizeInBytes = parseSize(input)
-
-      if (inputSizeInBytes >= sizeInBytes) return
-      else return 'Cannot expand to lower volume!'
-    } catch (err) {
-      return err.message || 'Invalid'
-    }
-  }
-
-  function parseSize(sizeStr) {
-    const units = {
-      '': 1,
-      K: 1e3,
-      M: 1e6,
-      G: 1e9,
-      T: 1e12,
-      P: 1e15,
-      E: 1e18,
-      Ki: 1024,
-      Mi: 1024 ** 2,
-      Gi: 1024 ** 3,
-      Ti: 1024 ** 4,
-      Pi: 1024 ** 5,
-      Ei: 1024 ** 6,
-    }
-
-    const match = String(sizeStr).match(/^([0-9]+(?:\.[0-9]*)?)\s*([A-Za-z]*)$/)
-    if (!match) throw new Error('Invalid size format')
-
-    const value = parseFloat(match[1])
-    const unit = match[2]
-
-    if (!(unit in units))
-      throw new Error('Unrecognized unit. Available units are K, Ki, M, Mi, G, Gi etc')
-
-    return value * units[unit]
-  }
-
   function fetchAliasOptions() {
     return getAliasOptions ? getAliasOptions() : []
   }
 
-  function validateNewCertificates({ itemCtx }) {
-    const addedAliases = (model && model.map((item) => item.alias)) || []
-
-    if (addedAliases.includes(itemCtx.alias) && itemCtx.isCreate) {
-      return { isInvalid: true, message: 'Alias already exists' }
-    }
-    return {}
-  }
-
   function disableAlias() {
     return !!(model && model.alias)
-  }
-
-  function getSelectedConfigSecret(type) {
-    const path = `/spec/configuration/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    // watchDependency(`model#${path}`)
-    return `You have selected ${selectedSecret} secret` || 'No secret selected'
-  }
-
-  function objectToYaml(obj, indent = 0) {
-    if (obj === null || obj === undefined) return 'null'
-    if (typeof obj !== 'object') return JSON.stringify(obj)
-
-    const spaces = '  '.repeat(indent)
-
-    if (Array.isArray(obj)) {
-      return obj
-        .map((item) => `${spaces}- ${objectToYaml(item, indent + 1).trimStart()}`)
-        .join('\n')
-    }
-
-    return Object.keys(obj)
-      .map((key) => {
-        const value = obj[key]
-        const keyLine = `${spaces}${key}:`
-
-        if (value === null || value === undefined) {
-          return `${keyLine} null`
-        }
-
-        if (typeof value === 'object') {
-          const nested = objectToYaml(value, indent + 1)
-          return `${keyLine}\n${nested}`
-        }
-
-        if (typeof value === 'string') {
-          return `${keyLine} "${value}"`
-        }
-
-        return `${keyLine} ${value}`
-      })
-      .join('\n')
-  }
-
-  function getSelectedConfigSecretValue(type) {
-    const path = `/spec/configuration/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    let data
-    secretArray.forEach((item) => {
-      if (item.value === selectedSecret) {
-        data = objectToYaml(item.data).trim() || 'No Data Found'
-      }
-    })
-    return data || 'No Data Found'
   }
 
   function setExporter(type) {
@@ -1718,22 +1230,14 @@ export const useFunc = (model) => {
     isMachineValid,
     setExporter,
     fetchAliasOptions,
-    validateNewCertificates,
     disableAlias,
     isRancherManaged,
-    fetchJsons,
-    returnFalse,
     getNamespaces,
     getDbs,
     getDbDetails,
-    getVersionInfo,
-    isVersionEmpty,
-    getVersion,
     ifRequestTypeEqualsTo,
     onRequestTypeChange,
     getDbTls,
-    getDbType,
-    disableOpsRequest,
     initNamespace,
     initDatabaseRef,
     showAndInitName,
@@ -1741,18 +1245,8 @@ export const useFunc = (model) => {
     showAndInitDatabaseRef,
     showConfigureOpsrequestLabel,
     showAndInitOpsRequestType,
-    ifDbTypeEqualsTo,
     getConfigSecrets,
-    getSelectedConfigSecret,
-    getSelectedConfigSecretValue,
-    createSecretUrl,
-    isEqualToValueFromType,
-    getNamespacedResourceList,
-    getResourceList,
-    resourceNames,
-    unNamespacedResourceNames,
     ifReconfigurationTypeEqualsTo,
-    onReconfigurationTypeChange,
     onApplyconfigChange,
     hasTlsField,
     initIssuerRefApiGroup,
@@ -1774,15 +1268,8 @@ export const useFunc = (model) => {
     getMachines,
     setMachine,
     onMachineChange,
-    isMachineCustom,
-    checkVolume,
-    setConfigFiles,
-    isConfigSelected,
     fetchConfigSecrets,
     getConfigSecretsforAppyConfig,
-    getSelectedConfigurationData,
-    getSelectedConfigurationName,
-    getSelectedConfigurationValueForRemove,
     createNewConfigSecret,
     decodeError,
     isCreateSecret,

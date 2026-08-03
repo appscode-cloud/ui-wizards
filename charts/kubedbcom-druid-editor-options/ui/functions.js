@@ -329,53 +329,6 @@ export const useFunc = (model) => {
   let nodetopologiesDedicated = []
   let features = []
 
-  async function getNamespaces() {
-    const params = storeGet('/route/params')
-    const { user, cluster, group, version, resource } = params
-    try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
-          apiVersion: 'identity.k8s.appscode.com/v1alpha1',
-          kind: 'SelfSubjectNamespaceAccessReview',
-          spec: {
-            resourceAttributes: [
-              {
-                verb: 'create',
-                group: group,
-                version: version,
-                resource: resource,
-              },
-            ],
-          },
-        },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
-        let projectsNamespace = []
-        projectsNamespace = Object.keys(projects).map((project) => ({
-          project: project,
-          namespaces: projects[project].map((namespace) => ({
-            text: namespace,
-            value: namespace,
-          })),
-        }))
-        return projectsNamespace
-      } else {
-        return resp.data?.status?.namespaces || []
-      }
-    } catch (e) {
-      console.log(e)
-    }
-    return []
-  }
-
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
-  }
-
   async function getSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -584,24 +537,6 @@ export const useFunc = (model) => {
       value: agent,
       force: true,
     })
-  }
-
-  function getCreateNameSpaceUrl() {
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const domain = storeGet('/domain') || ''
-    if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    } else {
-      const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    }
-  }
-
-  function isVariantAvailable() {
-    const variant = storeGet('/route/query/variant')
-    return variant ? true : false
   }
 
   function setStorageClass() {
@@ -1058,10 +993,6 @@ export const useFunc = (model) => {
     } else return filteredlist
   }
 
-  function returnFalse() {
-    return false
-  }
-
   function showAdditionalSettings() {
     // watchDependency('discriminator#/bundleApiLoaded')
     return features.length
@@ -1102,12 +1033,6 @@ export const useFunc = (model) => {
     return options
   }
 
-  function showAuthPasswordField() {
-    const modelPathValue = getValue(discriminator, '/referSecret')
-    // watchDependency('discriminator#/referSecret')
-    return !modelPathValue && showReferSecret()
-  }
-
   function showSecretDropdown() {
     const modelPathValue = getValue(discriminator, '/referSecret')
     // watchDependency('discriminator#/referSecret')
@@ -1143,16 +1068,11 @@ export const useFunc = (model) => {
     showReferSecretSwitch,
     onReferSecretChange,
     getDefaultValue,
-    isRancherManaged,
     showSecretDropdown,
     showReferSecret,
     getReferSecrets,
     showAdditionalSettings,
-    returnFalse,
     initBundle,
-    isVariantAvailable,
-    showAuthPasswordField,
-    getNamespaces,
     getSecrets,
     getMachineListForOptions,
     setLimits,
@@ -1161,7 +1081,6 @@ export const useFunc = (model) => {
     isMachineNotCustom,
     isMachineCustom,
     updateAlertValue,
-    getCreateNameSpaceUrl,
     setStorageClass,
     showAlerts,
     showIssuer,

@@ -380,12 +380,6 @@ export const useFunc = (model) => {
     return []
   }
 
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
-  }
-
   let array = []
   function getMachineListForOptions() {
     const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
@@ -562,19 +556,6 @@ export const useFunc = (model) => {
     })
   }
 
-  function getCreateNameSpaceUrl() {
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const domain = storeGet('/domain') || ''
-    if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    } else {
-      const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    }
-  }
-
   const ifCapiProviderIsNotEmpty = () => {
     // watchDependency('model#/form/capi/provider')
     const val = getValue(model, '/form/capi/provider')
@@ -619,60 +600,6 @@ export const useFunc = (model) => {
     if (!zones.length) commit('wizard/model$delete', 'form/capi/sku')
   }
 
-  async function getZones() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const isDedicated = getValue(model, 'form/capi/dedicated')
-    if (isDedicated) {
-      try {
-        const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`)
-        const val = resp.data.map((item) => {
-          return { value: item, text: item }
-        })
-        return val
-      } catch (e) {
-        console.log(e)
-        return []
-      }
-    }
-  }
-
-  async function getSKU() {
-    // watchDependency('model#/form/capi/zones')
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const zones = getValue(model, 'form/capi/zones') || []
-    if (zones.length) {
-      try {
-        let url = `clustersv2/${owner}/${cluster}/vms?`
-        if (typeof zones === 'string') {
-          url += `zones=${encodeURIComponent(zones)}`
-        } else {
-          zones.forEach((item) => {
-            url += `zones=${encodeURIComponent(item)}&`
-          })
-          url = url.slice(0, -1)
-        }
-        const resp = await axios.get(url)
-        const val = resp.data.map((item) => {
-          return {
-            value: item.name,
-            text: `${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb]`,
-          }
-        })
-        return val
-      } catch (e) {
-        console.log(e)
-        return []
-      }
-    }
-  }
-
-  function isVariantAvailable() {
-    const variant = storeGet('/route/query/variant')
-    return variant ? true : false
-  }
-
   function setStorageClass() {
     const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
     let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
@@ -712,10 +639,6 @@ export const useFunc = (model) => {
     if (!configOn) {
       commit('wizard/model$delete', '/spec/configuration')
     }
-  }
-
-  function returnFalse() {
-    return false
   }
 
   let placement = []
@@ -819,11 +742,6 @@ export const useFunc = (model) => {
     }
     namespaces = getNamespaces()
     setDiscriminatorValue('/bundleApiLoaded', true)
-  }
-
-  function fetchNamespaces() {
-    // watchDependency('discriminator#/bundleApiLoaded')
-    return namespaces
   }
 
   function fetchOptions(type) {
@@ -1040,24 +958,9 @@ export const useFunc = (model) => {
     return isTlsEnabled && isIssuerToggleEnabled
   }
 
-  function onBackupSwitch() {
-    const isBackupOn = getValue(discriminator, '/backup')
-    commit('wizard/model$update', {
-      path: '/spec/backup/tool',
-      value: isBackupOn ? 'KubeStash' : '',
-      force: true,
-    })
-  }
-
   function setMonitoring() {
     const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
     return !!agent
-  }
-
-  function setBackup() {
-    const backup = getValue(model, '/spec/backup/tool')
-    const val = getValue(model, '/spec/admin/backup/enable/default')
-    return backup === 'KubeStash' && features.includes('backup') && val
   }
 
   function onAuthChange() {
@@ -1126,12 +1029,6 @@ export const useFunc = (model) => {
     return options
   }
 
-  function showAuthPasswordField() {
-    const modelPathValue = getValue(discriminator, '/referSecret')
-    // watchDependency('discriminator#/referSecret')
-    return !modelPathValue && showReferSecret()
-  }
-
   function showSecretDropdown() {
     const modelPathValue = getValue(discriminator, '/referSecret')
     // watchDependency('discriminator#/referSecret')
@@ -1148,60 +1045,6 @@ export const useFunc = (model) => {
     const modelPathValue = getValue(model, '/spec/admin/authCredential/referExisting')
     // watchDependency('discriminator#/createAuthSecret')
     return !!modelPathValue && showReferSecret()
-  }
-
-  function showArchiver() {
-    return checkIfFeatureOn('archiver')
-  }
-
-  function onArchiverChange() {
-    const isArchiverOn = getValue(model, '/spec/admin/archiver/enable/default')
-    const stClass = getValue(model, '/spec/admin/storageClasses/default')
-    const found = archiverMap.find((item) => item.storageClass === stClass)
-    const via = getValue(model, '/spec/admin/archiver/via')
-
-    if (!isArchiverOn) {
-      commit('wizard/model$update', {
-        path: '/spec/archiverName',
-        value: '',
-        force: true,
-      })
-    } else {
-      if (via === 'VolumeSnapshotter') {
-        commit('wizard/model$update', {
-          path: '/spec/archiverName',
-          value: found?.annotation,
-          force: true,
-        })
-      } else {
-        const kind = getValue(model, '/metadata/resource/kind')
-        commit('wizard/model$update', {
-          path: '/spec/archiverName',
-          value: kind.toLowerCase(),
-          force: true,
-        })
-      }
-    }
-  }
-
-  function showArchiverAlert() {
-    // watchDependency('model#/spec/admin/storageClasses/default')
-    const via = getValue(model, '/spec/admin/archiver/via')
-
-    if (via === 'VolumeSnapshotter') {
-      const stClass = getValue(model, '/spec/admin/storageClasses/default')
-      const found = archiverMap.find((item) => item.storageClass === stClass)
-      const show = !found?.annotation
-      if (show) {
-        commit('wizard/model$update', {
-          path: '/spec/admin/archiver/enable/default',
-          value: false,
-          force: true,
-        })
-        return true
-      } else onArchiverChange()
-    } else onArchiverChange()
-    return false
   }
 
   function isMetaStorageExternallyManaged() {
@@ -1252,13 +1095,8 @@ export const useFunc = (model) => {
     showSecretDropdown,
     showReferSecret,
     getReferSecrets,
-    isRancherManaged,
-    fetchNamespaces,
     showAdditionalSettings,
-    returnFalse,
     initBundle,
-    isVariantAvailable,
-    showAuthPasswordField,
     isEqualToModelPathValue,
     getNamespaces,
     isMachineNotCustom,
@@ -1268,14 +1106,11 @@ export const useFunc = (model) => {
     setRequests,
     setMachineToCustom,
     updateAlertValue,
-    getCreateNameSpaceUrl,
     ifCapiProviderIsNotEmpty,
     ifDedicated,
     dedicatedOnChange,
     ifZones,
     zonesOnChange,
-    getZones,
-    getSKU,
     showMultiselectZone,
     showSelectZone,
     setStorageClass,
@@ -1285,16 +1120,11 @@ export const useFunc = (model) => {
     isToggleOn,
     showAlerts,
     showIssuer,
-    onBackupSwitch,
     setMonitoring,
     onAuthChange,
     isConfigDatabaseOn,
     clearConfiguration,
-    setBackup,
     getDefault,
-    onArchiverChange,
-    showArchiverAlert,
-    showArchiver,
     isMetaStorageExternallyManaged,
     getSecrets,
   }

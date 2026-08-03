@@ -48,16 +48,6 @@ export const useFunc = (model) => {
     else return 'no'
   }
 
-  function initScheduleBackup() {
-    const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
-      getValue,
-      model,
-    )
-
-    if (stashAppscodeComBackupConfiguration || isBluePrint) return 'yes'
-    else return 'no'
-  }
-
   function onScheduleBackupChange() {
     const scheduleBackup = getValue(discriminator, '/scheduleBackup')
 
@@ -150,7 +140,6 @@ export const useFunc = (model) => {
   let isBackupOnModel = false
   let dbResource = {}
   let initialDbMetadata = {}
-  let namespaceList = []
   let backupConfigurationsFromStore = {}
   let valuesFromWizard = {
     apiVersion: 'core.kubestash.com/v1alpha1',
@@ -1473,7 +1462,6 @@ export const useFunc = (model) => {
   }
 
   return {
-    initScheduleBackup,
     initScheduleBackupForEdit,
     onScheduleBackupChange,
     showBackupForm,

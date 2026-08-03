@@ -60,16 +60,6 @@ export const useFunc = (model) => {
     else return 'no'
   }
 
-  function initScheduleBackup() {
-    const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
-      getValue,
-      model,
-    )
-
-    if (stashAppscodeComBackupConfiguration || isBluePrint) return 'yes'
-    else return 'no'
-  }
-
   function onScheduleBackupChange() {
     const scheduleBackup = getValue(discriminator, '/scheduleBackup')
 
@@ -787,23 +777,6 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
-  function setMetadata() {
-    const dbname = storeGet('/route/params/name') || ''
-    const namespace = storeGet('/route/query/namespace') || ''
-    if (mode === 'standalone-step') {
-      commit('wizard/model$update', {
-        path: '/metadata/release/name',
-        value: dbname,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/metadata/release/namespace',
-        value: namespace,
-        force: true,
-      })
-    }
-  }
-
   async function fetchTopologyMachines() {
     const instance = hasAnnotations()
 
@@ -1254,12 +1227,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function isEqualToValueFromType(value) {
-    //watchDependency('discriminator#/valueFromType')
-    const valueFrom = getValue(discriminator, '/valueFromType')
-    return valueFrom === value
-  }
-
   async function resourceNames(group, version, resource) {
     const namespace = getValue(model, '/metadata/release/namespace')
     // watchDependency('model#/metadata/release/namespace')
@@ -1524,7 +1491,6 @@ export const useFunc = (model) => {
   }
 
   return {
-    initScheduleBackup,
     initScheduleBackupForEdit,
     onScheduleBackupChange,
     showBackupForm,
@@ -1563,7 +1529,6 @@ export const useFunc = (model) => {
     setControlledResources,
     setTrigger,
     setApplyToIfReady,
-    setMetadata,
     fetchTopologyMachines,
     setAllowedMachine,
     getMachines,
@@ -1588,7 +1553,6 @@ export const useFunc = (model) => {
     isConfigMapTypeValueFrom,
     isSecretTypeValueFrom,
     onValueFromChange,
-    isEqualToValueFromType,
     resourceNames,
     getConfigMapKeys,
     getSecrets,

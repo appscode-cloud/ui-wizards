@@ -710,33 +710,6 @@ export const useFunc = (model) => {
 
   // ── End Autoscaling ────────────────────────────────────────────────────────
 
-  async function resourceNames(group, version, resource) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = getValue(model, '/metadata/release/namespace')
-
-    try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`,
-        { params: { filter: { items: { metadata: { name: null }, type: null } } } },
-      )
-      let items = (resp && resp.data && resp.data.items) || []
-      if (resource === 'secrets') {
-        items = items.filter((item) => {
-          const validType = ['kubernetes.io/service-account-token', 'Opaque']
-          return validType.includes(item.type)
-        })
-      }
-      return items.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        return { text: name, value: name }
-      })
-    } catch (e) {
-      console.log(e)
-      return []
-    }
-  }
-
   function fetchJsons({ axios, itemCtx }) {
     let ui = {}
     let language = {}
@@ -847,7 +820,6 @@ export const useFunc = (model) => {
     onConfigurationSourceChange,
     setConfiguration,
     onConfigurationChange,
-    resourceNames,
     fetchJsons,
     // Autoscaling
     isKubedb,

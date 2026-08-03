@@ -51,16 +51,6 @@ export const useFunc = (model) => {
     else return 'no'
   }
 
-  function initScheduleBackup() {
-    const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
-      getValue,
-      model,
-    )
-
-    if (stashAppscodeComBackupConfiguration || isBluePrint) return 'yes'
-    else return 'no'
-  }
-
   function onScheduleBackupChange() {
     const scheduleBackup = getValue(discriminator, '/scheduleBackup')
 
@@ -176,7 +166,6 @@ export const useFunc = (model) => {
   let isBackupOnModel = false
   let dbResource = {}
   let initialDbMetadata = {}
-  let namespaceList = []
   let backupConfigurationsFromStore = {}
   let valuesFromWizard = {
     apiVersion: 'core.kubestash.com/v1alpha1',
@@ -931,24 +920,6 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
-  function setMetadata() {
-    const dbname = storeGet('/route/params/name') || ''
-    const namespace = storeGet('/route/query/namespace') || ''
-    const routeMode = storeGet('/route/params/mode') || ''
-    if (routeMode === 'standalone-step') {
-      commit('wizard/model$update', {
-        path: '/metadata/release/name',
-        value: dbname,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/metadata/release/namespace',
-        value: namespace,
-        force: true,
-      })
-    }
-  }
-
   function isRancherManaged() {
     const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
     const found = managers.find((item) => item === 'Rancher')
@@ -1627,7 +1598,6 @@ export const useFunc = (model) => {
   }
 
   return {
-    initScheduleBackup,
     initScheduleBackupForEdit,
     onScheduleBackupChange,
     showBackupForm,
@@ -1668,7 +1638,6 @@ export const useFunc = (model) => {
     setTrigger,
     onTriggerChange,
     setApplyToIfReady,
-    setMetadata,
     isRancherManaged,
     dbTypeEqualsTo,
     onMachineChange,
