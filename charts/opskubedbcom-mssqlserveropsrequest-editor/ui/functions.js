@@ -557,6 +557,47 @@ export const useFunc = (model) => {
     })
   }
 
+  function getDbTls() {
+    // watchDependency('discriminator#/dbDetails')
+    const dbDetails = getValue(discriminator, '/dbDetails')
+
+    const { spec } = dbDetails || {}
+    return spec?.tls || undefined
+  }
+
+  // for tls
+
+  function isTlsEnabled(type) {
+    const selectedOpsType = getValue(discriminator, '/tlsOperation')
+    return selectedOpsType === type
+  }
+
+  function fetchAliasOptions() {
+    return getAliasOptions ? getAliasOptions() : []
+  }
+
+  function disableAlias() {
+    return !!(model && model.alias)
+  }
+
+  function getDbType() {
+    // watchDependency('discriminator#/dbDetails')
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const { spec } = dbDetails || {}
+    const { topology } = spec || {}
+    if (topology) return 'Topology'
+    else return 'Combined'
+  }
+
+  function disableOpsRequest() {
+    if (itemCtx.value === 'HorizontalScaling') {
+      const dbType = getDbType()
+
+      if (dbType === 'Standalone') return true
+      else return false
+    } else return false
+  }
+
   function initNamespace() {
     const { namespace } = route.query || {}
     return namespace || null
@@ -1105,7 +1146,6 @@ export const useFunc = (model) => {
     return resSecret
   }
 
-
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {
     const reconfigurationType = getValue(discriminator, '/reconfigurationType')
@@ -1311,6 +1351,9 @@ export const useFunc = (model) => {
     getConfigSecrets,
     ifReconfigurationTypeEqualsTo,
     onApplyconfigChange,
+    isTlsEnabled,
+    fetchAliasOptions,
+    disableAlias,
     getRequestTypeFromRoute,
     isDbDetailsLoading,
     setValueFromDbDetails,

@@ -319,14 +319,9 @@ export const useFunc = (model) => {
 
   showAndInitOpsRequestType()
 
-  function isTlsEnabled() {
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    return (
-      (dbDetails?.spec?.sslMode &&
-        dbDetails?.spec?.sslMode !== 'disabled' &&
-        dbDetails?.spec?.sslMode !== 'disable') ||
-      dbDetails?.spec?.tls
-    )
+  function isTlsEnabled(type) {
+    const selectedOpsType = getValue(discriminator, '/tlsOperation')
+    return selectedOpsType === type
   }
 
   async function getNamespaces() {
@@ -1134,7 +1129,6 @@ export const useFunc = (model) => {
     })
     return resSecret
   }
-
 
   function ifReconfigurationTypeEqualsTo(value) {
     const reconfigurationType = getValue(discriminator, '/reconfigurationType')
