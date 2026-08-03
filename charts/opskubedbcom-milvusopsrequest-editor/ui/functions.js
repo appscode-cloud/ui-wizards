@@ -1575,6 +1575,26 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
+  function isReplicasValid(type) {
+    const dbTypeMap = {
+      dataNode: 'datanode',
+      mixcoord: 'mixcoord',
+      proxy: 'proxy',
+      querynode: 'querynode',
+      streamingnode: 'streamingnode',
+    }
+    const currentReplicas = getValue(
+      discriminator,
+      `/dbDetails/spec/topology/distributed/${dbTypeMap[type]}/replicas`,
+    )
+    const newReplicas = getValue(model, `/spec/horizontalScaling/topology/${type}`)
+
+    if (currentReplicas === newReplicas) {
+      return 'New replica count must be different from the current replica count.'
+    }
+    return false
+  }
+
   function isMachineValid(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const limits = getLimits(type)
@@ -1605,6 +1625,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    isReplicasValid,
     isMachineValid,
     fetchAliasOptions,
     validateNewCertificates,

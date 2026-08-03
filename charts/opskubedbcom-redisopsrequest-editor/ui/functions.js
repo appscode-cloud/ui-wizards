@@ -1795,6 +1795,27 @@ export const useFunc = (model) => {
     return limits
   }
 
+  function isMasterValid() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const currentMaster = dbDetails?.spec?.cluster?.master
+    const newMaster = getValue(model, '/spec/horizontalScaling/shards')
+
+    if (currentMaster === newMaster) {
+      return 'New master shard count must be different from the current master shard count.'
+    }
+    return false
+  }
+
+  function isReplicasValid() {
+    const currentReplicas = setReplicas()
+    const newReplicas = getValue(model, '/spec/horizontalScaling/replicas')
+
+    if (currentReplicas === newReplicas) {
+      return 'New replica count must be different from the current replica count.'
+    }
+    return false
+  }
+
   function isMachineValid() {
     const limits = getLimits()
 
@@ -1808,6 +1829,8 @@ export const useFunc = (model) => {
   }
 
   return {
+    isMasterValid,
+    isReplicasValid,
     isMachineValid,
     setExporter,
     onExporterResourceChange,

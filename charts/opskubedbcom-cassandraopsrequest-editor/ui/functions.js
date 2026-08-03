@@ -1782,6 +1782,17 @@ export const useFunc = (model) => {
     return data || 'No Data Found'
   }
 
+  function isReplicasValid() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const currentReplicas = dbDetails?.spec?.replicas
+    const newReplicas = getValue(model, '/spec/horizontalScaling/node')
+
+    if (currentReplicas === newReplicas) {
+      return 'New replica count must be different from the current replica count.'
+    }
+    return false
+  }
+
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const spec = dbDetails?.spec?.podTemplate?.spec
@@ -1811,6 +1822,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    isReplicasValid,
     isMachineValid,
     fetchAliasOptions,
     validateNewCertificates,

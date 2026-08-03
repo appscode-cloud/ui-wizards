@@ -1838,6 +1838,21 @@ export const useFunc = (model) => {
     return limitVal
   }
 
+  function isReplicasValid(type) {
+    const dbPath = type ? `/spec/shardTopology/${type}/replicas` : '/spec/replicas'
+    const modelPath = type
+      ? `/spec/horizontalScaling/${type}/replicas`
+      : '/spec/horizontalScaling/replicas'
+
+    const currentReplicas = getValue(discriminator, `/dbDetails${dbPath}`)
+    const newReplicas = getValue(model, modelPath)
+
+    if (currentReplicas === newReplicas) {
+      return 'New replica count must be different from the current replica count.'
+    }
+    return false
+  }
+
   function isMachineValid(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const limits = getLimits(type)
@@ -1869,6 +1884,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    isReplicasValid,
     isMachineValid,
     setExporter,
     fetchAliasOptions,

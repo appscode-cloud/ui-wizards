@@ -1707,6 +1707,17 @@ export const useFunc = (model) => {
     return limits
   }
 
+  function isReplicasValid() {
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const currentReplicas = dbDetails?.spec?.replicas
+    const newReplicas = getValue(model, '/spec/horizontalScaling/replicas')
+
+    if (currentReplicas === newReplicas) {
+      return 'New replica count must be different from the current replica count.'
+    }
+    return false
+  }
+
   function isMachineValid() {
     const limits = getLimits()
 
@@ -1720,6 +1731,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    isReplicasValid,
     isMachineValid,
     setExporter,
     isRancherManaged,

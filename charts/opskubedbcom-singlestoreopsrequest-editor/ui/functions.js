@@ -1773,6 +1773,16 @@ export const useFunc = (model) => {
     }
   }
 
+  function isReplicasValid(type) {
+    const currentReplicas = getValue(discriminator, `/dbDetails/spec/topology/${type}/replicas`)
+    const newReplicas = getValue(model, `/spec/horizontalScaling/${type}`)
+
+    if (currentReplicas === newReplicas) {
+      return 'New replica count must be different from the current replica count.'
+    }
+    return false
+  }
+
   function isMachineValid() {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const container = dbDetails?.spec?.podTemplate?.spec?.containers || []
@@ -1809,6 +1819,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    isReplicasValid,
     isMachineValid,
     fetchAliasOptions,
     validateNewCertificates,

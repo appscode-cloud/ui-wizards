@@ -114,7 +114,8 @@ step:
     type: block-layout
   - elements:
     - elements:
-      - header: Replicas
+      - header: Replica
+        customClass: mt-8s
         if:
           name: ifDbTypeEqualsTo|Combined|horizontalScaling
           type: function
@@ -126,6 +127,9 @@ step:
         subtitle: Define the total number of replicas for the database. Increasing
           replicas improves fault tolerance and load distribution, while reducing
           replicas conserves resources
+        validation:
+          name: isReplicasValid
+          type: custom|required
         type: input-compare
       - hasIcon: true
         if:
@@ -148,6 +152,9 @@ step:
             subtitle: Define the total number of master node replicas. Increasing
               replicas improves fault tolerance and load distribution, while reducing
               replicas conserves resources
+            validation:
+              name: isReplicasValid|master
+              type: custom|required
             type: input-compare
           - hasIcon: true
             label: Master nodes are responsible for cluster management operations.
@@ -168,6 +175,9 @@ step:
             subtitle: Define the total number of data node replicas. Increasing replicas
               improves fault tolerance and load distribution, while reducing replicas
               conserves resources
+            validation:
+              name: isReplicasValid|data
+              type: custom|required
             type: input-compare
           - hasIcon: true
             label: Data nodes store the actual documents and handle data-related operations
@@ -188,6 +198,9 @@ step:
             subtitle: Define the total number of ingest node replicas. Increasing
               replicas improves fault tolerance and load distribution, while reducing
               replicas conserves resources
+            validation:
+              name: isReplicasValid|ingest
+              type: custom|required
             type: input-compare
           - hasIcon: true
             label: Ingest nodes pre-process documents before they are indexed. They
@@ -206,7 +219,7 @@ step:
       name: ifRequestTypeEqualsTo|HorizontalScaling
       type: function
     label: Horizontal Scaling Form
-    showLabels: true
+    showLabels: false
     type: block-layout
   - elements:
     - label: Mode
