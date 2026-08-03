@@ -45,16 +45,6 @@ export const useFunc = (model) => {
     else return 'no'
   }
 
-  function initScheduleBackup() {
-    const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
-      getValue,
-      model,
-    )
-
-    if (stashAppscodeComBackupConfiguration || isBluePrint) return 'yes'
-    else return 'no'
-  }
-
   // backup form
   function showBackupForm() {
     const scheduleBackup = getValue(discriminator, '/scheduleBackup')
@@ -1259,45 +1249,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function handleUnit(path, type = 'bound') {
-    let value = getValue(model, `/resources/${path}`)
-    if (type === 'scalingRules') {
-      const updatedValue = []
-      value?.forEach((ele) => {
-        let appliesUpto = ele['appliesUpto']
-        let threshold = ele['threshold']
-        if (appliesUpto && !isNaN(appliesUpto)) {
-          appliesUpto += 'Gi'
-        }
-        if (!isNaN(threshold)) {
-          threshold += 'pc'
-        }
-        updatedValue.push({ threshold, appliesUpto })
-      })
-      if (JSON.stringify(updatedValue) !== JSON.stringify(value)) {
-        commit('wizard/model$update', {
-          path: `/resources/${path}`,
-          value: updatedValue,
-          force: true,
-        })
-      }
-    } else {
-      if (!isNaN(value)) {
-        value += 'Gi'
-        commit('wizard/model$update', {
-          path: `/resources/${path}`,
-          value: value,
-          force: true,
-        })
-      }
-    }
-  }
-
-  function setValueFromDbDetails(path) {
-    const value = getValue(model, path)
-    return value
-  }
-
   function isRancherManaged() {
     const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
     const found = managers?.find((item) => item === 'Rancher')
@@ -1380,7 +1331,6 @@ export const useFunc = (model) => {
 
   return {
     returnFalse,
-    initScheduleBackup,
     initScheduleBackupForEdit,
     showBackupForm,
     initBackupData,
@@ -1443,8 +1393,6 @@ export const useFunc = (model) => {
     hasAnnotations,
     hasNoAnnotations,
     onMachineChange,
-    handleUnit,
-    setValueFromDbDetails,
     isRancherManaged,
     onTriggerChange,
     onEnvArrayChange,

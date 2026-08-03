@@ -320,10 +320,6 @@ export const useFunc = (model) => {
 
   showAndInitOpsRequestType()
 
-  function returnFalse() {
-    return false
-  }
-
   function isRancherManaged() {
     const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
     const found = managers.find((item) => item === 'Rancher')
@@ -506,17 +502,6 @@ export const useFunc = (model) => {
     return txt
   }
 
-  function getVersion() {
-    return filteredVersion.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      const specVersion = (item.spec && item.spec.version) || ''
-      return {
-        text: `${name} (${specVersion})`,
-        value: name,
-      }
-    })
-  }
-
   function isVersionEmpty() {
     const val = getValue(discriminator, '/filteredVersion')
     return val.length === 0
@@ -581,36 +566,6 @@ export const useFunc = (model) => {
     Object.keys(reqTypeMapping).forEach((key) => {
       if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
     })
-  }
-
-  function disableOpsRequest() {
-    if (itemCtx.value === 'HorizontalScaling') {
-      const dbType = getDbType({
-        discriminator,
-        getValue,
-      })
-
-      if (dbType === 'Standalone') return true
-      else return false
-    } else return false
-  }
-
-  function getDbTls() {
-    // watchDependency'discriminator#/dbDetails')
-    const dbDetails = getValue(discriminator, '/dbDetails')
-
-    const { spec } = dbDetails || {}
-    return spec?.tls || undefined
-  }
-
-  function getDbType() {
-    // watchDependency'discriminator#/dbDetails')
-    const dbDetails = getValue(discriminator, '/dbDetails')
-
-    const { spec } = dbDetails || {}
-    const { mode } = spec || {}
-
-    return mode || 'Standalone'
   }
 
   function initNamespace() {
@@ -806,104 +761,6 @@ export const useFunc = (model) => {
       return { text: item.componentName, value: item.componentName }
     })
     return secrets
-  }
-
-  function getSelectedConfigurationData(type) {
-    type = type ? type + '/' : ''
-    const path = `/${type}selectedConfiguration`
-    const selectedConfiguration = getValue(discriminator, path)
-
-    if (!selectedConfiguration) {
-      return []
-    }
-
-    const configuration = secretConfigData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return []
-    }
-
-    const result = []
-    // Decode base64 and format as array of objects with name and content
-    Object.keys(configuration.data).forEach((fileName) => {
-      try {
-        // Decode base64 string
-        const decodedContent = atob(configuration.data[fileName])
-        result.push({
-          name: fileName,
-          content: decodedContent,
-        })
-      } catch (e) {
-        console.error(`Error decoding ${fileName}:`, e)
-        result.push({
-          name: fileName,
-          content: configuration.data[fileName], // Fallback to original if decode fails
-        })
-      }
-    })
-
-    // Set the value to the model
-    commit('wizard/model$update', {
-      path: `/temp/${type}applyConfig`,
-      value: result,
-      force: true,
-    })
-
-    return result
-  }
-
-  function getSelectedConfigurationName(configType, type) {
-    type = type ? type + '/' : ''
-    let path = ''
-    if (configType === 'create') path = `/spec/configuration/${type}/configSecret/name`
-    else if (configType === 'apply') path = `/${type}selectedConfiguration`
-    else if (configType === 'remove') path = `/${type}selectedConfigurationRemove`
-
-    const selectedConfiguration =
-      configType === 'create' ? getValue(model, path) : getValue(discriminator, path)
-
-    if (selectedConfiguration)
-      return { subtitle: ` You have selected <b>${selectedConfiguration}</b> secret` }
-    else return { subtitle: 'No secret selected' }
-  }
-
-  function getSelectedConfigurationValueForRemove(type) {
-    type = type ? type + '/' : ''
-    const path = `/${type}selectedConfigurationRemove`
-    const selectedConfiguration = getValue(discriminator, path)
-
-    if (!selectedConfiguration) {
-      return ''
-    }
-
-    const configuration = secretConfigData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return ''
-    }
-
-    let data = {}
-    // Decode base64 and parse YAML for each key in the secret data
-    Object.keys(configuration.data).forEach((item) => {
-      try {
-        // Decode base64 string
-        const decodedString = atob(configuration.data[item])
-        // Parse YAML string to object
-        const parsedYaml = yaml.load(decodedString)
-        // Store the parsed object with the filename as key
-        data[item] = parsedYaml
-      } catch (e) {
-        console.error(`Error parsing ${item}:`, e)
-        data[item] = atob(configuration.data[item]) // Fallback to decoded string
-      }
-    })
-
-    // Convert data object back to YAML string
-    return yaml.dump(data)
   }
 
   async function createNewConfigSecret(type) {
@@ -1138,180 +995,6 @@ export const useFunc = (model) => {
     return resSecret
   }
 
-  let secretArray = []
-
-  function objectToYaml(obj, indent = 0) {
-    if (obj === null || obj === undefined) return 'null'
-    if (typeof obj !== 'object') return JSON.stringify(obj)
-
-    const spaces = '  '.repeat(indent)
-
-    if (Array.isArray(obj)) {
-      return obj
-        .map((item) => `${spaces}- ${objectToYaml(item, indent + 1).trimStart()}`)
-        .join('\n')
-    }
-
-    return Object.keys(obj)
-      .map((key) => {
-        const value = obj[key]
-        const keyLine = `${spaces}${key}:`
-
-        if (value === null || value === undefined) {
-          return `${keyLine} null`
-        }
-
-        if (typeof value === 'object') {
-          const nested = objectToYaml(value, indent + 1)
-          return `${keyLine}\n${nested}`
-        }
-
-        if (typeof value === 'string') {
-          return `${keyLine} "${value}"`
-        }
-
-        return `${keyLine} ${value}`
-      })
-      .join('\n')
-  }
-
-  function getSelectedConfigSecret() {
-    const path = '/spec/configuration/configSecret/name'
-    const selectedSecret = getValue(model, path)
-    // watchDependency(`model#${path}`)
-    return `You have selected ${selectedSecret} secret` || 'No secret selected'
-  }
-
-  function getSelectedConfigSecretValue() {
-    const path = '/spec/configuration/configSecret/name'
-    const selectedSecret = getValue(model, path)
-    let data
-    secretArray.forEach((item) => {
-      if (item.value === selectedSecret) {
-        data = objectToYaml(item.data).trim() || 'No Data Found'
-      }
-    })
-    return data || 'No Data Found'
-  }
-
-  function createSecretUrl() {
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const domain = storeGet('/domain') || ''
-    if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
-    } else {
-      const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
-    }
-  }
-
-  function isEqualToValueFromType(value) {
-    // watchDependency'discriminator#/valueFromType')
-    const valueFrom = getValue(discriminator, '/valueFromType')
-    return valueFrom === value
-  }
-
-  async function getNamespacedResourceList(
-    axios,
-    storeGet,
-    { namespace, group, version, resource },
-  ) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
-
-    let ans = []
-    try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      })
-
-      const items = (resp && resp.data && resp.data.items) || []
-      ans = items
-    } catch (e) {
-      console.log(e)
-    }
-
-    return ans
-  }
-
-  async function getResourceList(axios, storeGet, { group, version, resource }) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`
-
-    let ans = []
-    try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      })
-
-      const items = (resp && resp.data && resp.data.items) || []
-      ans = items
-    } catch (e) {
-      console.log(e)
-    }
-
-    return ans
-  }
-
-  async function resourceNames(group, version, resource) {
-    const namespace = getValue(model, '/metadata/namespace')
-    // watchDependency'model#/metadata/namespace')
-
-    let resources = await getNamespacedResourceList(axios, storeGet, {
-      namespace,
-      group,
-      version,
-      resource,
-    })
-
-    if (resource === 'secrets') {
-      resources = resources.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
-        return validType.includes(item.type)
-      })
-    }
-
-    return resources.map((resource) => {
-      const name = (resource.metadata && resource.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
-
-  async function unNamespacedResourceNames(group, version, resource) {
-    let resources = await getResourceList(axios, storeGet, {
-      group,
-      version,
-      resource,
-    })
-
-    if (resource === 'secrets') {
-      resources = resources.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
-        return validType.includes(item.type)
-      })
-    }
-
-    return resources.map((resource) => {
-      const name = (resource.metadata && resource.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
 
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {
@@ -1319,24 +1002,6 @@ export const useFunc = (model) => {
     // watchDependency'discriminator#/reconfigurationType')
 
     return reconfigurationType === value
-  }
-
-  function onReconfigurationTypeChange() {
-    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
-    setDiscriminatorValue('/applyConfig', [])
-    if (reconfigurationType === 'remove') {
-      commit('wizard/model$delete', `/spec/configuration`)
-
-      commit('wizard/model$update', {
-        path: `/spec/configuration/removeCustomConfig`,
-        value: true,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', `/spec/configuration/configSecret`)
-      commit('wizard/model$delete', `/spec/configuration/applyConfig`)
-      commit('wizard/model$delete', `/spec/configuration/removeCustomConfig`)
-    }
   }
 
   function getRequestTypeFromRoute() {
@@ -1378,14 +1043,6 @@ export const useFunc = (model) => {
     }
 
     return retValue || undefined
-  }
-
-  function setResource(path) {
-    // watchDependency'discriminator#/dbDetails')
-    const containers = getValue(discriminator, `/dbDetails${path}`) || []
-    const kind = getValue(discriminator, '/dbDetails/kind')
-    const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
-    return resource[0].resources
   }
 
   function isNamespaceDisabled() {
@@ -1543,12 +1200,6 @@ export const useFunc = (model) => {
       })
   }
 
-  function isMachineCustom() {
-    // watchDependency'discriminator#/machine')
-    const machine = getValue(discriminator, '/machine')
-    return machine === 'custom'
-  }
-
   function checkVolume(initpath, path) {
     const volume = getValue(discriminator, `/dbDetails${initpath}`)
     const input = getValue(model, path)
@@ -1634,18 +1285,14 @@ export const useFunc = (model) => {
   return {
     isReplicasValid,
     isMachineValid,
-    returnFalse,
     getNamespaces,
     getDbs,
     getDbDetails,
     getDbVersions,
     getVersionInfo,
     isVersionEmpty,
-    getVersion,
     ifRequestTypeEqualsTo,
     onRequestTypeChange,
-    getDbTls,
-    getDbType,
     initNamespace,
     initDatabaseRef,
     isRancherManaged,
@@ -1655,23 +1302,11 @@ export const useFunc = (model) => {
     showConfigureOpsrequestLabel,
     showAndInitOpsRequestType,
     getConfigSecrets,
-    objectToYaml,
-    getSelectedConfigSecret,
-    getSelectedConfigSecretValue,
-    createSecretUrl,
-    isEqualToValueFromType,
-    disableOpsRequest,
-    getNamespacedResourceList,
-    getResourceList,
-    resourceNames,
-    unNamespacedResourceNames,
     ifReconfigurationTypeEqualsTo,
-    onReconfigurationTypeChange,
     onApplyconfigChange,
     getRequestTypeFromRoute,
     isDbDetailsLoading,
     setValueFromDbDetails,
-    setResource,
     isNamespaceDisabled,
     isDatabaseRefDisabled,
     onNamespaceChange,
@@ -1681,13 +1316,9 @@ export const useFunc = (model) => {
     getMachines,
     setMachine,
     onMachineChange,
-    isMachineCustom,
     checkVolume,
     fetchConfigSecrets,
     getConfigSecretsforAppyConfig,
-    getSelectedConfigurationData,
-    getSelectedConfigurationName,
-    getSelectedConfigurationValueForRemove,
     createNewConfigSecret,
     decodeError,
     isCreateSecret,

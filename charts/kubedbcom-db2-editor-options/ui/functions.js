@@ -339,123 +339,6 @@ export const useFunc = (model) => {
     return modelPathValue === value
   }
 
-  function showAuthSecretField() {
-    return !showAuthPasswordField()
-  }
-
-  async function getResources(group, version, resource) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-      {
-        params: { filter: { items: { metadata: { name: null } } } },
-      },
-    )
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      item.text = name
-      item.value = name
-      return true
-    })
-    return resources
-  }
-
-  async function getMySqlVersions(group, version, resource) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const queryParams = {
-      filter: {
-        items: {
-          metadata: { name: null },
-          spec: { version: null, deprecated: null },
-        },
-      },
-    }
-
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-      {
-        params: queryParams,
-      },
-    )
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    // keep only non deprecated versions
-    const filteredMySqlVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
-
-    filteredMySqlVersions.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      const specVersion = (item.spec && item.spec.version) || ''
-      item.text = `${name} (${specVersion})`
-      item.value = name
-      return true
-    })
-    return filteredMySqlVersions
-  }
-
-  function onCreateAuthSecretChange() {
-    const createAuthSecret = getValue(discriminator, '/createAuthSecret')
-    if (createAuthSecret) {
-      commit('wizard/model$delete', '/spec/authSecret/name')
-    } else if (createAuthSecret === false) {
-      commit('wizard/model$delete', '/spec/authSecret/password')
-    }
-  }
-
-  async function getSecrets() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = getValue(model, '/metadata/release/namespace')
-    // // // // watchDependency('model#/metadata/release/namespace')
-
-    if (owner && cluster && namespace) {
-      try {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-          {
-            params: {
-              filter: {
-                items: {
-                  metadata: { name: null },
-                  type: null,
-                },
-              },
-            },
-          },
-        )
-
-        const secrets = (resp && resp.data && resp.data.items) || []
-
-        const filteredSecrets = secrets.filter((item) => {
-          const validType = [
-            'kubernetes.io/service-account-token',
-            'Opaque',
-            'kubernetes.io/basic-auth',
-          ]
-          return validType.includes(item.type)
-        })
-
-        filteredSecrets.map((item) => {
-          const name = (item.metadata && item.metadata.name) || ''
-          item.text = name
-          item.value = name
-          return true
-        })
-        return filteredSecrets
-      } catch (e) {
-        console.log(e)
-      }
-    }
-    return []
-  }
-
   let array = []
   function getMachineListForOptions() {
     const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
@@ -491,77 +374,6 @@ export const useFunc = (model) => {
   function setMachineToCustom() {
     const machine = getValue(model, '/spec/admin/machineProfiles/default')
     return machine || 'custom'
-  }
-
-  async function fetchJsons() {
-    let ui = {}
-    let language = {}
-    let functions = {}
-    const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
-
-    try {
-      ui = await axios.get(
-        `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      language = await axios.get(
-        `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      const functionString = await axios.get(
-        `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-      )
-      // declare evaluate the functionString to get the functions Object
-      const evalFunc = new Function(functionString.data || '')
-      functions = evalFunc()
-    } catch (e) {
-      console.log(e)
-    }
-
-    return {
-      ui: ui.data || {},
-      language: language.data || {},
-      functions,
-    }
-  }
-
-  function updateAgentValue(val) {
-    commit('wizard/model$update', {
-      path: '/spec/monitoring/agent',
-      value: val ? 'prometheus.io/operator' : '',
-      force: true,
-    })
-
-    // update alert value depend on monitoring profile
-    commit('wizard/model$update', {
-      path: '/form/alert/enabled',
-      value: val ? 'warning' : 'none',
-      force: true,
-    })
-  }
-
-  function setReplicaNumber() {
-    const modelPathValue = getValue(model, '/spec/mode')
-    if (modelPathValue === 'Topology') {
-      return 2
-    } else return 1
-  }
-  function setRouterNumber() {
-    const modelPathValue = getValue(model, '/spec/mode')
-    if (modelPathValue === 'Topology') {
-      return 3
-    } else return 1
-  }
-
-  function getCreateNameSpaceUrl() {
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const domain = storeGet('/domain') || ''
-    if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    } else {
-      const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    }
   }
 
   const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
@@ -609,60 +421,6 @@ export const useFunc = (model) => {
     if (!zones.length) commit('wizard/model$delete', 'form/capi/sku')
   }
 
-  async function getZones() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const isDedicated = getValue(model, 'form/capi/dedicated')
-    if (isDedicated) {
-      try {
-        const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`)
-        const val = resp.data.map((item) => {
-          return { value: item, text: item }
-        })
-        return val
-      } catch (e) {
-        console.log(e)
-        return []
-      }
-    }
-  }
-
-  async function getSKU() {
-    // // // // watchDependency('model#/form/capi/zones')
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const zones = getValue(model, 'form/capi/zones') || []
-    if (zones.length) {
-      try {
-        let url = `clustersv2/${owner}/${cluster}/vms?`
-        if (typeof zones === 'string') {
-          url += `zones=${encodeURIComponent(zones)}`
-        } else {
-          zones.forEach((item) => {
-            url += `zones=${encodeURIComponent(item)}&`
-          })
-          url = url.slice(0, -1)
-        }
-        const resp = await axios.get(url)
-        const val = resp.data.map((item) => {
-          return {
-            value: item.name,
-            text: `${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `,
-          }
-        })
-        return val
-      } catch (e) {
-        console.log(e)
-        return []
-      }
-    }
-  }
-
-  function isVariantAvailable() {
-    const variant = storeGet('/route/query/variant')
-    return variant ? true : false
-  }
-
   function setStorageClass() {
     const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
     let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
@@ -691,35 +449,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function showAlerts() {
-    // // // // watchDependency('discriminator#/monitoring')
-    const isMonitorEnabled = getValue(discriminator, '/monitoring')
-    return isMonitorEnabled && isToggleOn('alert')
-  }
-
-  function onBackupSwitch() {
-    const isBackupOn = getValue(discriminator, '/backup')
-    commit('wizard/model$update', {
-      path: '/spec/backup/tool',
-      value: isBackupOn ? 'KubeStash' : '',
-      force: true,
-    })
-  }
-
-  function clearArbiterHidden() {
-    commit('wizard/model$update', {
-      path: `/spec/arbiter/enabled`,
-      value: false,
-      force: true,
-    })
-
-    commit('wizard/model$update', {
-      path: `/spec/hidden/enabled`,
-      value: false,
-      force: true,
-    })
-  }
-
   let placement = []
   let versions = []
   let storageClass = []
@@ -727,8 +456,6 @@ export const useFunc = (model) => {
   let nodetopologiesShared = []
   let nodetopologiesDedicated = []
   let features = []
-  let hostName = ''
-  let ip = ''
   async function initBundle() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1005,10 +732,6 @@ export const useFunc = (model) => {
     } else return filteredlist
   }
 
-  function returnFalse() {
-    return false
-  }
-
   function isConfigDatabaseOn() {
     // // // // watchDependency('discriminator#/configDatabase')
     return getValue(discriminator, '/configDatabase')
@@ -1018,28 +741,10 @@ export const useFunc = (model) => {
     // // // // watchDependency('model#/spec/mode')
     return modelPathValue && modelPathValue !== mode
   }
-  function showStorageSizeField() {
-    const modelPathValue = getValue(model, '/spec/mode')
-    // // // // watchDependency('model#/spec/mode')
-    const validType = ['Standalone', 'Replicaset']
-    return !validType.includes(modelPathValue)
-  }
-  function showHidden() {
-    // // // // watchDependency('model#/spec/hidden/enabled')
-    const isHiddenOn = getValue(model, '/spec/hidden/enabled') || ''
-    const notStandalone = notEqualToDatabaseMode('Standalone')
-    return isHiddenOn && notStandalone
-  }
   function notEqualToDatabaseMode(mode) {
     const modelPathValue = getValue(model, '/spec/mode')
     // // // // watchDependency('model#/spec/mode')
     return modelPathValue && modelPathValue !== mode
-  }
-  function showArbiter() {
-    // // // // watchDependency('model#/spec/arbiter/enabled')
-    const isArbiterOn = getValue(model, '/spec/arbiter/enabled') || ''
-    const notStandalone = notEqualToDatabaseMode('Standalone')
-    return isArbiterOn && notStandalone
   }
   function clearConfiguration() {
     const configOn = getValue(discriminator, '/configDatabase')
@@ -1049,12 +754,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function showIssuer() {
-    // // // // watchDependency('model#/spec/admin/tls/default')
-    const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
-    const isIssuerToggleEnabled = isToggleOn('clusterIssuers')
-    return isTlsEnabled && isIssuerToggleEnabled
-  }
   function onAuthChange() {
     commit('wizard/model$update', {
       path: '/spec/authSecret/name',
@@ -1067,17 +766,6 @@ export const useFunc = (model) => {
       force: true,
     })
   }
-  function setMonitoring() {
-    const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
-    return !!agent
-  }
-
-  function setBackup() {
-    const backup = getValue(model, '/spec/backup/tool')
-    const val = getValue(model, '/spec/admin/backup/enable/default')
-    return backup === 'KubeStash' && features.includes('backup') && val
-  }
-
   function isMachineCustom(path) {
     const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
     const modelPathValue = getValue(model, fullpath)
@@ -1088,70 +776,6 @@ export const useFunc = (model) => {
   function isMachineNotCustom(path) {
     return !isMachineCustom(path)
   }
-  async function getNamespaces() {
-    const params = storeGet('/route/params')
-    const { user, cluster, group, version, resource } = params
-    try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
-          apiVersion: 'identity.k8s.appscode.com/v1alpha1',
-          kind: 'SelfSubjectNamespaceAccessReview',
-          spec: {
-            resourceAttributes: [
-              {
-                verb: 'create',
-                group: group,
-                version: version,
-                resource: resource,
-              },
-            ],
-          },
-        },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
-        let projectsNamespace = []
-        projectsNamespace = Object.keys(projects).map((project) => ({
-          project: project,
-          namespaces: projects[project].map((namespace) => ({
-            text: namespace,
-            value: namespace,
-          })),
-        }))
-        return projectsNamespace
-      } else {
-        return resp.data?.status?.namespaces || []
-      }
-    } catch (e) {
-      console.log(e)
-    }
-    return []
-  }
-
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
-  }
-
-  function updateAlertValue() {
-    const isMonitorEnabled = getValue(discriminator, '/monitoring')
-    const alert = isMonitorEnabled ? 'warning' : 'none'
-    // update alert value depend on monitoring profile
-    commit('wizard/model$update', {
-      path: '/form/alert/enabled',
-      value: alert,
-      force: true,
-    })
-    const agent = isMonitorEnabled ? 'prometheus.io/operator' : ''
-    commit('wizard/model$update', {
-      path: '/spec/admin/monitoring/agent',
-      value: agent,
-      force: true,
-    })
-  }
-
   function setLimits(resource, type) {
     const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
     // watchDependency(`model#${path}`)
@@ -1267,25 +891,6 @@ export const useFunc = (model) => {
     return cpuMemoryValue
   }
 
-  function toggleTls() {
-    let modelPathValue = getValue(model, '/spec/mode')
-    commit('wizard/model$update', {
-      path: '/spec/admin/tls/default',
-      value: modelPathValue !== 'Standalone',
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/spec/admin/tls/toggle',
-      value: modelPathValue !== 'Standalone',
-      force: true,
-    })
-  }
-
-  function showAdditionalSettings() {
-    // // // // watchDependency('discriminator#/bundleApiLoaded')
-    return features.length
-  }
-
   function getDefault(type) {
     const val = getValue(model, `/spec/admin/${type}/default`) || ''
     return val
@@ -1321,12 +926,6 @@ export const useFunc = (model) => {
     return options
   }
 
-  function showAuthPasswordField() {
-    const modelPathValue = getValue(discriminator, '/referSecret')
-    // // // // watchDependency('discriminator#/referSecret')
-    return !modelPathValue && showReferSecret()
-  }
-
   function showSecretDropdown() {
     const modelPathValue = getValue(discriminator, '/referSecret')
     // // // // watchDependency('discriminator#/referSecret')
@@ -1358,158 +957,37 @@ export const useFunc = (model) => {
     })
   }
 
-  function showArchiver() {
-    // // // // watchDependency('model#/spec/mode')
-    const dbmode = getValue(model, '/spec/mode')
-
-    if (dbmode === 'Standalone') {
-      commit('wizard/model$update', {
-        path: '/spec/admin/archiver/enable/default',
-        value: false,
-        force: true,
-      })
-      return false
-    }
-    return checkIfFeatureOn('archiver')
-  }
-
-  function checkHostnameOrIP(type) {
-    const tls = getValue(model, '/spec/admin/tls/default')
-    const expose = getValue(model, '/spec/admin/expose/enable/default')
-    if (tls && expose) {
-      if (hostName) {
-        commit('wizard/model$update', {
-          path: '/spec/hostName',
-          value: hostName,
-          force: true,
-        })
-      } else {
-        commit('wizard/model$update', {
-          path: '/spec/ip',
-          value: ip,
-          force: true,
-        })
-      }
-    } else {
-      commit('wizard/model$update', {
-        path: '/spec/hostName',
-        value: '',
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/spec/ip',
-        value: '',
-        force: true,
-      })
-    }
-    if (type === 'tls') return tls
-  }
-
-  function onArchiverChange() {
-    const isArchiverOn = getValue(model, '/spec/admin/archiver/enable/default')
-    const stClass = getValue(model, '/spec/admin/storageClasses/default')
-    const found = archiverMap.find((item) => item.storageClass === stClass)
-
-    if (isArchiverOn && found?.annotation)
-      commit('wizard/model$update', {
-        path: '/spec/archiverName',
-        value: found.annotation,
-        force: true,
-      })
-    else
-      commit('wizard/model$update', {
-        path: '/spec/archiverName',
-        value: '',
-        force: true,
-      })
-  }
-
-  function showArchiverAlert() {
-    // // // // watchDependency('model#/spec/admin/storageClasses/default')
-
-    const mode = getValue(model, '/spec/mode')
-    if (mode === 'Standalone') return false
-
-    const stClass = getValue(model, '/spec/admin/storageClasses/default')
-    const found = archiverMap.find((item) => item.storageClass === stClass)
-    const show = !found?.annotation
-
-    // toggle archiver to false when storageClass annotation not found
-    if (show)
-      commit('wizard/model$update', {
-        path: '/spec/admin/archiver/enable/default',
-        value: false,
-        force: true,
-      })
-    else onArchiverChange()
-
-    return show
-  }
-
   return {
     showReferSecretSwitch,
     onReferSecretChange,
     getDefaultValue,
-    isRancherManaged,
     showSecretDropdown,
     showReferSecret,
     getReferSecrets,
     initBundle,
-    returnFalse,
     setLimits,
     setRequests,
-    toggleTls,
-    getNamespaces,
-    updateAlertValue,
     getAdminOptions,
     isToggleOn,
-    showAlerts,
     getNodeTopology,
-    clearArbiterHidden,
-    showHidden,
     isConfigDatabaseOn,
     notEqualToDatabaseMode,
     filterNodeTopology,
     onAuthChange,
-    setMonitoring,
     isMachineNotCustom,
     isMachineCustom,
-    showIssuer,
-    showArbiter,
     clearConfiguration,
-    showStorageSizeField,
-    onBackupSwitch,
-    isVariantAvailable,
-    fetchJsons,
-    showAuthPasswordField,
     isEqualToModelPathValue,
-    showAuthSecretField,
-    getResources,
-    getMySqlVersions,
-    onCreateAuthSecretChange,
-    getSecrets,
     getMachineListForOptions,
     setMachineToCustom,
-    updateAgentValue,
-    getCreateNameSpaceUrl,
     ifCapiProviderIsNotEmpty,
     ifDedicated,
     dedicatedOnChange,
     ifZones,
     zonesOnChange,
-    getZones,
-    getSKU,
     showMultiselectZone,
     showSelectZone,
     setStorageClass,
-    setReplicaNumber,
-    setRouterNumber,
-    setBackup,
-    showAdditionalSettings,
     getDefault,
-    showArchiver,
-    checkHostnameOrIP,
-    onArchiverChange,
-    showArchiverAlert,
   }
 }

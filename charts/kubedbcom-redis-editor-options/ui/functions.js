@@ -372,44 +372,6 @@ export const useFunc = (model) => {
     }
   }
 
-  function dedicatedOnChange() {
-    const val = getValue(model, 'form/capi/dedicated')
-    if (!val) {
-      commit('wizard/model$delete', 'form/capi/zones')
-      commit('wizard/model$delete', 'form/capi/sku')
-    }
-  }
-
-  async function fetchJsons(itemCtx) {
-    let ui = {}
-    let language = {}
-    let functions = {}
-    const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
-
-    try {
-      ui = await axios.get(
-        `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      language = await axios.get(
-        `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      const functionString = await axios.get(
-        `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-      )
-      // declare evaluate the functionString to get the functions Object
-      const evalFunc = new Function(functionString.data || '')
-      functions = evalFunc()
-    } catch (e) {
-      console.log(e)
-    }
-
-    return {
-      ui: ui.data || {},
-      language: language.data || {},
-      functions,
-    }
-  }
-
   function fetchOptions(type) {
     let kind = getValue(model, '/metadata/resource/kind')
 
@@ -515,19 +477,6 @@ export const useFunc = (model) => {
     return options
   }
 
-  function getCreateNameSpaceUrl() {
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const domain = storeGet('/domain') || ''
-    if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    } else {
-      const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-    }
-  }
-
   function getDefault(type) {
     const val = getValue(model, `/spec/admin/${type}/default`) || ''
     return val
@@ -568,47 +517,6 @@ export const useFunc = (model) => {
         .filter((val) => !!val)
     }
     return array
-  }
-
-  async function getNamespaces() {
-    const params = storeGet('/route/params')
-    const { user, cluster, group, version, resource } = params
-    try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
-          apiVersion: 'identity.k8s.appscode.com/v1alpha1',
-          kind: 'SelfSubjectNamespaceAccessReview',
-          spec: {
-            resourceAttributes: [
-              {
-                verb: 'create',
-                group: group,
-                version: version,
-                resource: resource,
-              },
-            ],
-          },
-        },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
-        let projectsNamespace = []
-        projectsNamespace = Object.keys(projects).map((project) => ({
-          project: project,
-          namespaces: projects[project].map((namespace) => ({
-            text: namespace,
-            value: namespace,
-          })),
-        }))
-        return projectsNamespace
-      } else {
-        return resp.data?.status?.namespaces || []
-      }
-    } catch (e) {
-      console.log(e)
-    }
-    return []
   }
 
   async function getNodeTopology() {
@@ -662,41 +570,6 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getRedisVersions(group, version, resource) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const queryParams = {
-      filter: {
-        items: {
-          metadata: { name: null },
-          spec: { version: null, deprecated: null },
-        },
-      },
-    }
-
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-      {
-        params: queryParams,
-      },
-    )
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    // keep only non deprecated versions
-    const filteredRedisVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
-
-    filteredRedisVersions.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      const specVersion = (item.spec && item.spec.version) || ''
-      item.text = `${name} (${specVersion})`
-      item.value = name
-      return true
-    })
-    return filteredRedisVersions
-  }
-
   async function getReferSecrets() {
     const referSecret = getValue(discriminator, '/referSecret')
     if (!referSecret) {
@@ -747,86 +620,6 @@ export const useFunc = (model) => {
       return true
     })
     return resources
-  }
-
-  async function getSecrets() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = getValue(model, '/metadata/release/namespace')
-    // watchDependency('model#/metadata/release/namespace')
-
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      },
-    )
-
-    const secrets = (resp && resp.data && resp.data.items) || []
-
-    const filteredSecrets = secrets.filter((item) => {
-      const validType = ['kubernetes.io/service-account-token', 'Opaque']
-      return validType.includes(item.type)
-    })
-
-    filteredSecrets.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      item.text = name
-      item.value = name
-      return true
-    })
-    return filteredSecrets
-  }
-
-  async function getSKU() {
-    // watchDependency('model#/form/capi/zones')
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const zones = getValue(model, 'form/capi/zones') || []
-    if (zones.length) {
-      try {
-        let url = `clustersv2/${owner}/${cluster}/vms?`
-        if (typeof zones === 'string') {
-          url += `zones=${encodeURIComponent(zones)}`
-        } else {
-          zones.forEach((item) => {
-            url += `zones=${encodeURIComponent(item)}&`
-          })
-          url = url.slice(0, -1)
-        }
-        const resp = await axios.get(url)
-        const val = resp.data.map((item) => {
-          return {
-            value: item.name,
-            text: `${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `,
-          }
-        })
-        return val
-      } catch (e) {
-        console.log(e)
-        return []
-      }
-    }
-  }
-
-  async function getZones() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const isDedicated = getValue(model, 'form/capi/dedicated')
-    if (isDedicated) {
-      try {
-        const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`)
-        const val = resp.data.map((item) => {
-          return { value: item, text: item }
-        })
-        return val
-      } catch (e) {
-        console.log(e)
-        return []
-      }
-    }
   }
 
   const ifCapiProviderIsNotEmpty = () => {
@@ -951,18 +744,6 @@ export const useFunc = (model) => {
     setDiscriminatorValue('/bundleApiLoaded', true)
   }
 
-  function isAnnounceValid() {
-    // watchDependency('model#/spec/cluster/master')
-
-    const master = getValue(model, '/spec/cluster/master') || 0
-
-    const shards = getValue(model, '/spec/cluster/announce/shards') || []
-    const shardsLength = shards?.length || 0
-
-    if (shardsLength !== master) return `Shards Length should be equal to master(${master})`
-    return true
-  }
-
   function isConfigDatabaseOn() {
     // watchDependency('discriminator#/configDatabase')
     return getValue(discriminator, '/configDatabase')
@@ -989,12 +770,6 @@ export const useFunc = (model) => {
     const modelPathValue = getValue(model, modelPath)
     // watchDependency('model#' + modelPath)
     return modelPathValue !== value && isToggleOn('storageClasses')
-  }
-
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
   }
 
   function isToggleOn(type) {
@@ -1032,11 +807,6 @@ export const useFunc = (model) => {
         bundleApiLoaded
       )
     } else return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
-  }
-
-  function isVariantAvailable() {
-    const variant = storeGet('/route/query/variant')
-    return variant ? true : false
   }
 
   function notEqualToDatabaseMode(mode) {
@@ -1091,10 +861,6 @@ export const useFunc = (model) => {
       value: '',
       force: true,
     })
-  }
-
-  function returnFalse() {
-    return false
   }
 
   function setAnnounce() {
@@ -1324,16 +1090,6 @@ export const useFunc = (model) => {
     return isAnnounceEnable
   }
 
-  function showAuthPasswordField() {
-    const modelPathValue = getValue(discriminator, '/referSecret')
-    // watchDependency('discriminator#/referSecret')
-    return !modelPathValue && showReferSecret()
-  }
-
-  function showAuthSecretField() {
-    return !showAuthPasswordField()
-  }
-
   function showIssuer() {
     // watchDependency('model#/spec/admin/tls/default')
     const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
@@ -1379,21 +1135,6 @@ export const useFunc = (model) => {
     return verd === 'false' || verd === false
   }
 
-  function updateAgentValue(val) {
-    commit('wizard/model$update', {
-      path: '/spec/monitoring/agent',
-      value: val ? 'prometheus.io/operator' : '',
-      force: true,
-    })
-
-    // update alert value depend on monitoring profile
-    commit('wizard/model$update', {
-      path: '/form/alert/enabled',
-      value: val ? 'warning' : 'none',
-      force: true,
-    })
-  }
-
   function updateAlertValue() {
     const isMonitorEnabled = getValue(discriminator, '/monitoring')
     const alert = isMonitorEnabled ? 'warning' : 'none'
@@ -1411,29 +1152,6 @@ export const useFunc = (model) => {
     })
   }
 
-  function validateEndpoints() {
-    // watchDependency('model#/spec/cluster/replicas')
-
-    const replicas = getValue(model, '/spec/cluster/replicas') || 0
-
-    const endpoints = storeGet('/wizard/temporaryModel/endpoints')
-    const endpointsObject = Object.values(endpoints)
-    const length = Object.keys(endpointsObject?.[0])?.length
-    if (length !== replicas)
-      return {
-        isInvalid: true,
-        message: `Endpoints length should be equal to replicas(${replicas})`,
-      }
-    else {
-      return {}
-    }
-  }
-
-  function zonesOnChange() {
-    const zones = getValue(model, 'form/capi/zones') || []
-    if (!zones.length) commit('wizard/model$delete', 'form/capi/sku')
-  }
-
   function returnTrue() {
     return 'true'
   }
@@ -1441,37 +1159,26 @@ export const useFunc = (model) => {
   return {
     checkIfFeatureOn,
     clearConfiguration,
-    dedicatedOnChange,
-    fetchJsons,
     fetchOptions,
     filterNodeTopology,
     getAdminOptions,
-    getCreateNameSpaceUrl,
     getDefault,
     getDefaultValue,
     getMachineListForOptions,
-    getNamespaces,
     getNodeTopology,
     getRedisSentinels,
-    getRedisVersions,
     getReferSecrets,
     getResources,
-    getSecrets,
-    getSKU,
-    getZones,
     ifCapiProviderIsNotEmpty,
     ifDedicated,
     ifZones,
     initBundle,
-    isAnnounceValid,
     isConfigDatabaseOn,
     isEqualToModelPathValue,
     isMachineCustom,
     isMachineNotCustom,
     isNotEqualToModelPathValue,
-    isRancherManaged,
     isToggleOn,
-    isVariantAvailable,
     notEqualToDatabaseMode,
     onAnnounceShardsChange,
     validateAnnounceShards,
@@ -1479,7 +1186,6 @@ export const useFunc = (model) => {
     onBackupSwitch,
     onCreateSentinelChange,
     onReferSecretChange,
-    returnFalse,
     returnTrue,
     setAnnounce,
     setAnnounceShards,
@@ -1492,8 +1198,6 @@ export const useFunc = (model) => {
     showAdditionalSettings,
     showAlerts,
     showAnnounce,
-    showAuthPasswordField,
-    showAuthSecretField,
     showIssuer,
     showMultiselectZone,
     showReferSecret,
@@ -1501,9 +1205,6 @@ export const useFunc = (model) => {
     showSecretDropdown,
     showSelectZone,
     showSentinelNameAndNamespace,
-    updateAgentValue,
     updateAlertValue,
-    validateEndpoints,
-    zonesOnChange,
   }
 }

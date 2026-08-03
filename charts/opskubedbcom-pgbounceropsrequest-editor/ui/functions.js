@@ -319,40 +319,6 @@ export const useFunc = (model) => {
   )
 
   showAndInitOpsRequestType()
-  async function fetchJsons({ axios, itemCtx }) {
-    let ui = {}
-    let language = {}
-    let functions = {}
-    const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
-
-    try {
-      ui = await axios.get(
-        `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      language = await axios.get(
-        `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      const functionString = await axios.get(
-        `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-      )
-      // declare evaluate the functionString to get the functions Object
-      const evalFunc = new Function(functionString.data || '')
-      functions = evalFunc()
-    } catch (e) {
-      console.log(e)
-    }
-
-    return {
-      ui: ui.data || {},
-      language: language.data || {},
-      functions,
-    }
-  }
-
-  function returnFalse() {
-    return false
-  }
-
   function isRancherManaged() {
     const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
     const found = managers.find((item) => item === 'Rancher')
@@ -525,17 +491,6 @@ export const useFunc = (model) => {
     return txt
   }
 
-  function getVersion() {
-    return filteredVersion.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      const specVersion = (item.spec && item.spec.version) || ''
-      return {
-        text: `${name} (${specVersion})`,
-        value: name,
-      }
-    })
-  }
-
   function isVersionEmpty() {
     const val = getValue(discriminator, '/filteredVersion')
     return val.length === 0
@@ -582,53 +537,6 @@ export const useFunc = (model) => {
     // watchDependency('model#/spec/type')
 
     return selectedType === type
-  }
-
-  function onRequestTypeChange() {
-    const selectedType = getValue(model, '/spec/type')
-    const reqTypeMapping = {
-      Upgrade: 'updateVersion',
-      UpdateVersion: 'updateVersion',
-      HorizontalScaling: 'horizontalScaling',
-      VerticalScaling: 'verticalScaling',
-      VolumeExpansion: 'volumeExpansion',
-      Restart: 'restart',
-      Reconfigure: 'configuration',
-      ReconfigureTLS: 'tls',
-    }
-
-    Object.keys(reqTypeMapping).forEach((key) => {
-      if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
-    })
-  }
-
-  function getDbTls() {
-    // watchDependency('discriminator#/dbDetails')
-    const dbDetails = getValue(discriminator, '/dbDetails')
-
-    const { spec } = dbDetails || {}
-    return spec?.tls || undefined
-  }
-
-  function getDbType() {
-    // watchDependency('discriminator#/dbDetails')
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const { spec } = dbDetails || {}
-    const { topology } = spec || {}
-    if (topology) return 'Topology'
-    else return 'Combined'
-  }
-
-  function disableOpsRequest() {
-    if (itemCtx.value === 'HorizontalScaling') {
-      const dbType = getDbType({
-        discriminator,
-        getValue,
-      })
-
-      if (dbType === 'Standalone') return true
-      else return false
-    } else return false
   }
 
   function initNamespace() {
@@ -744,11 +652,6 @@ export const useFunc = (model) => {
   }
 
   // vertical scaling
-  function ifDbTypeEqualsTo(value, opsReqType) {
-    const verd = getDbType()
-    return value === verd
-  }
-
   // machine profile stuffs
   // let machinesFromPreset = []
 
@@ -867,12 +770,6 @@ export const useFunc = (model) => {
       })
   }
 
-  function isMachineCustom() {
-    // watchDependency('discriminator#/machine')
-    const machine = getValue(discriminator, '/machine')
-    return machine === 'custom'
-  }
-
   // Fetch and store database Infos
   // for secret configurations in reconfigure
   let configSecrets = []
@@ -958,104 +855,6 @@ export const useFunc = (model) => {
       return { text: item.componentName, value: item.componentName }
     })
     return secrets
-  }
-
-  function getSelectedConfigurationData(type) {
-    type = type ? type + '/' : ''
-    const path = `/${type}selectedConfiguration`
-    const selectedConfiguration = getValue(discriminator, path)
-
-    if (!selectedConfiguration) {
-      return []
-    }
-
-    const configuration = secretConfigData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return []
-    }
-
-    const result = []
-    // Decode base64 and format as array of objects with name and content
-    Object.keys(configuration.data).forEach((fileName) => {
-      try {
-        // Decode base64 string
-        const decodedContent = atob(configuration.data[fileName])
-        result.push({
-          name: fileName,
-          content: decodedContent,
-        })
-      } catch (e) {
-        console.error(`Error decoding ${fileName}:`, e)
-        result.push({
-          name: fileName,
-          content: configuration.data[fileName], // Fallback to original if decode fails
-        })
-      }
-    })
-
-    // Set the value to the model
-    commit('wizard/model$update', {
-      path: `/temp/${type}applyConfig`,
-      value: result,
-      force: true,
-    })
-
-    return result
-  }
-
-  function getSelectedConfigurationName(configType, type) {
-    type = type ? type + '/' : ''
-    let path = ''
-    if (configType === 'create') path = `/spec/configuration/${type}/configSecret/name`
-    else if (configType === 'apply') path = `/${type}selectedConfiguration`
-    else if (configType === 'remove') path = `/${type}selectedConfigurationRemove`
-
-    const selectedConfiguration =
-      configType === 'create' ? getValue(model, path) : getValue(discriminator, path)
-
-    if (selectedConfiguration)
-      return { subtitle: ` You have selected <b>${selectedConfiguration}</b> secret` }
-    else return { subtitle: 'No secret selected' }
-  }
-
-  function getSelectedConfigurationValueForRemove(type) {
-    type = type ? type + '/' : ''
-    const path = `/${type}selectedConfigurationRemove`
-    const selectedConfiguration = getValue(discriminator, path)
-
-    if (!selectedConfiguration) {
-      return ''
-    }
-
-    const configuration = secretConfigData.find(
-      (item) => item.componentName === selectedConfiguration,
-    )
-
-    if (!configuration) {
-      return ''
-    }
-
-    let data = {}
-    // Decode base64 and parse YAML for each key in the secret data
-    Object.keys(configuration.data).forEach((item) => {
-      try {
-        // Decode base64 string
-        const decodedString = atob(configuration.data[item])
-        // Parse YAML string to object
-        const parsedYaml = yaml.load(decodedString)
-        // Store the parsed object with the filename as key
-        data[item] = parsedYaml
-      } catch (e) {
-        console.error(`Error parsing ${item}:`, e)
-        data[item] = atob(configuration.data[item]) // Fallback to decoded string
-      }
-    })
-
-    // Convert data object back to YAML string
-    return yaml.dump(data)
   }
 
   async function createNewConfigSecret(type) {
@@ -1290,118 +1089,6 @@ export const useFunc = (model) => {
     return resSecret
   }
 
-  function createSecretUrl() {
-    const user = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const domain = storeGet('/domain') || ''
-    if (domain.includes('bb.test')) {
-      return `http://console.bb.test:5990/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
-    } else {
-      const editedDomain = domain.replace('kubedb', 'console')
-      return `${editedDomain}/console/${user}/kubernetes/${cluster}/core/v1/secrets/create`
-    }
-  }
-
-  function isEqualToValueFromType(value) {
-    // watchDependency('discriminator#/valueFromType')
-    const valueFrom = getValue(discriminator, '/valueFromType')
-    return valueFrom === value
-  }
-
-  async function getNamespacedResourceList({ namespace, group, version, resource }) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
-
-    let ans = []
-    try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      })
-
-      const items = (resp && resp.data && resp.data.items) || []
-      ans = items
-    } catch (e) {
-      console.log(e)
-    }
-
-    return ans
-  }
-  async function getResourceList({ group, version, resource }) {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-
-    const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`
-
-    let ans = []
-    try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      })
-
-      const items = (resp && resp.data && resp.data.items) || []
-      ans = items
-    } catch (e) {
-      console.log(e)
-    }
-
-    return ans
-  }
-  async function resourceNames(group, version, resource) {
-    const namespace = getValue(model, '/metadata/namespace')
-    // watchDependency('model#/metadata/namespace')
-
-    let resources = await getNamespacedResourceList({
-      namespace,
-      group,
-      version,
-      resource,
-    })
-
-    if (resource === 'secrets') {
-      resources = resources.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
-        return validType.includes(item.type)
-      })
-    }
-
-    return resources.map((resource) => {
-      const name = (resource.metadata && resource.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
-  async function unNamespacedResourceNames(group, version, resource) {
-    let resources = await getResourceList({
-      group,
-      version,
-      resource,
-    })
-
-    if (resource === 'secrets') {
-      resources = resources.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
-        return validType.includes(item.type)
-      })
-    }
-
-    return resources.map((resource) => {
-      const name = (resource.metadata && resource.metadata.name) || ''
-      return {
-        text: name,
-        value: name,
-      }
-    })
-  }
-
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {
     const reconfigurationType = getValue(discriminator, '/reconfigurationType')
@@ -1411,130 +1098,7 @@ export const useFunc = (model) => {
     return reconfigurationType === value
   }
 
-  function onReconfigurationTypeChange() {
-    setDiscriminatorValue('/applyConfig', [])
-    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
-    if (reconfigurationType === 'remove') {
-      commit('wizard/model$delete', `/spec/configuration`)
-
-      commit('wizard/model$update', {
-        path: `/spec/configuration/pgbouncer/removeCustomConfig`,
-        value: true,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$delete', `/spec/configuration/pgbouncer/configSecret`)
-      commit('wizard/model$delete', `/spec/configuration/pgbouncer/applyConfig`)
-      commit('wizard/model$delete', `/spec/configuration/pgbouncer/removeCustomConfig`)
-    }
-  }
-
   // for tls
-  function hasTlsField() {
-    const tls = getDbTls()
-
-    return !!tls
-  }
-
-  function initIssuerRefApiGroup() {
-    const kind = getValue(model, '/spec/tls/issuerRef/kind')
-    // watchDependency('model#/spec/tls/issuerRef/kind')
-
-    if (kind) {
-      return 'cert-manager.io'
-    } else return undefined
-  }
-
-  async function getIssuerRefsName() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    // watchDependency('model#/spec/tls/issuerRef/kind')
-    // watchDependency('model#/metadata/namespace')
-    const kind = getValue(model, '/spec/tls/issuerRef/kind')
-    const namespace = getValue(model, '/metadata/namespace')
-
-    if (kind === 'Issuer') {
-      const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
-      return getIssuer(url)
-    } else if (kind === 'ClusterIssuer') {
-      const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
-
-      let presets = storeGet('/kubedbuiPresets') || {}
-      if (!storeGet('/route/params/actions')) {
-        try {
-          const presetResp = await axios.get(url)
-          presets = presetResp.data?.spec?.values?.spec
-        } catch (e) {
-          console.log(e)
-          presets.status = String(e.status)
-        }
-      }
-      let clusterIssuers = presets.admin?.clusterIssuers?.available || []
-      if (presets.status === '404') {
-        const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
-        return getIssuer(url)
-      }
-      return clusterIssuers
-    } else if (!kind) {
-      commit('wizard/model$delete', '/spec/tls/issuerRef/name')
-      return []
-    }
-
-    async function getIssuer(url) {
-      try {
-        const resp = await axios.get(url)
-        const resources = (resp && resp.data && resp.data.items) || []
-
-        resources.map((item) => {
-          const name = (item.metadata && item.metadata.name) || ''
-          item.text = name
-          item.value = name
-          return true
-        })
-        return resources
-      } catch (e) {
-        console.log(e)
-        return []
-      }
-    }
-  }
-
-  function initTlsOperation() {
-    return 'update'
-  }
-  function onTlsOperationChange() {
-    const tlsOperation = getValue(discriminator, '/tlsOperation')
-
-    commit('wizard/model$delete', '/spec/tls')
-
-    if (tlsOperation === 'rotate') {
-      commit('wizard/model$update', {
-        path: '/spec/tls/rotateCertificates',
-        value: true,
-        force: true,
-      })
-    } else if (tlsOperation === 'remove') {
-      commit('wizard/model$update', {
-        path: '/spec/tls/remove',
-        value: true,
-        force: true,
-      })
-    }
-  }
-
-  function showIssuerRefAndCertificates() {
-    const tlsOperation = getValue(discriminator, '/tlsOperation')
-    // watchDependency('discriminator#/tlsOperation')
-    const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
-
-    return verd
-  }
-
-  function isIssuerRefRequired() {
-    const hasTls = hasTlsField()
-    return hasTls ? false : ''
-  }
-
   function getRequestTypeFromRoute() {
     const isDbloading = isDbDetailsLoading()
     const { query } = route || {}
@@ -1570,17 +1134,6 @@ export const useFunc = (model) => {
       })
     }
     return retValue || undefined
-  }
-
-  function setResource(path) {
-    const containers = getValue(discriminator, `/dbDetails${path}`) || []
-    // for standalone
-    if (!containers.length)
-      return getValue(discriminator, '/dbDetails/spec/podTemplate/spec/resources') || {}
-
-    const kind = getValue(discriminator, '/dbDetails/kind')
-    const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
-    return resource[0]?.resources || {}
   }
 
   function isNamespaceDisabled() {
@@ -1623,60 +1176,6 @@ export const useFunc = (model) => {
         ? 'Key is required when Value is provided'
         : 'Value is required when Key is provided'
     }
-  }
-
-  function getSelectedConfigSecret() {
-    const path = `/spec/configuration/pgbouncer/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    // watchDependency(`model#${path}`)
-    return `You have selected ${selectedSecret} secret` || 'No secret selected'
-  }
-
-  function objectToYaml(obj, indent = 0) {
-    if (obj === null || obj === undefined) return 'null'
-    if (typeof obj !== 'object') return JSON.stringify(obj)
-
-    const spaces = '  '.repeat(indent)
-
-    if (Array.isArray(obj)) {
-      return obj
-        .map((item) => `${spaces}- ${objectToYaml(item, indent + 1).trimStart()}`)
-        .join('\n')
-    }
-
-    return Object.keys(obj)
-      .map((key) => {
-        const value = obj[key]
-        const keyLine = `${spaces}${key}:`
-
-        if (value === null || value === undefined) {
-          return `${keyLine} null`
-        }
-
-        if (typeof value === 'object') {
-          const nested = objectToYaml(value, indent + 1)
-          return `${keyLine}\n${nested}`
-        }
-
-        if (typeof value === 'string') {
-          return `${keyLine} "${value}"`
-        }
-
-        return `${keyLine} ${value}`
-      })
-      .join('\n')
-  }
-
-  function getSelectedConfigSecretValue() {
-    const path = `/spec/configuration/pgbouncer/configSecret/name`
-    const selectedSecret = getValue(model, path)
-    let data
-    secretArray.forEach((item) => {
-      if (item.value === selectedSecret) {
-        data = objectToYaml(item.data).trim() || 'No Data Found'
-      }
-    })
-    return data || 'No Data Found'
   }
 
   function setExporter(type) {
@@ -1735,20 +1234,13 @@ export const useFunc = (model) => {
     isMachineValid,
     setExporter,
     isRancherManaged,
-    fetchJsons,
-    returnFalse,
     getNamespaces,
     getDbs,
     getDbDetails,
     getDbVersions,
     getVersionInfo,
     isVersionEmpty,
-    getVersion,
     ifRequestTypeEqualsTo,
-    onRequestTypeChange,
-    getDbTls,
-    getDbType,
-    disableOpsRequest,
     initNamespace,
     initDatabaseRef,
     showAndInitName,
@@ -1756,30 +1248,12 @@ export const useFunc = (model) => {
     showAndInitDatabaseRef,
     showConfigureOpsrequestLabel,
     showAndInitOpsRequestType,
-    ifDbTypeEqualsTo,
     getConfigSecrets,
-    createSecretUrl,
-    getSelectedConfigSecret,
-    getSelectedConfigSecretValue,
-    isEqualToValueFromType,
-    getNamespacedResourceList,
-    getResourceList,
-    resourceNames,
-    unNamespacedResourceNames,
     ifReconfigurationTypeEqualsTo,
-    onReconfigurationTypeChange,
     onApplyconfigChange,
-    hasTlsField,
-    initIssuerRefApiGroup,
-    getIssuerRefsName,
-    initTlsOperation,
-    onTlsOperationChange,
-    showIssuerRefAndCertificates,
-    isIssuerRefRequired,
     getRequestTypeFromRoute,
     isDbDetailsLoading,
     setValueFromDbDetails,
-    setResource,
     isNamespaceDisabled,
     isDatabaseRefDisabled,
     onDbChange,
@@ -1789,12 +1263,8 @@ export const useFunc = (model) => {
     getMachines,
     setMachine,
     onMachineChange,
-    isMachineCustom,
     fetchConfigSecrets,
     getConfigSecretsforAppyConfig,
-    getSelectedConfigurationData,
-    getSelectedConfigurationName,
-    getSelectedConfigurationValueForRemove,
     createNewConfigSecret,
     decodeError,
     isCreateSecret,

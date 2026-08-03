@@ -66,12 +66,6 @@ export const useFunc = (model) => {
     return !!modelValue
   }
 
-  function isRancherManaged() {
-    const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-    const found = managers.find((item) => item === 'Rancher')
-    return !!found
-  }
-
   // *************************      Backup & Restore Configuration ********************************************
 
   const stashAppscodeComBackupConfiguration = {
@@ -143,16 +137,6 @@ export const useFunc = (model) => {
     )
 
     initRepositoryChoiseForEdit()
-
-    if (stashAppscodeComBackupConfiguration || isBluePrint) return 'yes'
-    else return 'no'
-  }
-
-  function initScheduleBackup() {
-    const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
-      getValue,
-      model,
-    )
 
     if (stashAppscodeComBackupConfiguration || isBluePrint) return 'yes'
     else return 'no'
@@ -239,7 +223,6 @@ export const useFunc = (model) => {
   let isBackupOnModel = false
   let dbResource = {}
   let initialDbMetadata = {}
-  let namespaceList = []
   let backupConfigurationsFromStore = {}
   let valuesFromWizard = {
     apiVersion: 'core.kubestash.com/v1alpha1',
@@ -1506,10 +1489,8 @@ export const useFunc = (model) => {
     objectCopy,
     isEqualToModelPathValue,
     isValueExistInModel,
-    isRancherManaged,
 
     // Backup & restore
-    initScheduleBackup,
     initScheduleBackupForEdit,
     onScheduleBackupChange,
     showBackupForm,

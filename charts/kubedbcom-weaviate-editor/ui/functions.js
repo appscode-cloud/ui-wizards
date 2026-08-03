@@ -25,12 +25,6 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/allowedMachine-max', '')
   let showStoragememory = false
 
-  function valueExists(value, getValue, path) {
-    const val = getValue(value, path)
-    if (val) return true
-    else return false
-  }
-
   /*********** Compute Autoscaling ************/
 
   let autoscaleType = ''
@@ -366,12 +360,6 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
-  function isEqualToModelPathValue(value, modelPath) {
-    const modelPathValue = getValue(model, modelPath)
-    // watchDependency('model#' + modelPath)
-    return modelPathValue === value
-  }
-
   async function getResources(group, version, resource) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -615,7 +603,6 @@ export const useFunc = (model) => {
     setApplyToIfReady,
     handleUnit,
     getResources,
-    isEqualToModelPathValue,
     onNamespaceChange,
     resourceNames,
     getSecrets,
