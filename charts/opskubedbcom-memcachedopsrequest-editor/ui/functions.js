@@ -540,6 +540,137 @@ export const useFunc = (model) => {
     return selectedType === type
   }
 
+  function getDbTls() {
+    // watchDependency('discriminator#/dbDetails')
+    const dbDetails = getValue(discriminator, '/dbDetails')
+
+    const { spec } = dbDetails || {}
+    return spec?.tls || undefined
+  }
+
+  // for tls
+  function hasTlsField() {
+    const tls = getDbTls()
+
+    return !!tls
+  }
+
+  function initIssuerRefApiGroup() {
+    const kind = getValue(model, '/spec/tls/issuerRef/kind')
+    // watchDependency('model#/spec/tls/issuerRef/kind')
+
+    if (kind) {
+      return 'cert-manager.io'
+    } else return undefined
+  }
+
+  async function getIssuerRefsName() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    // watchDependency('model#/spec/tls/issuerRef/kind')
+    // watchDependency('model#/metadata/namespace')
+    const kind = getValue(model, '/spec/tls/issuerRef/kind')
+    const namespace = getValue(model, '/metadata/namespace')
+
+    if (kind === 'Issuer') {
+      const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
+      return getIssuer(url)
+    } else if (kind === 'ClusterIssuer') {
+      const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+
+      let presets = storeGet('/kubedbuiPresets') || {}
+      if (!storeGet('/route/params/actions')) {
+        try {
+          const presetResp = await axios.get(url)
+          presets = presetResp.data?.spec?.values?.spec
+        } catch (e) {
+          console.log(e)
+          presets.status = String(e.status)
+        }
+      }
+      let clusterIssuers = presets.admin?.clusterIssuers?.available || []
+      if (presets.status === '404') {
+        const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
+        return getIssuer(url)
+      }
+      return clusterIssuers
+    } else if (!kind) {
+      commit('wizard/model$delete', '/spec/tls/issuerRef/name')
+      return []
+    }
+
+    async function getIssuer(url) {
+      try {
+        const resp = await axios.get(url)
+        const resources = (resp && resp.data && resp.data.items) || []
+
+        resources.map((item) => {
+          const name = (item.metadata && item.metadata.name) || ''
+          item.text = name
+          item.value = name
+          return true
+        })
+        return resources
+      } catch (e) {
+        console.log(e)
+        return []
+      }
+    }
+  }
+
+  function initTlsOperation() {
+    return 'update'
+  }
+
+  function isTlsEnabled(type) {
+    const selectedOpsType = getValue(discriminator, '/tlsOperation')
+    return selectedOpsType === type
+  }
+
+  function onTlsOperationChange() {
+    const tlsOperation = getValue(discriminator, '/tlsOperation')
+
+    commit('wizard/model$delete', '/spec/tls')
+
+    if (tlsOperation === 'rotate') {
+      commit('wizard/model$update', {
+        path: '/spec/tls/rotateCertificates',
+        value: true,
+        force: true,
+      })
+    } else if (tlsOperation === 'remove') {
+      commit('wizard/model$update', {
+        path: '/spec/tls/remove',
+        value: true,
+        force: true,
+      })
+    }
+  }
+
+  function showIssuerRefAndCertificates() {
+    const tlsOperation = getValue(discriminator, '/tlsOperation')
+    // watchDependency('discriminator#/tlsOperation')
+    const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
+
+    return verd
+  }
+
+  function isIssuerRefRequired() {
+    const hasTls = hasTlsField()
+    return hasTls ? false : ''
+  }
+
+  function fetchAliasOptions() {
+    return getAliasOptions ? getAliasOptions() : []
+  }
+
+  function getAliasOptions() {
+    return ['server', 'client', 'metrics-exporter']
+  }
+  function disableAlias() {
+    return !!(model && model.alias)
+  }
+
   function getDbType() {
     // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
@@ -1264,6 +1395,18 @@ export const useFunc = (model) => {
     getVersionInfo,
     isVersionEmpty,
     ifRequestTypeEqualsTo,
+    getDbTls,
+    hasTlsField,
+    initIssuerRefApiGroup,
+    getIssuerRefsName,
+    initTlsOperation,
+    isTlsEnabled,
+    onTlsOperationChange,
+    showIssuerRefAndCertificates,
+    isIssuerRefRequired,
+    fetchAliasOptions,
+    getAliasOptions,
+    disableAlias,
     getDbType,
     initNamespace,
     initDatabaseRef,

@@ -319,14 +319,10 @@ export const useFunc = (model) => {
   )
 
   showAndInitOpsRequestType()
-  function isTlsEnabled() {
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    return (
-      (dbDetails?.spec?.sslMode &&
-        dbDetails?.spec?.sslMode !== 'disabled' &&
-        dbDetails?.spec?.sslMode !== 'disable') ||
-      dbDetails?.spec?.tls
-    )
+
+  function isTlsEnabled(type) {
+    const selectedOpsType = getValue(discriminator, '/tlsOperation')
+    return selectedOpsType === type
   }
 
   function isRancherManaged() {
@@ -1426,7 +1422,9 @@ export const useFunc = (model) => {
 
   function isReplicasValid(type) {
     const dbPath = type ? `/spec/topology/${type}/replicas` : '/spec/replicas'
-    const modelPath = type ? `/spec/horizontalScaling/topology/${type}` : '/spec/horizontalScaling/node'
+    const modelPath = type
+      ? `/spec/horizontalScaling/topology/${type}`
+      : '/spec/horizontalScaling/node'
 
     const currentReplicas = getValue(discriminator, `/dbDetails${dbPath}`)
     const newReplicas = getValue(model, modelPath)

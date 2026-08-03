@@ -318,14 +318,10 @@ export const useFunc = (model) => {
   )
 
   showAndInitOpsRequestType()
-  function isTlsEnabled() {
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    return (
-      (dbDetails?.spec?.sslMode &&
-        dbDetails?.spec?.sslMode !== 'disabled' &&
-        dbDetails?.spec?.sslMode !== 'disable') ||
-      dbDetails?.spec?.tls
-    )
+
+  function isTlsEnabled(type) {
+    const selectedOpsType = getValue(discriminator, '/tlsOperation')
+    return selectedOpsType === type
   }
 
   function isRancherManaged() {
@@ -1131,7 +1127,6 @@ export const useFunc = (model) => {
     })
     return resSecret
   }
-
 
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {

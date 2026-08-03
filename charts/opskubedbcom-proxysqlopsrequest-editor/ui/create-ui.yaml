@@ -364,10 +364,14 @@ step:
       options:
       - text: Update
         value: update
+        description: 'Modify the TLS configuration, such as issuer or certificate details'
       - text: Rotate
         value: rotate
+        description: 'Generate new certificates and rotate existing TLS credentials'
       - text: Remove
         value: remove
+        description: 'Disable TLS and remove existing certificates from the database'
+      isHorizontal: true
       schema: temp/properties/tlsOperation
       type: radio
       watcher:
@@ -376,14 +380,14 @@ step:
         - temp/properties/tlsOperation
     - fullwidth: true
       if:
-        name: isTlsEnabled
+        name: isTlsEnabled|remove
         type: function
       label: Remove TLS
       schema: schema/properties/spec/properties/tls/properties/remove
       type: switch
     - fullwidth: true
       if:
-        name: isTlsEnabled
+        name: isTlsEnabled|rotate
         type: function
       label: Rotate Certificates
       schema: schema/properties/spec/properties/tls/properties/rotateCertificates
