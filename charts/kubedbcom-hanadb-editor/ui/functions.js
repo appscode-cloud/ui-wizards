@@ -425,7 +425,7 @@ export const useFunc = (model) => {
       let items = (resp && resp.data && resp.data.items) || []
       if (resource === 'secrets') {
         items = items.filter((item) => {
-          const validType = ['kubernetes.io/service-account-token', 'Opaque']
+          const validType = ['Opaque']
           return validType.includes(item.type)
         })
       }
@@ -471,7 +471,7 @@ export const useFunc = (model) => {
       )
       const items = (resp && resp.data && resp.data.items) || []
       return items
-        .filter((item) => ['kubernetes.io/service-account-token', 'Opaque'].includes(item.type))
+        .filter((item) => ['Opaque'].includes(item.type))
         .map((item) => {
           const name = (item.metadata && item.metadata.name) || ''
           return { text: name, value: name }

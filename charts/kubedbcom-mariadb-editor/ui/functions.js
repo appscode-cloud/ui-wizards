@@ -785,7 +785,7 @@ export const useFunc = (model) => {
       const secrets = (resp && resp.data && resp.data.items) || []
 
       const filteredSecrets = secrets.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
+        const validType = ['Opaque']
         return validType.includes(item.type)
       })
 
@@ -1300,7 +1300,7 @@ export const useFunc = (model) => {
 
     if (resource === 'secrets') {
       resources = resources.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
+        const validType = ['Opaque']
         return validType.includes(item.type)
       })
     }
@@ -1367,7 +1367,7 @@ export const useFunc = (model) => {
       const secrets = (resp && resp.data && resp.data.items) || []
 
       const filteredSecrets = secrets.filter((item) => {
-        const validType = ['kubernetes.io/service-account-token', 'Opaque']
+        const validType = ['Opaque']
         return validType.includes(item.type)
       })
 
