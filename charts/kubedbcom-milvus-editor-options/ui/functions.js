@@ -1220,7 +1220,7 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
         {
           params: {
-            filter: { items: { metadata: { name: null }, type: null } },
+            filter: { items: { metadata: { name: null }, type: null, data: null } },
           },
         },
       )
@@ -1229,7 +1229,7 @@ export const useFunc = (model) => {
 
       const filteredSecrets = secrets.filter((item) => {
         const validType = ['kubernetes.io/service-account-token', 'Opaque']
-        return validType.includes(item.type)
+        return validType.includes(item.type) && Object.keys(item.data || {}).includes('config.env')
       })
 
       filteredSecrets.map((item) => {
