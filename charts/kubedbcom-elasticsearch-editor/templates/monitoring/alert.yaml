@@ -31,7 +31,7 @@ spec:
         alertname: elasticsearch_heap_usage_too_high
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch Heap Usage Too High (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch Heap Usage Too High (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The heap usage is over {{ .rules.elasticsearchHeapUsageTooHigh.val -}}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -44,7 +44,7 @@ spec:
         alertname: elasticsearch_heap_usage_warning
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch Heap Usage warning (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch Heap Usage warning (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The heap usage is over {{ .rules.elasticsearchHeapUsageWarning.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -57,7 +57,7 @@ spec:
         alertname: elasticsearch_disk_out_of_space
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch disk out of space (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch disk out of space (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The disk usage is over {{ .rules.elasticsearchDiskOutOfSpace.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -70,7 +70,7 @@ spec:
         alertname: elasticsearch_disk_space_low
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch disk space low (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch disk space low (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "The disk usage is over {{ .rules.elasticsearchDiskSpaceLow.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -83,7 +83,7 @@ spec:
         alertname: elasticsearch_cluster_red
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch Cluster Red (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch Cluster Red (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Elastic Cluster Red status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -96,7 +96,7 @@ spec:
         alertname: elasticsearch_cluster_yellow
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch Cluster Yellow (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch Cluster Yellow (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Elastic Cluster Yellow status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -109,7 +109,7 @@ spec:
         alertname: elasticsearch_healthy_nodes
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch Healthy Nodes (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch Healthy Nodes (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Missing node in Elasticsearch cluster\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -122,7 +122,7 @@ spec:
         alertname: elasticsearch_healthy_data_nodes
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch Healthy Data Nodes (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch Healthy Data Nodes (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Missing data node in Elasticsearch cluster\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -135,7 +135,7 @@ spec:
         alertname: elasticsearch_relocating_shards
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch relocating shards (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch relocating shards (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Elasticsearch is relocating shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -148,7 +148,7 @@ spec:
         alertname: elasticsearch_initializing_shards
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch initializing shards (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch initializing shards (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Elasticsearch is initializing shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -161,7 +161,7 @@ spec:
         alertname: elasticsearch_unassigned_shards
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch unassigned shards (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch unassigned shards (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Elasticsearch has unassigned shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -174,7 +174,7 @@ spec:
         alertname: elasticsearch_pending_tasks
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch pending tasks (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch pending tasks (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Elasticsearch has pending tasks. Cluster works slowly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
 
@@ -187,32 +187,32 @@ spec:
         alertname: elasticsearch_no_new_documents_10m
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Elasticsearch no new documents (instance {{`{{`}} $labels.instance {{`}}`}})
+        summary: Elasticsearch no new documents (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "No new documents for 10 min!\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
     {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) ((kubelet_volume_stats_used_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) ) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "kubedbcom-elasticsearch-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}

@@ -1,3 +1,108 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          weaviateGRPCErrorRateHigh:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 5
+          weaviateGRPCP95LatencyHigh:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1
+          weaviateGoroutinesExplosion:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1000
+          weaviateHTTPErrorRateHigh:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 5
+          weaviateHTTPP95LatencyHigh:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1
+          weaviateHighCPUUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          weaviateHighFDsUsage:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 80
+          weaviateHighMemoryUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          weaviateHighProcessMemoryUsage:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1.073741824e+09
+          weaviateHighThreadPressure:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 100
+          weaviateInstanceDown:
+            duration: 30s
+            enabled: true
+            severity: critical
+          weaviateReplicationEngineDown:
+            duration: 1m
+            enabled: true
+            severity: critical
+          weaviateReplicationFailuresHigh:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 0
+          weaviateReplicationQueueHigh:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 10
+          weaviateRestarted:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 180
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: prometheus
 metadata:
   resource:
     group: kubedb.com
@@ -21,12 +126,24 @@ resources:
     metadata:
       name: weaviate
       namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: weaviate-ca
+      namespace: demo
   kubedbComWeaviate: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Weaviate
     metadata:
       name: weaviate
       namespace: default
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: weaviate
+      namespace: demo
   secret_auth: # +doc-gen:break
     apiVersion: v1
     kind: Secret

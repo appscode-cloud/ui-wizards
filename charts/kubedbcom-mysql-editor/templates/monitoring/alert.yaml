@@ -153,7 +153,7 @@ spec:
         severity: {{ .rules.diskUsageHigh.severity }}
         {{- include "kubedbcom-mysql-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
@@ -165,7 +165,7 @@ spec:
         severity: {{ .rules.diskAlmostFull.severity }}
         {{- include "kubedbcom-mysql-editor.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}

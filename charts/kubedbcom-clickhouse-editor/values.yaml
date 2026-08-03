@@ -1,3 +1,112 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    appSuffix: ""
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          clickhouseBrokenPartsDetected:
+            duration: 0m
+            enabled: true
+            severity: critical
+          clickhouseDataPartCorrupted:
+            duration: 5m
+            enabled: true
+            severity: warning
+          clickhouseInstanceDown:
+            duration: 1m
+            enabled: true
+            severity: critical
+          clickhouseReplicationPartFetchFailed:
+            duration: 5m
+            enabled: true
+            severity: warning
+          clickhouseTooManyActiveQueries:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 500
+          clickhouseTooManyConnections:
+            duration: 5m
+            enabled: true
+            severity: critical
+            val: 400
+          diskAlmostFull:
+            duration: 5m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 80
+      kubeStash:
+        enabled: warning
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com

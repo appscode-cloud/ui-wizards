@@ -1,0 +1,295 @@
+{{ $app := (include "kubedbcom-clickhouse-editor.fullname" .) }}
+
+{{ if (include "kubedbcom-clickhouse-editor.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-clickhouse-editor.selectorLabels" . | nindent 4 }}
+{{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+{{- end }}
+{{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+{{- end }}
+spec:
+  groups:
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "kubedbcom-clickhouse-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: clickhouse.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "clickhouseInstanceDown")) -}}
+    - alert: ClickhouseInstanceDown
+      expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.clickhouseInstanceDown.duration }}
+      labels:
+        severity: {{ .rules.clickhouseInstanceDown.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse instance down (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "clickhouseTooManyConnections")) -}}
+    - alert: ClickhouseTooManyConnections
+      expr: ClickHouseMetrics_TCPConnection{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.clickhouseTooManyConnections.val }}
+      for: {{ .rules.clickhouseTooManyConnections.duration }}
+      labels:
+        severity: {{ .rules.clickhouseTooManyConnections.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse instance has more than {{ .rules.clickhouseTooManyConnections.val }} TCP connections on {{`{{`}} $labels.pod {{`}}`}}."
+    {{end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "clickhouseTooManyActiveQueries")) -}}
+    - alert: ClickhouseTooManyActiveQueries
+      expr: ClickHouseMetrics_Query{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.clickhouseTooManyActiveQueries.val }}
+      for: {{ .rules.clickhouseTooManyActiveQueries.duration }}
+      labels:
+        severity: {{ .rules.clickhouseTooManyActiveQueries.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse too many active queries (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse has more than {{ .rules.clickhouseTooManyActiveQueries.val }} active queries on {{`{{`}} $labels.pod {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "clickhouseReplicationPartFetchFailed")) -}}
+    - alert: ClickhouseReplicationPartFetchFailed
+      expr: increase(ClickHouseProfileEvents_ReplicatedPartFailedFetches{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
+      for: {{ .rules.clickhouseReplicationPartFetchFailed.duration }}
+      labels:
+        severity: {{ .rules.clickhouseReplicationPartFetchFailed.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse replication part fetch failed (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse failed to download data parts from replica on {{`{{`}} $labels.pod {{`}}`}}.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "clickhouseBrokenPartsDetected")) -}}
+    - alert: ClickhouseBrokenPartsDetected
+      expr: increase(ClickHouseErrorMetric_TOO_MANY_UNEXPECTED_DATA_PARTS{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
+      for: {{ .rules.clickhouseBrokenPartsDetected.duration }}
+      labels:
+        severity: {{ .rules.clickhouseBrokenPartsDetected.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse too many broken data parts (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse detected too many broken/unexpected data parts and refused to attach a table on {{`{{`}} $labels.pod {{`}}`}}. This may indicate disk corruption or backward incompatibility after an upgrade.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "clickhouseDataPartCorrupted")) -}}
+    - alert: ClickhouseDataPartCorrupted
+      expr: increase(ClickHouseErrorMetric_CANNOT_PARSE_INPUT_ASSERTION_FAILED{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
+      for: {{ .rules.clickhouseDataPartCorrupted.duration }}
+      labels:
+        severity: {{ .rules.clickhouseDataPartCorrupted.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse data part corruption detected (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "ClickHouse failed to parse data part metadata on {{`{{`}} $labels.pod {{`}}`}}. Parts may have zero-byte files due to improper shutdown, disk issues, or version incompatibility.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
+    - alert: DiskUsageHigh
+      expr: >-
+        (
+          100 * kubelet_volume_stats_used_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+          /
+          on(namespace, persistentvolumeclaim)
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+        )
+        * on(namespace, persistentvolumeclaim) group_left(pod)
+        max by (namespace, persistentvolumeclaim, pod) (
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(.*-shard-[0-9]+-[0-9]+|[0-9]+)$"}
+        )
+        > {{ .rules.diskUsageHigh.val }}
+      for: {{ .rules.diskUsageHigh.duration }}
+      labels:
+        severity: {{ .rules.diskUsageHigh.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
+        description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the warning threshold."
+    {{- end }}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
+    - alert: DiskAlmostFull
+      expr: >-
+        (
+          100 * kubelet_volume_stats_used_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+          /
+          on(namespace, persistentvolumeclaim)
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="{{ $.Release.Namespace }}"}
+        )
+        * on(namespace, persistentvolumeclaim) group_left(pod)
+        max by (namespace, persistentvolumeclaim, pod) (
+          kube_pod_spec_volumes_persistentvolumeclaims_info{namespace="{{ $.Release.Namespace }}",pod=~"{{ $app }}-(.*-shard-[0-9]+-[0-9]+|[0-9]+)$"}
+        )
+        > {{ .rules.diskAlmostFull.val }}
+      for: {{ .rules.diskAlmostFull.duration }}
+      labels:
+        severity: {{ .rules.diskAlmostFull.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Persistent Volume Usages in instance {{`{{`}} $labels.pod {{`}}`}}
+        description: "Persistent volume usage for {{`{{`}} $labels.pod {{`}}`}} is above the critical threshold."
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "kubedbcom-clickhouse-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: clickhouse.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseNotReady")) -}}
+    - alert: KubeDBClickHousePhaseNotReady
+      expr: kubedb_com_clickhouse_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB ClickHouse Phase NotReady (clickhouse {{`{{`}} $labels.clickhouse {{`}}`}})
+        description: "KubeDB ClickHouse Phase not ready on {{`{{`}} $labels.clickhouse {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "appPhaseCritical")) -}}
+    - alert: KubeDBClickHousePhaseCritical
+      expr: kubedb_com_clickhouse_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB ClickHouse Phase Critical (clickhouse {{`{{`}} $labels.clickhouse {{`}}`}})
+        description: "KubeDB ClickHouse Phase Critical {{`{{`}} $labels.clickhouse {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.opsManager -}}
+  {{ if (include "kubedbcom-clickhouse-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: clickhouse.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestOnProgress")) -}}
+    - alert: KubeDBClickHouseOpsRequestOnProgress
+      expr: ops_kubedb_com_clickhouseopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestOnProgress.duration }}
+      labels:
+        severity: {{ .rules.opsRequestOnProgress.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouseOpsRequest on progress (clickhouseopsrequest {{`{{`}} $labels.clickhouseopsrequest {{`}}`}})
+        description: "ClickHouseOpsRequest {{`{{`}} $labels.clickhouseopsrequest {{`}}`}} is in progressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestStatusProgressingToLong")) -}}
+    - alert: KubeDBClickHouseOpsRequestStatusProgressingToLong
+      expr: ops_kubedb_com_clickhouseopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
+      labels:
+        severity: {{ .rules.opsRequestStatusProgressingToLong.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouseOpsRequest is in progressing status for too long (clickhouseopsrequest {{`{{`}} $labels.clickhouseopsrequest {{`}}`}})
+        description: "ClickHouseOpsRequest {{`{{`}} $labels.clickhouseopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "opsRequestFailed")) -}}
+    - alert: KubeDBClickHouseOpsRequestFailed
+      expr: ops_kubedb_com_clickhouseopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestFailed.duration }}
+      labels:
+        severity: {{ .rules.opsRequestFailed.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouseOpsRequest failed (clickhouseopsrequest {{`{{`}} $labels.clickhouseopsrequest {{`}}`}})
+        description: "ClickHouseOpsRequest {{`{{`}} $labels.clickhouseopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.kubeStash -}}
+  {{ if (include "kubedbcom-clickhouse-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: clickhouse.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) -}}
+    - alert: ClickHouseKubeStashBackupSessionFailed
+      expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="ClickHouse", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.backupSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.backupSessionFailed.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "ClickHouse KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) -}}
+    - alert: ClickHouseKubeStashRestoreSessionFailed
+      expr: core_kubestash_com_restoresession_phase{target_kind="ClickHouse", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
+      for: {{ .rules.restoreSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionFailed.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "ClickHouse KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) -}}
+    - alert: ClickHouseKubeStashNoBackupSessionForTooLong
+      expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="ClickHouse", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
+      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      labels:
+        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "ClickHouse KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) -}}
+    - alert: ClickHouseKubeStashRepositoryCorrupted
+      expr: storage_kubestash_com_repository_info{target_kind="ClickHouse", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
+      for: {{ .rules.repositoryCorrupted.duration }}
+      labels:
+        severity: {{ .rules.repositoryCorrupted.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "ClickHouse KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) -}}
+    - alert: ClickHouseKubeStashRepositoryStorageRunningLow
+      expr: storage_kubestash_com_repository_size_bytes{target_kind="ClickHouse", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
+      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      labels:
+        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ClickHouse KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "ClickHouse KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) -}}
+    - alert: ClickHouseKubeStashBackupSessionPeriodTooLong
+      expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="ClickHouse", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
+      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary:  ClickHouse KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "ClickHouse KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-clickhouse-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) -}}
+    - alert: ClickHouseKubeStashRestoreSessionPeriodTooLong
+      expr: core_kubestash_com_restoresession_duration_seconds{target_kind="ClickHouse", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
+      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-clickhouse-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary:  ClickHouse KubeStash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "ClickHouse KubeStash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+{{ end }}
