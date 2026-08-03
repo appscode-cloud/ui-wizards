@@ -2032,6 +2032,16 @@ export const useFunc = (model) => {
     }
   }
 
+  function isReplicasValid(type) {
+    const currentReplicas = getValue(discriminator, `/dbDetails/spec/topology/${type}/replicas`)
+    const newReplicas = getValue(model, `/spec/horizontalScaling/topology/${type}`)
+
+    if (currentReplicas === newReplicas) {
+      return 'New replica count must be different from the current replica count.'
+    }
+    return false
+  }
+
   function isMachineValid(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const limits = getLimits(type)
@@ -2114,6 +2124,9 @@ export const useFunc = (model) => {
     // Vertical scaling functions
     isVerticalScaleTopologyRequired,
     isMachineValid,
+
+    // Horizontal scaling functions
+    isReplicasValid,
 
     // Volume expansion functions
     checkVolume,

@@ -1788,6 +1788,19 @@ export const useFunc = (model) => {
     return data || 'No Data Found'
   }
 
+  function isReplicasValid() {
+    // watchDependency('discriminator#/dbDetails')
+    // watchDependency('model#/spec/horizontalScaling/server')
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const currentReplicas = dbDetails?.spec?.replicas
+    const newReplicas = getValue(model, '/spec/horizontalScaling/server')
+
+    if (currentReplicas === newReplicas) {
+      return 'New replica count must be different from the current replica count.'
+    }
+    return false
+  }
+
   function isMachineValid() {
     const limits = getLimits()
 
@@ -1816,6 +1829,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    isReplicasValid,
     isMachineValid,
     fetchAliasOptions,
     validateNewCertificates,

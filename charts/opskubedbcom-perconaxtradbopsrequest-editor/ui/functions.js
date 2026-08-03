@@ -1753,6 +1753,18 @@ export const useFunc = (model) => {
     return limits
   }
 
+  function isReplicasValid(type) {
+    const modelPath = type ? `/spec/horizontalScaling/${type}` : '/spec/horizontalScaling/member'
+
+    const currentReplicas = getValue(discriminator, '/dbDetails/spec/replicas')
+    const newReplicas = getValue(model, modelPath)
+
+    if (currentReplicas === newReplicas) {
+      return 'New replica count must be different from the current replica count.'
+    }
+    return false
+  }
+
   function isMachineValid() {
     const limits = getLimits()
 
@@ -1766,6 +1778,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    isReplicasValid,
     isMachineValid,
     setExporter,
     onExporterResourceChange,
