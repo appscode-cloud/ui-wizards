@@ -1843,7 +1843,7 @@ export const useFunc = (model) => {
     const limits = getLimits(type)
 
     const selectedMachine = getValue(discriminator, `/machine-${type}`)
-    const selectedLimits = { cpu: selectedMachine.cpu, memory: selectedMachine.memory }
+    const selectedLimits = { cpu: selectedMachine?.cpu, memory: selectedMachine?.memory }
 
     if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
       return 'Resource limits are same as current machine configuration. Please select different resources or machine preset.'
