@@ -1282,10 +1282,16 @@ export const useFunc = (model) => {
 
     const options = []
     try {
-      const resp = await axios.get(url)
-      const items = resp.data?.items
+      const resp = await axios.get(url, {
+        params: {
+          filter: { items: { metadata: { name: null }, data: null } },
+        },
+      })
+      const items = resp.data?.items || []
       items.forEach((ele) => {
-        options.push(ele.metadata?.name)
+        const keys = Object.keys(ele.data || {})
+        if (keys.length === 2 && keys.includes('username') && keys.includes('password'))
+          options.push(ele.metadata?.name)
       })
     } catch (e) {
       console.log(e)
