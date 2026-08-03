@@ -114,8 +114,8 @@ step:
     type: block-layout
   - elements:
     - elements:
-      - header: Replica
-        customClass: mt-8s
+      - customClass: mt-8s
+        header: Replica
         if:
           name: ifDbTypeEqualsTo|Combined|horizontalScaling
           type: function
@@ -127,10 +127,10 @@ step:
         subtitle: Define the total number of replicas for the database. Increasing
           replicas improves fault tolerance and load distribution, while reducing
           replicas conserves resources
+        type: input-compare
         validation:
           name: isReplicasValid
           type: custom|required
-        type: input-compare
       - hasIcon: true
         if:
           name: ifDbTypeEqualsTo|Combined|horizontalScaling
@@ -152,10 +152,10 @@ step:
             subtitle: Define the total number of master node replicas. Increasing
               replicas improves fault tolerance and load distribution, while reducing
               replicas conserves resources
+            type: input-compare
             validation:
               name: isReplicasValid|master
               type: custom|required
-            type: input-compare
           - hasIcon: true
             label: Master nodes are responsible for cluster management operations.
               It's recommended to have an odd number of master nodes (e.g., 3, 5)
@@ -175,10 +175,10 @@ step:
             subtitle: Define the total number of data node replicas. Increasing replicas
               improves fault tolerance and load distribution, while reducing replicas
               conserves resources
+            type: input-compare
             validation:
               name: isReplicasValid|data
               type: custom|required
-            type: input-compare
           - hasIcon: true
             label: Data nodes store the actual documents and handle data-related operations
               like search and aggregation. More data nodes provide better storage
@@ -198,10 +198,10 @@ step:
             subtitle: Define the total number of ingest node replicas. Increasing
               replicas improves fault tolerance and load distribution, while reducing
               replicas conserves resources
+            type: input-compare
             validation:
               name: isReplicasValid|ingest
               type: custom|required
-            type: input-compare
           - hasIcon: true
             label: Ingest nodes pre-process documents before they are indexed. They
               can apply transformations and enrichments to your data pipeline.
