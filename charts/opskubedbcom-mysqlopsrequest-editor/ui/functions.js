@@ -851,29 +851,13 @@ export const useFunc = (model) => {
     const name = getValue(model, '/spec/databaseRef/name')
     const dbGroup = getValue(model, '/route/params/group')
     const dbKind = getValue(store.state, '/resource/definition/result/kind')
-    const dbResource = getValue(model, '/route/params/resource')
-    const dbVersion = getValue(model, '/route/params/version')
 
     try {
-      const resp = await axios.post(
-        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/databaseconfigurations`,
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
-          apiVersion: 'ui.kubedb.com/v1alpha1',
-          kind: 'DatabaseConfiguration',
-          request: {
-            source: {
-              ref: {
-                name: name,
-                namespace: namespace,
-              },
-              resource: {
-                group: dbGroup,
-                kind: dbKind,
-                name: dbResource,
-                version: dbVersion,
-              },
-            },
-            keys: ['kubedb-user.cnf'],
+          params: {
+            keys: ['kubedb-user.cnf'].join(','),
           },
         },
       )
