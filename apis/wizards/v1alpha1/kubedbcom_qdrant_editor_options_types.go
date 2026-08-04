@@ -55,7 +55,7 @@ type KubedbcomQdrantEditorOptionsSpecSpec struct {
 	Halted          bool               `json:"halted"`
 	Persistence     Persistence        `json:"persistence"`
 	PodResources    PodResources       `json:"podResources"`
-	AuthSecret      AuthSecret         `json:"authSecret"`
+	AuthSecret      QdrantAuthSecret   `json:"authSecret"`
 	DeletionPolicy  DeletionPolicy     `json:"deletionPolicy"`
 	Configuration   string             `json:"configuration"`
 	TLS             QdrantTLS          `json:"tls"`
@@ -68,6 +68,17 @@ type KubedbcomQdrantEditorOptionsSpecSpec struct {
 
 // +kubebuilder:validation:Enum=Standalone;Distributed
 type QdrantMode string
+
+type QdrantAuthSecret struct {
+	// +optional
+	Name string `json:"name"`
+	// +optional
+	// +kubebuilder:validation:Format:=password
+	ApiKey string `json:"apiKey"`
+	// +optional
+	// +kubebuilder:validation:Format:=password
+	ReadOnlyApiKey string `json:"readOnlyApiKey"`
+}
 
 type QdrantTLS struct {
 	IssuerRef QdrantIssuerRef `json:"issuerRef"`

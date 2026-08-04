@@ -53,7 +53,7 @@ type KubedbcomWeaviateEditorOptionsSpecSpec struct {
 	HealthChecker  *WeaviateHealthChecker `json:"healthChecker,omitempty"`
 	Persistence    Persistence            `json:"persistence"`
 	PodResources   PodResources           `json:"podResources"`
-	AuthSecret     AuthSecret             `json:"authSecret"`
+	AuthSecret     WeaviateAuthSecret     `json:"authSecret"`
 	DeletionPolicy DeletionPolicy         `json:"deletionPolicy"`
 	Configuration  string                 `json:"configuration"`
 	Admin          AdminOptions           `json:"admin"`
@@ -61,6 +61,15 @@ type KubedbcomWeaviateEditorOptionsSpecSpec struct {
 	Monitoring     MonitoringOperator     `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+type WeaviateAuthSecret struct {
+	// +optional
+	Name string `json:"name"`
+	// +optional
+	// +kubebuilder:validation:Format:=password
+	// Comma separated api keys, stored as the AUTHENTICATION_APIKEY_ALLOWED_KEYS secret key.
+	AllowedKeys string `json:"allowedKeys"`
 }
 
 type WeaviateHealthChecker struct {
