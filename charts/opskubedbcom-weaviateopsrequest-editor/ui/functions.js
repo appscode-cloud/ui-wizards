@@ -503,20 +503,20 @@ export const useFunc = (model) => {
 
   function onTlsOperationChange() {
     const tlsOperation = getValue(discriminator, '/tlsOperation')
+    const rotate = !!getValue(model, '/spec/tls/rotateCertificates')
+    const remove = !!getValue(model, '/spec/tls/remove')
 
     commit('wizard/model$delete', '/spec/tls')
 
     if (tlsOperation === 'rotate') {
       commit('wizard/model$update', {
         path: '/spec/tls/rotateCertificates',
-        value: true,
-        force: true,
+        value: rotate,
       })
     } else if (tlsOperation === 'remove') {
       commit('wizard/model$update', {
         path: '/spec/tls/remove',
-        value: true,
-        force: true,
+        value: remove,
       })
     }
   }
@@ -1097,7 +1097,6 @@ export const useFunc = (model) => {
     })
     return resSecret
   }
-
 
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {
