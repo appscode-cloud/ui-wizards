@@ -736,7 +736,7 @@ export const useFunc = (model) => {
       force: true,
     })
     commit('wizard/model$update', {
-      path: '/spec/authSecret/password',
+      path: '/spec/authSecret/allowedKeys',
       value: '',
       force: true,
     })
@@ -898,7 +898,7 @@ export const useFunc = (model) => {
       const items = resp.data?.items || []
       items.forEach((ele) => {
         const keys = Object.keys(ele.data || {})
-        if (keys.length === 2 && keys.includes('username') && keys.includes('password'))
+        if (keys.includes('AUTHENTICATION_APIKEY_ALLOWED_KEYS'))
           options.push(ele.metadata?.name)
       })
     } catch (e) {

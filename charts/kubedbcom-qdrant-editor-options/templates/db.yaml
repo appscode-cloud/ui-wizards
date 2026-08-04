@@ -139,7 +139,7 @@ spec:
     apiGroup: ""
     kind: Secret
 {{- end }}
-{{- if .Values.spec.authSecret.password }}
+{{- if or .Values.spec.authSecret.apiKey .Values.spec.authSecret.readOnlyApiKey }}
   authSecret:
     name: {{ include "kubedbcom-qdrant-editor-options.fullname" . }}-auth
     apiGroup: ""
