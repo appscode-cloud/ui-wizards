@@ -14,6 +14,8 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/useCustomProfile', false)
   setDiscriminatorValue('/profile', '')
   setDiscriminatorValue('/profileChoseSwitch', false)
+  // the sidebar writes the active page here, keep the first page selected on load
+  setDiscriminatorValue('/presetPage', 'deployment-type')
 
   /************** Common Funcitons ******************/
 
@@ -498,6 +500,10 @@ export const useFunc = (model) => {
   function presetNameEqualsTo(value) {
     const presetName = storeGet('/route/params/presetName') || ''
     return presetName === value
+  }
+
+  function isActivePage(page) {
+    return getValue(discriminator, '/presetPage') === page
   }
 
   function getOptions(type) {
@@ -1035,6 +1041,7 @@ export const useFunc = (model) => {
     returnFalse,
     fetchJsons,
     presetNameEqualsTo,
+    isActivePage,
     fetchModes,
     availableModes,
     setDefaultMode,
