@@ -1052,6 +1052,10 @@ export const useFunc = (model) => {
     return getValue(model, '/spec/metaStorage/externallyManaged')
   }
 
+  function showEtcdOperatorWarning() {
+    return !getValue(model, '/spec/metaStorage/externallyManaged')
+  }
+
   async function getSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -1126,6 +1130,7 @@ export const useFunc = (model) => {
     clearConfiguration,
     getDefault,
     isMetaStorageExternallyManaged,
+    showEtcdOperatorWarning,
     getSecrets,
   }
 }

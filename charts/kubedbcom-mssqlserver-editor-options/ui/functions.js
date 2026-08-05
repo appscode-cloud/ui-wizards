@@ -1129,6 +1129,10 @@ export const useFunc = (model) => {
     })
   }
 
+  function showEULAWarning() {
+    return !getValue(model, '/spec/acceptEULA')
+  }
+
   function convertToUTC(localTime) {
     const date = new Date(localTime)
     if (isNaN(date.getTime())) return
@@ -1369,6 +1373,7 @@ export const useFunc = (model) => {
     onPidChange,
     isPidCustom,
     onCustomPidChange,
+    showEULAWarning,
     onArchiverChange,
     showArchiverAlert,
     showArchiver,
