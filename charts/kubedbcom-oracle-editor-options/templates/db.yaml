@@ -146,7 +146,7 @@ spec:
           resources:
             {{- toYaml .res | nindent 12 }}
           securityContext:
-            {{- include "container.securityContext" . | nindent 12 }}
+            {{- include "container.securityContext.privileged" . | nindent 12 }}
           {{- if ne .Values.spec.mode "Standalone" }}
         - name: oracle-coordinator
           resources:
@@ -179,11 +179,30 @@ spec:
     secretName: {{ include "kubedbcom-oracle-editor-options.fullname" . }}-config
 {{- end }}
 {{- if .Values.spec.admin.tls.default }}
-  tls:
-    issuerRef:
-      apiGroup: "cert-manager.io"
-      kind: ClusterIssuer
-      name: {{ .Values.spec.admin.clusterIssuers.default }}
-  requireSSL: true
+  tcpsConfig:
+    tls:
+      issuerRef:
+        apiGroup: "cert-manager.io"
+        kind: ClusterIssuer
+        name: {{ .Values.spec.admin.clusterIssuers.default }}
+    tcpsListener:
+      port: 2484
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
+  monitor:
+    agent: {{ .Values.spec.admin.monitoring.agent }}
+    prometheus:
+    {{- with .Values.spec.admin.monitoring.exporter }}
+      exporter:
+        port: 56790
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+        securityContext:
+          {{- include "container.securityContext" $ | nindent 10 }}
+    {{- end }}
+      serviceMonitor:
+        interval: 30s
+        labels:
+          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}
 

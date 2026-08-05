@@ -120,6 +120,15 @@ Alert Enabled
 
 {{- define "container.securityContext" -}}
 allowPrivilegeEscalation: false
+{{ include "container.securityContext.common" . -}}
+{{- end }}
+
+{{- define "container.securityContext.privileged" -}}
+allowPrivilegeEscalation: true
+{{ include "container.securityContext.common" . -}}
+{{- end }}
+
+{{- define "container.securityContext.common" -}}
 capabilities:
   drop:
   - ALL
