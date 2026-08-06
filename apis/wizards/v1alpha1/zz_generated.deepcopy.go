@@ -25,6 +25,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	clientgoapiv1 "kmodules.xyz/client-go/api/v1"
 	apiv1 "kmodules.xyz/monitoring-agent-api/api/v1"
 	offshootapiapiv1 "kmodules.xyz/offshoot-api/api/v1"
 )
@@ -3886,7 +3887,7 @@ func (in *KubedbcomNeo4jEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomNeo4jE
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	out.TLS = in.TLS
+	in.TLS.DeepCopyInto(&out.TLS)
 	in.Admin.DeepCopyInto(&out.Admin)
 	in.Backup.DeepCopyInto(&out.Backup)
 	in.Monitoring.DeepCopyInto(&out.Monitoring)
@@ -6386,6 +6387,14 @@ func (in *Neo4jTLS) DeepCopyInto(out *Neo4jTLS) {
 	out.Bolt = in.Bolt
 	out.HTTP = in.HTTP
 	out.Cluster = in.Cluster
+	out.Backup = in.Backup
+	if in.Certificates != nil {
+		in, out := &in.Certificates, &out.Certificates
+		*out = make([]clientgoapiv1.CertificateSpec, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	return
 }
 

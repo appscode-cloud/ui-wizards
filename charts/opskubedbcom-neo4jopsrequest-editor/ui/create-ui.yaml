@@ -137,6 +137,25 @@ step:
           setting this to 3 creates three copies of the database for better availability.
         type: info
       type: horizontal-layout
+    - elements:
+      - label: Reallocation Strategy
+        options:
+        - text: incremental
+          value: incremental
+        - text: full
+          value: full
+        - text: none
+          value: none
+        schema: schema/properties/spec/properties/horizontalScaling/properties/reallocate/properties/strategy
+        subtitle: Controls how database shards are redistributed after scaling. 'incremental'
+          reallocates in batches, 'full' reallocates everything at once, 'none' skips
+          reallocation
+        type: select
+      - label: Batch Size
+        schema: schema/properties/spec/properties/horizontalScaling/properties/reallocate/properties/batchSize
+        subtitle: Number of databases reallocated per batch when the strategy is 'incremental'
+        type: input
+      type: horizontal-layout
     fixedBlock: true
     if:
       name: ifRequestTypeEqualsTo|HorizontalScaling
