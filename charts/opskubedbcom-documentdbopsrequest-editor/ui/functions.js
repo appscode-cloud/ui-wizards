@@ -1224,6 +1224,12 @@ export const useFunc = (model) => {
     }
   }
 
+  function isTlsOptionDisabled(type) {
+    const tlsEnabled = hasTlsField()
+
+    return !tlsEnabled && (type === 'rotate' || type === 'remove')
+  }
+
   function showIssuerRefAndCertificates() {
     const tlsOperation = getValue(discriminator, '/tlsOperation')
     // watchDependency('discriminator#/tlsOperation')
@@ -1458,6 +1464,7 @@ export const useFunc = (model) => {
     getIssuerRefsName,
     initTlsOperation,
     onTlsOperationChange,
+    isTlsOptionDisabled,
     showIssuerRefAndCertificates,
     isIssuerRefRequired,
     getRequestTypeFromRoute,
