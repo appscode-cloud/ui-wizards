@@ -572,6 +572,18 @@ export const useFunc = (model) => {
     return selectedOpsType === type
   }
 
+  function hasTlsField() {
+    const tls = getDbTls()
+
+    return !!tls
+  }
+
+  function isTlsOptionDisabled(type) {
+    const tlsEnabled = hasTlsField()
+
+    return !tlsEnabled && (type === 'rotate' || type === 'remove')
+  }
+
   function fetchAliasOptions() {
     return getAliasOptions ? getAliasOptions() : []
   }
@@ -1336,6 +1348,8 @@ export const useFunc = (model) => {
     ifReconfigurationTypeEqualsTo,
     onApplyconfigChange,
     isTlsEnabled,
+    hasTlsField,
+    isTlsOptionDisabled,
     fetchAliasOptions,
     disableAlias,
     getRequestTypeFromRoute,

@@ -1526,6 +1526,12 @@ export const useFunc = (model) => {
     }
   }
 
+  function isTlsOptionDisabled(type) {
+    const tlsEnabled = hasTlsField()
+
+    return !tlsEnabled && (type === 'rotate' || type === 'remove')
+  }
+
   function isIssuerRefRequired() {
     const hasTls = hasTlsField()
     return hasTls ? false : ''
@@ -1695,6 +1701,7 @@ export const useFunc = (model) => {
     getIssuerRefsName,
     initTlsOperation,
     onTlsOperationChange,
+    isTlsOptionDisabled,
     isIssuerRefRequired,
     fetchAliasOptions,
     disableAlias,
