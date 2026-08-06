@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kmapi "kmodules.xyz/client-go/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -70,6 +71,9 @@ type Neo4jTLS struct {
 	Bolt      Neo4jProtocolTLS `json:"bolt"`
 	HTTP      Neo4jProtocolTLS `json:"http"`
 	Cluster   Neo4jProtocolTLS `json:"cluster"`
+	Backup    Neo4jProtocolTLS `json:"backup"`
+	// +optional
+	Certificates []kmapi.CertificateSpec `json:"certificates,omitempty"`
 }
 
 type Neo4jIssuerRef struct {

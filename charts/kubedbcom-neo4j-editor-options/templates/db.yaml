@@ -160,4 +160,12 @@ spec:
     cluster:
       mode: {{ .Values.spec.tls.cluster.mode }}
     {{- end }}
+    {{- if .Values.spec.tls.backup }}
+    backup:
+      mode: {{ .Values.spec.tls.backup.mode }}
+    {{- end }}
+    {{- if .Values.spec.tls.certificates }}
+    certificates:
+      {{- toYaml .Values.spec.tls.certificates | nindent 6 }}
+    {{- end }}
 {{- end }}
