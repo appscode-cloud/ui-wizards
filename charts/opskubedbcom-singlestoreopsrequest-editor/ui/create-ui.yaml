@@ -499,7 +499,7 @@ step:
           name: getCurrentConfig
           watchPaths:
           - schema/properties/metadata/properties/namespace
-          - temp/properties/createSecret/properties/status
+          - temp/properties/node/createSecret/properties/status
         readonly: true
         schema: temp/properties/currentConfig
         type: editor
@@ -514,27 +514,27 @@ step:
           - customClass: mb-2
             init:
               type: func
-              value: setValueFromDbDetails|/spec/topology/node/configSecret/name
+              value: setValueFromDbDetails|/spec/configSecret/name
             label: Config Secret
             loader:
               name: getConfigSecrets
               watchPaths:
               - schema/properties/metadata/properties/namespace
-              - temp/properties/createSecret/properties/status
+              - temp/properties/node/createSecret/properties/status
             refresh: fetchConfigSecrets
             schema: schema/properties/spec/properties/configuration/properties/node/properties/configSecret/properties/name
             type: select
             watcher:
-              func: onCreateSecretChange
+              func: onCreateSecretChange|node
               paths:
-              - temp/properties/createSecret/properties/status
+              - temp/properties/node/createSecret/properties/status
           - customClass: mt-15
             elements:
             - label: ""
               subtitle: Enter a <b>unique name</b> to identify this secret.
               type: label-element
             - label: Secret Name
-              schema: temp/properties/createSecret/properties/name
+              schema: temp/properties/node/createSecret/properties/name
               type: input
               validation:
                 type: required
@@ -544,7 +544,7 @@ step:
                 loader:
                   name: onSelectedSecretChange
                   watchPaths:
-                  - temp/properties/createSecret/properties/data
+                  - temp/properties/node/createSecret/properties/data
                 schema: key
                 type: select
                 validation:
@@ -555,16 +555,16 @@ step:
                 type: textarea
               keepInitial: true
               label: String Data
-              schema: temp/properties/createSecret/properties/data
+              schema: temp/properties/node/createSecret/properties/data
               type: array-object-form
               validation:
                 type: required
             hasButton:
-              action: createNewConfigSecret
-              hasCancel: cancelCreateSecret
+              action: createNewConfigSecret|node
+              hasCancel: cancelCreateSecret|node
               text: Save
             if:
-              name: isCreateSecret
+              name: isCreateSecret|node
               type: function
             label: Create a New Config Secret
             showLabels: true
@@ -572,10 +572,10 @@ step:
           - editorHeight: 500px
             hideFormatButton: true
             if:
-              name: isNotCreateSecret
+              name: isNotCreateSecret|node
               type: function
             loader:
-              name: onNewConfigSecretChange
+              name: onNewConfigSecretChange|node
               watchPaths:
               - schema/properties/spec/properties/configuration/properties/node/properties/configSecret/properties/name
             readonly: true
@@ -598,22 +598,22 @@ step:
             label: Configuration
             loader: getConfigSecretsforAppyConfig
             refresh: fetchConfigSecrets
-            schema: temp/properties/selectedConfiguration
+            schema: temp/properties/node/selectedConfiguration
             type: select
           - editorHeight: 500px
             hideFormatButton: true
             loader:
-              name: setApplyConfig
+              name: setApplyConfig|node
               watchPaths:
-              - temp/properties/selectedConfiguration
+              - temp/properties/node/selectedConfiguration
             placeholder: Add config parameters...
-            schema: temp/properties/applyConfig
+            schema: temp/properties/node/applyConfig
             type: multi-file-editor
             validateContent: false
             watcher:
-              func: onApplyconfigChange
+              func: onApplyconfigChange|node
               paths:
-              - temp/properties/applyConfig
+              - temp/properties/node/applyConfig
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig
             type: function
@@ -632,12 +632,12 @@ step:
               watchPaths:
               - schema/properties/metadata/properties/namespace
             refresh: fetchConfigSecrets
-            schema: temp/properties/selectedConfigurationRemove
+            schema: temp/properties/node/selectedConfigurationRemove
             type: select
             watcher:
-              func: onRemoveConfigChange
+              func: onRemoveConfigChange|node
               paths:
-              - temp/properties/selectedConfigurationRemove
+              - temp/properties/node/selectedConfigurationRemove
           if:
             name: ifReconfigurationTypeEqualsTo|remove
             type: function
@@ -654,7 +654,7 @@ step:
         schema: temp/properties/reconfigurationType
         type: tab-layout
       if:
-        name: ifDbTypeEqualsTo|standalone|Reconfigure
+        name: ifDbTypeEqualsTo|Combined|Reconfigure
         type: function
       label: Node Configuration
       type: block-layout
@@ -820,6 +820,9 @@ step:
           value: remove
         schema: temp/properties/reconfigurationType
         type: tab-layout
+      if:
+        name: ifDbTypeEqualsTo|Topology|Reconfigure
+        type: function
       label: Aggregator Configuration
       showLabels: true
       type: block-layout
@@ -984,6 +987,9 @@ step:
           value: remove
         schema: temp/properties/reconfigurationType
         type: tab-layout
+      if:
+        name: ifDbTypeEqualsTo|Topology|Reconfigure
+        type: function
       label: Leaf Configuration
       showLabels: true
       type: block-layout
