@@ -130,6 +130,18 @@ seccompProfile:
   type: RuntimeDefault
 {{- end }}
 
+{{- define "backup.securityContext" -}}
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+  - ALL
+runAsGroup: 0
+runAsNonRoot: false
+runAsUser: 0
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
+
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := "" -}}
