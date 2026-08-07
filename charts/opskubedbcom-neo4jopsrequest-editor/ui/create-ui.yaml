@@ -348,25 +348,12 @@ step:
               type: input
               validation:
                 type: required
-            - buttonClass: is-light is-outlined
-              elements:
-              - label: Key
-                loader:
-                  name: onSelectedSecretChange
-                  watchPaths:
-                  - temp/properties/createSecret/properties/data
-                schema: key
-                type: select
-                validation:
-                  type: required
-              - height: 120px
-                label: Value
-                schema: value
-                type: textarea
-              keepInitial: true
+            - type: editor
               label: String Data
-              schema: temp/properties/createSecret/properties/data
-              type: array-object-form
+              editorHeight: 200px
+              placeholder: Type here...
+              schema: temp/properties/createSecret/properties/data/properties/value
+              validateContent: true
               validation:
                 type: required
             hasButton:
@@ -416,10 +403,11 @@ step:
               name: setApplyConfig
               watchPaths:
               - temp/properties/selectedConfiguration
-            placeholder: Add config parameters...
+            placeholder: 'Example format:\n\ndbms.logs.query.enabled: "INFO"\ndbms.logs.query.parameter_logging: "true"\nserver.jvm.additional: |-\n  -XX:+UseG1GC\n  -XX:-OmitStackTraceInFastThrow'
             schema: temp/properties/applyConfig
             type: multi-file-editor
-            validateContent: false
+            validateContent: true
+            hideSidebarKeys: true
             watcher:
               func: onApplyconfigChange
               paths:
