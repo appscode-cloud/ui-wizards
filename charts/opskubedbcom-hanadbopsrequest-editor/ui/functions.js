@@ -306,7 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
-const configSecretKeys = ['hanadb.cnf']
+const configSecretKeys = ['global.ini']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -675,7 +675,7 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
           params: {
-            keys: ['hanadb.cnf'].join(','),
+            keys: ['global.ini'].join(','),
           },
         },
       )
