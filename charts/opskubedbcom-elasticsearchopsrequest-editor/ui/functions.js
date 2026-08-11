@@ -1041,7 +1041,9 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
           params: {
-            keys: ['elasticsearch.yml', 'data-elasticsearch.yml', 'ingest-elasticsearch.yml'].join(','),
+            keys: ['elasticsearch.yml', 'data-elasticsearch.yml', 'ingest-elasticsearch.yml'].join(
+              ',',
+            ),
           },
         },
       )
@@ -1565,7 +1567,9 @@ export const useFunc = (model) => {
 
   function isReplicasValid(type) {
     const dbPath = type ? `/spec/topology/${type}/replicas` : '/spec/replicas'
-    const modelPath = type ? `/spec/horizontalScaling/topology/${type}` : '/spec/horizontalScaling/node'
+    const modelPath = type
+      ? `/spec/horizontalScaling/topology/${type}`
+      : '/spec/horizontalScaling/node'
 
     const currentReplicas = getValue(discriminator, `/dbDetails${dbPath}`)
     const newReplicas = getValue(model, modelPath)
