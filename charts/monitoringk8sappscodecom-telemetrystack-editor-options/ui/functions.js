@@ -62,6 +62,15 @@ export const useFunc = (model) => {
     })
   }
 
+  // The same S3 config is rendered twice - inside the ClickHouse page and on the Thanos
+  // S3 page - and an input keeps its own copy of the value once it is mounted. Both
+  // copies watch the shared path and read it back through this, so editing either one
+  // updates the other.
+  function s3Field(field) {
+    const value = getValue(model, `/spec/logs/s3/${field}`)
+    return value === undefined || value === null ? '' : value
+  }
+
   // one S3 backend feeds both pillars, each one gets its own prefix inside the bucket
   function syncS3() {
     const s3 = getValue(model, '/spec/logs/s3') || {}
@@ -104,6 +113,7 @@ export const useFunc = (model) => {
     isPillarEnabled,
     isVolumeType,
     pillarStatus,
+    s3Field,
     syncS3,
     volumeMode,
     volumeMountPath,

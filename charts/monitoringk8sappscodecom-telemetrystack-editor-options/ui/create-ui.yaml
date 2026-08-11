@@ -275,6 +275,55 @@ step:
         type: block-layout
       - elements:
         - elements:
+          - label: Bucket
+            schema: schema/properties/spec/properties/logs/properties/s3/properties/bucket
+            type: input
+            watcher:
+              func: s3Field|bucket
+              paths:
+              - schema/properties/spec/properties/logs/properties/s3/properties/bucket
+          - label: Region
+            schema: schema/properties/spec/properties/logs/properties/s3/properties/region
+            type: input
+            watcher:
+              func: s3Field|region
+              paths:
+              - schema/properties/spec/properties/logs/properties/s3/properties/region
+          type: horizontal-layout
+        - elements:
+          - label: Endpoint
+            schema: schema/properties/spec/properties/logs/properties/s3/properties/endpoint
+            type: input
+            watcher:
+              func: s3Field|endpoint
+              paths:
+              - schema/properties/spec/properties/logs/properties/s3/properties/endpoint
+          - label: Access Key
+            schema: schema/properties/spec/properties/logs/properties/s3/properties/accessKey
+            type: input
+            watcher:
+              func: s3Field|accessKey
+              paths:
+              - schema/properties/spec/properties/logs/properties/s3/properties/accessKey
+          type: horizontal-layout
+        - elements:
+          - isSecret: true
+            label: Secret Key
+            schema: schema/properties/spec/properties/logs/properties/s3/properties/secretKey
+            type: input
+            watcher:
+              func: s3Field|secretKey
+              paths:
+              - schema/properties/spec/properties/logs/properties/s3/properties/secretKey
+          type: horizontal-layout
+        if:
+          name: isPillarEnabled|logs
+          type: function
+        label: S3 Storage
+        showLabels: true
+        type: block-layout
+      - elements:
+        - elements:
           - elements:
             - label: Name
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/cluster/properties/name
@@ -342,23 +391,43 @@ step:
         - label: Bucket
           schema: schema/properties/spec/properties/logs/properties/s3/properties/bucket
           type: input
+          watcher:
+            func: s3Field|bucket
+            paths:
+            - schema/properties/spec/properties/logs/properties/s3/properties/bucket
         - label: Region
           schema: schema/properties/spec/properties/logs/properties/s3/properties/region
           type: input
+          watcher:
+            func: s3Field|region
+            paths:
+            - schema/properties/spec/properties/logs/properties/s3/properties/region
         type: horizontal-layout
       - elements:
         - label: Endpoint
           schema: schema/properties/spec/properties/logs/properties/s3/properties/endpoint
           type: input
+          watcher:
+            func: s3Field|endpoint
+            paths:
+            - schema/properties/spec/properties/logs/properties/s3/properties/endpoint
         - label: Access Key
           schema: schema/properties/spec/properties/logs/properties/s3/properties/accessKey
           type: input
+          watcher:
+            func: s3Field|accessKey
+            paths:
+            - schema/properties/spec/properties/logs/properties/s3/properties/accessKey
         type: horizontal-layout
       - elements:
         - isSecret: true
           label: Secret Key
           schema: schema/properties/spec/properties/logs/properties/s3/properties/secretKey
           type: input
+          watcher:
+            func: s3Field|secretKey
+            paths:
+            - schema/properties/spec/properties/logs/properties/s3/properties/secretKey
         type: horizontal-layout
       if:
         name: isActivePage|s3
@@ -371,6 +440,9 @@ step:
     - options:
       - icon: circle
         options:
+        - icon: cloud
+          text: S3 Storage
+          value: s3
         - icon: arrow-shrink-02
           text: Compact
           value: metrics-thanos-compact
@@ -403,9 +475,6 @@ step:
         text: ClickHouse
         value: logs-clickhouse
       text: Logs
-    - icon: cloud
-      text: S3 Storage
-      value: s3
     schema: temp/properties/telemetryPage
     subtitle: Configuration
     type: sidebar-layout
