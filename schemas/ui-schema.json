@@ -250,6 +250,9 @@
             "multiple": {
               "type": "boolean"
             },
+            "onChange": {
+              "type": "string"
+            },
             "options": {
               "$ref": "#/definitions/Options"
             },
@@ -314,6 +317,9 @@
                 },
                 "loader": {
                   "$ref": "#/definitions/LoaderType"
+                },
+                "onChange": {
+                  "type": "string"
                 },
                 "schema": {
                   "type": "string"
@@ -443,6 +449,9 @@
               },
               {
                 "$ref": "#/definitions/ArrayItem"
+              },
+              {
+                "$ref": "#/definitions/HorizontalLayout"
               }
             ]
           },
@@ -1181,6 +1190,9 @@
             "loader": {
               "$ref": "#/definitions/LoaderType"
             },
+            "onChange": {
+              "type": "string"
+            },
             "schema": {
               "type": "string"
             },
@@ -1225,6 +1237,9 @@
         },
         {
           "$ref": "#/definitions/TabLayout"
+        },
+        {
+          "$ref": "#/definitions/SidebarLayout"
         }
       ]
     },
@@ -1771,6 +1786,99 @@
       "required": ["label", "schema", "type"],
       "type": "object"
     },
+    "SidebarLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "customClass": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "elements": {
+          "items": {
+            "$ref": "#/definitions/AllElement"
+          },
+          "type": "array"
+        },
+        "if": {
+          "$ref": "#/definitions/IfType"
+        },
+        "init": {
+          "$ref": "#/definitions/Init"
+        },
+        "label": {
+          "type": "string"
+        },
+        "loader": {
+          "$ref": "#/definitions/LoaderType"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/definitions/SidebarOption"
+          },
+          "type": "array"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "showLabels": {
+          "type": "boolean"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "type": {
+          "const": "sidebar-layout",
+          "type": "string"
+        },
+        "watcher": {
+          "$ref": "#/definitions/Watchers"
+        }
+      },
+      "required": ["elements", "options", "schema", "type"],
+      "type": "object"
+    },
+    "SidebarOption": {
+      "additionalProperties": false,
+      "properties": {
+        "activeIcon": {
+          "type": "string"
+        },
+        "checkIcon": {
+          "type": "string"
+        },
+        "checkIf": {
+          "$ref": "#/definitions/IfType"
+        },
+        "hideOptions": {
+          "type": "boolean"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/definitions/SidebarOption"
+          },
+          "type": "array"
+        },
+        "tag": {
+          "type": "string"
+        },
+        "tagClass": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": ["text"],
+      "type": "object"
+    },
     "SingleStepForm": {
       "additionalProperties": false,
       "properties": {
@@ -1849,6 +1957,9 @@
         },
         "loader": {
           "$ref": "#/definitions/LoaderType"
+        },
+        "onChange": {
+          "type": "string"
         },
         "schema": {
           "type": "string"
