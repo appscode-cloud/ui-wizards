@@ -999,7 +999,7 @@ export const useFunc = (model) => {
       return
     }
 
-    if (!configObj || typeof configObj !== 'object') {
+    if (!configObj) {
       commit('wizard/model$delete', path)
       return
     }
