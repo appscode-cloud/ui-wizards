@@ -1,4 +1,4 @@
-const { axios, useOperator, store, useToast } = window.vueHelpers || {}
+const { axios, useOperator, store, useToast, yaml } = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -833,11 +833,6 @@ export const useFunc = (model) => {
     try {
       const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
-        {
-          params: {
-            keys: ['kubedb-user.cnf'].join(','),
-          },
-        },
       )
       databaseInfoResponse = resp?.data?.response || {}
       configSecrets = resp?.data?.response?.availableSecrets || []
@@ -890,8 +885,8 @@ export const useFunc = (model) => {
     const url = `/clusters/${user}/${cluster}/resources`
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const secretName = getValue(discriminator, `${type}createSecret/name`)
-    const secretData = getValue(discriminator, `${type}createSecret/data`)
-    const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
+    const secretData = getValue(discriminator, `${type}createSecret/data/value`)
+    const secretDataObj = yaml.load(secretData)
 
     // Check uniqueness of secret name
     if (existingSecrets.includes(secretName)) {
@@ -982,58 +977,51 @@ export const useFunc = (model) => {
   }
 
   async function onApplyconfigChange(type) {
-    type = type ? type + '/' : ''
-    const configValue = getValue(discriminator, `${type}applyConfig`)
+    const prefix = type ? `${type}/` : ''
+    const path = `/spec/configuration/${prefix}applyConfig`
+    const configValue = getValue(discriminator, `${prefix}applyConfig`)
 
-    if (!configValue) {
-      commit('wizard/model$delete', `/spec/configuration/${type}applyConfig`)
+    const contentStr = Array.isArray(configValue)
+      ? configValue.find((item) => item.content)?.content
+      : configValue?.content
+
+    if (!contentStr) {
+      commit('wizard/model$delete', path)
       return
     }
-    const tempConfigObj = {}
-    configValue.forEach((item) => {
-      if (item.name && item.content) {
-        tempConfigObj[item.name] = item.content
-      }
-    })
-    if (Object.keys(tempConfigObj).length === 0) {
-      commit('wizard/model$delete', `/spec/configuration/${type}applyConfig`)
+
+    let configObj
+    try {
+      configObj = yaml.load(contentStr)
+    } catch (e) {
+      console.error('Error parsing applyConfig YAML:', e)
+      commit('wizard/model$delete', path)
       return
     }
-    commit('wizard/model$update', {
-      path: `/spec/configuration/${type}applyConfig`,
-      value: tempConfigObj,
-    })
+
+    if (!configObj || typeof configObj !== 'object') {
+      commit('wizard/model$delete', path)
+      return
+    }
+    commit('wizard/model$update', { path, value: configObj })
   }
 
   function setApplyConfig(type) {
-    type = type ? type + '/' : ''
-    const configPath = `/${type}selectedConfiguration`
+    const prefix = type ? `${type}/` : ''
+    const configPath = `/${prefix}selectedConfiguration`
     const selectedConfig = getValue(discriminator, configPath)
+
     if (!selectedConfig) {
       return [{ name: '', content: '' }]
     }
-    const applyconfigData = secretConfigData.find((item) => {
-      if (item.componentName === selectedConfig) {
-        return item
-      }
-    })
-    const { applyConfig } = applyconfigData
-    const configObj = []
 
-    if (applyConfig) {
-      Object.keys(applyConfig).forEach((fileName) => {
-        configObj.push({
-          name: fileName,
-          content: applyConfig[fileName],
-        })
-      })
-    }
-    configSecretKeys.forEach((key) => {
-      if (!configObj.find((item) => item.name === key)) {
-        configObj.push({ name: key, content: '' })
-      }
-    })
-    return configObj
+    const applyconfigData = secretConfigData.find((item) => item.componentName === selectedConfig)
+
+    const mergedContent = applyconfigData?.applyConfig
+      ? yaml.dump(applyconfigData.applyConfig).trim()
+      : ''
+
+    return [{ name: 'Config Parameters', content: mergedContent }]
   }
 
   function onRemoveConfigChange(type) {
@@ -1098,22 +1086,6 @@ export const useFunc = (model) => {
       console.error('Error fetching secret:', e)
       return [{ name: '', content: '' }]
     }
-  }
-
-  function onSelectedSecretChange(index) {
-    const secretData = getValue(discriminator, 'createSecret/data') || []
-    const selfSecrets = secretData.map((item) => item.key)
-
-    const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
-
-    const selfKey = getValue(discriminator, `createSecret/data/${index}/key`)
-    if (selfKey) {
-      remainingSecrets.push(selfKey)
-    }
-    const resSecret = remainingSecrets.map((item) => {
-      return { text: item, value: item }
-    })
-    return resSecret
   }
 
   // reconfiguration type
@@ -1476,7 +1448,6 @@ export const useFunc = (model) => {
     setApplyConfig,
     onRemoveConfigChange,
     onNewConfigSecretChange,
-    onSelectedSecretChange,
     isTlsEnabled,
   }
 }

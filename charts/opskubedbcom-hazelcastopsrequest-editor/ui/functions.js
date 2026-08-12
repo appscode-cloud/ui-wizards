@@ -306,7 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
-const configSecretKeys = ['hazelcast.cnf']
+const configSecretKeys = ['hazelcast.yaml']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -838,7 +838,7 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
           params: {
-            keys: ['hazelcast.cnf'].join(','),
+            keys: ['hazelcast.yaml'].join(','),
           },
         },
       )
