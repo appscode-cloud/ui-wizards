@@ -64,7 +64,7 @@ export const useFunc = (model) => {
       commit('wizard/model$delete', '/resources/stashAppscodeComBackupConfiguration')
       commit('wizard/model$delete', '/resources/stashAppscodeComRepository_repo')
       // delete annotation from kubedbComNeo4j annotation
-      deleteKubeDbComMySqlDbAnnotation(getValue, model, commit)
+      deleteKubeDbComNeo4jDbAnnotation(getValue, model, commit)
     } else {
       const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model)
 
@@ -116,7 +116,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function deleteKubeDbComMySqlDbAnnotation(getValue, model, commit) {
+  function deleteKubeDbComNeo4jDbAnnotation(getValue, model, commit) {
     const annotations = getValue(model, '/resources/kubedbComNeo4j/metadata/annotations') || {}
     const filteredKeyList =
       Object.keys(annotations).filter(
@@ -688,7 +688,7 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getMysqlDbs() {
+  async function getNeo4jDbs() {
     // watchDependency('model#/resources/autoscalingKubedbComNeo4jAutoscaler/metadata/namespace')
     const namespace = getValue(
       model,
@@ -1499,7 +1499,7 @@ export const useFunc = (model) => {
     isConsole,
     getNamespaces,
     isRancherManaged,
-    getMysqlDbs,
+    getNeo4jDbs,
     initMetadata,
     fetchTopologyMachines,
     setTrigger,
