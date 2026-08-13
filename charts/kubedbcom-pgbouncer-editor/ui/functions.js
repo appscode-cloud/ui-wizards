@@ -172,7 +172,7 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/pgbouncers`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },

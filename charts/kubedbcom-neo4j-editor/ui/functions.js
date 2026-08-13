@@ -699,7 +699,7 @@ export const useFunc = (model) => {
     const storageEngine = getValue(model, '/resources/kubedbComNeo4j/spec/storageEngine')
     showStoragememory = storageEngine === 'inMemory'
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/Neo4js`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/neo4js`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
       },
@@ -1115,7 +1115,7 @@ export const useFunc = (model) => {
 
     if (isKube) return pathConstructedForKubedb
     else
-      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/Neo4jopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+      return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/neo4jopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
   }
 
   function onNamespaceChange() {
