@@ -24,7 +24,7 @@ spec:
     rules:
     {{ if (include "kubedbcom-solr-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "solrDownShards")) -}}
     - alert: SolrDownShards
-      expr: count(max by (core) (solr_collections_replica_state{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",state="down"})) OR on() vector(0) != 0
+      expr: (count(max by (core) (solr_collections_replica_state{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",state="down"})) OR on() vector(0)) != 0
       for: {{ .rules.solrDownShards.duration }}
       labels:
         job: {{ $app }}-stats
@@ -36,7 +36,7 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-solr-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "solrRecoveryFailedShards")) -}}
     - alert: SolrRecoveryFailedShards
-      expr: count(max by (core) (solr_collections_replica_state{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",state="recovery_failed"})) OR on() vector(0) != 0
+      expr: (count(max by (core) (solr_collections_replica_state{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",state="recovery_failed"})) OR on() vector(0)) != 0
       for: {{ .rules.solrRecoveryFailedShards.duration }}
       labels:
         job: {{ $app }}-stats
@@ -48,7 +48,7 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-solr-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "solrHighThreadRunning")) -}}
     - alert: SolrHighThreadRunning
-      expr: solr_metrics_jvm_threads{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ .rules.solrHighThreadRunning.val }}
+      expr: solr_metrics_jvm_threads{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",item="count"} > {{ .rules.solrHighThreadRunning.val }}
       for: {{ .rules.solrHighThreadRunning.duration }}
       labels:
         severity: {{ .rules.solrHighThreadRunning.severity }}
@@ -59,7 +59,8 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-solr-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "solrHighPoolSize")) -}}
     - alert: SolrHighPoolSize
-      expr: solr_metrics_jvm_memory_pools_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ .rules.solrHighPoolSize.val }}
+      expr: (solr_metrics_jvm_memory_pools_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",item="used"} / ignoring(item) (solr_metrics_jvm_memory_pools_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",item="max"} > 0))
+        * 100 > {{ .rules.solrHighPoolSize.val }}
       for: {{ .rules.solrHighPoolSize.duration }}
       labels:
         severity: {{ .rules.solrHighPoolSize.severity }}
@@ -81,7 +82,9 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-solr-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "solrHighHeapSize")) -}}
     - alert: SolrHighHeapSize
-      expr: solr_metrics_jvm_memory_heap_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ .rules.solrHighHeapSize.val }}
+      expr: (solr_metrics_jvm_memory_heap_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",item="used"} / ignoring(item)
+        min without(item) (solr_metrics_jvm_memory_heap_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",item="max"} or solr_metrics_jvm_os_memory_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",item="totalPhysicalMemorySize"}))
+        * 100 > {{ .rules.solrHighHeapSize.val }}
       for: {{ .rules.solrHighHeapSize.duration }}
       labels:
         severity: {{ .rules.solrHighHeapSize.severity }}
@@ -92,7 +95,9 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-solr-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "solrHighBufferSize")) -}}
     - alert: SolrHighBufferSize
-      expr: solr_metrics_jvm_buffers_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats"} > {{ .rules.solrHighBufferSize.val }}
+      expr: (solr_metrics_jvm_buffers_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",item="MemoryUsed",pool="direct"} / on(pod) group_left()
+        solr_metrics_jvm_os_memory_bytes{namespace="{{ $.Release.Namespace }}",job="{{ $app }}-stats",item="totalPhysicalMemorySize"})
+        * 100 > {{ .rules.solrHighBufferSize.val }}
       for: {{ .rules.solrHighBufferSize.duration }}
       labels:
         severity: {{ .rules.solrHighBufferSize.severity }}
@@ -103,7 +108,7 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-solr-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskUsageHigh")) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-overseer-[0-9]+$|{{ $.Release.Name }}-coordinator-[0-9]+$|{{ $.Release.Name }}-data-[0-9]+$|{{ $.Release.Name }}-[0-9]+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
@@ -115,7 +120,7 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-solr-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "diskAlmostFull")) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
+      expr: (kubelet_volume_stats_used_bytes{service="kubernetes"} / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes{service="kubernetes"} + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-overseer-[0-9]+$|{{ $.Release.Name }}-coordinator-[0-9]+$|{{ $.Release.Name }}-data-[0-9]+$|{{ $.Release.Name }}-[0-9]+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
