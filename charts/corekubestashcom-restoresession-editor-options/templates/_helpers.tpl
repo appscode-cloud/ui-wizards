@@ -77,7 +77,7 @@ kubedbcom-<db>-editor-options chart; the OpenShift uid-range value wins when set
   "PerconaXtraDB" 1001
   "PgBouncer" 70
   "Pgpool" 70
-  "Postgres" 999
+  "Postgres" 70
   "ProxySQL" 999
   "Qdrant" 1000
   "Redis" 999
