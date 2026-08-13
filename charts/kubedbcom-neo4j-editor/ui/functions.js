@@ -182,7 +182,7 @@ export const useFunc = (model) => {
                   },
                   runAsGroup: 0,
                   runAsNonRoot: true,
-                  runAsUser: 999,
+                  runAsUser: 7474,
                   seccompProfile: {
                     type: 'RuntimeDefault',
                   },
@@ -224,7 +224,7 @@ export const useFunc = (model) => {
                     },
                     runAsGroup: 0,
                     runAsNonRoot: true,
-                    runAsUser: 999,
+                    runAsUser: 7474,
                     seccompProfile: {
                       type: 'RuntimeDefault',
                     },

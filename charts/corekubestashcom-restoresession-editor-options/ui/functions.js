@@ -59,6 +59,7 @@ export const useFunc = (model) => {
     // get encryptionSecret from stash-preset
     await getPreset()
     setSecurityContext()
+    setNeo4jParams()
   }
 
   async function getPreset() {
@@ -388,18 +389,7 @@ export const useFunc = (model) => {
     return !!target.name
   }
 
-  const securityContextMap = {
-    MongoDB: 999,
-    Postgres: 70,
-    Elasticsearch: 1000,
-    MSSQLServer: 10001,
-    MySQL: 999,
-    MariaDB: 999,
-    Redis: 999,
-    Singlestore: 999,
-    ZooKeeper: 999,
-  }
-
+  // the per-kind default lives in the chart helper; only the OpenShift uid-range overrides it
   async function setSecurityContext() {
     const namespace = storeGet('/route/query/namespace') || ''
     const user = storeGet('/route/params/user') || ''
@@ -415,15 +405,6 @@ export const useFunc = (model) => {
           commit('wizard/model$update', {
             path: '/spec/addon/jobTemplate/securityContext',
             value: val,
-            force: true,
-          })
-        } else {
-          const kind = storeGet('/resource/layout/result/resource/kind') || ''
-          const context = securityContextMap[kind]
-
-          commit('wizard/model$update', {
-            path: '/spec/addon/jobTemplate/securityContext',
-            value: context,
             force: true,
           })
         }
@@ -562,6 +543,25 @@ export const useFunc = (model) => {
     })
   }
 
+  // neo4j restore needs the pod to seed from; it is always the first pod of the target
+  function setNeo4jParams() {
+    if (getValue(model, '/spec/target/kind') !== 'Neo4j') return
+    const name = getValue(model, '/spec/target/name') || ''
+    if (!name) return
+
+    const params = `{seedServerName: "${name}-0"}`
+    setDiscriminatorValue('params', params)
+
+    const tasks = getValue(model, '/spec/addon/tasks') || []
+    if (!tasks.length) return
+    tasks[0]['params'] = params
+    commit('wizard/model$update', {
+      path: '/spec/addon/tasks',
+      value: tasks,
+      force: true,
+    })
+  }
+
   function clearAddon() {
     return ''
   }
@@ -593,5 +593,6 @@ export const useFunc = (model) => {
     setSecurityContext,
     showGroupKind,
     clearAddon,
+    setNeo4jParams,
   }
 }

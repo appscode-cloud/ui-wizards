@@ -27,13 +27,24 @@ spec:
         params: {{ .params }}
         {{- end }}
     {{- end }}
-    {{- if and .Values.spec.addon.jobTemplate .Values.spec.addon.jobTemplate.securityContext }}
+    {{- $runAsUser := include "corekubestashcom-restoresession-editor-options.runAsUser" . }}
+    {{- if $runAsUser }}
     jobTemplate:
       spec:
+        {{- if eq .Values.spec.target.kind "Neo4j" }}
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: data-{{ .Values.spec.target.name }}-0
+        volumeMounts:
+          - mountPath: /data
+            name: data
+            subPath: data
+        {{- end }}
         nodeSelector:
           kubernetes.io/os: linux
         securityContext:
-          runAsUser: {{ .Values.spec.addon.jobTemplate.securityContext }}
+          runAsUser: {{ $runAsUser }}
           runAsGroup: 0
     containerRuntimeSettings:
       securityContext:
@@ -43,7 +54,7 @@ spec:
             - ALL
         runAsGroup: 0
         runAsNonRoot: true
-        runAsUser: {{ .Values.spec.addon.jobTemplate.securityContext }}
+        runAsUser: {{ $runAsUser }}
         seccompProfile:
           type: RuntimeDefault
     {{- end }}
