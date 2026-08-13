@@ -132,6 +132,29 @@ export const useFunc = (model) => {
     return namespace
   }
 
+  function isNamespaceScopedOrg() {
+    const activeOrg = storeGet('/activeOrganization') || ''
+    const orgList = storeGet('/organizations') || []
+    return orgList.find((item) => item.username === activeOrg)?.orgType === 3
+  }
+
+  function flattenNamespaces(list) {
+    return list.flatMap((item) =>
+      item?.namespaces ? item.namespaces.map((ns) => ns?.value ?? ns) : (item?.value ?? item),
+    )
+  }
+
+  // a namespace-scoped org reaches exactly one namespace, and the /restoresessions/create
+  // route carries no ?namespace=, so fall back to what the access review grants
+  async function resolveNamespace() {
+    const namespace = setNamespace()
+    if (namespace) return namespace
+
+    if (!namespaces.length) namespaces = await fetchNamespacesApi()
+    const accessible = flattenNamespaces(namespaces)
+    return accessible.length === 1 ? accessible[0] : ''
+  }
+
   async function getDbs() {
     // watchDependency('model#/metadata/release/namespace')
     const namespace = getValue(model, '/metadata/release/namespace')
@@ -183,14 +206,10 @@ export const useFunc = (model) => {
   async function getRepositories() {
     const user = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
-    const namespace = storeGet('/route/query/namespace') || ''
-    const activeOrg = storeGet('/activeOrganization') || ''
-    const orgList = storeGet('/organizations') || []
-    const activeOrgObj = orgList.find((item) => item.username === activeOrg)
-    const orgType = activeOrgObj?.orgType
-
     let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/repositories`
-    if (orgType === 3) {
+    if (isNamespaceScopedOrg()) {
+      const namespace = await resolveNamespace()
+      if (!namespace) return []
       url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`
     }
 
@@ -391,7 +410,7 @@ export const useFunc = (model) => {
 
   // the per-kind default lives in the chart helper; only the OpenShift uid-range overrides it
   async function setSecurityContext() {
-    const namespace = storeGet('/route/query/namespace') || ''
+    const namespace = await resolveNamespace()
     const user = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
     if (namespace) {

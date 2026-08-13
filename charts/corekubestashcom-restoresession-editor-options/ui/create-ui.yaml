@@ -13,6 +13,10 @@ step:
     type: select
     validation:
       type: required
+    watcher:
+      func: setSecurityContext
+      paths:
+      - schema/properties/metadata/properties/release/properties/namespace
   - if:
       name: isConsole
       type: function
@@ -28,7 +32,10 @@ step:
       type: label-element
     - disableUnselect: true
       label: Repository
-      loader: getRepositories
+      loader:
+        name: getRepositories
+        watchPaths:
+        - schema/properties/metadata/properties/release/properties/namespace
       refresh: true
       schema: temp/properties/repository
       subtitle: Select the repository where your backup snapshots are stored
