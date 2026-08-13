@@ -106,7 +106,7 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getMysqlDbs() {
+  async function getQdrantDbs() {
     // watchDependency('model#/resources/autoscalingKubedbComQdrantAutoscaler/metadata/namespace')
     const namespace = getValue(
       model,
@@ -892,7 +892,7 @@ export const useFunc = (model) => {
     isConsole,
     getNamespaces,
     isRancherManaged,
-    getMysqlDbs,
+    getQdrantDbs,
     initMetadata,
     fetchTopologyMachines,
     setTrigger,
