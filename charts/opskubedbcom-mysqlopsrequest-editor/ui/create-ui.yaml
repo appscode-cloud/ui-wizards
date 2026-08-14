@@ -354,15 +354,26 @@ step:
                 type: required
             - buttonClass: is-light is-outlined
               elements:
-              - label: Key
-                loader:
-                  name: onSelectedSecretChange
-                  watchPaths:
-                  - temp/properties/createSecret/properties/data
-                schema: key
-                type: select
-                validation:
-                  type: required
+              - label: ""
+                loader: getSecretKeyTitle
+                type: label-element
+              - type: horizontal-layout
+                elements:
+                - label: Key
+                  schema: key
+                  type: input
+                  validation:
+                    type: custom|required
+                    name: validateSecretKeys
+                - type: input
+                  label: Extension
+                  schema: extension
+                  disable: true
+                  validation:
+                    type: required
+                  init:
+                    type: func
+                    value: secretKeyExtension
               - height: 120px
                 label: Value
                 schema: value

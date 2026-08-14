@@ -306,7 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
-const configSecretKeys = ['kubedb-user.cnf']
+// const configSecretKeys = ['kubedb-user.cnf']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -857,7 +857,7 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
           params: {
-            keys: ['kubedb-user.cnf'].join(','),
+            keys: ['*.cnf'].join(','),
           },
         },
       )
@@ -911,9 +911,12 @@ export const useFunc = (model) => {
     const { user, cluster } = route.params
     const url = `/clusters/${user}/${cluster}/resources`
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+    const keyExtension = secretKeyExtension()
     const secretName = getValue(discriminator, `${type}createSecret/name`)
     const secretData = getValue(discriminator, `${type}createSecret/data`)
-    const secretDataObj = Object.fromEntries(secretData.map((item) => [item.key, item.value]))
+    const secretDataObj = Object.fromEntries(
+      secretData.map((item) => [`${item.key}${keyExtension}`, item.value]),
+    )
 
     // Check uniqueness of secret name
     if (existingSecrets.includes(secretName)) {
@@ -1003,6 +1006,28 @@ export const useFunc = (model) => {
     })
   }
 
+  function secretKeyExtension() {
+    return '.cnf'
+  }
+
+  function getSecretKeyTitle() {
+    const extension = secretKeyExtension()
+    return {
+      subtitle: `Enter key name — the <b>${extension}</b> extension is added automatically to the name`,
+    }
+  }
+
+  function validateSecretKeys(value, index) {
+    const secretData = getValue(discriminator, `createSecret/data`)
+    const keyName = getValue(discriminator, `createSecret/data/${index}/key`)
+
+    window.console.log('validation fired')
+
+    return secretData.some((item, idx) => idx !== index && item.key === keyName)
+      ? 'same key'
+      : false
+  }
+
   async function onApplyconfigChange(type) {
     type = type ? type + '/' : ''
     const configValue = getValue(discriminator, `${type}applyConfig`)
@@ -1050,11 +1075,11 @@ export const useFunc = (model) => {
         })
       })
     }
-    configSecretKeys.forEach((key) => {
-      if (!configObj.find((item) => item.name === key)) {
-        configObj.push({ name: key, content: '' })
-      }
-    })
+    // configSecretKeys.forEach((key) => {
+    //   if (!configObj.find((item) => item.name === key)) {
+    //     configObj.push({ name: key, content: '' })
+    //   }
+    // })
     return configObj
   }
 
@@ -1122,21 +1147,21 @@ export const useFunc = (model) => {
     }
   }
 
-  function onSelectedSecretChange(index) {
-    const secretData = getValue(discriminator, 'createSecret/data') || []
-    const selfSecrets = secretData.map((item) => item.key)
+  // function onSelectedSecretChange(index) {
+  //   const secretData = getValue(discriminator, 'createSecret/data') || []
+  //   const selfSecrets = secretData.map((item) => item.key)
 
-    const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
+  //   const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
 
-    const selfKey = getValue(discriminator, `createSecret/data/${index}/key`)
-    if (selfKey) {
-      remainingSecrets.push(selfKey)
-    }
-    const resSecret = remainingSecrets.map((item) => {
-      return { text: item, value: item }
-    })
-    return resSecret
-  }
+  //   const selfKey = getValue(discriminator, `createSecret/data/${index}/key`)
+  //   if (selfKey) {
+  //     remainingSecrets.push(selfKey)
+  //   }
+  //   const resSecret = remainingSecrets.map((item) => {
+  //     return { text: item, value: item }
+  //   })
+  //   return resSecret
+  // }
 
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {
@@ -1508,10 +1533,12 @@ export const useFunc = (model) => {
     isNotCreateSecret,
     onCreateSecretChange,
     cancelCreateSecret,
+    secretKeyExtension,
+    getSecretKeyTitle,
+    validateSecretKeys,
     setApplyConfig,
     onRemoveConfigChange,
     onNewConfigSecretChange,
-    onSelectedSecretChange,
     isTlsEnabled,
     getCurrentConfig,
   }
