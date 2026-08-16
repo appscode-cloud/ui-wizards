@@ -1173,6 +1173,10 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
+  function isMonitoringEnabled() {
+    return !!getValue(discriminator, '/dbDetails/spec/monitor')
+  }
+
   function setExporter(type) {
     let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
     const limitVal = getValue(discriminator, path)
@@ -1213,6 +1217,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    isMonitoringEnabled,
     isMachineValid,
     setExporter,
     fetchAliasOptions,
