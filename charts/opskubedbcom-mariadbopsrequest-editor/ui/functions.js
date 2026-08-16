@@ -1271,7 +1271,13 @@ export const useFunc = (model) => {
   }
 
   function getAliasOptions() {
-    return ['server', 'client', 'metrics-exporter']
+    const aliases = ['server', 'client']
+
+    if (isMonitoringEnabled()) {
+      aliases.push('metrics-exporter')
+    }
+
+    return aliases
   }
 
   function isNamespaceDisabled() {
@@ -1364,6 +1370,10 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
+  function isMonitoringEnabled() {
+    return !!getValue(discriminator, '/dbDetails/spec/monitor')
+  }
+
   function setExporter(type) {
     let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
     const limitVal = getValue(discriminator, path)
@@ -1416,6 +1426,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    isMonitoringEnabled,
     isReplicasValid,
     isMachineValid,
     setExporter,

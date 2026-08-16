@@ -1552,6 +1552,10 @@ export const useFunc = (model) => {
     return !!topology[type]?.storage
   }
 
+  function isMonitoringEnabled() {
+    return !!getValue(discriminator, '/dbDetails/spec/monitor')
+  }
+
   function setExporter(type) {
     let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
     const limitVal = getValue(discriminator, path)
@@ -1612,6 +1616,7 @@ export const useFunc = (model) => {
   // =====================================================
 
   return {
+    isMonitoringEnabled,
     // Utility functions
     isRancherManaged,
 
