@@ -1272,8 +1272,18 @@ export const useFunc = (model) => {
     return retValue || undefined
   }
 
+  function isMonitoringEnabled() {
+    return !!getValue(discriminator, '/dbDetails/spec/monitor')
+  }
+
   function getAliasOptions() {
-    return ['server', 'client', 'metrics-exporter']
+    const aliases = ['server', 'client']
+
+    if (isMonitoringEnabled()) {
+      aliases.push('metrics-exporter')
+    }
+
+    return aliases
   }
 
   function isNamespaceDisabled() {

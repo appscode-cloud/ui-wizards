@@ -1271,7 +1271,13 @@ export const useFunc = (model) => {
   }
 
   function getAliasOptions() {
-    return ['server', 'client', 'metrics-exporter']
+    const aliases = ['server', 'client']
+
+    if (isMonitoringEnabled()) {
+      aliases.push('metrics-exporter')
+    }
+
+    return aliases
   }
 
   function isNamespaceDisabled() {
