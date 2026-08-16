@@ -339,16 +339,19 @@ export const useFunc = (model) => {
       `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
       {
         params: {
-          filter: { items: { metadata: { name: null }, type: null } },
+          filter: { items: { metadata: { name: null }, type: null, data: null } },
         },
       },
     )
 
     const secrets = (resp && resp.data && resp.data.items) || []
 
+    const deepStorageKey = /^druid\.storage\..+/
+
     const filteredSecrets = secrets.filter((item) => {
       const validType = ['Opaque']
-      return validType.includes(item.type)
+      const keys = Object.keys(item.data || {})
+      return validType.includes(item.type) && keys.some((key) => deepStorageKey.test(key))
     })
 
     filteredSecrets.map((item) => {
