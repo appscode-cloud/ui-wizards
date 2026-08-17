@@ -484,7 +484,7 @@ export const useFunc = (model) => {
             name: 'druid-addon',
             tasks: [
               {
-                name: 'logical-backup',
+                name: 'mysql-metadata-storage-backup',
               },
             ],
           },
@@ -556,6 +556,15 @@ export const useFunc = (model) => {
     dbResource = getValue(model, '/resources/kubedbComDruid')
     initialDbMetadata = objectCopy(dbResource.metadata)
     initialArchiver = dbResource.spec?.archiver ? objectCopy(dbResource.spec?.archiver) : undefined
+
+    const metadataStorageType = dbResource.spec?.metadataStorage?.type || 'MySQL'
+    valuesFromWizard.spec.sessions[0].addon.tasks = [
+      {
+        name: metadataStorageType.toLowerCase().startsWith('postgres')
+          ? 'postgres-metadata-storage-backup'
+          : 'mysql-metadata-storage-backup',
+      },
+    ]
 
     // get values.yaml to populate data when backup-config is being created
 

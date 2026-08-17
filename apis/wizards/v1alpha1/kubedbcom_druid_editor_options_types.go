@@ -86,7 +86,7 @@ type DruidDeepStorage struct {
 // +kubebuilder:validation:Enum=s3;google;azure;hdfs
 type DruidDeepStorageType string
 
-// +kubebuilder:validation:Enum=MySQL;Postgres
+// +kubebuilder:validation:Enum=MySQL;PostgreSQL
 type DruidMetadataStorageType string
 
 type DruidMetadataStorage struct {

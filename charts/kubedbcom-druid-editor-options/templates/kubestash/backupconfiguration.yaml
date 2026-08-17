@@ -46,7 +46,7 @@ spec:
       addon:
         name: druid-addon
         tasks:
-          - name: logical-backup
+          - name: {{ if hasPrefix "postgres" (lower (.Values.spec.metadataStorage.type | default "MySQL")) }}postgres-metadata-storage-backup{{ else }}mysql-metadata-storage-backup{{ end }}
         jobTemplate:
           spec:
             containerSecurityContext:
