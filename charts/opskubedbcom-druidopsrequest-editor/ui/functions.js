@@ -323,7 +323,14 @@ const druidNodeTypes = [
 
 let machinesFromPreset = []
 let secretArray = []
-const configSecretKeys = ['kubedb-user.properties']
+const configSecretKeys = [
+  'brokers.properties',
+  'coordinators.properties',
+  'historicals.properties',
+  'middleManagers.properties',
+  'routers.properties',
+  'common.runtime.properties',
+]
 
 export const useFunc = (model) => {
   const route = store.state?.route
