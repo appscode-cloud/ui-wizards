@@ -1020,7 +1020,7 @@ export const useFunc = (model) => {
         return item
       }
     })
-    const { applyConfig } = applyconfigData
+    const { applyConfig } = applyconfigData ?? {}
     const configObj = []
 
     if (applyConfig) {
