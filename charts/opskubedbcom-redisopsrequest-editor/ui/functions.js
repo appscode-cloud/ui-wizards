@@ -826,7 +826,7 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
           params: {
-            keys: ['kubedb-user.conf'].join(','),
+            keys: ['*.conf'].join(','),
           },
         },
       )

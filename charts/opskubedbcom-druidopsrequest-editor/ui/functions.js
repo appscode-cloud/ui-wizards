@@ -323,7 +323,7 @@ const druidNodeTypes = [
 
 let machinesFromPreset = []
 let secretArray = []
-const configSecretKeys = ['.properties']
+const configSecretKeys = ['kubedb-user.properties']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -1033,7 +1033,7 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
           params: {
-            keys: ['.properties'].join(','),
+            keys: ['*.properties'].join(','),
           },
         },
       )

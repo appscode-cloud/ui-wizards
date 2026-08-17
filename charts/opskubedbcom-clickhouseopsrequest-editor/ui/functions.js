@@ -306,7 +306,7 @@ const machineList = [
 ]
 
 let machinesFromPreset = []
-const configSecretKeys = ['kubedb-user.cnf']
+const configSecretKeys = ['kubedb-user.yaml']
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -841,7 +841,7 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
           params: {
-            keys: ['kubedb-user.cnf'].join(','),
+            keys: ['*.yaml'].join(','),
           },
         },
       )
@@ -1121,7 +1121,6 @@ export const useFunc = (model) => {
     })
     return resSecret
   }
-
 
   // reconfiguration type
   function ifReconfigurationTypeEqualsTo(value) {
