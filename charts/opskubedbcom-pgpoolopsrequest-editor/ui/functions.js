@@ -305,7 +305,7 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
-const configSecretKeys = ['pgpool.conf']
+const configSecretKeys = ['kubedb-user.conf']
 let machinesFromPreset = []
 let secretArray = []
 
@@ -840,7 +840,7 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
           params: {
-            keys: ['pgpool.conf'].join(','),
+            keys: ['*.conf'].join(','),
           },
         },
       )
@@ -1022,7 +1022,7 @@ export const useFunc = (model) => {
         return item
       }
     })
-    const { applyConfig } = applyconfigData
+    const { applyConfig } = applyconfigData ?? {}
     const configObj = []
 
     if (applyConfig) {

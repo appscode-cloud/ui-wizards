@@ -323,7 +323,14 @@ const druidNodeTypes = [
 
 let machinesFromPreset = []
 let secretArray = []
-const configSecretKeys = ['.properties']
+const configSecretKeys = [
+  'brokers.properties',
+  'coordinators.properties',
+  'historicals.properties',
+  'middleManagers.properties',
+  'routers.properties',
+  'common.runtime.properties',
+]
 
 export const useFunc = (model) => {
   const route = store.state?.route
@@ -1033,7 +1040,7 @@ export const useFunc = (model) => {
         `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
         {
           params: {
-            keys: ['.properties'].join(','),
+            keys: ['*.properties'].join(','),
           },
         },
       )
@@ -1215,7 +1222,7 @@ export const useFunc = (model) => {
         return item
       }
     })
-    const { applyConfig } = applyconfigData
+    const { applyConfig } = applyconfigData ?? {}
     const configObj = []
 
     if (applyConfig) {

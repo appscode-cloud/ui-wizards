@@ -217,6 +217,17 @@ export const useFunc = (model) => {
     return 'On'
   }
 
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComKafkaAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
+  }
+
   function hasAnnotations() {
     const annotations =
       getValue(model, '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations') || {}
@@ -1001,6 +1012,7 @@ export const useFunc = (model) => {
     fetchTopologyMachines,
     dbTypeEqualsTo,
     setTrigger,
+    onTriggerChange,
     hasAnnotations,
     setAllowedMachine,
     getMachines,
