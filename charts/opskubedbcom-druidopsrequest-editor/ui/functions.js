@@ -1597,13 +1597,36 @@ export const useFunc = (model) => {
    * @returns {Object} Resource configuration
    */
   function isReplicasValid(type) {
-    const currentReplicas = getValue(discriminator, `/dbDetails/spec/topology/${type}/replicas`)
-    const newReplicas = getValue(model, `/spec/horizontalScaling/topology/${type}`)
+    let currentReplicas = getValue(discriminator, `/dbDetails/spec/topology/${type}/replicas`)
+    let newReplicas = getValue(model, `/spec/horizontalScaling/topology/${type}`)
+    if (!newReplicas) return
+    const replicaTypes = [
+      'brokers',
+      'historicals',
+      'middleManagers',
+      'coordinators',
+      'overlords',
+      'routers',
+    ]
 
-    if (currentReplicas === newReplicas) {
-      return 'New replica count must be different from the current replica count.'
+    for (let i = 0; i < replicaTypes.length; i++) {
+      if (type === replicaTypes[i]) {
+        if (newReplicas < 1) {
+          return 'Replica count must be at least 1.'
+        }
+      }
+      let tempCur = getValue(discriminator, `/dbDetails/spec/topology/${replicaTypes[i]}/replicas`)
+      let tempNew = getValue(model, `/spec/horizontalScaling/topology/${replicaTypes[i]}`)
+      console.log(replicaTypes[i], tempCur, tempNew)
+
+      if (tempNew && tempCur !== tempNew) {
+        return false
+      }
     }
-    return false
+    // if (currentReplicas === newReplicas) {
+    //   return 'New replica count must be different from the current replica count.'
+    // }
+    return 'New replica count must be different from the current replica count.'
   }
 
   function isMachineValid(type) {
