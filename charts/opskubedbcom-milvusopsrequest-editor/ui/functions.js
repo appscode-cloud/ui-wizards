@@ -1321,7 +1321,7 @@ export const useFunc = (model) => {
     if (!volume) return
 
     try {
-      const sizeInBytes = parseSize(volume)
+      const sizeInBytes = parseSize(volume ?? 0)
       const inputSizeInBytes = parseSize(input)
 
       if (inputSizeInBytes >= sizeInBytes) return

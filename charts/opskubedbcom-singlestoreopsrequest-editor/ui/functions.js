@@ -1310,7 +1310,7 @@ export const useFunc = (model) => {
     const input = getValue(model, path)
 
     try {
-      const sizeInBytes = parseSize(volume)
+      const sizeInBytes = parseSize(volume ?? 0)
       const inputSizeInBytes = parseSize(input)
 
       if (inputSizeInBytes >= sizeInBytes) return
