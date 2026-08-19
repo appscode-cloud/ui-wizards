@@ -1366,6 +1366,9 @@ export const useFunc = (model) => {
     const currentReplicas = dbDetails?.spec?.replicas
     const newReplicas = getValue(model, '/spec/horizontalScaling/server')
 
+    if (!newReplicas) return
+    if (newReplicas < 1) return 'Replica count must be at least 1.'
+
     if (currentReplicas === newReplicas) {
       return 'New replica count must be different from the current replica count.'
     }

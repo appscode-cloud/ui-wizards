@@ -142,7 +142,10 @@ step:
         type: input-compare
         validation:
           name: isReplicasValid|broker
-          type: custom|required
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/broker
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/controller
       - init:
           type: func
           value: setValueFromDbDetails|/spec/topology/controller/replicas
@@ -153,7 +156,10 @@ step:
         type: input-compare
         validation:
           name: isReplicasValid|controller
-          type: custom|required
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/broker
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/controller
       if:
         name: ifDbTypeEqualsTo|Topology|horizontalScaling
         type: function
