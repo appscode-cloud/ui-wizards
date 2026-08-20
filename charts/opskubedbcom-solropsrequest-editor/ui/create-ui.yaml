@@ -142,90 +142,62 @@ step:
         type: info
       type: horizontal-layout
     - elements:
-      - elements:
-        - label: Coordinator
-          type: label-element
-        - elements:
-          - init:
-              type: func
-              value: setValueFromDbDetails|/spec/topology/coordinator/replicas
-            label: Replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/coordinator
-            subtitle: Define the total number of replicas for the database. Increasing
-              replicas improves fault tolerance and load distribution , while reducing
-              replicas conserves resources
-            type: input-compare
-            validation:
-              name: isReplicasValid|coordinator
-              type: custom
-              watchPaths:
-              - schema/properties/spec/properties/horizontalScaling/properties/coordinator
-              - schema/properties/spec/properties/horizontalScaling/properties/data
-              - schema/properties/spec/properties/horizontalScaling/properties/overseer
-          - hasIcon: true
-            label: Each replica represents an independent copy of your database. For
-              example, setting this to 3 creates three copies of the database for
-              better availability.
-            type: info
-          type: horizontal-layout
-        label: Coordinator horizontal Scaling
-        type: block-layout
-      - elements:
-        - label: Data
-          type: label-element
-        - elements:
-          - init:
-              type: func
-              value: setValueFromDbDetails|/spec/topology/data/replicas
-            label: Replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/data
-            subtitle: Define the total number of replicas for the database. Increasing
-              replicas improves fault tolerance and load distribution , while reducing
-              replicas conserves resources
-            type: input-compare
-            validation:
-              name: isReplicasValid|data
-              type: custom
-              watchPaths:
-              - schema/properties/spec/properties/horizontalScaling/properties/coordinator
-              - schema/properties/spec/properties/horizontalScaling/properties/data
-              - schema/properties/spec/properties/horizontalScaling/properties/overseer
-          - hasIcon: true
-            label: Each replica represents an independent copy of your database. For
-              example, setting this to 3 creates three copies of the database for
-              better availability.
-            type: info
-          type: horizontal-layout
-        label: Data Horizontal Scaling
-        type: block-layout
-      - elements:
-        - label: Overseer
-          type: label-element
-        - elements:
-          - init:
-              type: func
-              value: setValueFromDbDetails|/spec/topology/overseer/replicas
-            label: Replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/overseer
-            subtitle: Define the total number of replicas for the database. Increasing
-              replicas improves fault tolerance and load distribution , while reducing
-              replicas conserves resources
-            type: input-compare
-            validation:
-              name: isReplicasValid|overseer
-              type: custom
-              watchPaths:
-              - schema/properties/spec/properties/horizontalScaling/properties/coordinator
-              - schema/properties/spec/properties/horizontalScaling/properties/data
-              - schema/properties/spec/properties/horizontalScaling/properties/overseer
-          - hasIcon: true
-            label: Each replica represents an independent copy of your database. For
-              example, setting this to 3 creates three copies of the database for
-              better availability.
-            type: info
-          type: horizontal-layout
-        label: Overseer horizontal Scaling
-        type: block-layout
+      - type: label-element
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution, while reducing
+          replicas conserves resources
+        label: ''
+      - customClass: mt-8
+        hasIcon: true
+        subtitle: Define the total number of replicas for the database. Increasing
+          replicas improves fault tolerance and load distribution, while reducing
+          replicas conserves resources
+        label: Each replica represents an independent copy of your database. For example,
+          setting this to 3 creates three copies of the database for better availability.
+        type: info
+      - header: Coordinator
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/coordinator/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/coordinator
+        type: input-compare
+        validation:
+          name: isReplicasValid|coordinator
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/coordinator
+          - schema/properties/spec/properties/horizontalScaling/properties/data
+          - schema/properties/spec/properties/horizontalScaling/properties/overseer
+      - header: Data
+        customClass: ml-30
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/data/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/data
+        type: input-compare
+        validation:
+          name: isReplicasValid|data
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/coordinator
+          - schema/properties/spec/properties/horizontalScaling/properties/data
+          - schema/properties/spec/properties/horizontalScaling/properties/overseer
+      - header: Overseer
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/overseer/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/overseer
+        type: input-compare
+        validation:
+          name: isReplicasValid|overseer
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/coordinator
+          - schema/properties/spec/properties/horizontalScaling/properties/data
+          - schema/properties/spec/properties/horizontalScaling/properties/overseer
       if:
         name: ifDbTypeEqualsTo|Topology|horizontalScaling
         type: function
