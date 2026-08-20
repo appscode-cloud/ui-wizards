@@ -16,6 +16,8 @@ export const useFunc = (model) => {
   let showStoragememory = false
 
   // ************************* Autoscaler *************************
+  setDiscriminatorValue('/allowedMachine-min', '')
+  setDiscriminatorValue('/allowedMachine-max', '')
 
   function isKubedb() {
     return !!storeGet('/route/params/actions')
@@ -141,7 +143,11 @@ export const useFunc = (model) => {
     const nodeGroups = getValue(discriminator, '/topologyMachines') || []
     const machineData = nodeGroups.find((item) => item.topologyValue === machineName)
     if (machineData) {
-      return { machine: machineName, cpu: machineData.allocatable?.cpu, memory: machineData.allocatable?.memory }
+      return {
+        machine: machineName,
+        cpu: machineData.allocatable?.cpu,
+        memory: machineData.allocatable?.memory,
+      }
     }
     return { machine: machineName || '', cpu: '', memory: '' }
   }
@@ -155,7 +161,11 @@ export const useFunc = (model) => {
     const machines = nodeGroups?.map((item) => ({
       text: item.topologyValue,
       subtext: `CPU: ${item.allocatable?.cpu}, Memory: ${item.allocatable?.memory}`,
-      value: { machine: item.topologyValue, cpu: item.allocatable?.cpu, memory: item.allocatable?.memory },
+      value: {
+        machine: item.topologyValue,
+        cpu: item.allocatable?.cpu,
+        memory: item.allocatable?.memory,
+      },
     }))
     const filteredMachine = machines?.filter((item, ind) =>
       minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
@@ -173,12 +183,24 @@ export const useFunc = (model) => {
     const maxMachine = maxMachineObj?.machine || ''
     const minMaxMachine = `${minMachine},${maxMachine}`
     annotations['kubernetes.io/instance-type'] = minMaxMachine
-    const minMachineAllocatable = minMachineObj ? { cpu: minMachineObj.cpu, memory: minMachineObj.memory } : null
-    const maxMachineAllocatable = maxMachineObj ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory } : null
+    const minMachineAllocatable = minMachineObj
+      ? { cpu: minMachineObj.cpu, memory: minMachineObj.memory }
+      : null
+    const maxMachineAllocatable = maxMachineObj
+      ? { cpu: maxMachineObj.cpu, memory: maxMachineObj.memory }
+      : null
     const allowedPath = `/resources/autoscalingKubedbComHanaDBAutoscaler/spec/compute/${type}`
     if (minMachine && maxMachine && inst !== minMaxMachine) {
-      commit('wizard/model$update', { path: `${allowedPath}/maxAllowed`, value: maxMachineAllocatable, force: true })
-      commit('wizard/model$update', { path: `${allowedPath}/minAllowed`, value: minMachineAllocatable, force: true })
+      commit('wizard/model$update', {
+        path: `${allowedPath}/maxAllowed`,
+        value: maxMachineAllocatable,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `${allowedPath}/minAllowed`,
+        value: minMachineAllocatable,
+        force: true,
+      })
       commit('wizard/model$update', { path: annoPath, value: { ...annotations }, force: true })
     }
   }
@@ -206,7 +228,10 @@ export const useFunc = (model) => {
 
   function isNodeTopologySelected() {
     const nodeTopologyName =
-      getValue(model, '/resources/autoscalingKubedbComHanaDBAutoscaler/spec/compute/nodeTopology/name') || ''
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComHanaDBAutoscaler/spec/compute/nodeTopology/name',
+      ) || ''
     return !!nodeTopologyName.length
   }
 
@@ -337,10 +362,7 @@ export const useFunc = (model) => {
   }
 
   function initEnvArray() {
-    const env = getValue(
-      model,
-      '/resources/kubedbComHanaDB/spec/monitor/prometheus/exporter/env',
-    )
+    const env = getValue(model, '/resources/kubedbComHanaDB/spec/monitor/prometheus/exporter/env')
     return env || []
   }
 

@@ -85,19 +85,19 @@ step:
             type: function
           init:
             type: func
-            value: setAllowedMachine|perconaxtradb|min
+            value: setAllowedMachine|min
           label: Min Allowed Profile
           loader:
-            name: getMachines|perconaxtradb|min
+            name: getMachines|min
             watchPaths:
             - temp/properties/topologyMachines
-            - temp/properties/allowedMachine-perconaxtradb-max
-          schema: temp/properties/allowedMachine-perconaxtradb-min
+            - temp/properties/allowedMachine-max
+          schema: temp/properties/allowedMachine-min
           type: machine-compare
           watcher:
             func: onMachineChange|perconaxtradb
             paths:
-            - temp/properties/allowedMachine-perconaxtradb-min
+            - temp/properties/allowedMachine-min
         - elements:
           - label: Cpu
             schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/minAllowed/properties/cpu
@@ -118,19 +118,19 @@ step:
             type: function
           init:
             type: func
-            value: setAllowedMachine|perconaxtradb|max
+            value: setAllowedMachine|max
           label: Max Allowed Profile
           loader:
-            name: getMachines|perconaxtradb|max
+            name: getMachines|max
             watchPaths:
             - temp/properties/topologyMachines
-            - temp/properties/allowedMachine-perconaxtradb-min
-          schema: temp/properties/allowedMachine-perconaxtradb-max
+            - temp/properties/allowedMachine-min
+          schema: temp/properties/allowedMachine-max
           type: machine-compare
           watcher:
             func: onMachineChange|perconaxtradb
             paths:
-            - temp/properties/allowedMachine-perconaxtradb-max
+            - temp/properties/allowedMachine-max
         - elements:
           - label: Cpu
             schema: schema/properties/resources/properties/autoscalingKubedbComPerconaXtraDBAutoscaler/properties/spec/properties/compute/properties/perconaxtradb/properties/maxAllowed/properties/cpu

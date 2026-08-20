@@ -16,8 +16,6 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-pgpool-min', '')
-  setDiscriminatorValue('/allowedMachine-pgpool-max', '')
   setDiscriminatorValue('/allowedMachine-min', '')
   setDiscriminatorValue('/allowedMachine-max', '')
 
@@ -292,8 +290,9 @@ export const useFunc = (model) => {
     }
   }
 
-  function setAllowedMachine(type, minmax) {
+  function setAllowedMachine(minmax) {
     // For pgpool, the instance format is stored as: "min,max" or as a JSON object like {"pgpool": "min,max"}
+    const type = 'pgpool'
     let instanceValue = instance
     try {
       const parsed = JSON.parse(instance)
@@ -326,10 +325,10 @@ export const useFunc = (model) => {
     }
   }
 
-  function getMachines(type, minmax) {
+  function getMachines(minmax) {
     // watchDependency('discriminator#/topologyMachines')
     const depends = minmax === 'min' ? 'max' : 'min'
-    const dependantPath = `/allowedMachine-${type}-${depends}`
+    const dependantPath = `/allowedMachine-${depends}`
 
     // watchDependency(`discriminator#${dependantPath}`)
     const dependantMachineObj = getValue(discriminator, dependantPath)
@@ -379,8 +378,8 @@ export const useFunc = (model) => {
     const instance = annotations['kubernetes.io/instance-type']
 
     // Now discriminator values are objects with { machine, cpu, memory }
-    const minMachineObj = getValue(discriminator, `/allowedMachine-${type}-min`)
-    const maxMachineObj = getValue(discriminator, `/allowedMachine-${type}-max`)
+    const minMachineObj = getValue(discriminator, `/allowedMachine-min`)
+    const maxMachineObj = getValue(discriminator, `/allowedMachine-max`)
     const minMachine = minMachineObj?.machine || ''
     const maxMachine = maxMachineObj?.machine || ''
     const minMaxMachine = `${minMachine},${maxMachine}`

@@ -85,19 +85,19 @@ step:
             type: function
           init:
             type: func
-            value: setAllowedMachine|proxysql|min
+            value: setAllowedMachine|min
           label: Min Allowed Profile
           loader:
-            name: getMachines|proxysql|min
+            name: getMachines|min
             watchPaths:
             - temp/properties/topologyMachines
-            - temp/properties/allowedMachine-proxysql-max
-          schema: temp/properties/allowedMachine-proxysql-min
+            - temp/properties/allowedMachine-max
+          schema: temp/properties/allowedMachine-min
           type: machine-compare
           watcher:
             func: onMachineChange|proxysql
             paths:
-            - temp/properties/allowedMachine-proxysql-min
+            - temp/properties/allowedMachine-min
         - elements:
           - label: Cpu
             schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/minAllowed/properties/cpu
@@ -118,19 +118,19 @@ step:
             type: function
           init:
             type: func
-            value: setAllowedMachine|proxysql|max
+            value: setAllowedMachine|max
           label: Max Allowed Profile
           loader:
-            name: getMachines|proxysql|max
+            name: getMachines|max
             watchPaths:
             - temp/properties/topologyMachines
-            - temp/properties/allowedMachine-proxysql-min
-          schema: temp/properties/allowedMachine-proxysql-max
+            - temp/properties/allowedMachine-min
+          schema: temp/properties/allowedMachine-max
           type: machine-compare
           watcher:
             func: onMachineChange|proxysql
             paths:
-            - temp/properties/allowedMachine-proxysql-max
+            - temp/properties/allowedMachine-max
         - elements:
           - label: Cpu
             schema: schema/properties/resources/properties/autoscalingKubedbComProxySQLAutoscaler/properties/spec/properties/compute/properties/proxysql/properties/maxAllowed/properties/cpu

@@ -9,6 +9,19 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/enableMonitoring', false)
   setDiscriminatorValue('/customizeExporter', true)
 
+  setDiscriminatorValue('/allowedMachine-node-min', '')
+  setDiscriminatorValue('/allowedMachine-node-max', '')
+  setDiscriminatorValue('/allowedMachine-datanode-min', '')
+  setDiscriminatorValue('/allowedMachine-datanode-max', '')
+  setDiscriminatorValue('/allowedMachine-mixcoord-min', '')
+  setDiscriminatorValue('/allowedMachine-mixcoord-max', '')
+  setDiscriminatorValue('/allowedMachine-proxy-min', '')
+  setDiscriminatorValue('/allowedMachine-proxy-max', '')
+  setDiscriminatorValue('/allowedMachine-querynode-min', '')
+  setDiscriminatorValue('/allowedMachine-querynode-max', '')
+  setDiscriminatorValue('/allowedMachine-streamingnode-min', '')
+  setDiscriminatorValue('/allowedMachine-streamingnode-max', '')
+
   function returnFalse() {
     return false
   }

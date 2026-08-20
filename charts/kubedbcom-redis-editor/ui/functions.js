@@ -32,16 +32,8 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-standalone-min', '')
-  setDiscriminatorValue('/allowedMachine-standalone-max', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
-  setDiscriminatorValue('/allowedMachine-shard-min', '')
-  setDiscriminatorValue('/allowedMachine-shard-max', '')
-  setDiscriminatorValue('/allowedMachine-configServer-min', '')
-  setDiscriminatorValue('/allowedMachine-configServer-max', '')
-  setDiscriminatorValue('/allowedMachine-mongos-min', '')
-  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  setDiscriminatorValue('/allowedMachine-min', '')
+  setDiscriminatorValue('/allowedMachine-max', '')
 
   function initScheduleBackupForEdit() {
     const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(

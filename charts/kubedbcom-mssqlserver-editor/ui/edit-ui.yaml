@@ -485,19 +485,19 @@ step:
             type: function
           init:
             type: func
-            value: setAllowedMachine|mssqlserver|min
+            value: setAllowedMachine|min
           label: Min Allowed Profile
           loader:
-            name: getMachines|mssqlserver|min
+            name: getMachines|min
             watchPaths:
             - temp/properties/topologyMachines
-            - temp/properties/allowedMachine-mssqlserver-max
-          schema: temp/properties/allowedMachine-mssqlserver-min
+            - temp/properties/allowedMachine-max
+          schema: temp/properties/allowedMachine-min
           type: machine-compare
           watcher:
             func: onMachineChange|mssqlserver
             paths:
-            - temp/properties/allowedMachine-mssqlserver-min
+            - temp/properties/allowedMachine-min
         - elements:
           - label: Cpu
             schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/minAllowed/properties/cpu
@@ -518,19 +518,19 @@ step:
             type: function
           init:
             type: func
-            value: setAllowedMachine|mssqlserver|max
+            value: setAllowedMachine|max
           label: Max Allowed Profile
           loader:
-            name: getMachines|mssqlserver|max
+            name: getMachines|max
             watchPaths:
             - temp/properties/topologyMachines
-            - temp/properties/allowedMachine-mssqlserver-min
-          schema: temp/properties/allowedMachine-mssqlserver-max
+            - temp/properties/allowedMachine-min
+          schema: temp/properties/allowedMachine-max
           type: machine-compare
           watcher:
             func: onMachineChange|mssqlserver
             paths:
-            - temp/properties/allowedMachine-mssqlserver-max
+            - temp/properties/allowedMachine-max
         - elements:
           - label: Cpu
             schema: schema/properties/resources/properties/autoscalingKubedbComMSSQLServerAutoscaler/properties/spec/properties/compute/properties/mssqlserver/properties/maxAllowed/properties/cpu
