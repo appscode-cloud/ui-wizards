@@ -32,16 +32,8 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-standalone-min', '')
-  setDiscriminatorValue('/allowedMachine-standalone-max', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
-  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
-  setDiscriminatorValue('/allowedMachine-shard-min', '')
-  setDiscriminatorValue('/allowedMachine-shard-max', '')
-  setDiscriminatorValue('/allowedMachine-configServer-min', '')
-  setDiscriminatorValue('/allowedMachine-configServer-max', '')
-  setDiscriminatorValue('/allowedMachine-mongos-min', '')
-  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  setDiscriminatorValue('/allowedMachine-min', '')
+  setDiscriminatorValue('/allowedMachine-max', '')
   let showStoragememory = false
 
   function initScheduleBackupForEdit() {
@@ -737,7 +729,9 @@ export const useFunc = (model) => {
     )
 
     const resources = (resp && resp.data && resp.data.items) || []
-    const filteredClickHouseVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
+    const filteredClickHouseVersions = resources.filter(
+      (item) => item.spec && !item.spec.deprecated,
+    )
 
     filteredClickHouseVersions.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
@@ -751,7 +745,10 @@ export const useFunc = (model) => {
 
   function initMetadata() {
     const dbName =
-      getValue(model, '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name') || ''
+      getValue(
+        model,
+        '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
+      ) || ''
     const type = getValue(discriminator, '/autoscalingType') || ''
     const date = Math.floor(Date.now() / 1000)
     const resource = storeGet('/route/params/resource')
@@ -766,14 +763,21 @@ export const useFunc = (model) => {
 
     // delete the other type object from vuex wizard model
     if (type === 'compute')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/storage')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/storage',
+      )
     if (type === 'storage')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute',
+      )
   }
 
   async function fetchTopologyMachines() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComClickHouseAutoscaler/metadata/annotations') || {}
+      getValue(model, '/resources/autoscalingKubedbComClickHouseAutoscaler/metadata/annotations') ||
+      {}
     instance = annotations['kubernetes.io/instance-type']
     const user = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -810,7 +814,8 @@ export const useFunc = (model) => {
 
   function hasAnnotations() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComClickHouseAutoscaler/metadata/annotations') || {}
+      getValue(model, '/resources/autoscalingKubedbComClickHouseAutoscaler/metadata/annotations') ||
+      {}
     const instance = annotations['kubernetes.io/instance-type']
 
     return !!instance
@@ -967,8 +972,10 @@ export const useFunc = (model) => {
     // watchDependency('model#/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name')
     // watchDependency('discriminator#/autoscalingType')
     return (
-      !!getValue(model, '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name') &&
-      !!getValue(discriminator, '/autoscalingType')
+      !!getValue(
+        model,
+        '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
+      ) && !!getValue(discriminator, '/autoscalingType')
     )
   }
 
@@ -1079,7 +1086,10 @@ export const useFunc = (model) => {
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/kubedbComClickHouse/spec/monitor/prometheus/exporter')
+      commit(
+        'wizard/model$delete',
+        '/resources/kubedbComClickHouse/spec/monitor/prometheus/exporter',
+      )
     }
   }
 
@@ -1477,7 +1487,10 @@ export const useFunc = (model) => {
   }
 
   function initEnvArray() {
-    const env = getValue(model, '/resources/kubedbComClickHouse/spec/monitor/prometheus/exporter/env')
+    const env = getValue(
+      model,
+      '/resources/kubedbComClickHouse/spec/monitor/prometheus/exporter/env',
+    )
 
     return env || []
   }

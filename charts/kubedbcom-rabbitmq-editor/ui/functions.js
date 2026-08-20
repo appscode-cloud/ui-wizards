@@ -29,8 +29,8 @@ export const useFunc = (model) => {
   // Compute Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-node-min', '')
-  setDiscriminatorValue('/allowedMachine-node-max', '')
+  setDiscriminatorValue('/allowedMachine-min', '')
+  setDiscriminatorValue('/allowedMachine-max', '')
 
   // monitoring
 

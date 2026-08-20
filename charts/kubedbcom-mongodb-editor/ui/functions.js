@@ -40,6 +40,10 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/allowedMachine-configServer-max', '')
   setDiscriminatorValue('/allowedMachine-mongos-min', '')
   setDiscriminatorValue('/allowedMachine-mongos-max', '')
+  setDiscriminatorValue('/allowedMachine-arbiter-min', '')
+  setDiscriminatorValue('/allowedMachine-arbiter-max', '')
+  setDiscriminatorValue('/allowedMachine-hidden-min', '')
+  setDiscriminatorValue('/allowedMachine-hidden-max', '')
 
   // *************************      common functions ********************************************
   // eslint-disable-next-line no-empty-pattern

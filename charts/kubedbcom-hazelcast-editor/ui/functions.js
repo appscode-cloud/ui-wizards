@@ -32,8 +32,8 @@ export const useFunc = (model) => {
   // Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
   setDiscriminatorValue('/topologyMachines', [])
-  setDiscriminatorValue('/allowedMachine-hazelcast-min', '')
-  setDiscriminatorValue('/allowedMachine-hazelcast-max', '')
+  setDiscriminatorValue('/allowedMachine-min', '')
+  setDiscriminatorValue('/allowedMachine-max', '')
   let showStoragememory = false
 
   function initScheduleBackupForEdit() {
@@ -709,7 +709,8 @@ export const useFunc = (model) => {
   }
   function initMetadata() {
     const dbName =
-      getValue(model, '/resources/autoscalingKubedbComHazelcastAutoscaler/spec/databaseRef/name') || ''
+      getValue(model, '/resources/autoscalingKubedbComHazelcastAutoscaler/spec/databaseRef/name') ||
+      ''
     const type = getValue(discriminator, '/autoscalingType') || ''
     const date = Math.floor(Date.now() / 1000)
     const resource = storeGet('/route/params/resource')
@@ -724,14 +725,21 @@ export const useFunc = (model) => {
 
     // delete the other type object from vuex wizard model
     if (type === 'compute')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComHazelcastAutoscaler/spec/storage')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComHazelcastAutoscaler/spec/storage',
+      )
     if (type === 'storage')
-      commit('wizard/model$delete', '/resources/autoscalingKubedbComHazelcastAutoscaler/spec/compute')
+      commit(
+        'wizard/model$delete',
+        '/resources/autoscalingKubedbComHazelcastAutoscaler/spec/compute',
+      )
   }
 
   async function fetchTopologyMachines() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComHazelcastAutoscaler/metadata/annotations') || {}
+      getValue(model, '/resources/autoscalingKubedbComHazelcastAutoscaler/metadata/annotations') ||
+      {}
     instance = annotations['kubernetes.io/instance-type']
     const user = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -768,7 +776,8 @@ export const useFunc = (model) => {
 
   function hasAnnotations() {
     const annotations =
-      getValue(model, '/resources/autoscalingKubedbComHazelcastAutoscaler/metadata/annotations') || {}
+      getValue(model, '/resources/autoscalingKubedbComHazelcastAutoscaler/metadata/annotations') ||
+      {}
     const instance = annotations['kubernetes.io/instance-type']
 
     return !!instance
@@ -925,8 +934,10 @@ export const useFunc = (model) => {
     // watchDependency('model#/resources/autoscalingKubedbComHazelcastAutoscaler/spec/databaseRef/name')
     // watchDependency('discriminator#/autoscalingType')
     return (
-      !!getValue(model, '/resources/autoscalingKubedbComHazelcastAutoscaler/spec/databaseRef/name') &&
-      !!getValue(discriminator, '/autoscalingType')
+      !!getValue(
+        model,
+        '/resources/autoscalingKubedbComHazelcastAutoscaler/spec/databaseRef/name',
+      ) && !!getValue(discriminator, '/autoscalingType')
     )
   }
 
@@ -1037,7 +1048,10 @@ export const useFunc = (model) => {
         force: true,
       })
     } else {
-      commit('wizard/model$delete', '/resources/kubedbComHazelcast/spec/monitor/prometheus/exporter')
+      commit(
+        'wizard/model$delete',
+        '/resources/kubedbComHazelcast/spec/monitor/prometheus/exporter',
+      )
     }
   }
 
@@ -1435,7 +1449,10 @@ export const useFunc = (model) => {
   }
 
   function initEnvArray() {
-    const env = getValue(model, '/resources/kubedbComHazelcast/spec/monitor/prometheus/exporter/env')
+    const env = getValue(
+      model,
+      '/resources/kubedbComHazelcast/spec/monitor/prometheus/exporter/env',
+    )
 
     return env || []
   }
