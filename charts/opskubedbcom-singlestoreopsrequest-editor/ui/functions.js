@@ -1377,13 +1377,23 @@ export const useFunc = (model) => {
   }
 
   function isReplicasValid(type) {
-    const currentReplicas = getValue(discriminator, `/dbDetails/spec/topology/${type}/replicas`)
     const newReplicas = getValue(model, `/spec/horizontalScaling/${type}`)
+    if (!newReplicas) return
+    if (newReplicas < 1) return 'Replica count must be at least 1.'
 
-    if (currentReplicas === newReplicas) {
-      return 'New replica count must be different from the current replica count.'
+    const replicaTypes = ['aggregator', 'leaf']
+
+    for (let i = 0; i < replicaTypes.length; i++) {
+      const current = getValue(
+        discriminator,
+        `/dbDetails/spec/topology/${replicaTypes[i]}/replicas`,
+      )
+      const updated = getValue(model, `/spec/horizontalScaling/${replicaTypes[i]}`)
+
+      if (updated && current !== updated) return false
     }
-    return false
+
+    return 'New replica count must be different from the current replica count.'
   }
 
   function isMachineValid() {

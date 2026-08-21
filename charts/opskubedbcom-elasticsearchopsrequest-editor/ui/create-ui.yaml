@@ -155,7 +155,11 @@ step:
             type: input-compare
             validation:
               name: isReplicasValid|master
-              type: custom|required
+              type: custom
+              watchPaths:
+              - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/data
+              - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/ingest
+              - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/master
           - hasIcon: true
             label: Master nodes are responsible for cluster management operations.
               It's recommended to have an odd number of master nodes (e.g., 3, 5)
@@ -178,7 +182,11 @@ step:
             type: input-compare
             validation:
               name: isReplicasValid|data
-              type: custom|required
+              type: custom
+              watchPaths:
+              - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/data
+              - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/ingest
+              - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/master
           - hasIcon: true
             label: Data nodes store the actual documents and handle data-related operations
               like search and aggregation. More data nodes provide better storage
@@ -201,7 +209,11 @@ step:
             type: input-compare
             validation:
               name: isReplicasValid|ingest
-              type: custom|required
+              type: custom
+              watchPaths:
+              - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/data
+              - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/ingest
+              - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/master
           - hasIcon: true
             label: Ingest nodes pre-process documents before they are indexed. They
               can apply transformations and enrichments to your data pipeline.

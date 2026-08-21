@@ -1376,16 +1376,24 @@ export const useFunc = (model) => {
       querynode: 'querynode',
       streamingnode: 'streamingnode',
     }
-    const currentReplicas = getValue(
-      discriminator,
-      `/dbDetails/spec/topology/distributed/${dbTypeMap[type]}/replicas`,
-    )
-    const newReplicas = getValue(model, `/spec/horizontalScaling/topology/${type}`)
 
-    if (currentReplicas === newReplicas) {
-      return 'New replica count must be different from the current replica count.'
+    const newReplicas = getValue(model, `/spec/horizontalScaling/topology/${type}`)
+    if (!newReplicas) return
+    if (newReplicas < 1) return 'Replica count must be at least 1.'
+
+    const replicaTypes = Object.keys(dbTypeMap)
+
+    for (let i = 0; i < replicaTypes.length; i++) {
+      const current = getValue(
+        discriminator,
+        `/dbDetails/spec/topology/distributed/${dbTypeMap[replicaTypes[i]]}/replicas`,
+      )
+      const updated = getValue(model, `/spec/horizontalScaling/topology/${replicaTypes[i]}`)
+
+      if (updated && current !== updated) return false
     }
-    return false
+
+    return 'New replica count must be different from the current replica count.'
   }
 
   function isMachineValid(type) {

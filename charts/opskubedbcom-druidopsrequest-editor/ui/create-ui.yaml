@@ -104,6 +104,19 @@ step:
     showLabels: true
     type: block-layout
   - elements:
+    - type: label-element
+      subtitle: Define the total number of replicas for the database. Increasing
+        replicas improves fault tolerance and load distribution, while reducing
+        replicas conserves resources
+      label: ''
+    - customClass: mt-8
+      hasIcon: true
+      subtitle: Define the total number of replicas for the database. Increasing
+        replicas improves fault tolerance and load distribution, while reducing
+        replicas conserves resources
+      label: Each replica represents an independent copy of your database. For example,
+        setting this to 3 creates three copies of the database for better availability.
+      type: info
     - elements:
       - header: Brokers
         init:
@@ -111,44 +124,41 @@ step:
           value: setValueFromDbDetails|/spec/topology/brokers/replicas
         label: Replicas
         schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/brokers
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution, while reducing
-          replicas conserves resources
         type: input-compare
         validation:
           name: isReplicasValid|brokers
-          type: custom|required
-      - customClass: mt-8
-        hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|brokers|topology|horizontalScaling
-        type: function
-      type: horizontal-layout
-    - elements:
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/brokers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/coordinators
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/historicals
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
+        if:
+          name: ifDbTypeEqualsTo|brokers|topology|horizontalScaling
+          type: function
       - header: Coordinators
+        customClass: ml-30
         init:
           type: func
           value: setValueFromDbDetails|/spec/topology/coordinators/replicas
         label: Replicas
         schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/coordinators
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution, while reducing
-          replicas conserves resources
         type: input-compare
         validation:
           name: isReplicasValid|coordinators
-          type: custom|required
-      - customClass: mt-8
-        hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|coordinators|topology|horizontalScaling
-        type: function
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/brokers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/coordinators
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/historicals
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
+        if:
+          name: ifDbTypeEqualsTo|coordinators|topology|horizontalScaling
+          type: function
       type: horizontal-layout
     - elements:
       - header: Historicals
@@ -157,67 +167,41 @@ step:
           value: setValueFromDbDetails|/spec/topology/historicals/replicas
         label: Replicas
         schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/historicals
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution, while reducing
-          replicas conserves resources
         type: input-compare
         validation:
           name: isReplicasValid|historicals
-          type: custom|required
-      - customClass: mt-8
-        hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|historicals|topology|horizontalScaling
-        type: function
-      type: horizontal-layout
-    - elements:
-      - header: Middle Managers
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/brokers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/coordinators
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/historicals
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
+        if:
+          name: ifDbTypeEqualsTo|historicals|topology|horizontalScaling
+          type: function
+      - customClass: ml-30
+        header: Middle Managers
         init:
           type: func
           value: setValueFromDbDetails|/spec/topology/middleManagers/replicas
         label: Replicas
         schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution, while reducing
-          replicas conserves resources
         type: input-compare
         validation:
           name: isReplicasValid|middleManagers
-          type: custom|required
-      - customClass: mt-8
-        hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|middleManagers|topology|horizontalScaling
-        type: function
-      type: horizontal-layout
-    - elements:
-      - header: Overlords
-        init:
-          type: func
-          value: setValueFromDbDetails|/spec/topology/overlords/replicas
-        label: Replicas
-        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution, while reducing
-          replicas conserves resources
-        type: input-compare
-        validation:
-          name: isReplicasValid|overlords
-          type: custom|required
-      - customClass: mt-8
-        hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|overlords|topology|horizontalScaling
-        type: function
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/brokers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/coordinators
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/historicals
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
+        if:
+          name: ifDbTypeEqualsTo|middleManagers|topology|horizontalScaling
+          type: function
       type: horizontal-layout
     - elements:
       - header: Routers
@@ -226,21 +210,33 @@ step:
           value: setValueFromDbDetails|/spec/topology/routers/replicas
         label: Replicas
         schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
-        subtitle: Define the total number of replicas for the database. Increasing
-          replicas improves fault tolerance and load distribution, while reducing
-          replicas conserves resources
         type: input-compare
         validation:
           name: isReplicasValid|routers
+          type: custom
+          watchPaths:
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/brokers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/coordinators
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/historicals
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
+          - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
+        if:
+          name: ifDbTypeEqualsTo|routers|topology|horizontalScaling
+          type: function
+      - header: Overlords
+        init:
+          type: func
+          value: setValueFromDbDetails|/spec/topology/overlords/replicas
+        label: Replicas
+        schema: schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
+        type: input-compare
+        validation:
+          name: isReplicasValid|overlords
           type: custom|required
-      - customClass: mt-8
-        hasIcon: true
-        label: Each replica represents an independent copy of your database. For example,
-          setting this to 3 creates three copies of the database for better availability.
-        type: info
-      if:
-        name: ifDbTypeEqualsTo|routers|topology|horizontalScaling
-        type: function
+        if:
+          name: ifDbTypeEqualsTo|overlords|topology|horizontalScaling
+          type: function
       type: horizontal-layout
     fixedBlock: true
     if:

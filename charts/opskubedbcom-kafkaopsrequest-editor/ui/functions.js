@@ -1421,18 +1421,33 @@ export const useFunc = (model) => {
   }
 
   function isReplicasValid(type) {
-    const dbPath = type ? `/spec/topology/${type}/replicas` : '/spec/replicas'
-    const modelPath = type
-      ? `/spec/horizontalScaling/topology/${type}`
-      : '/spec/horizontalScaling/node'
+    if (!type) {
+      const currentReplicas = getValue(discriminator, '/dbDetails/spec/replicas')
+      const newReplicas = getValue(model, '/spec/horizontalScaling/node')
 
-    const currentReplicas = getValue(discriminator, `/dbDetails${dbPath}`)
-    const newReplicas = getValue(model, modelPath)
-
-    if (currentReplicas === newReplicas) {
-      return 'New replica count must be different from the current replica count.'
+      if (currentReplicas === newReplicas) {
+        return 'New replica count must be different from the current replica count.'
+      }
+      return false
     }
-    return false
+
+    const newReplicas = getValue(model, `/spec/horizontalScaling/topology/${type}`)
+    if (!newReplicas) return
+    if (newReplicas < 1) return 'Replica count must be at least 1.'
+
+    const replicaTypes = ['broker', 'controller']
+
+    for (let i = 0; i < replicaTypes.length; i++) {
+      const current = getValue(
+        discriminator,
+        `/dbDetails/spec/topology/${replicaTypes[i]}/replicas`,
+      )
+      const updated = getValue(model, `/spec/horizontalScaling/topology/${replicaTypes[i]}`)
+
+      if (updated && current !== updated) return false
+    }
+
+    return 'New replica count must be different from the current replica count.'
   }
 
   function isMachineValid(type) {
