@@ -532,6 +532,43 @@ export const useFunc = (model) => {
     return enabledTypes
   }
 
+  async function getVersions(dbname) {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/${dbname}versions`
+
+    const queryParams = {
+      filter: {
+        items: {
+          metadata: { name: null },
+          spec: { version: null, deprecated: null },
+        },
+      },
+    }
+
+    try {
+      const resp = await axios.get(url, { params: queryParams })
+      const resources = (resp && resp.data && resp.data.items) || []
+
+      // keep only non deprecated versions
+      return resources
+        .filter((item) => item.spec && !item.spec.deprecated)
+        .map((item) => {
+          const name = (item.metadata && item.metadata.name) || ''
+          const specVersion = (item.spec && item.spec.version) || ''
+          return { text: `${name} (${specVersion})`, value: name }
+        })
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
+  function isDbSelected(dbname) {
+    const enabledTypes = getValue(discriminator, '/enabledTypes') || []
+    return enabledTypes.includes(dbname)
+  }
+
   return {
     hideThisElement,
     checkIsResourceLoaded,
@@ -550,5 +587,7 @@ export const useFunc = (model) => {
     returnFalse,
     getEnabledTypes,
     databaseLoader,
+    getVersions,
+    isDbSelected,
   }
 }
