@@ -12,6 +12,12 @@ step:
       func: onEnabledFeaturesChange
       paths:
       - temp/properties/enabledFeatures
+  - label: 'Note: Enabling a feature auto enables any prerequisite features'
+    type: info
+    watcher:
+      func: checkIsResourceLoaded
+      paths:
+      - temp/properties/isResourceLoaded
   - customClass: mt-16
     if:
       name: isKubedbSelected
@@ -28,12 +34,246 @@ step:
       func: onTypeUpdate
       paths:
       - temp/properties/enabledTypes
-  - label: 'Note: Enabling a feature auto enables any prerequisite features'
-    type: info
-    watcher:
-      func: checkIsResourceLoaded
-      paths:
-      - temp/properties/isResourceLoaded
+  - if:
+      name: isDbSelected|Cassandra
+      type: function
+    label: Cassandra Versions
+    loader: getVersions|cassandra
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Cassandra
+    type: select
+  - if:
+      name: isDbSelected|ClickHouse
+      type: function
+    label: ClickHouse Versions
+    loader: getVersions|clickhouse
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/ClickHouse
+    type: select
+  - if:
+      name: isDbSelected|DB2
+      type: function
+    label: DB2 Versions
+    loader: getVersions|db2
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/DB2
+    type: select
+  - if:
+      name: isDbSelected|DocumentDB
+      type: function
+    label: DocumentDB Versions
+    loader: getVersions|documentdb
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/DocumentDB
+    type: select
+  - if:
+      name: isDbSelected|Druid
+      type: function
+    label: Druid Versions
+    loader: getVersions|druid
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Druid
+    type: select
+  - if:
+      name: isDbSelected|Elasticsearch
+      type: function
+    label: Elasticsearch Versions
+    loader: getVersions|elasticsearch
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Elasticsearch
+    type: select
+  - if:
+      name: isDbSelected|HanaDB
+      type: function
+    label: HanaDB Versions
+    loader: getVersions|hanadb
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/HanaDB
+    type: select
+  - if:
+      name: isDbSelected|Hazelcast
+      type: function
+    label: Hazelcast Versions
+    loader: getVersions|hazelcast
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Hazelcast
+    type: select
+  - if:
+      name: isDbSelected|Ignite
+      type: function
+    label: Ignite Versions
+    loader: getVersions|ignite
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Ignite
+    type: select
+  - if:
+      name: isDbSelected|Kafka
+      type: function
+    label: Kafka Versions
+    loader: getVersions|kafka
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Kafka
+    type: select
+  - if:
+      name: isDbSelected|MariaDB
+      type: function
+    label: MariaDB Versions
+    loader: getVersions|mariadb
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/MariaDB
+    type: select
+  - if:
+      name: isDbSelected|Memcached
+      type: function
+    label: Memcached Versions
+    loader: getVersions|memcached
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Memcached
+    type: select
+  - if:
+      name: isDbSelected|Milvus
+      type: function
+    label: Milvus Versions
+    loader: getVersions|milvus
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Milvus
+    type: select
+  - if:
+      name: isDbSelected|MSSQLServer
+      type: function
+    label: MSSQLServer Versions
+    loader: getVersions|mssqlserver
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/MSSQLServer
+    type: select
+  - if:
+      name: isDbSelected|MongoDB
+      type: function
+    label: MongoDB Versions
+    loader: getVersions|mongodb
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/MongoDB
+    type: select
+  - if:
+      name: isDbSelected|MySQL
+      type: function
+    label: MySQL Versions
+    loader: getVersions|mysql
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/MySQL
+    type: select
+  - if:
+      name: isDbSelected|Neo4j
+      type: function
+    label: Neo4j Versions
+    loader: getVersions|neo4j
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Neo4j
+    type: select
+  - if:
+      name: isDbSelected|Oracle
+      type: function
+    label: Oracle Versions
+    loader: getVersions|oracle
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Oracle
+    type: select
+  - if:
+      name: isDbSelected|PerconaXtraDB
+      type: function
+    label: PerconaXtraDB Versions
+    loader: getVersions|perconaxtradb
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/PerconaXtraDB
+    type: select
+  - if:
+      name: isDbSelected|PgBouncer
+      type: function
+    label: PgBouncer Versions
+    loader: getVersions|pgbouncer
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/PgBouncer
+    type: select
+  - if:
+      name: isDbSelected|Pgpool
+      type: function
+    label: Pgpool Versions
+    loader: getVersions|pgpool
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Pgpool
+    type: select
+  - if:
+      name: isDbSelected|Postgres
+      type: function
+    label: Postgres Versions
+    loader: getVersions|postgres
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Postgres
+    type: select
+  - if:
+      name: isDbSelected|ProxySQL
+      type: function
+    label: ProxySQL Versions
+    loader: getVersions|proxysql
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/ProxySQL
+    type: select
+  - if:
+      name: isDbSelected|Qdrant
+      type: function
+    label: Qdrant Versions
+    loader: getVersions|qdrant
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Qdrant
+    type: select
+  - if:
+      name: isDbSelected|RabbitMQ
+      type: function
+    label: RabbitMQ Versions
+    loader: getVersions|rabbitmq
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/RabbitMQ
+    type: select
+  - if:
+      name: isDbSelected|Redis
+      type: function
+    label: Redis Versions
+    loader: getVersions|redis
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Redis
+    type: select
+  - if:
+      name: isDbSelected|Singlestore
+      type: function
+    label: Singlestore Versions
+    loader: getVersions|singlestore
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Singlestore
+    type: select
+  - if:
+      name: isDbSelected|Solr
+      type: function
+    label: Solr Versions
+    loader: getVersions|solr
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Solr
+    type: select
+  - if:
+      name: isDbSelected|Weaviate
+      type: function
+    label: Weaviate Versions
+    loader: getVersions|weaviate
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/Weaviate
+    type: select
+  - if:
+      name: isDbSelected|ZooKeeper
+      type: function
+    label: ZooKeeper Versions
+    loader: getVersions|zookeeper
+    multiple: true
+    schema: schema/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubedb/properties/spec/properties/values/properties/kubedb-catalog/properties/ZooKeeper
+    type: select
   id: opscenter-datastore
   loader: setReleaseNameAndNamespaceAndInitializeValues
   type: single-step-form
