@@ -10,7 +10,7 @@ export const useFunc = (model) => {
   )
 
   // the sidebar writes the active page here, keep the first page selected on load
-  setDiscriminatorValue('/telemetryPage', 'metrics-thanos-compact')
+  setDiscriminatorValue('/telemetryPage', 'basic-info')
 
   function isActivePage(page) {
     return getValue(discriminator, '/telemetryPage') === page
