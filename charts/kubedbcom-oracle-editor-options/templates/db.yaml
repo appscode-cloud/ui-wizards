@@ -178,13 +178,13 @@ spec:
   configuration:
     secretName: {{ include "kubedbcom-oracle-editor-options.fullname" . }}-config
 {{- end }}
-{{- if .Values.spec.admin.tls.default }}
+{{- if and .Values.spec.admin.tls.default .Values.spec.admin.clusterIssuers.default }}
   tcpsConfig:
     tls:
       issuerRef:
         apiGroup: "cert-manager.io"
         kind: ClusterIssuer
-        name: {{ .Values.spec.admin.clusterIssuers.default }}
+        name: {{ .Values.spec.admin.clusterIssuers.default | quote }}
     tcpsListener:
       port: 2484
 {{- end }}
