@@ -89,6 +89,109 @@ export const useFunc = (model) => {
     })
   }
 
+  // ---------------------------------------------------------------------------
+  // Validation. Ported from cluster-ui master's CreateTelemetryStackView.vue so
+  // the wizard rejects exactly what the master form rejects. Each validator
+  // returns an error message, or false when the value is acceptable.
+  // ---------------------------------------------------------------------------
+
+  const DURATION_RE = /^([1-9]\d*y)?([1-9]\d*w)?([1-9]\d*d)?([1-9]\d*h)?([1-9]\d*m)?([1-9]\d*s)?$/
+  const STORAGE_RE = /^\d+(Ki|Mi|Gi|Ti|Pi|Ei|k|m|g|t|p|e|K|M|G|T|P|E)?$/
+
+  function validateRetention(value) {
+    if (!value) return false
+    return DURATION_RE.test(value) ? false : 'e.g. 10d, 1h30m, 2d12h'
+  }
+
+  function validateStorageSize(value) {
+    if (!value) return false
+    return STORAGE_RE.test(value) ? false : 'e.g. 1Gi, 512Mi, 1Ki'
+  }
+
+  function validateReplicationFactor(value) {
+    if (!value) return false
+    return [1, 3, 5].includes(Number(value)) ? false : 'Must be 1, 3, or 5'
+  }
+
+  function durationToSeconds(value) {
+    const units = { y: 365 * 24 * 3600, w: 7 * 24 * 3600, d: 24 * 3600, h: 3600, m: 60, s: 1 }
+    let seconds = 0
+    let match
+    const regex = /([1-9]\d*)(y|w|d|h|m|s)/g
+    while ((match = regex.exec(value || '')) !== null) {
+      seconds += parseInt(match[1], 10) * units[match[2]]
+    }
+    return seconds
+  }
+
+  function validateRawRetention(value) {
+    const format = validateRetention(value)
+    if (format || !value) return format
+    return durationToSeconds(value) < 40 * 3600 ? 'Must be at least 40h' : false
+  }
+
+  function validateFiveMinutesRetention(value) {
+    const format = validateRetention(value)
+    if (format || !value) return format
+    return durationToSeconds(value) < 10 * 24 * 3600 ? 'Must be at least 10d' : false
+  }
+
+  // A custom validator on a field never sees its own row index, so the rules that
+  // compare two columns of the same row live on the array element, which is handed
+  // the whole list.
+  function validateRetentionConfig(rows) {
+    const list = Array.isArray(rows) ? rows : []
+    for (let i = 0; i < list.length; i++) {
+      const row = list[i] || {}
+      const at = list.length > 1 ? ` in row ${i + 1}` : ''
+
+      const raw = validateRawRetention(row.raw)
+      if (raw) return `Raw retention${at}: ${raw}`
+
+      const five = validateFiveMinutesRetention(row.fiveMinutes)
+      if (five) return `5m retention${at}: ${five}`
+
+      const hour = validateRetention(row.oneHour)
+      if (hour) return `1h retention${at}: ${hour}`
+
+      if (row.oneHour && row.fiveMinutes && !validateRetention(row.fiveMinutes)) {
+        if (durationToSeconds(row.oneHour) <= durationToSeconds(row.fiveMinutes)) {
+          return `1h retention${at} must be greater than 5m retention`
+        }
+      }
+    }
+    return false
+  }
+
+  // master: a certificate ref needs both halves or neither.
+  function validateClientCaCertificates(rows) {
+    const list = Array.isArray(rows) ? rows : []
+    for (let i = 0; i < list.length; i++) {
+      const { name, key } = list[i] || {}
+      const at = list.length > 1 ? ` in row ${i + 1}` : ''
+      if (key && !name) return `Secret name is required${at}`
+      if (name && !key) return `Key is required${at}`
+    }
+    return false
+  }
+
+  // master: once a volume type is picked, the whole row has to be filled in.
+  function validateAdditionalVolumes(rows) {
+    const list = Array.isArray(rows) ? rows : []
+    for (let i = 0; i < list.length; i++) {
+      const row = list[i] || {}
+      if (!row.volumeType) continue
+      const at = list.length > 1 ? ` in row ${i + 1}` : ''
+      const source = row.volumeType === 'ConfigMap' ? 'ConfigMap name' : 'Secret name'
+
+      if (!String(row.name || '').trim()) return `Name is required${at}`
+      if (!String(row.secretName || '').trim()) return `${source} is required${at}`
+      if (!String(row.key || '').trim()) return `Key is required${at}`
+      if (!String(row.path || '').trim()) return `Path is required${at}`
+    }
+    return false
+  }
+
   async function getStorageClasses() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -108,6 +211,14 @@ export const useFunc = (model) => {
 
   return {
     getStorageClasses,
+    validateAdditionalVolumes,
+    validateClientCaCertificates,
+    validateFiveMinutesRetention,
+    validateRawRetention,
+    validateReplicationFactor,
+    validateRetention,
+    validateRetentionConfig,
+    validateStorageSize,
     isActivePage,
     isClusterTopology,
     isPillarEnabled,

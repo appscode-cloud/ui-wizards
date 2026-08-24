@@ -6,9 +6,13 @@ step:
         - label: Name
           schema: schema/properties/metadata/properties/release/properties/name
           type: input
+          validation:
+            type: required
         - label: Namespace
           schema: schema/properties/metadata/properties/release/properties/namespace
           type: input
+          validation:
+            type: required
         type: horizontal-layout
       if:
         name: isActivePage|basic-info
@@ -21,20 +25,35 @@ step:
         - label: Storage Size
           schema: schema/properties/spec/properties/metrics/properties/thanos/properties/compact/properties/storageSize
           type: input
+          validation:
+            name: validateStorageSize
+            type: custom
         type: horizontal-layout
       - elements:
         - label: Raw Retention
           schema: raw
           type: input
+          validation:
+            name: validateRawRetention
+            type: custom
         - label: 5m Retention
           schema: fiveMinutes
           type: input
+          validation:
+            name: validateFiveMinutesRetention
+            type: custom
         - label: 1h Retention
           schema: oneHour
           type: input
+          validation:
+            name: validateRetention
+            type: custom
         label: Retention Config
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/compact/properties/retentionConfig
         type: array-object-form
+        validation:
+          name: validateRetentionConfig
+          type: custom
       if:
         name: isActivePage|metrics-thanos-compact
         type: function
@@ -46,9 +65,15 @@ step:
         - label: Storage Size
           schema: schema/properties/spec/properties/metrics/properties/thanos/properties/store/properties/storageSize
           type: input
+          validation:
+            name: validateStorageSize
+            type: custom
         - label: Ignore Deletion Marks Delay
           schema: schema/properties/spec/properties/metrics/properties/thanos/properties/store/properties/ignoreDeletionMarksDelay
           type: input
+          validation:
+            name: validateRetention
+            type: custom
         type: horizontal-layout
       - elements:
         - elements:
@@ -97,9 +122,15 @@ step:
           - label: Storage Size
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/storageSize
             type: input
+            validation:
+              name: validateStorageSize
+              type: custom
           - label: TSDB Retention
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tsdbRetention
             type: input
+            validation:
+              name: validateRetention
+              type: custom
           type: horizontal-layout
         - elements:
           - elements:
@@ -132,6 +163,9 @@ step:
           - label: Replication Factor
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/routerSpec/properties/replicationFactor
             type: input
+            validation:
+              name: validateReplicationFactor
+              type: custom
           type: horizontal-layout
         - buttonClass: is-light is-outlined
           label: External Labels
@@ -154,6 +188,9 @@ step:
         - label: Storage Size
           schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/storageSize
           type: input
+          validation:
+            name: validateStorageSize
+            type: custom
         type: horizontal-layout
       - label: Alertmanager URL
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/alertmanagerURL
@@ -212,6 +249,9 @@ step:
         label: Additional Volumes
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes
         type: array-object-form
+        validation:
+          name: validateAdditionalVolumes
+          type: custom
       - elements:
         - disable: true
           label: Name
@@ -281,6 +321,9 @@ step:
           - label: Storage Size
             schema: schema/properties/spec/properties/logs/properties/storage/properties/size
             type: input
+            validation:
+              name: validateStorageSize
+              type: custom
           type: horizontal-layout
         if:
           name: isPillarEnabled|logs
@@ -346,14 +389,24 @@ step:
             - label: Replicas
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/cluster/properties/replicas
               type: input
+              validation:
+                name: validateReplicationFactor
+                type: custom
             type: horizontal-layout
           - elements:
             - label: Shards
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/cluster/properties/shards
               type: input
+            - label: Storage Class
+              loader: getStorageClasses
+              schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/cluster/properties/persistence/properties/storageClassName
+              type: select
             - label: Storage Size
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/cluster/properties/persistence/properties/size
               type: input
+              validation:
+                name: validateStorageSize
+                type: custom
             type: horizontal-layout
           label: Cluster
           showLabels: true
@@ -366,9 +419,19 @@ step:
             - label: Replicas
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/clickHouseKeeper/properties/replicas
               type: input
+              validation:
+                name: validateReplicationFactor
+                type: custom
+            - label: Storage Class
+              loader: getStorageClasses
+              schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/clickHouseKeeper/properties/persistence/properties/storageClassName
+              type: select
             - label: Storage Size
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/clickHouseKeeper/properties/persistence/properties/size
               type: input
+              validation:
+                name: validateStorageSize
+                type: custom
             type: horizontal-layout
           label: ClickHouse Keeper
           showLabels: true
@@ -390,6 +453,9 @@ step:
           label: Certificates
           schema: schema/properties/spec/properties/logs/properties/clientCaCertificates
           type: array-object-form
+          validation:
+            name: validateClientCaCertificates
+            type: custom
         hideBlock: true
         if:
           name: isPillarEnabled|logs
