@@ -941,11 +941,13 @@ export const useFunc = (model) => {
     return mappedSecrets
   }
 
-  async function getConfigSecretsforAppyConfig() {
-    const secrets = secretConfigData.map((item) => {
-      return { text: item.componentName, value: item.componentName }
-    })
-    return secrets
+  function getConfigSecretsforAppyConfig(type) {
+    return secretConfigData.reduce((secrets, item) => {
+      if (item.componentName === type) {
+        secrets.push({ text: item.componentName, value: item.componentName })
+      }
+      return secrets
+    }, [])
   }
 
   async function createNewConfigSecret(type) {

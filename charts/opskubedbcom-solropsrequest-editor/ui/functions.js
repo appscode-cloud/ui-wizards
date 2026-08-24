@@ -1143,14 +1143,13 @@ export const useFunc = (model) => {
     }
   }
 
-  function onSelectedSecretChange(type, index) {
-    type = type ? type + '/' : ''
-    const secretData = getValue(discriminator, `${type}createSecret/data`) || []
+  function onSelectedSecretChange(index) {
+    const secretData = getValue(discriminator, 'createSecret/data') || []
     const selfSecrets = secretData.map((item) => item.key)
 
     const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
 
-    const selfKey = getValue(discriminator, `${type}createSecret/data/${index}/key`)
+    const selfKey = getValue(discriminator, `createSecret/data/${index}/key`)
     if (selfKey) {
       remainingSecrets.push(selfKey)
     }
