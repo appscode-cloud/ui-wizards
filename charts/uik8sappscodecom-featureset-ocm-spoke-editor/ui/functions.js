@@ -338,14 +338,12 @@ export const useFunc = (model) => {
     const resp = await axios.get(`/clustersv2/${owner}/hub-info`)
 
     hubData = [{ name: 'yo', apiServer: 'https://api-server-url', token: 'token-value' }]
-    console.log(hubData)
 
     return hubData.map((item) => item.name)
   }
 
   function onHubChange() {
     const hubName = getValue(discriminator, '/hubName')
-    console.log(hubName)
 
     hubData.forEach((item) => {
       if (item.name === hubName) {

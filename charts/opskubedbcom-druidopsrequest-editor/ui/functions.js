@@ -1617,7 +1617,6 @@ export const useFunc = (model) => {
       }
       let tempCur = getValue(discriminator, `/dbDetails/spec/topology/${replicaTypes[i]}/replicas`)
       let tempNew = getValue(model, `/spec/horizontalScaling/topology/${replicaTypes[i]}`)
-      console.log(replicaTypes[i], tempCur, tempNew)
 
       if (tempNew && tempCur !== tempNew) {
         return false
