@@ -768,7 +768,11 @@ export const useFunc = (model) => {
     let obj = {}
     if (selectedMachine.machine !== 'custom') {
       if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
-      else obj = machines[selectedMachine.machine]?.resources
+      else
+        obj = {
+          requests: { ...machines[selectedMachine.machine]?.resources?.requests },
+          limits: { ...machines[selectedMachine.machine]?.resources?.limits },
+        }
     } else {
       const cpu = selectedMachine.cpu || ''
       const memory = selectedMachine.memory || ''
@@ -783,7 +787,7 @@ export const useFunc = (model) => {
     if (obj && Object.keys(obj).length) {
       commit('wizard/model$update', {
         path: path,
-        value: obj,
+        value: { ...obj },
       })
     } else {
       commit('wizard/model$delete', `/spec/verticalScaling/${type}`)
@@ -1423,7 +1427,7 @@ export const useFunc = (model) => {
       const topologyLimits =
         dbDetails?.spec?.topology?.[type]?.podTemplate?.spec?.containers?.[0]?.resources
           ?.requests || {}
-      limits = topologyLimits
+      if (topologyLimits) return topologyLimits
     }
     if (containers.length === 0)
       limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
