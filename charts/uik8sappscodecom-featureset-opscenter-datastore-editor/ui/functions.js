@@ -20,7 +20,6 @@ export const useFunc = (model) => {
 
   function showForm(param) {
     const queryParam = storeGet('/route/query/mode') || ''
-    console.log('showForm', param, queryParam)
     return queryParam === param
   }
 
@@ -539,13 +538,24 @@ export const useFunc = (model) => {
   }
 
   async function setVersions(dbname) {
-    return versions[dbname] || []
+    const lowerCaseDbName = dbname.toLowerCase()
+    const initValues =
+      getValue(
+        model,
+        `resources/helmToolkitFluxcdIoHelmRelease_kubedb/spec/values/kubedb-catalog/enableVersions/${dbname}`,
+      ) || []
+
+    return initValues.length ? initValues : versions[lowerCaseDbName] || []
   }
   let versions = {}
   async function getVersions(dbname) {
+    const lowerCaseDbName = dbname.toLowerCase()
+    if (versions[lowerCaseDbName]) {
+      return versions[lowerCaseDbName]
+    }
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/${dbname}versions`
+    const url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/${lowerCaseDbName}versions`
 
     const queryParams = {
       filter: {
@@ -568,7 +578,7 @@ export const useFunc = (model) => {
           const specVersion = (item.spec && item.spec.version) || ''
           return { text: `${name} (${specVersion})`, value: name }
         })
-      versions[dbname] = filteredResources
+      versions[lowerCaseDbName] = filteredResources
       return filteredResources
     } catch (e) {
       console.log(e)
