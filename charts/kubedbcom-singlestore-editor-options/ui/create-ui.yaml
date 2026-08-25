@@ -228,14 +228,14 @@ step:
         loader: getAdminOptions|storageClasses
         schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
         type: select
-      - label: Storage Size
+      - if:
+          name: isEqualToModelPathValue|Standalone|/spec/mode
+          type: function
+        label: Storage Size
         schema: schema/properties/spec/properties/persistence/properties/size
         type: input
       showLabels: true
       type: horizontal-layout
-    if:
-      name: isEqualToModelPathValue|Standalone|/spec/mode
-      type: function
     type: block-layout
   - label: License Secret
     loader: getSecrets

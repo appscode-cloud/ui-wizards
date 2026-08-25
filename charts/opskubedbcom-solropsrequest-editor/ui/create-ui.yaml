@@ -639,7 +639,7 @@ step:
         name: getCurrentConfig
         watchPaths:
         - schema/properties/metadata/properties/namespace
-        - temp/properties/node/properties/createSecret/properties/status
+        - temp/properties/createSecret/properties/status
       readonly: true
       schema: temp/properties/currentConfig
       type: editor
@@ -658,24 +658,24 @@ step:
               value: setValueFromDbDetails|/spec/configSecret/name
             label: Config Secret
             loader:
-              name: getConfigSecrets|node
+              name: getConfigSecrets
               watchPaths:
               - schema/properties/metadata/properties/namespace
-              - temp/properties/node/properties/createSecret/properties/status
+              - temp/properties/createSecret/properties/status
             refresh: fetchConfigSecrets
             schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
             type: select
             watcher:
-              func: onCreateSecretChange|node
+              func: onCreateSecretChange
               paths:
-              - temp/properties/node/properties/createSecret/properties/status
+              - temp/properties/createSecret/properties/status
           - customClass: mt-15
             elements:
             - label: ""
               subtitle: Enter a <b>unique name</b> to identify this secret.
               type: label-element
             - label: Secret Name
-              schema: temp/properties/node/properties/createSecret/properties/name
+              schema: temp/properties/createSecret/properties/name
               type: input
               validation:
                 type: required
@@ -683,9 +683,9 @@ step:
               elements:
               - label: Key
                 loader:
-                  name: onSelectedSecretChange|node
+                  name: onSelectedSecretChange
                   watchPaths:
-                  - temp/properties/node/properties/createSecret/properties/data
+                  - temp/properties/createSecret/properties/data
                 schema: key
                 type: select
                 validation:
@@ -696,16 +696,16 @@ step:
                 type: textarea
               keepInitial: true
               label: String Data
-              schema: temp/properties/node/properties/createSecret/properties/data
+              schema: temp/properties/createSecret/properties/data
               type: array-object-form
               validation:
                 type: required
             hasButton:
-              action: createNewConfigSecret|node
-              hasCancel: cancelCreateSecret|node
+              action: createNewConfigSecret
+              hasCancel: cancelCreateSecret
               text: Save
             if:
-              name: isCreateSecret|node
+              name: isCreateSecret
               type: function
             label: Create a New Config Secret
             showLabels: true
@@ -713,14 +713,14 @@ step:
           - editorHeight: 500px
             hideFormatButton: true
             if:
-              name: isNotCreateSecret|node
+              name: isNotCreateSecret
               type: function
             loader:
-              name: onNewConfigSecretChange|node
+              name: onNewConfigSecretChange
               watchPaths:
               - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
             readonly: true
-            schema: temp/properties/node/newConfigSecret
+            schema: temp/properties/newConfigSecret
             type: multi-file-editor
             validateContent: false
           if:
@@ -739,22 +739,22 @@ step:
             label: Configuration
             loader: getConfigSecretsforAppyConfig
             refresh: fetchConfigSecrets
-            schema: temp/properties/node/selectedConfiguration
+            schema: temp/properties/selectedConfiguration
             type: select
           - editorHeight: 500px
             hideFormatButton: true
             loader:
-              name: setApplyConfig|node
+              name: setApplyConfig
               watchPaths:
-              - temp/properties/node/selectedConfiguration
+              - temp/properties/selectedConfiguration
             placeholder: Add config parameters...
-            schema: temp/properties/node/applyConfig
+            schema: temp/properties/applyConfig
             type: multi-file-editor
             validateContent: false
             watcher:
-              func: onApplyconfigChange|node
+              func: onApplyconfigChange
               paths:
-              - temp/properties/node/applyConfig
+              - temp/properties/applyConfig
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig
             type: function
@@ -773,12 +773,12 @@ step:
               watchPaths:
               - schema/properties/metadata/properties/namespace
             refresh: fetchConfigSecrets
-            schema: temp/properties/node/selectedConfigurationRemove
+            schema: temp/properties/selectedConfigurationRemove
             type: select
             watcher:
-              func: onRemoveConfigChange|node
+              func: onRemoveConfigChange
               paths:
-              - temp/properties/node/selectedConfigurationRemove
+              - temp/properties/selectedConfigurationRemove
           if:
             name: ifReconfigurationTypeEqualsTo|remove
             type: function
@@ -794,475 +794,7 @@ step:
           value: remove
         schema: temp/properties/reconfigurationType
         type: tab-layout
-      if:
-        name: ifDbTypeEqualsTo|Combined|configuration
-        type: function
-      label: Combined
-      type: block-layout
-    - elements:
-      - elements:
-        - elements:
-          - elements:
-            - customClass: mb-15
-              label: Config Secret
-              subtitle: Select an existing secret or create a new one to apply to
-                your database configuration.
-              type: label-element
-            - customClass: mb-2
-              init:
-                type: func
-                value: setValueFromDbDetails|/spec/topology/coordinator/configSecret/name
-              label: Config Secret
-              loader:
-                name: getConfigSecrets|coordinator
-                watchPaths:
-                - schema/properties/metadata/properties/namespace
-                - temp/properties/coordinator/properties/createSecret/properties/status
-              refresh: fetchConfigSecrets
-              schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-              type: select
-              watcher:
-                func: onCreateSecretChange|coordinator
-                paths:
-                - temp/properties/coordinator/properties/createSecret/properties/status
-            - customClass: mt-15
-              elements:
-              - label: ""
-                subtitle: Enter a <b>unique name</b> to identify this secret.
-                type: label-element
-              - label: Secret Name
-                schema: temp/properties/coordinator/properties/createSecret/properties/name
-                type: input
-                validation:
-                  type: required
-              - buttonClass: is-light is-outlined
-                elements:
-                - label: Key
-                  loader:
-                    name: onSelectedSecretChange|coordinator
-                    watchPaths:
-                    - temp/properties/coordinator/properties/createSecret/properties/data
-                  schema: key
-                  type: select
-                  validation:
-                    type: required
-                - height: 120px
-                  label: Value
-                  schema: value
-                  type: textarea
-                keepInitial: true
-                label: String Data
-                schema: temp/properties/coordinator/properties/createSecret/properties/data
-                type: array-object-form
-                validation:
-                  type: required
-              hasButton:
-                action: createNewConfigSecret|coordinator
-                hasCancel: cancelCreateSecret|coordinator
-                text: Save
-              if:
-                name: isCreateSecret|coordinator
-                type: function
-              label: Create a New Config Secret
-              showLabels: true
-              type: block-layout
-            - editorHeight: 500px
-              hideFormatButton: true
-              if:
-                name: isNotCreateSecret|coordinator
-                type: function
-              loader:
-                name: onNewConfigSecretChange|coordinator
-                watchPaths:
-                - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-              readonly: true
-              schema: temp/properties/coordinator/newConfigSecret
-              type: multi-file-editor
-              validateContent: false
-            if:
-              name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|coordinator|true
-              type: function
-            label: Config Secret
-            type: block-layout
-          - elements:
-            - customClass: mb-15
-              label: New Apply Config
-              subtitle: Define custom configurations for your database using key-value
-                pairs. These parameters will overwrite existing settings.<br>Enter
-                the parameter you want to configure (e.g., max_connections).
-              type: label-element
-            - customClass: mb-2
-              label: Configuration
-              loader: getConfigSecretsforAppyConfig
-              refresh: fetchConfigSecrets
-              schema: temp/properties/coordinator/selectedConfiguration
-              type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              loader:
-                name: setApplyConfig|coordinator
-                watchPaths:
-                - temp/properties/coordinator/selectedConfiguration
-              placeholder: Add config parameters...
-              schema: temp/properties/coordinator/applyConfig
-              type: multi-file-editor
-              validateContent: false
-              watcher:
-                func: onApplyconfigChange|coordinator
-                paths:
-                - temp/properties/coordinator/applyConfig
-            if:
-              name: ifReconfigurationTypeEqualsTo|applyConfig|coordinator|true
-              type: function
-            label: ApplyConfig
-            type: block-layout
-          - elements:
-            - customClass: mb-15
-              label: Remove
-              subtitle: Selected a configuration secret from the available list to
-                update your database settings
-              type: label-element
-            - customClass: mb-2
-              label: Configuration
-              loader:
-                name: getConfigSecretsforAppyConfig
-                watchPaths:
-                - schema/properties/metadata/properties/namespace
-              refresh: fetchConfigSecrets
-              schema: temp/properties/coordinator/selectedConfigurationRemove
-              type: select
-              watcher:
-                func: onRemoveConfigChange|coordinator
-                paths:
-                - temp/properties/coordinator/selectedConfigurationRemove
-            if:
-              name: ifReconfigurationTypeEqualsTo|remove|coordinator|true
-              type: function
-            label: Remove
-            type: block-layout
-          label: New Config Secret
-          options:
-          - text: NEW CONFIG SECRET
-            value: selectNewConfigSecret
-          - text: APPLY CONFIG
-            value: applyConfig
-          - text: REMOVE
-            value: remove
-          schema: temp/properties/reconfigurationType-coordinator
-          type: tab-layout
-        label: Coordinator
-        showLabels: true
-        type: block-layout
-      - elements:
-        - elements:
-          - elements:
-            - customClass: mb-15
-              label: Config Secret
-              subtitle: Select an existing secret or create a new one to apply to
-                your database configuration.
-              type: label-element
-            - customClass: mb-2
-              init:
-                type: func
-                value: setValueFromDbDetails|/spec/topology/data/configSecret/name
-              label: Config Secret
-              loader:
-                name: getConfigSecrets|data
-                watchPaths:
-                - schema/properties/metadata/properties/namespace
-                - temp/properties/data/properties/createSecret/properties/status
-              refresh: fetchConfigSecrets
-              schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-              type: select
-              watcher:
-                func: onCreateSecretChange|data
-                paths:
-                - temp/properties/data/properties/createSecret/properties/status
-            - customClass: mt-15
-              elements:
-              - label: ""
-                subtitle: Enter a <b>unique name</b> to identify this secret.
-                type: label-element
-              - label: Secret Name
-                schema: temp/properties/data/properties/createSecret/properties/name
-                type: input
-                validation:
-                  type: required
-              - buttonClass: is-light is-outlined
-                elements:
-                - label: Key
-                  loader:
-                    name: onSelectedSecretChange|data
-                    watchPaths:
-                    - temp/properties/data/properties/createSecret/properties/data
-                  schema: key
-                  type: select
-                  validation:
-                    type: required
-                - height: 120px
-                  label: Value
-                  schema: value
-                  type: textarea
-                keepInitial: true
-                label: String Data
-                schema: temp/properties/data/properties/createSecret/properties/data
-                type: array-object-form
-                validation:
-                  type: required
-              hasButton:
-                action: createNewConfigSecret|data
-                hasCancel: cancelCreateSecret|data
-                text: Save
-              if:
-                name: isCreateSecret|data
-                type: function
-              label: Create a New Config Secret
-              showLabels: true
-              type: block-layout
-            - editorHeight: 500px
-              hideFormatButton: true
-              if:
-                name: isNotCreateSecret|data
-                type: function
-              loader:
-                name: onNewConfigSecretChange|data
-                watchPaths:
-                - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-              readonly: true
-              schema: temp/properties/data/newConfigSecret
-              type: multi-file-editor
-              validateContent: false
-            if:
-              name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|data|true
-              type: function
-            label: Config Secret
-            type: block-layout
-          - elements:
-            - customClass: mb-15
-              label: New Apply Config
-              subtitle: Define custom configurations for your database using key-value
-                pairs. These parameters will overwrite existing settings.<br>Enter
-                the parameter you want to configure (e.g., max_connections).
-              type: label-element
-            - customClass: mb-2
-              label: Configuration
-              loader: getConfigSecretsforAppyConfig
-              refresh: fetchConfigSecrets
-              schema: temp/properties/data/selectedConfiguration
-              type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              loader:
-                name: setApplyConfig|data
-                watchPaths:
-                - temp/properties/data/selectedConfiguration
-              placeholder: Add config parameters...
-              schema: temp/properties/data/applyConfig
-              type: multi-file-editor
-              validateContent: false
-              watcher:
-                func: onApplyconfigChange|data
-                paths:
-                - temp/properties/data/applyConfig
-            if:
-              name: ifReconfigurationTypeEqualsTo|applyConfig|data|true
-              type: function
-            label: ApplyConfig
-            type: block-layout
-          - elements:
-            - customClass: mb-15
-              label: Remove
-              subtitle: Selected a configuration secret from the available list to
-                update your database settings
-              type: label-element
-            - customClass: mb-2
-              label: Configuration
-              loader:
-                name: getConfigSecretsforAppyConfig
-                watchPaths:
-                - schema/properties/metadata/properties/namespace
-              refresh: fetchConfigSecrets
-              schema: temp/properties/data/selectedConfigurationRemove
-              type: select
-              watcher:
-                func: onRemoveConfigChange|data
-                paths:
-                - temp/properties/data/selectedConfigurationRemove
-            if:
-              name: ifReconfigurationTypeEqualsTo|remove|data|true
-              type: function
-            label: Remove
-            type: block-layout
-          label: New Config Secret
-          options:
-          - text: NEW CONFIG SECRET
-            value: selectNewConfigSecret
-          - text: APPLY CONFIG
-            value: applyConfig
-          - text: REMOVE
-            value: remove
-          schema: temp/properties/reconfigurationType-data
-          type: tab-layout
-        label: Data
-        showLabels: true
-        type: block-layout
-      - elements:
-        - elements:
-          - elements:
-            - customClass: mb-15
-              label: Config Secret
-              subtitle: Select an existing secret or create a new one to apply to
-                your database configuration.
-              type: label-element
-            - customClass: mb-2
-              init:
-                type: func
-                value: setValueFromDbDetails|/spec/topology/overseer/configSecret/name
-              label: Config Secret
-              loader:
-                name: getConfigSecrets|overseer
-                watchPaths:
-                - schema/properties/metadata/properties/namespace
-                - temp/properties/overseer/properties/createSecret/properties/status
-              refresh: fetchConfigSecrets
-              schema: schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-              type: select
-              watcher:
-                func: onCreateSecretChange|overseer
-                paths:
-                - temp/properties/overseer/properties/createSecret/properties/status
-            - customClass: mt-15
-              elements:
-              - label: ""
-                subtitle: Enter a <b>unique name</b> to identify this secret.
-                type: label-element
-              - label: Secret Name
-                schema: temp/properties/overseer/properties/createSecret/properties/name
-                type: input
-                validation:
-                  type: required
-              - buttonClass: is-light is-outlined
-                elements:
-                - label: Key
-                  loader:
-                    name: onSelectedSecretChange|overseer
-                    watchPaths:
-                    - temp/properties/overseer/properties/createSecret/properties/data
-                  schema: key
-                  type: select
-                  validation:
-                    type: required
-                - height: 120px
-                  label: Value
-                  schema: value
-                  type: textarea
-                keepInitial: true
-                label: String Data
-                schema: temp/properties/overseer/properties/createSecret/properties/data
-                type: array-object-form
-                validation:
-                  type: required
-              hasButton:
-                action: createNewConfigSecret|overseer
-                hasCancel: cancelCreateSecret|overseer
-                text: Save
-              if:
-                name: isCreateSecret|overseer
-                type: function
-              label: Create a New Config Secret
-              showLabels: true
-              type: block-layout
-            - editorHeight: 500px
-              hideFormatButton: true
-              if:
-                name: isNotCreateSecret|overseer
-                type: function
-              loader:
-                name: onNewConfigSecretChange|overseer
-                watchPaths:
-                - schema/properties/spec/properties/configuration/properties/configSecret/properties/name
-              readonly: true
-              schema: temp/properties/overseer/newConfigSecret
-              type: multi-file-editor
-              validateContent: false
-            if:
-              name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|overseer|true
-              type: function
-            label: Config Secret
-            type: block-layout
-          - elements:
-            - customClass: mb-15
-              label: New Apply Config
-              subtitle: Define custom configurations for your database using key-value
-                pairs. These parameters will overwrite existing settings.<br>Enter
-                the parameter you want to configure (e.g., max_connections).
-              type: label-element
-            - customClass: mb-2
-              label: Configuration
-              loader: getConfigSecretsforAppyConfig
-              refresh: fetchConfigSecrets
-              schema: temp/properties/overseer/selectedConfiguration
-              type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              loader:
-                name: setApplyConfig|overseer
-                watchPaths:
-                - temp/properties/overseer/selectedConfiguration
-              placeholder: Add config parameters...
-              schema: temp/properties/overseer/applyConfig
-              type: multi-file-editor
-              validateContent: false
-              watcher:
-                func: onApplyconfigChange|overseer
-                paths:
-                - temp/properties/overseer/applyConfig
-            if:
-              name: ifReconfigurationTypeEqualsTo|applyConfig|overseer|true
-              type: function
-            label: ApplyConfig
-            type: block-layout
-          - elements:
-            - customClass: mb-15
-              label: Remove
-              subtitle: Selected a configuration secret from the available list to
-                update your database settings
-              type: label-element
-            - customClass: mb-2
-              label: Configuration
-              loader:
-                name: getConfigSecretsforAppyConfig
-                watchPaths:
-                - schema/properties/metadata/properties/namespace
-              refresh: fetchConfigSecrets
-              schema: temp/properties/overseer/selectedConfigurationRemove
-              type: select
-              watcher:
-                func: onRemoveConfigChange|overseer
-                paths:
-                - temp/properties/overseer/selectedConfigurationRemove
-            if:
-              name: ifReconfigurationTypeEqualsTo|remove|overseer|true
-              type: function
-            label: Remove
-            type: block-layout
-          label: New Config Secret
-          options:
-          - text: NEW CONFIG SECRET
-            value: selectNewConfigSecret
-          - text: APPLY CONFIG
-            value: applyConfig
-          - text: REMOVE
-            value: remove
-          schema: temp/properties/reconfigurationType-overseer
-          type: tab-layout
-        label: Overseer
-        showLabels: true
-        type: block-layout
-      if:
-        name: ifDbTypeEqualsTo|Topology|configuration
-        type: function
-      label: Topology Reconfigure form
+      label: Configuration
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|Reconfigure
