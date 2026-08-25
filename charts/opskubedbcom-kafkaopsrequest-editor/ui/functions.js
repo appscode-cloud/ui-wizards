@@ -808,7 +808,11 @@ export const useFunc = (model) => {
     let obj = {}
     if (selectedMachine.machine !== 'custom') {
       if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
-      else obj = machines[selectedMachine.machine]?.resources
+      else
+        obj = {
+          requests: { ...machines[selectedMachine.machine]?.resources?.requests },
+          limits: { ...machines[selectedMachine.machine]?.resources?.limits },
+        }
     } else {
       const cpu = selectedMachine.cpu || ''
       const memory = selectedMachine.memory || ''
@@ -1474,7 +1478,10 @@ export const useFunc = (model) => {
       containers = spec?.podTemplate?.spec?.containers ?? []
     }
     const kind = dbDetails?.kind?.toLowerCase()
-    return containers.find((container) => container.name === kind)?.resources?.requests ?? {}
+
+    const limits =
+      containers.find((container) => container.name === kind)?.resources?.requests ?? {}
+    return limits
   }
 
   return {

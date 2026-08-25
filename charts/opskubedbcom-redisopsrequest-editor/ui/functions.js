@@ -770,7 +770,11 @@ export const useFunc = (model) => {
     let obj = {}
     if (selectedMachine.machine !== 'custom') {
       if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
-      else obj = machines[selectedMachine.machine]?.resources
+      else
+        obj = {
+          requests: { ...machines[selectedMachine.machine]?.resources?.requests },
+          limits: { ...machines[selectedMachine.machine]?.resources?.limits },
+        }
     } else {
       const cpu = selectedMachine.cpu || ''
       const memory = selectedMachine.memory || ''
