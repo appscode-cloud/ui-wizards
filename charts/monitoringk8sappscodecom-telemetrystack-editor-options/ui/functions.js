@@ -33,24 +33,77 @@ export const useFunc = (model) => {
     )
   }
 
-  function isVolumeType(type, index) {
-    return getValue(model, `${additionalConfigPath}/additionalVolumes/${index}/volumeType`) === type
+  // Additional Volumes/Volume Mounts are a single configuration (master lets you configure
+  // exactly one, not a repeatable list), held in scratch `temp` fields and synced into the real
+  // (array-shaped, per values.openapiv3_schema.yaml) additionalConfig fields by
+  // syncAdditionalConfig below. The schema keeps `additionalVolumes`/`additionalVolumeMounts` as
+  // `type: array` (we do not touch the schema), so the synced value is always a 0-or-1-element
+  // array - the UI just never offers a way to add a second entry.
+  // getValue's `module` argument (not the key string) picks the prefix: pass `model` for real
+  // `schema/...` fields, `discriminator` for `temp/...` scratch fields (same as isActivePage
+  // above) - and the key itself must be relative, with no leading `schema/` or `temp/`.
+  const additionalVolumePath = '/additionalVolume'
+
+  function isVolumeType(type) {
+    return getValue(discriminator, `${additionalVolumePath}/volumeType`) === type
   }
 
-  function volumeMode(index) {
-    return getValue(model, `${additionalConfigPath}/additionalVolumes/${index}/volumeType`)
-      ? 420
-      : ''
+  function volumeMode() {
+    return getValue(discriminator, `${additionalVolumePath}/volumeType`) ? 420 : ''
   }
 
-  // volume mounts are derived from the volume sitting at the same index
-  function volumeName(index) {
-    return getValue(model, `${additionalConfigPath}/additionalVolumes/${index}/name`) || ''
+  // the mount row is derived from the volume above
+  function volumeName() {
+    return getValue(discriminator, `${additionalVolumePath}/name`) || ''
   }
 
-  function volumeMountPath(index) {
-    const path = getValue(model, `${additionalConfigPath}/additionalVolumes/${index}/path`)
+  function volumeMountPath() {
+    const path = getValue(discriminator, `${additionalVolumePath}/path`)
     return path ? `${certificateMountDir}/${path}` : ''
+  }
+
+  // mirror the single scratch volume/mount into the real additionalConfig arrays master's
+  // CRD schema expects (each holding at most one entry): key/mode/name/path/secretName/volumeType
+  // for additionalVolumes, name/mountPath/readOnly for additionalVolumeMounts - exactly the
+  // properties values.openapiv3_schema.yaml declares, nothing more.
+  function syncAdditionalConfig() {
+    const volume = getValue(discriminator, additionalVolumePath) || {}
+    const mount = getValue(discriminator, '/additionalVolumeMount') || {}
+    const volumesPath = `${additionalConfigPath}/additionalVolumes`
+    const mountsPath = `${additionalConfigPath}/additionalVolumeMounts`
+
+    if (volume.volumeType) {
+      commit('/model$update', {
+        path: volumesPath,
+        value: [
+          {
+            volumeType: volume.volumeType,
+            name: volume.name,
+            secretName: volume.secretName,
+            key: volume.key,
+            path: volume.path,
+            mode: 420,
+          },
+        ],
+      })
+    } else {
+      commit('/model$delete', volumesPath)
+    }
+
+    if (volume.name || volume.path) {
+      commit('/model$update', {
+        path: mountsPath,
+        value: [
+          {
+            name: volume.name || '',
+            mountPath: volume.path ? `${certificateMountDir}/${volume.path}` : '',
+            readOnly: mount.readOnly !== undefined ? mount.readOnly : true,
+          },
+        ],
+      })
+    } else {
+      commit('/model$delete', mountsPath)
+    }
   }
 
   function setS3(path, values) {
@@ -71,8 +124,12 @@ export const useFunc = (model) => {
     return value === undefined || value === null ? '' : value
   }
 
-  // one S3 backend feeds both pillars, each one gets its own prefix inside the bucket
+  // one S3 backend feeds both pillars, each one gets its own prefix inside the bucket. Also the
+  // single form-wide watcher entry point (see the sidebar-layout's `watcher` in create-ui.yaml),
+  // so it drives the additionalConfig sync too - both react to the same "something changed" tick.
   function syncS3() {
+    syncAdditionalConfig()
+
     const s3 = getValue(model, '/spec/logs/s3') || {}
     const mounts = getValue(model, `${additionalConfigPath}/additionalVolumeMounts`) || []
     const caFile = mounts.find((mount) => mount?.mountPath)?.mountPath
@@ -175,21 +232,11 @@ export const useFunc = (model) => {
     return false
   }
 
-  // master: once a volume type is picked, the whole row has to be filled in.
-  function validateAdditionalVolumes(rows) {
-    const list = Array.isArray(rows) ? rows : []
-    for (let i = 0; i < list.length; i++) {
-      const row = list[i] || {}
-      if (!row.volumeType) continue
-      const at = list.length > 1 ? ` in row ${i + 1}` : ''
-      const source = row.volumeType === 'ConfigMap' ? 'ConfigMap name' : 'Secret name'
-
-      if (!String(row.name || '').trim()) return `Name is required${at}`
-      if (!String(row.secretName || '').trim()) return `${source} is required${at}`
-      if (!String(row.key || '').trim()) return `Key is required${at}`
-      if (!String(row.path || '').trim()) return `Path is required${at}`
-    }
-    return false
+  // master: once a volume type is picked, the whole (single) volume has to be filled in - Name,
+  // ConfigMap/Secret Name, Key and Path all attach this to their own field's validation.
+  function validateVolumeFieldRequired(value) {
+    if (!isVolumeType('ConfigMap') && !isVolumeType('Secret')) return false
+    return String(value || '').trim() ? false : 'This field is required'
   }
 
   async function getStorageClasses() {
@@ -211,7 +258,6 @@ export const useFunc = (model) => {
 
   return {
     getStorageClasses,
-    validateAdditionalVolumes,
     validateClientCaCertificates,
     validateFiveMinutesRetention,
     validateRawRetention,
@@ -219,6 +265,7 @@ export const useFunc = (model) => {
     validateRetention,
     validateRetentionConfig,
     validateStorageSize,
+    validateVolumeFieldRequired,
     isActivePage,
     isClusterTopology,
     isPillarEnabled,
