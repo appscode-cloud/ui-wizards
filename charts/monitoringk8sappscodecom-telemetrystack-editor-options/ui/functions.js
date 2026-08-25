@@ -66,23 +66,29 @@ export const useFunc = (model) => {
   // array (name/mountPath/readOnly, exactly what values.openapiv3_schema.yaml declares).
   // additionalVolumes needs no mirroring anymore - its fields already write the real schema path
   // directly via their own native input binding.
+  //
+  // additionalVolumeMounts is itself one of this function's own watcher paths (see the
+  // sidebar-layout's `watcher` in create-ui.yaml), so committing a fresh array literal on every
+  // call - even one with identical contents - looks like a change (new array reference) and
+  // re-triggers the same watcher forever ("Maximum recursive updates exceeded"). Comparing
+  // against the current value first, and only committing on an actual difference, breaks the
+  // cycle the same way setS3 already avoids it per-field below.
   function syncAdditionalConfig() {
     const mount = getValue(discriminator, '/additionalVolumeMount') || {}
     const mountsPath = `${additionalConfigPath}/additionalVolumeMounts`
+    const current = getValue(model, mountsPath)
 
     if (mount.name || mount.mountPath) {
-      commit('wizard/model$update', {
-        path: mountsPath,
-        value: [
-          {
-            name: mount.name || '',
-            mountPath: mount.mountPath || '',
-            readOnly: mount.readOnly !== undefined ? mount.readOnly : true,
-          },
-        ],
-        force: true,
-      })
-    } else {
+      const next = [
+        {
+          name: mount.name || '',
+          mountPath: mount.mountPath || '',
+          readOnly: mount.readOnly !== undefined ? mount.readOnly : true,
+        },
+      ]
+      if (JSON.stringify(current) === JSON.stringify(next)) return
+      commit('wizard/model$update', { path: mountsPath, value: next, force: true })
+    } else if (current !== undefined) {
       commit('wizard/model$delete', mountsPath)
     }
   }
