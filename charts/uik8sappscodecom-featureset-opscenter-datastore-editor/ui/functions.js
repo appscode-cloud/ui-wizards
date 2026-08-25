@@ -18,6 +18,12 @@ export const useFunc = (model) => {
   ])
   let resources = {}
 
+  function showForm(param) {
+    const queryParam = storeGet('/route/query/mode') || ''
+    console.log('showForm', param, queryParam)
+    return queryParam === param
+  }
+
   function getFeatureSetDetails() {
     const featureSets = storeGet('/cluster/featureSets/result') || []
     const featureSetName = storeGet('/route/params/featureset') || ''
@@ -532,6 +538,10 @@ export const useFunc = (model) => {
     return enabledTypes
   }
 
+  async function setVersions(dbname) {
+    return versions[dbname] || []
+  }
+  let versions = {}
   async function getVersions(dbname) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -551,13 +561,15 @@ export const useFunc = (model) => {
       const resources = (resp && resp.data && resp.data.items) || []
 
       // keep only non deprecated versions
-      return resources
+      const filteredResources = resources
         .filter((item) => item.spec && !item.spec.deprecated)
         .map((item) => {
           const name = (item.metadata && item.metadata.name) || ''
           const specVersion = (item.spec && item.spec.version) || ''
           return { text: `${name} (${specVersion})`, value: name }
         })
+      versions[dbname] = filteredResources
+      return filteredResources
     } catch (e) {
       console.log(e)
       return []
@@ -570,6 +582,7 @@ export const useFunc = (model) => {
   }
 
   return {
+    showForm,
     hideThisElement,
     checkIsResourceLoaded,
     getFeatureSetDetails,
@@ -587,6 +600,7 @@ export const useFunc = (model) => {
     returnFalse,
     getEnabledTypes,
     databaseLoader,
+    setVersions,
     getVersions,
     isDbSelected,
   }
