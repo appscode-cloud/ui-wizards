@@ -287,31 +287,31 @@ step:
     showLabels: true
     type: block-layout
   - elements:
-    - elements:
-      - if:
-          name: isToggleOn|storageClasses
-          type: function
-        label: Storage Class
-        loader: getAdminOptions|storageClasses
-        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-        type: select
-      - if:
-          name: showStorageSizeField
-          type: function
-        label: Storage Size
-        schema: schema/properties/spec/properties/persistence/properties/size
-        type: input
-      showLabels: true
-      type: horizontal-layout
-    if:
-      name: isEqualToModelPathValue|Replicaset,Standalone|/spec/mode
-      type: function
-    type: block-layout
-  - elements:
-    - label: Name
-      loader: getAppBindings
-      schema: schema/properties/spec/properties/zookeeperRef/properties/name
+    - if:
+        name: isToggleOn|storageClasses
+        type: function
+      label: Storage Class
+      loader: getAdminOptions|storageClasses
+      schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
+    - if:
+        name: showStorageSizeField
+        type: function
+      label: Storage Size
+      schema: schema/properties/spec/properties/persistence/properties/size
+      type: input
+    showLabels: true
+    type: horizontal-layout
+  - elements:
+    - elements:
+      - label: Name
+        loader: getAppBindings
+        schema: schema/properties/spec/properties/zookeeperRef/properties/name
+        type: select
+      - label: Namespace
+        schema: schema/properties/spec/properties/zookeeperRef/properties/namespace
+        type: input
+      type: horizontal-layout
     label: ZookeeperRef
     showLabels: true
     type: block-layout
