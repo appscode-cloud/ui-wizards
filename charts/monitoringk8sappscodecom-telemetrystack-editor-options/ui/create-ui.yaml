@@ -217,68 +217,53 @@ step:
               value: Secret
             - text: ConfigMap
               value: ConfigMap
-            schema: temp/properties/additionalVolume/properties/volumeType
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/volumeType
             type: select
           type: horizontal-layout
         - customClass: mb-16
           elements:
           - label: Name
-            schema: temp/properties/additionalVolume/properties/name
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/name
             type: input
             validation:
-              name: validateVolumeFieldRequired
-              type: custom
-              watchPaths:
-              - temp/properties/additionalVolume/properties/volumeType
+              type: required
           - if:
               name: isVolumeType|ConfigMap
               type: function
             label: ConfigMap Name
-            schema: temp/properties/additionalVolume/properties/secretName
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/secretName
             type: input
             validation:
-              name: validateVolumeFieldRequired
-              type: custom
-              watchPaths:
-              - temp/properties/additionalVolume/properties/volumeType
+              type: required
           - if:
               name: isVolumeType|Secret
               type: function
             label: Secret Name
-            schema: temp/properties/additionalVolume/properties/secretName
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/secretName
             type: input
             validation:
-              name: validateVolumeFieldRequired
-              type: custom
-              watchPaths:
-              - temp/properties/additionalVolume/properties/volumeType
+              type: required
           type: horizontal-layout
         - customClass: mb-16
           elements:
           - label: Key
-            schema: temp/properties/additionalVolume/properties/key
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/key
             type: input
             validation:
-              name: validateVolumeFieldRequired
-              type: custom
-              watchPaths:
-              - temp/properties/additionalVolume/properties/volumeType
+              type: required
           - label: Path
-            schema: temp/properties/additionalVolume/properties/path
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/path
             type: input
             validation:
-              name: validateVolumeFieldRequired
-              type: custom
-              watchPaths:
-              - temp/properties/additionalVolume/properties/volumeType
+              type: required
           - disable: true
             label: Mode
-            schema: temp/properties/additionalVolume/properties/mode
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/mode
             type: input
             watcher:
               func: volumeMode
               paths:
-              - temp/properties/additionalVolume/properties/volumeType
+              - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/volumeType
           type: horizontal-layout
         label: Additional Volumes
         showLabels: true
@@ -293,7 +278,7 @@ step:
             watcher:
               func: volumeName
               paths:
-              - temp/properties/additionalVolume/properties/name
+              - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/name
           - disable: true
             label: Mount Path
             schema: temp/properties/additionalVolumeMount/properties/mountPath
@@ -301,7 +286,7 @@ step:
             watcher:
               func: volumeMountPath
               paths:
-              - temp/properties/additionalVolume/properties/path
+              - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/path
           type: horizontal-layout
         - label: Read Only
           schema: temp/properties/additionalVolumeMount/properties/readOnly
@@ -609,7 +594,6 @@ step:
       paths:
       - schema/properties/spec/properties/logs/properties/s3
       - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumeMounts
-      - temp/properties/additionalVolume
       - temp/properties/additionalVolumeMount
   id: options
   type: single-step-form

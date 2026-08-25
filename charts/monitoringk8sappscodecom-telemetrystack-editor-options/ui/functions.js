@@ -33,76 +33,57 @@ export const useFunc = (model) => {
     )
   }
 
-  // Additional Volumes/Volume Mounts are a single configuration (master lets you configure
-  // exactly one, not a repeatable list), held in scratch `temp` fields and synced into the real
-  // (array-shaped, per values.openapiv3_schema.yaml) additionalConfig fields by
-  // syncAdditionalConfig below. The schema keeps `additionalVolumes`/`additionalVolumeMounts` as
-  // `type: array` (we do not touch the schema), so the synced value is always a 0-or-1-element
-  // array - the UI just never offers a way to add a second entry.
-  // getValue's `module` argument (not the key string) picks the prefix: pass `model` for real
-  // `schema/...` fields, `discriminator` for `temp/...` scratch fields (same as isActivePage
-  // above) - and the key itself must be relative, with no leading `schema/` or `temp/`.
-  const additionalVolumePath = '/additionalVolume'
+  // additionalVolumes is real, schema-bound (values.openapiv3_schema.yaml keeps it array-shaped;
+  // we do not touch the schema). Master only ever configures one, so every field here writes
+  // straight to index 0 - the array stays exactly 0-or-1 elements without ever offering an Add
+  // button. Because it's schema-bound directly, it needs no sync step of its own: each input
+  // commits into the real model on its own, the same as any other plain field.
+  const additionalVolumesPath = `${additionalConfigPath}/additionalVolumes/0`
 
   function isVolumeType(type) {
-    return getValue(discriminator, `${additionalVolumePath}/volumeType`) === type
+    return getValue(model, `${additionalVolumesPath}/volumeType`) === type
   }
 
   function volumeMode() {
-    return getValue(discriminator, `${additionalVolumePath}/volumeType`) ? 420 : ''
+    return getValue(model, `${additionalVolumesPath}/volumeType`) ? 420 : ''
   }
 
-  // the mount row is derived from the volume above
+  // additionalVolumeMounts stays a scratch `temp` field (values.openapiv3_schema.yaml has no
+  // per-item way to derive one array's values from another, so name/mountPath are computed here
+  // and pushed into the mount's own disabled inputs - one-way, additionalVolumes -> mounts only).
   function volumeName() {
-    return getValue(discriminator, `${additionalVolumePath}/name`) || ''
+    console.log('volumeName', getValue(model, `${additionalVolumesPath}/name`))
+    return getValue(model, `${additionalVolumesPath}/name`) || ''
   }
 
   function volumeMountPath() {
-    const path = getValue(discriminator, `${additionalVolumePath}/path`)
+    const path = getValue(model, `${additionalVolumesPath}/path`)
+    console.log('volumeMountPath', path, certificateMountDir)
     return path ? `${certificateMountDir}/${path}` : ''
   }
 
-  // mirror the single scratch volume/mount into the real additionalConfig arrays master's
-  // CRD schema expects (each holding at most one entry): key/mode/name/path/secretName/volumeType
-  // for additionalVolumes, name/mountPath/readOnly for additionalVolumeMounts - exactly the
-  // properties values.openapiv3_schema.yaml declares, nothing more.
+  // Mirror the scratch additionalVolumeMount into the real additionalConfig.additionalVolumeMounts
+  // array (name/mountPath/readOnly, exactly what values.openapiv3_schema.yaml declares).
+  // additionalVolumes needs no mirroring anymore - its fields already write the real schema path
+  // directly via their own native input binding.
   function syncAdditionalConfig() {
-    const volume = getValue(discriminator, additionalVolumePath) || {}
     const mount = getValue(discriminator, '/additionalVolumeMount') || {}
-    const volumesPath = `${additionalConfigPath}/additionalVolumes`
     const mountsPath = `${additionalConfigPath}/additionalVolumeMounts`
 
-    if (volume.volumeType) {
-      commit('/model$update', {
-        path: volumesPath,
-        value: [
-          {
-            volumeType: volume.volumeType,
-            name: volume.name,
-            secretName: volume.secretName,
-            key: volume.key,
-            path: volume.path,
-            mode: 420,
-          },
-        ],
-      })
-    } else {
-      commit('/model$delete', volumesPath)
-    }
-
-    if (volume.name || volume.path) {
-      commit('/model$update', {
+    if (mount.name || mount.mountPath) {
+      commit('wizard/model$update', {
         path: mountsPath,
         value: [
           {
-            name: volume.name || '',
-            mountPath: volume.path ? `${certificateMountDir}/${volume.path}` : '',
+            name: mount.name || '',
+            mountPath: mount.mountPath || '',
             readOnly: mount.readOnly !== undefined ? mount.readOnly : true,
           },
         ],
+        force: true,
       })
     } else {
-      commit('/model$delete', mountsPath)
+      commit('wizard/model$delete', mountsPath)
     }
   }
 
@@ -110,8 +91,8 @@ export const useFunc = (model) => {
     Object.entries(values).forEach(([key, value]) => {
       const current = getValue(model, `${path}/${key}`)
       if (current === value) return
-      if (value === undefined) commit('/model$delete', `${path}/${key}`)
-      else commit('/model$update', { path: `${path}/${key}`, value })
+      if (value === undefined) commit('wizard/model$delete', `${path}/${key}`)
+      else commit('wizard/model$update', { path: `${path}/${key}`, value, force: true })
     })
   }
 
@@ -232,13 +213,6 @@ export const useFunc = (model) => {
     return false
   }
 
-  // master: once a volume type is picked, the whole (single) volume has to be filled in - Name,
-  // ConfigMap/Secret Name, Key and Path all attach this to their own field's validation.
-  function validateVolumeFieldRequired(value) {
-    if (!isVolumeType('ConfigMap') && !isVolumeType('Secret')) return false
-    return String(value || '').trim() ? false : 'This field is required'
-  }
-
   async function getStorageClasses() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -265,7 +239,6 @@ export const useFunc = (model) => {
     validateRetention,
     validateRetentionConfig,
     validateStorageSize,
-    validateVolumeFieldRequired,
     isActivePage,
     isClusterTopology,
     isPillarEnabled,
