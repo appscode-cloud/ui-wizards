@@ -14,7 +14,6 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/useCustomProfile', false)
   setDiscriminatorValue('/profile', '')
   setDiscriminatorValue('/profileChoseSwitch', false)
-  // the sidebar writes the active page here, keep the first page selected on load
   setDiscriminatorValue('/presetPage', 'deployment-type')
 
   /************** Common Funcitons ******************/

@@ -2,6 +2,8 @@ const { axios, useOperator, store } = window.vueHelpers || {}
 
 const certificateMountDir = '/etc/thanos/certs'
 const additionalConfigPath = '/spec/metrics/thanos/ruler/additionalConfig'
+const retentionConfigPath = '/spec/metrics/thanos/compact/retentionConfig'
+const externalLabelsPath = '/spec/metrics/thanos/receive/routerSpec/externalLabels'
 
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, storeGet, discriminator, commit } = useOperator(
@@ -9,7 +11,6 @@ export const useFunc = (model) => {
     store.state,
   )
 
-  // the sidebar writes the active page here, keep the first page selected on load
   setDiscriminatorValue('/telemetryPage', 'metrics-thanos-compact')
 
   function isActivePage(page) {
@@ -33,11 +34,6 @@ export const useFunc = (model) => {
     )
   }
 
-  // additionalVolumes is real, schema-bound (values.openapiv3_schema.yaml keeps it array-shaped;
-  // we do not touch the schema). Master only ever configures one, so every field here writes
-  // straight to index 0 - the array stays exactly 0-or-1 elements without ever offering an Add
-  // button. Because it's schema-bound directly, it needs no sync step of its own: each input
-  // commits into the real model on its own, the same as any other plain field.
   const additionalVolumesPath = `${additionalConfigPath}/additionalVolumes/0`
 
   function isVolumeType(type) {
@@ -48,9 +44,6 @@ export const useFunc = (model) => {
     return getValue(model, `${additionalVolumesPath}/volumeType`) ? 420 : ''
   }
 
-  // additionalVolumeMounts stays a scratch `temp` field (values.openapiv3_schema.yaml has no
-  // per-item way to derive one array's values from another, so name/mountPath are computed here
-  // and pushed into the mount's own disabled inputs - one-way, additionalVolumes -> mounts only).
   function volumeName() {
     console.log('volumeName', getValue(model, `${additionalVolumesPath}/name`))
     return getValue(model, `${additionalVolumesPath}/name`) || ''
@@ -62,17 +55,6 @@ export const useFunc = (model) => {
     return path ? `${certificateMountDir}/${path}` : ''
   }
 
-  // Mirror the scratch additionalVolumeMount into the real additionalConfig.additionalVolumeMounts
-  // array (name/mountPath/readOnly, exactly what values.openapiv3_schema.yaml declares).
-  // additionalVolumes needs no mirroring anymore - its fields already write the real schema path
-  // directly via their own native input binding.
-  //
-  // additionalVolumeMounts is itself one of this function's own watcher paths (see the
-  // sidebar-layout's `watcher` in create-ui.yaml), so committing a fresh array literal on every
-  // call - even one with identical contents - looks like a change (new array reference) and
-  // re-triggers the same watcher forever ("Maximum recursive updates exceeded"). Comparing
-  // against the current value first, and only committing on an actual difference, breaks the
-  // cycle the same way setS3 already avoids it per-field below.
   function syncAdditionalConfig() {
     const mount = getValue(discriminator, '/additionalVolumeMount') || {}
     const mountsPath = `${additionalConfigPath}/additionalVolumeMounts`
@@ -93,6 +75,14 @@ export const useFunc = (model) => {
     }
   }
 
+  function syncExternalLabels() {
+    const extra = getValue(discriminator, '/externalLabelsExtra') || {}
+    const next = { ...extra, receive: 'true' }
+    const current = getValue(model, externalLabelsPath)
+    if (JSON.stringify(current) === JSON.stringify(next)) return
+    commit('wizard/model$update', { path: externalLabelsPath, value: next, force: true })
+  }
+
   function setS3(path, values) {
     Object.entries(values).forEach(([key, value]) => {
       const current = getValue(model, `${path}/${key}`)
@@ -102,20 +92,14 @@ export const useFunc = (model) => {
     })
   }
 
-  // The same S3 config is rendered twice - inside the ClickHouse page and on the Thanos
-  // S3 page - and an input keeps its own copy of the value once it is mounted. Both
-  // copies watch the shared path and read it back through this, so editing either one
-  // updates the other.
   function s3Field(field) {
     const value = getValue(model, `/spec/logs/s3/${field}`)
     return value === undefined || value === null ? '' : value
   }
 
-  // one S3 backend feeds both pillars, each one gets its own prefix inside the bucket. Also the
-  // single form-wide watcher entry point (see the sidebar-layout's `watcher` in create-ui.yaml),
-  // so it drives the additionalConfig sync too - both react to the same "something changed" tick.
   function syncS3() {
     syncAdditionalConfig()
+    syncExternalLabels()
 
     const s3 = getValue(model, '/spec/logs/s3') || {}
     const mounts = getValue(model, `${additionalConfigPath}/additionalVolumeMounts`) || []
@@ -133,11 +117,7 @@ export const useFunc = (model) => {
     })
   }
 
-  // ---------------------------------------------------------------------------
-  // Validation. Ported from cluster-ui master's CreateTelemetryStackView.vue so
-  // the wizard rejects exactly what the master form rejects. Each validator
-  // returns an error message, or false when the value is acceptable.
-  // ---------------------------------------------------------------------------
+  syncExternalLabels()
 
   const DURATION_RE = /^([1-9]\d*y)?([1-9]\d*w)?([1-9]\d*d)?([1-9]\d*h)?([1-9]\d*m)?([1-9]\d*s)?$/
   const STORAGE_RE = /^\d+(Ki|Mi|Gi|Ti|Pi|Ei|k|m|g|t|p|e|K|M|G|T|P|E)?$/
@@ -180,34 +160,19 @@ export const useFunc = (model) => {
     return durationToSeconds(value) < 10 * 24 * 3600 ? 'Must be at least 10d' : false
   }
 
-  // A custom validator on a field never sees its own row index, so the rules that
-  // compare two columns of the same row live on the array element, which is handed
-  // the whole list.
-  function validateRetentionConfig(rows) {
-    const list = Array.isArray(rows) ? rows : []
-    for (let i = 0; i < list.length; i++) {
-      const row = list[i] || {}
-      const at = list.length > 1 ? ` in row ${i + 1}` : ''
+  function validateOneHourRetention(value, items) {
+    const format = validateRetention(value)
+    if (format || !value) return format
 
-      const raw = validateRawRetention(row.raw)
-      if (raw) return `Raw retention${at}: ${raw}`
-
-      const five = validateFiveMinutesRetention(row.fiveMinutes)
-      if (five) return `5m retention${at}: ${five}`
-
-      const hour = validateRetention(row.oneHour)
-      if (hour) return `1h retention${at}: ${hour}`
-
-      if (row.oneHour && row.fiveMinutes && !validateRetention(row.fiveMinutes)) {
-        if (durationToSeconds(row.oneHour) <= durationToSeconds(row.fiveMinutes)) {
-          return `1h retention${at} must be greater than 5m retention`
-        }
+    const fiveMinutes = getValue(model, `${retentionConfigPath}/${items ?? '0'}/fiveMinutes`)
+    if (fiveMinutes && !validateRetention(fiveMinutes)) {
+      if (durationToSeconds(value) <= durationToSeconds(fiveMinutes)) {
+        return 'Must be greater than 5m retention'
       }
     }
     return false
   }
 
-  // master: a certificate ref needs both halves or neither.
   function validateClientCaCertificates(rows) {
     const list = Array.isArray(rows) ? rows : []
     for (let i = 0; i < list.length; i++) {
@@ -240,10 +205,10 @@ export const useFunc = (model) => {
     getStorageClasses,
     validateClientCaCertificates,
     validateFiveMinutesRetention,
+    validateOneHourRetention,
     validateRawRetention,
     validateReplicationFactor,
     validateRetention,
-    validateRetentionConfig,
     validateStorageSize,
     isActivePage,
     isClusterTopology,

@@ -9,6 +9,7 @@ step:
           validation:
             name: validateStorageSize
             type: custom
+        customClass: mb-16
         type: horizontal-layout
       - elements:
         - label: Raw Retention
@@ -27,14 +28,13 @@ step:
           schema: oneHour
           type: input
           validation:
-            name: validateRetention
+            name: validateOneHourRetention
             type: custom
+            watchPaths:
+            - schema/properties/spec/properties/metrics/properties/thanos/properties/compact/properties/retentionConfig/0/fiveMinutes
         label: Retention Config
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/compact/properties/retentionConfig
         type: array-object-form
-        validation:
-          name: validateRetentionConfig
-          type: custom
       if:
         name: isActivePage|metrics-thanos-compact
         type: function
@@ -58,7 +58,8 @@ step:
         type: horizontal-layout
       - elements:
         - elements:
-          - label: Type
+          - disable: true
+            label: Type
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/store/properties/shardingStrategy/properties/type
             type: input
           - label: Shards
@@ -115,18 +116,22 @@ step:
           type: horizontal-layout
         - elements:
           - elements:
-            - label: Matcher Type
+            - disable: true
+              label: Matcher Type
               schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tenancyConfig/properties/tenantMatcherType
               type: select
-            - label: Tenant Header
+            - disable: true
+              label: Tenant Header
               schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tenancyConfig/properties/tenantHeader
               type: input
             type: horizontal-layout
           - elements:
-            - label: Default Tenant ID
+            - disable: true
+              label: Default Tenant ID
               schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tenancyConfig/properties/defaultTenantID
               type: input
-            - label: Tenant Label Name
+            - disable: true
+              label: Tenant Label Name
               schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tenancyConfig/properties/tenantLabelName
               type: input
             type: horizontal-layout
@@ -148,9 +153,25 @@ step:
               name: validateReplicationFactor
               type: custom
           type: horizontal-layout
+        - elements:
+          - disable: true
+            init:
+              type: static
+              value: receive
+            label: Key
+            schema: temp/properties/externalLabelsFixedKey
+            type: input
+          - disable: true
+            init:
+              type: static
+              value: 'true'
+            label: Value
+            schema: temp/properties/externalLabelsFixedValue
+            type: input
+          type: horizontal-layout
         - buttonClass: is-light is-outlined
           label: External Labels
-          schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/routerSpec/properties/externalLabels
+          schema: temp/properties/externalLabelsExtra
           type: object-item
         label: Router
         showLabels: true
@@ -184,7 +205,7 @@ step:
       type: block-layout
     - elements:
       - element:
-          label: Argument
+          label: arg (e.g. --example-flag=true)
           type: input
         label: Additional Args
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalArgs
@@ -307,7 +328,8 @@ step:
           schema: schema/properties/spec/properties/logs/properties/deploymentMode
           type: radio
         - elements:
-          - label: Version
+          - disable: true
+            label: Version
             schema: schema/properties/spec/properties/logs/properties/version
             type: input
           - label: Deletion Policy
@@ -573,6 +595,7 @@ step:
       - schema/properties/spec/properties/logs/properties/s3
       - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumeMounts
       - temp/properties/additionalVolumeMount
+      - temp/properties/externalLabelsExtra
   id: options
   type: single-step-form
 type: multi-step-form
