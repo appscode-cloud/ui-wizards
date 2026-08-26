@@ -31,6 +31,8 @@ spec:
             spec:
               containerSecurityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
+              securityContext:
+                {{- include "pod.securityContext" . | nindent 16 }}
               nodeSelector:
                 kubernetes.io/os: linux
           backoffLimit: 2
@@ -51,6 +53,8 @@ spec:
           spec:
             containerSecurityContext:
               {{- include "container.securityContext" . | nindent 14 }}
+            securityContext:
+              {{- include "pod.securityContext" . | nindent 14 }}
             nodeSelector:
               kubernetes.io/os: linux
 {{- end }}

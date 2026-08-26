@@ -130,6 +130,10 @@ seccompProfile:
   type: RuntimeDefault
 {{- end }}
 
+{{- define "pod.securityContext" -}}
+fsGroup: {{ $.Values.spec.openshift.securityContext.runAsUser | default 7474 }}
+{{- end }}
+
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := "" -}}
