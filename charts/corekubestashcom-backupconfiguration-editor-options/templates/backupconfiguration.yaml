@@ -41,10 +41,20 @@ spec:
             params: {{ .params }}
             {{- end }}
         {{- end }}
-        {{- if and .addon.jobTemplate .addon.jobTemplate.securityContext }}
+        {{- $runAsUser := "" }}
+        {{- if .addon.jobTemplate }}
+        {{- $runAsUser = .addon.jobTemplate.securityContext }}
+        {{- end }}
+        {{- $isNeo4j := eq $.Values.spec.target.kind "Neo4j" }}
+        {{- if or $runAsUser $isNeo4j }}
         jobTemplate:
           spec:
             securityContext:
-              runAsUser: {{ .addon.jobTemplate.securityContext | int64 }}
+              {{- if $runAsUser }}
+              runAsUser: {{ $runAsUser | int64 }}
+              {{- end }}
+              {{- if $isNeo4j }}
+              fsGroup: {{ $runAsUser | default 7474 | int64 }}
+              {{- end }}
         {{- end }}
   {{- end }}

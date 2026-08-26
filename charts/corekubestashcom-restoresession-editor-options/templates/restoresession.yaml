@@ -46,6 +46,9 @@ spec:
         securityContext:
           runAsUser: {{ $runAsUser }}
           runAsGroup: 0
+          {{- if eq .Values.spec.target.kind "Neo4j" }}
+          fsGroup: {{ $runAsUser }}
+          {{- end }}
     containerRuntimeSettings:
       securityContext:
         allowPrivilegeEscalation: false

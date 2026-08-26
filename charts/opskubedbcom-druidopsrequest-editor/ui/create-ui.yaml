@@ -104,21 +104,24 @@ step:
     showLabels: true
     type: block-layout
   - elements:
-    - type: label-element
-      subtitle: Define the total number of replicas for the database. Increasing
-        replicas improves fault tolerance and load distribution, while reducing
-        replicas conserves resources
-      label: ''
+    - label: ""
+      subtitle: Define the total number of replicas for the database. Increasing replicas
+        improves fault tolerance and load distribution, while reducing replicas conserves
+        resources
+      type: label-element
     - customClass: mt-8
       hasIcon: true
-      subtitle: Define the total number of replicas for the database. Increasing
-        replicas improves fault tolerance and load distribution, while reducing
-        replicas conserves resources
       label: Each replica represents an independent copy of your database. For example,
         setting this to 3 creates three copies of the database for better availability.
+      subtitle: Define the total number of replicas for the database. Increasing replicas
+        improves fault tolerance and load distribution, while reducing replicas conserves
+        resources
       type: info
     - elements:
       - header: Brokers
+        if:
+          name: ifDbTypeEqualsTo|brokers|topology|horizontalScaling
+          type: function
         init:
           type: func
           value: setValueFromDbDetails|/spec/topology/brokers/replicas
@@ -135,11 +138,11 @@ step:
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
+      - customClass: ml-30
+        header: Coordinators
         if:
-          name: ifDbTypeEqualsTo|brokers|topology|horizontalScaling
+          name: ifDbTypeEqualsTo|coordinators|topology|horizontalScaling
           type: function
-      - header: Coordinators
-        customClass: ml-30
         init:
           type: func
           value: setValueFromDbDetails|/spec/topology/coordinators/replicas
@@ -156,12 +159,12 @@ step:
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
-        if:
-          name: ifDbTypeEqualsTo|coordinators|topology|horizontalScaling
-          type: function
       type: horizontal-layout
     - elements:
       - header: Historicals
+        if:
+          name: ifDbTypeEqualsTo|historicals|topology|horizontalScaling
+          type: function
         init:
           type: func
           value: setValueFromDbDetails|/spec/topology/historicals/replicas
@@ -178,11 +181,11 @@ step:
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
-        if:
-          name: ifDbTypeEqualsTo|historicals|topology|horizontalScaling
-          type: function
       - customClass: ml-30
         header: Middle Managers
+        if:
+          name: ifDbTypeEqualsTo|middleManagers|topology|horizontalScaling
+          type: function
         init:
           type: func
           value: setValueFromDbDetails|/spec/topology/middleManagers/replicas
@@ -199,12 +202,12 @@ step:
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
-        if:
-          name: ifDbTypeEqualsTo|middleManagers|topology|horizontalScaling
-          type: function
       type: horizontal-layout
     - elements:
       - header: Routers
+        if:
+          name: ifDbTypeEqualsTo|routers|topology|horizontalScaling
+          type: function
         init:
           type: func
           value: setValueFromDbDetails|/spec/topology/routers/replicas
@@ -221,10 +224,10 @@ step:
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/middleManagers
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/overlords
           - schema/properties/spec/properties/horizontalScaling/properties/topology/properties/routers
-        if:
-          name: ifDbTypeEqualsTo|routers|topology|horizontalScaling
-          type: function
       - header: Overlords
+        if:
+          name: ifDbTypeEqualsTo|overlords|topology|horizontalScaling
+          type: function
         init:
           type: func
           value: setValueFromDbDetails|/spec/topology/overlords/replicas
@@ -234,9 +237,6 @@ step:
         validation:
           name: isReplicasValid|overlords
           type: custom|required
-        if:
-          name: ifDbTypeEqualsTo|overlords|topology|horizontalScaling
-          type: function
       type: horizontal-layout
     fixedBlock: true
     if:

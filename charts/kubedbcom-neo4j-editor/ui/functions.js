@@ -179,6 +179,9 @@ export const useFunc = (model) => {
                     type: 'RuntimeDefault',
                   },
                 },
+                securityContext: {
+                  fsGroup: 7474,
+                },
                 nodeSelector: {
                   'kubernetes.io/os': 'linux',
                 },
@@ -220,6 +223,9 @@ export const useFunc = (model) => {
                     seccompProfile: {
                       type: 'RuntimeDefault',
                     },
+                  },
+                  securityContext: {
+                    fsGroup: 7474,
                   },
                   nodeSelector: {
                     'kubernetes.io/os': 'linux',
