@@ -1237,6 +1237,13 @@ export const useFunc = (model) => {
     return verd
   }
 
+  function showP2pTls() {
+    // watchDependency('discriminator#/dbDetails')
+    const mode = getValue(discriminator, '/dbDetails/spec/mode')
+
+    return showIssuerRefAndCertificates() && mode !== 'Standalone'
+  }
+
   function isIssuerRefRequired() {
     const hasTls = hasTlsField()
     return hasTls ? false : ''
@@ -1461,6 +1468,7 @@ export const useFunc = (model) => {
     onTlsOperationChange,
     isTlsOptionDisabled,
     showIssuerRefAndCertificates,
+    showP2pTls,
     isIssuerRefRequired,
     getRequestTypeFromRoute,
     isDbDetailsLoading,
