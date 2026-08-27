@@ -551,28 +551,21 @@ export const useFunc = (model) => {
   }
 
   function getVersionValues(dbname) {
-    return (versions[dbname.toLowerCase()] || []).map((item) => item.value)
+    return versions[dbname.toLowerCase()] || []
   }
 
   // whatever is not selected goes to `disableVersions`
   function setOmittedVersions(dbname, selected) {
     const omitted = getVersionValues(dbname).filter((v) => !selected.includes(v))
-
     commit('wizard/model$update', {
       path: versionsPath(dbname, 'disable'),
       value: omitted,
       force: true,
     })
-
-    return omitted
   }
 
   function withBulkOptions(options) {
-    return [
-      { text: 'Select All', value: 'select-all' },
-      { text: 'Remove All', value: 'remove-all' },
-      ...options,
-    ]
+    return ['Select All', 'Remove All', ...options]
   }
 
   async function getVersions(dbname) {
@@ -601,11 +594,7 @@ export const useFunc = (model) => {
       // keep only non deprecated versions
       const filteredResources = resources
         .filter((item) => item.spec && !item.spec.deprecated)
-        .map((item) => {
-          const name = (item.metadata && item.metadata.name) || ''
-          const specVersion = (item.spec && item.spec.version) || ''
-          return { text: `${name} (${specVersion})`, value: name }
-        })
+        .map((item) => (item.metadata && item.metadata.name) || '')
       versions[lowerCaseDbName] = filteredResources
       return withBulkOptions(filteredResources)
     } catch (e) {
@@ -617,12 +606,15 @@ export const useFunc = (model) => {
   // handles the 'Select All' / 'Remove All' entries of the version selects
   function onVersionChange(dbname) {
     const selected = getValue(model, versionsPath(dbname, 'enable')) || []
-    const list = versions[dbname.toLowerCase()].map((v) => v.value) || []
-    setOmittedVersions(dbname, selected)
+    const hasRemoveAll = selected.includes('Remove All')
+    const hasSelectAll = selected.includes('Select All')
 
-    if (selected.includes('remove-all')) return []
-    if (selected.includes('select-all'))
-      return list.filter((v) => v !== 'select-all' && v !== 'remove-all')
+    const updated = hasRemoveAll ? [] : hasSelectAll ? getVersionValues(dbname) : selected
+    setOmittedVersions(dbname, updated)
+
+    if (!hasRemoveAll && !hasSelectAll) return
+    // the select keeps its value as {text, value} pairs, so wrap the names before handing them back
+    return updated.map((version) => ({ text: version, value: version }))
   }
 
   function isDbSelected(dbname) {
