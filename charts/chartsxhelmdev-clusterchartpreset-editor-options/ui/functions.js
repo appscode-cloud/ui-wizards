@@ -1040,7 +1040,6 @@ export const useFunc = (model) => {
     onMachineProfileChange,
     setMachineProfiles,
     fetchNames,
-    onNodeSelectorChange,
     onAvailableMachineChange,
   }
 }
