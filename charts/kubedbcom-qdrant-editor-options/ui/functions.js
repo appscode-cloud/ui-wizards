@@ -912,6 +912,12 @@ export const useFunc = (model) => {
     return getValue(model, '/spec/admin/tls/default')
   }
 
+  function showP2pTls() {
+    // watchDependency('model#/spec/mode')
+    const mode = getValue(model, '/spec/mode')
+    return showTlsDetails() && mode !== 'Standalone'
+  }
+
   function onBackupSwitch() {
     const isBackupOn = getValue(discriminator, '/backup')
     commit('wizard/model$update', {
@@ -1047,6 +1053,7 @@ export const useFunc = (model) => {
     showAlerts,
     showIssuer,
     showTlsDetails,
+    showP2pTls,
     onBackupSwitch,
     setMonitoring,
     onAuthChange,
