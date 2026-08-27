@@ -538,21 +538,42 @@ export const useFunc = (model) => {
   }
 
   async function setVersions(dbname) {
-    const lowerCaseDbName = dbname.toLowerCase()
-    const initValues =
-      getValue(
-        model,
-        `resources/helmToolkitFluxcdIoHelmRelease_kubedb/spec/values/kubedb-catalog/enableVersions/${dbname}`,
-      ) || []
+    const initValues = getValue(model, versionsPath(dbname, 'enable')) || []
+    const selected = initValues.length ? initValues : getVersionValues(dbname)
+    setOmittedVersions(dbname, selected)
 
-    return initValues.length ? initValues : versions[lowerCaseDbName] || []
+    return selected
   }
   let versions = {}
+
+  function versionsPath(dbname, type) {
+    return `resources/helmToolkitFluxcdIoHelmRelease_kubedb/spec/values/kubedb-catalog/${type}Versions/${dbname}`
+  }
+
+  function getVersionValues(dbname) {
+    return versions[dbname.toLowerCase()] || []
+  }
+
+  // whatever is not selected goes to `disableVersions`
+  function setOmittedVersions(dbname, selected) {
+    const omitted = getVersionValues(dbname).filter((v) => !selected.includes(v))
+    commit('wizard/model$update', {
+      path: versionsPath(dbname, 'disable'),
+      value: omitted,
+      force: true,
+    })
+  }
+
+  function withBulkOptions(options) {
+    return ['Select All', 'Remove All', ...options]
+  }
+
   async function getVersions(dbname) {
     const lowerCaseDbName = dbname.toLowerCase()
     if (versions[lowerCaseDbName]) {
-      return versions[lowerCaseDbName]
+      return withBulkOptions(versions[lowerCaseDbName])
     }
+
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/${lowerCaseDbName}versions`
@@ -573,17 +594,27 @@ export const useFunc = (model) => {
       // keep only non deprecated versions
       const filteredResources = resources
         .filter((item) => item.spec && !item.spec.deprecated)
-        .map((item) => {
-          const name = (item.metadata && item.metadata.name) || ''
-          const specVersion = (item.spec && item.spec.version) || ''
-          return { text: `${name} (${specVersion})`, value: name }
-        })
+        .map((item) => (item.metadata && item.metadata.name) || '')
       versions[lowerCaseDbName] = filteredResources
-      return filteredResources
+      return withBulkOptions(filteredResources)
     } catch (e) {
       console.log(e)
       return []
     }
+  }
+
+  // handles the 'Select All' / 'Remove All' entries of the version selects
+  function onVersionChange(dbname) {
+    const selected = getValue(model, versionsPath(dbname, 'enable')) || []
+    const hasRemoveAll = selected.includes('Remove All')
+    const hasSelectAll = selected.includes('Select All')
+
+    const updated = hasRemoveAll ? [] : hasSelectAll ? getVersionValues(dbname) : selected
+    setOmittedVersions(dbname, updated)
+
+    if (!hasRemoveAll && !hasSelectAll) return
+    // the select keeps its value as {text, value} pairs, so wrap the names before handing them back
+    return updated.map((version) => ({ text: version, value: version }))
   }
 
   function isDbSelected(dbname) {
@@ -611,6 +642,7 @@ export const useFunc = (model) => {
     getEnabledTypes,
     databaseLoader,
     setVersions,
+    onVersionChange,
     getVersions,
     isDbSelected,
   }
