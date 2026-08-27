@@ -17,21 +17,8 @@ export const useFunc = (model) => {
     return getValue(discriminator, '/telemetryPage') === page
   }
 
-  function isPillarEnabled(pillar) {
-    return !!getValue(model, `/spec/${pillar}/enabled`)
-  }
-
-  function pillarStatus(pillar) {
-    return isPillarEnabled(pillar)
-      ? `ClickHouse is collecting ${pillar}. Turn it off to remove the backend from this stack.`
-      : `ClickHouse is not collecting ${pillar}. Turn it on to configure the backend.`
-  }
-
   function isClusterTopology(pillar) {
-    return (
-      isPillarEnabled(pillar) &&
-      getValue(model, `/spec/${pillar}/deploymentMode`) === 'ClusterTopology'
-    )
+    return getValue(model, `/spec/${pillar}/deploymentMode`) === 'ClusterTopology'
   }
 
   const additionalVolumesPath = `${additionalConfigPath}/additionalVolumes/0`
@@ -212,9 +199,7 @@ export const useFunc = (model) => {
     validateStorageSize,
     isActivePage,
     isClusterTopology,
-    isPillarEnabled,
     isVolumeType,
-    pillarStatus,
     s3Field,
     syncS3,
     volumeMode,

@@ -303,20 +303,9 @@ step:
       showLabels: true
       type: block-layout
     - elements:
-      - hasIcon: true
-        isClickable: true
-        label: ClickHouse for Logs
-        loader: pillarStatus|logs
-        switchInfo:
-          schema: schema/properties/spec/properties/logs/properties/enabled
-          type: switch
-        type: neutral
-        watcher:
-          func: pillarStatus|logs
-          paths:
-          - schema/properties/spec/properties/logs/properties/enabled
       - elements:
-        - isHorizontal: true
+        - customClass: mb-16
+          isHorizontal: true
           label: Deployment Mode
           options:
           - description: Single node ClickHouse without high availability
@@ -336,9 +325,6 @@ step:
             schema: schema/properties/spec/properties/logs/properties/deletionPolicy
             type: select
           type: horizontal-layout
-        if:
-          name: isPillarEnabled|logs
-          type: function
         label: General
         showLabels: true
         type: block-layout
@@ -355,9 +341,6 @@ step:
               name: validateStorageSize
               type: custom
           type: horizontal-layout
-        if:
-          name: isPillarEnabled|logs
-          type: function
         label: Persistent Storage
         showLabels: true
         type: block-layout
@@ -404,9 +387,6 @@ step:
               paths:
               - schema/properties/spec/properties/logs/properties/s3/properties/secretKey
           type: horizontal-layout
-        if:
-          name: isPillarEnabled|logs
-          type: function
         label: S3 Storage
         showLabels: true
         type: block-layout
@@ -487,9 +467,6 @@ step:
             name: validateClientCaCertificates
             type: custom
         hideBlock: true
-        if:
-          name: isPillarEnabled|logs
-          type: function
         label: Client CA Certificates
         showLabels: true
         type: block-layout
@@ -549,7 +526,7 @@ step:
     label: Telemetry Stack
     options:
     - options:
-      - icon: circle
+      - icon: chart-column
         options:
         - icon: cloud
           text: S3 Storage
@@ -576,12 +553,7 @@ step:
         text: Thanos
       text: Metrics
     - options:
-      - activeIcon: radio-button
-        checkIcon: success
-        checkIf:
-          name: isPillarEnabled|logs
-          type: function
-        icon: circle
+      - icon: database
         tag: Recommended
         text: ClickHouse
         value: logs-clickhouse
