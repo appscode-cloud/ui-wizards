@@ -1000,26 +1000,6 @@ export const useFunc = (model) => {
     return []
   }
 
-  function onNodeSelectorChange() {
-    let nodeSelector = getValue(discriminator, '/spec/admin/nodeSelector')
-    if (nodeSelector) {
-      nodeSelector = Object.fromEntries(
-        Object.entries(nodeSelector).filter(
-          ([key, value]) => key?.toString().trim() !== '' || value?.toString().trim() !== '',
-        ),
-      )
-    }
-    if (!nodeSelector || Object.entries(nodeSelector).length === 0) {
-      commit('wizard/model$delete', '/spec/admin/nodeSelector')
-    } else {
-      commit('wizard/model$update', {
-        path: '/spec/admin/nodeSelector',
-        value: nodeSelector,
-        force: true,
-      })
-    }
-  }
-
   return {
     preSelectClusterIssuer,
     isRancherManaged,
