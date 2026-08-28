@@ -873,7 +873,7 @@ export const useFunc = (model) => {
     const mappedSecrets = configSecrets.map((item) => {
       return { text: item, value: item }
     })
-    mappedSecrets.push({ text: '+ Create a new Secret', value: 'Create' })
+    // mappedSecrets.push({ text: '+ Create a new Secret', value: 'Create' })
     return mappedSecrets
   }
 
@@ -917,6 +917,10 @@ export const useFunc = (model) => {
         value: 'success',
       })
       commit('wizard/temp$update', {
+        path: `${type}createSecret/onClick`,
+        value: false,
+      })
+      commit('wizard/temp$update', {
         path: `${type}createSecret/lastCreatedSecret`,
         value: secretName,
       })
@@ -941,28 +945,38 @@ export const useFunc = (model) => {
     )
   }
 
+  function onClickCreateSecret(type) {
+    type = type ? type + '/' : ''
+    commit('wizard/temp$update', {
+      path: `${type}createSecret/onClick`,
+      value: true,
+    })
+  }
+
   function isCreateSecret(type) {
     type = type ? type + '/' : ''
-    const selectedSecret = getValue(model, `spec/configuration/${type}configSecret/name`)
-    const res = selectedSecret === 'Create'
+    const onClicked = getValue(discriminator, `${type}createSecret/onClick`)
 
-    if (res === true) {
+    if (onClicked) {
       commit('wizard/temp$update', {
         path: `${type}createSecret/status`,
         value: 'pending',
       })
     }
-    return res
+    return onClicked
   }
 
   function isNotCreateSecret(type) {
-    return !isCreateSecret(type)
+    type = type ? type + '/' : ''
+    return (
+      !isCreateSecret(type) && isValueExist('model', `/spec/configuration/${type}configSecret/name`)
+    )
   }
 
   function onCreateSecretChange(type) {
     type = type ? type + '/' : ''
     const secretStatus = getValue(discriminator, `${type}createSecret/status`)
-    if (secretStatus === 'cancelled') return ''
+    if (secretStatus === 'cancelled' || secretStatus === 'pending') return ''
     else if (secretStatus === 'success') {
       const name = getValue(discriminator, `${type}createSecret/lastCreatedSecret`)
 
@@ -978,6 +992,10 @@ export const useFunc = (model) => {
     commit('wizard/temp$update', {
       path: `${type}createSecret/status`,
       value: 'cancelled',
+    })
+    commit('wizard/temp$update', {
+      path: `${type}createSecret/onClick`,
+      value: false,
     })
   }
 
@@ -1429,6 +1447,11 @@ export const useFunc = (model) => {
     return limits
   }
 
+  function isValueExist(type, path) {
+    const source = type === 'model' ? model : discriminator
+    return !!getValue(source, path)
+  }
+
   return {
     isMonitoringEnabled,
     isReplicasValid,
@@ -1482,6 +1505,7 @@ export const useFunc = (model) => {
     getConfigSecretsforAppyConfig,
     createNewConfigSecret,
     decodeError,
+    onClickCreateSecret,
     isCreateSecret,
     isNotCreateSecret,
     onCreateSecretChange,
@@ -1492,5 +1516,6 @@ export const useFunc = (model) => {
     onSelectedSecretChange,
     isTlsEnabled,
     getCurrentConfig,
+    isValueExist,
   }
 }
