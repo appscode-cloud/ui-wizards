@@ -923,7 +923,10 @@ export const useFunc = (model) => {
         path: `${type}createSecret/lastCreatedSecret`,
         value: secretName,
       })
-      toast.success('Secret created successfully')
+      toast.success(
+        'Secret created successfully. Select the newly created secret from the dropdown menu.',
+        { timeout: 5000 },
+      )
     } catch (error) {
       const errMsg = decodeError(error, 'Failed to create secret')
       toast.error(errMsg, { timeout: 5000 })
