@@ -339,23 +339,28 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/selectedConfiguration
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            loader:
-              name: setApplyConfig
-              watchPaths:
-              - temp/properties/selectedConfiguration
-            placeholder: Add config parameters...
-            schema: temp/properties/applyConfig
-            type: multi-file-editor
-            validateContent: false
-            watcher:
-              func: onApplyconfigChange
-              paths:
-              - temp/properties/applyConfig
+          - type: block-layout
             if:
               name: isValueExist|temp|/selectedConfiguration
               type: function
+            elements:
+            - editorHeight: 500px
+              hideFormatButton: true
+              loader:
+                name: setApplyConfig
+                watchPaths:
+                - temp/properties/selectedConfiguration
+              placeholder: Add config parameters...
+              schema: temp/properties/applyConfig
+              type: multi-file-editor
+              validateContent: false
+              watcher:
+                func: onApplyconfigChange
+                paths:
+                - temp/properties/applyConfig
+            - type: label-element
+              label: ''
+              subtitle: ⓘ Changes will take effect after a successful redeployment.
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig
             type: function
