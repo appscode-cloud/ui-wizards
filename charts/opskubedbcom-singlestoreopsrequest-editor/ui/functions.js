@@ -1166,13 +1166,14 @@ export const useFunc = (model) => {
     }
   }
 
-  function onSelectedSecretChange(index) {
-    const secretData = getValue(discriminator, 'createSecret/data') || []
+  function onSelectedSecretChange(type, index) {
+    type = type ? type + '/' : ''
+    const secretData = getValue(discriminator, `${type}createSecret/data`) || []
     const selfSecrets = secretData.map((item) => item.key)
 
     const remainingSecrets = configSecretKeys.filter((item) => !selfSecrets.includes(item))
 
-    const selfKey = getValue(discriminator, `createSecret/data/${index}/key`)
+    const selfKey = getValue(discriminator, `${type}createSecret/data/${index}/key`)
     if (selfKey) {
       remainingSecrets.push(selfKey)
     }
@@ -1183,14 +1184,15 @@ export const useFunc = (model) => {
   }
 
   // reconfiguration type
-  function ifReconfigurationTypeEqualsTo(value) {
-    const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+  function ifReconfigurationTypeEqualsTo(value, property, isTopology) {
+    let path = '/reconfigurationType'
+    if (isTopology) path += `-${property}`
+    const reconfigurationType = getValue(discriminator, path)
 
-    const watchPath = 'discriminator#/reconfigurationType'
+    // const watchPath = 'discriminator#/reconfigurationType'
     // watchDependency(watchPath)
     return reconfigurationType === value
   }
-
   // for tls
   function hasTlsField() {
     const tls = getDbTls()

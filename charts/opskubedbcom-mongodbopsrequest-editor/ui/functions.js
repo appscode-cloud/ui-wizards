@@ -1254,7 +1254,7 @@ export const useFunc = (model) => {
     if (isShard) path += `-${property}`
     const reconfigurationType = getValue(discriminator, path)
 
-    const watchPath = `discriminator#${path}`
+    // const watchPath = `discriminator#${path}`
     // watchDependency(watchPath)
     return reconfigurationType === value
   }

@@ -539,7 +539,7 @@ step:
                 value: setValueFromDbDetails|/spec/configSecret/name
               label: Select Config Secret
               loader:
-                name: getConfigSecrets
+                name: getConfigSecrets|node
                 watchPaths:
                 - schema/properties/metadata/properties/namespace
                 - temp/properties/node/createSecret/properties/status
@@ -568,7 +568,7 @@ step:
               elements:
               - label: Key
                 loader:
-                  name: onSelectedSecretChange
+                  name: onSelectedSecretChange|node
                   watchPaths:
                   - temp/properties/node/createSecret/properties/data
                 schema: key
@@ -734,7 +734,7 @@ step:
                 value: setValueFromDbDetails|/spec/topology/aggregator/configSecret/name
               label: Select Config Secret
               loader:
-                name: getConfigSecrets
+                name: getConfigSecrets|aggregator
                 watchPaths:
                 - schema/properties/metadata/properties/namespace
                 - temp/properties/aggregator/createSecret/properties/status
@@ -763,7 +763,7 @@ step:
               elements:
               - label: Key
                 loader:
-                  name: onSelectedSecretChange
+                  name: onSelectedSecretChange|aggregator
                   watchPaths:
                   - temp/properties/aggregator/createSecret/properties/data
                 schema: key
@@ -804,7 +804,7 @@ step:
             type: multi-file-editor
             validateContent: false
           if:
-            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|aggregator|true
             type: function
           label: Aggregator Config Secret
           type: block-layout
@@ -843,7 +843,7 @@ step:
               label: ''
               subtitle: ⓘ Changes will take effect after a successful redeployment.
           if:
-            name: ifReconfigurationTypeEqualsTo|applyConfig
+            name: ifReconfigurationTypeEqualsTo|applyConfig|aggregator|true
             type: function
           label: ApplyConfig
           type: block-layout
@@ -862,15 +862,6 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/aggregator/selectedConfigurationRemove
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            init:
-              type: func
-              value: onRemoveConfigChange|aggregator
-            readonly: true
-            schema: temp/properties/aggregator/removeConfig
-            type: multi-file-editor
-            validateContent: false
             watcher:
               func: onRemoveConfigChange|aggregator
               paths:
@@ -889,7 +880,7 @@ step:
             type: multi-file-editor
             validateContent: false
           if:
-            name: ifReconfigurationTypeEqualsTo|remove
+            name: ifReconfigurationTypeEqualsTo|remove|aggregator|true
             type: function
           label: Remove
           type: block-layout
@@ -905,7 +896,7 @@ step:
           name: isCreateSecret|aggregator
           watchPaths:
           - temp/properties/aggregator/createSecret/properties/onClick
-        schema: temp/properties/reconfigurationType
+        schema: temp/properties/reconfigurationType-aggregator
         type: tab-layout
       if:
         name: ifDbTypeEqualsTo|Topology|Reconfigure
@@ -938,7 +929,7 @@ step:
                 value: setValueFromDbDetails|/spec/topology/leaf/configSecret/name
               label: Select Config Secret
               loader:
-                name: getConfigSecrets
+                name: getConfigSecrets|leaf
                 watchPaths:
                 - schema/properties/metadata/properties/namespace
                 - temp/properties/leaf/createSecret/properties/status
@@ -967,7 +958,7 @@ step:
               elements:
               - label: Key
                 loader:
-                  name: onSelectedSecretChange
+                  name: onSelectedSecretChange|leaf
                   watchPaths:
                   - temp/properties/leaf/createSecret/properties/data
                 schema: key
@@ -1008,7 +999,7 @@ step:
             type: multi-file-editor
             validateContent: false
           if:
-            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|leaf|true
             type: function
           label: Leaf Config Secret
           type: block-layout
@@ -1047,7 +1038,7 @@ step:
               label: ''
               subtitle: ⓘ Changes will take effect after a successful redeployment.
           if:
-            name: ifReconfigurationTypeEqualsTo|applyConfig
+            name: ifReconfigurationTypeEqualsTo|applyConfig|leaf|true
             type: function
           label: ApplyConfig
           type: block-layout
@@ -1065,15 +1056,6 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/leaf/selectedConfigurationRemove
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            init:
-              type: func
-              value: onRemoveConfigChange|leaf
-            readonly: true
-            schema: temp/properties/leaf/removeConfig
-            type: multi-file-editor
-            validateContent: false
             watcher:
               func: onRemoveConfigChange|leaf
               paths:
@@ -1092,7 +1074,7 @@ step:
             type: multi-file-editor
             validateContent: false
           if:
-            name: ifReconfigurationTypeEqualsTo|remove
+            name: ifReconfigurationTypeEqualsTo|remove|leaf|true
             type: function
           label: Remove
           type: block-layout
@@ -1108,7 +1090,7 @@ step:
           name: isCreateSecret|leaf
           watchPaths:
           - temp/properties/leaf/createSecret/properties/onClick
-        schema: temp/properties/reconfigurationType
+        schema: temp/properties/reconfigurationType-leaf
         type: tab-layout
       if:
         name: ifDbTypeEqualsTo|Topology|Reconfigure
