@@ -5,6 +5,8 @@ const additionalConfigPath = '/spec/metrics/thanos/ruler/additionalConfig'
 const retentionConfigPath = '/spec/metrics/thanos/compact/retentionConfig'
 const externalLabelsPath = '/spec/metrics/thanos/receive/routerSpec/externalLabels'
 
+const storageClassCache = {}
+
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, storeGet, discriminator, commit } = useOperator(
     model,
@@ -171,21 +173,26 @@ export const useFunc = (model) => {
     return false
   }
 
-  async function getStorageClasses() {
+  function getStorageClasses() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
+    const key = `${owner}/${cluster}`
 
-    try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-        { params: { filter: { items: { metadata: { name: null } } } } },
-      )
-      const items = (resp && resp.data && resp.data.items) || []
-      return items.map((item) => item?.metadata?.name).filter(Boolean)
-    } catch (e) {
-      console.log(e)
-      return []
+    if (!storageClassCache[key]) {
+      storageClassCache[key] = axios
+        .get(`/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`)
+        .then((resp) => {
+          const items = (resp && resp.data && resp.data.items) || []
+          return items.map((item) => item?.metadata?.name).filter(Boolean)
+        })
+        .catch((e) => {
+          console.log(e)
+          delete storageClassCache[key]
+          return []
+        })
     }
+
+    return storageClassCache[key]
   }
 
   return {
