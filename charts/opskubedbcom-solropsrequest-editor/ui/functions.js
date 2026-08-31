@@ -1115,6 +1115,47 @@ export const useFunc = (model) => {
       value: true,
     })
   }
+  // TODO: Remove multi editor pannel functionalities from remove section in reconfig ops
+  // when current configuration (appliedConfig) is set to databaseConfiguration api
+
+  function getConfigData(type) {
+    type = type ? type + '/' : ''
+    const selectedConfig = getValue(discriminator, `/${type}selectedConfigurationRemove`)
+    const configuration = secretConfigData.find((item) => item.componentName === selectedConfig)
+
+    return configuration?.data
+  }
+
+  function ifConfigExist(type) {
+    return !!getConfigData(type)
+  }
+
+  function setRemoveConfig(type) {
+    const configData = getConfigData(type)
+
+    if (!configData) {
+      return [{ name: '', content: '' }]
+    }
+    const configObj = []
+    // Decode base64 and format as array of objects with name and content
+    Object.keys(configData).forEach((fileName) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(configData[fileName])
+        configObj.push({
+          name: fileName,
+          content: decodedString,
+        })
+      } catch (e) {
+        console.error(`Error decoding ${fileName}:`, e)
+        configObj.push({
+          name: fileName,
+          content: configData[fileName], // Fallback to original if decode fails
+        })
+      }
+    })
+    return configObj
+  }
 
   async function onNewConfigSecretChange(type) {
     type = type ? type + '/' : ''
@@ -1572,6 +1613,8 @@ export const useFunc = (model) => {
     cancelCreateSecret,
     setApplyConfig,
     onRemoveConfigChange,
+    ifConfigExist,
+    setRemoveConfig,
     onNewConfigSecretChange,
     onSelectedSecretChange,
     isTlsEnabled,
