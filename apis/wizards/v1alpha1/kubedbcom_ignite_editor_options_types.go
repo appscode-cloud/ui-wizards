@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -48,17 +49,30 @@ type KubedbcomIgniteEditorOptionsSpecSpec struct {
 	Labels map[string]string `json:"labels"`
 	Mode   GeneralMode       `json:"mode"`
 	// +optional
-	Replicas       int                `json:"replicas,omitempty"`
-	Persistence    Persistence        `json:"persistence"`
-	PodResources   PodResources       `json:"podResources"`
-	AuthSecret     AuthSecret         `json:"authSecret"`
-	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Configuration  string             `json:"configuration"`
-	Admin          AdminOptions       `json:"admin"`
-	Backup         BackupToolSpec     `json:"backup"`
-	Monitoring     MonitoringOperator `json:"monitoring"`
+	Replicas       int            `json:"replicas,omitempty"`
+	Persistence    Persistence    `json:"persistence"`
+	PodResources   PodResources   `json:"podResources"`
+	AuthSecret     AuthSecret     `json:"authSecret"`
+	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
+	Configuration  string         `json:"configuration"`
+	// +optional
+	ServiceTemplates []IgniteServiceTemplate `json:"serviceTemplates,omitempty"`
+	Admin            AdminOptions            `json:"admin"`
+	Backup           BackupToolSpec          `json:"backup"`
+	Monitoring       MonitoringOperator      `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
+type IgniteServiceAlias string
+
+type IgniteServiceTemplate struct {
+	Alias IgniteServiceAlias `json:"alias"`
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// +optional
+	SvcType core.ServiceType `json:"svcType,omitempty"`
 }
 
 type IgniteAlertsSpecForm struct {

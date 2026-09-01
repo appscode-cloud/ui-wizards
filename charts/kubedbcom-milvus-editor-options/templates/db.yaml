@@ -214,6 +214,22 @@ spec:
       {{- include "common.placement" . | nindent 6 }}
 {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- $svcTpls := .Values.spec.serviceTemplates | default .Values.spec.admin.serviceTemplates }}
+{{- if $svcTpls }}
+  serviceTemplates:
+  {{- range $svcTpls }}
+  - alias: {{ .alias }}
+    {{- if .annotations }}
+    metadata:
+      annotations:
+        {{- toYaml .annotations | nindent 8 }}
+    {{- end }}
+    {{- if .svcType }}
+    spec:
+      type: {{ .svcType }}
+    {{- end }}
+  {{- end }}
+{{- end }}
 {{- if or .Values.spec.authSecret.name .Values.spec.authSecret.password .Values.spec.authSecret.externallyManaged }}
   authSecret:
     name: {{ .Values.spec.authSecret.name | default (printf "%s-auth" (include "kubedbcom-milvus-editor-options.fullname" .)) }}
