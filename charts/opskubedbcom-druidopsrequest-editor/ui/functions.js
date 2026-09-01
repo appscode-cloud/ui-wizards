@@ -321,6 +321,8 @@ const druidNodeTypes = [
   'middleManagers',
 ]
 
+let allowScaling = false
+
 let machinesFromPreset = []
 let secretArray = []
 const configSecretKeys = [
@@ -417,6 +419,14 @@ export const useFunc = (model) => {
       try {
         const resp = await axios.get(url)
         setDiscriminatorValue('/dbDetails', resp.data || {})
+
+        if (route.params.actions === 'scale-storage') {
+          const storageClassName = resp.data?.spec?.topology?.historicals?.storage?.storageClassName
+          const stUrl = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses/longhorn`
+          const storageResp = await axios.get(stUrl)
+          allowScaling = storageResp.data?.allowVolumeExpansion || false
+        }
+
         return resp.data || {}
       } catch (e) {
         console.log(e)
@@ -970,6 +980,10 @@ export const useFunc = (model) => {
   // ============================================================
   // VOLUME EXPANSION FUNCTIONS
   // ============================================================
+
+  function isScalingDIsabled() {
+    return allowScaling === false
+  }
 
   function checkVolume(currentVolPath, newVolPath) {
     // watchDependency(`discriminator#${currentVolPath}`)
@@ -1566,40 +1580,10 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  // ============================================================
-  // HELPER FUNCTIONS
-  // ============================================================
-
-  // ============================================================
-  // RESOURCE MANAGEMENT FUNCTIONS
-  // ============================================================
-
   function setApplyToIfReady() {
     return 'IfReady'
   }
 
-  // ============================================================
-  // ADDITIONAL HELPER FUNCTIONS (from MongoDB patterns)
-  // ============================================================
-
-  /**
-   * Utility function to safely get nested values from objects
-   * @param {Object} obj - The object to traverse
-   * @param {String} path - Dot notation path (e.g., 'spec.topology.brokers')
-   * @param {*} defaultValue - Default value if path not found
-   * @returns {*} The value at the path or default value
-   */
-  /**
-   * Check if the current database has specific topology configuration
-   * @param {String} topologyType - The topology type to check
-   * @returns {Boolean} Whether the topology exists
-   */
-  /**
-   * Get resource limits or requests from database details
-   * @param {String} type - Node type (e.g., 'brokers', 'historicals')
-   * @param {String} resourceType - 'limits' or 'requests'
-   * @returns {Object} Resource configuration
-   */
   function isReplicasValid(type) {
     let currentReplicas = getValue(discriminator, `/dbDetails/spec/topology/${type}/replicas`)
     let newReplicas = getValue(model, `/spec/horizontalScaling/topology/${type}`)
@@ -1716,6 +1700,7 @@ export const useFunc = (model) => {
     // Volume expansion functions
     checkVolume,
     parseSize,
+    isScalingDIsabled,
 
     // Configuration functions
     getConfigSecrets,

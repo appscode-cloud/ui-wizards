@@ -575,9 +575,16 @@ step:
             type: required
         type: block-layout
       type: horizontal-layout
+    - type: warning
+      hasIcon: true
+      if:
+        name: isScalingDIsabled
+        type: function
+      label: 'Warning: Volume expansion may require downtime depending on the underlying storage class. Please check your storage class documentation for details.'
     - elements:
       - elements:
-        - init:
+        - disable: isScalingDIsabled
+          init:
             type: func
             value: setValueFromDbDetails|/spec/topology/historicals/storage/resources/requests/storage
           label: Storage Size
@@ -599,7 +606,8 @@ step:
       type: block-layout
     - elements:
       - elements:
-        - init:
+        - disable: isScalingDIsabled
+          init:
             type: func
             value: setValueFromDbDetails|/spec/topology/middleManagers/storage/resources/requests/storage
           label: Storage Size
