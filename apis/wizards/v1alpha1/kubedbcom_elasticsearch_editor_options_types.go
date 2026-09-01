@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -58,14 +59,27 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	AuthSecret     AuthSecret             `json:"authSecret"`
 	DeletionPolicy DeletionPolicy         `json:"deletionPolicy"`
 	Configuration  string                 `json:"configuration"`
-	Admin          AdminOptions           `json:"admin"`
-	Backup         BackupToolSpec         `json:"backup"`
-	Monitoring     MonitoringOperator     `json:"monitoring"`
+	// +optional
+	ServiceTemplates []ElasticsearchServiceTemplate `json:"serviceTemplates,omitempty"`
+	Admin            AdminOptions                   `json:"admin"`
+	Backup           BackupToolSpec                 `json:"backup"`
+	Monitoring       MonitoringOperator             `json:"monitoring"`
 	// KernelSettings contains the additional kernel settings.
 	// +optional
 	KernelSettings KernelSettings `json:"kernelSettings"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=primary;standby;stats
+type ElasticsearchServiceAlias string
+
+type ElasticsearchServiceTemplate struct {
+	Alias ElasticsearchServiceAlias `json:"alias"`
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// +optional
+	SvcType core.ServiceType `json:"svcType,omitempty"`
 }
 
 type KernelSettings struct {

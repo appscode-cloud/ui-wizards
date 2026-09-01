@@ -1831,6 +1831,28 @@ step:
         type: block-layout
       - elements:
         - elements:
+          - elements:
+            - label: Alias
+              schema: alias
+              type: input
+            - label: Annotations
+              schema: annotations
+              type: object-item
+            - label: Service Type
+              options:
+              - ClusterIP
+              - NodePort
+              - LoadBalancer
+              schema: svcType
+              type: select
+            label: New Service Template
+            schema: schema/properties/spec/properties/admin/properties/serviceTemplates
+            type: array-object-form
+          hideBlock: true
+          label: Service Templates
+          showLabels: true
+          type: block-layout
+        - elements:
           - label: Can users modify Monitoring?
             schema: schema/properties/spec/properties/admin/properties/monitoring/properties/toggle
             type: switch
@@ -1860,6 +1882,50 @@ step:
             label: Resources
             showLabels: true
             type: horizontal-layout
+          - elements:
+            - label: Scrape Interval
+              schema: schema/properties/spec/properties/admin/properties/monitoring/properties/serviceMonitor/properties/interval
+              type: input
+            - label: Labels
+              schema: schema/properties/spec/properties/admin/properties/monitoring/properties/serviceMonitor/properties/labels
+              type: object-item
+            - elements:
+              - label: Port
+                schema: port
+                type: input
+              - elements:
+                - label: Action
+                  options:
+                  - replace
+                  - keep
+                  - drop
+                  - labelmap
+                  - labeldrop
+                  - labelkeep
+                  - hashmod
+                  - lowercase
+                  - uppercase
+                  schema: action
+                  type: select
+                - element:
+                    label: Source Label
+                    type: input
+                  label: Source Labels
+                  schema: sourceLabels
+                  type: array-item-form
+                - label: Target Label
+                  schema: targetLabel
+                  type: input
+                label: New Relabeling
+                schema: relabelings
+                type: array-object-form
+              label: New Endpoint
+              schema: schema/properties/spec/properties/admin/properties/monitoring/properties/serviceMonitor/properties/endpoints
+              type: array-object-form
+            hideBlock: true
+            label: Service Monitor
+            showLabels: true
+            type: block-layout
           hideBlock: true
           label: Monitoring
           showLabels: true

@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -63,12 +64,25 @@ type KubedbcomMilvusEditorOptionsSpecSpec struct {
 	// +optional
 	ConfigurationSecretName string `json:"configurationSecretName,omitempty"`
 	// +optional
-	ConfigurationInline map[string]string  `json:"configurationInline,omitempty"`
-	Admin               AdminOptions       `json:"admin"`
-	Backup              BackupToolSpec     `json:"backup"`
-	Monitoring          MonitoringOperator `json:"monitoring"`
+	ConfigurationInline map[string]string `json:"configurationInline,omitempty"`
+	// +optional
+	ServiceTemplates []MilvusServiceTemplate `json:"serviceTemplates,omitempty"`
+	Admin            AdminOptions            `json:"admin"`
+	Backup           BackupToolSpec          `json:"backup"`
+	Monitoring       MonitoringOperator      `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
+type MilvusServiceAlias string
+
+type MilvusServiceTemplate struct {
+	Alias MilvusServiceAlias `json:"alias"`
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// +optional
+	SvcType core.ServiceType `json:"svcType,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Distributed
