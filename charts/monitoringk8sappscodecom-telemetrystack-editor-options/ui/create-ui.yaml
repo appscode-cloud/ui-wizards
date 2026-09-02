@@ -6,17 +6,32 @@ step:
         - label: Storage Size
           schema: schema/properties/spec/properties/metrics/properties/thanos/properties/compact/properties/storageSize
           type: input
+          validation:
+            name: validateStorageSize
+            type: custom
+        customClass: mb-16
         type: horizontal-layout
       - elements:
         - label: Raw Retention
           schema: raw
           type: input
+          validation:
+            name: validateRawRetention
+            type: custom
         - label: 5m Retention
           schema: fiveMinutes
           type: input
+          validation:
+            name: validateFiveMinutesRetention
+            type: custom
         - label: 1h Retention
           schema: oneHour
           type: input
+          validation:
+            name: validateOneHourRetention
+            type: custom
+            watchPaths:
+            - schema/properties/spec/properties/metrics/properties/thanos/properties/compact/properties/retentionConfig/0/fiveMinutes
         label: Retention Config
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/compact/properties/retentionConfig
         type: array-object-form
@@ -31,13 +46,20 @@ step:
         - label: Storage Size
           schema: schema/properties/spec/properties/metrics/properties/thanos/properties/store/properties/storageSize
           type: input
+          validation:
+            name: validateStorageSize
+            type: custom
         - label: Ignore Deletion Marks Delay
           schema: schema/properties/spec/properties/metrics/properties/thanos/properties/store/properties/ignoreDeletionMarksDelay
           type: input
+          validation:
+            name: validateRetention
+            type: custom
         type: horizontal-layout
       - elements:
         - elements:
-          - label: Type
+          - disable: true
+            label: Type
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/store/properties/shardingStrategy/properties/type
             type: input
           - label: Shards
@@ -82,24 +104,34 @@ step:
           - label: Storage Size
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/storageSize
             type: input
+            validation:
+              name: validateStorageSize
+              type: custom
           - label: TSDB Retention
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tsdbRetention
             type: input
+            validation:
+              name: validateRetention
+              type: custom
           type: horizontal-layout
         - elements:
           - elements:
-            - label: Matcher Type
+            - disable: true
+              label: Matcher Type
               schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tenancyConfig/properties/tenantMatcherType
               type: select
-            - label: Tenant Header
+            - disable: true
+              label: Tenant Header
               schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tenancyConfig/properties/tenantHeader
               type: input
             type: horizontal-layout
           - elements:
-            - label: Default Tenant ID
+            - disable: true
+              label: Default Tenant ID
               schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tenancyConfig/properties/defaultTenantID
               type: input
-            - label: Tenant Label Name
+            - disable: true
+              label: Tenant Label Name
               schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/ingesterSpec/properties/tenancyConfig/properties/tenantLabelName
               type: input
             type: horizontal-layout
@@ -117,10 +149,29 @@ step:
           - label: Replication Factor
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/routerSpec/properties/replicationFactor
             type: input
+            validation:
+              name: validateReplicationFactor
+              type: custom
+          type: horizontal-layout
+        - elements:
+          - disable: true
+            init:
+              type: static
+              value: receive
+            label: Key
+            schema: temp/properties/externalLabelsFixedKey
+            type: input
+          - disable: true
+            init:
+              type: static
+              value: 'true'
+            label: Value
+            schema: temp/properties/externalLabelsFixedValue
+            type: input
           type: horizontal-layout
         - buttonClass: is-light is-outlined
           label: External Labels
-          schema: schema/properties/spec/properties/metrics/properties/thanos/properties/receive/properties/routerSpec/properties/externalLabels
+          schema: temp/properties/externalLabelsExtra
           type: object-item
         label: Router
         showLabels: true
@@ -139,6 +190,9 @@ step:
         - label: Storage Size
           schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/storageSize
           type: input
+          validation:
+            name: validateStorageSize
+            type: custom
         type: horizontal-layout
       - label: Alertmanager URL
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/alertmanagerURL
@@ -151,75 +205,97 @@ step:
       type: block-layout
     - elements:
       - element:
-          label: Argument
+          label: arg (e.g. --example-flag=true)
           type: input
         label: Additional Args
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalArgs
         type: array-item-form
       - elements:
-        - label: Volume Type
-          options:
-          - text: Secret
-            value: Secret
-          - text: ConfigMap
-            value: ConfigMap
-          schema: volumeType
-          type: select
-        - label: Name
-          schema: name
-          type: input
-        - if:
-            name: isVolumeType|ConfigMap
-            type: function
-          label: ConfigMap Name
-          schema: secretName
-          type: input
-        - if:
-            name: isVolumeType|Secret
-            type: function
-          label: Secret Name
-          schema: secretName
-          type: input
-        - label: Key
-          schema: key
-          type: input
-        - label: Path
-          schema: path
-          type: input
-        - disable: true
-          label: Mode
-          schema: mode
-          type: input
-          watcher:
-            func: volumeMode
-            paths:
-            - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/dynamicIndex/volumeType
+        - customClass: mb-16
+          elements:
+          - label: Volume Type
+            options:
+            - text: Secret
+              value: Secret
+            - text: ConfigMap
+              value: ConfigMap
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/volumeType
+            type: select
+          type: horizontal-layout
+        - customClass: mb-16
+          elements:
+          - label: Name
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/name
+            type: input
+            validation:
+              type: required
+          - if:
+              name: isVolumeType|ConfigMap
+              type: function
+            label: ConfigMap Name
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/secretName
+            type: input
+            validation:
+              type: required
+          - if:
+              name: isVolumeType|Secret
+              type: function
+            label: Secret Name
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/secretName
+            type: input
+            validation:
+              type: required
+          type: horizontal-layout
+        - customClass: mb-16
+          elements:
+          - label: Key
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/key
+            type: input
+            validation:
+              type: required
+          - label: Path
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/path
+            type: input
+            validation:
+              type: required
+          - disable: true
+            label: Mode
+            schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/mode
+            type: input
+            watcher:
+              func: volumeMode
+              paths:
+              - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/volumeType
+          type: horizontal-layout
         label: Additional Volumes
-        schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes
-        type: array-object-form
+        showLabels: true
+        type: block-layout
       - elements:
-        - disable: true
-          label: Name
-          schema: name
-          type: input
-          watcher:
-            func: volumeName
-            paths:
-            - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/dynamicIndex/name
-        - disable: true
-          label: Mount Path
-          schema: mountPath
-          type: input
-          watcher:
-            func: volumeMountPath
-            paths:
-            - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/dynamicIndex/path
+        - customClass: mb-16
+          elements:
+          - disable: true
+            label: Name
+            schema: temp/properties/additionalVolumeMount/properties/name
+            type: input
+            watcher:
+              func: volumeName
+              paths:
+              - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/name
+          - disable: true
+            label: Mount Path
+            schema: temp/properties/additionalVolumeMount/properties/mountPath
+            type: input
+            watcher:
+              func: volumeMountPath
+              paths:
+              - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/path
+          type: horizontal-layout
         - label: Read Only
-          schema: readOnly
+          schema: temp/properties/additionalVolumeMount/properties/readOnly
           type: switch
         label: Additional Volume Mounts
-        schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumeMounts
-        type: array-object-form
+        showLabels: true
+        type: block-layout
       if:
         name: isActivePage|metrics-thanos-additional-config
         type: function
@@ -227,33 +303,31 @@ step:
       showLabels: true
       type: block-layout
     - elements:
-      - hasIcon: true
-        isClickable: true
-        label: ClickHouse for Logs
-        loader: pillarStatus|logs
-        switchInfo:
-          schema: schema/properties/spec/properties/logs/properties/enabled
-          type: switch
-        type: neutral
-        watcher:
-          func: pillarStatus|logs
-          paths:
-          - schema/properties/spec/properties/logs/properties/enabled
       - elements:
+        - customClass: mb-16
+          isHorizontal: true
+          label: Deployment Mode
+          options:
+          - description: Single node ClickHouse without high availability
+            text: Standalone
+            value: Standalone
+          - description: ClickHouse Topology cluster for high performance and high availability.
+            text: Cluster Topology
+            value: ClusterTopology
+          schema: schema/properties/spec/properties/logs/properties/deploymentMode
+          type: radio
         - elements:
-          - label: Version
+          - customClass: mb-0
+            disable: true
+            label: Version
             schema: schema/properties/spec/properties/logs/properties/version
             type: input
-          - label: Deployment Mode
-            schema: schema/properties/spec/properties/logs/properties/deploymentMode
-            type: select
-          - label: Deletion Policy
+          - customClass: mb-0
+            label: Deletion Policy
             schema: schema/properties/spec/properties/logs/properties/deletionPolicy
             type: select
+          customClass: mt-20
           type: horizontal-layout
-        if:
-          name: isPillarEnabled|logs
-          type: function
         label: General
         showLabels: true
         type: block-layout
@@ -266,10 +340,10 @@ step:
           - label: Storage Size
             schema: schema/properties/spec/properties/logs/properties/storage/properties/size
             type: input
+            validation:
+              name: validateStorageSize
+              type: custom
           type: horizontal-layout
-        if:
-          name: isPillarEnabled|logs
-          type: function
         label: Persistent Storage
         showLabels: true
         type: block-layout
@@ -316,9 +390,6 @@ step:
               paths:
               - schema/properties/spec/properties/logs/properties/s3/properties/secretKey
           type: horizontal-layout
-        if:
-          name: isPillarEnabled|logs
-          type: function
         label: S3 Storage
         showLabels: true
         type: block-layout
@@ -331,14 +402,24 @@ step:
             - label: Replicas
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/cluster/properties/replicas
               type: input
+              validation:
+                name: validateReplicationFactor
+                type: custom
             type: horizontal-layout
           - elements:
             - label: Shards
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/cluster/properties/shards
               type: input
+            - label: Storage Class
+              loader: getStorageClasses
+              schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/cluster/properties/persistence/properties/storageClassName
+              type: select
             - label: Storage Size
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/cluster/properties/persistence/properties/size
               type: input
+              validation:
+                name: validateStorageSize
+                type: custom
             type: horizontal-layout
           label: Cluster
           showLabels: true
@@ -351,9 +432,19 @@ step:
             - label: Replicas
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/clickHouseKeeper/properties/replicas
               type: input
+              validation:
+                name: validateReplicationFactor
+                type: custom
+            - label: Storage Class
+              loader: getStorageClasses
+              schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/clickHouseKeeper/properties/persistence/properties/storageClassName
+              type: select
             - label: Storage Size
               schema: schema/properties/spec/properties/logs/properties/clusterTopology/properties/clickHouseKeeper/properties/persistence/properties/size
               type: input
+              validation:
+                name: validateStorageSize
+                type: custom
             type: horizontal-layout
           label: ClickHouse Keeper
           showLabels: true
@@ -375,10 +466,10 @@ step:
           label: Certificates
           schema: schema/properties/spec/properties/logs/properties/clientCaCertificates
           type: array-object-form
+          validation:
+            name: validateClientCaCertificates
+            type: custom
         hideBlock: true
-        if:
-          name: isPillarEnabled|logs
-          type: function
         label: Client CA Certificates
         showLabels: true
         type: block-layout
@@ -435,10 +526,11 @@ step:
       label: S3 Object Storage
       showLabels: true
       type: block-layout
+    customClass: pl-0 pr-0
     label: Telemetry Stack
     options:
     - options:
-      - icon: circle
+      - icon: chart-column
         options:
         - icon: cloud
           text: S3 Storage
@@ -465,12 +557,7 @@ step:
         text: Thanos
       text: Metrics
     - options:
-      - activeIcon: radio-button
-        checkIcon: success
-        checkIf:
-          name: isPillarEnabled|logs
-          type: function
-        icon: circle
+      - icon: database
         tag: Recommended
         text: ClickHouse
         value: logs-clickhouse
@@ -483,6 +570,8 @@ step:
       paths:
       - schema/properties/spec/properties/logs/properties/s3
       - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumeMounts
+      - temp/properties/additionalVolumeMount
+      - temp/properties/externalLabelsExtra
   id: options
   type: single-step-form
 type: multi-step-form
