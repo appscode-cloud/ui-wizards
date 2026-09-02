@@ -39,10 +39,6 @@ export const useFunc = (model) => {
 
   function volumeMountPath() {
     const path = getValue(model, `${additionalVolumesPath}/path`)
-    return path ? `${certificateMountDir}/${path}` : ''
-  }
-
-  function syncAdditionalConfig() {
     const mount = getValue(discriminator, '/additionalVolumeMount') || {}
     const mountsPath = `${additionalConfigPath}/additionalVolumeMounts`
     const current = getValue(model, mountsPath)
