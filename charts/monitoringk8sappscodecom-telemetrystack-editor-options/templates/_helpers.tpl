@@ -71,7 +71,7 @@ clusterTopology:
     replicas: {{ $pillar.clusterTopology.cluster.replicas }}
     shards: {{ $pillar.clusterTopology.cluster.shards }}
     storage:
-      storageClassName: {{ $pillar.storage.storageClassName | quote }}
+      storageClassName: {{ $pillar.clusterTopology.cluster.persistence.storageClassName | quote }}
       accessModes:
       - ReadWriteOnce
       resources:
@@ -81,7 +81,7 @@ clusterTopology:
     externallyManaged: {{ $pillar.clusterTopology.clickHouseKeeper.externallyManaged }}
     replicas: {{ $pillar.clusterTopology.clickHouseKeeper.replicas }}
     storage:
-      storageClassName: {{ $pillar.storage.storageClassName | quote }}
+      storageClassName: {{ $pillar.clusterTopology.clickHouseKeeper.persistence.storageClassName | quote }}
       accessModes:
       - ReadWriteOnce
       resources:
