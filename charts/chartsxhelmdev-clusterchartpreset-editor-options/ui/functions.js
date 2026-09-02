@@ -94,11 +94,11 @@ export const useFunc = (model) => {
       resources: {
         requests: {
           cpu: '500m',
-          memory: '912680550',
+          memory: '0.85Gi',
         },
         limits: {
           cpu: '1',
-          memory: '1825361100',
+          memory: '1.7Gi',
         },
       },
     },
