@@ -411,88 +411,111 @@ step:
     type: block-layout
   - elements:
     - elements:
+      - hasIcon: true
+        label: ""
+        loader: loadwarning
+        type: warning
+      hideBorder: true
+      if:
+        name: isScalingDisabled
+        type: function
+      label: Volume Expansion Warning
+      showLabels: false
+      type: block-layout
+    - elements:
       - elements:
-        - label: Mode
-          subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
-            with minimal disruption. Choose Offline Mode if you can afford a brief
-            downtime for added reliability during the volume expansion.
-          type: label-element
-        - label: Mode
-          options:
-          - text: Offline
-            value: Offline
-          - text: Online
-            value: Online
-          schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          type: select
-          validation:
-            type: required
+        - elements:
+          - label: Mode
+            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
+              with minimal disruption. Choose Offline Mode if you can afford a brief
+              downtime for added reliability during the volume expansion.
+            type: label-element
+          - label: Mode
+            options:
+            - text: Offline
+              value: Offline
+            - text: Online
+              value: Online
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+            type: select
+            validation:
+              type: required
+          type: block-layout
+        type: horizontal-layout
+      - elements:
+        - elements:
+          - disable: isScalingDisabled
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/aggregator/storage/resources/requests/storage
+            label: Storage Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/aggregator
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/aggregator/storage/resources/requests/storage|/spec/volumeExpansion/aggregator
+              type: custom
+          type: horizontal-layout
+        fixedBlock: true
+        if:
+          name: ifDbTypeEqualsTo|Topology|VolumeExpansion
+          type: function
+        label: Aggregator Volume Expansion
+        showLabels: true
         type: block-layout
-      type: horizontal-layout
-    - elements:
       - elements:
-        - init:
+        - elements:
+          - disable: isScalingDisabled
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/leaf/storage/resources/requests/storage
+            label: Storage Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/leaf
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/leaf/storage/resources/requests/storage|/spec/volumeExpansion/leaf
+              type: custom
+          type: horizontal-layout
+        fixedBlock: true
+        if:
+          name: ifDbTypeEqualsTo|Topology|VolumeExpansion
+          type: function
+        label: Leaf Volume Expansion
+        showLabels: true
+        type: block-layout
+      - elements:
+        - elements:
+          - label: Storage Size
+            subtitle: How much extra storage does your database need? Specify the
+              size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: label-element
+          - hasIcon: true
+            label: Storage expansion allows you to increase your database's disk space
+              without downtime (Online mode) or with brief downtime (Offline mode).
+            type: info
+          type: horizontal-layout
+        - disable: isScalingDisabled
+          init:
             type: func
-            value: setValueFromDbDetails|/spec/topology/aggregator/storage/resources/requests/storage
+            value: setValueFromDbDetails|/spec/storage/resources/requests/storage
           label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/aggregator
+          schema: schema/properties/spec/properties/volumeExpansion/properties/node
           type: input-compare
           validation:
-            name: checkVolume|/spec/topology/aggregator/storage/resources/requests/storage|/spec/volumeExpansion/aggregator
+            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
             type: custom
-        type: horizontal-layout
-      fixedBlock: true
+        fixedBlock: true
+        if:
+          name: ifDbTypeEqualsTo|Combined|VolumeExpansion
+          type: function
+        label: Node Volume Expansion
+        showLabels: true
+        type: block-layout
+      hideBorder: true
       if:
-        name: ifDbTypeEqualsTo|Topology|VolumeExpansion
+        name: isScalingEnabled
         type: function
-      label: Aggregator Volume Expansion
-      showLabels: true
-      type: block-layout
-    - elements:
-      - elements:
-        - init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/leaf/storage/resources/requests/storage
-          label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/leaf
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/leaf/storage/resources/requests/storage|/spec/volumeExpansion/leaf
-            type: custom
-        type: horizontal-layout
-      fixedBlock: true
-      if:
-        name: ifDbTypeEqualsTo|Topology|VolumeExpansion
-        type: function
-      label: Leaf Volume Expansion
-      showLabels: true
-      type: block-layout
-    - elements:
-      - elements:
-        - label: Storage Size
-          subtitle: How much extra storage does your database need? Specify the size(e.g.
-            2Gi for 2 gigabytes) so we can allocate it correctly
-          type: label-element
-        - hasIcon: true
-          label: Storage expansion allows you to increase your database's disk space
-            without downtime (Online mode) or with brief downtime (Offline mode).
-          type: info
-        type: horizontal-layout
-      - init:
-          type: func
-          value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-        label: Storage Size
-        schema: schema/properties/spec/properties/volumeExpansion/properties/node
-        type: input-compare
-        validation:
-          name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
-          type: custom
-      fixedBlock: true
-      if:
-        name: ifDbTypeEqualsTo|Combined|VolumeExpansion
-        type: function
-      label: Node Volume Expansion
-      showLabels: true
+      label: Volume Expansion Details
+      showLabels: false
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|VolumeExpansion
@@ -1276,6 +1299,9 @@ step:
         value: Always
       schema: schema/properties/spec/properties/apply
       type: radio
+    if:
+      name: isScalingEnabled
+      type: function
     label: Ops Request Options
     showLabels: true
     type: block-layout

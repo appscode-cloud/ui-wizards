@@ -1133,267 +1133,298 @@ step:
     type: block-layout
   - elements:
     - elements:
-      - elements:
-        - label: Mode
-          subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
-            with minimal disruption. Choose Offline Mode if you can afford a brief
-            downtime for added reliability during the volume expansion.
-          type: label-element
-        - label: Mode
-          options:
-          - text: Offline
-            value: Offline
-          - text: Online
-            value: Online
-          schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          type: select
-          validation:
-            type: required
-        type: block-layout
-      type: horizontal-layout
-    - elements:
-      - elements:
-        - header: Node
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-          label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/node
-          subtitle: How much extra storage does your database need? Specify the size
-            (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
-            type: custom
-        - hasIcon: true
-          label: Volume expansion increases the storage capacity of your database.
-            Ensure your storage class supports volume expansion before proceeding.
-          type: info
-        type: horizontal-layout
-      fixedBlock: true
+      - hasIcon: true
+        label: ""
+        loader: loadwarning
+        type: warning
+      hideBorder: true
       if:
-        name: ifDbTypeEqualsTo|Combined|VolumeExpansion
+        name: isScalingDisabled
         type: function
-      label: Combined volume expansion
-      showLabels: true
+      label: Volume Expansion Warning
+      showLabels: false
       type: block-layout
     - elements:
       - elements:
-        - header: Master
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/master/storage/resources/requests/storage
-          label: Master Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/master
-          subtitle: How much extra storage does your master nodes need? Specify the
-            size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/master/storage/resources/requests/storage|/spec/volumeExpansion/master
-            type: custom
-        - hasIcon: true
-          label: Master nodes store cluster metadata and configuration. Proper storage
-            allocation ensures reliable cluster management operations.
-          type: info
-        if:
-          name: hasVolumeExpansion|master
-          type: function
+        - elements:
+          - label: Mode
+            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
+              with minimal disruption. Choose Offline Mode if you can afford a brief
+              downtime for added reliability during the volume expansion.
+            type: label-element
+          - label: Mode
+            options:
+            - text: Offline
+              value: Offline
+            - text: Online
+              value: Online
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+            type: select
+            validation:
+              type: required
+          type: block-layout
         type: horizontal-layout
       - elements:
-        - header: Data
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/data/storage/resources/requests/storage
-          label: Data Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/data
-          subtitle: How much extra storage does your data nodes need? Specify the
-            size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/data/storage/resources/requests/storage|/spec/volumeExpansion/data
-            type: custom
-        - hasIcon: true
-          label: Data nodes store your actual documents and indices. Adequate storage
-            ensures smooth data operations and prevents disk space issues.
-          type: info
+        - elements:
+          - disable: isScalingDisabled
+            header: Node
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+            label: Storage Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/node
+            subtitle: How much extra storage does your database need? Specify the
+              size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+              type: custom
+          - hasIcon: true
+            label: Volume expansion increases the storage capacity of your database.
+              Ensure your storage class supports volume expansion before proceeding.
+            type: info
+          type: horizontal-layout
+        fixedBlock: true
         if:
-          name: hasVolumeExpansion|data
+          name: ifDbTypeEqualsTo|Combined|VolumeExpansion
           type: function
-        type: horizontal-layout
+        label: Combined volume expansion
+        showLabels: true
+        type: block-layout
       - elements:
-        - header: Ingest
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/ingest/storage/resources/requests/storage
-          label: Ingest Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/ingest
-          subtitle: How much extra storage does your ingest nodes need? Specify the
-            size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/ingest/storage/resources/requests/storage|/spec/volumeExpansion/ingest
-            type: custom
-        - hasIcon: true
-          label: Ingest nodes handle data pre-processing tasks. Sufficient storage
-            ensures smooth pipeline operations.
-          type: info
+        - elements:
+          - disable: isScalingDisabled
+            header: Master
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/master/storage/resources/requests/storage
+            label: Master Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/master
+            subtitle: How much extra storage does your master nodes need? Specify
+              the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/master/storage/resources/requests/storage|/spec/volumeExpansion/master
+              type: custom
+          - hasIcon: true
+            label: Master nodes store cluster metadata and configuration. Proper storage
+              allocation ensures reliable cluster management operations.
+            type: info
+          if:
+            name: hasVolumeExpansion|master
+            type: function
+          type: horizontal-layout
+        - elements:
+          - disable: isScalingDisabled
+            header: Data
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/data/storage/resources/requests/storage
+            label: Data Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/data
+            subtitle: How much extra storage does your data nodes need? Specify the
+              size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/data/storage/resources/requests/storage|/spec/volumeExpansion/data
+              type: custom
+          - hasIcon: true
+            label: Data nodes store your actual documents and indices. Adequate storage
+              ensures smooth data operations and prevents disk space issues.
+            type: info
+          if:
+            name: hasVolumeExpansion|data
+            type: function
+          type: horizontal-layout
+        - elements:
+          - disable: isScalingDisabled
+            header: Ingest
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/ingest/storage/resources/requests/storage
+            label: Ingest Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/ingest
+            subtitle: How much extra storage does your ingest nodes need? Specify
+              the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/ingest/storage/resources/requests/storage|/spec/volumeExpansion/ingest
+              type: custom
+          - hasIcon: true
+            label: Ingest nodes handle data pre-processing tasks. Sufficient storage
+              ensures smooth pipeline operations.
+            type: info
+          if:
+            name: hasVolumeExpansion|ingest
+            type: function
+          type: horizontal-layout
+        - elements:
+          - disable: isScalingDisabled
+            header: ML
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/ml/storage/resources/requests/storage
+            label: ML Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/ml
+            subtitle: How much extra storage does your ML nodes need? Specify the
+              size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/ml/storage/resources/requests/storage|/spec/volumeExpansion/ml
+              type: custom
+          - hasIcon: true
+            label: ML nodes store machine learning models and job data. Adequate storage
+              supports complex ML operations.
+            type: info
+          if:
+            name: hasVolumeExpansion|ml
+            type: function
+          type: horizontal-layout
+        - elements:
+          - disable: isScalingDisabled
+            header: Transform
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/transform/storage/resources/requests/storage
+            label: Transform Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/transform
+            subtitle: How much extra storage does your transform nodes need? Specify
+              the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/transform/storage/resources/requests/storage|/spec/volumeExpansion/transform
+              type: custom
+          - hasIcon: true
+            label: Transform nodes handle continuous data transformation operations.
+              Sufficient storage ensures smooth processing.
+            type: info
+          if:
+            name: hasVolumeExpansion|transform
+            type: function
+          type: horizontal-layout
+        - elements:
+          - disable: isScalingDisabled
+            header: Data Cold
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/dataCold/storage/resources/requests/storage
+            label: Data Cold Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/dataCold
+            subtitle: How much extra storage does your data cold nodes need? Specify
+              the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/dataCold/storage/resources/requests/storage|/spec/volumeExpansion/dataCold
+              type: custom
+          - hasIcon: true
+            label: Data cold tier stores infrequently accessed data. Cost-effective
+              storage allocation is important for this tier.
+            type: info
+          if:
+            name: hasVolumeExpansion|dataCold
+            type: function
+          type: horizontal-layout
+        - elements:
+          - disable: isScalingDisabled
+            header: Data Content
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/dataContent/storage/resources/requests/storage
+            label: Data Content Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/dataContent
+            subtitle: How much extra storage does your data content nodes need? Specify
+              the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/dataContent/storage/resources/requests/storage|/spec/volumeExpansion/dataContent
+              type: custom
+          - hasIcon: true
+            label: Data content tier stores regular content data. Proper storage allocation
+              ensures optimal performance for standard workloads.
+            type: info
+          if:
+            name: hasVolumeExpansion|dataContent
+            type: function
+          type: horizontal-layout
+        - elements:
+          - disable: isScalingDisabled
+            header: Data Frozen
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/dataFrozen/storage/resources/requests/storage
+            label: Data Frozen Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/dataFrozen
+            subtitle: How much extra storage does your data frozen nodes need? Specify
+              the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/dataFrozen/storage/resources/requests/storage|/spec/volumeExpansion/dataFrozen
+              type: custom
+          - hasIcon: true
+            label: Data frozen tier stores searchable snapshot data with minimal storage
+              costs. This tier optimizes long-term data retention.
+            type: info
+          if:
+            name: hasVolumeExpansion|dataFrozen
+            type: function
+          type: horizontal-layout
+        - elements:
+          - disable: isScalingDisabled
+            header: Data Hot
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/dataHot/storage/resources/requests/storage
+            label: Data Hot Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/dataHot
+            subtitle: How much extra storage does your data hot nodes need? Specify
+              the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/dataHot/storage/resources/requests/storage|/spec/volumeExpansion/dataHot
+              type: custom
+          - hasIcon: true
+            label: Data hot tier stores frequently accessed data requiring fast performance.
+              Adequate storage and fast I/O are crucial for this tier.
+            type: info
+          if:
+            name: hasVolumeExpansion|dataHot
+            type: function
+          type: horizontal-layout
+        - elements:
+          - disable: isScalingDisabled
+            header: Data Warm
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/dataWarm/storage/resources/requests/storage
+            label: Data Warm Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/dataWarm
+            subtitle: How much extra storage does your data warm nodes need? Specify
+              the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/dataWarm/storage/resources/requests/storage|/spec/volumeExpansion/dataWarm
+              type: custom
+          - hasIcon: true
+            label: Data warm tier stores less frequently accessed data. Balanced storage
+              allocation provides cost-effective performance.
+            type: info
+          if:
+            name: hasVolumeExpansion|dataWarm
+            type: function
+          type: horizontal-layout
+        fixedBlock: true
         if:
-          name: hasVolumeExpansion|ingest
+          name: ifDbTypeEqualsTo|Topology|VolumeExpansion
           type: function
-        type: horizontal-layout
-      - elements:
-        - header: ML
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/ml/storage/resources/requests/storage
-          label: ML Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/ml
-          subtitle: How much extra storage does your ML nodes need? Specify the size
-            (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/ml/storage/resources/requests/storage|/spec/volumeExpansion/ml
-            type: custom
-        - hasIcon: true
-          label: ML nodes store machine learning models and job data. Adequate storage
-            supports complex ML operations.
-          type: info
-        if:
-          name: hasVolumeExpansion|ml
-          type: function
-        type: horizontal-layout
-      - elements:
-        - header: Transform
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/transform/storage/resources/requests/storage
-          label: Transform Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/transform
-          subtitle: How much extra storage does your transform nodes need? Specify
-            the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/transform/storage/resources/requests/storage|/spec/volumeExpansion/transform
-            type: custom
-        - hasIcon: true
-          label: Transform nodes handle continuous data transformation operations.
-            Sufficient storage ensures smooth processing.
-          type: info
-        if:
-          name: hasVolumeExpansion|transform
-          type: function
-        type: horizontal-layout
-      - elements:
-        - header: Data Cold
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/dataCold/storage/resources/requests/storage
-          label: Data Cold Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/dataCold
-          subtitle: How much extra storage does your data cold nodes need? Specify
-            the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/dataCold/storage/resources/requests/storage|/spec/volumeExpansion/dataCold
-            type: custom
-        - hasIcon: true
-          label: Data cold tier stores infrequently accessed data. Cost-effective
-            storage allocation is important for this tier.
-          type: info
-        if:
-          name: hasVolumeExpansion|dataCold
-          type: function
-        type: horizontal-layout
-      - elements:
-        - header: Data Content
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/dataContent/storage/resources/requests/storage
-          label: Data Content Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/dataContent
-          subtitle: How much extra storage does your data content nodes need? Specify
-            the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/dataContent/storage/resources/requests/storage|/spec/volumeExpansion/dataContent
-            type: custom
-        - hasIcon: true
-          label: Data content tier stores regular content data. Proper storage allocation
-            ensures optimal performance for standard workloads.
-          type: info
-        if:
-          name: hasVolumeExpansion|dataContent
-          type: function
-        type: horizontal-layout
-      - elements:
-        - header: Data Frozen
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/dataFrozen/storage/resources/requests/storage
-          label: Data Frozen Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/dataFrozen
-          subtitle: How much extra storage does your data frozen nodes need? Specify
-            the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/dataFrozen/storage/resources/requests/storage|/spec/volumeExpansion/dataFrozen
-            type: custom
-        - hasIcon: true
-          label: Data frozen tier stores searchable snapshot data with minimal storage
-            costs. This tier optimizes long-term data retention.
-          type: info
-        if:
-          name: hasVolumeExpansion|dataFrozen
-          type: function
-        type: horizontal-layout
-      - elements:
-        - header: Data Hot
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/dataHot/storage/resources/requests/storage
-          label: Data Hot Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/dataHot
-          subtitle: How much extra storage does your data hot nodes need? Specify
-            the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/dataHot/storage/resources/requests/storage|/spec/volumeExpansion/dataHot
-            type: custom
-        - hasIcon: true
-          label: Data hot tier stores frequently accessed data requiring fast performance.
-            Adequate storage and fast I/O are crucial for this tier.
-          type: info
-        if:
-          name: hasVolumeExpansion|dataHot
-          type: function
-        type: horizontal-layout
-      - elements:
-        - header: Data Warm
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/dataWarm/storage/resources/requests/storage
-          label: Data Warm Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/dataWarm
-          subtitle: How much extra storage does your data warm nodes need? Specify
-            the size (e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/dataWarm/storage/resources/requests/storage|/spec/volumeExpansion/dataWarm
-            type: custom
-        - hasIcon: true
-          label: Data warm tier stores less frequently accessed data. Balanced storage
-            allocation provides cost-effective performance.
-          type: info
-        if:
-          name: hasVolumeExpansion|dataWarm
-          type: function
-        type: horizontal-layout
-      fixedBlock: true
+        label: Topology volume expansion
+        showLabels: true
+        type: block-layout
+      hideBorder: true
       if:
-        name: ifDbTypeEqualsTo|Topology|VolumeExpansion
+        name: isScalingEnabled
         type: function
-      label: Topology volume expansion
-      showLabels: true
+      label: Volume Expansion Details
+      showLabels: false
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|VolumeExpansion
@@ -1756,6 +1787,9 @@ step:
         value: Always
       schema: schema/properties/spec/properties/apply
       type: radio
+    if:
+      name: isScalingEnabled
+      type: function
     label: OpsRequest Options
     showLabels: true
     type: block-layout
