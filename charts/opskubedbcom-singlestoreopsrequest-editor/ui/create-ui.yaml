@@ -526,23 +526,34 @@ step:
             subtitle: Select an existing secret or create a new one to apply to your
               database configuration.
             type: label-element
-          - customClass: mb-2
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/configSecret/name
-            label: Config Secret
-            loader:
-              name: getConfigSecrets
-              watchPaths:
-              - schema/properties/metadata/properties/namespace
-              - temp/properties/node/createSecret/properties/status
-            refresh: fetchConfigSecrets
-            schema: schema/properties/spec/properties/configuration/properties/node/properties/configSecret/properties/name
-            type: select
-            watcher:
-              func: onCreateSecretChange|node
-              paths:
-              - temp/properties/node/createSecret/properties/status
+          - type: horizontal-layout
+            hasButton:
+              text: Create a New Secret
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              action: onClickCreateSecret|node
+            elements:
+            - customClass: mb-2
+              init:
+                type: func
+                value: setValueFromDbDetails|/spec/configSecret/name
+              label: Select Config Secret
+              loader:
+                name: getConfigSecrets|node
+                watchPaths:
+                - schema/properties/metadata/properties/namespace
+                - temp/properties/node/createSecret/properties/status
+              refresh: fetchConfigSecrets
+              schema: schema/properties/spec/properties/configuration/properties/node/properties/configSecret/properties/name
+              type: select
+              watcher:
+                func: onCreateSecretChange|node
+                paths:
+                - temp/properties/node/createSecret/properties/status
+              disable:
+                name: isCreateSecret|node
+                watchPaths:
+                - temp/properties/node/createSecret/properties/onClick
           - customClass: mt-15
             elements:
             - label: ""
@@ -557,7 +568,7 @@ step:
               elements:
               - label: Key
                 loader:
-                  name: onSelectedSecretChange
+                  name: onSelectedSecretChange|node
                   watchPaths:
                   - temp/properties/node/createSecret/properties/data
                 schema: key
@@ -604,31 +615,39 @@ step:
           type: block-layout
         - elements:
           - customClass: mb-15
-            label: New Apply Config
+            label: Apply New Config
             subtitle: Define custom configurations for your database using key-value
               pairs. These parameters will overwrite existing settings.<br>Enter the
               parameter you want to configure (e.g., max_connections).
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader: getConfigSecretsforAppyConfig
             refresh: fetchConfigSecrets
             schema: temp/properties/node/selectedConfiguration
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            loader:
-              name: setApplyConfig|node
-              watchPaths:
-              - temp/properties/node/selectedConfiguration
-            placeholder: Add config parameters...
-            schema: temp/properties/node/applyConfig
-            type: multi-file-editor
-            validateContent: false
-            watcher:
-              func: onApplyconfigChange|node
-              paths:
-              - temp/properties/node/applyConfig
+          - type: block-layout
+            if:
+              name: isValueExist|temp|/node/selectedConfiguration
+              type: function
+            elements:
+            - editorHeight: 500px
+              hideFormatButton: true
+              loader:
+                name: setApplyConfig|node
+                watchPaths:
+                - temp/properties/node/selectedConfiguration
+              placeholder: Add config parameters...
+              schema: temp/properties/node/applyConfig
+              type: multi-file-editor
+              validateContent: false
+              watcher:
+                func: onApplyconfigChange|node
+                paths:
+                - temp/properties/node/applyConfig
+            - type: label-element
+              label: ''
+              subtitle: ⓘ Changes will take effect after a successful redeployment.
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig
             type: function
@@ -641,7 +660,7 @@ step:
               your database settings
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader:
               name: getConfigSecretsforAppyConfig
               watchPaths:
@@ -653,6 +672,19 @@ step:
               func: onRemoveConfigChange|node
               paths:
               - temp/properties/node/selectedConfigurationRemove
+          - editorHeight: 500px
+            hideFormatButton: true
+            if:
+              name: ifConfigExist|node
+              type: function
+            loader:
+              name: setRemoveConfig|node
+              watchPaths:
+              - temp/properties/node/selectedConfigurationRemove
+            readonly: true
+            schema: temp/properties/node/removeConfig
+            type: multi-file-editor
+            validateContent: false
           if:
             name: ifReconfigurationTypeEqualsTo|remove
             type: function
@@ -666,6 +698,10 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
+        disable:
+          name: isCreateSecret|node
+          watchPaths:
+          - temp/properties/node/createSecret/properties/onClick
         schema: temp/properties/reconfigurationType
         type: tab-layout
       if:
@@ -685,23 +721,34 @@ step:
             subtitle: Select an existing secret or create a new one to apply to your
               Aggregator node configuration.
             type: label-element
-          - customClass: mb-2
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/topology/aggregator/configSecret/name
-            label: Config Secret
-            loader:
-              name: getConfigSecrets
-              watchPaths:
-              - schema/properties/metadata/properties/namespace
-              - temp/properties/aggregator/createSecret/properties/status
-            refresh: fetchConfigSecrets
-            schema: schema/properties/spec/properties/configuration/properties/aggregator/properties/configSecret/properties/name
-            type: select
-            watcher:
-              func: onCreateSecretChange|aggregator
-              paths:
-              - temp/properties/aggregator/createSecret/properties/status
+          - type: horizontal-layout
+            hasButton:
+              text: Create a New Secret
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              action: onClickCreateSecret|aggregator
+            elements:
+            - customClass: mb-2
+              init:
+                type: func
+                value: setValueFromDbDetails|/spec/topology/aggregator/configSecret/name
+              label: Select Config Secret
+              loader:
+                name: getConfigSecrets|aggregator
+                watchPaths:
+                - schema/properties/metadata/properties/namespace
+                - temp/properties/aggregator/createSecret/properties/status
+              refresh: fetchConfigSecrets
+              schema: schema/properties/spec/properties/configuration/properties/aggregator/properties/configSecret/properties/name
+              type: select
+              watcher:
+                func: onCreateSecretChange|aggregator
+                paths:
+                - temp/properties/aggregator/createSecret/properties/status
+              disable:
+                name: isCreateSecret|aggregator
+                watchPaths:
+                - temp/properties/aggregator/createSecret/properties/onClick
           - customClass: mt-15
             elements:
             - label: ""
@@ -716,7 +763,7 @@ step:
               elements:
               - label: Key
                 loader:
-                  name: onSelectedSecretChange
+                  name: onSelectedSecretChange|aggregator
                   watchPaths:
                   - temp/properties/aggregator/createSecret/properties/data
                 schema: key
@@ -757,38 +804,46 @@ step:
             type: multi-file-editor
             validateContent: false
           if:
-            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|aggregator|true
             type: function
           label: Aggregator Config Secret
           type: block-layout
         - elements:
           - customClass: mb-15
-            label: New Apply Config
+            label: Apply New Config
             subtitle: Define custom configurations for your Aggregator node using
               key-value pairs. These parameters will overwrite existing settings.
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader: getConfigSecretsforAppyConfig
             refresh: fetchConfigSecrets
             schema: temp/properties/aggregator/selectedConfiguration
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            loader:
-              name: setApplyConfig|aggregator
-              watchPaths:
-              - temp/properties/aggregator/selectedConfiguration
-            placeholder: Add config parameters...
-            schema: temp/properties/aggregator/applyConfig
-            type: multi-file-editor
-            validateContent: false
-            watcher:
-              func: onApplyconfigChange|aggregator
-              paths:
-              - temp/properties/aggregator/applyConfig
+          - type: block-layout
+            if:
+              name: isValueExist|temp|/aggregator/selectedConfiguration
+              type: function
+            elements:
+            - editorHeight: 500px
+              hideFormatButton: true
+              loader:
+                name: setApplyConfig|aggregator
+                watchPaths:
+                - temp/properties/aggregator/selectedConfiguration
+              placeholder: Add config parameters...
+              schema: temp/properties/aggregator/applyConfig
+              type: multi-file-editor
+              validateContent: false
+              watcher:
+                func: onApplyconfigChange|aggregator
+                paths:
+                - temp/properties/aggregator/applyConfig
+            - type: label-element
+              label: ''
+              subtitle: ⓘ Changes will take effect after a successful redeployment.
           if:
-            name: ifReconfigurationTypeEqualsTo|applyConfig
+            name: ifReconfigurationTypeEqualsTo|applyConfig|aggregator|true
             type: function
           label: ApplyConfig
           type: block-layout
@@ -799,7 +854,7 @@ step:
               node.
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader:
               name: getConfigSecretsforAppyConfig
               watchPaths:
@@ -807,21 +862,25 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/aggregator/selectedConfigurationRemove
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            init:
-              type: func
-              value: onRemoveConfigChange|aggregator
-            readonly: true
-            schema: temp/properties/aggregator/removeConfig
-            type: multi-file-editor
-            validateContent: false
             watcher:
               func: onRemoveConfigChange|aggregator
               paths:
               - temp/properties/aggregator/selectedConfigurationRemove
+          - editorHeight: 500px
+            hideFormatButton: true
+            if:
+              name: ifConfigExist|aggregator
+              type: function
+            loader:
+              name: setRemoveConfig|aggregator
+              watchPaths:
+              - temp/properties/aggregator/selectedConfigurationRemove
+            readonly: true
+            schema: temp/properties/aggregator/removeConfig
+            type: multi-file-editor
+            validateContent: false
           if:
-            name: ifReconfigurationTypeEqualsTo|remove
+            name: ifReconfigurationTypeEqualsTo|remove|aggregator|true
             type: function
           label: Remove
           type: block-layout
@@ -833,7 +892,11 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
-        schema: temp/properties/reconfigurationType
+        disable:
+          name: isCreateSecret|aggregator
+          watchPaths:
+          - temp/properties/aggregator/createSecret/properties/onClick
+        schema: temp/properties/reconfigurationType-aggregator
         type: tab-layout
       if:
         name: ifDbTypeEqualsTo|Topology|Reconfigure
@@ -853,23 +916,34 @@ step:
             subtitle: Select an existing secret or create a new one to apply to your
               Leaf node configuration.
             type: label-element
-          - customClass: mb-2
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/topology/leaf/configSecret/name
-            label: Config Secret
-            loader:
-              name: getConfigSecrets
-              watchPaths:
-              - schema/properties/metadata/properties/namespace
-              - temp/properties/leaf/createSecret/properties/status
-            refresh: fetchConfigSecrets
-            schema: schema/properties/spec/properties/configuration/properties/leaf/properties/configSecret/properties/name
-            type: select
-            watcher:
-              func: onCreateSecretChange|leaf
-              paths:
-              - temp/properties/leaf/createSecret/properties/status
+          - type: horizontal-layout
+            hasButton:
+              text: Create a New Secret
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              action: onClickCreateSecret|leaf
+            elements:
+            - customClass: mb-2
+              init:
+                type: func
+                value: setValueFromDbDetails|/spec/topology/leaf/configSecret/name
+              label: Select Config Secret
+              loader:
+                name: getConfigSecrets|leaf
+                watchPaths:
+                - schema/properties/metadata/properties/namespace
+                - temp/properties/leaf/createSecret/properties/status
+              refresh: fetchConfigSecrets
+              schema: schema/properties/spec/properties/configuration/properties/leaf/properties/configSecret/properties/name
+              type: select
+              watcher:
+                func: onCreateSecretChange|leaf
+                paths:
+                - temp/properties/leaf/createSecret/properties/status
+              disable:
+                name: isCreateSecret|leaf
+                watchPaths:
+                - temp/properties/leaf/createSecret/properties/onClick
           - customClass: mt-15
             elements:
             - label: ""
@@ -884,7 +958,7 @@ step:
               elements:
               - label: Key
                 loader:
-                  name: onSelectedSecretChange
+                  name: onSelectedSecretChange|leaf
                   watchPaths:
                   - temp/properties/leaf/createSecret/properties/data
                 schema: key
@@ -925,38 +999,46 @@ step:
             type: multi-file-editor
             validateContent: false
           if:
-            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|leaf|true
             type: function
           label: Leaf Config Secret
           type: block-layout
         - elements:
           - customClass: mb-15
-            label: New Apply Config
+            label: Apply New Config
             subtitle: Define custom configurations for your Leaf node using key-value
               pairs. These parameters will overwrite existing settings.
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader: getConfigSecretsforAppyConfig
             refresh: fetchConfigSecrets
             schema: temp/properties/leaf/selectedConfiguration
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            loader:
-              name: setApplyConfig|leaf
-              watchPaths:
-              - temp/properties/leaf/selectedConfiguration
-            placeholder: Add config parameters...
-            schema: temp/properties/leaf/applyConfig
-            type: multi-file-editor
-            validateContent: false
-            watcher:
-              func: onApplyconfigChange|leaf
-              paths:
-              - temp/properties/leaf/applyConfig
+          - type: block-layout
+            if:
+              name: isValueExist|temp|/leaf/selectedConfiguration
+              type: function
+            elements:
+            - editorHeight: 500px
+              hideFormatButton: true
+              loader:
+                name: setApplyConfig|leaf
+                watchPaths:
+                - temp/properties/leaf/selectedConfiguration
+              placeholder: Add config parameters...
+              schema: temp/properties/leaf/applyConfig
+              type: multi-file-editor
+              validateContent: false
+              watcher:
+                func: onApplyconfigChange|leaf
+                paths:
+                - temp/properties/leaf/applyConfig
+            - type: label-element
+              label: ''
+              subtitle: ⓘ Changes will take effect after a successful redeployment.
           if:
-            name: ifReconfigurationTypeEqualsTo|applyConfig
+            name: ifReconfigurationTypeEqualsTo|applyConfig|leaf|true
             type: function
           label: ApplyConfig
           type: block-layout
@@ -966,7 +1048,7 @@ step:
             subtitle: Select a configuration secret to remove from the Leaf node.
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader:
               name: getConfigSecretsforAppyConfig
               watchPaths:
@@ -974,21 +1056,25 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/leaf/selectedConfigurationRemove
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            init:
-              type: func
-              value: onRemoveConfigChange|leaf
-            readonly: true
-            schema: temp/properties/leaf/removeConfig
-            type: multi-file-editor
-            validateContent: false
             watcher:
               func: onRemoveConfigChange|leaf
               paths:
               - temp/properties/leaf/selectedConfigurationRemove
+          - editorHeight: 500px
+            hideFormatButton: true
+            if:
+              name: ifConfigExist|leaf
+              type: function
+            loader:
+              name: setRemoveConfig|leaf
+              watchPaths:
+              - temp/properties/leaf/selectedConfigurationRemove
+            readonly: true
+            schema: temp/properties/leaf/removeConfig
+            type: multi-file-editor
+            validateContent: false
           if:
-            name: ifReconfigurationTypeEqualsTo|remove
+            name: ifReconfigurationTypeEqualsTo|remove|leaf|true
             type: function
           label: Remove
           type: block-layout
@@ -1000,7 +1086,11 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
-        schema: temp/properties/reconfigurationType
+        disable:
+          name: isCreateSecret|leaf
+          watchPaths:
+          - temp/properties/leaf/createSecret/properties/onClick
+        schema: temp/properties/reconfigurationType-leaf
         type: tab-layout
       if:
         name: ifDbTypeEqualsTo|Topology|Reconfigure

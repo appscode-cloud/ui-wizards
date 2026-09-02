@@ -788,26 +788,36 @@ step:
         - elements:
           - customClass: mb-15
             label: Config Secret
-            subtitle: Select an existing secret or create a new one to apply to your
-              database configuration.
+            subtitle: Select an existing secret or create a new one to apply to your database configuration.
             type: label-element
-          - customClass: mb-2
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/configSecret/name
-            label: Config Secret
-            loader:
-              name: getConfigSecrets|standalone
-              watchPaths:
-              - schema/properties/metadata/properties/namespace
-              - temp/properties/standalone/properties/createSecret/properties/status
-            refresh: fetchConfigSecrets
-            schema: schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-            type: select
-            watcher:
-              func: onCreateSecretChange|standalone
-              paths:
-              - temp/properties/standalone/properties/createSecret/properties/status
+          - type: horizontal-layout
+            hasButton:
+              text: Create a New Secret
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              action: onClickCreateSecret|standalone
+            elements:
+            - customClass: mb-2
+              init:
+                type: func
+                value: setValueFromDbDetails|/spec/configSecret/name
+              label: Select Config Secret
+              loader:
+                name: getConfigSecrets|standalone
+                watchPaths:
+                - schema/properties/metadata/properties/namespace
+                - temp/properties/standalone/properties/createSecret/properties/status
+              refresh: fetchConfigSecrets
+              schema: schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+              type: select
+              watcher:
+                func: onCreateSecretChange|standalone
+                paths:
+                - temp/properties/standalone/properties/createSecret/properties/status
+              disable:
+                name: isCreateSecret|standalone
+                watchPaths:
+                - temp/properties/standalone/properties/createSecret/properties/onClick
           - customClass: mt-15
             elements:
             - label: ""
@@ -869,31 +879,37 @@ step:
           type: block-layout
         - elements:
           - customClass: mb-15
-            label: New Apply Config
-            subtitle: Define custom configurations for your database using key-value
-              pairs. These parameters will overwrite existing settings.<br>Enter the
-              parameter you want to configure (e.g., max_connections).
+            label: Apply New Config
+            subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Select a Configuration first, then Enter parameters you want to configure (e.g., max_connections).
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader: getConfigSecretsforAppyConfig|standalone
             refresh: fetchConfigSecrets
             schema: temp/properties/standalone/selectedConfiguration
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            loader:
-              name: setApplyConfig|standalone
-              watchPaths:
-              - temp/properties/standalone/selectedConfiguration
-            placeholder: Add config parameters...
-            schema: temp/properties/standalone/applyConfig
-            type: multi-file-editor
-            validateContent: false
-            watcher:
-              func: onApplyconfigChange|standalone
-              paths:
-              - temp/properties/standalone/applyConfig
+          - type: block-layout
+            if:
+              name: isValueExist|temp|/standalone/selectedConfiguration
+              type: function
+            elements:
+            - editorHeight: 500px
+              hideFormatButton: true
+              loader:
+                name: setApplyConfig|standalone
+                watchPaths:
+                - temp/properties/standalone/selectedConfiguration
+              placeholder: Add config parameters...
+              schema: temp/properties/standalone/applyConfig
+              type: multi-file-editor
+              validateContent: false
+              watcher:
+                func: onApplyconfigChange|standalone
+                paths:
+                - temp/properties/standalone/applyConfig
+            - type: label-element
+              label: ''
+              subtitle: ⓘ Changes will take effect after a successful redeployment.
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig
             type: function
@@ -906,7 +922,7 @@ step:
               your database settings
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader:
               name: getConfigSecretsforAppyConfig|standalone
               watchPaths:
@@ -918,6 +934,19 @@ step:
               func: onRemoveConfigChange|standalone
               paths:
               - temp/properties/standalone/selectedConfigurationRemove
+          - editorHeight: 500px
+            hideFormatButton: true
+            if:
+              name: ifConfigExist|standalone
+              type: function
+            loader:
+              name: setRemoveConfig|standalone
+              watchPaths:
+              - temp/properties/standalone/selectedConfigurationRemove
+            readonly: true
+            schema: temp/properties/standalone/removeConfig
+            type: multi-file-editor
+            validateContent: false
           if:
             name: ifReconfigurationTypeEqualsTo|remove
             type: function
@@ -931,6 +960,10 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
+        disable:
+          name: isCreateSecret|standalone
+          watchPaths:
+          - temp/properties/standalone/properties/createSecret/properties/onClick
         schema: temp/properties/reconfigurationType
         type: tab-layout
       if:
@@ -946,23 +979,34 @@ step:
             subtitle: Select an existing secret or create a new one to apply to your
               database configuration.
             type: label-element
-          - customClass: mb-2
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/configSecret/name
-            label: Config Secret
-            loader:
-              name: getConfigSecrets|replicaSet
-              watchPaths:
-              - schema/properties/metadata/properties/namespace
-              - temp/properties/replicaSet/properties/createSecret/properties/status
-            refresh: fetchConfigSecrets
-            schema: schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
-            type: select
-            watcher:
-              func: onCreateSecretChange|replicaSet
-              paths:
-              - temp/properties/replicaSet/properties/createSecret/properties/status
+          - type: horizontal-layout
+            hasButton:
+              text: Create a New Secret
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              action: onClickCreateSecret|replicaSet
+            elements:
+            - customClass: mb-2
+              init:
+                type: func
+                value: setValueFromDbDetails|/spec/configSecret/name
+              label: Select Config Secret
+              loader:
+                name: getConfigSecrets|replicaSet
+                watchPaths:
+                - schema/properties/metadata/properties/namespace
+                - temp/properties/replicaSet/properties/createSecret/properties/status
+              refresh: fetchConfigSecrets
+              schema: schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
+              type: select
+              watcher:
+                func: onCreateSecretChange|replicaSet
+                paths:
+                - temp/properties/replicaSet/properties/createSecret/properties/status
+              disable:
+                name: isCreateSecret|replicaSet
+                watchPaths:
+                - temp/properties/replicaSet/properties/createSecret/properties/onClick
           - customClass: mt-15
             elements:
             - label: ""
@@ -1024,31 +1068,37 @@ step:
           type: block-layout
         - elements:
           - customClass: mb-15
-            label: New Apply Config
-            subtitle: Define custom configurations for your database using key-value
-              pairs. These parameters will overwrite existing settings.<br>Enter the
-              parameter you want to configure (e.g., max_connections).
+            label: Apply New Config
+            subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Select a Configuration first, then Enter parameters you want to configure (e.g., max_connections).
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader: getConfigSecretsforAppyConfig|replicaSet
             refresh: fetchConfigSecrets
             schema: temp/properties/replicaSet/selectedConfiguration
             type: select
-          - editorHeight: 500px
-            hideFormatButton: true
-            loader:
-              name: setApplyConfig|replicaSet
-              watchPaths:
-              - temp/properties/replicaSet/selectedConfiguration
-            placeholder: Add config parameters...
-            schema: temp/properties/replicaSet/applyConfig
-            type: multi-file-editor
-            validateContent: false
-            watcher:
-              func: onApplyconfigChange|replicaSet
-              paths:
-              - temp/properties/replicaSet/applyConfig
+          - type: block-layout
+            if:
+              name: isValueExist|temp|/replicaSet/selectedConfiguration
+              type: function
+            elements:
+            - editorHeight: 500px
+              hideFormatButton: true
+              loader:
+                name: setApplyConfig|replicaSet
+                watchPaths:
+                - temp/properties/replicaSet/selectedConfiguration
+              placeholder: Add config parameters...
+              schema: temp/properties/replicaSet/applyConfig
+              type: multi-file-editor
+              validateContent: false
+              watcher:
+                func: onApplyconfigChange|replicaSet
+                paths:
+                - temp/properties/replicaSet/applyConfig
+            - type: label-element
+              label: ''
+              subtitle: ⓘ Changes will take effect after a successful redeployment.
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig
             type: function
@@ -1061,7 +1111,7 @@ step:
               your database settings
             type: label-element
           - customClass: mb-2
-            label: Configuration
+            label: Select Configuration
             loader:
               name: getConfigSecretsforAppyConfig|replicaSet
               watchPaths:
@@ -1073,6 +1123,19 @@ step:
               func: onRemoveConfigChange|replicaSet
               paths:
               - temp/properties/replicaSet/selectedConfigurationRemove
+          - editorHeight: 500px
+            hideFormatButton: true
+            if:
+              name: ifConfigExist|replicaSet
+              type: function
+            loader:
+              name: setRemoveConfig|replicaSet
+              watchPaths:
+              - temp/properties/replicaSet/selectedConfigurationRemove
+            readonly: true
+            schema: temp/properties/replicaSet/removeConfig
+            type: multi-file-editor
+            validateContent: false
           if:
             name: ifReconfigurationTypeEqualsTo|remove
             type: function
@@ -1086,6 +1149,10 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
+        disable:
+          name: isCreateSecret|replicaSet
+          watchPaths:
+          - temp/properties/replicaSet/properties/createSecret/properties/onClick
         schema: temp/properties/reconfigurationType
         type: tab-layout
       if:
@@ -1103,23 +1170,34 @@ step:
               subtitle: Select an existing secret or create a new one to apply to
                 your database configuration.
               type: label-element
-            - customClass: mb-2
-              init:
-                type: func
-                value: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
-              label: Config Secret
-              loader:
-                name: getConfigSecrets|configServer
-                watchPaths:
-                - schema/properties/metadata/properties/namespace
-                - temp/properties/configServer/properties/createSecret/properties/status
-              refresh: fetchConfigSecrets
-              schema: schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
-              type: select
-              watcher:
-                func: onCreateSecretChange|configServer
-                paths:
-                - temp/properties/configServer/properties/createSecret/properties/status
+            - type: horizontal-layout
+              hasButton:
+                text: Create a New Secret
+                buttonClass: is-light is-outlined
+                hasPlusIcon: true
+                action: onClickCreateSecret|configServer
+              elements:
+              - customClass: mb-2
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
+                label: Select Config Secret
+                loader:
+                  name: getConfigSecrets|configServer
+                  watchPaths:
+                  - schema/properties/metadata/properties/namespace
+                  - temp/properties/configServer/properties/createSecret/properties/status
+                refresh: fetchConfigSecrets
+                schema: schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
+                type: select
+                watcher:
+                  func: onCreateSecretChange|configServer
+                  paths:
+                  - temp/properties/configServer/properties/createSecret/properties/status
+                disable:
+                  name: isCreateSecret|configServer
+                  watchPaths:
+                  - temp/properties/configServer/properties/createSecret/properties/onClick
             - customClass: mt-15
               elements:
               - label: ""
@@ -1181,31 +1259,37 @@ step:
             type: block-layout
           - elements:
             - customClass: mb-15
-              label: New Apply Config
-              subtitle: Define custom configurations for your database using key-value
-                pairs. These parameters will overwrite existing settings.<br>Enter
-                the parameter you want to configure (e.g., max_connections).
+              label: Apply New Config
+              subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Select a Configuration first, then Enter parameters you want to configure (e.g., max_connections).
               type: label-element
             - customClass: mb-2
-              label: Configuration
+              label: Select Configuration
               loader: getConfigSecretsforAppyConfig|configServer
               refresh: fetchConfigSecrets
               schema: temp/properties/configServer/selectedConfiguration
               type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              loader:
-                name: setApplyConfig|configServer
-                watchPaths:
-                - temp/properties/configServer/selectedConfiguration
-              placeholder: Add config parameters...
-              schema: temp/properties/configServer/applyConfig
-              type: multi-file-editor
-              validateContent: false
-              watcher:
-                func: onApplyconfigChange|configServer
-                paths:
-                - temp/properties/configServer/applyConfig
+            - type: block-layout
+              if:
+                name: isValueExist|temp|/configServer/selectedConfiguration
+                type: function
+              elements:
+              - editorHeight: 500px
+                hideFormatButton: true
+                loader:
+                  name: setApplyConfig|configServer
+                  watchPaths:
+                  - temp/properties/configServer/selectedConfiguration
+                placeholder: Add config parameters...
+                schema: temp/properties/configServer/applyConfig
+                type: multi-file-editor
+                validateContent: false
+                watcher:
+                  func: onApplyconfigChange|configServer
+                  paths:
+                  - temp/properties/configServer/applyConfig
+              - type: label-element
+                label: ''
+                subtitle: ⓘ Changes will take effect after a successful redeployment.
             if:
               name: ifReconfigurationTypeEqualsTo|applyConfig|configServer|true
               type: function
@@ -1218,7 +1302,7 @@ step:
                 update your database settings
               type: label-element
             - customClass: mb-2
-              label: Configuration
+              label: Select Configuration
               loader:
                 name: getConfigSecretsforAppyConfig|configServer
                 watchPaths:
@@ -1230,6 +1314,19 @@ step:
                 func: onRemoveConfigChange|configServer
                 paths:
                 - temp/properties/configServer/selectedConfigurationRemove
+            - editorHeight: 500px
+              hideFormatButton: true
+              if:
+                name: ifConfigExist|configServer
+                type: function
+              loader:
+                name: setRemoveConfig|configServer
+                watchPaths:
+                - temp/properties/configServer/selectedConfigurationRemove
+              readonly: true
+              schema: temp/properties/configServer/removeConfig
+              type: multi-file-editor
+              validateContent: false
             if:
               name: ifReconfigurationTypeEqualsTo|remove|configServer|true
               type: function
@@ -1243,6 +1340,10 @@ step:
             value: applyConfig
           - text: REMOVE
             value: remove
+          disable:
+            name: isCreateSecret|configServer
+            watchPaths:
+            - temp/properties/configServer/properties/createSecret/properties/onClick
           schema: temp/properties/reconfigurationType-configServer
           type: tab-layout
         label: Config Server
@@ -1256,23 +1357,34 @@ step:
               subtitle: Select an existing secret or create a new one to apply to
                 your database configuration.
               type: label-element
-            - customClass: mb-2
-              init:
-                type: func
-                value: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
-              label: Config Secret
-              loader:
-                name: getConfigSecrets|mongos
-                watchPaths:
-                - schema/properties/metadata/properties/namespace
-                - temp/properties/mongos/properties/createSecret/properties/status
-              refresh: fetchConfigSecrets
-              schema: schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
-              type: select
-              watcher:
-                func: onCreateSecretChange|mongos
-                paths:
-                - temp/properties/mongos/properties/createSecret/properties/status
+            - type: horizontal-layout
+              hasButton:
+                text: Create a New Secret
+                buttonClass: is-light is-outlined
+                hasPlusIcon: true
+                action: onClickCreateSecret|mongos
+              elements:
+              - customClass: mb-2
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
+                label: Select Config Secret
+                loader:
+                  name: getConfigSecrets|mongos
+                  watchPaths:
+                  - schema/properties/metadata/properties/namespace
+                  - temp/properties/mongos/properties/createSecret/properties/status
+                refresh: fetchConfigSecrets
+                schema: schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
+                type: select
+                watcher:
+                  func: onCreateSecretChange|mongos
+                  paths:
+                  - temp/properties/mongos/properties/createSecret/properties/status
+                disable:
+                  name: isCreateSecret|mongos
+                  watchPaths:
+                  - temp/properties/mongos/properties/createSecret/properties/onClick
             - customClass: mt-15
               elements:
               - label: ""
@@ -1334,31 +1446,37 @@ step:
             type: block-layout
           - elements:
             - customClass: mb-15
-              label: New Apply Config
-              subtitle: Define custom configurations for your database using key-value
-                pairs. These parameters will overwrite existing settings.<br>Enter
-                the parameter you want to configure (e.g., max_connections).
+              label: Apply New Config
+              subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Select a Configuration first, then Enter parameters you want to configure (e.g., max_connections).
               type: label-element
             - customClass: mb-2
-              label: Configuration
+              label: Select Configuration
               loader: getConfigSecretsforAppyConfig|mongos
               refresh: fetchConfigSecrets
               schema: temp/properties/mongos/selectedConfiguration
               type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              loader:
-                name: setApplyConfig|mongos
-                watchPaths:
-                - temp/properties/mongos/selectedConfiguration
-              placeholder: Add config parameters...
-              schema: temp/properties/mongos/applyConfig
-              type: multi-file-editor
-              validateContent: false
-              watcher:
-                func: onApplyconfigChange|mongos
-                paths:
-                - temp/properties/mongos/applyConfig
+            - type: block-layout
+              if:
+                name: isValueExist|temp|/mongos/selectedConfiguration
+                type: function
+              elements:
+              - editorHeight: 500px
+                hideFormatButton: true
+                loader:
+                  name: setApplyConfig|mongos
+                  watchPaths:
+                  - temp/properties/mongos/selectedConfiguration
+                placeholder: Add config parameters...
+                schema: temp/properties/mongos/applyConfig
+                type: multi-file-editor
+                validateContent: false
+                watcher:
+                  func: onApplyconfigChange|mongos
+                  paths:
+                  - temp/properties/mongos/applyConfig
+              - type: label-element
+                label: ''
+                subtitle: ⓘ Changes will take effect after a successful redeployment.
             if:
               name: ifReconfigurationTypeEqualsTo|applyConfig|mongos|true
               type: function
@@ -1371,7 +1489,7 @@ step:
                 update your database settings
               type: label-element
             - customClass: mb-2
-              label: Configuration
+              label: Select Configuration
               loader:
                 name: getConfigSecretsforAppyConfig|mongos
                 watchPaths:
@@ -1383,6 +1501,19 @@ step:
                 func: onRemoveConfigChange|mongos
                 paths:
                 - temp/properties/mongos/selectedConfigurationRemove
+            - editorHeight: 500px
+              hideFormatButton: true
+              if:
+                name: ifConfigExist|mongos
+                type: function
+              loader:
+                name: setRemoveConfig|mongos
+                watchPaths:
+                - temp/properties/mongos/selectedConfigurationRemove
+              readonly: true
+              schema: temp/properties/mongos/removeConfig
+              type: multi-file-editor
+              validateContent: false
             if:
               name: ifReconfigurationTypeEqualsTo|remove|mongos|true
               type: function
@@ -1396,6 +1527,10 @@ step:
             value: applyConfig
           - text: REMOVE
             value: remove
+          disable:
+            name: isCreateSecret|mongos
+            watchPaths:
+            - temp/properties/mongos/properties/createSecret/properties/onClick
           schema: temp/properties/reconfigurationType-mongos
           type: tab-layout
         label: Mongos
@@ -1409,23 +1544,34 @@ step:
               subtitle: Select an existing secret or create a new one to apply to
                 your database configuration.
               type: label-element
-            - customClass: mb-2
-              init:
-                type: func
-                value: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
-              label: Config Secret
-              loader:
-                name: getConfigSecrets|shard
-                watchPaths:
-                - schema/properties/metadata/properties/namespace
-                - temp/properties/shard/properties/createSecret/properties/status
-              refresh: fetchConfigSecrets
-              schema: schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
-              type: select
-              watcher:
-                func: onCreateSecretChange|shard
-                paths:
-                - temp/properties/shard/properties/createSecret/properties/status
+            - type: horizontal-layout
+              hasButton:
+                text: Create a New Secret
+                buttonClass: is-light is-outlined
+                hasPlusIcon: true
+                action: onClickCreateSecret|shard
+              elements:
+              - customClass: mb-2
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
+                label: Select Config Secret
+                loader:
+                  name: getConfigSecrets|shard
+                  watchPaths:
+                  - schema/properties/metadata/properties/namespace
+                  - temp/properties/shard/properties/createSecret/properties/status
+                refresh: fetchConfigSecrets
+                schema: schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
+                type: select
+                watcher:
+                  func: onCreateSecretChange|shard
+                  paths:
+                  - temp/properties/shard/properties/createSecret/properties/status
+                disable:
+                  name: isCreateSecret|shard
+                  watchPaths:
+                  - temp/properties/shard/properties/createSecret/properties/onClick
             - customClass: mt-15
               elements:
               - label: ""
@@ -1487,31 +1633,37 @@ step:
             type: block-layout
           - elements:
             - customClass: mb-15
-              label: New Apply Config
-              subtitle: Define custom configurations for your database using key-value
-                pairs. These parameters will overwrite existing settings.<br>Enter
-                the parameter you want to configure (e.g., max_connections).
+              label: Apply New Config
+              subtitle: Define custom configurations for your database using key-value pairs. These parameters will overwrite existing settings.<br>Select a Configuration first, then Enter parameters you want to configure (e.g., max_connections).
               type: label-element
             - customClass: mb-2
-              label: Configuration
+              label: Select Configuration
               loader: getConfigSecretsforAppyConfig|shard
               refresh: fetchConfigSecrets
               schema: temp/properties/shard/selectedConfiguration
               type: select
-            - editorHeight: 500px
-              hideFormatButton: true
-              loader:
-                name: setApplyConfig|shard
-                watchPaths:
-                - temp/properties/shard/selectedConfiguration
-              placeholder: Add config parameters...
-              schema: temp/properties/shard/applyConfig
-              type: multi-file-editor
-              validateContent: false
-              watcher:
-                func: onApplyconfigChange|shard
-                paths:
-                - temp/properties/shard/applyConfig
+            - type: block-layout
+              if:
+                name: isValueExist|temp|/shard/selectedConfiguration
+                type: function
+              elements:
+              - editorHeight: 500px
+                hideFormatButton: true
+                loader:
+                  name: setApplyConfig|shard
+                  watchPaths:
+                  - temp/properties/shard/selectedConfiguration
+                placeholder: Add config parameters...
+                schema: temp/properties/shard/applyConfig
+                type: multi-file-editor
+                validateContent: false
+                watcher:
+                  func: onApplyconfigChange|shard
+                  paths:
+                  - temp/properties/shard/applyConfig
+              - type: label-element
+                label: ''
+                subtitle: ⓘ Changes will take effect after a successful redeployment.
             if:
               name: ifReconfigurationTypeEqualsTo|applyConfig|shard|true
               type: function
@@ -1524,7 +1676,7 @@ step:
                 update your database settings
               type: label-element
             - customClass: mb-2
-              label: Configuration
+              label: Select Configuration
               loader:
                 name: getConfigSecretsforAppyConfig|shard
                 watchPaths:
@@ -1536,6 +1688,19 @@ step:
                 func: onRemoveConfigChange|shard
                 paths:
                 - temp/properties/shard/selectedConfigurationRemove
+            - editorHeight: 500px
+              hideFormatButton: true
+              if:
+                name: ifConfigExist|shard
+                type: function
+              loader:
+                name: setRemoveConfig|shard
+                watchPaths:
+                - temp/properties/shard/selectedConfigurationRemove
+              readonly: true
+              schema: temp/properties/shard/removeConfig
+              type: multi-file-editor
+              validateContent: false
             if:
               name: ifReconfigurationTypeEqualsTo|remove|shard|true
               type: function
@@ -1549,6 +1714,10 @@ step:
             value: applyConfig
           - text: REMOVE
             value: remove
+          disable:
+            name: isCreateSecret|shard
+            watchPaths:
+            - temp/properties/shard/properties/createSecret/properties/onClick
           schema: temp/properties/reconfigurationType-shard
           type: tab-layout
         label: Shard
