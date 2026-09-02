@@ -322,7 +322,7 @@ const druidNodeTypes = [
 ]
 
 let allowScaling = false
-
+let storageClassName = ''
 let machinesFromPreset = []
 let secretArray = []
 const configSecretKeys = [
@@ -421,10 +421,26 @@ export const useFunc = (model) => {
         setDiscriminatorValue('/dbDetails', resp.data || {})
 
         if (route.params.actions === 'scale-storage') {
-          const storageClassName = resp.data?.spec?.topology?.historicals?.storage?.storageClassName
-          const stUrl = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses/longhorn`
-          const storageResp = await axios.get(stUrl)
-          allowScaling = storageResp.data?.allowVolumeExpansion || false
+          storageClassName = resp.data?.spec?.topology?.historicals?.storage?.storageClassName || ''
+          if (storageClassName) {
+            const stUrl = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses/${storageClassName}`
+            try {
+              const storageResp = await axios.get(stUrl)
+              allowScaling = storageResp.data?.allowVolumeExpansion || false
+            } catch (e) {
+              console.log(e)
+              // Could not read the storage class; don't block the user on an unknown.
+              allowScaling = true
+            }
+          } else {
+            // No explicit storage class on the database (default class in use),
+            // so allowVolumeExpansion can't be resolved here.
+            allowScaling = true
+          }
+          commit('wizard/temp$update', {
+            path: '/preview/disabled',
+            value: !allowScaling,
+          })
         }
 
         return resp.data || {}
@@ -981,8 +997,18 @@ export const useFunc = (model) => {
   // VOLUME EXPANSION FUNCTIONS
   // ============================================================
 
-  function isScalingDIsabled() {
+  function isScalingDisabled() {
+    if (route.params.actions !== 'scale-storage') return false
     return allowScaling === false
+  }
+
+  function isScalingEnabled() {
+    if (route.params.actions !== 'scale-storage') return true
+    return allowScaling
+  }
+
+  function loadwarning() {
+    return `Warning: The storage class "${storageClassName}" has allowVolumeExpansion set to false, so volume expansion is not supported for this database.`
   }
 
   function checkVolume(currentVolPath, newVolPath) {
@@ -1700,7 +1726,9 @@ export const useFunc = (model) => {
     // Volume expansion functions
     checkVolume,
     parseSize,
-    isScalingDIsabled,
+    loadwarning,
+    isScalingDisabled,
+    isScalingEnabled,
 
     // Configuration functions
     getConfigSecrets,

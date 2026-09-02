@@ -557,75 +557,89 @@ step:
     type: block-layout
   - elements:
     - elements:
-      - elements:
-        - label: Mode
-          subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
-            with minimal disruption. Choose Offline Mode if you can afford a brief
-            downtime for added reliability during the volume expansion.
-          type: label-element
-        - label: Mode
-          options:
-          - text: Offline
-            value: Offline
-          - text: Online
-            value: Online
-          schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          type: select
-          validation:
-            type: required
-        type: block-layout
-      type: horizontal-layout
-    - type: warning
-      hasIcon: true
+      - hasIcon: true
+        loader: loadwarning
+        label: ''
+        type: warning
+      hideBorder: true
       if:
-        name: isScalingDIsabled
+        name: isScalingDisabled
         type: function
-      label: 'Warning: Volume expansion may require downtime depending on the underlying storage class. Please check your storage class documentation for details.'
-    - elements:
-      - elements:
-        - disable: isScalingDIsabled
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/historicals/storage/resources/requests/storage
-          label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/historicals
-          subtitle: How much extra storage does your database need? Specify the size(e.g.,
-            2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/historicals/storage/resources/requests/storage|/spec/volumeExpansion/historicals
-            type: custom
-        - hasIcon: true
-          label: Historicals nodes store historical data segments. Increasing storage
-            allows for more historical data retention.
-          type: info
-        type: horizontal-layout
-      fixedBlock: true
-      label: Historicals
-      showLabels: true
+      label: Volume Expansion Warning
+      showLabels: false
       type: block-layout
     - elements:
       - elements:
-        - disable: isScalingDIsabled
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/topology/middleManagers/storage/resources/requests/storage
-          label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/middleManagers
-          subtitle: How much extra storage does your database need? Specify the size(e.g.,
-            2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/topology/middleManagers/storage/resources/requests/storage|/spec/volumeExpansion/middleManagers
-            type: custom
-        - hasIcon: true
-          label: Middle Managers handle real-time ingestion tasks. More storage enables
-            larger batch processing capabilities.
-          type: info
+        - elements:
+          - label: Mode
+            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
+              with minimal disruption. Choose Offline Mode if you can afford a brief
+              downtime for added reliability during the volume expansion.
+            type: label-element
+          - label: Mode
+            options:
+            - text: Offline
+              value: Offline
+            - text: Online
+              value: Online
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+            type: select
+            validation:
+              type: required
+          type: block-layout
         type: horizontal-layout
-      fixedBlock: true
-      label: Middle Managers
-      showLabels: true
+      - elements:
+        - elements:
+          - disable: isScalingDisabled
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/historicals/storage/resources/requests/storage
+            label: Storage Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/historicals
+            subtitle: How much extra storage does your database need? Specify the size(e.g.,
+              2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/historicals/storage/resources/requests/storage|/spec/volumeExpansion/historicals
+              type: custom
+          - hasIcon: true
+            label: Historicals nodes store historical data segments. Increasing storage
+              allows for more historical data retention.
+            type: info
+          type: horizontal-layout
+        fixedBlock: true
+        label: Historicals
+        showLabels: true
+        type: block-layout
+      - elements:
+        - elements:
+          - disable: isScalingDisabled
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/middleManagers/storage/resources/requests/storage
+            label: Storage Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/middleManagers
+            subtitle: How much extra storage does your database need? Specify the size(e.g.,
+              2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/middleManagers/storage/resources/requests/storage|/spec/volumeExpansion/middleManagers
+              type: custom
+          - hasIcon: true
+            label: Middle Managers handle real-time ingestion tasks. More storage enables
+              larger batch processing capabilities.
+            type: info
+          type: horizontal-layout
+        fixedBlock: true
+        label: Middle Managers
+        showLabels: true
+        type: block-layout
+      hideBorder: true
+      if:
+        name: isScalingEnabled
+        type: function
+      label: Volume Expansion Details
+      showLabels: false
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|VolumeExpansion
@@ -990,6 +1004,9 @@ step:
         value: Always
       schema: schema/properties/spec/properties/apply
       type: radio
+    if:
+      type: function
+      name: isScalingEnabled
     label: OpsRequest Options
     showLabels: true
     type: block-layout
