@@ -234,46 +234,67 @@ step:
     type: block-layout
   - elements:
     - elements:
-      - elements:
-        - label: Mode (Required)
-          subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
-            with minimal disruption. Choose offline Mode if you can afford a brief
-            downntime for added reliability during the volume expansion.
-          type: label-element
-        - label: Mode
-          options:
-          - text: Offline
-            value: Offline
-          - text: Online
-            value: Online
-          schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          type: select
-          validation:
-            type: required
-        type: block-layout
-      type: horizontal-layout
+      - hasIcon: true
+        label: ""
+        loader: loadwarning
+        type: warning
+      hideBorder: true
+      if:
+        name: isScalingDisabled
+        type: function
+      label: Volume Expansion Warning
+      showLabels: false
+      type: block-layout
     - elements:
       - elements:
-        - header: PerconaXtraDB
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-          label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/perconaxtradb
-          subtitle: How much extra storage does your database need? Specify the size(e.g.
-            2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/perconaxtradb
-            type: custom
-        - hasIcon: true
-          label: Volume expansion increases the available storage for your database.
-            Make sure the new size is larger than the current size.
-          type: info
+        - elements:
+          - label: Mode (Required)
+            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
+              with minimal disruption. Choose offline Mode if you can afford a brief
+              downntime for added reliability during the volume expansion.
+            type: label-element
+          - label: Mode
+            options:
+            - text: Offline
+              value: Offline
+            - text: Online
+              value: Online
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+            type: select
+            validation:
+              type: required
+          type: block-layout
         type: horizontal-layout
-      fixedBlock: true
-      label: PerconaXtraDB volume expansion
-      showLabels: true
+      - elements:
+        - elements:
+          - disable: isScalingDisabled
+            header: PerconaXtraDB
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+            label: Storage Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/perconaxtradb
+            subtitle: How much extra storage does your database need? Specify the
+              size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/perconaxtradb
+              type: custom
+          - hasIcon: true
+            label: Volume expansion increases the available storage for your database.
+              Make sure the new size is larger than the current size.
+            type: info
+          type: horizontal-layout
+        fixedBlock: true
+        label: PerconaXtraDB volume expansion
+        showLabels: true
+        type: block-layout
+      hideBorder: true
+      if:
+        name: isScalingEnabled
+        type: function
+      label: Volume Expansion Details
+      showLabels: false
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|VolumeExpansion
@@ -670,6 +691,9 @@ step:
         value: Always
       schema: schema/properties/spec/properties/apply
       type: radio
+    if:
+      name: isScalingEnabled
+      type: function
     label: OpsRequest Options
     showLabels: true
     type: block-layout
