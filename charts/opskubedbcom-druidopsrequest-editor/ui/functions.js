@@ -321,6 +321,8 @@ const druidNodeTypes = [
   'middleManagers',
 ]
 
+let allowScaling = false
+let storageClassName = ''
 let machinesFromPreset = []
 let secretArray = []
 const configSecretKeys = [
@@ -417,6 +419,30 @@ export const useFunc = (model) => {
       try {
         const resp = await axios.get(url)
         setDiscriminatorValue('/dbDetails', resp.data || {})
+
+        if (route.params.actions === 'scale-storage') {
+          storageClassName = resp.data?.spec?.topology?.historicals?.storage?.storageClassName || ''
+          if (storageClassName) {
+            const stUrl = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses/${storageClassName}`
+            try {
+              const storageResp = await axios.get(stUrl)
+              allowScaling = storageResp.data?.allowVolumeExpansion || false
+            } catch (e) {
+              console.log(e)
+              // Could not read the storage class; don't block the user on an unknown.
+              allowScaling = true
+            }
+          } else {
+            // No explicit storage class on the database (default class in use),
+            // so allowVolumeExpansion can't be resolved here.
+            allowScaling = true
+          }
+          commit('wizard/temp$update', {
+            path: '/preview/disabled',
+            value: !allowScaling,
+          })
+        }
+
         return resp.data || {}
       } catch (e) {
         console.log(e)
@@ -970,6 +996,20 @@ export const useFunc = (model) => {
   // ============================================================
   // VOLUME EXPANSION FUNCTIONS
   // ============================================================
+
+  function isScalingDisabled() {
+    if (route.params.actions !== 'scale-storage') return false
+    return allowScaling === false
+  }
+
+  function isScalingEnabled() {
+    if (route.params.actions !== 'scale-storage') return true
+    return allowScaling
+  }
+
+  function loadwarning() {
+    return `Warning: The storage class "${storageClassName}" has allowVolumeExpansion set to false, so volume expansion is not supported for this database.`
+  }
 
   function checkVolume(currentVolPath, newVolPath) {
     // watchDependency(`discriminator#${currentVolPath}`)
@@ -1628,40 +1668,10 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  // ============================================================
-  // HELPER FUNCTIONS
-  // ============================================================
-
-  // ============================================================
-  // RESOURCE MANAGEMENT FUNCTIONS
-  // ============================================================
-
   function setApplyToIfReady() {
     return 'IfReady'
   }
 
-  // ============================================================
-  // ADDITIONAL HELPER FUNCTIONS (from MongoDB patterns)
-  // ============================================================
-
-  /**
-   * Utility function to safely get nested values from objects
-   * @param {Object} obj - The object to traverse
-   * @param {String} path - Dot notation path (e.g., 'spec.topology.brokers')
-   * @param {*} defaultValue - Default value if path not found
-   * @returns {*} The value at the path or default value
-   */
-  /**
-   * Check if the current database has specific topology configuration
-   * @param {String} topologyType - The topology type to check
-   * @returns {Boolean} Whether the topology exists
-   */
-  /**
-   * Get resource limits or requests from database details
-   * @param {String} type - Node type (e.g., 'brokers', 'historicals')
-   * @param {String} resourceType - 'limits' or 'requests'
-   * @returns {Object} Resource configuration
-   */
   function isReplicasValid(type) {
     let currentReplicas = getValue(discriminator, `/dbDetails/spec/topology/${type}/replicas`)
     let newReplicas = getValue(model, `/spec/horizontalScaling/topology/${type}`)
@@ -1783,6 +1793,9 @@ export const useFunc = (model) => {
     // Volume expansion functions
     checkVolume,
     parseSize,
+    loadwarning,
+    isScalingDisabled,
+    isScalingEnabled,
 
     // Configuration functions
     getConfigSecrets,

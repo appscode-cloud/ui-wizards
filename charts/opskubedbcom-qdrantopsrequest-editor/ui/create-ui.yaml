@@ -233,42 +233,63 @@ step:
     type: block-layout
   - elements:
     - elements:
-      - elements:
-        - label: Mode
-          subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
-            with minimal disruption. Choose Offline Mode if you can afford a brief
-            downtime for added reliability during the volume expansion.
-          type: label-element
-        - label: Mode
-          options:
-          - text: Offline
-            value: Offline
-          - text: Online
-            value: Online
-          schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          type: select
-          validation:
-            type: required
-        type: block-layout
-      type: horizontal-layout
+      - hasIcon: true
+        label: ""
+        loader: loadwarning
+        type: warning
+      hideBorder: true
+      if:
+        name: isScalingDisabled
+        type: function
+      label: Volume Expansion Warning
+      showLabels: false
+      type: block-layout
     - elements:
       - elements:
-        - header: Qdrant
-          init:
-            type: func
-            value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-          label: Storage Size
-          schema: schema/properties/spec/properties/volumeExpansion/properties/node
-          subtitle: How much extra storage does your database need? Specify the size(e.g.
-            2Gi for 2 gigabytes) so we can allocate it correctly
-          type: input-compare
-          validation:
-            name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
-            type: custom
+        - elements:
+          - label: Mode
+            subtitle: Not sure which mode to pick? Use Online Mode for smooth operations
+              with minimal disruption. Choose Offline Mode if you can afford a brief
+              downtime for added reliability during the volume expansion.
+            type: label-element
+          - label: Mode
+            options:
+            - text: Offline
+              value: Offline
+            - text: Online
+              value: Online
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+            type: select
+            validation:
+              type: required
+          type: block-layout
         type: horizontal-layout
-      fixedBlock: true
-      label: Qdrant volume expansion
-      showLabels: true
+      - elements:
+        - elements:
+          - disable: isScalingDisabled
+            header: Qdrant
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+            label: Storage Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/node
+            subtitle: How much extra storage does your database need? Specify the
+              size(e.g. 2Gi for 2 gigabytes) so we can allocate it correctly
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
+              type: custom
+          type: horizontal-layout
+        fixedBlock: true
+        label: Qdrant volume expansion
+        showLabels: true
+        type: block-layout
+      hideBorder: true
+      if:
+        name: isScalingEnabled
+        type: function
+      label: Volume Expansion Details
+      showLabels: false
       type: block-layout
     if:
       name: ifRequestTypeEqualsTo|VolumeExpansion
@@ -685,6 +706,9 @@ step:
         value: Always
       schema: schema/properties/spec/properties/apply
       type: radio
+    if:
+      name: isScalingEnabled
+      type: function
     label: OpsRequest Options
     showLabels: true
     type: block-layout

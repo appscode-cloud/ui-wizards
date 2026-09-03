@@ -306,6 +306,8 @@ const machineList = [
 ]
 
 const configSecretKeys = ['kubedb-user.cnf']
+let allowScaling = false
+let storageClassName = ''
 let machinesFromPreset = []
 let secretArray = []
 
@@ -390,6 +392,28 @@ export const useFunc = (model) => {
       const resp = await axios.get(url)
 
       setDiscriminatorValue('/dbDetails', resp.data || {})
+      if (route.params.actions === 'scale-storage') {
+        storageClassName = resp.data?.spec?.storage?.storageClassName || ''
+        if (storageClassName) {
+          const stUrl = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses/${storageClassName}`
+          try {
+            const storageResp = await axios.get(stUrl)
+            allowScaling = storageResp.data?.allowVolumeExpansion || false
+          } catch (e) {
+            console.log(e)
+            // Could not read the storage class; don't block the user on an unknown.
+            allowScaling = true
+          }
+        } else {
+          // No explicit storage class on the database (default class in use),
+          // so allowVolumeExpansion can't be resolved here.
+          allowScaling = true
+        }
+        commit('wizard/temp$update', {
+          path: '/preview/disabled',
+          value: !allowScaling,
+        })
+      }
 
       return resp.data || {}
     } else return {}
@@ -1248,6 +1272,20 @@ export const useFunc = (model) => {
     }
   }
 
+  function isScalingDisabled() {
+    if (route.params.actions !== 'scale-storage') return false
+    return allowScaling === false
+  }
+
+  function isScalingEnabled() {
+    if (route.params.actions !== 'scale-storage') return true
+    return allowScaling
+  }
+
+  function loadwarning() {
+    return `Warning: The storage class "${storageClassName}" has allowVolumeExpansion set to false, so volume expansion is not supported for this database.`
+  }
+
   function checkVolume(initpath, path) {
     const volume = getValue(discriminator, `/dbDetails${initpath}`)
     const input = getValue(model, path)
@@ -1419,6 +1457,9 @@ export const useFunc = (model) => {
     getMachines,
     setMachine,
     onMachineChange,
+    loadwarning,
+    isScalingDisabled,
+    isScalingEnabled,
     checkVolume,
     fetchConfigSecrets,
     getConfigSecretsforAppyConfig,
