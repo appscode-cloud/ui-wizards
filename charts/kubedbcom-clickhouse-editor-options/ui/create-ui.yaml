@@ -119,28 +119,35 @@ step:
       showLabels: true
       type: horizontal-layout
     type: block-layout
-  - label: Externally Managed?
-    schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/externallyManaged
-    type: switch
   - elements:
-    - label: ""
-      subtitle: Configure external ClickHouse Keeper node connection details. Specify
-        the host address and port number for the externally managed keeper service.
-      type: label-element
+    - label: Externally Managed?
+      schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/externallyManaged
+      type: switch
     - elements:
-      - label: Host
-        schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/host
-        type: input
-      - label: Port
-        schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/port
-        type: input
+      - label: ""
+        subtitle: Configure external ClickHouse Keeper node connection details. Specify
+          the host address and port number for the externally managed keeper service.
+        type: label-element
+      - elements:
+        - label: Host
+          schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/host
+          type: input
+        - label: Port
+          schema: schema/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/port
+          type: input
+        showLabels: true
+        type: horizontal-layout
+      if:
+        name: isExternallyManaged|true
+        type: function
+      label: Node
       showLabels: true
-      type: horizontal-layout
+      type: block-layout
     if:
-      name: isExternallyManaged|true
+      name: isEqualToModelPathValue|Topology|/spec/mode
       type: function
-    label: Node
-    showLabels: true
+    label: ClickHouse Keeper
+    showLabels: false
     type: block-layout
   - elements:
     - label: ""
