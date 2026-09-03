@@ -14,6 +14,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/useCustomProfile', false)
   setDiscriminatorValue('/profile', '')
   setDiscriminatorValue('/profileChoseSwitch', false)
+  setDiscriminatorValue('/presetPage', 'deployment-type')
 
   /************** Common Funcitons ******************/
 
@@ -94,11 +95,11 @@ export const useFunc = (model) => {
       resources: {
         requests: {
           cpu: '500m',
-          memory: '912680550',
+          memory: '0.85Gi',
         },
         limits: {
           cpu: '1',
-          memory: '1825361100',
+          memory: '1.7Gi',
         },
       },
     },
@@ -498,6 +499,10 @@ export const useFunc = (model) => {
   function presetNameEqualsTo(value) {
     const presetName = storeGet('/route/params/presetName') || ''
     return presetName === value
+  }
+
+  function isActivePage(page) {
+    return getValue(discriminator, '/presetPage') === page
   }
 
   function getOptions(type) {
@@ -995,26 +1000,6 @@ export const useFunc = (model) => {
     return []
   }
 
-  function onNodeSelectorChange() {
-    let nodeSelector = getValue(discriminator, '/spec/admin/nodeSelector')
-    if (nodeSelector) {
-      nodeSelector = Object.fromEntries(
-        Object.entries(nodeSelector).filter(
-          ([key, value]) => key?.toString().trim() !== '' || value?.toString().trim() !== '',
-        ),
-      )
-    }
-    if (!nodeSelector || Object.entries(nodeSelector).length === 0) {
-      commit('wizard/model$delete', '/spec/admin/nodeSelector')
-    } else {
-      commit('wizard/model$update', {
-        path: '/spec/admin/nodeSelector',
-        value: nodeSelector,
-        force: true,
-      })
-    }
-  }
-
   return {
     preSelectClusterIssuer,
     isRancherManaged,
@@ -1035,6 +1020,7 @@ export const useFunc = (model) => {
     returnFalse,
     fetchJsons,
     presetNameEqualsTo,
+    isActivePage,
     fetchModes,
     availableModes,
     setDefaultMode,
@@ -1054,7 +1040,6 @@ export const useFunc = (model) => {
     onMachineProfileChange,
     setMachineProfiles,
     fetchNames,
-    onNodeSelectorChange,
     onAvailableMachineChange,
   }
 }

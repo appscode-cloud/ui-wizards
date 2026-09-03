@@ -52,8 +52,8 @@ The following table lists the configurable parameters of the `monitoringk8sappsc
 | metadata.resource.name                                                   |                   | <code>telemetrystacks</code>             |
 | metadata.resource.scope                                                  |                   | <code>Cluster</code>                     |
 | metadata.resource.version                                                |                   | <code>v1alpha1</code>                    |
-| metadata.release.name                                                    | Release name      | <code>""</code>                          |
-| metadata.release.namespace                                               | Release namespace | <code>""</code>                          |
+| metadata.release.name                                                    | Release name      | <code>telemetry-stack</code>             |
+| metadata.release.namespace                                               | Release namespace | <code>monitoring</code>                  |
 | spec.metrics.thanos.compact.storageSize                                  |                   | <code>2Gi</code>                         |
 | spec.metrics.thanos.store.storageSize                                    |                   | <code>2Gi</code>                         |
 | spec.metrics.thanos.store.ignoreDeletionMarksDelay                       |                   | <code>24h</code>                         |

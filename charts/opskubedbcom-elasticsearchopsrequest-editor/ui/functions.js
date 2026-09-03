@@ -80,11 +80,11 @@ const machines = {
     resources: {
       requests: {
         cpu: '500m',
-        memory: '912680550',
+        memory: '0.85Gi',
       },
       limits: {
         cpu: '1',
-        memory: '1825361100',
+        memory: '1.7Gi',
       },
     },
   },
@@ -312,6 +312,8 @@ const machineList = [
 // =====================================================
 // Global Variables
 // =====================================================
+let allowScaling = false
+let storageClassName = ''
 let machinesFromPreset = []
 let secretArray = []
 const configSecretKeys = ['elasticsearch.yml', 'data-elasticsearch.yml', 'ingest-elasticsearch.yml']
@@ -433,6 +435,40 @@ export const useFunc = (model) => {
         }
 
         setDiscriminatorValue('/dbDetails', resp.data || {})
+        if (route.params.actions === 'scale-storage') {
+          storageClassName =
+            resp.data?.spec?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.master?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.data?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.ingest?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.ml?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.transform?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.dataCold?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.dataContent?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.dataFrozen?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.dataHot?.storage?.storageClassName ||
+            resp.data?.spec?.topology?.dataWarm?.storage?.storageClassName ||
+            ''
+          if (storageClassName) {
+            const stUrl = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses/${storageClassName}`
+            try {
+              const storageResp = await axios.get(stUrl)
+              allowScaling = storageResp.data?.allowVolumeExpansion || false
+            } catch (e) {
+              console.log(e)
+              // Could not read the storage class; don't block the user on an unknown.
+              allowScaling = true
+            }
+          } else {
+            // No explicit storage class on the database (default class in use),
+            // so allowVolumeExpansion can't be resolved here.
+            allowScaling = true
+          }
+          commit('wizard/temp$update', {
+            path: '/preview/disabled',
+            value: !allowScaling,
+          })
+        }
 
         return resp.data || {}
       } catch (e) {
@@ -975,6 +1011,20 @@ export const useFunc = (model) => {
   // Volume Expansion Functions
   // =====================================================
 
+  function isScalingDisabled() {
+    if (route.params.actions !== 'scale-storage') return false
+    return allowScaling === false
+  }
+
+  function isScalingEnabled() {
+    if (route.params.actions !== 'scale-storage') return true
+    return allowScaling
+  }
+
+  function loadwarning() {
+    return `Warning: The storage class "${storageClassName}" has allowVolumeExpansion set to false, so volume expansion is not supported for this database.`
+  }
+
   function checkVolume(initpath, path) {
     const volume = getValue(discriminator, `/dbDetails${initpath}`)
     const input = getValue(model, path)
@@ -1085,7 +1135,7 @@ export const useFunc = (model) => {
     const mappedSecrets = configSecrets.map((item) => {
       return { text: item, value: item }
     })
-    mappedSecrets.push({ text: '+ Create a new Secret', value: 'Create' })
+    // mappedSecrets.push({ text: '+ Create a new Secret', value: 'Create' })
     return mappedSecrets
   }
 
@@ -1129,10 +1179,17 @@ export const useFunc = (model) => {
         value: 'success',
       })
       commit('wizard/temp$update', {
+        path: `${type}createSecret/onClick`,
+        value: false,
+      })
+      commit('wizard/temp$update', {
         path: `${type}createSecret/lastCreatedSecret`,
         value: secretName,
       })
-      toast.success('Secret created successfully')
+      toast.success(
+        'Secret created successfully. Select the newly created secret from the dropdown menu.',
+        { timeout: 5000 },
+      )
     } catch (error) {
       const errMsg = decodeError(error, 'Failed to create secret')
       toast.error(errMsg, { timeout: 5000 })
@@ -1153,28 +1210,38 @@ export const useFunc = (model) => {
     )
   }
 
+  function onClickCreateSecret(type) {
+    type = type ? type + '/' : ''
+    commit('wizard/temp$update', {
+      path: `${type}createSecret/onClick`,
+      value: true,
+    })
+  }
+
   function isCreateSecret(type) {
     type = type ? type + '/' : ''
-    const selectedSecret = getValue(model, `spec/configuration/${type}configSecret/name`)
-    const res = selectedSecret === 'Create'
+    const onClicked = getValue(discriminator, `${type}createSecret/onClick`)
 
-    if (res === true) {
+    if (onClicked) {
       commit('wizard/temp$update', {
         path: `${type}createSecret/status`,
         value: 'pending',
       })
     }
-    return res
+    return onClicked
   }
 
   function isNotCreateSecret(type) {
-    return !isCreateSecret(type)
+    type = type ? type + '/' : ''
+    return (
+      !isCreateSecret(type) && isValueExist('model', `/spec/configuration/${type}configSecret/name`)
+    )
   }
 
   function onCreateSecretChange(type) {
     type = type ? type + '/' : ''
     const secretStatus = getValue(discriminator, `${type}createSecret/status`)
-    if (secretStatus === 'cancelled') return ''
+    if (secretStatus === 'cancelled' || secretStatus === 'pending') return ''
     else if (secretStatus === 'success') {
       const name = getValue(discriminator, `${type}createSecret/lastCreatedSecret`)
 
@@ -1190,6 +1257,10 @@ export const useFunc = (model) => {
     commit('wizard/temp$update', {
       path: `${type}createSecret/status`,
       value: 'cancelled',
+    })
+    commit('wizard/temp$update', {
+      path: `${type}createSecret/onClick`,
+      value: false,
     })
   }
 
@@ -1261,6 +1332,47 @@ export const useFunc = (model) => {
       path: `/spec/configuration/${type}removeCustomConfig`,
       value: true,
     })
+  }
+  // TODO: Remove multi editor pannel functionalities from remove section in reconfig ops
+  // when current configuration (appliedConfig) is set to databaseConfiguration api
+
+  function getConfigData(type) {
+    type = type ? type + '/' : ''
+    const selectedConfig = getValue(discriminator, `/${type}selectedConfigurationRemove`)
+    const configuration = secretConfigData.find((item) => item.componentName === selectedConfig)
+
+    return configuration?.data
+  }
+
+  function ifConfigExist(type) {
+    return !!getConfigData(type)
+  }
+
+  function setRemoveConfig(type) {
+    const configData = getConfigData(type)
+
+    if (!configData) {
+      return [{ name: '', content: '' }]
+    }
+    const configObj = []
+    // Decode base64 and format as array of objects with name and content
+    Object.keys(configData).forEach((fileName) => {
+      try {
+        // Decode base64 string
+        const decodedString = atob(configData[fileName])
+        configObj.push({
+          name: fileName,
+          content: decodedString,
+        })
+      } catch (e) {
+        console.error(`Error decoding ${fileName}:`, e)
+        configObj.push({
+          name: fileName,
+          content: configData[fileName], // Fallback to original if decode fails
+        })
+      }
+    })
+    return configObj
   }
 
   async function onNewConfigSecretChange(type) {
@@ -1630,6 +1742,11 @@ export const useFunc = (model) => {
     return containers.find((container) => container.name === kind)?.resources?.requests ?? {}
   }
 
+  function isValueExist(type, path) {
+    const source = type === 'model' ? model : discriminator
+    return !!getValue(source, path)
+  }
+
   // =====================================================
   // Return all exported functions
   // =====================================================
@@ -1689,6 +1806,9 @@ export const useFunc = (model) => {
     setExporter,
 
     // Volume expansion functions
+    loadwarning,
+    isScalingDisabled,
+    isScalingEnabled,
     checkVolume,
 
     // Configuration/Reconfiguration functions
@@ -1700,11 +1820,14 @@ export const useFunc = (model) => {
     createNewConfigSecret,
     decodeError,
     isCreateSecret,
+    onClickCreateSecret,
     isNotCreateSecret,
     onCreateSecretChange,
     cancelCreateSecret,
     setApplyConfig,
     onRemoveConfigChange,
+    ifConfigExist,
+    setRemoveConfig,
     onNewConfigSecretChange,
     onSelectedSecretChange,
 
@@ -1731,5 +1854,6 @@ export const useFunc = (model) => {
     hasVolumeExpansion,
     isTlsEnabled,
     getCurrentConfig,
+    isValueExist,
   }
 }
