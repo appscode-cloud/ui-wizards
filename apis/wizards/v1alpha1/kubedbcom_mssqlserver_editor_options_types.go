@@ -61,7 +61,7 @@ type KubedbcomMssqlserverEditorOptionsSpecSpec struct {
 	ArchiverName string       `json:"archiverName"`
 	Init         InitDatabase `json:"init"`
 	// +optional
-	ServiceTemplates []MssqlserverServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []MssqlserverServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions                 `json:"admin"`
 	Backup           BackupToolSpec               `json:"backup"`
 	Monitoring       MonitoringOperator           `json:"monitoring"`

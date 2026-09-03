@@ -56,7 +56,7 @@ type KubedbcomOracleEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
 	Configuration  string         `json:"configuration"`
 	// +optional
-	ServiceTemplates []OracleServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []OracleServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions            `json:"admin"`
 	Backup           BackupToolSpec          `json:"backup"`
 	Monitoring       MonitoringOperator      `json:"monitoring"`

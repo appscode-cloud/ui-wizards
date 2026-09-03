@@ -53,7 +53,7 @@ type KubedbcomDB2EditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
 	Configuration  string         `json:"configuration"`
 	// +optional
-	ServiceTemplates []DB2ServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []DB2ServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions         `json:"admin"`
 	Backup           BackupToolSpec       `json:"backup"`
 	Monitoring       MonitoringOperator   `json:"monitoring"`

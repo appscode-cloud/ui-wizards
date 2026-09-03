@@ -55,7 +55,7 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Configuration  string            `json:"configuration"`
 	// +optional
-	ServiceTemplates []ZookeeperServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []ZookeeperServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions               `json:"admin"`
 	Backup           BackupToolSpec             `json:"backup"`
 	Monitoring       MonitoringOperator         `json:"monitoring"`

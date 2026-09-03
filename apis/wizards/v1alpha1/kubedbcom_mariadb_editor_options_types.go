@@ -59,7 +59,7 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	ArchiverName string       `json:"archiverName"`
 	Init         InitDatabase `json:"init"`
 	// +optional
-	ServiceTemplates []MariadbServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []MariadbServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions             `json:"admin"`
 	Backup           BackupToolSpec           `json:"backup"`
 	Monitoring       MonitoringOperator       `json:"monitoring"`

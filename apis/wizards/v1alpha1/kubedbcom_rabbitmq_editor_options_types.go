@@ -56,7 +56,7 @@ type KubedbcomRabbitMQEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
 	Configuration  string         `json:"configuration"`
 	// +optional
-	ServiceTemplates []RabbitMQServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []RabbitMQServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions              `json:"admin"`
 	Backup           BackupToolSpec            `json:"backup"`
 	Monitoring       MonitoringOperator        `json:"monitoring"`

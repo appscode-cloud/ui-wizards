@@ -61,7 +61,7 @@ type KubedbcomQdrantEditorOptionsSpecSpec struct {
 	Configuration   string           `json:"configuration"`
 	TLS             QdrantTLS        `json:"tls"`
 	// +optional
-	ServiceTemplates []QdrantServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []QdrantServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions            `json:"admin"`
 	Backup           BackupToolSpec          `json:"backup"`
 	Monitoring       MonitoringOperator      `json:"monitoring"`

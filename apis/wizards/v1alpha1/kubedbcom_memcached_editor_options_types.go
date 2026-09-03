@@ -55,7 +55,7 @@ type KubedbcomMemcachedEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
 	Configuration  string         `json:"configuration"`
 	// +optional
-	ServiceTemplates []MemcachedServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []MemcachedServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions               `json:"admin"`
 	Backup           BackupToolSpec             `json:"backup"`
 	Monitoring       MonitoringOperator         `json:"monitoring"`

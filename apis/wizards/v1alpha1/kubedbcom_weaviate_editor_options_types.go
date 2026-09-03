@@ -58,7 +58,7 @@ type KubedbcomWeaviateEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy         `json:"deletionPolicy"`
 	Configuration  string                 `json:"configuration"`
 	// +optional
-	ServiceTemplates []WeaviateServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []WeaviateServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions              `json:"admin"`
 	Backup           BackupToolSpec            `json:"backup"`
 	Monitoring       MonitoringOperator        `json:"monitoring"`

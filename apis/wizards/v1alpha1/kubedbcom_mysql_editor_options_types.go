@@ -67,7 +67,7 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	ArchiverName string       `json:"archiverName"`
 	Init         InitDatabase `json:"init"`
 	// +optional
-	ServiceTemplates []MysqlServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []MysqlServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions           `json:"admin"`
 	Backup           BackupToolSpec         `json:"backup"`
 	Monitoring       MonitoringOperator     `json:"monitoring"`

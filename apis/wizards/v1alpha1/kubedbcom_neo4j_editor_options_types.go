@@ -61,7 +61,7 @@ type KubedbcomNeo4jEditorOptionsSpecSpec struct {
 	Configuration   string         `json:"configuration"`
 	TLS             Neo4jTLS       `json:"tls"`
 	// +optional
-	ServiceTemplates []Neo4jServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []Neo4jServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions           `json:"admin"`
 	Backup           BackupToolSpec         `json:"backup"`
 	Monitoring       MonitoringOperator     `json:"monitoring"`
