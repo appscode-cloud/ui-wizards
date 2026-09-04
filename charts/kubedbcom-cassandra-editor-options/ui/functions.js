@@ -801,6 +801,13 @@ export const useFunc = (model) => {
     return returnArray
   }
 
+  async function getIssuers() {
+    const options = (await getValue(model, '/spec/admin/clusterIssuers/available')) || []
+    const bundleData = fetchOptions('clusterIssuers') || []
+    const val = bundleData.filter((item) => options.includes(item))
+    return val
+  }
+
   async function getAdminOptions(type) {
     // watchDependency('discriminator#/bundleApiLoaded')
 
@@ -1091,6 +1098,7 @@ export const useFunc = (model) => {
     isConfigDatabaseOn,
     clearConfiguration,
     isToggleOn,
+    getIssuers,
     getAdminOptions,
     onBackupSwitch,
     showAlerts,
