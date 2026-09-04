@@ -302,19 +302,14 @@ step:
       type: input
     showLabels: true
     type: horizontal-layout
-  - elements:
-    - elements:
-      - label: Name
-        loader: getAppBindings
-        schema: schema/properties/spec/properties/zookeeperRef/properties/name
-        type: select
-      - label: Namespace
-        schema: schema/properties/spec/properties/zookeeperRef/properties/namespace
-        type: input
-      type: horizontal-layout
-    label: ZookeeperRef
-    showLabels: true
-    type: block-layout
+  - label: ZookeeperRef
+    loader: getAppBindings
+    schema: temp/zookeeperRef
+    type: select
+    watcher:
+      func: onZookeeperRefChange
+      paths:
+      - temp/zookeeperRef
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:

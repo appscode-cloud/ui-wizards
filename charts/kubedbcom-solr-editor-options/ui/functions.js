@@ -332,6 +332,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('referSecret', false)
   setDiscriminatorValue('configDatabase', false)
   setDiscriminatorValue('monitoring', false)
+  setDiscriminatorValue('zookeeperRef', '')
 
   function clearConfiguration() {
     const configOn = getValue(discriminator, '/configDatabase')
@@ -971,7 +972,7 @@ export const useFunc = (model) => {
     const queryParams = {
       filter: {
         items: {
-          metadata: { name: null },
+          metadata: { name: null, namespace: null },
           spec: { type: null },
         },
       },
@@ -988,9 +989,10 @@ export const useFunc = (model) => {
         .filter((item) => item.spec?.type === 'kubedb.com/zookeeper')
         .map((item) => {
           const name = (item.metadata && item.metadata.name) || ''
+          const itemNamespace = (item.metadata && item.metadata.namespace) || namespace
           return {
-            text: `${namespace}/${name}`,
-            value: name,
+            text: `${itemNamespace}/${name}`,
+            value: `${itemNamespace}/${name}`,
           }
         })
       return filteredResources
@@ -1000,9 +1002,25 @@ export const useFunc = (model) => {
     }
   }
 
+  function onZookeeperRefChange() {
+    const isZookeeperRef = getValue(discriminator, '/zookeeperRef') || ''
+    const [namespace, name] = isZookeeperRef.split('/')
+    commit('wizard/model$update', {
+      path: '/spec/zookeeperRef/namespace',
+      value: namespace || '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/spec/zookeeperRef/name',
+      value: name || '',
+      force: true,
+    })
+  }
+
   return {
     clearConfiguration,
     filterNodeTopology,
+    getAppBindings,
     getDefault,
     getDefaultValue,
     getMachineListForOptions,
@@ -1014,6 +1032,7 @@ export const useFunc = (model) => {
     isMachineNotCustom,
     onAuthChange,
     onReferSecretChange,
+    onZookeeperRefChange,
     returnFalse,
     setLimits,
     setMachineToCustom,
