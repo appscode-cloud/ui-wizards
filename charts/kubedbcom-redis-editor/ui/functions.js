@@ -316,7 +316,6 @@ export const useFunc = (model) => {
       const tempBackends = valuesFromWizard.spec?.backends
       tempBackends[0]['storageRef'] = storageRef
       tempBackends[0]['retentionPolicy'] = retentionPolicy
-      console.log(tempBackends)
 
       valuesFromWizard.spec['backends'] = tempBackends
 

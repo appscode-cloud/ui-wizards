@@ -316,14 +316,12 @@ export const useFunc = (model) => {
       const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
 
       const tempBackends = valuesFromWizard.spec?.backends || []
-      console.log(tempBackends)
 
       tempBackends[0]['storageRef'] = storageRef
       tempBackends[0]['retentionPolicy'] = retentionPolicy
       valuesFromWizard.spec['backends'] = tempBackends
 
       const tempSessions = valuesFromWizard.spec?.sessions || []
-      console.log(tempSessions)
 
       const tempRepositories = valuesFromWizard.spec?.sessions[0]?.repositories || []
       tempRepositories[0]['encryptionSecret'] = encryptionSecret
@@ -674,7 +672,6 @@ export const useFunc = (model) => {
         )
         dbDetails = resp.data || {}
         showStoragememory = dbDetails?.spec?.storageEngine === 'inMemory'
-        console.log('showStoragememory', showStoragememory)
 
         setDiscriminatorValue('/dbDetails', true)
       } catch (e) {

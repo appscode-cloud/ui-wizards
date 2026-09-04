@@ -1322,7 +1322,6 @@ export const useFunc = (model) => {
 
   function isMachineValid() {
     const limits = getLimits()
-    console.log('limits', limits)
     const selectedMachine = getValue(discriminator, '/machine')
     const selectedLimits = { cpu: selectedMachine?.cpu, memory: selectedMachine?.memory }
 

@@ -957,7 +957,6 @@ export const useFunc = (model) => {
 
   function getDefaultValue(path) {
     const val = getValue(model, `/${path}`) || ''
-    console.log({ val }, { path })
     return val
   }
 

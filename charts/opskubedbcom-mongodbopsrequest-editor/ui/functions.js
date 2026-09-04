@@ -1488,7 +1488,6 @@ export const useFunc = (model) => {
         `/dbDetails/spec/shardTopology/${replicaTypes[i]}/replicas`,
       )
       const updated = getValue(model, `/spec/horizontalScaling/${replicaTypes[i]}/replicas`)
-      console.log(replicaTypes[i], current, updated)
 
       if (updated && current !== updated) return false
     }
