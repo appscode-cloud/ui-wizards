@@ -332,7 +332,8 @@ export const useFunc = (model) => {
   setDiscriminatorValue('referSecret', false)
   setDiscriminatorValue('configDatabase', false)
   setDiscriminatorValue('monitoring', false)
-  setDiscriminatorValue('zookeeperRef', '')
+  setDiscriminatorValue('zookeeperRef', {})
+  setDiscriminatorValue('zookeeperExternal', false)
 
   function clearConfiguration() {
     const configOn = getValue(discriminator, '/configDatabase')
@@ -955,7 +956,7 @@ export const useFunc = (model) => {
     } else return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
   }
 
-  async function getAppBindings() {
+  async function getAppBindings(type) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace =
@@ -986,13 +987,16 @@ export const useFunc = (model) => {
       const resources = (resp && resp.data && resp.data.items) || []
 
       const filteredResources = resources
-        .filter((item) => item.spec?.type === 'kubedb.com/zookeeper')
+        .filter((item) => item.spec?.type === `kubedb.com/${type}`)
         .map((item) => {
           const name = (item.metadata && item.metadata.name) || ''
           const itemNamespace = (item.metadata && item.metadata.namespace) || namespace
           return {
             text: `${itemNamespace}/${name}`,
-            value: `${itemNamespace}/${name}`,
+            value: {
+              name: name,
+              namespace: itemNamespace,
+            },
           }
         })
       return filteredResources
@@ -1002,17 +1006,36 @@ export const useFunc = (model) => {
     }
   }
 
-  function onZookeeperRefChange() {
-    const isZookeeperRef = getValue(discriminator, '/zookeeperRef') || ''
-    const [namespace, name] = isZookeeperRef.split('/')
+  function onRefChange(type) {
+    const ref = getValue(discriminator, `/${type}`) || {}
     commit('wizard/model$update', {
-      path: '/spec/zookeeperRef/namespace',
-      value: namespace || '',
+      path: `/spec/${type}/name`,
+      value: ref.name || '',
       force: true,
     })
     commit('wizard/model$update', {
-      path: '/spec/zookeeperRef/name',
-      value: name || '',
+      path: `/spec/${type}/namespace`,
+      value: ref.namespace || '',
+      force: true,
+    })
+  }
+
+  function isZookeeperExternal() {
+    const isExternal = getValue(discriminator, '/zookeeperExternal') || false
+    if (!isExternal) clearRefs('zookeeperRef')
+    return isExternal
+  }
+
+  function clearRefs(type) {
+    setDiscriminatorValue(`/${type}`, {})
+    commit('wizard/model$update', {
+      path: `/spec/${type}/name`,
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/spec/${type}/namespace`,
+      value: '',
       force: true,
     })
   }
@@ -1032,7 +1055,9 @@ export const useFunc = (model) => {
     isMachineNotCustom,
     onAuthChange,
     onReferSecretChange,
-    onZookeeperRefChange,
+    onRefChange,
+    isZookeeperExternal,
+    clearRefs,
     returnFalse,
     setLimits,
     setMachineToCustom,
@@ -1052,6 +1077,5 @@ export const useFunc = (model) => {
     getNodeTopology,
     checkIfFeatureOn,
     isToggleOn,
-    getAppBindings,
   }
 }
