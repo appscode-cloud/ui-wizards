@@ -302,14 +302,6 @@ step:
       type: input
     showLabels: true
     type: horizontal-layout
-  - label: ZookeeperRef
-    loader: getAppBindings
-    schema: temp/zookeeperRef
-    type: select
-    watcher:
-      func: onZookeeperRefChange
-      paths:
-      - temp/zookeeperRef
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
@@ -357,6 +349,23 @@ step:
         func: setStorageClass
         paths:
         - schema/properties/spec/properties/deletionPolicy
+    - label: Zookeeper External
+      schema: temp/zookeeperExternal
+      type: switch
+    - if:
+        name: isZookeeperExternal
+        type: function
+      label: Zookeeper
+      loader: getAppBindings|zookeeper
+      refresh: true
+      schema: temp/zookeeperRef
+      type: select
+      validation:
+        type: required
+      watcher:
+        func: onRefChange|zookeeperRef
+        paths:
+        - temp/zookeeperRef
     - if:
         name: getDefaultValue|spec/admin/authCredential/customize
         type: function
