@@ -800,7 +800,6 @@ export const useFunc = (model) => {
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) {
-      console.log('machinePresets', machinePresets, machine)
       return {
         machine: machine,
         cpu: machinePresets.limits.cpu,

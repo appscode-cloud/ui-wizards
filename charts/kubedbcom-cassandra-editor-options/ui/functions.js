@@ -891,7 +891,6 @@ export const useFunc = (model) => {
   function onBackupSwitch() {
     const isBackupOn = getValue(discriminator, '/backup')
     setDiscriminatorValue('/isBackupToggleOn', true)
-    console.log('Backup toggle is changed to ON/OFF. Updating backup tool to KubeStash/empty.')
     commit('wizard/model$update', {
       path: '/spec/backup/tool',
       value: isBackupOn ? 'KubeStash' : '',

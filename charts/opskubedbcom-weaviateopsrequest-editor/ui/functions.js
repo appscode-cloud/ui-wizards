@@ -758,7 +758,6 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
-    console.log(limits)
 
     let parsedInstance = {}
     try {

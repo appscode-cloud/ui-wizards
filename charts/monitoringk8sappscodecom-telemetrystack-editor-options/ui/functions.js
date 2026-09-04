@@ -34,13 +34,11 @@ export const useFunc = (model) => {
   }
 
   function volumeName() {
-    console.log('volumeName', getValue(model, `${additionalVolumesPath}/name`))
     return getValue(model, `${additionalVolumesPath}/name`) || ''
   }
 
   function volumeMountPath() {
     const path = getValue(model, `${additionalVolumesPath}/path`)
-    console.log('volumeMountPath', path, certificateMountDir)
     return path ? `${certificateMountDir}/${path}` : ''
   }
 
