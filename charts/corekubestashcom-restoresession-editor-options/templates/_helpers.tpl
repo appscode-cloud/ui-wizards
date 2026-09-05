@@ -59,7 +59,7 @@ kubedbcom-<db>-editor-options chart; the OpenShift uid-range value wins when set
   "Cassandra" 999
   "ClickHouse" 101
   "DB2" 54321
-  "DocumentDB" 999
+  "DocumentDB" 1000
   "Druid" 1000
   "Elasticsearch" 1000
   "HanaDB" 54321
