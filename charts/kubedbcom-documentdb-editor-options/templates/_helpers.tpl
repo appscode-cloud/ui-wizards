@@ -119,9 +119,9 @@ allowPrivilegeEscalation: false
 capabilities:
   drop:
   - ALL
-runAsGroup: 0
+runAsGroup: 1000
 runAsNonRoot: true
-runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 999 }}
+runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 1000 }}
 seccompProfile:
   type: RuntimeDefault
 {{- end }}
