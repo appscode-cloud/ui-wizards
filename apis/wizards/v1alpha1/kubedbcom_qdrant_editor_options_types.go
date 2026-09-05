@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -50,20 +51,33 @@ type KubedbcomQdrantEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	StorageType     string             `json:"storageType,omitempty"`
-	DisableSecurity bool               `json:"disableSecurity"`
-	Halted          bool               `json:"halted"`
-	Persistence     Persistence        `json:"persistence"`
-	PodResources    PodResources       `json:"podResources"`
-	AuthSecret      QdrantAuthSecret   `json:"authSecret"`
-	DeletionPolicy  DeletionPolicy     `json:"deletionPolicy"`
-	Configuration   string             `json:"configuration"`
-	TLS             QdrantTLS          `json:"tls"`
-	Admin           AdminOptions       `json:"admin"`
-	Backup          BackupToolSpec     `json:"backup"`
-	Monitoring      MonitoringOperator `json:"monitoring"`
+	StorageType     string           `json:"storageType,omitempty"`
+	DisableSecurity bool             `json:"disableSecurity"`
+	Halted          bool             `json:"halted"`
+	Persistence     Persistence      `json:"persistence"`
+	PodResources    PodResources     `json:"podResources"`
+	AuthSecret      QdrantAuthSecret `json:"authSecret"`
+	DeletionPolicy  DeletionPolicy   `json:"deletionPolicy"`
+	Configuration   string           `json:"configuration"`
+	TLS             QdrantTLS        `json:"tls"`
+	// +optional
+	ServiceTemplates []QdrantServiceTemplate `json:"serviceTemplates"`
+	Admin            AdminOptions            `json:"admin"`
+	Backup           BackupToolSpec          `json:"backup"`
+	Monitoring       MonitoringOperator      `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
+type QdrantServiceAlias string
+
+type QdrantServiceTemplate struct {
+	Alias QdrantServiceAlias `json:"alias"`
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// +optional
+	SvcType core.ServiceType `json:"svcType,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Distributed

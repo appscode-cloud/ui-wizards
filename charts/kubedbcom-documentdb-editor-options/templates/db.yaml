@@ -108,6 +108,22 @@ spec:
             {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- $svcTpls := .Values.spec.serviceTemplates | default .Values.spec.admin.serviceTemplates }}
+{{- if $svcTpls }}
+  serviceTemplates:
+  {{- range $svcTpls }}
+  - alias: {{ .alias }}
+    {{- if .annotations }}
+    metadata:
+      annotations:
+        {{- toYaml .annotations | nindent 8 }}
+    {{- end }}
+    {{- if .svcType }}
+    spec:
+      type: {{ .svcType }}
+    {{- end }}
+  {{- end }}
+{{- end }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}

@@ -46,6 +46,8 @@ spec:
     securityContext:
       runAsUser: null
 
+  # Service templates applied to the database services, keyed by alias.
+  serviceTemplates: []
   admin:
     deployment:
       default: Shared
@@ -104,6 +106,8 @@ spec:
         disableUI: false
         disableCostEfficiency: false
 
+    # Default service templates offered by the preset, keyed by alias.
+    serviceTemplates: []
     monitoring:
       # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
       agent: prometheus.io/operator
@@ -114,6 +118,13 @@ spec:
             memory: 128Mi
           limits:
             memory: 256Mi
+      serviceMonitor:
+        # Scrape interval for the generated ServiceMonitor.
+        interval: 30s
+        # Labels used by Prometheus to select the generated ServiceMonitor.
+        labels: {}
+        # Scrape endpoints, each with optional relabeling rules.
+        endpoints: []
       toggle: true
     alert:
       toggle: true
