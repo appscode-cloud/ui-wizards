@@ -1074,9 +1074,11 @@ export const useFunc = (model) => {
 
       const secrets = (resp && resp.data && resp.data.items) || []
 
+      const requiredKeys = ['address', 'port', 'accessKeyID', 'secretAccessKey', 'bucketName']
       const filteredSecrets = secrets.filter((item) => {
-        const validType = ['Opaque']
-        return validType.includes(item.type) && Object.keys(item.data || {}).includes('config.env')
+        if (item.type !== 'Opaque') return false
+        const keys = Object.keys(item.data || {})
+        return requiredKeys.every((key) => keys.includes(key))
       })
 
       filteredSecrets.map((item) => {
