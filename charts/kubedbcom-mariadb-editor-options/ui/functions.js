@@ -785,6 +785,13 @@ export const useFunc = (model) => {
   let archiverMap = []
   let archiverCalled = false
 
+  async function getIssuers() {
+    const options = (await getValue(model, '/spec/admin/clusterIssuers/available')) || []
+    const bundleData = fetchOptions('clusterIssuers') || []
+    const val = bundleData.filter((item) => options.includes(item))
+    return val
+  }
+
   async function getAdminOptions(type) {
     // watchDependency('discriminator#/bundleApiLoaded')
 
@@ -1305,6 +1312,7 @@ export const useFunc = (model) => {
     setStorageClass,
     getNodeTopology,
     filterNodeTopology,
+    getIssuers,
     getAdminOptions,
     isToggleOn,
     showAlerts,
