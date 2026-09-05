@@ -591,6 +591,71 @@ export const useFunc = (model) => {
 
   // for tls
 
+  function initIssuerRefApiGroup() {
+    const kind = getValue(model, '/spec/tls/issuerRef/kind')
+    // watchDependency('model#/spec/tls/issuerRef/kind')
+
+    if (kind) {
+      const apiGroup = getValue(discriminator, '/dbDetails/spec/tls/issuerRef/apiGroup')
+      if (apiGroup) return apiGroup
+      return 'cert-manager.io'
+    } else return undefined
+  }
+
+  async function getIssuerRefsName() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    // watchDependency('model#/spec/tls/issuerRef/kind')
+    // watchDependency('model#/metadata/namespace')
+    const kind = getValue(model, '/spec/tls/issuerRef/kind')
+    const namespace = getValue(model, '/metadata/namespace')
+
+    if (kind === 'Issuer') {
+      const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
+      return getIssuer(url)
+    } else if (kind === 'ClusterIssuer') {
+      const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+
+      let presets = storeGet('/kubedbuiPresets') || {}
+      if (!storeGet('/route/params/actions')) {
+        try {
+          const presetResp = await axios.get(url)
+          presets = presetResp.data?.spec?.values?.spec
+        } catch (e) {
+          console.log(e)
+          presets.status = String(e.status)
+        }
+      }
+      let clusterIssuers = presets.admin?.clusterIssuers?.available || []
+      if (presets.status === '404') {
+        const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
+        return getIssuer(url)
+      }
+      return clusterIssuers
+    } else if (!kind) {
+      commit('wizard/model$delete', '/spec/tls/issuerRef/name')
+      return []
+    }
+
+    async function getIssuer(url) {
+      try {
+        const resp = await axios.get(url)
+        const resources = (resp && resp.data && resp.data.items) || []
+
+        resources.map((item) => {
+          const name = (item.metadata && item.metadata.name) || ''
+          item.text = name
+          item.value = name
+          return true
+        })
+        return resources
+      } catch (e) {
+        console.log(e)
+        return []
+      }
+    }
+  }
+
   function isTlsEnabled(type) {
     const selectedOpsType = getValue(discriminator, '/tlsOperation')
     return selectedOpsType === type
@@ -606,6 +671,39 @@ export const useFunc = (model) => {
     const tlsEnabled = hasTlsField()
 
     return !tlsEnabled && (type === 'rotate' || type === 'remove')
+  }
+
+  function showIssuerRefAndCertificates() {
+    const tlsOperation = getValue(discriminator, '/tlsOperation')
+    // watchDependency('discriminator#/tlsOperation')
+    const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
+
+    return verd
+  }
+
+  function isIssuerRefRequired() {
+    const hasTls = hasTlsField()
+    return hasTls ? false : ''
+  }
+
+  function onTlsOperationChange() {
+    const tlsOperation = getValue(discriminator, '/tlsOperation')
+    const rotate = !!getValue(model, '/spec/tls/rotateCertificates')
+    const remove = !!getValue(model, '/spec/tls/remove')
+
+    commit('wizard/model$delete', '/spec/tls')
+
+    if (tlsOperation === 'rotate') {
+      commit('wizard/model$update', {
+        path: '/spec/tls/rotateCertificates',
+        value: rotate,
+      })
+    } else if (tlsOperation === 'remove') {
+      commit('wizard/model$update', {
+        path: '/spec/tls/remove',
+        value: remove,
+      })
+    }
   }
 
   function fetchAliasOptions() {
@@ -1381,6 +1479,16 @@ export const useFunc = (model) => {
     return !!getValue(discriminator, '/dbDetails/spec/monitor')
   }
 
+  function getAliasOptions() {
+    const aliases = ['server', 'client']
+
+    if (isMonitoringEnabled()) {
+      aliases.push('metrics-exporter')
+    }
+
+    return aliases
+  }
+
   function setExporter(type) {
     let path = `/dbDetails/spec/monitor/prometheus/exporter/resources/limits/${type}`
     const limitVal = getValue(discriminator, path)
@@ -1463,6 +1571,12 @@ export const useFunc = (model) => {
     isTlsEnabled,
     hasTlsField,
     isTlsOptionDisabled,
+    initIssuerRefApiGroup,
+    getIssuerRefsName,
+    showIssuerRefAndCertificates,
+    getAliasOptions,
+    isIssuerRefRequired,
+    onTlsOperationChange,
     fetchAliasOptions,
     disableAlias,
     getRequestTypeFromRoute,
