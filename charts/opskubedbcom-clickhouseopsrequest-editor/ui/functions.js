@@ -323,7 +323,7 @@ export const useFunc = (model) => {
 
   function isTlsEnabled(type) {
     const selectedOpsType = getValue(discriminator, '/tlsOperation')
-    return selectedOpsType === type
+    return type?.split(',').includes(selectedOpsType)
   }
 
   function isRancherManaged() {
@@ -1321,17 +1321,16 @@ export const useFunc = (model) => {
     return !tlsEnabled && (type === 'rotate' || type === 'remove')
   }
 
-  function showIssuerRefAndCertificates() {
-    const tlsOperation = getValue(discriminator, '/tlsOperation')
-    // watchDependency('discriminator#/tlsOperation')
-    const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
-
-    return verd
-  }
-
   function isIssuerRefRequired() {
     const hasTls = hasTlsField()
     return hasTls ? false : ''
+  }
+
+  function onVerificationModeChange() {
+    const sslMode = getValue(model, '/spec/tls/sslVerificationMode')
+    if (!sslMode) {
+      commit('wizard/model$delete', '/spec/tls/sslVerificationMode')
+    }
   }
 
   function getRequestTypeFromRoute() {
@@ -1497,13 +1496,16 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  function isReplicasValid() {
+  function isScalingValid(type) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const currentReplicas = dbDetails?.spec?.clusterTopology?.cluster?.replicas
-    const newReplicas = getValue(model, '/spec/horizontalScaling/replicas')
+    const currentValue = dbDetails?.spec?.clusterTopology?.cluster?.[type]
+    const newValue = getValue(model, `/spec/horizontalScaling/${type}`)
 
-    if (currentReplicas === newReplicas) {
-      return 'New replica count must be different from the current replica count.'
+    if (type === 'shards' && typeof newValue === 'number' && newValue <= currentValue) {
+      return 'Shards count must be greater than current shards count.'
+    }
+    if (currentValue === newValue) {
+      return `New ${type} count must be different from the current ${type} count.`
     }
     return false
   }
@@ -1544,7 +1546,7 @@ export const useFunc = (model) => {
   }
 
   return {
-    isReplicasValid,
+    isScalingValid,
     isMachineValid,
     fetchAliasOptions,
     disableAlias,
@@ -1574,8 +1576,8 @@ export const useFunc = (model) => {
     initTlsOperation,
     onTlsOperationChange,
     isTlsOptionDisabled,
-    showIssuerRefAndCertificates,
     isIssuerRefRequired,
+    onVerificationModeChange,
     getRequestTypeFromRoute,
     isDbDetailsLoading,
     setValueFromDbDetails,
