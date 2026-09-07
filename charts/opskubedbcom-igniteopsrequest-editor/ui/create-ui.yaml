@@ -316,21 +316,23 @@ step:
         schema: temp/properties/currentConfig
         type: editor
         validateContent: false
-      - elements:
+      - disable:
+          name: isCreateSecret
+          watchPaths:
+          - temp/properties/createSecret/properties/onClick
+        elements:
         - elements:
           - customClass: mb-15
             label: Config Secret
             subtitle: Select an existing secret or create a new one to apply to your
               database configuration.
             type: label-element
-          - type: horizontal-layout
-            hasButton:
-              text: Create a New Secret
-              buttonClass: is-light is-outlined
-              hasPlusIcon: true
-              action: onClickCreateSecret
-            elements:
+          - elements:
             - customClass: mb-2
+              disable:
+                name: isCreateSecret
+                watchPaths:
+                - temp/properties/createSecret/properties/onClick
               init:
                 type: func
                 value: setValueFromDbDetails|/spec/configSecret/name
@@ -347,10 +349,12 @@ step:
                 func: onCreateSecretChange
                 paths:
                 - temp/properties/createSecret/properties/status
-              disable:
-                name: isCreateSecret
-                watchPaths:
-                - temp/properties/createSecret/properties/onClick
+            hasButton:
+              action: onClickCreateSecret
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              text: Create a New Secret
+            type: horizontal-layout
           - customClass: mt-15
             elements:
             - label: ""
@@ -423,11 +427,7 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/selectedConfiguration
             type: select
-          - type: block-layout
-            if:
-              name: isValueExist|temp|/selectedConfiguration
-              type: function
-            elements:
+          - elements:
             - editorHeight: 500px
               hideFormatButton: true
               loader:
@@ -442,9 +442,13 @@ step:
                 func: onApplyconfigChange
                 paths:
                 - temp/properties/applyConfig
-            - type: label-element
-              label: ''
+            - label: ""
               subtitle: ⓘ Changes will take effect after a successful redeployment.
+              type: label-element
+            if:
+              name: isValueExist|temp|/selectedConfiguration
+              type: function
+            type: block-layout
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig
             type: function
@@ -495,10 +499,6 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
-        disable:
-          name: isCreateSecret
-          watchPaths:
-          - temp/properties/createSecret/properties/onClick
         schema: temp/properties/reconfigurationType
         type: tab-layout
       label: Configuration

@@ -558,8 +558,8 @@ step:
   - elements:
     - elements:
       - hasIcon: true
+        label: ""
         loader: loadwarning
-        label: ''
         type: warning
       hideBorder: true
       if:
@@ -596,8 +596,8 @@ step:
               value: setValueFromDbDetails|/spec/topology/historicals/storage/resources/requests/storage
             label: Storage Size
             schema: schema/properties/spec/properties/volumeExpansion/properties/historicals
-            subtitle: How much extra storage does your database need? Specify the size(e.g.,
-              2Gi for 2 gigabytes) so we can allocate it correctly
+            subtitle: How much extra storage does your database need? Specify the
+              size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
             type: input-compare
             validation:
               name: checkVolume|/spec/topology/historicals/storage/resources/requests/storage|/spec/volumeExpansion/historicals
@@ -619,15 +619,15 @@ step:
               value: setValueFromDbDetails|/spec/topology/middleManagers/storage/resources/requests/storage
             label: Storage Size
             schema: schema/properties/spec/properties/volumeExpansion/properties/middleManagers
-            subtitle: How much extra storage does your database need? Specify the size(e.g.,
-              2Gi for 2 gigabytes) so we can allocate it correctly
+            subtitle: How much extra storage does your database need? Specify the
+              size(e.g., 2Gi for 2 gigabytes) so we can allocate it correctly
             type: input-compare
             validation:
               name: checkVolume|/spec/topology/middleManagers/storage/resources/requests/storage|/spec/volumeExpansion/middleManagers
               type: custom
           - hasIcon: true
-            label: Middle Managers handle real-time ingestion tasks. More storage enables
-              larger batch processing capabilities.
+            label: Middle Managers handle real-time ingestion tasks. More storage
+              enables larger batch processing capabilities.
             type: info
           type: horizontal-layout
         fixedBlock: true
@@ -666,21 +666,23 @@ step:
         schema: temp/properties/currentConfig
         type: editor
         validateContent: false
-      - elements:
+      - disable:
+          name: isCreateSecret
+          watchPaths:
+          - temp/properties/createSecret/properties/onClick
+        elements:
         - elements:
           - customClass: mb-15
             label: Config Secret
             subtitle: Select an existing secret or create a new one to apply to your
               database configuration.
             type: label-element
-          - type: horizontal-layout
-            hasButton:
-              text: Create a New Secret
-              buttonClass: is-light is-outlined
-              hasPlusIcon: true
-              action: onClickCreateSecret
-            elements:
+          - elements:
             - customClass: mb-2
+              disable:
+                name: isCreateSecret
+                watchPaths:
+                - temp/properties/createSecret/properties/onClick
               init:
                 type: func
                 value: setValueFromDbDetails|/spec/configSecret/name
@@ -697,10 +699,12 @@ step:
                 func: onCreateSecretChange
                 paths:
                 - temp/properties/createSecret/properties/status
-              disable:
-                name: isCreateSecret
-                watchPaths:
-                - temp/properties/createSecret/properties/onClick
+            hasButton:
+              action: onClickCreateSecret
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              text: Create a New Secret
+            type: horizontal-layout
           - customClass: mt-15
             elements:
             - label: ""
@@ -773,11 +777,7 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/selectedConfiguration
             type: select
-          - type: block-layout
-            if:
-              name: isValueExist|temp|/selectedConfiguration
-              type: function
-            elements:
+          - elements:
             - editorHeight: 500px
               hideFormatButton: true
               loader:
@@ -792,9 +792,13 @@ step:
                 func: onApplyconfigChange
                 paths:
                 - temp/properties/applyConfig
-            - type: label-element
-              label: ''
+            - label: ""
               subtitle: ⓘ Changes will take effect after a successful redeployment.
+              type: label-element
+            if:
+              name: isValueExist|temp|/selectedConfiguration
+              type: function
+            type: block-layout
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig
             type: function
@@ -845,10 +849,6 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
-        disable:
-          name: isCreateSecret
-          watchPaths:
-          - temp/properties/createSecret/properties/onClick
         schema: temp/properties/reconfigurationType
         type: tab-layout
       label: Configuration
@@ -1041,8 +1041,8 @@ step:
       schema: schema/properties/spec/properties/apply
       type: radio
     if:
-      type: function
       name: isScalingEnabled
+      type: function
     label: OpsRequest Options
     showLabels: true
     type: block-layout
