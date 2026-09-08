@@ -965,6 +965,11 @@ export const useFunc = (model) => {
     return isTlsEnabled && isIssuerToggleEnabled
   }
 
+  function showTlsDetails() {
+    // watchDependency('model#/spec/admin/tls/default')
+    return getValue(model, '/spec/admin/tls/default')
+  }
+
   function setMonitoring() {
     const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
     return !!agent
@@ -1134,6 +1139,7 @@ export const useFunc = (model) => {
     isToggleOn,
     showAlerts,
     showIssuer,
+    showTlsDetails,
     setMonitoring,
     onAuthChange,
     isConfigDatabaseOn,

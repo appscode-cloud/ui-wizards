@@ -2367,6 +2367,34 @@ properties:
         type: object
       replicas:
         type: integer
+      tls:
+        properties:
+          external:
+            properties:
+              mode:
+                enum:
+                - Disabled
+                - TLS
+                - mTLS
+                type: string
+            required:
+            - mode
+            type: object
+          internal:
+            properties:
+              mode:
+                enum:
+                - Disabled
+                - TLS
+                - mTLS
+                type: string
+            required:
+            - mode
+            type: object
+        required:
+        - external
+        - internal
+        type: object
     required:
     - admin
     - authSecret
@@ -2381,6 +2409,7 @@ properties:
     - objectStorage
     - persistence
     - podResources
+    - tls
     type: object
 required:
 - form

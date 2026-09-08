@@ -1050,6 +1050,48 @@ step:
       schema: schema/properties/spec/properties/tls/properties/rotateCertificates
       type: switch
     - elements:
+      - init:
+          type: func
+          value: setValueFromDbDetails|/spec/tls/external/mode
+        isHorizontal: true
+        label: External TLS Mode
+        options:
+        - description: Client connections are not encrypted
+          text: Disabled
+          value: Disabled
+        - description: Encrypt client connections with a server certificate
+          text: TLS
+          value: TLS
+        - description: Encrypt client connections and require a client certificate
+          text: mTLS
+          value: mTLS
+        schema: schema/properties/spec/properties/tls/properties/external/properties/mode
+        type: radio
+      - init:
+          type: func
+          value: setValueFromDbDetails|/spec/tls/internal/mode
+        isHorizontal: true
+        label: Internal TLS Mode
+        options:
+        - description: Traffic between Milvus components is not encrypted
+          text: Disabled
+          value: Disabled
+        - description: Encrypt traffic between Milvus components
+          text: TLS
+          value: TLS
+        - description: Encrypt traffic between Milvus components and require a client
+            certificate
+          text: mTLS
+          value: mTLS
+        schema: schema/properties/spec/properties/tls/properties/internal/properties/mode
+        type: radio
+      if:
+        name: showIssuerRefAndCertificates
+        type: function
+      label: TLS Mode
+      showLabels: true
+      type: block-layout
+    - elements:
       - disable: true
         init:
           type: func

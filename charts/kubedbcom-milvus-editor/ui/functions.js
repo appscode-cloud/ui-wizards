@@ -275,6 +275,24 @@ export const useFunc = (model) => {
     const enableMonitoring = getValue(discriminator, '/enableMonitoring')
     if (!enableMonitoring) {
       commit('wizard/model$delete', '/resources/kubedbComMilvus/spec/monitor')
+    } else {
+      setServiceMonitorDefaults()
+    }
+  }
+
+  function getServiceMonitorInterval() {
+    const path = '/resources/kubedbComMilvus/spec/monitor/prometheus/serviceMonitor/interval'
+    return getValue(model, path) || '30s'
+  }
+
+  // The operator only reconciles a ServiceMonitor when spec.monitor.prometheus.serviceMonitor
+  // exists, so seed an interval to keep the subtree in the generated yaml.
+  function setServiceMonitorDefaults() {
+    const agent = getValue(model, '/resources/kubedbComMilvus/spec/monitor/agent')
+    if (agent !== 'prometheus.io/operator') return
+    const path = '/resources/kubedbComMilvus/spec/monitor/prometheus/serviceMonitor/interval'
+    if (!getValue(model, path)) {
+      commit('wizard/model$update', { path, value: '30s', force: true })
     }
   }
 
@@ -287,6 +305,14 @@ export const useFunc = (model) => {
     const agent = getValue(model, '/resources/kubedbComMilvus/spec/monitor/agent')
     if (agent !== 'prometheus.io') {
       commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
+    }
+    if (agent === 'prometheus.io/operator') {
+      setServiceMonitorDefaults()
+    } else {
+      commit(
+        'wizard/model$delete',
+        '/resources/kubedbComMilvus/spec/monitor/prometheus/serviceMonitor',
+      )
     }
   }
 
@@ -372,6 +398,7 @@ export const useFunc = (model) => {
     if (!exporter) {
       setDiscriminatorValue('/customizeExporter', false)
     }
+    setServiceMonitorDefaults()
   }
 
   // ── Autoscaling ────────────────────────────────────────────────────────────
@@ -814,6 +841,7 @@ export const useFunc = (model) => {
     isValueExistInModel,
     getOpsRequestUrl,
     initMonitoring,
+    getServiceMonitorInterval,
     getCreateAuthSecret,
     onCreateAuthSecretChange,
     showExistingSecretSection,
