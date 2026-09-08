@@ -15,6 +15,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/profile', '')
   setDiscriminatorValue('/profileChoseSwitch', false)
   setDiscriminatorValue('/presetPage', 'deployment-type')
+  setDiscriminatorValue('/isHubManaged', false)
 
   /************** Common Funcitons ******************/
 
@@ -536,14 +537,18 @@ export const useFunc = (model) => {
     return data
   }
 
+  // `FetchDbVersions` unshifts the two bulk-action entries into the cached list
+  // in place, so the raw catalog always has to be read back through here.
+  function allDbVersions(db) {
+    const versions = getValue(discriminator, `allDbVersions/${db}Version`) ?? []
+    return versions.filter((v) => v !== 'Select all' && v !== 'Remove all')
+  }
+
   function clearDefaultVersion(db) {
     const data = getValue(model, `/spec/admin/databases/${db}/versions/available`)
     if (data?.includes('Remove all')) return []
     if (data?.includes('Select all')) {
-      const versions = getValue(discriminator, `allDbVersions/${db}Version`) ?? []
-      return versions
-        .filter((v) => v !== 'Select all' && v !== 'Remove all')
-        .map((v) => ({ text: v, value: v }))
+      return allDbVersions(db).map((v) => ({ text: v, value: v }))
     }
   }
 
@@ -555,13 +560,39 @@ export const useFunc = (model) => {
     })
   }
 
+  // `type` is a path under /spec/admin, e.g. `databases/Cassandra/versions`.
+  // Every `Can user modify ...?` switch is stored as a `toggle` next to the
+  // `available`/`default` pair it controls.
+  function isAdminToggleOn(type) {
+    // watchDependency(`model#/spec/admin/${type}/toggle`)
+    return !!getValue(model, `/spec/admin/${type}/toggle`)
+  }
+
+  function isAdminToggleOff(type) {
+    return !isAdminToggleOn(type)
+  }
+
+  // While the switch is off end users never get a picker, so `default` is the
+  // single value they are given and must not be left empty.
+  function isDefaultRequired(type, value) {
+    if (isAdminToggleOn(type)) return ''
+    return value ? '' : 'This field is required'
+  }
+
   function availableVersions(db) {
     // watchDependency(`model#/spec/admin/databases/${db}/versions/available`)
+    // The `Available Versions` picker is hidden while the switch is off, so the
+    // whole catalog has to be selectable from `Default Version` instead.
+    if (isAdminToggleOff(`databases/${db}/versions`)) return allDbVersions(db)
     return getValue(model, `/spec/admin/databases/${db}/versions/available`)
   }
 
   function availableModes(db) {
     // watchDependency(`model#/spec/admin/databases/${db}/mode/available`)
+    // Same as `availableVersions`: with `Available Modes` hidden, every mode has
+    // to be selectable from `Default Mode`. `fetchModes` also seeds
+    // `mode/available`, which nothing else does while the picker is hidden.
+    if (isAdminToggleOff(`databases/${db}/mode`)) return fetchModes(db)
     return getValue(model, `/spec/admin/databases/${db}/mode/available`)
   }
 
@@ -588,6 +619,64 @@ export const useFunc = (model) => {
       console.log(e)
       return []
     }
+  }
+
+  // TODO: the hub console url is a placeholder until we know where it comes from
+  // (annotation on the HelmRelease / ClusterChartPreset, console store, or OCM objects).
+  const hubUiLink = 'https://appscode.com'
+
+  // A preset that is delivered by the hub cluster carries an AppliedManifestWork
+  // ownerReference on the flux HelmRelease that installed it. The release name and
+  // namespace are stamped on the preset itself as flux labels. Such presets are
+  // read only here, they can only be changed from the hub.
+  async function fetchHubOwnership() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const presetName = storeGet('/route/params/presetName') || ''
+    if (!presetName) {
+      setDiscriminatorValue('/isHubManaged', false)
+      return false
+    }
+    const proxyUrl = `/clusters/${owner}/${cluster}/proxy`
+    try {
+      const preset = await axios.get(
+        `${proxyUrl}/charts.x-helm.dev/v1alpha1/clusterchartpresets/${presetName}`,
+      )
+      const labels = preset.data?.metadata?.labels || {}
+      const releaseName = labels['helm.toolkit.fluxcd.io/name']
+      const releaseNamespace = labels['helm.toolkit.fluxcd.io/namespace']
+      if (!releaseName || !releaseNamespace) {
+        setDiscriminatorValue('/isHubManaged', false)
+        return false
+      }
+      const release = await axios.get(
+        `${proxyUrl}/helm.toolkit.fluxcd.io/v2/namespaces/${releaseNamespace}/helmreleases/${releaseName}`,
+      )
+      const ownerReferences = release.data?.metadata?.ownerReferences || []
+      const isHubManaged = ownerReferences.some(
+        (ref) =>
+          ref?.apiVersion === 'work.open-cluster-management.io/v1' &&
+          ref?.kind === 'AppliedManifestWork',
+      )
+      setDiscriminatorValue('/isHubManaged', isHubManaged)
+      return isHubManaged
+    } catch (e) {
+      console.log(e)
+      setDiscriminatorValue('/isHubManaged', false)
+      return false
+    }
+  }
+
+  async function initPresetPage() {
+    await Promise.all([FetchDbBundle(), fetchHubOwnership()])
+  }
+
+  function isHubManaged() {
+    return !!getValue(discriminator, '/isHubManaged')
+  }
+
+  function loadHubManagedWarning() {
+    return `This preset is maintained by the hub cluster, so it can not be edited from here. Use the <a href="${hubUiLink}" target="_blank" rel="noopener noreferrer">hub console</a> to change it.`
   }
 
   function getPlacements() {
@@ -840,18 +929,29 @@ export const useFunc = (model) => {
     }
   }
 
-  function getMachines() {
+  // every fully filled in profile, in the shape the selects expect
+  function machineOptions() {
     // watchDependency('model#/spec/admin/machineProfiles/machines')
-    // watchDependency('discriminator#/useCustomProfile')
-    let machines = getValue(model, '/spec/admin/machineProfiles/machines') || []
-
-    let mappedMachine =
+    const machines = getValue(model, '/spec/admin/machineProfiles/machines') || []
+    return (
       machines
         ?.filter((machine) => machine?.id && machine?.limits?.cpu && machine?.limits?.memory)
         .map((machine) => ({
           text: machine.id,
           value: machine.id,
         })) || []
+    )
+  }
+
+  function isCustomProfileOn() {
+    // watchDependency('discriminator#/useCustomProfile')
+    return !!getValue(discriminator, '/useCustomProfile')
+  }
+
+  function getMachines() {
+    // watchDependency('model#/spec/admin/machineProfiles/machines')
+    // watchDependency('discriminator#/useCustomProfile')
+    let mappedMachine = machineOptions()
 
     const hasCustom = getValue(discriminator, '/useCustomProfile')
     if (hasCustom) mappedMachine = [{ text: 'custom', value: 'custom' }, ...mappedMachine]
@@ -895,8 +995,71 @@ export const useFunc = (model) => {
 
   function getAvailableMachines() {
     // watchDependency('model#/spec/admin/machineProfiles/available')
+    // watchDependency('discriminator#/useCustomProfile')
+    // The `Available Machines` picker is hidden while the custom resource switch
+    // is off, so `Default Machine` offers every defined profile instead of the
+    // curated subset. `syncAvailableMachines` keeps `available` usable meanwhile,
+    // the same way `fetchModes` seeds `mode/available`.
+    if (!isCustomProfileOn()) {
+      syncAvailableMachines()
+      return machineOptions()
+    }
     let machines = getValue(model, '/spec/admin/machineProfiles/available') || []
     return machines
+  }
+
+  // `available` is normally maintained by the `Available Machines` picker. That
+  // picker is hidden while the switch is off, and the only thing the switch takes
+  // away is the `custom` entry, so end users keep every defined profile: exactly
+  // the options `Default Machine` lists. Leaving `available` empty is not an
+  // option, the consuming editor falls back to the built in machine list then.
+  function syncAvailableMachines() {
+    if (isCustomProfileOn()) return
+
+    const ids = machineOptions().map((item) => item.value)
+    const current = getValue(model, '/spec/admin/machineProfiles/available') || []
+
+    const unchanged = current.length === ids.length && current.every((item, i) => item === ids[i])
+    if (unchanged) return
+
+    commit('wizard/model$update', {
+      path: '/spec/admin/machineProfiles/available',
+      value: ids,
+      force: true,
+    })
+  }
+
+  // remembers the curated list so turning the switch off and on again does not
+  // lose it
+  let curatedMachines = []
+  function onCustomProfileToggle() {
+    if (isCustomProfileOn()) {
+      if (curatedMachines.length)
+        commit('wizard/model$update', {
+          path: '/spec/admin/machineProfiles/available',
+          value: curatedMachines,
+          force: true,
+        })
+      return
+    }
+
+    curatedMachines = getValue(model, '/spec/admin/machineProfiles/available') || []
+
+    // `custom` is not offered any more, so it can not stay as the default either
+    const ids = machineOptions().map((item) => item.value)
+    const def = getValue(model, '/spec/admin/machineProfiles/default') || ''
+    if (def && !ids.includes(def))
+      commit('wizard/model$update', {
+        path: '/spec/admin/machineProfiles/default',
+        value: '',
+        force: true,
+      })
+
+    syncAvailableMachines()
+  }
+
+  function onDefaultMachineChange() {
+    syncAvailableMachines()
   }
 
   function isKnownProfileToggled(index) {
@@ -1010,12 +1173,18 @@ export const useFunc = (model) => {
     FetchDbVersions,
     availableVersions,
     clearDefaultVersion,
+    isAdminToggleOn,
+    isDefaultRequired,
     getPlacements,
     getStorageClass,
     getClusterIssuers,
     getNamespaces,
     isKubedbUiPreset,
     FetchDbBundle,
+    initPresetPage,
+    fetchHubOwnership,
+    isHubManaged,
+    loadHubManagedWarning,
     setTool,
     returnFalse,
     fetchJsons,
@@ -1036,6 +1205,9 @@ export const useFunc = (model) => {
     getProfileName,
     hasCustomProfile,
     getAvailableMachines,
+    isCustomProfileOn,
+    onCustomProfileToggle,
+    onDefaultMachineChange,
     setCustomAvlMachine,
     onMachineProfileChange,
     setMachineProfiles,
