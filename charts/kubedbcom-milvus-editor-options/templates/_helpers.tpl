@@ -125,7 +125,7 @@ capabilities:
   - ALL
 runAsGroup: 0
 runAsNonRoot: true
-runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 54321 }}
+runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 1000 }}
 seccompProfile:
   type: RuntimeDefault
 {{- end }}
