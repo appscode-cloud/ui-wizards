@@ -195,4 +195,94 @@ spec:
         {{- end }}
     {{- end }}
     {{- end }}
+
+    {{- with .Values.form.alert.groups.kubeStash }}
+    {{- if (include "kubedbcom-milvus-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) }}
+    - name: milvus.kubeStash.{{ $.Release.Namespace }}.{{ $app }}.rules
+      rules:
+        {{- if (include "kubedbcom-milvus-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionFailed")) }}
+        - alert: MilvusKubeStashBackupSessionFailed
+          expr: core_kubestash_com_backupsession_phase{phase="Failed"} * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Milvus", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} == 1
+          for: {{ .rules.backupSessionFailed.duration }}
+          labels:
+            severity: {{ .rules.backupSessionFailed.severity }}
+            {{- include "kubedbcom-milvus-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus KubeStash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+            description: "Milvus KubeStash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionFailed")) }}
+        - alert: MilvusKubeStashRestoreSessionFailed
+          expr: core_kubestash_com_restoresession_phase{target_kind="Milvus", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", phase="Failed"} == 1
+          for: {{ .rules.restoreSessionFailed.duration }}
+          labels:
+            severity: {{ .rules.restoreSessionFailed.severity }}
+            {{- include "kubedbcom-milvus-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus KubeStash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+            description: "Milvus KubeStash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "noBackupSessionForTooLong")) }}
+        - alert: MilvusKubeStashNoBackupSessionForTooLong
+          expr: time() - max(core_kubestash_com_backupsession_created * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Milvus", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"}) > {{ .rules.noBackupSessionForTooLong.val }}
+          for: {{ .rules.noBackupSessionForTooLong.duration }}
+          labels:
+            severity: {{ .rules.noBackupSessionForTooLong.severity }}
+            {{- include "kubedbcom-milvus-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus KubeStash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+            description: "Milvus KubeStash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryCorrupted")) }}
+        - alert: MilvusKubeStashRepositoryCorrupted
+          expr: storage_kubestash_com_repository_info{target_kind="Milvus", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}", integrity="false"} == 1
+          for: {{ .rules.repositoryCorrupted.duration }}
+          labels:
+            severity: {{ .rules.repositoryCorrupted.severity }}
+            {{- include "kubedbcom-milvus-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus KubeStash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+            description: "Milvus KubeStash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "repositoryStorageRunningLow")) }}
+        - alert: MilvusKubeStashRepositoryStorageRunningLow
+          expr: storage_kubestash_com_repository_size_bytes{target_kind="Milvus", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
+          for: {{ .rules.repositoryStorageRunningLow.duration }}
+          labels:
+            severity: {{ .rules.repositoryStorageRunningLow.severity }}
+            {{- include "kubedbcom-milvus-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus KubeStash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+            description: "Milvus KubeStash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "backupSessionPeriodTooLong")) }}
+        - alert: MilvusKubeStashBackupSessionPeriodTooLong
+          expr: core_kubestash_com_backupsession_duration_seconds * on(backup_invoker_kind, backup_invoker_name, namespace) group_left(target_kind, target_name, target_namespace) core_kubestash_com_backupconfiguration_info{target_kind="Milvus", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
+          for: {{ .rules.backupSessionPeriodTooLong.duration }}
+          labels:
+            severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+            {{- include "kubedbcom-milvus-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus KubeStash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+            description: "Milvus KubeStash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+
+        {{- if (include "kubedbcom-milvus-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules "restoreSessionPeriodTooLong")) }}
+        - alert: MilvusKubeStashRestoreSessionPeriodTooLong
+          expr: core_kubestash_com_restoresession_duration_seconds{target_kind="Milvus", target_name="{{ $app }}", target_namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
+          for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+          labels:
+            severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+            {{- include "kubedbcom-milvus-editor.alertLabels" $ | nindent 12 }}
+          annotations:
+            summary: Milvus KubeStash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+            description: "Milvus KubeStash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        {{- end }}
+    {{- end }}
+    {{- end }}
 {{- end }}

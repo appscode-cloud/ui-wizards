@@ -56,6 +56,41 @@ form:
             enabled: true
             severity: warning
             val: 180
+      kubeStash:
+        enabled: warning
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
       provisioner:
         enabled: warning
         rules:
@@ -97,6 +132,24 @@ resources:
     kind: Issuer
     metadata:
       name: milvus-ca
+      namespace: demo
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: milvus
+      namespace: demo
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: milvus
+      namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: milvus
       namespace: demo
   kubedbComMilvus: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
