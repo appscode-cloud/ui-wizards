@@ -1031,9 +1031,8 @@ export const useFunc = (model) => {
   }
 
   function setTrigger(path) {
-    let value = getValue(model, `/resources/${path}`)
-    if (value) return value
-    return 'On'
+    const value = getValue(model, `/resources/${path}`)
+    return value === 'On'
   }
 
   function setApplyToIfReady() {

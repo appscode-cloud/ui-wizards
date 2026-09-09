@@ -201,8 +201,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/brokers/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/trigger
+      schema: temp/properties/compute/properties/brokers/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/brokers
+        paths:
+        - temp/properties/compute/properties/brokers/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before using considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -302,8 +306,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/coordinators/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/trigger
+      schema: temp/properties/compute/properties/coordinators/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/coordinators
+        paths:
+        - temp/properties/compute/properties/coordinators/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before using considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -403,8 +411,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/historicals/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/trigger
+      schema: temp/properties/compute/properties/historicals/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/historicals
+        paths:
+        - temp/properties/compute/properties/historicals/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before using considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -504,8 +516,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/compute/middleManagers/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/trigger
+      schema: temp/properties/compute/properties/middleManagers/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/middleManagers
+        paths:
+        - temp/properties/compute/properties/middleManagers/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before using considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -658,8 +674,12 @@ step:
           type: func
           value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/storage/historicals/trigger
         label: Trigger
-        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/trigger
+        schema: temp/properties/storage/properties/historicals/properties/trigger
         type: switch
+        watcher:
+          func: onTriggerChange|storage/historicals
+          paths:
+          - temp/properties/storage/properties/historicals/properties/trigger
       - label: Expansion Mode (Online/Offline)
         subtitle: For Online Mode enables scaling without downtime by dynamically
           resizing storage while the database remains operational and Offline Mode
@@ -675,6 +695,8 @@ step:
           value: Offline
         schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/expansionMode
         type: select
+        validation:
+          type: required
       - elements:
         - label: UsageThreshold (%)
           schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/usageThreshold
@@ -703,8 +725,12 @@ step:
           type: func
           value: setTrigger|autoscalingKubedbComDruidAutoscaler/spec/storage/middleManagers/trigger
         label: Trigger
-        schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/trigger
+        schema: temp/properties/storage/properties/middleManagers/properties/trigger
         type: switch
+        watcher:
+          func: onTriggerChange|storage/middleManagers
+          paths:
+          - temp/properties/storage/properties/middleManagers/properties/trigger
       - label: Expansion Mode (Online/Offline)
         subtitle: For Online Mode enables scaling without downtime by dynamically
           resizing storage while the database remains operational and Offline Mode
@@ -720,6 +746,8 @@ step:
           value: Offline
         schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/expansionMode
         type: select
+        validation:
+          type: required
       - elements:
         - label: UsageThreshold (%)
           schema: schema/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/usageThreshold

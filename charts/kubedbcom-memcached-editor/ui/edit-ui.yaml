@@ -308,17 +308,17 @@ step:
       - temp/properties/autoscalingType
   - elements:
     - elements:
-      - init:
+      - fullwidth: true
+        init:
           type: func
           value: setTrigger|autoscalingKubedbComMemcachedAutoscaler/spec/compute/memcached/trigger
         label: Trigger
-        options:
-        - text: "On"
-          value: "On"
-        - text: "Off"
-          value: "Off"
-        schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/trigger
-        type: select
+        schema: temp/properties/compute/properties/memcached/properties/trigger
+        type: switch
+        watcher:
+          func: onTriggerChange|compute/memcached
+          paths:
+          - temp/properties/compute/properties/memcached/properties/trigger
       - label: Pod LifeTime Threshold
         schema: schema/properties/resources/properties/autoscalingKubedbComMemcachedAutoscaler/properties/spec/properties/compute/properties/memcached/properties/podLifeTimeThreshold
         type: input
