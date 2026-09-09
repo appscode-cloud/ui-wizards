@@ -1120,8 +1120,18 @@ export const useFunc = (model) => {
 
   function setTrigger(path) {
     const value = getValue(model, `/resources/${path}`)
-    if (value) return value
-    return 'On'
+    return value === 'On'
+  }
+
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComMilvusAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
   }
 
   async function fetchTopologyMachines() {
@@ -1470,6 +1480,7 @@ export const useFunc = (model) => {
     isMilvusStandalone,
     isMilvusDistributed,
     setTrigger,
+    onTriggerChange,
     fetchTopologyMachines,
     getMachines,
     setAllowedMachine,

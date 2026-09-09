@@ -197,8 +197,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/node/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
+      schema: temp/properties/compute/properties/node/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/node
+        paths:
+        - temp/properties/compute/properties/node/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -305,8 +309,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/datanode/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/trigger
+      schema: temp/properties/compute/properties/datanode/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/datanode
+        paths:
+        - temp/properties/compute/properties/datanode/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -413,8 +421,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/mixcoord/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/trigger
+      schema: temp/properties/compute/properties/mixcoord/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/mixcoord
+        paths:
+        - temp/properties/compute/properties/mixcoord/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -521,8 +533,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/proxy/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/trigger
+      schema: temp/properties/compute/properties/proxy/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/proxy
+        paths:
+        - temp/properties/compute/properties/proxy/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -629,8 +645,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/querynode/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/trigger
+      schema: temp/properties/compute/properties/querynode/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/querynode
+        paths:
+        - temp/properties/compute/properties/querynode/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -737,8 +757,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/streamingnode/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/trigger
+      schema: temp/properties/compute/properties/streamingnode/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/streamingnode
+        paths:
+        - temp/properties/compute/properties/streamingnode/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -894,8 +918,12 @@ step:
           type: func
           value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/storage/node/trigger
         label: Trigger
-        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
+        schema: temp/properties/storage/properties/node/properties/trigger
         type: switch
+        watcher:
+          func: onTriggerChange|storage/node
+          paths:
+          - temp/properties/storage/properties/node/properties/trigger
       - label: Expansion Mode (Online/Offline)
         subtitle: Online Mode enables scaling without downtime by dynamically resizing
           storage while the database remains operational. Offline Mode performs storage
@@ -904,6 +932,8 @@ step:
         type: label-element
       - description: Select how the storage expansion should be handled.
         label: Mode
+        validation:
+          type: required
         options:
         - text: Online
           value: Online
@@ -945,8 +975,12 @@ step:
           type: func
           value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/storage/streamingnode/trigger
         label: Trigger
-        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/trigger
+        schema: temp/properties/storage/properties/streamingnode/properties/trigger
         type: switch
+        watcher:
+          func: onTriggerChange|storage/streamingnode
+          paths:
+          - temp/properties/storage/properties/streamingnode/properties/trigger
       - label: Expansion Mode (Online/Offline)
         subtitle: Online Mode enables scaling without downtime by dynamically resizing
           storage while the database remains operational. Offline Mode performs storage
