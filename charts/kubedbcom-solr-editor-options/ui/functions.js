@@ -692,6 +692,21 @@ export const useFunc = (model) => {
     return !!agent
   }
 
+  function onBackupSwitch() {
+    const isBackupOn = getValue(discriminator, '/backup')
+    commit('wizard/model$update', {
+      path: '/spec/backup/tool',
+      value: isBackupOn ? 'KubeStash' : '',
+      force: true,
+    })
+  }
+
+  function setBackup() {
+    const backup = getValue(model, '/spec/backup/tool')
+    const val = getValue(model, '/spec/admin/backup/enable/default')
+    return backup === 'KubeStash' && features.includes('backup') && val
+  }
+
   function setRequests(resource, type) {
     const modelPath = type
       ? `/spec/${type}/podResources/resources/requests/${resource}`
@@ -873,17 +888,16 @@ export const useFunc = (model) => {
 
     const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
+    if (type.endsWith('/mode')) {
+      const modes = options.length ? options : Object.keys(modeDetails)
+      return modes.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      }))
+    }
     if (options.length === 0) {
       return fetchOptions(type)
-    }
-    if (type.endsWith('/mode')) {
-      return (
-        options?.map((item) => ({
-          description: modeDetails[item]?.description || '',
-          text: modeDetails[item]?.text || '',
-          value: item,
-        })) || []
-      )
     }
     return options
   }
@@ -1020,8 +1034,10 @@ export const useFunc = (model) => {
     isMachineCustom,
     isMachineNotCustom,
     onAuthChange,
+    onBackupSwitch,
     onReferSecretChange,
     returnFalse,
+    setBackup,
     setLimits,
     setMachineToCustom,
     setMonitoring,

@@ -163,6 +163,38 @@ steps:
         $ref: discriminator#/configureTLS
       type: switch
     - elements:
+      - hasDescription: true
+        label:
+          text: labels.external_tls_mode
+        options:
+        - description: options.external_tls_mode.disabled.description
+          text: options.external_tls_mode.disabled.label
+          value: Disabled
+        - description: options.external_tls_mode.tls.description
+          text: options.external_tls_mode.tls.label
+          value: TLS
+        - description: options.external_tls_mode.mtls.description
+          text: options.external_tls_mode.mtls.label
+          value: mTLS
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMilvus/properties/spec/properties/tls/properties/external/properties/mode
+        type: radio
+      - hasDescription: true
+        label:
+          text: labels.internal_tls_mode
+        options:
+        - description: options.internal_tls_mode.disabled.description
+          text: options.internal_tls_mode.disabled.label
+          value: Disabled
+        - description: options.internal_tls_mode.tls.description
+          text: options.internal_tls_mode.tls.label
+          value: TLS
+        - description: options.internal_tls_mode.mtls.description
+          text: options.internal_tls_mode.mtls.label
+          value: mTLS
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMilvus/properties/spec/properties/tls/properties/internal/properties/mode
+        type: radio
       - elements:
         - computed: setApiGroup
           disabled: true
@@ -245,11 +277,28 @@ steps:
           $ref: schema#/properties/resources/properties/kubedbComMilvus/properties/spec/properties/monitor/properties/agent
         type: radio
       - elements:
-        - label:
+        - computed: getServiceMonitorInterval
+          label:
             text: labels.scrapping_interval
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMilvus/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
           type: input
+        - isArray: true
+          keys:
+            label:
+              isSubsection: true
+              text: labels.labels.key
+          label:
+            text: labels.service_monitor_labels
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComMilvus/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.labels.value
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComMilvus/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels/additionalProperties
+            type: input
         if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMilvus/spec/monitor/agent
         label:
           text: labels.service_monitor_configuration

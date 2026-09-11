@@ -812,17 +812,16 @@ export const useFunc = (model) => {
 
     const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
+    if (type.endsWith('/mode')) {
+      const modes = options.length ? options : Object.keys(modeDetails)
+      return modes.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      }))
+    }
     if (options.length === 0) {
       return fetchOptions(type)
-    }
-    if (type.endsWith('/mode')) {
-      return (
-        options?.map((item) => ({
-          description: modeDetails[item]?.description || '',
-          text: modeDetails[item]?.text || '',
-          value: item,
-        })) || []
-      )
     }
     return options
   }
@@ -965,9 +964,29 @@ export const useFunc = (model) => {
     return isTlsEnabled && isIssuerToggleEnabled
   }
 
+  function showTlsDetails() {
+    // watchDependency('model#/spec/admin/tls/default')
+    return getValue(model, '/spec/admin/tls/default')
+  }
+
   function setMonitoring() {
     const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
     return !!agent
+  }
+
+  function setBackup() {
+    const backup = getValue(model, '/spec/backup/tool')
+    const val = getValue(model, '/spec/admin/backup/enable/default')
+    return backup === 'KubeStash' && features.includes('backup') && val
+  }
+
+  function onBackupSwitch() {
+    const isBackupOn = getValue(discriminator, '/backup')
+    commit('wizard/model$update', {
+      path: '/spec/backup/tool',
+      value: isBackupOn ? 'KubeStash' : '',
+      force: true,
+    })
   }
 
   function onAuthChange() {
@@ -1134,7 +1153,10 @@ export const useFunc = (model) => {
     isToggleOn,
     showAlerts,
     showIssuer,
+    showTlsDetails,
     setMonitoring,
+    setBackup,
+    onBackupSwitch,
     onAuthChange,
     isConfigDatabaseOn,
     clearConfiguration,

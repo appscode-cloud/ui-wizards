@@ -67,6 +67,7 @@ type KubedbcomMilvusEditorOptionsSpecSpec struct {
 	ConfigurationInline map[string]string `json:"configurationInline,omitempty"`
 	// +optional
 	ServiceTemplates []MilvusServiceTemplate `json:"serviceTemplates,omitempty"`
+	TLS              MilvusTLS               `json:"tls"`
 	Admin            AdminOptions            `json:"admin"`
 	Backup           BackupToolSpec          `json:"backup"`
 	Monitoring       MonitoringOperator      `json:"monitoring"`
@@ -126,6 +127,18 @@ type MilvusAuthSecret struct {
 	// +kubebuilder:validation:Format:=password
 	Password string `json:"password"`
 }
+
+type MilvusTLS struct {
+	Internal MilvusTLSMode `json:"internal"`
+	External MilvusTLSMode `json:"external"`
+}
+
+type MilvusTLSMode struct {
+	Mode MilvusTLSModeType `json:"mode"`
+}
+
+// +kubebuilder:validation:Enum=Disabled;TLS;mTLS
+type MilvusTLSModeType string
 
 type MilvusAlertsSpecForm struct {
 	Alert alerts.MilvusAlert `json:"alert"`

@@ -765,6 +765,8 @@ step:
           value: Offline
         schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
         type: select
+        validation:
+          type: required
       - elements:
         - label: UsageThreshold (%)
           schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
@@ -816,6 +818,8 @@ step:
           value: Offline
         schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/expansionMode
         type: select
+        validation:
+          type: required
       - elements:
         - label: UsageThreshold (%)
           schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/usageThreshold
@@ -917,6 +921,10 @@ step:
       - label: Scrapping Interval
         schema: schema/properties/resources/properties/kubedbComMilvus/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
         type: input
+      - buttonClass: is-light is-outlined
+        label: ServiceMonitor Labels
+        schema: schema/properties/resources/properties/kubedbComMilvus/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels
+        type: object-item
       if:
         name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMilvus/spec/monitor/agent
         type: function

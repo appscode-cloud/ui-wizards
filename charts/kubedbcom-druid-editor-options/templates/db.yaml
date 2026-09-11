@@ -175,6 +175,7 @@ spec:
     name: {{ .Values.spec.zookeeperRef.name }}
     namespace: {{ .Values.spec.zookeeperRef.namespace }}
     externallyManaged: {{ .Values.spec.zookeeperRef.externallyManaged }}
+{{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- $svcTpls := .Values.spec.serviceTemplates | default .Values.spec.admin.serviceTemplates }}
 {{- if $svcTpls }}
@@ -191,7 +192,6 @@ spec:
       type: {{ .svcType }}
     {{- end }}
   {{- end }}
-{{- end }}
 {{- end }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:

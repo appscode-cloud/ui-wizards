@@ -68,7 +68,7 @@ kubedbcom-<db>-editor-options chart; the OpenShift uid-range value wins when set
   "Kafka" 1001
   "MariaDB" 999
   "Memcached" 999
-  "Milvus" 54321
+  "Milvus" 1000
   "MongoDB" 999
   "MSSQLServer" 10001
   "MySQL" 999

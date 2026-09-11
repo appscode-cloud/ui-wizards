@@ -38,7 +38,8 @@ spec:
         {{- range .addon.tasks }}
           - name: {{ .name }}
             {{- if .params }}
-            params: {{ .params }}
+            params:
+              {{- .params | fromYaml | toYaml | nindent 14 }}
             {{- end }}
         {{- end }}
         {{- $runAsUser := "" }}
