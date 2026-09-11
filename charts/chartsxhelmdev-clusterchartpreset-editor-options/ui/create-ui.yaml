@@ -3211,6 +3211,13 @@ step:
     showLabels: false
     type: block-layout
   - elements:
+    - hasIcon: true
+      if:
+        name: isHubManaged
+        type: function
+      label: ""
+      loader: loadHubManagedWarning
+      type: warning
     - elements:
       - if:
           name: returnFalse
@@ -3220,13 +3227,15 @@ step:
         type: input
       - elements:
         - elements:
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Namespace
             loader: getNamespaces
             refresh: true
             schema: schema/properties/spec/properties/backup/properties/kubestash/properties/encryptionSecret/properties/namespace
             type: select
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Name
             loader:
               name: fetchNames|encryptionSecret
@@ -3239,14 +3248,16 @@ step:
           showLabels: true
           type: block-layout
         - elements:
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             hasGroup: isRancherManaged
             label: Namespace
             loader: getNamespaces
             refresh: true
             schema: schema/properties/spec/properties/backup/properties/kubestash/properties/retentionPolicy/properties/namespace
             type: select
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Name
             loader:
               name: fetchNames|retentionPolicy
@@ -3259,14 +3270,16 @@ step:
           showLabels: true
           type: block-layout
         - elements:
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             hasGroup: isRancherManaged
             label: Namespace
             loader: getNamespaces
             refresh: true
             schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef/properties/namespace
             type: select
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Name
             loader:
               name: fetchNames|storageRef
@@ -3278,7 +3291,8 @@ step:
           label: Storage Ref
           showLabels: true
           type: block-layout
-        - label: Schedule
+        - disable: isHubManaged
+          label: Schedule
           schema: schema/properties/spec/properties/backup/properties/kubestash/properties/schedule
           type: input
         type: block-layout
@@ -3287,6 +3301,7 @@ step:
     if:
       name: presetNameEqualsTo|stash-presets
       type: function
+    loader: fetchHubOwnership
     type: block-layout
   id: options
   type: single-step-form
