@@ -6,8 +6,6 @@ export const useFunc = (model) => {
     store.state,
   )
 
-  /********** Initialize Discriminator **************/
-
   setDiscriminatorValue('/bundle', {})
   setDiscriminatorValue('/allDbVersions', {})
   setDiscriminatorValue('/enableProfiles', false)
@@ -16,8 +14,6 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/profileChoseSwitch', false)
   setDiscriminatorValue('/presetPage', 'deployment-type')
   setDiscriminatorValue('/isHubManaged', false)
-
-  /************** Common Funcitons ******************/
 
   const machinesMap = {
     'db.t.micro': {
@@ -466,7 +462,6 @@ export const useFunc = (model) => {
     return false
   }
 
-  // remove itemCtx
   async function fetchJsons({ itemCtx }) {
     let ui = {}
     let language = {}
@@ -483,7 +478,6 @@ export const useFunc = (model) => {
       const functionString = await axios.get(
         `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
       )
-      // declare evaluate the functionString to get the functions Object
       const evalFunc = new Function(functionString.data || '')
       functions = evalFunc()
     } catch (e) {
@@ -507,7 +501,6 @@ export const useFunc = (model) => {
   }
 
   function getOptions(type) {
-    // watchDependency(`model#/spec/admin/${type}/available`)
     const options = getValue(model, `/spec/admin/${type}/available`)
     return options
   }
@@ -524,21 +517,17 @@ export const useFunc = (model) => {
   }
 
   function isConfigureDb(value) {
-    // watchDependency(`discriminator#/${value}/isConfigure`)
     const resp = getValue(discriminator, `/${value}/isConfigure`)
     return resp
   }
 
   async function FetchDbVersions(db) {
-    // watchDependency(`discriminator#/allDbVersions`)
     let data = getValue(discriminator, `allDbVersions/${db}Version`)
     if (!data?.includes('Remove all')) data?.unshift('Remove all')
     if (!data?.includes('Select all')) data?.unshift('Select all')
     return data
   }
 
-  // `FetchDbVersions` unshifts the two bulk-action entries into the cached list
-  // in place, so the raw catalog always has to be read back through here.
   function allDbVersions(db) {
     const versions = getValue(discriminator, `allDbVersions/${db}Version`) ?? []
     return versions.filter((v) => v !== 'Select all' && v !== 'Remove all')
@@ -560,11 +549,7 @@ export const useFunc = (model) => {
     })
   }
 
-  // `type` is a path under /spec/admin, e.g. `databases/Cassandra/versions`.
-  // Every `Can user modify ...?` switch is stored as a `toggle` next to the
-  // `available`/`default` pair it controls.
   function isAdminToggleOn(type) {
-    // watchDependency(`model#/spec/admin/${type}/toggle`)
     return !!getValue(model, `/spec/admin/${type}/toggle`)
   }
 
@@ -572,26 +557,17 @@ export const useFunc = (model) => {
     return !isAdminToggleOn(type)
   }
 
-  // While the switch is off end users never get a picker, so `default` is the
-  // single value they are given and must not be left empty.
   function isDefaultRequired(type, value) {
     if (isAdminToggleOn(type)) return ''
     return value ? '' : 'This field is required'
   }
 
   function availableVersions(db) {
-    // watchDependency(`model#/spec/admin/databases/${db}/versions/available`)
-    // The `Available Versions` picker is hidden while the switch is off, so the
-    // whole catalog has to be selectable from `Default Version` instead.
     if (isAdminToggleOff(`databases/${db}/versions`)) return allDbVersions(db)
     return getValue(model, `/spec/admin/databases/${db}/versions/available`)
   }
 
   function availableModes(db) {
-    // watchDependency(`model#/spec/admin/databases/${db}/mode/available`)
-    // Same as `availableVersions`: with `Available Modes` hidden, every mode has
-    // to be selectable from `Default Mode`. `fetchModes` also seeds
-    // `mode/available`, which nothing else does while the picker is hidden.
     if (isAdminToggleOff(`databases/${db}/mode`)) return fetchModes(db)
     return getValue(model, `/spec/admin/databases/${db}/mode/available`)
   }
@@ -621,14 +597,8 @@ export const useFunc = (model) => {
     }
   }
 
-  // TODO: the hub console url is a placeholder until we know where it comes from
-  // (annotation on the HelmRelease / ClusterChartPreset, console store, or OCM objects).
   const hubUiLink = 'https://appscode.com'
 
-  // A preset that is delivered by the hub cluster carries an AppliedManifestWork
-  // ownerReference on the flux HelmRelease that installed it. The release name and
-  // namespace are stamped on the preset itself as flux labels. Such presets are
-  // read only here, they can only be changed from the hub.
   async function fetchHubOwnership() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -680,14 +650,12 @@ export const useFunc = (model) => {
   }
 
   function getPlacements() {
-    // watchDependency('discriminator#/bundle')
     const placements = getValue(discriminator, '/bundle/placementpolicies')
 
     return placements
   }
 
   function getNodeTopology() {
-    // watchDependency('discriminator#/bundle')
     const shared = getValue(discriminator, '/bundle/shared')
     const dedicated = getValue(discriminator, '/bundle/dedicated')
 
@@ -704,14 +672,12 @@ export const useFunc = (model) => {
   }
 
   function getStorageClass() {
-    // watchDependency('discriminator#/bundle')
     const storageClasses = getValue(discriminator, '/bundle/storageclasses')
 
     return storageClasses
   }
 
   function getClusterIssuers() {
-    // watchDependency('discriminator#/bundle')
     const clusterIssuers = getValue(discriminator, '/bundle/clusterissuers')
 
     return clusterIssuers
@@ -768,7 +734,6 @@ export const useFunc = (model) => {
     const presetName = storeGet('/route/params/presetName') || ''
     if (presetName === 'kubedb-ui-presets') return true
     const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
-    // watchDependency('discriminator#/enabledFeatures')
     if (enabledFeatures?.includes('kubedb-ui-presets')) {
       return true
     } else return false
@@ -789,12 +754,10 @@ export const useFunc = (model) => {
   function setDefaultMode(db) {
     const modelDef = getValue(model, `/spec/admin/databases/${db}/mode/default`)
     const def = modes[db]?.default || ''
-    // if (modelDef === undefined) return def
     return def
   }
 
   function setStorageClass() {
-    // watchDependency('model#/spec/admin/storageClasses/available')
     const classes = getValue(model, '/spec/admin/storageClasses/available') || []
     if (classes.length === 1) return classes[0]
   }
@@ -819,35 +782,31 @@ export const useFunc = (model) => {
     }
   }
 
-  // machine profiles stuffs
-
   function parseMemory(memory) {
     if (memory == null || (typeof memory !== 'string' && typeof memory !== 'number')) return 0
     const units = {
-      B: 1, // Base unit (Bytes)
-      K: 1000, // 1 K = 1000 B
-      KB: 1000, // 1 KB = 1000 B
-      Ki: 1024, // 1 Ki = 1024 B
-      M: 1000 * 1000, // 1 M = 1000 K
-      MB: 1000 * 1000, // 1 MB = 1000 KB
-      Mi: 1024 * 1024, // 1 Mi = 1024 Ki
-      G: 1000 * 1000 * 1000, // 1 G = 1000 M
-      GB: 1000 * 1000 * 1000, // 1 GB = 1000 MB
-      Gi: 1024 * 1024 * 1024, // 1 Gi = 1024 Mi
-      T: 1000 * 1000 * 1000 * 1000, // 1 T = 1000 G
-      TB: 1000 * 1000 * 1000 * 1000, // 1 TB = 1000 GB
-      Ti: 1024 * 1024 * 1024 * 1024, // 1 Ti = 1024 Gi
-      P: 1000 * 1000 * 1000 * 1000 * 1000, // 1 P = 1000 T
-      PB: 1000 * 1000 * 1000 * 1000 * 1000, // 1 PB = 1000 TB
-      Pi: 1024 * 1024 * 1024 * 1024 * 1024, // 1 Pi = 1024 Ti
+      B: 1, 
+      K: 1000, 
+      KB: 1000, 
+      Ki: 1024, 
+      M: 1000 * 1000, 
+      MB: 1000 * 1000, 
+      Mi: 1024 * 1024, 
+      G: 1000 * 1000 * 1000, 
+      GB: 1000 * 1000 * 1000, 
+      Gi: 1024 * 1024 * 1024, 
+      T: 1000 * 1000 * 1000 * 1000, 
+      TB: 1000 * 1000 * 1000 * 1000, 
+      Ti: 1024 * 1024 * 1024 * 1024, 
+      P: 1000 * 1000 * 1000 * 1000 * 1000, 
+      PB: 1000 * 1000 * 1000 * 1000 * 1000, 
+      Pi: 1024 * 1024 * 1024 * 1024 * 1024, 
     }
 
-    // If memory is just a number (int or float), treat it as bytes
     if (/^\d+(\.\d+)?$/.test(memory)) {
       return parseFloat(memory)
     }
 
-    // Match float or int followed by optional unit
     const match = memory.match(/^(\d+(?:\.\d+)?)(B|KB|Ki|K|M|MB|Mi|G|GB|Gi|T|TB|Ti|P|PB|Pi)?$/)
     if (match) {
       const value = parseFloat(match[1])
@@ -855,21 +814,21 @@ export const useFunc = (model) => {
       return value * (units[unit] || 1)
     }
 
-    return 0 // Default fallback for unexpected formats
+    return 0 
   }
 
   function parseCPU(cpu) {
     if (cpu == null) return 0
-    if (typeof cpu === 'number') return cpu // If already a number, return as is
+    if (typeof cpu === 'number') return cpu 
 
     const match = cpu.match(/^(\d+(?:\.\d+)?)(m)?$/)
-    if (!match) return 0 // Invalid format, return 0
+    if (!match) return 0 
 
     if (cpu.endsWith('m')) {
-      return parseFloat(cpu) / 1000 // Convert '500m' to 0.5
+      return parseFloat(cpu) / 1000 
     }
 
-    return parseFloat(cpu) // Convert '1', '0.5' directly
+    return parseFloat(cpu) 
   }
 
   function sortMachines(arr) {
@@ -907,7 +866,6 @@ export const useFunc = (model) => {
   }
 
   function isEnableProfiles() {
-    // watchDependency('discriminator#/enableProfiles')
     return getValue(discriminator, '/enableProfiles') || false
   }
 
@@ -929,9 +887,7 @@ export const useFunc = (model) => {
     }
   }
 
-  // every fully filled in profile, in the shape the selects expect
   function machineOptions() {
-    // watchDependency('model#/spec/admin/machineProfiles/machines')
     const machines = getValue(model, '/spec/admin/machineProfiles/machines') || []
     return (
       machines
@@ -944,13 +900,10 @@ export const useFunc = (model) => {
   }
 
   function isCustomProfileOn() {
-    // watchDependency('discriminator#/useCustomProfile')
     return !!getValue(discriminator, '/useCustomProfile')
   }
 
   function getMachines() {
-    // watchDependency('model#/spec/admin/machineProfiles/machines')
-    // watchDependency('discriminator#/useCustomProfile')
     let mappedMachine = machineOptions()
 
     const hasCustom = getValue(discriminator, '/useCustomProfile')
@@ -966,7 +919,6 @@ export const useFunc = (model) => {
   }
 
   function setCustomAvlMachine() {
-    // watchDependency('discriminator#/useCustomProfile')
     const hasCustom = getValue(discriminator, '/useCustomProfile')
     let avl = getValue(model, '/spec/admin/machineProfiles/available') || []
 
@@ -984,7 +936,6 @@ export const useFunc = (model) => {
     const loadedMachines = getValue(discriminator, '/spec/admin/machineProfiles/available') || []
     const hasCustom = getValue(discriminator, '/useCustomProfile')
 
-    // filter out unselected machines from from available machine list
     let res = setMachines?.filter((item) => loadedMachines?.includes(item)) || []
     res = res?.filter((item) => item !== 'custom')
     if (hasCustom) res = ['custom', ...res]
@@ -994,12 +945,6 @@ export const useFunc = (model) => {
   }
 
   function getAvailableMachines() {
-    // watchDependency('model#/spec/admin/machineProfiles/available')
-    // watchDependency('discriminator#/useCustomProfile')
-    // The `Available Machines` picker is hidden while the custom resource switch
-    // is off, so `Default Machine` offers every defined profile instead of the
-    // curated subset. `syncAvailableMachines` keeps `available` usable meanwhile,
-    // the same way `fetchModes` seeds `mode/available`.
     if (!isCustomProfileOn()) {
       syncAvailableMachines()
       return machineOptions()
@@ -1008,11 +953,6 @@ export const useFunc = (model) => {
     return machines
   }
 
-  // `available` is normally maintained by the `Available Machines` picker. That
-  // picker is hidden while the switch is off, and the only thing the switch takes
-  // away is the `custom` entry, so end users keep every defined profile: exactly
-  // the options `Default Machine` lists. Leaving `available` empty is not an
-  // option, the consuming editor falls back to the built in machine list then.
   function syncAvailableMachines() {
     if (isCustomProfileOn()) return
 
@@ -1029,8 +969,6 @@ export const useFunc = (model) => {
     })
   }
 
-  // remembers the curated list so turning the switch off and on again does not
-  // lose it
   let curatedMachines = []
   function onCustomProfileToggle() {
     if (isCustomProfileOn()) {
@@ -1045,7 +983,6 @@ export const useFunc = (model) => {
 
     curatedMachines = getValue(model, '/spec/admin/machineProfiles/available') || []
 
-    // `custom` is not offered any more, so it can not stay as the default either
     const ids = machineOptions().map((item) => item.value)
     const def = getValue(model, '/spec/admin/machineProfiles/default') || ''
     if (def && !ids.includes(def))
@@ -1063,7 +1000,6 @@ export const useFunc = (model) => {
   }
 
   function isKnownProfileToggled(index) {
-    // watchDependency('discriminator#/profileChoseSwitch')
     const val = getValue(
       discriminator,
       `/spec/admin/machineProfiles/machines/${index}/temp/profileChoseSwitch`,
@@ -1074,7 +1010,6 @@ export const useFunc = (model) => {
   function getKnownProfile() {
     const machineProfiles = getValue(model, '/spec/admin/machineProfiles/machines')
 
-    // filtering machine list, if it's already in the model we don't need to show it
     const filteredMachines = machineList.filter(
       (machine) => !machineProfiles.some((m) => m.id === machine),
     )
@@ -1087,7 +1022,6 @@ export const useFunc = (model) => {
   }
 
   function setLimits(type, index) {
-    // watchDependency('discriminator#/profile')
     const pro =
       getValue(discriminator, `/spec/admin/machineProfiles/machines/${index}/temp/profile`) || ''
     if (!pro) {
@@ -1103,7 +1037,6 @@ export const useFunc = (model) => {
   }
 
   function getProfileName(index) {
-    // watchDependency('discriminator#/profile')
     const pro =
       getValue(discriminator, `/spec/admin/machineProfiles/machines/${index}/temp/profile`) || ''
     if (!pro) return
@@ -1137,7 +1070,6 @@ export const useFunc = (model) => {
   }
 
   async function fetchNames(type) {
-    // watchDependency(`model#/${type}/namespace`)
     const username = storeGet('/route/params/user')
     const clusterName = storeGet('/route/params/cluster')
     const namespace = getValue(model, `/spec/backup/kubestash/${type}/namespace`)
