@@ -812,6 +812,13 @@ export const useFunc = (model) => {
   let archiverMap = []
   let archiverCalled = false
 
+  async function getIssuers() {
+    const options = (await getValue(model, '/spec/admin/clusterIssuers/available')) || []
+    const bundleData = fetchOptions('clusterIssuers') || []
+    const val = bundleData.filter((item) => options.includes(item))
+    return val
+  }
+
   async function getAdminOptions(type) {
     if (type === 'storageClasses' && !archiverCalled) {
       getArchiverName()
@@ -819,17 +826,16 @@ export const useFunc = (model) => {
 
     const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
+    if (type.endsWith('/mode')) {
+      const modes = options.length ? options : Object.keys(modeDetails)
+      return modes.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || item,
+        value: item,
+      }))
+    }
     if (options.length === 0) {
       return fetchOptions(type)
-    }
-    if (type.endsWith('/mode')) {
-      return (
-        options?.map((item) => ({
-          description: modeDetails[item]?.description || '',
-          text: modeDetails[item]?.text || item,
-          value: item,
-        })) || []
-      )
     }
     return options
   }
@@ -1273,6 +1279,7 @@ export const useFunc = (model) => {
     isConfigDatabaseOn,
     clearConfiguration,
     isToggleOn,
+    getIssuers,
     getAdminOptions,
     onBackupSwitch,
     showAlerts,

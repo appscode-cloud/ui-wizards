@@ -24,7 +24,8 @@ spec:
     {{- range .Values.spec.addon.tasks }}
       - name: {{ .name }}
         {{- if .params }}
-        params: {{ .params }}
+        params:
+          {{- .params | fromYaml | toYaml | nindent 10 }}
         {{- end }}
     {{- end }}
     {{- $runAsUser := include "corekubestashcom-restoresession-editor-options.runAsUser" . }}

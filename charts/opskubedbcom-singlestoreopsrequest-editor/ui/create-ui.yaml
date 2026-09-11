@@ -542,21 +542,23 @@ step:
         schema: temp/properties/currentConfig
         type: editor
         validateContent: false
-      - elements:
+      - disable:
+          name: isCreateSecret|node
+          watchPaths:
+          - temp/properties/node/createSecret/properties/onClick
+        elements:
         - elements:
           - customClass: mb-15
             label: Config Secret
             subtitle: Select an existing secret or create a new one to apply to your
               database configuration.
             type: label-element
-          - type: horizontal-layout
-            hasButton:
-              text: Create a New Secret
-              buttonClass: is-light is-outlined
-              hasPlusIcon: true
-              action: onClickCreateSecret|node
-            elements:
+          - elements:
             - customClass: mb-2
+              disable:
+                name: isCreateSecret|node
+                watchPaths:
+                - temp/properties/node/createSecret/properties/onClick
               init:
                 type: func
                 value: setValueFromDbDetails|/spec/configSecret/name
@@ -573,10 +575,12 @@ step:
                 func: onCreateSecretChange|node
                 paths:
                 - temp/properties/node/createSecret/properties/status
-              disable:
-                name: isCreateSecret|node
-                watchPaths:
-                - temp/properties/node/createSecret/properties/onClick
+            hasButton:
+              action: onClickCreateSecret|node
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              text: Create a New Secret
+            type: horizontal-layout
           - customClass: mt-15
             elements:
             - label: ""
@@ -649,11 +653,7 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/node/selectedConfiguration
             type: select
-          - type: block-layout
-            if:
-              name: isValueExist|temp|/node/selectedConfiguration
-              type: function
-            elements:
+          - elements:
             - editorHeight: 500px
               hideFormatButton: true
               loader:
@@ -668,9 +668,13 @@ step:
                 func: onApplyconfigChange|node
                 paths:
                 - temp/properties/node/applyConfig
-            - type: label-element
-              label: ''
+            - label: ""
               subtitle: ⓘ Changes will take effect after a successful redeployment.
+              type: label-element
+            if:
+              name: isValueExist|temp|/node/selectedConfiguration
+              type: function
+            type: block-layout
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig
             type: function
@@ -721,10 +725,6 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
-        disable:
-          name: isCreateSecret|node
-          watchPaths:
-          - temp/properties/node/createSecret/properties/onClick
         schema: temp/properties/reconfigurationType
         type: tab-layout
       if:
@@ -737,21 +737,23 @@ step:
         subtitle: Select a new configuration secret, apply a custom configuration,
           or remove an existing setup to update your Aggregator node settings
         type: label-element
-      - elements:
+      - disable:
+          name: isCreateSecret|aggregator
+          watchPaths:
+          - temp/properties/aggregator/createSecret/properties/onClick
+        elements:
         - elements:
           - customClass: mb-15
             label: Aggregator Config Secret
             subtitle: Select an existing secret or create a new one to apply to your
               Aggregator node configuration.
             type: label-element
-          - type: horizontal-layout
-            hasButton:
-              text: Create a New Secret
-              buttonClass: is-light is-outlined
-              hasPlusIcon: true
-              action: onClickCreateSecret|aggregator
-            elements:
+          - elements:
             - customClass: mb-2
+              disable:
+                name: isCreateSecret|aggregator
+                watchPaths:
+                - temp/properties/aggregator/createSecret/properties/onClick
               init:
                 type: func
                 value: setValueFromDbDetails|/spec/topology/aggregator/configSecret/name
@@ -768,10 +770,12 @@ step:
                 func: onCreateSecretChange|aggregator
                 paths:
                 - temp/properties/aggregator/createSecret/properties/status
-              disable:
-                name: isCreateSecret|aggregator
-                watchPaths:
-                - temp/properties/aggregator/createSecret/properties/onClick
+            hasButton:
+              action: onClickCreateSecret|aggregator
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              text: Create a New Secret
+            type: horizontal-layout
           - customClass: mt-15
             elements:
             - label: ""
@@ -843,11 +847,7 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/aggregator/selectedConfiguration
             type: select
-          - type: block-layout
-            if:
-              name: isValueExist|temp|/aggregator/selectedConfiguration
-              type: function
-            elements:
+          - elements:
             - editorHeight: 500px
               hideFormatButton: true
               loader:
@@ -862,9 +862,13 @@ step:
                 func: onApplyconfigChange|aggregator
                 paths:
                 - temp/properties/aggregator/applyConfig
-            - type: label-element
-              label: ''
+            - label: ""
               subtitle: ⓘ Changes will take effect after a successful redeployment.
+              type: label-element
+            if:
+              name: isValueExist|temp|/aggregator/selectedConfiguration
+              type: function
+            type: block-layout
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig|aggregator|true
             type: function
@@ -915,10 +919,6 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
-        disable:
-          name: isCreateSecret|aggregator
-          watchPaths:
-          - temp/properties/aggregator/createSecret/properties/onClick
         schema: temp/properties/reconfigurationType-aggregator
         type: tab-layout
       if:
@@ -932,21 +932,23 @@ step:
         subtitle: Select a new configuration secret, apply a custom configuration,
           or remove an existing setup to update your Leaf node settings
         type: label-element
-      - elements:
+      - disable:
+          name: isCreateSecret|leaf
+          watchPaths:
+          - temp/properties/leaf/createSecret/properties/onClick
+        elements:
         - elements:
           - customClass: mb-15
             label: Leaf Config Secret
             subtitle: Select an existing secret or create a new one to apply to your
               Leaf node configuration.
             type: label-element
-          - type: horizontal-layout
-            hasButton:
-              text: Create a New Secret
-              buttonClass: is-light is-outlined
-              hasPlusIcon: true
-              action: onClickCreateSecret|leaf
-            elements:
+          - elements:
             - customClass: mb-2
+              disable:
+                name: isCreateSecret|leaf
+                watchPaths:
+                - temp/properties/leaf/createSecret/properties/onClick
               init:
                 type: func
                 value: setValueFromDbDetails|/spec/topology/leaf/configSecret/name
@@ -963,10 +965,12 @@ step:
                 func: onCreateSecretChange|leaf
                 paths:
                 - temp/properties/leaf/createSecret/properties/status
-              disable:
-                name: isCreateSecret|leaf
-                watchPaths:
-                - temp/properties/leaf/createSecret/properties/onClick
+            hasButton:
+              action: onClickCreateSecret|leaf
+              buttonClass: is-light is-outlined
+              hasPlusIcon: true
+              text: Create a New Secret
+            type: horizontal-layout
           - customClass: mt-15
             elements:
             - label: ""
@@ -1038,11 +1042,7 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/leaf/selectedConfiguration
             type: select
-          - type: block-layout
-            if:
-              name: isValueExist|temp|/leaf/selectedConfiguration
-              type: function
-            elements:
+          - elements:
             - editorHeight: 500px
               hideFormatButton: true
               loader:
@@ -1057,9 +1057,13 @@ step:
                 func: onApplyconfigChange|leaf
                 paths:
                 - temp/properties/leaf/applyConfig
-            - type: label-element
-              label: ''
+            - label: ""
               subtitle: ⓘ Changes will take effect after a successful redeployment.
+              type: label-element
+            if:
+              name: isValueExist|temp|/leaf/selectedConfiguration
+              type: function
+            type: block-layout
           if:
             name: ifReconfigurationTypeEqualsTo|applyConfig|leaf|true
             type: function
@@ -1109,10 +1113,6 @@ step:
           value: applyConfig
         - text: REMOVE
           value: remove
-        disable:
-          name: isCreateSecret|leaf
-          watchPaths:
-          - temp/properties/leaf/createSecret/properties/onClick
         schema: temp/properties/reconfigurationType-leaf
         type: tab-layout
       if:

@@ -50,7 +50,7 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas       int                `json:"replicas"`
 	Topology       SolrTopology       `json:"topology"`
-	ZookeeperRef   ObjectReference    `json:"zookeeperRef"`
+	ZookeeperRef   SolrZooKeeperRef   `json:"zookeeperRef"`
 	Persistence    Persistence        `json:"persistence"`
 	PodResources   PodResources       `json:"podResources"`
 	AuthSecret     AuthSecret         `json:"authSecret"`
@@ -76,6 +76,11 @@ type SolrTopology struct {
 	Overseer    *SolrNode `json:"overseer"`
 	Data        *SolrNode `json:"data"`
 	Coordinator *SolrNode `json:"coordinator"`
+}
+
+type SolrZooKeeperRef struct {
+	ObjectReference   `json:",inline"`
+	ExternallyManaged bool `json:"externallyManaged"`
 }
 
 type SolrAlertsSpecForm struct {

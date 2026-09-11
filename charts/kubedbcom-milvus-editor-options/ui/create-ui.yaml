@@ -139,7 +139,7 @@ step:
         files and index files. Provide the name of a Kubernetes secret that contains
         the MinIO or S3-compatible storage configuration.
       type: label-element
-    - label: Config Secret
+    - label: Object Storage Secret
       loader: getSecrets
       refresh: true
       schema: schema/properties/spec/properties/objectStorage/properties/configSecretName
@@ -591,6 +591,19 @@ step:
         name: isToggleOn|monitoring
         type: function
       type: block-layout
+    - if:
+        name: isToggleOn|backup
+        type: function
+      init:
+        type: func
+        value: setBackup
+      label: Enable Backup?
+      schema: temp/backup
+      type: switch
+      watcher:
+        func: onBackupSwitch
+        paths:
+        - temp/backup
     - elements:
       - if:
           name: isToggleOn|tls
@@ -602,11 +615,44 @@ step:
           name: showIssuer
           type: function
         label: Cluster Issuers
-        loader: getAdminOptions|clusterIssuers
+        loader: getIssuers
         schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/default
         type: select
         validation:
           type: required
+      - if:
+          name: showTlsDetails
+          type: function
+        label: External TLS Mode
+        options:
+        - description: Client connections are not encrypted
+          text: Disabled
+          value: Disabled
+        - description: Encrypt client connections with a server certificate
+          text: TLS
+          value: TLS
+        - description: Encrypt client connections and require a client certificate
+          text: mTLS
+          value: mTLS
+        schema: schema/properties/spec/properties/tls/properties/external/properties/mode
+        type: select
+      - if:
+          name: showTlsDetails
+          type: function
+        label: Internal TLS Mode
+        options:
+        - description: Traffic between Milvus components is not encrypted
+          text: Disabled
+          value: Disabled
+        - description: Encrypt traffic between Milvus components
+          text: TLS
+          value: TLS
+        - description: Encrypt traffic between Milvus components and require a client
+            certificate
+          text: mTLS
+          value: mTLS
+        schema: schema/properties/spec/properties/tls/properties/internal/properties/mode
+        type: select
       if:
         name: isToggleOn|tls
         type: function

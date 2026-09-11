@@ -362,9 +362,19 @@ export const useFunc = (model) => {
   }
 
   function setTrigger(path) {
-    let value = getValue(model, `/resources/${path}`)
-    if (value) return value
-    return 'On'
+    const value = getValue(model, `/resources/${path}`)
+    return value === 'On'
+  }
+
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComMemcachedAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
   }
 
   function setApplyToIfReady() {
@@ -875,6 +885,7 @@ export const useFunc = (model) => {
     isNodeTopologySelected,
     setControlledResources,
     setTrigger,
+    onTriggerChange,
     setApplyToIfReady,
     fetchNodeTopology,
     showOpsRequestOptions,

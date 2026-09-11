@@ -332,6 +332,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('referSecret', false)
   setDiscriminatorValue('configDatabase', false)
   setDiscriminatorValue('monitoring', false)
+  setDiscriminatorValue('zookeeperRef', {})
 
   function clearConfiguration() {
     const configOn = getValue(discriminator, '/configDatabase')
@@ -692,6 +693,21 @@ export const useFunc = (model) => {
     return !!agent
   }
 
+  function onBackupSwitch() {
+    const isBackupOn = getValue(discriminator, '/backup')
+    commit('wizard/model$update', {
+      path: '/spec/backup/tool',
+      value: isBackupOn ? 'KubeStash' : '',
+      force: true,
+    })
+  }
+
+  function setBackup() {
+    const backup = getValue(model, '/spec/backup/tool')
+    const val = getValue(model, '/spec/admin/backup/enable/default')
+    return backup === 'KubeStash' && features.includes('backup') && val
+  }
+
   function setRequests(resource, type) {
     const modelPath = type
       ? `/spec/${type}/podResources/resources/requests/${resource}`
@@ -861,22 +877,28 @@ export const useFunc = (model) => {
     return returnArray
   }
 
+  async function getIssuers() {
+    const options = (await getValue(model, '/spec/admin/clusterIssuers/available')) || []
+    const bundleData = fetchOptions('clusterIssuers') || []
+    const val = bundleData.filter((item) => options.includes(item))
+    return val
+  }
+
   async function getAdminOptions(type) {
     // watchDependency('discriminator#/bundleApiLoaded')
 
     const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
+    if (type.endsWith('/mode')) {
+      const modes = options.length ? options : Object.keys(modeDetails)
+      return modes.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      }))
+    }
     if (options.length === 0) {
       return fetchOptions(type)
-    }
-    if (type.endsWith('/mode')) {
-      return (
-        options?.map((item) => ({
-          description: modeDetails[item]?.description || '',
-          text: modeDetails[item]?.text || '',
-          value: item,
-        })) || []
-      )
     }
     return options
   }
@@ -954,7 +976,7 @@ export const useFunc = (model) => {
     } else return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
   }
 
-  async function getAppBindings() {
+  async function getAppBindings(type) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace =
@@ -971,7 +993,7 @@ export const useFunc = (model) => {
     const queryParams = {
       filter: {
         items: {
-          metadata: { name: null },
+          metadata: { name: null, namespace: null },
           spec: { type: null },
         },
       },
@@ -985,12 +1007,16 @@ export const useFunc = (model) => {
       const resources = (resp && resp.data && resp.data.items) || []
 
       const filteredResources = resources
-        .filter((item) => item.spec?.type === 'kubedb.com/zookeeper')
+        .filter((item) => item.spec?.type === `kubedb.com/${type}`)
         .map((item) => {
           const name = (item.metadata && item.metadata.name) || ''
+          const itemNamespace = (item.metadata && item.metadata.namespace) || namespace
           return {
-            text: `${namespace}/${name}`,
-            value: name,
+            text: `${itemNamespace}/${name}`,
+            value: {
+              name: name,
+              namespace: itemNamespace,
+            },
           }
         })
       return filteredResources
@@ -1000,9 +1026,44 @@ export const useFunc = (model) => {
     }
   }
 
+  function onRefChange(type) {
+    const ref = getValue(discriminator, `/${type}`) || {}
+    commit('wizard/model$update', {
+      path: `/spec/${type}/name`,
+      value: ref.name || '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/spec/${type}/namespace`,
+      value: ref.namespace || '',
+      force: true,
+    })
+  }
+
+  function isExternallyManaged(type) {
+    const isManaged = getValue(model, `/spec/${type}/externallyManaged`) || false
+    if (!isManaged) clearRefs(type)
+    return isManaged
+  }
+
+  function clearRefs(type) {
+    setDiscriminatorValue(`/${type}`, {})
+    commit('wizard/model$update', {
+      path: `/spec/${type}/name`,
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/spec/${type}/namespace`,
+      value: '',
+      force: true,
+    })
+  }
+
   return {
     clearConfiguration,
     filterNodeTopology,
+    getAppBindings,
     getDefault,
     getDefaultValue,
     getMachineListForOptions,
@@ -1013,8 +1074,13 @@ export const useFunc = (model) => {
     isMachineCustom,
     isMachineNotCustom,
     onAuthChange,
+    onBackupSwitch,
     onReferSecretChange,
+    onRefChange,
+    isExternallyManaged,
+    clearRefs,
     returnFalse,
+    setBackup,
     setLimits,
     setMachineToCustom,
     setMonitoring,
@@ -1029,10 +1095,10 @@ export const useFunc = (model) => {
     showIssuer,
     updateAlertValue,
     fetchOptions,
+    getIssuers,
     getAdminOptions,
     getNodeTopology,
     checkIfFeatureOn,
     isToggleOn,
-    getAppBindings,
   }
 }

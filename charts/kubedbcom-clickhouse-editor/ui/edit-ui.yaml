@@ -400,10 +400,17 @@ step:
         value: Offline
       schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/expansionMode
       type: select
+      validation:
+        type: required
     - elements:
       - label: UsageThreshold (%)
         schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/usageThreshold
         subtitle: Set the threshold percentage of storage usage to trigger scaling.
+        type: threshold-input
+      - label: ScalingThreshold (%)
+        schema: schema/properties/resources/properties/autoscalingKubedbComClickHouseAutoscaler/properties/spec/properties/storage/properties/clickhouse/properties/scalingThreshold
+        subtitle: Set the percentage by which storage is increased each time scaling
+          is triggered.
         type: threshold-input
       - label: Scaling Rules
         loader: setValueFromDbDetails|resources/kubedbComClickHouse/spec/storage/resources/requests/storage

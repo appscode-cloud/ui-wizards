@@ -796,6 +796,13 @@ export const useFunc = (model) => {
     }
   }
 
+  async function getIssuers() {
+    const options = (await getValue(model, '/spec/admin/clusterIssuers/available')) || []
+    const bundleData = fetchOptions('clusterIssuers') || []
+    const val = bundleData.filter((item) => options.includes(item))
+    return val
+  }
+
   async function getAdminOptions(type) {
     // watchDependency('discriminator#/bundleApiLoaded')
 
@@ -805,17 +812,16 @@ export const useFunc = (model) => {
 
     const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
+    if (type.endsWith('/mode')) {
+      const modes = options.length ? options : Object.keys(modeDetails)
+      return modes.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      }))
+    }
     if (options.length === 0) {
       return fetchOptions(type)
-    }
-    if (type.endsWith('/mode')) {
-      return (
-        options?.map((item) => ({
-          description: modeDetails[item]?.description || '',
-          text: modeDetails[item]?.text || '',
-          value: item,
-        })) || []
-      )
     }
     return options
   }
@@ -958,9 +964,29 @@ export const useFunc = (model) => {
     return isTlsEnabled && isIssuerToggleEnabled
   }
 
+  function showTlsDetails() {
+    // watchDependency('model#/spec/admin/tls/default')
+    return getValue(model, '/spec/admin/tls/default')
+  }
+
   function setMonitoring() {
     const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
     return !!agent
+  }
+
+  function setBackup() {
+    const backup = getValue(model, '/spec/backup/tool')
+    const val = getValue(model, '/spec/admin/backup/enable/default')
+    return backup === 'KubeStash' && features.includes('backup') && val
+  }
+
+  function onBackupSwitch() {
+    const isBackupOn = getValue(discriminator, '/backup')
+    commit('wizard/model$update', {
+      path: '/spec/backup/tool',
+      value: isBackupOn ? 'KubeStash' : '',
+      force: true,
+    })
   }
 
   function onAuthChange() {
@@ -1074,9 +1100,11 @@ export const useFunc = (model) => {
 
       const secrets = (resp && resp.data && resp.data.items) || []
 
+      const requiredKeys = ['address', 'port', 'accessKeyID', 'secretAccessKey', 'bucketName']
       const filteredSecrets = secrets.filter((item) => {
-        const validType = ['Opaque']
-        return validType.includes(item.type) && Object.keys(item.data || {}).includes('config.env')
+        if (item.type !== 'Opaque') return false
+        const keys = Object.keys(item.data || {})
+        return requiredKeys.every((key) => keys.includes(key))
       })
 
       filteredSecrets.map((item) => {
@@ -1120,11 +1148,15 @@ export const useFunc = (model) => {
     setStorageClass,
     getNodeTopology,
     filterNodeTopology,
+    getIssuers,
     getAdminOptions,
     isToggleOn,
     showAlerts,
     showIssuer,
+    showTlsDetails,
     setMonitoring,
+    setBackup,
+    onBackupSwitch,
     onAuthChange,
     isConfigDatabaseOn,
     clearConfiguration,

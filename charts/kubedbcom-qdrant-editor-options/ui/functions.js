@@ -745,6 +745,13 @@ export const useFunc = (model) => {
     }
   }
 
+  async function getIssuers() {
+    const options = (await getValue(model, '/spec/admin/clusterIssuers/available')) || []
+    const bundleData = fetchOptions('clusterIssuers') || []
+    const val = bundleData.filter((item) => options.includes(item))
+    return val
+  }
+
   async function getAdminOptions(type) {
     // watchDependency('discriminator#/bundleApiLoaded')
 
@@ -754,17 +761,16 @@ export const useFunc = (model) => {
 
     const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
+    if (type.endsWith('/mode')) {
+      const modes = options.length ? options : Object.keys(modeDetails)
+      return modes.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      }))
+    }
     if (options.length === 0) {
       return fetchOptions(type)
-    }
-    if (type.endsWith('/mode')) {
-      return (
-        options?.map((item) => ({
-          description: modeDetails[item]?.description || '',
-          text: modeDetails[item]?.text || '',
-          value: item,
-        })) || []
-      )
     }
     return options
   }
@@ -1048,6 +1054,7 @@ export const useFunc = (model) => {
     setStorageClass,
     getNodeTopology,
     filterNodeTopology,
+    getIssuers,
     getAdminOptions,
     isToggleOn,
     showAlerts,

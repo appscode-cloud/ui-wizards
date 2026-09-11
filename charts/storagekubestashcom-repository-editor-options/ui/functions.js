@@ -18,11 +18,14 @@ export const useFunc = (model) => {
   setDiscriminatorValue('existingAuthSecrets', [])
   setDiscriminatorValue('isExistingAuthSecretsFetching', true)
   setDiscriminatorValue('useExistingAuthSecret', true)
+  const route = store.state?.route
 
   async function init() {
     namespaces = await getNamespacesApi()
     await getKindsApi()
     setDiscriminatorValue('/nameSpaceApi', true)
+    const group = route.params?.group || ''
+    if (group === 'kubedb.com') setAppRef()
   }
 
   function getKinds() {
@@ -288,7 +291,32 @@ export const useFunc = (model) => {
     })
   }
 
+  function setAppRef() {
+    const resource = storeGet('/resource/layout/result/resource') || {}
+    console.log(resource)
+
+    const kind = resource?.kind || ''
+    const namespace = route.query?.namespace || ''
+    const name = route.params?.name || ''
+    commit('wizard/model$update', {
+      path: '/spec/appRef',
+      value: {
+        apiGroup: 'kubedb.com',
+        kind: kind,
+        namespace: namespace,
+        name: name,
+      },
+      force: true,
+    })
+  }
+
+  function isAppRefRequired() {
+    const group = route.params?.group || ''
+    return group !== 'kubedb.com'
+  }
+
   return {
+    isAppRefRequired,
     getKindsApi,
     getNamespacesApi,
     init,

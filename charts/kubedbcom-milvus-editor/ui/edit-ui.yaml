@@ -1,5 +1,151 @@
 step:
 - elements:
+  - if:
+      name: showScheduleBackup
+      type: function
+    init:
+      type: func
+      value: initScheduleBackupForEdit
+    isHorizontal: true
+    label: Schedule a Backup?
+    options:
+    - text: "Yes"
+      value: "yes"
+    - text: "No"
+      value: "no"
+    schema: temp/properties/scheduleBackup
+    type: radio
+    watcher:
+      func: onScheduleBackupChange
+      paths:
+      - temp/properties/scheduleBackup
+  - elements:
+    - if:
+        name: isBackupDataLoadedTrue
+        type: function
+      init:
+        type: func
+        value: setBackupType
+      isHorizontal: true
+      label: Select Backup Type
+      loader: getTypes
+      options:
+      - description: Create, Delete or Modify BackupConfig
+        text: BackupConfig
+        value: BackupConfig
+      - description: Enable/Disable BackupBlueprint
+        text: BackupBlueprint
+        value: BackupBlueprint
+      schema: temp/properties/backupType
+      type: radio
+      watcher:
+        func: onBackupTypeChange
+        paths:
+        - temp/properties/backupType
+    - elements:
+      - label: Select Context
+        loader: getContext
+        schema: temp/properties/backupConfigContext
+        type: select
+        validation:
+          type: required
+        watcher:
+          func: onContextChange
+          paths:
+          - temp/properties/backupConfigContext
+      - if:
+          name: showConfigList
+          type: function
+        label: Select BackupConfig
+        loader: getConfigList
+        schema: temp/properties/config
+        type: select
+        validation:
+          type: required
+        watcher:
+          func: onConfigChange
+          paths:
+          - temp/properties/config
+      - if:
+          name: showSchedule
+          type: function
+        label: Schedule
+        loader:
+          name: getDefaultSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions
+          watchPaths:
+          - temp/properties/config
+        schema: temp/properties/schedule
+        type: input
+        validation:
+          type: required
+        watcher:
+          func: onInputChangeSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions|schedule
+          paths:
+          - temp/properties/schedule
+      - fullwidth: true
+        if:
+          name: showPause
+          type: function
+        init:
+          type: func
+          value: setPausedValue
+        label: Paused
+        schema: schema/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
+        type: switch
+        watcher:
+          func: setPausedValue
+          paths:
+          - temp/properties/config
+      if:
+        name: isBackupType|BackupConfig
+        type: function
+      label: Config
+      type: block-layout
+    - elements:
+      - fullwidth: true
+        init:
+          type: func
+          value: setBlueprintSwitch
+        label: Enable Backup Blueprint
+        schema: temp/properties/blueprintEnabled
+        type: switch
+        watcher:
+          func: onBlueprintChange
+          paths:
+          - temp/properties/blueprintEnabled
+      if:
+        name: isBackupType|BackupBlueprint
+        type: function
+      label: Blueprint
+      type: block-layout
+    - elements:
+      - fullwidth: true
+        init:
+          type: func
+          value: setArchiverSwitch
+        label: Enable Archiver
+        schema: temp/properties/archiverEnabled
+        type: switch
+        watcher:
+          func: onArchiverChange
+          paths:
+          - temp/properties/archiverEnabled
+      if:
+        name: isBackupType|Archiver
+        type: function
+      label: Archiver
+      type: block-layout
+    if:
+      name: showBackupForm
+      type: function
+    label: Backup Form
+    loader: initBackupData
+    showLabels: false
+    type: block-layout
+  id: backupconfiguration
+  schema: schema/
+  type: single-step-form
+- elements:
   - elements:
     - label: Name
       schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/metadata/properties/name
@@ -51,8 +197,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/node/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
+      schema: temp/properties/compute/properties/node/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/node
+        paths:
+        - temp/properties/compute/properties/node/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -159,8 +309,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/datanode/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/datanode/properties/trigger
+      schema: temp/properties/compute/properties/datanode/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/datanode
+        paths:
+        - temp/properties/compute/properties/datanode/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -267,8 +421,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/mixcoord/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/mixcoord/properties/trigger
+      schema: temp/properties/compute/properties/mixcoord/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/mixcoord
+        paths:
+        - temp/properties/compute/properties/mixcoord/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -375,8 +533,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/proxy/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/proxy/properties/trigger
+      schema: temp/properties/compute/properties/proxy/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/proxy
+        paths:
+        - temp/properties/compute/properties/proxy/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -483,8 +645,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/querynode/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/querynode/properties/trigger
+      schema: temp/properties/compute/properties/querynode/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/querynode
+        paths:
+        - temp/properties/compute/properties/querynode/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -591,8 +757,12 @@ step:
         type: func
         value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/compute/streamingnode/trigger
       label: Trigger
-      schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/compute/properties/streamingnode/properties/trigger
+      schema: temp/properties/compute/properties/streamingnode/properties/trigger
       type: switch
+      watcher:
+        func: onTriggerChange|compute/streamingnode
+        paths:
+        - temp/properties/compute/properties/streamingnode/properties/trigger
     - label: Pod lifetime threshold
       subtitle: Specifies the duration a pod can exist before being considered for
         scaling decisions, ensuring resource optimization and workload stability
@@ -748,8 +918,12 @@ step:
           type: func
           value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/storage/node/trigger
         label: Trigger
-        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
+        schema: temp/properties/storage/properties/node/properties/trigger
         type: switch
+        watcher:
+          func: onTriggerChange|storage/node
+          paths:
+          - temp/properties/storage/properties/node/properties/trigger
       - label: Expansion Mode (Online/Offline)
         subtitle: Online Mode enables scaling without downtime by dynamically resizing
           storage while the database remains operational. Offline Mode performs storage
@@ -765,6 +939,8 @@ step:
           value: Offline
         schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
         type: select
+        validation:
+          type: required
       - elements:
         - label: UsageThreshold (%)
           schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
@@ -799,8 +975,12 @@ step:
           type: func
           value: setTrigger|autoscalingKubedbComMilvusAutoscaler/spec/storage/streamingnode/trigger
         label: Trigger
-        schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/trigger
+        schema: temp/properties/storage/properties/streamingnode/properties/trigger
         type: switch
+        watcher:
+          func: onTriggerChange|storage/streamingnode
+          paths:
+          - temp/properties/storage/properties/streamingnode/properties/trigger
       - label: Expansion Mode (Online/Offline)
         subtitle: Online Mode enables scaling without downtime by dynamically resizing
           storage while the database remains operational. Offline Mode performs storage
@@ -816,6 +996,8 @@ step:
           value: Offline
         schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/expansionMode
         type: select
+        validation:
+          type: required
       - elements:
         - label: UsageThreshold (%)
           schema: schema/properties/resources/properties/autoscalingKubedbComMilvusAutoscaler/properties/spec/properties/storage/properties/streamingnode/properties/usageThreshold
@@ -917,6 +1099,10 @@ step:
       - label: Scrapping Interval
         schema: schema/properties/resources/properties/kubedbComMilvus/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
         type: input
+      - buttonClass: is-light is-outlined
+        label: ServiceMonitor Labels
+        schema: schema/properties/resources/properties/kubedbComMilvus/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels
+        type: object-item
       if:
         name: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMilvus/spec/monitor/agent
         type: function

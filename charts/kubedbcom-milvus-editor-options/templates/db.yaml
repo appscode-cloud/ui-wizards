@@ -198,7 +198,7 @@ spec:
   podTemplate:
     spec:
       securityContext:
-        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 54321 }}
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 1000 }}
       containers:
         - name: milvus
           resources:
@@ -213,6 +213,21 @@ spec:
             {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
 {{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  {{- if .Values.spec.tls.external.mode }}
+    external:
+      mode: {{ .Values.spec.tls.external.mode }}
+  {{- end }}
+  {{- if .Values.spec.tls.internal.mode }}
+    internal:
+      mode: {{ .Values.spec.tls.internal.mode }}
+  {{- end }}
+{{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if or .Values.spec.authSecret.name .Values.spec.authSecret.password .Values.spec.authSecret.externallyManaged }}
   authSecret:
@@ -222,6 +237,22 @@ spec:
     {{- if .Values.spec.authSecret.externallyManaged }}
     externallyManaged: true
     {{- end }}
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
+  monitor:
+    agent: {{ .Values.spec.admin.monitoring.agent }}
+    prometheus:
+    {{- with .Values.spec.admin.monitoring.exporter }}
+      exporter:
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+        securityContext:
+          {{- include "container.securityContext" $ | nindent 10 }}
+    {{- end }}
+      serviceMonitor:
+        interval: 30s
+        labels:
+          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}
 {{- if .Values.spec.halted }}
   halted: {{ .Values.spec.halted }}
