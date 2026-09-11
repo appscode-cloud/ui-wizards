@@ -784,7 +784,6 @@ export const useFunc = (model) => {
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const limits = getLimits()
-    console.log(limits)
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
