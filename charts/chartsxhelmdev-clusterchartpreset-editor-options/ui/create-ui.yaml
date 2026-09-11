@@ -2,11 +2,20 @@ step:
 - elements:
   - elements:
     - elements:
+      - hasIcon: true
+        if:
+          name: isHubManaged
+          type: function
+        label: ""
+        loader: loadHubManagedWarning
+        type: warning
       - elements:
-        - label: Can users modify Deployment type?
+        - disable: isHubManaged
+          label: Can users modify Deployment type?
           schema: schema/properties/spec/properties/admin/properties/deployment/properties/toggle
           type: switch
-        - isHorizontal: true
+        - disable: isHubManaged
+          isHorizontal: true
           label: ""
           options:
           - description: For exploring databases when high-performance is not required.
@@ -25,10 +34,12 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can users modify Cluster Tier?
+        - disable: isHubManaged
+          label: Can users modify Cluster Tier?
           schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/toggle
           type: switch
-        - isHorizontal: true
+        - disable: isHubManaged
+          isHorizontal: true
           label: ""
           options:
           - text: General Purpose
@@ -40,10 +51,12 @@ step:
           schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/default
           type: radio
         - elements:
-          - label: Can user modify Placement?
+          - disable: isHubManaged
+            label: Can user modify Placement?
             schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/toggle
             type: switch
-          - label: Available Placements
+          - disable: isHubManaged
+            label: Available Placements
             loader:
               name: getPlacements
               watchPaths:
@@ -51,7 +64,8 @@ step:
             multiple: true
             schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/available
             type: select
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Default Placement
             loader:
               name: getOptions|clusterTier/placement
@@ -62,10 +76,12 @@ step:
           showLabels: false
           type: block-layout
         - elements:
-          - label: Can user modify Node Topology?
+          - disable: isHubManaged
+            label: Can user modify Node Topology?
             schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/toggle
             type: switch
-          - label: Available Node Topologies
+          - disable: isHubManaged
+            label: Available Node Topologies
             loader:
               name: getNodeTopology
               watchPaths:
@@ -73,7 +89,8 @@ step:
             multiple: true
             schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/available
             type: select
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Default Node Topology
             loader:
               name: getOptions|clusterTier/nodeTopology
@@ -91,7 +108,8 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - init:
+        - disable: isHubManaged
+          init:
             type: func
             value: hasMachineProfiles
           label: Use custom profiles?
@@ -102,18 +120,22 @@ step:
             paths:
             - temp/enableProfiles
         - elements:
-          - elements:
-            - label: Choose from well-known profiles
+          - disable: isHubManaged
+            elements:
+            - disable: isHubManaged
+              label: Choose from well-known profiles
               schema: temp/profileChoseSwitch
               type: switch
-            - if:
+            - disable: isHubManaged
+              if:
                 name: isKnownProfileToggled
                 type: function
               label: Profile
               loader: getKnownProfile
               schema: temp/profile
               type: select
-            - label: ID
+            - disable: isHubManaged
+              label: ID
               loader:
                 name: getProfileName
                 watchPaths:
@@ -122,14 +144,16 @@ step:
               type: input
               validation:
                 type: required
-            - label: Name
+            - disable: isHubManaged
+              label: Name
               loader:
                 name: getProfileName
                 watchPaths:
                 - temp/spec/admin/machineProfiles/machines/dynamicIndex/temp/profile
               schema: name
               type: input
-            - label: CPU Limits
+            - disable: isHubManaged
+              label: CPU Limits
               loader:
                 name: setLimits|cpu
                 watchPaths:
@@ -138,7 +162,8 @@ step:
               type: input
               validation:
                 type: required
-            - label: Memory Limits
+            - disable: isHubManaged
+              label: Memory Limits
               loader:
                 name: setLimits|memory
                 watchPaths:
@@ -157,13 +182,22 @@ step:
               func: onMachineProfileChange
               paths:
               - temp/properties/spec/properties/admin/properties/machineProfiles/properties/machines
-          - init:
+          - disable: isHubManaged
+            init:
               type: func
               value: hasCustomProfile
             label: Can users set their own custom CPU & memory resources?
             schema: temp/useCustomProfile
             type: switch
+            watcher:
+              func: onCustomProfileToggle
+              paths:
+              - temp/useCustomProfile
           - customClass: mt-10
+            disable: isHubManaged
+            if:
+              name: isCustomProfileOn
+              type: function
             init:
               type: func
               value: setCustomAvlMachine
@@ -181,13 +215,20 @@ step:
               paths:
               - temp/spec/admin/machineProfiles/available
               - temp/useCustomProfile
-          - label: Default Machine
+          - disable: isHubManaged
+            label: Default Machine
             loader:
               name: getAvailableMachines
               watchPaths:
               - schema/spec/admin/machineProfiles/available
+              - schema/spec/admin/machineProfiles/machines
+              - temp/useCustomProfile
             schema: schema/properties/spec/properties/admin/properties/machineProfiles/properties/default
             type: select
+            watcher:
+              func: onDefaultMachineChange
+              paths:
+              - schema/spec/admin/machineProfiles/default
           if:
             name: isEnableProfiles
             type: function
@@ -201,6 +242,7 @@ step:
         type: block-layout
       - elements:
         - buttonClass: is-light is-outlined
+          disable: isHubManaged
           label: Node Selector
           schema: schema/properties/spec/properties/admin/properties/nodeSelector
           type: object-item
@@ -212,27 +254,33 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - elements:
-          - label: Key
+        - disable: isHubManaged
+          elements:
+          - disable: isHubManaged
+            label: Key
             schema: key
             type: input
-          - label: Operator
+          - disable: isHubManaged
+            label: Operator
             options:
             - NoSchedule
             - PreferNoSchedule
             - NoExecute
             schema: operator
             type: select
-          - label: Value
+          - disable: isHubManaged
+            label: Value
             schema: value
             type: input
-          - label: Effect
+          - disable: isHubManaged
+            label: Effect
             options:
             - Exists
             - Equal
             schema: effect
             type: select
-          - label: Toleration Seconds
+          - disable: isHubManaged
+            label: Toleration Seconds
             schema: tolerationSeconds
             type: input
           label: New Tolerations
@@ -248,10 +296,15 @@ step:
       - elements:
         - elements:
           - elements:
-            - label: Can user modify Cassandra Version?
+            - disable: isHubManaged
+              label: Can user modify Cassandra Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Cassandra/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Cassandra
                 watchPaths:
@@ -263,24 +316,40 @@ step:
                 func: clearDefaultVersion|Cassandra
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Cassandra
                 watchPaths:
                 - schema/spec/admin/databases/Cassandra/versions/available
+                - schema/spec/admin/databases/Cassandra/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Cassandra/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Cassandra/versions/toggle
+                - schema/spec/admin/databases/Cassandra/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Cassandra Mode?
+            - disable: isHubManaged
+              label: Can user modify Cassandra Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Cassandra/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Cassandra
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Cassandra
               label: Default Mode
@@ -288,8 +357,15 @@ step:
                 name: availableModes|Cassandra
                 watchPaths:
                 - schema/spec/admin/databases/Cassandra/mode/available
+                - schema/spec/admin/databases/Cassandra/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Cassandra/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Cassandra/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Cassandra/mode/toggle
+                - schema/spec/admin/databases/Cassandra/mode/available
             showLabels: false
             type: block-layout
           fixedBlock: true
@@ -301,10 +377,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify ClickHouse Version?
+            - disable: isHubManaged
+              label: Can user modify ClickHouse Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/ClickHouse/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|ClickHouse
                 watchPaths:
@@ -316,24 +397,40 @@ step:
                 func: clearDefaultVersion|ClickHouse
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|ClickHouse
                 watchPaths:
                 - schema/spec/admin/databases/ClickHouse/versions/available
+                - schema/spec/admin/databases/ClickHouse/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/ClickHouse/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/ClickHouse/versions/toggle
+                - schema/spec/admin/databases/ClickHouse/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify ClickHouse Mode?
+            - disable: isHubManaged
+              label: Can user modify ClickHouse Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/ClickHouse/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|ClickHouse
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|ClickHouse
               label: Default Mode
@@ -341,8 +438,15 @@ step:
                 name: availableModes|ClickHouse
                 watchPaths:
                 - schema/spec/admin/databases/ClickHouse/mode/available
+                - schema/spec/admin/databases/ClickHouse/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/ClickHouse/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/ClickHouse/mode/toggle
+                - schema/spec/admin/databases/ClickHouse/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -353,10 +457,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify DB2 Version?
+            - disable: isHubManaged
+              label: Can user modify DB2 Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/DB2/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|DB2
                 watchPaths:
@@ -368,24 +477,40 @@ step:
                 func: clearDefaultVersion|DB2
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|DB2
                 watchPaths:
                 - schema/spec/admin/databases/DB2/versions/available
+                - schema/spec/admin/databases/DB2/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/DB2/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/DB2/versions/toggle
+                - schema/spec/admin/databases/DB2/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify DB2 Mode?
+            - disable: isHubManaged
+              label: Can user modify DB2 Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/DB2/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|DB2
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|DB2
               label: Default Mode
@@ -393,8 +518,15 @@ step:
                 name: availableModes|DB2
                 watchPaths:
                 - schema/spec/admin/databases/DB2/mode/available
+                - schema/spec/admin/databases/DB2/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DB2/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/DB2/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/DB2/mode/toggle
+                - schema/spec/admin/databases/DB2/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -405,10 +537,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify DocumentDB Version?
+            - disable: isHubManaged
+              label: Can user modify DocumentDB Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/DocumentDB/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|DocumentDB
                 watchPaths:
@@ -420,24 +557,40 @@ step:
                 func: clearDefaultVersion|DocumentDB
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|DocumentDB
                 watchPaths:
                 - schema/spec/admin/databases/DocumentDB/versions/available
+                - schema/spec/admin/databases/DocumentDB/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/DocumentDB/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/DocumentDB/versions/toggle
+                - schema/spec/admin/databases/DocumentDB/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify DocumentDB Mode?
+            - disable: isHubManaged
+              label: Can user modify DocumentDB Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/DocumentDB/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|DocumentDB
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|DocumentDB
               label: Default Mode
@@ -445,8 +598,15 @@ step:
                 name: availableModes|DocumentDB
                 watchPaths:
                 - schema/spec/admin/databases/DocumentDB/mode/available
+                - schema/spec/admin/databases/DocumentDB/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/DocumentDB/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/DocumentDB/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/DocumentDB/mode/toggle
+                - schema/spec/admin/databases/DocumentDB/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -457,10 +617,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Druid Version?
+            - disable: isHubManaged
+              label: Can user modify Druid Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Druid/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Druid
                 watchPaths:
@@ -472,24 +637,40 @@ step:
                 func: clearDefaultVersion|Druid
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Druid
                 watchPaths:
                 - schema/spec/admin/databases/Druid/versions/available
+                - schema/spec/admin/databases/Druid/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Druid/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Druid/versions/toggle
+                - schema/spec/admin/databases/Druid/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Druid Mode?
+            - disable: isHubManaged
+              label: Can user modify Druid Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Druid/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Druid
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Druid
               label: Default Mode
@@ -497,8 +678,15 @@ step:
                 name: availableModes|Druid
                 watchPaths:
                 - schema/spec/admin/databases/Druid/mode/available
+                - schema/spec/admin/databases/Druid/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Druid/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Druid/mode/toggle
+                - schema/spec/admin/databases/Druid/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -509,10 +697,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Elasticsearch Version?
+            - disable: isHubManaged
+              label: Can user modify Elasticsearch Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Elasticsearch/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Elasticsearch
                 watchPaths:
@@ -524,24 +717,40 @@ step:
                 func: clearDefaultVersion|Elasticsearch
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Elasticsearch
                 watchPaths:
                 - schema/spec/admin/databases/Elasticsearch/versions/available
+                - schema/spec/admin/databases/Elasticsearch/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Elasticsearch/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Elasticsearch/versions/toggle
+                - schema/spec/admin/databases/Elasticsearch/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Elasticsearch Mode?
+            - disable: isHubManaged
+              label: Can user modify Elasticsearch Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Elasticsearch/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Elasticsearch
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Elasticsearch
               label: Default Mode
@@ -549,8 +758,15 @@ step:
                 name: availableModes|Elasticsearch
                 watchPaths:
                 - schema/spec/admin/databases/Elasticsearch/mode/available
+                - schema/spec/admin/databases/Elasticsearch/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Elasticsearch/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Elasticsearch/mode/toggle
+                - schema/spec/admin/databases/Elasticsearch/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -561,10 +777,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify HanaDB Version?
+            - disable: isHubManaged
+              label: Can user modify HanaDB Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/HanaDB/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|HanaDB
                 watchPaths:
@@ -576,24 +797,40 @@ step:
                 func: clearDefaultVersion|HanaDB
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|HanaDB
                 watchPaths:
                 - schema/spec/admin/databases/HanaDB/versions/available
+                - schema/spec/admin/databases/HanaDB/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/HanaDB/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/HanaDB/versions/toggle
+                - schema/spec/admin/databases/HanaDB/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify HanaDB Mode?
+            - disable: isHubManaged
+              label: Can user modify HanaDB Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/HanaDB/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|HanaDB
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|HanaDB
               label: Default Mode
@@ -601,8 +838,15 @@ step:
                 name: availableModes|HanaDB
                 watchPaths:
                 - schema/spec/admin/databases/HanaDB/mode/available
+                - schema/spec/admin/databases/HanaDB/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/HanaDB/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/HanaDB/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/HanaDB/mode/toggle
+                - schema/spec/admin/databases/HanaDB/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -613,10 +857,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Hazelcast Version?
+            - disable: isHubManaged
+              label: Can user modify Hazelcast Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Hazelcast/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Hazelcast
                 watchPaths:
@@ -628,24 +877,40 @@ step:
                 func: clearDefaultVersion|Hazelcast
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Hazelcast
                 watchPaths:
                 - schema/spec/admin/databases/Hazelcast/versions/available
+                - schema/spec/admin/databases/Hazelcast/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Hazelcast/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Hazelcast/versions/toggle
+                - schema/spec/admin/databases/Hazelcast/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Hazelcast Mode?
+            - disable: isHubManaged
+              label: Can user modify Hazelcast Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Hazelcast/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Hazelcast
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Hazelcast
               label: Default Mode
@@ -653,8 +918,15 @@ step:
                 name: availableModes|Hazelcast
                 watchPaths:
                 - schema/spec/admin/databases/Hazelcast/mode/available
+                - schema/spec/admin/databases/Hazelcast/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Hazelcast/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Hazelcast/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Hazelcast/mode/toggle
+                - schema/spec/admin/databases/Hazelcast/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -665,10 +937,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Ignite Version?
+            - disable: isHubManaged
+              label: Can user modify Ignite Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Ignite/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Ignite
                 watchPaths:
@@ -680,24 +957,40 @@ step:
                 func: clearDefaultVersion|Ignite
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Ignite
                 watchPaths:
                 - schema/spec/admin/databases/Ignite/versions/available
+                - schema/spec/admin/databases/Ignite/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Ignite/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Ignite/versions/toggle
+                - schema/spec/admin/databases/Ignite/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Ignite Mode?
+            - disable: isHubManaged
+              label: Can user modify Ignite Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Ignite/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Ignite
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Ignite
               label: Default Mode
@@ -705,8 +998,15 @@ step:
                 name: availableModes|Ignite
                 watchPaths:
                 - schema/spec/admin/databases/Ignite/mode/available
+                - schema/spec/admin/databases/Ignite/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Ignite/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Ignite/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Ignite/mode/toggle
+                - schema/spec/admin/databases/Ignite/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -717,10 +1017,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Kafka Version?
+            - disable: isHubManaged
+              label: Can user modify Kafka Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Kafka/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Kafka
                 watchPaths:
@@ -732,24 +1037,40 @@ step:
                 func: clearDefaultVersion|Kafka
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Kafka
                 watchPaths:
                 - schema/spec/admin/databases/Kafka/versions/available
+                - schema/spec/admin/databases/Kafka/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Kafka/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Kafka/versions/toggle
+                - schema/spec/admin/databases/Kafka/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Kafka Mode?
+            - disable: isHubManaged
+              label: Can user modify Kafka Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Kafka/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Kafka
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Kafka
               label: Default Mode
@@ -757,8 +1078,15 @@ step:
                 name: availableModes|Kafka
                 watchPaths:
                 - schema/spec/admin/databases/Kafka/mode/available
+                - schema/spec/admin/databases/Kafka/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Kafka/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Kafka/mode/toggle
+                - schema/spec/admin/databases/Kafka/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -769,10 +1097,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify MSSQLServer Version?
+            - disable: isHubManaged
+              label: Can user modify MSSQLServer Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/MSSQLServer/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|MSSQLServer
                 watchPaths:
@@ -784,24 +1117,40 @@ step:
                 func: clearDefaultVersion|MSSQLServer
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|MSSQLServer
                 watchPaths:
                 - schema/spec/admin/databases/MSSQLServer/versions/available
+                - schema/spec/admin/databases/MSSQLServer/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/MSSQLServer/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/MSSQLServer/versions/toggle
+                - schema/spec/admin/databases/MSSQLServer/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify MSSQLServer Mode?
+            - disable: isHubManaged
+              label: Can user modify MSSQLServer Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/MSSQLServer/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|MSSQLServer
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|MSSQLServer
               label: Default Mode
@@ -809,8 +1158,15 @@ step:
                 name: availableModes|MSSQLServer
                 watchPaths:
                 - schema/spec/admin/databases/MSSQLServer/mode/available
+                - schema/spec/admin/databases/MSSQLServer/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/MSSQLServer/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/MSSQLServer/mode/toggle
+                - schema/spec/admin/databases/MSSQLServer/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -821,10 +1177,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify MariaDB Version?
+            - disable: isHubManaged
+              label: Can user modify MariaDB Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/MariaDB/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|MariaDB
                 watchPaths:
@@ -836,24 +1197,40 @@ step:
                 func: clearDefaultVersion|MariaDB
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|MariaDB
                 watchPaths:
                 - schema/spec/admin/databases/MariaDB/versions/available
+                - schema/spec/admin/databases/MariaDB/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/MariaDB/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/MariaDB/versions/toggle
+                - schema/spec/admin/databases/MariaDB/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify MariaDB Mode?
+            - disable: isHubManaged
+              label: Can user modify MariaDB Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/MariaDB/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|MariaDB
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|MariaDB
               label: Default Mode
@@ -861,8 +1238,15 @@ step:
                 name: availableModes|MariaDB
                 watchPaths:
                 - schema/spec/admin/databases/MariaDB/mode/available
+                - schema/spec/admin/databases/MariaDB/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/MariaDB/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/MariaDB/mode/toggle
+                - schema/spec/admin/databases/MariaDB/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -873,10 +1257,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Memcached Version?
+            - disable: isHubManaged
+              label: Can user modify Memcached Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Memcached/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Memcached
                 watchPaths:
@@ -888,24 +1277,40 @@ step:
                 func: clearDefaultVersion|Memcached
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Memcached
                 watchPaths:
                 - schema/spec/admin/databases/Memcached/versions/available
+                - schema/spec/admin/databases/Memcached/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Memcached/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Memcached/versions/toggle
+                - schema/spec/admin/databases/Memcached/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Memcached Mode?
+            - disable: isHubManaged
+              label: Can user modify Memcached Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Memcached/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Memcached
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Memcached
               label: Default Mode
@@ -913,8 +1318,15 @@ step:
                 name: availableModes|Memcached
                 watchPaths:
                 - schema/spec/admin/databases/Memcached/mode/available
+                - schema/spec/admin/databases/Memcached/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Memcached/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Memcached/mode/toggle
+                - schema/spec/admin/databases/Memcached/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -925,10 +1337,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Milvus Version?
+            - disable: isHubManaged
+              label: Can user modify Milvus Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Milvus/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Milvus
                 watchPaths:
@@ -940,24 +1357,40 @@ step:
                 func: clearDefaultVersion|Milvus
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Milvus
                 watchPaths:
                 - schema/spec/admin/databases/Milvus/versions/available
+                - schema/spec/admin/databases/Milvus/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Milvus/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Milvus/versions/toggle
+                - schema/spec/admin/databases/Milvus/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Milvus Mode?
+            - disable: isHubManaged
+              label: Can user modify Milvus Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Milvus/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Milvus
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Milvus
               label: Default Mode
@@ -965,8 +1398,15 @@ step:
                 name: availableModes|Milvus
                 watchPaths:
                 - schema/spec/admin/databases/Milvus/mode/available
+                - schema/spec/admin/databases/Milvus/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Milvus/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Milvus/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Milvus/mode/toggle
+                - schema/spec/admin/databases/Milvus/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -977,10 +1417,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify MongoDB Version?
+            - disable: isHubManaged
+              label: Can user modify MongoDB Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/MongoDB/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|MongoDB
                 watchPaths:
@@ -992,24 +1437,40 @@ step:
                 func: clearDefaultVersion|MongoDB
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|MongoDB
                 watchPaths:
                 - schema/spec/admin/databases/MongoDB/versions/available
+                - schema/spec/admin/databases/MongoDB/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/MongoDB/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/MongoDB/versions/toggle
+                - schema/spec/admin/databases/MongoDB/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify MongoDB Mode?
+            - disable: isHubManaged
+              label: Can user modify MongoDB Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/MongoDB/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|MongoDB
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|MongoDB
               label: Default Mode
@@ -1017,8 +1478,15 @@ step:
                 name: availableModes|MongoDB
                 watchPaths:
                 - schema/spec/admin/databases/MongoDB/mode/available
+                - schema/spec/admin/databases/MongoDB/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/MongoDB/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/MongoDB/mode/toggle
+                - schema/spec/admin/databases/MongoDB/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1029,10 +1497,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify MySQL Version?
+            - disable: isHubManaged
+              label: Can user modify MySQL Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/MySQL/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|MySQL
                 watchPaths:
@@ -1044,24 +1517,40 @@ step:
                 func: clearDefaultVersion|MySQL
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|MySQL
                 watchPaths:
                 - schema/spec/admin/databases/MySQL/versions/available
+                - schema/spec/admin/databases/MySQL/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/MySQL/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/MySQL/versions/toggle
+                - schema/spec/admin/databases/MySQL/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify MySQL Mode?
+            - disable: isHubManaged
+              label: Can user modify MySQL Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/MySQL/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|MySQL
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|MySQL
               label: Default Mode
@@ -1069,8 +1558,15 @@ step:
                 name: availableModes|MySQL
                 watchPaths:
                 - schema/spec/admin/databases/MySQL/mode/available
+                - schema/spec/admin/databases/MySQL/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/MySQL/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/MySQL/mode/toggle
+                - schema/spec/admin/databases/MySQL/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1081,10 +1577,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Neo4j Version?
+            - disable: isHubManaged
+              label: Can user modify Neo4j Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Neo4j/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Neo4j
                 watchPaths:
@@ -1096,24 +1597,40 @@ step:
                 func: clearDefaultVersion|Neo4j
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Neo4j
                 watchPaths:
                 - schema/spec/admin/databases/Neo4j/versions/available
+                - schema/spec/admin/databases/Neo4j/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Neo4j/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Neo4j/versions/toggle
+                - schema/spec/admin/databases/Neo4j/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Neo4j Mode?
+            - disable: isHubManaged
+              label: Can user modify Neo4j Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Neo4j/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Neo4j
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Neo4j
               label: Default Mode
@@ -1121,8 +1638,15 @@ step:
                 name: availableModes|Neo4j
                 watchPaths:
                 - schema/spec/admin/databases/Neo4j/mode/available
+                - schema/spec/admin/databases/Neo4j/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Neo4j/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Neo4j/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Neo4j/mode/toggle
+                - schema/spec/admin/databases/Neo4j/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1133,10 +1657,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Oracle Version?
+            - disable: isHubManaged
+              label: Can user modify Oracle Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Oracle/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Oracle
                 watchPaths:
@@ -1148,24 +1677,40 @@ step:
                 func: clearDefaultVersion|Oracle
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Oracle
                 watchPaths:
                 - schema/spec/admin/databases/Oracle/versions/available
+                - schema/spec/admin/databases/Oracle/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Oracle/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Oracle/versions/toggle
+                - schema/spec/admin/databases/Oracle/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Oracle Mode?
+            - disable: isHubManaged
+              label: Can user modify Oracle Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Oracle/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Oracle
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Oracle
               label: Default Mode
@@ -1173,8 +1718,15 @@ step:
                 name: availableModes|Oracle
                 watchPaths:
                 - schema/spec/admin/databases/Oracle/mode/available
+                - schema/spec/admin/databases/Oracle/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Oracle/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Oracle/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Oracle/mode/toggle
+                - schema/spec/admin/databases/Oracle/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1185,10 +1737,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify PerconaXtraDB Version?
+            - disable: isHubManaged
+              label: Can user modify PerconaXtraDB Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/PerconaXtraDB/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|PerconaXtraDB
                 watchPaths:
@@ -1200,24 +1757,40 @@ step:
                 func: clearDefaultVersion|PerconaXtraDB
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|PerconaXtraDB
                 watchPaths:
                 - schema/spec/admin/databases/PerconaXtraDB/versions/available
+                - schema/spec/admin/databases/PerconaXtraDB/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/PerconaXtraDB/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/PerconaXtraDB/versions/toggle
+                - schema/spec/admin/databases/PerconaXtraDB/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify PerconaXtraDB Mode?
+            - disable: isHubManaged
+              label: Can user modify PerconaXtraDB Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/PerconaXtraDB/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|PerconaXtraDB
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|PerconaXtraDB
               label: Default Mode
@@ -1225,8 +1798,15 @@ step:
                 name: availableModes|PerconaXtraDB
                 watchPaths:
                 - schema/spec/admin/databases/PerconaXtraDB/mode/available
+                - schema/spec/admin/databases/PerconaXtraDB/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/PerconaXtraDB/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/PerconaXtraDB/mode/toggle
+                - schema/spec/admin/databases/PerconaXtraDB/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1237,10 +1817,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify PgBouncer Version?
+            - disable: isHubManaged
+              label: Can user modify PgBouncer Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/PgBouncer/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|PgBouncer
                 watchPaths:
@@ -1252,24 +1837,40 @@ step:
                 func: clearDefaultVersion|PgBouncer
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|PgBouncer
                 watchPaths:
                 - schema/spec/admin/databases/PgBouncer/versions/available
+                - schema/spec/admin/databases/PgBouncer/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/PgBouncer/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/PgBouncer/versions/toggle
+                - schema/spec/admin/databases/PgBouncer/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify PgBouncer Mode?
+            - disable: isHubManaged
+              label: Can user modify PgBouncer Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/PgBouncer/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|PgBouncer
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|PgBouncer
               label: Default Mode
@@ -1277,8 +1878,15 @@ step:
                 name: availableModes|PgBouncer
                 watchPaths:
                 - schema/spec/admin/databases/PgBouncer/mode/available
+                - schema/spec/admin/databases/PgBouncer/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/PgBouncer/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/PgBouncer/mode/toggle
+                - schema/spec/admin/databases/PgBouncer/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1289,10 +1897,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Pgpool Version?
+            - disable: isHubManaged
+              label: Can user modify Pgpool Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Pgpool/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Pgpool
                 watchPaths:
@@ -1304,24 +1917,40 @@ step:
                 func: clearDefaultVersion|Pgpool
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Pgpool
                 watchPaths:
                 - schema/spec/admin/databases/Pgpool/versions/available
+                - schema/spec/admin/databases/Pgpool/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Pgpool/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Pgpool/versions/toggle
+                - schema/spec/admin/databases/Pgpool/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Pgpool Mode?
+            - disable: isHubManaged
+              label: Can user modify Pgpool Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Pgpool/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Pgpool
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Pgpool
               label: Default Mode
@@ -1329,8 +1958,15 @@ step:
                 name: availableModes|Pgpool
                 watchPaths:
                 - schema/spec/admin/databases/Pgpool/mode/available
+                - schema/spec/admin/databases/Pgpool/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Pgpool/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Pgpool/mode/toggle
+                - schema/spec/admin/databases/Pgpool/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1341,10 +1977,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Postgres Version?
+            - disable: isHubManaged
+              label: Can user modify Postgres Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Postgres/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Postgres
                 watchPaths:
@@ -1356,24 +1997,40 @@ step:
                 func: clearDefaultVersion|Postgres
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Postgres
                 watchPaths:
                 - schema/spec/admin/databases/Postgres/versions/available
+                - schema/spec/admin/databases/Postgres/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Postgres/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Postgres/versions/toggle
+                - schema/spec/admin/databases/Postgres/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Postgres Mode?
+            - disable: isHubManaged
+              label: Can user modify Postgres Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Postgres/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Postgres
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Postgres
               label: Default Mode
@@ -1381,8 +2038,15 @@ step:
                 name: availableModes|Postgres
                 watchPaths:
                 - schema/spec/admin/databases/Postgres/mode/available
+                - schema/spec/admin/databases/Postgres/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Postgres/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Postgres/mode/toggle
+                - schema/spec/admin/databases/Postgres/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1393,10 +2057,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify ProxySQL Version?
+            - disable: isHubManaged
+              label: Can user modify ProxySQL Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/ProxySQL/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|ProxySQL
                 watchPaths:
@@ -1408,24 +2077,40 @@ step:
                 func: clearDefaultVersion|ProxySQL
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|ProxySQL
                 watchPaths:
                 - schema/spec/admin/databases/ProxySQL/versions/available
+                - schema/spec/admin/databases/ProxySQL/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/ProxySQL/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/ProxySQL/versions/toggle
+                - schema/spec/admin/databases/ProxySQL/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify ProxySQL Mode?
+            - disable: isHubManaged
+              label: Can user modify ProxySQL Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/ProxySQL/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|ProxySQL
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|ProxySQL
               label: Default Mode
@@ -1433,8 +2118,15 @@ step:
                 name: availableModes|ProxySQL
                 watchPaths:
                 - schema/spec/admin/databases/ProxySQL/mode/available
+                - schema/spec/admin/databases/ProxySQL/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/ProxySQL/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/ProxySQL/mode/toggle
+                - schema/spec/admin/databases/ProxySQL/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1445,10 +2137,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Qdrant Version?
+            - disable: isHubManaged
+              label: Can user modify Qdrant Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Qdrant/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Qdrant
                 watchPaths:
@@ -1460,24 +2157,40 @@ step:
                 func: clearDefaultVersion|Qdrant
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Qdrant
                 watchPaths:
                 - schema/spec/admin/databases/Qdrant/versions/available
+                - schema/spec/admin/databases/Qdrant/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Qdrant/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Qdrant/versions/toggle
+                - schema/spec/admin/databases/Qdrant/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Qdrant Mode?
+            - disable: isHubManaged
+              label: Can user modify Qdrant Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Qdrant/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Qdrant
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Qdrant
               label: Default Mode
@@ -1485,8 +2198,15 @@ step:
                 name: availableModes|Qdrant
                 watchPaths:
                 - schema/spec/admin/databases/Qdrant/mode/available
+                - schema/spec/admin/databases/Qdrant/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Qdrant/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Qdrant/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Qdrant/mode/toggle
+                - schema/spec/admin/databases/Qdrant/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1497,10 +2217,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify RabbitMQ Version?
+            - disable: isHubManaged
+              label: Can user modify RabbitMQ Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/RabbitMQ/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|RabbitMQ
                 watchPaths:
@@ -1512,24 +2237,40 @@ step:
                 func: clearDefaultVersion|RabbitMQ
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|RabbitMQ
                 watchPaths:
                 - schema/spec/admin/databases/RabbitMQ/versions/available
+                - schema/spec/admin/databases/RabbitMQ/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/RabbitMQ/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/RabbitMQ/versions/toggle
+                - schema/spec/admin/databases/RabbitMQ/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify RabbitMQ Mode?
+            - disable: isHubManaged
+              label: Can user modify RabbitMQ Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/RabbitMQ/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|RabbitMQ
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|RabbitMQ
               label: Default Mode
@@ -1537,8 +2278,15 @@ step:
                 name: availableModes|RabbitMQ
                 watchPaths:
                 - schema/spec/admin/databases/RabbitMQ/mode/available
+                - schema/spec/admin/databases/RabbitMQ/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/RabbitMQ/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/RabbitMQ/mode/toggle
+                - schema/spec/admin/databases/RabbitMQ/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1549,10 +2297,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Redis Version?
+            - disable: isHubManaged
+              label: Can user modify Redis Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Redis/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Redis
                 watchPaths:
@@ -1564,24 +2317,40 @@ step:
                 func: clearDefaultVersion|Redis
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Redis
                 watchPaths:
                 - schema/spec/admin/databases/Redis/versions/available
+                - schema/spec/admin/databases/Redis/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Redis/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Redis/versions/toggle
+                - schema/spec/admin/databases/Redis/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Redis Mode?
+            - disable: isHubManaged
+              label: Can user modify Redis Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Redis/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Redis
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Redis
               label: Default Mode
@@ -1589,8 +2358,15 @@ step:
                 name: availableModes|Redis
                 watchPaths:
                 - schema/spec/admin/databases/Redis/mode/available
+                - schema/spec/admin/databases/Redis/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Redis/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Redis/mode/toggle
+                - schema/spec/admin/databases/Redis/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1601,10 +2377,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Singlestore Version?
+            - disable: isHubManaged
+              label: Can user modify Singlestore Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Singlestore/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Singlestore
                 watchPaths:
@@ -1616,24 +2397,40 @@ step:
                 func: clearDefaultVersion|Singlestore
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Singlestore
                 watchPaths:
                 - schema/spec/admin/databases/Singlestore/versions/available
+                - schema/spec/admin/databases/Singlestore/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Singlestore/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Singlestore/versions/toggle
+                - schema/spec/admin/databases/Singlestore/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Singlestore Mode?
+            - disable: isHubManaged
+              label: Can user modify Singlestore Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Singlestore/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Singlestore
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Singlestore
               label: Default Mode
@@ -1641,8 +2438,15 @@ step:
                 name: availableModes|Singlestore
                 watchPaths:
                 - schema/spec/admin/databases/Singlestore/mode/available
+                - schema/spec/admin/databases/Singlestore/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Singlestore/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Singlestore/mode/toggle
+                - schema/spec/admin/databases/Singlestore/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1653,10 +2457,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Solr configuration?
+            - disable: isHubManaged
+              label: Can user modify Solr configuration?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Solr/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Solr
                 watchPaths:
@@ -1668,24 +2477,40 @@ step:
                 func: clearDefaultVersion|Solr
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Solr
                 watchPaths:
                 - schema/spec/admin/databases/Solr/versions/available
+                - schema/spec/admin/databases/Solr/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Solr/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Solr/versions/toggle
+                - schema/spec/admin/databases/Solr/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Solr Mode?
+            - disable: isHubManaged
+              label: Can user modify Solr Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Solr/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Solr
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Solr
               label: Default Mode
@@ -1693,8 +2518,15 @@ step:
                 name: availableModes|Solr
                 watchPaths:
                 - schema/spec/admin/databases/Solr/mode/available
+                - schema/spec/admin/databases/Solr/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Solr/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Solr/mode/toggle
+                - schema/spec/admin/databases/Solr/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1705,10 +2537,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify Weaviate Version?
+            - disable: isHubManaged
+              label: Can user modify Weaviate Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Weaviate/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|Weaviate
                 watchPaths:
@@ -1720,24 +2557,40 @@ step:
                 func: clearDefaultVersion|Weaviate
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|Weaviate
                 watchPaths:
                 - schema/spec/admin/databases/Weaviate/versions/available
+                - schema/spec/admin/databases/Weaviate/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Weaviate/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Weaviate/versions/toggle
+                - schema/spec/admin/databases/Weaviate/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify Weaviate Mode?
+            - disable: isHubManaged
+              label: Can user modify Weaviate Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/Weaviate/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|Weaviate
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|Weaviate
               label: Default Mode
@@ -1745,8 +2598,15 @@ step:
                 name: availableModes|Weaviate
                 watchPaths:
                 - schema/spec/admin/databases/Weaviate/mode/available
+                - schema/spec/admin/databases/Weaviate/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/Weaviate/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/Weaviate/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/Weaviate/mode/toggle
+                - schema/spec/admin/databases/Weaviate/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1757,10 +2617,15 @@ step:
           type: block-layout
         - elements:
           - elements:
-            - label: Can user modify ZooKeeper Version?
+            - disable: isHubManaged
+              label: Can user modify ZooKeeper Version?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/toggle
               type: switch
-            - label: Available Versions
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/ZooKeeper/versions
+                type: function
+              label: Available Versions
               loader:
                 name: FetchDbVersions|ZooKeeper
                 watchPaths:
@@ -1772,24 +2637,40 @@ step:
                 func: clearDefaultVersion|ZooKeeper
                 paths:
                 - schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/available
-            - label: Default Version
+            - disable: isHubManaged
+              label: Default Version
               loader:
                 name: availableVersions|ZooKeeper
                 watchPaths:
                 - schema/spec/admin/databases/ZooKeeper/versions/available
+                - schema/spec/admin/databases/ZooKeeper/versions/toggle
+                - temp/allDbVersions
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/ZooKeeper/versions
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/ZooKeeper/versions/toggle
+                - schema/spec/admin/databases/ZooKeeper/versions/available
+                - temp/allDbVersions
             type: block-layout
           - elements:
-            - label: Can user modify ZooKeeper Mode?
+            - disable: isHubManaged
+              label: Can user modify ZooKeeper Mode?
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/toggle
               type: switch
-            - label: Available Modes
+            - disable: isHubManaged
+              if:
+                name: isAdminToggleOn|databases/ZooKeeper/mode
+                type: function
+              label: Available Modes
               loader: fetchModes|ZooKeeper
               multiple: true
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/available
               type: select
-            - init:
+            - disable: isHubManaged
+              init:
                 type: func
                 value: setDefaultMode|ZooKeeper
               label: Default Mode
@@ -1797,8 +2678,15 @@ step:
                 name: availableModes|ZooKeeper
                 watchPaths:
                 - schema/spec/admin/databases/ZooKeeper/mode/available
+                - schema/spec/admin/databases/ZooKeeper/mode/toggle
               schema: schema/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/default
               type: select
+              validation:
+                name: isDefaultRequired|databases/ZooKeeper/mode
+                type: custom
+                watchPaths:
+                - schema/spec/admin/databases/ZooKeeper/mode/toggle
+                - schema/spec/admin/databases/ZooKeeper/mode/available
             type: block-layout
           fixedBlock: true
           if:
@@ -1810,10 +2698,12 @@ step:
         loader: FetchAllDbVersions
         type: block-layout
       - elements:
-        - label: Can user modify AuthCredential?
+        - disable: isHubManaged
+          label: Can user modify AuthCredential?
           schema: schema/properties/spec/properties/admin/properties/authCredential/properties/customize
           type: switch
-        - label: Can user refer existing Auth?
+        - disable: isHubManaged
+          label: Can user refer existing Auth?
           schema: schema/properties/spec/properties/admin/properties/authCredential/properties/referExisting
           type: switch
         fixedBlock: true
@@ -1824,7 +2714,8 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Custom Configuration
+        - disable: isHubManaged
+          label: Custom Configuration
           schema: schema/properties/spec/properties/admin/properties/customConfiguration
           type: switch
         fixedBlock: true
@@ -1835,10 +2726,12 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can user modify Deletion Policy?
+        - disable: isHubManaged
+          label: Can user modify Deletion Policy?
           schema: schema/properties/spec/properties/admin/properties/deletionPolicy/properties/toggle
           type: switch
-        - label: Default Deletion Policy
+        - disable: isHubManaged
+          label: Default Deletion Policy
           options:
           - description: Keep only database Secrets and backed up data.
             text: Delete ( Keep only database Secrets and backed up data )
@@ -1862,10 +2755,12 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can users modify Storage Class?
+        - disable: isHubManaged
+          label: Can users modify Storage Class?
           schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/toggle
           type: switch
-        - label: Available Storage Classes
+        - disable: isHubManaged
+          label: Available Storage Classes
           loader:
             name: getStorageClass
             watchPaths:
@@ -1873,7 +2768,8 @@ step:
           multiple: true
           schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/available
           type: select
-        - init:
+        - disable: isHubManaged
+          init:
             type: func
             value: setStorageClass
           label: Default Storage Class
@@ -1891,10 +2787,12 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can users modify TLS?
+        - disable: isHubManaged
+          label: Can users modify TLS?
           schema: schema/properties/spec/properties/admin/properties/tls/properties/toggle
           type: switch
-        - label: Enable TLS?
+        - disable: isHubManaged
+          label: Enable TLS?
           schema: schema/properties/spec/properties/admin/properties/tls/properties/default
           type: switch
           watcher:
@@ -1909,10 +2807,12 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can user modify Cluster Issuers?
+        - disable: isHubManaged
+          label: Can user modify Cluster Issuers?
           schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/toggle
           type: switch
-        - label: Available Cluster Issuers
+        - disable: isHubManaged
+          label: Available Cluster Issuers
           loader:
             name: getClusterIssuers
             watchPaths:
@@ -1920,7 +2820,8 @@ step:
           multiple: true
           schema: schema/properties/spec/properties/admin/properties/clusterIssuers/properties/available
           type: select
-        - label: Default Cluster Issuer
+        - disable: isHubManaged
+          label: Default Cluster Issuer
           loader:
             name: getOptions|clusterIssuers
             watchPaths:
@@ -1935,10 +2836,12 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can users modify Monitoring?
+        - disable: isHubManaged
+          label: Can users modify Monitoring?
           schema: schema/properties/spec/properties/admin/properties/monitoring/properties/toggle
           type: switch
-        - label: Agent
+        - disable: isHubManaged
+          label: Agent
           options:
           - text: prometheus.io/operator
             value: prometheus.io/operator
@@ -1949,16 +2852,20 @@ step:
           schema: schema/properties/spec/properties/admin/properties/monitoring/properties/agent
           type: radio
         - elements:
-          - label: CPU Requests
+          - disable: isHubManaged
+            label: CPU Requests
             schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/requests/properties/cpu
             type: input
-          - label: CPU Limits
+          - disable: isHubManaged
+            label: CPU Limits
             schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/limits/properties/cpu
             type: input
-          - label: Memory Requests
+          - disable: isHubManaged
+            label: Memory Requests
             schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/requests/properties/memory
             type: input
-          - label: Memory Limits
+          - disable: isHubManaged
+            label: Memory Limits
             schema: schema/properties/spec/properties/admin/properties/monitoring/properties/exporter/properties/resources/properties/limits/properties/memory
             type: input
           label: Resources
@@ -1972,7 +2879,8 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can user modify Alert?
+        - disable: isHubManaged
+          label: Can user modify Alert?
           schema: schema/properties/spec/properties/admin/properties/alert/properties/toggle
           type: switch
         fixedBlock: true
@@ -1983,13 +2891,16 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can user modify Backup?
+        - disable: isHubManaged
+          label: Can user modify Backup?
           schema: schema/properties/spec/properties/admin/properties/backup/properties/enable/properties/toggle
           type: switch
-        - label: Enable Backup
+        - disable: isHubManaged
+          label: Enable Backup
           schema: schema/properties/spec/properties/admin/properties/backup/properties/enable/properties/default
           type: switch
-        - isHorizontal: true
+        - disable: isHubManaged
+          isHorizontal: true
           label: Take Backup by
           options:
           - text: BackupConfiguration
@@ -2006,10 +2917,12 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can user modify Archiver?
+        - disable: isHubManaged
+          label: Can user modify Archiver?
           schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/toggle
           type: switch
-        - label: Default Archiver
+        - disable: isHubManaged
+          label: Default Archiver
           schema: schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
           type: switch
         fixedBlock: true
@@ -2020,10 +2933,12 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can users modify Point In-Time Recovery?
+        - disable: isHubManaged
+          label: Can users modify Point In-Time Recovery?
           schema: schema/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/toggle
           type: switch
-        - label: Enable Point In-Time Recovery
+        - disable: isHubManaged
+          label: Enable Point In-Time Recovery
           schema: schema/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/default
           type: switch
         fixedBlock: true
@@ -2034,7 +2949,8 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Show Preview?
+        - disable: isHubManaged
+          label: Show Preview?
           schema: schema/properties/spec/properties/admin/properties/showPreview
           type: switch
         fixedBlock: true
@@ -2045,22 +2961,28 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Show Backup?
+        - disable: isHubManaged
+          label: Show Backup?
           schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showBackup
           type: switch
-        - label: Show BackupLegacy?
+        - disable: isHubManaged
+          label: Show BackupLegacy?
           schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showBackupLegacy
           type: switch
-        - label: Show Insights?
+        - disable: isHubManaged
+          label: Show Insights?
           schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showInsights
           type: switch
-        - label: Show Operations?
+        - disable: isHubManaged
+          label: Show Operations?
           schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showOperations
           type: switch
-        - label: Show Security?
+        - disable: isHubManaged
+          label: Show Security?
           schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showSecurity
           type: switch
-        - label: Show VaultInfo?
+        - disable: isHubManaged
+          label: Show VaultInfo?
           schema: schema/properties/spec/properties/admin/properties/leftPanel/properties/showVaultInfo
           type: switch
         fixedBlock: true
@@ -2071,19 +2993,23 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Can users modify Exposer via gateway?
+        - disable: isHubManaged
+          label: Can users modify Exposer via gateway?
           schema: schema/properties/spec/properties/admin/properties/expose/properties/enable/properties/toggle
           type: switch
-        - label: Expose via gateway?
+        - disable: isHubManaged
+          label: Expose via gateway?
           schema: schema/properties/spec/properties/admin/properties/expose/properties/enable/properties/default
           type: switch
-        - info:
+        - disable: isHubManaged
+          info:
             label: UI will not be deployed for the database.
             type: info
           label: Disable UI exposure?
           schema: schema/properties/spec/properties/admin/properties/expose/properties/uiExposure/properties/disableUI
           type: switch
-        - info:
+        - disable: isHubManaged
+          info:
             label: UI pod for the database will always be running.
             type: info
           label: Disable Cost Efficiency exposure?
@@ -2097,7 +3023,8 @@ step:
         showLabels: true
         type: block-layout
       - elements:
-        - label: Enable GitOps?
+        - disable: isHubManaged
+          label: Enable GitOps?
           schema: schema/properties/spec/properties/admin/properties/gitOps/properties/enable/properties/default
           type: switch
         fixedBlock: true
@@ -2280,10 +3207,17 @@ step:
     if:
       name: presetNameEqualsTo|kubedb-ui-presets
       type: function
-    loader: FetchDbBundle
+    loader: initPresetPage
     showLabels: false
     type: block-layout
   - elements:
+    - hasIcon: true
+      if:
+        name: isHubManaged
+        type: function
+      label: ""
+      loader: loadHubManagedWarning
+      type: warning
     - elements:
       - if:
           name: returnFalse
@@ -2293,13 +3227,15 @@ step:
         type: input
       - elements:
         - elements:
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Namespace
             loader: getNamespaces
             refresh: true
             schema: schema/properties/spec/properties/backup/properties/kubestash/properties/encryptionSecret/properties/namespace
             type: select
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Name
             loader:
               name: fetchNames|encryptionSecret
@@ -2312,14 +3248,16 @@ step:
           showLabels: true
           type: block-layout
         - elements:
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             hasGroup: isRancherManaged
             label: Namespace
             loader: getNamespaces
             refresh: true
             schema: schema/properties/spec/properties/backup/properties/kubestash/properties/retentionPolicy/properties/namespace
             type: select
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Name
             loader:
               name: fetchNames|retentionPolicy
@@ -2332,14 +3270,16 @@ step:
           showLabels: true
           type: block-layout
         - elements:
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             hasGroup: isRancherManaged
             label: Namespace
             loader: getNamespaces
             refresh: true
             schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef/properties/namespace
             type: select
-          - disableUnselect: true
+          - disable: isHubManaged
+            disableUnselect: true
             label: Name
             loader:
               name: fetchNames|storageRef
@@ -2351,7 +3291,8 @@ step:
           label: Storage Ref
           showLabels: true
           type: block-layout
-        - label: Schedule
+        - disable: isHubManaged
+          label: Schedule
           schema: schema/properties/spec/properties/backup/properties/kubestash/properties/schedule
           type: input
         type: block-layout
@@ -2360,6 +3301,7 @@ step:
     if:
       name: presetNameEqualsTo|stash-presets
       type: function
+    loader: fetchHubOwnership
     type: block-layout
   id: options
   type: single-step-form
