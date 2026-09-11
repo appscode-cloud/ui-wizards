@@ -14,6 +14,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/profileChoseSwitch', false)
   setDiscriminatorValue('/presetPage', 'deployment-type')
   setDiscriminatorValue('/isHubManaged', false)
+  setDiscriminatorValue('/hubUiLink', '')
 
   const machinesMap = {
     'db.t.micro': {
@@ -597,7 +598,26 @@ export const useFunc = (model) => {
     }
   }
 
-  const hubUiLink = 'https://appscode.com'
+  async function getHubConsoleUrl() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const domain = storeGet('/domain') || ''
+
+    let clusterInfo = storeGet('/cluster/clusterDefinition/result') || {}
+    if (!clusterInfo?.hubClusterName) {
+      try {
+        const resp = await axios.get(`/clusters/${owner}/${cluster}`)
+        clusterInfo = resp.data || {}
+      } catch (e) {
+        console.log(e)
+      }
+    }
+
+    const hubOwner = clusterInfo?.hubClusterOwnerName || owner
+    const hubClusterName = clusterInfo?.hubClusterName
+    if (!hubClusterName) return `${domain}/console/${hubOwner}/hubs`
+    return `${domain}/console/${hubOwner}/hubs/${hubClusterName}`
+  }
 
   async function fetchHubOwnership() {
     const owner = storeGet('/route/params/user')
@@ -629,6 +649,7 @@ export const useFunc = (model) => {
           ref?.kind === 'AppliedManifestWork',
       )
       setDiscriminatorValue('/isHubManaged', isHubManaged)
+      if (isHubManaged) setDiscriminatorValue('/hubUiLink', await getHubConsoleUrl())
       return isHubManaged
     } catch (e) {
       console.log(e)
@@ -645,8 +666,13 @@ export const useFunc = (model) => {
     return !!getValue(discriminator, '/isHubManaged')
   }
 
-  function loadHubManagedWarning() {
-    return `This preset is maintained by the hub cluster, so it can not be edited from here. Use the <a href="${hubUiLink}" target="_blank" rel="noopener noreferrer">hub console</a> to change it.`
+  async function loadHubManagedWarning() {
+    const hubUiLink = getValue(discriminator, '/hubUiLink') || (await getHubConsoleUrl())
+    return {
+      label:
+        'This preset is maintained by the hub cluster, so it can not be edited from here. Use the {link} to change it.',
+      link: { text: 'hub console', url: hubUiLink },
+    }
   }
 
   function getPlacements() {
@@ -1114,6 +1140,7 @@ export const useFunc = (model) => {
     isKubedbUiPreset,
     FetchDbBundle,
     initPresetPage,
+    getHubConsoleUrl,
     fetchHubOwnership,
     isHubManaged,
     loadHubManagedWarning,
