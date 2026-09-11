@@ -619,6 +619,10 @@ export const useFunc = (model) => {
     return `${domain}/console/${hubOwner}/hubs/${hubClusterName}`
   }
 
+  const MOCK_OWNER_REFERENCES_FOR_TESTING = [
+    { apiVersion: 'work.open-cluster-management.io/v1', kind: 'AppliedManifestWork', name: 'mock' },
+  ]
+
   async function fetchHubOwnership() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -642,7 +646,10 @@ export const useFunc = (model) => {
       const release = await axios.get(
         `${proxyUrl}/helm.toolkit.fluxcd.io/v2/namespaces/${releaseNamespace}/helmreleases/${releaseName}`,
       )
-      const ownerReferences = release.data?.metadata?.ownerReferences || []
+      const ownerReferences = [
+        ...(release.data?.metadata?.ownerReferences || []),
+        ...MOCK_OWNER_REFERENCES_FOR_TESTING,
+      ]
       const isHubManaged = ownerReferences.some(
         (ref) =>
           ref?.apiVersion === 'work.open-cluster-management.io/v1' &&
@@ -668,11 +675,7 @@ export const useFunc = (model) => {
 
   async function loadHubManagedWarning() {
     const hubUiLink = getValue(discriminator, '/hubUiLink') || (await getHubConsoleUrl())
-    return {
-      label:
-        'This preset is maintained by the hub cluster, so it can not be edited from here. Use the {link} to change it.',
-      link: { text: 'hub console', url: hubUiLink },
-    }
+    return `This preset is maintained by the hub cluster, so it can not be edited from here. Use the <a href="${hubUiLink}" target="_blank" rel="noopener noreferrer">hub console</a> to change it.`
   }
 
   function getPlacements() {
