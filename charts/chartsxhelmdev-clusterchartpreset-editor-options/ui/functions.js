@@ -620,10 +620,6 @@ export const useFunc = (model) => {
     return `${domain}/console/${hubOwner}/hubs/${hubClusterName}`
   }
 
-  const MOCK_OWNER_REFERENCES_FOR_TESTING = [
-    { apiVersion: 'work.open-cluster-management.io/v1', kind: 'AppliedManifestWork', name: 'mock' },
-  ]
-
   async function fetchHubOwnership() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -647,10 +643,7 @@ export const useFunc = (model) => {
       const release = await axios.get(
         `${proxyUrl}/helm.toolkit.fluxcd.io/v2/namespaces/${releaseNamespace}/helmreleases/${releaseName}`,
       )
-      const ownerReferences = [
-        ...(release.data?.metadata?.ownerReferences || []),
-        ...MOCK_OWNER_REFERENCES_FOR_TESTING,
-      ]
+      const ownerReferences = release.data?.metadata?.ownerReferences || []
       const isHubManaged = ownerReferences.some(
         (ref) =>
           ref?.apiVersion === 'work.open-cluster-management.io/v1' &&
