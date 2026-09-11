@@ -66,6 +66,9 @@ type AdminOptions struct {
 	ClusterIssuers ClusterScopedProfile   `json:"clusterIssuers"`
 	Expose         ExposeOption           `json:"expose"`
 
+	// +optional
+	ServiceTemplates []ServiceTemplateOption `json:"serviceTemplates,omitempty"`
+
 	Monitoring Monitoring `json:"monitoring"`
 	Alert      Alert      `json:"alert"`
 
@@ -164,6 +167,16 @@ type UIExposureSpec struct {
 	DisableCostEfficiency bool `json:"disableCostEfficiency"`
 }
 
+// Alias is free-form here because the ClusterChartPreset is shared across all
+// database kinds, each of which enumerates its own valid service aliases.
+type ServiceTemplateOption struct {
+	Alias string `json:"alias"`
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// +optional
+	SvcType core.ServiceType `json:"svcType,omitempty"`
+}
+
 type MachineProfiles struct {
 	Machines  []Machine `json:"machines"`
 	Available []string  `json:"available"`
@@ -233,7 +246,34 @@ type MonitoringOperator struct {
 type Monitoring struct {
 	Agent    mona.AgentType     `json:"agent"`
 	Exporter PrometheusExporter `json:"exporter"`
-	Toggle   bool               `json:"toggle"`
+	// +optional
+	ServiceMonitor *ServiceMonitorOption `json:"serviceMonitor,omitempty"`
+	Toggle         bool                  `json:"toggle"`
+}
+
+type ServiceMonitorOption struct {
+	// +optional
+	Interval string `json:"interval,omitempty"`
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
+	// +optional
+	Endpoints []ServiceMonitorEndpoint `json:"endpoints,omitempty"`
+}
+
+type ServiceMonitorEndpoint struct {
+	// +optional
+	Port string `json:"port,omitempty"`
+	// +optional
+	Relabelings []ServiceMonitorRelabelConfig `json:"relabelings,omitempty"`
+}
+
+type ServiceMonitorRelabelConfig struct {
+	// +optional
+	Action string `json:"action,omitempty"`
+	// +optional
+	SourceLabels []string `json:"sourceLabels,omitempty"`
+	// +optional
+	TargetLabel string `json:"targetLabel,omitempty"`
 }
 
 type PrometheusExporter struct {

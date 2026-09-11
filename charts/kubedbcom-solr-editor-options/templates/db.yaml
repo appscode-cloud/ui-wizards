@@ -167,6 +167,22 @@ spec:
       name: {{ .Values.spec.admin.clusterIssuers.default }}
   enableSSL: true
 {{- end }}
+{{- $svcTpls := .Values.spec.serviceTemplates | default .Values.spec.admin.serviceTemplates }}
+{{- if $svcTpls }}
+  serviceTemplates:
+  {{- range $svcTpls }}
+  - alias: {{ .alias }}
+    {{- if .annotations }}
+    metadata:
+      annotations:
+        {{- toYaml .annotations | nindent 8 }}
+    {{- end }}
+    {{- if .svcType }}
+    spec:
+      type: {{ .svcType }}
+    {{- end }}
+  {{- end }}
+{{- end }}
 {{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.admin.monitoring.agent }}
@@ -178,7 +194,18 @@ spec:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}
       serviceMonitor:
-        interval: 30s
+      {{- $sm := .Values.spec.admin.monitoring.serviceMonitor | default dict }}
+        interval: {{ $sm.interval | default "30s" }}
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml (merge (deepCopy (.Values.spec.monitoring.serviceMonitor.labels | default dict)) ($sm.labels | default dict)) | nindent 10 }}
+      {{- if $sm.endpoints }}
+        endpoints:
+        {{- range $sm.endpoints }}
+        - port: {{ .port | default "metrics" }}
+          {{- if .relabelings }}
+          relabelings:
+            {{- toYaml .relabelings | nindent 10 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
 {{- end }}

@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -61,13 +62,26 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	// +optional
 	IP string `json:"ip"`
 	// +optional
-	ArchiverName string             `json:"archiverName"`
-	Init         InitDatabase       `json:"init"`
-	Admin        AdminOptions       `json:"admin"`
-	Backup       BackupToolSpec     `json:"backup"`
-	Monitoring   MonitoringOperator `json:"monitoring"`
+	ArchiverName string       `json:"archiverName"`
+	Init         InitDatabase `json:"init"`
+	// +optional
+	ServiceTemplates []MongodbServiceTemplate `json:"serviceTemplates,omitempty"`
+	Admin            AdminOptions             `json:"admin"`
+	Backup           BackupToolSpec           `json:"backup"`
+	Monitoring       MonitoringOperator       `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=primary;standby;stats
+type MongodbServiceAlias string
+
+type MongodbServiceTemplate struct {
+	Alias MongodbServiceAlias `json:"alias"`
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// +optional
+	SvcType core.ServiceType `json:"svcType,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
