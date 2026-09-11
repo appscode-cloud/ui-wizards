@@ -302,19 +302,6 @@ step:
       type: input
     showLabels: true
     type: horizontal-layout
-  - elements:
-    - elements:
-      - label: Name
-        loader: getAppBindings
-        schema: schema/properties/spec/properties/zookeeperRef/properties/name
-        type: select
-      - label: Namespace
-        schema: schema/properties/spec/properties/zookeeperRef/properties/namespace
-        type: input
-      type: horizontal-layout
-    label: ZookeeperRef
-    showLabels: true
-    type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
@@ -362,6 +349,23 @@ step:
         func: setStorageClass
         paths:
         - schema/properties/spec/properties/deletionPolicy
+    - label: Zookeeper External
+      schema: schema/properties/spec/properties/zookeeperRef/properties/externallyManaged
+      type: switch
+    - if:
+        name: isExternallyManaged|zookeeperRef
+        type: function
+      label: Zookeeper
+      loader: getAppBindings|zookeeper
+      refresh: true
+      schema: temp/zookeeperRef
+      type: select
+      validation:
+        type: required
+      watcher:
+        func: onRefChange|zookeeperRef
+        paths:
+        - temp/zookeeperRef
     - if:
         name: getDefaultValue|spec/admin/authCredential/customize
         type: function
@@ -454,7 +458,6 @@ step:
       loader: getNodeTopology
       schema: schema/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
-    hideBlock: true
     label: Advanced Configuration
     showLabels: true
     type: block-layout

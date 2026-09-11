@@ -69,9 +69,12 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.Solr.versions.default | quote }}
+{{- if .Values.spec.zookeeperRef.name }}
   zookeeperRef:
     name: {{ .Values.spec.zookeeperRef.name }}
     namespace: {{ .Values.spec.zookeeperRef.namespace }}
+    externallyManaged: {{ .Values.spec.zookeeperRef.externallyManaged }}
+{{- end }}
 {{- if eq .Values.spec.mode "Topology" }}
   topology:
     overseer:
