@@ -15,6 +15,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/presetPage', 'deployment-type')
   setDiscriminatorValue('/isHubManaged', false)
   setDiscriminatorValue('/hubUiLink', '')
+  setDiscriminatorValue('/preview/disabled', false)
 
   const machinesMap = {
     'db.t.micro': {
@@ -656,6 +657,7 @@ export const useFunc = (model) => {
           ref?.kind === 'AppliedManifestWork',
       )
       setDiscriminatorValue('/isHubManaged', isHubManaged)
+      setDiscriminatorValue('/preview/disabled', isHubManaged)
       if (isHubManaged) setDiscriminatorValue('/hubUiLink', await getHubConsoleUrl())
       return isHubManaged
     } catch (e) {
