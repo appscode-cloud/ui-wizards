@@ -333,7 +333,6 @@ export const useFunc = (model) => {
   setDiscriminatorValue('configDatabase', false)
   setDiscriminatorValue('monitoring', false)
   setDiscriminatorValue('zookeeperRef', {})
-  setDiscriminatorValue('zookeeperExternal', false)
 
   function clearConfiguration() {
     const configOn = getValue(discriminator, '/configDatabase')
@@ -1027,10 +1026,10 @@ export const useFunc = (model) => {
     })
   }
 
-  function isZookeeperExternal() {
-    const isExternal = getValue(discriminator, '/zookeeperExternal') || false
-    if (!isExternal) clearRefs('zookeeperRef')
-    return isExternal
+  function isExternallyManaged(type) {
+    const isManaged = getValue(model, `/spec/${type}/externallyManaged`) || false
+    if (!isManaged) clearRefs(type)
+    return isManaged
   }
 
   function clearRefs(type) {
@@ -1063,7 +1062,7 @@ export const useFunc = (model) => {
     onAuthChange,
     onReferSecretChange,
     onRefChange,
-    isZookeeperExternal,
+    isExternallyManaged,
     clearRefs,
     returnFalse,
     setLimits,
