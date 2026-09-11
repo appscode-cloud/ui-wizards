@@ -1108,12 +1108,22 @@ export const useFunc = (model) => {
   /**
    * Gets the current trigger state for autoscaling
    * @param {string} path - The model path to the trigger
-   * @returns {string} 'On' or 'Off'
+   * @returns {boolean} True if the trigger is 'On'
    */
   function setTrigger(path) {
-    let value = getValue(model, `/resources/${path}`)
-    if (value) return value
-    return 'On'
+    const value = getValue(model, `/resources/${path}`)
+    return value === 'On'
+  }
+
+  function onTriggerChange(type) {
+    const trigger = getValue(discriminator, `/${type}/trigger`)
+    const commitPath = `/resources/autoscalingKubedbComDruidAutoscaler/spec/${type}/trigger`
+
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: trigger ? 'On' : 'Off',
+      force: true,
+    })
   }
 
   /**
@@ -1650,6 +1660,7 @@ export const useFunc = (model) => {
     // Autoscaling Functions - Compute
     getDbDetails,
     setTrigger,
+    onTriggerChange,
     fetchTopologyMachines,
     getMachines,
     setAllowedMachine,
