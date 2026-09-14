@@ -3,6 +3,33 @@ step:
   - customClass: pl-0 pr-0
     elements:
     - elements:
+      - elements:
+        - label: Metrics
+          options:
+          - text: Thanos
+            value: Thanos
+          - text: VictoriaMetrics
+            value: VictoriaMetrics
+          schema: schema/properties/spec/properties/metrics/properties/backend
+          type: select
+        - label: Logs
+          options:
+          - text: ClickHouse
+            value: ClickHouse
+          - text: VictoriaLogs
+            value: VictoriaLogs
+          schema: schema/properties/spec/properties/logs/properties/backend
+          type: select
+        type: horizontal-layout
+      - elements: []
+        type: horizontal-layout
+      if:
+        name: isActivePage|backends
+        type: function
+      label: Backends
+      showLabels: true
+      type: block-layout
+    - elements:
       - customClass: mb-16
         elements:
         - label: Storage Size
@@ -37,7 +64,7 @@ step:
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/compact/properties/retentionConfig
         type: array-object-form
       if:
-        name: isActivePage|metrics-thanos-compact
+        name: isBackendPage|metrics-thanos-compact,metrics,Thanos
         type: function
       label: Compact
       showLabels: true
@@ -71,7 +98,7 @@ step:
         showLabels: true
         type: block-layout
       if:
-        name: isActivePage|metrics-thanos-store
+        name: isBackendPage|metrics-thanos-store,metrics,Thanos
         type: function
       label: Store
       showLabels: true
@@ -86,7 +113,7 @@ step:
           type: input
         type: horizontal-layout
       if:
-        name: isActivePage|metrics-thanos-query
+        name: isBackendPage|metrics-thanos-query,metrics,Thanos
         type: function
       label: Query
       showLabels: true
@@ -165,7 +192,7 @@ step:
           - disable: true
             init:
               type: static
-              value: "true"
+              value: 'true'
             label: Value
             schema: temp/properties/externalLabelsFixedValue
             type: input
@@ -178,7 +205,7 @@ step:
         showLabels: true
         type: block-layout
       if:
-        name: isActivePage|metrics-thanos-receive
+        name: isBackendPage|metrics-thanos-receive,metrics,Thanos
         type: function
       label: Receive
       showLabels: true
@@ -199,7 +226,7 @@ step:
         schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/alertmanagerURL
         type: input
       if:
-        name: isActivePage|metrics-thanos-ruler
+        name: isBackendPage|metrics-thanos-ruler,metrics,Thanos
         type: function
       label: Ruler
       showLabels: true
@@ -298,7 +325,7 @@ step:
         showLabels: true
         type: block-layout
       if:
-        name: isActivePage|metrics-thanos-additional-config
+        name: isBackendPage|metrics-thanos-additional-config,metrics,Thanos
         type: function
       label: Additional Config
       showLabels: true
@@ -312,8 +339,7 @@ step:
           - description: Single node ClickHouse without high availability
             text: Standalone
             value: Standalone
-          - description: ClickHouse Topology cluster for high performance and high
-              availability.
+          - description: ClickHouse Topology cluster for high performance and high availability.
             text: Cluster Topology
             value: ClusterTopology
           schema: schema/properties/spec/properties/logs/properties/deploymentMode
@@ -476,7 +502,7 @@ step:
         showLabels: true
         type: block-layout
       if:
-        name: isActivePage|logs-clickhouse
+        name: isBackendPage|logs-clickhouse,logs,ClickHouse
         type: function
       type: block-layout
     - elements:
@@ -523,13 +549,162 @@ step:
             - schema/properties/spec/properties/logs/properties/s3/properties/secretKey
         type: horizontal-layout
       if:
-        name: isActivePage|s3
+        name: isBackendPage|s3,metrics,Thanos
         type: function
       label: S3 Object Storage
       showLabels: true
       type: block-layout
+    - elements:
+      - elements:
+        - label: Deployment Mode
+          options:
+          - text: Standalone
+            value: Standalone
+          - text: Cluster
+            value: Cluster
+          schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/deploymentMode
+          type: select
+        - label: Version
+          schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/version
+          type: input
+        - label: Default Retention
+          schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/defaultRetention
+          type: input
+        type: horizontal-layout
+      - elements:
+        - label: Licence Secret
+          schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/license/properties/secretName
+          type: input
+        - label: Licence Secret Key
+          schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/license/properties/secretKey
+          type: input
+        type: horizontal-layout
+      - elements:
+        - label: Retention Strategy
+          options:
+          - text: PerTierInstance
+            value: PerTierInstance
+          - text: RetentionFilters
+            value: RetentionFilters
+          schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/retentionStrategy
+          type: select
+        if:
+          name: canUseRetentionFilters
+          type: function
+        type: horizontal-layout
+      - elements:
+        - label: Storage Size
+          schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/storage/properties/size
+          type: input
+          validation:
+            name: validateStorageSize
+            type: custom
+        - label: Storage Class
+          schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/storage/properties/storageClassName
+          type: input
+        type: horizontal-layout
+      - elements:
+        - elements:
+          - label: Replication Factor
+            schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/cluster/properties/replicationFactor
+            type: input
+          - label: Insert Replicas
+            schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/cluster/properties/insertReplicas
+            type: input
+          - label: Select Replicas
+            schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/cluster/properties/selectReplicas
+            type: input
+          - label: Storage Replicas
+            schema: schema/properties/spec/properties/metrics/properties/victoriaMetrics/properties/cluster/properties/storageReplicas
+            type: input
+          type: horizontal-layout
+        if:
+          name: isVictoriaCluster|metrics,victoriaMetrics
+          type: function
+        label: Cluster
+        showLabels: true
+        type: block-layout
+      if:
+        name: isBackendPage|metrics-victoriametrics,metrics,VictoriaMetrics
+        type: function
+      label: VictoriaMetrics
+      showLabels: true
+      type: block-layout
+    - elements:
+      - elements:
+        - label: Deployment Mode
+          options:
+          - text: Standalone
+            value: Standalone
+          - text: Cluster
+            value: Cluster
+          schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/deploymentMode
+          type: select
+        - label: Version
+          schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/version
+          type: input
+        - label: Default Retention
+          schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/defaultRetention
+          type: input
+        type: horizontal-layout
+      - elements:
+        - label: Future Retention
+          schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/futureRetention
+          type: input
+        - label: Max Disk Usage %
+          schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/maxDiskUsagePercent
+          type: input
+        type: horizontal-layout
+      - elements:
+        - label: Storage Size
+          schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/storage/properties/size
+          type: input
+          validation:
+            name: validateStorageSize
+            type: custom
+        - label: Storage Class
+          schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/storage/properties/storageClassName
+          type: input
+        type: horizontal-layout
+      - elements:
+        - elements:
+          - label: Insert Replicas
+            schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/cluster/properties/insertReplicas
+            type: input
+          - label: Select Replicas
+            schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/cluster/properties/selectReplicas
+            type: input
+          - label: Storage Replicas
+            schema: schema/properties/spec/properties/logs/properties/victoriaLogs/properties/cluster/properties/storageReplicas
+            type: input
+          type: horizontal-layout
+        if:
+          name: isVictoriaCluster|logs,victoriaLogs
+          type: function
+        label: Cluster
+        showLabels: true
+        type: block-layout
+      if:
+        name: isBackendPage|logs-victorialogs,logs,VictoriaLogs
+        type: function
+      label: VictoriaLogs
+      showLabels: true
+      type: block-layout
+    - elements:
+      - customClass: mt-24
+        label: This backend is not selected for its pillar, so nothing here applies. Pick it on the Backends
+          page to configure it.
+        type: info
+      if:
+        name: isUnselectedBackendPage
+        type: function
+      showLabels: false
+      type: block-layout
     label: Telemetry Stack
     options:
+    - icon: layers-01
+      text: Backends
+      value: backends
     - options:
       - icon: chart-column
         options:
@@ -555,11 +730,17 @@ step:
           text: Additional Config
           value: metrics-thanos-additional-config
         text: Thanos
+      - icon: chart-line-data-01
+        text: VictoriaMetrics
+        value: metrics-victoriametrics
       text: Metrics
     - options:
       - icon: database
         text: ClickHouse
         value: logs-clickhouse
+      - icon: file-02
+        text: VictoriaLogs
+        value: logs-victorialogs
       text: Logs
     schema: temp/properties/telemetryPage
     subtitle: Configuration

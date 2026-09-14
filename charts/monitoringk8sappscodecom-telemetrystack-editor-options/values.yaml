@@ -1,7 +1,3 @@
-# Default values for monitoringk8sappscodecom-telemetrystack-editor-options.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 metadata:
   resource:
     group: monitoring.k8s.appscode.com
@@ -10,20 +6,34 @@ metadata:
     scope: Cluster
     version: v1alpha1
   release:
-    # Release name
     name: telemetry-stack
-    # Release namespace
     namespace: monitoring
-
 spec:
   metrics:
+    backend: Thanos
+    victoriaMetrics:
+      deploymentMode: Standalone
+      version: ''
+      defaultRetention: 30d
+      retentionStrategy: PerTierInstance
+      license:
+        secretName: ''
+        secretKey: ''
+      storage:
+        size: 10Gi
+        storageClassName: ''
+      cluster:
+        replicationFactor: 2
+        insertReplicas: 2
+        selectReplicas: 2
+        storageReplicas: 2
     thanos:
       compact:
         storageSize: 2Gi
         retentionConfig:
-        - raw: ""
-          oneHour: ""
-          fiveMinutes: ""
+        - raw: ''
+          oneHour: ''
+          fiveMinutes: ''
       store:
         storageSize: 2Gi
         ignoreDeletionMarksDelay: 24h
@@ -49,81 +59,93 @@ spec:
           replicas: 1
           replicationFactor: 1
           externalLabels:
-            receive: "true"
+            receive: 'true'
       ruler:
         replicas: 1
         storageSize: 2Gi
-        alertmanagerURL: ""
+        alertmanagerURL: ''
         additionalConfig:
           additionalArgs: []
           additionalVolumes: []
           additionalVolumeMounts: []
       s3:
-        bucket: ""
-        endpoint: ""
-        region: ""
-        prefix: ""
-        accessKey: ""
-        secretKey: ""
-
+        bucket: ''
+        endpoint: ''
+        region: ''
+        prefix: ''
+        accessKey: ''
+        secretKey: ''
   logs:
+    backend: ClickHouse
+    victoriaLogs:
+      deploymentMode: Standalone
+      version: ''
+      defaultRetention: 30d
+      futureRetention: 2d
+      maxDiskUsagePercent: 80
+      storage:
+        size: 10Gi
+        storageClassName: ''
+      cluster:
+        insertReplicas: 2
+        selectReplicas: 2
+        storageReplicas: 2
     enabled: true
     deploymentMode: Standalone
     version: 24.4.1
     deletionPolicy: Delete
     storage:
-      storageClassName: ""
+      storageClassName: ''
       size: 2Gi
     clientCaCertificates: []
     clusterTopology:
       cluster:
-        name: ""
+        name: ''
         replicas: 3
         shards: 2
         persistence:
           size: 2Gi
-          storageClassName: ""
+          storageClassName: ''
       clickHouseKeeper:
         externallyManaged: false
         replicas: 3
         persistence:
           size: 2Gi
-          storageClassName: ""
+          storageClassName: ''
     s3:
-      bucket: ""
-      endpoint: ""
-      region: ""
-      prefix: ""
-      accessKey: ""
-      secretKey: ""
-
+      bucket: ''
+      endpoint: ''
+      region: ''
+      prefix: ''
+      accessKey: ''
+      secretKey: ''
   traces:
     enabled: false
     deploymentMode: Standalone
     version: 24.4.1
     deletionPolicy: Delete
     storage:
-      storageClassName: ""
+      storageClassName: ''
       size: 2Gi
     clientCaCertificates: []
     clusterTopology:
       cluster:
-        name: ""
+        name: ''
         replicas: 3
         shards: 2
         persistence:
           size: 2Gi
-          storageClassName: ""
+          storageClassName: ''
       clickHouseKeeper:
         externallyManaged: false
         replicas: 3
         persistence:
           size: 2Gi
-          storageClassName: ""
+          storageClassName: ''
     s3:
-      bucket: ""
-      endpoint: ""
-      region: ""
-      prefix: ""
-      accessKey: ""
-      secretKey: ""
+      bucket: ''
+      endpoint: ''
+      region: ''
+      prefix: ''
+      accessKey: ''
+      secretKey: ''

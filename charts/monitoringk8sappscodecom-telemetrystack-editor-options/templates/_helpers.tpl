@@ -37,7 +37,7 @@ app.kubernetes.io/instance: {{ include "monitoringk8sappscodecom-telemetrystack-
 {{- end }}
 
 {{/*
-Render a ClickHouse pillar (logs/traces) as the CRD's expected `clickhouse` object.
+Render a ClickHouse pillar (logs or traces) as the CRD's `clickhouse` object.
 Call with a dict: {"root": $, "pillar": .Values.spec.logs}
 */}}
 {{- define "monitoringk8sappscodecom-telemetrystack-editor-options.clickhouse" -}}
@@ -88,5 +88,52 @@ clusterTopology:
         requests:
           storage: {{ $pillar.clusterTopology.clickHouseKeeper.persistence.size }}
 {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Storage block for a Victoria component, from the flat size and class the form
+collects. Emitted only when one of them is set, so an unconfigured pillar does
+not pin an empty storage class.
+*/}}
+{{- define "monitoringk8sappscodecom-telemetrystack-editor-options.victoriaStorage" -}}
+{{- if or .size .storageClassName }}
+storage:
+  {{- if .storageClassName }}
+  storageClassName: {{ .storageClassName }}
+  {{- end }}
+  {{- if .size }}
+  resources:
+    requests:
+      storage: {{ .size }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Single or cluster topology for VictoriaLogs, which has three components and,
+unlike VictoriaMetrics, no replication factor.
+*/}}
+{{- define "monitoringk8sappscodecom-telemetrystack-editor-options.victoriaTopology" -}}
+{{- $v := .pillar -}}
+deploymentMode: {{ $v.deploymentMode }}
+{{- if $v.version }}
+version: {{ $v.version | quote }}
+{{- end }}
+{{- if $v.defaultRetention }}
+defaultRetention: {{ $v.defaultRetention | quote }}
+{{- end }}
+{{- if eq $v.deploymentMode "Cluster" }}
+cluster:
+  insert:
+    replicas: {{ $v.cluster.insertReplicas }}
+  select:
+    replicas: {{ $v.cluster.selectReplicas }}
+  storage:
+    replicas: {{ $v.cluster.storageReplicas }}
+    {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.victoriaStorage" $v.storage | nindent 4 }}
+{{- else }}
+single:
+  {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.victoriaStorage" $v.storage | nindent 2 }}
 {{- end }}
 {{- end }}
