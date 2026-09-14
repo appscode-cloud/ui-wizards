@@ -19,6 +19,65 @@ export const useFunc = (model) => {
     return getValue(discriminator, '/telemetryPage') === page
   }
 
+  // Renders a pillar's options only for the backend selected for it.
+  function isBackend(pillar, backend) {
+    return getValue(model, `/spec/${pillar}/backend`) === backend
+  }
+
+
+  // Both products in a pillar share one sidebar page.
+  function isBackendPage(arg) {
+    const [page, pillar, backend] = arg.split(',')
+    return isActivePage(page) && isBackend(pillar, backend)
+  }
+
+  // Which backend each page belongs to. The sidebar cannot be gated, so a page
+  // for an unselected backend is reachable and would otherwise render blank.
+  const PAGE_BACKEND = {
+    's3': ['metrics', 'Thanos'],
+    'metrics-thanos-compact': ['metrics', 'Thanos'],
+    'metrics-thanos-store': ['metrics', 'Thanos'],
+    'metrics-thanos-query': ['metrics', 'Thanos'],
+    'metrics-thanos-receive': ['metrics', 'Thanos'],
+    'metrics-thanos-ruler': ['metrics', 'Thanos'],
+    'metrics-thanos-additional-config': ['metrics', 'Thanos'],
+    'metrics-victoriametrics': ['metrics', 'VictoriaMetrics'],
+    'logs-clickhouse': ['logs', 'ClickHouse'],
+    'logs-victorialogs': ['logs', 'VictoriaLogs'],
+  }
+
+  // True on a page for an unselected backend, which shows a note instead of rendering empty.
+  function isUnselectedBackendPage() {
+    const page = getValue(discriminator, '/telemetryPage')
+    const entry = PAGE_BACKEND[page]
+    if (!entry) return false
+    return !isBackend(entry[0], entry[1])
+  }
+
+  function unselectedBackendName() {
+    const entry = PAGE_BACKEND[getValue(discriminator, '/telemetryPage')]
+    return entry ? entry[1] : ''
+  }
+
+  function isVictoriaCluster(arg) {
+    const [pillar, field] = arg.split(',')
+    return getValue(model, `/spec/${pillar}/${field}/deploymentMode`) === 'Cluster'
+  }
+
+  // Only VictoriaMetrics has an enterprise build to license.
+  function isLicensedBackend() {
+    return isBackend('metrics', 'VictoriaMetrics')
+  }
+
+  // Retention filters are enterprise only, so the choice is hidden without a
+  // licence rather than offered and refused on apply.
+  function canUseRetentionFilters() {
+    return (
+      isBackend('metrics', 'VictoriaMetrics') &&
+      !!getValue(model, '/spec/metrics/victoriaMetrics/license/secretName')
+    )
+  }
+
   function isClusterTopology(pillar) {
     return getValue(model, `/spec/${pillar}/deploymentMode`) === 'ClusterTopology'
   }
@@ -171,6 +230,17 @@ export const useFunc = (model) => {
     return false
   }
 
+  // The licence is optional, but a Secret without a key, or a key without a Secret, is not.
+  const licensePath = '/spec/metrics/victoriaMetrics/license'
+
+  function validateLicenseSecretName(value) {
+    return !value && getValue(model, `${licensePath}/secretKey`) ? 'Secret name is required' : false
+  }
+
+  function validateLicenseSecretKey(value) {
+    return !value && getValue(model, `${licensePath}/secretName`) ? 'Key is required' : false
+  }
+
   function getStorageClasses() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
@@ -197,13 +267,22 @@ export const useFunc = (model) => {
     getStorageClasses,
     validateClientCaCertificates,
     validateFiveMinutesRetention,
+    validateLicenseSecretKey,
+    validateLicenseSecretName,
     validateOneHourRetention,
     validateRawRetention,
     validateReplicationFactor,
     validateRetention,
     validateStorageSize,
     isActivePage,
+    isBackendPage,
+    isUnselectedBackendPage,
+    unselectedBackendName,
+    isBackend,
     isClusterTopology,
+    isLicensedBackend,
+    isVictoriaCluster,
+    canUseRetentionFilters,
     isVolumeType,
     s3Field,
     syncS3,
