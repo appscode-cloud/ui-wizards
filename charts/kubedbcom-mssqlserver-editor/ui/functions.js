@@ -194,7 +194,7 @@ export const useFunc = (model) => {
                     drop: ['ALL'],
                   },
                   runAsGroup: 0,
-                  runAsNonRoot: true,
+                  runAsNonRoot: false,
                   runAsUser: 0,
                   seccompProfile: {
                     type: 'RuntimeDefault',
@@ -213,7 +213,7 @@ export const useFunc = (model) => {
                   drop: ['ALL'],
                 },
                 runAsGroup: 0,
-                runAsNonRoot: true,
+                runAsNonRoot: false,
                 runAsUser: 0,
                 seccompProfile: {
                   type: 'RuntimeDefault',
@@ -250,7 +250,7 @@ export const useFunc = (model) => {
                       drop: ['ALL'],
                     },
                     runAsGroup: 0,
-                    runAsNonRoot: true,
+                    runAsNonRoot: false,
                     runAsUser: 0,
                     seccompProfile: {
                       type: 'RuntimeDefault',
