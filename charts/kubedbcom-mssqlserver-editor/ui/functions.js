@@ -195,7 +195,7 @@ export const useFunc = (model) => {
                   },
                   runAsGroup: 0,
                   runAsNonRoot: true,
-                  runAsUser: 999,
+                  runAsUser: 0,
                   seccompProfile: {
                     type: 'RuntimeDefault',
                   },
@@ -206,6 +206,20 @@ export const useFunc = (model) => {
               },
             },
             name: 'mssqlserver-addon',
+            containerRuntimeSettings: {
+              securityContext: {
+                allowPrivilegeEscalation: false,
+                capabilities: {
+                  drop: ['ALL'],
+                },
+                runAsGroup: 0,
+                runAsNonRoot: true,
+                runAsUser: 0,
+                seccompProfile: {
+                  type: 'RuntimeDefault',
+                },
+              },
+            },
             tasks: [
               {
                 name: 'logical-backup',
@@ -237,7 +251,7 @@ export const useFunc = (model) => {
                     },
                     runAsGroup: 0,
                     runAsNonRoot: true,
-                    runAsUser: 999,
+                    runAsUser: 0,
                     seccompProfile: {
                       type: 'RuntimeDefault',
                     },
