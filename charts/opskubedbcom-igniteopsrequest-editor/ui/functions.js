@@ -456,14 +456,12 @@ export const useFunc = (model) => {
           },
         },
       }
-
       const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/igniteversions`,
         {
           params: queryParams,
         },
       )
-
       const resources = (resp && resp.data && resp.data.items) || []
 
       const sortedVersions = resources.sort((a, b) =>
@@ -474,7 +472,6 @@ export const useFunc = (model) => {
       const found = sortedVersions.find((item) => item.metadata.name === ver)
 
       if (found) ver = found.spec?.version
-
       const limit = allowed?.length ? allowed[0] : '0.0'
 
       // keep only non deprecated & kubedb-ui-presets & within constraints of current version
@@ -508,9 +505,16 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      setDiscriminatorValue('/filteredVersion', filteredIgniteVersions)
+      // When no version meets the preset and upgrade constraints, let the user
+      // choose from every non-deprecated version in the catalog.
+      const versionsToShow = filteredIgniteVersions.length
+        ? filteredIgniteVersions
+        : sortedVersions.filter((item) => !item.spec?.deprecated)
 
-      return filteredIgniteVersions.map((item) => {
+      setDiscriminatorValue('/filteredVersion', versionsToShow)
+      setDiscriminatorValue('/filteredVersionStatus', 'success')
+
+      return versionsToShow.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -528,21 +532,25 @@ export const useFunc = (model) => {
     const filteredVersion = getValue(discriminator, '/filteredVersion')
     if (filteredVersion.length) return ''
 
-    let txt = 'No versions from this list can be selected as the target version: [ '
+    let txt = 'No versions from this list can be selected as the target version '
     const presetVersionsInfo = presets.admin?.databases?.Ignite?.versions?.available || []
 
-    presetVersionsInfo.forEach((v, idx) => {
-      txt = `${txt}"${v}"`
-      if (idx !== presetVersionsInfo.length - 1) txt = txt + ', '
-      else txt = txt + ' ]'
-    })
+    if (presetVersionsInfo.length) {
+      txt = `${txt} [ `
+      presetVersionsInfo.forEach((v, idx) => {
+        txt = `${txt}"${v}"`
+        if (idx !== presetVersionsInfo.length - 1) txt = txt + ', '
+        else txt = txt + ' ]'
+      })
+    }
 
     return txt
   }
 
   function isVersionEmpty() {
     const val = getValue(discriminator, '/filteredVersion')
-    return val.length === 0
+    const status = getValue(discriminator, '/filteredVersionStatus')
+    return val.length === 0 && status === 'success'
   }
 
   function versionCompare(v1, v2) {

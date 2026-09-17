@@ -501,9 +501,16 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      setDiscriminatorValue('/filteredVersion', filteredNeo4jVersions)
+      // When no version meets the preset and upgrade constraints, let the user
+      // choose from every non-deprecated version in the catalog.
+      const versionsToShow = filteredNeo4jVersions.length
+        ? filteredNeo4jVersions
+        : sortedVersions.filter((item) => !item.spec?.deprecated)
 
-      return filteredNeo4jVersions.map((item) => {
+      setDiscriminatorValue('/filteredVersion', versionsToShow)
+      setDiscriminatorValue('/filteredVersionStatus', 'success')
+
+      return versionsToShow.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -521,25 +528,31 @@ export const useFunc = (model) => {
     const filteredVersion = getValue(discriminator, '/filteredVersion')
     if (filteredVersion.length) return ''
 
-    let txt = 'No versions from this list can be selected as the target version: [ '
+    let txt = 'No versions from this list can be selected as the target version '
 
-    presetVersions.forEach((v, idx) => {
-      txt = `${txt}"${v}"`
-      if (idx !== presetVersions.length - 1) txt = txt + ', '
-      else txt = txt + ' ]'
-    })
+    if (presetVersions.length) {
+      txt = `${txt} [ `
+      presetVersions.forEach((v, idx) => {
+        txt = `${txt}"${v}"`
+        if (idx !== presetVersions.length - 1) txt = txt + ', '
+        else txt = txt + ' ]'
+      })
+    }
 
     return txt
   }
 
   function isVersionEmpty() {
     const val = getValue(discriminator, '/filteredVersion')
-    return val.length === 0
+    const status = getValue(discriminator, '/filteredVersionStatus')
+    return val.length === 0 && status === 'success'
   }
 
   function versionCompare(v1, v2) {
-    const arr1 = v1.split('.').map(Number)
-    const arr2 = v2.split('.').map(Number)
+    // Neo4j versions may have an edition suffix (for example, -enterprise).
+    // Compare their numeric components so suffixes do not discard patch values.
+    const arr1 = String(v1).match(/\d+/g)?.map(Number) || []
+    const arr2 = String(v2).match(/\d+/g)?.map(Number) || []
 
     for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
       const num1 = arr1[i] || 0
