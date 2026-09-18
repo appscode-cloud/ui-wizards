@@ -621,6 +621,7 @@ step:
               type: function
             label: Create a New Config Secret
             showLabels: true
+            fixedBlock: true
             type: block-layout
           - editorHeight: 500px
             hideFormatButton: true
@@ -644,7 +645,7 @@ step:
           - customClass: mb-15
             label: Apply New Config
             subtitle: Define custom configurations for your database using key-value
-              pairs. These parameters will overwrite existing settings.<br>Enter the
+              pairs. These parameters will overwrite existing settings.<br>Select a Configuration first, then Enter the
               parameter you want to configure (e.g., max_connections).
             type: label-element
           - customClass: mb-2
@@ -653,6 +654,10 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/node/selectedConfiguration
             type: select
+            watcher:
+              func: onApplyconfigChange|node
+              paths:
+              - temp/properties/node/applyConfig
           - elements:
             - editorHeight: 500px
               hideFormatButton: true
@@ -664,10 +669,6 @@ step:
               schema: temp/properties/node/applyConfig
               type: multi-file-editor
               validateContent: false
-              watcher:
-                func: onApplyconfigChange|node
-                paths:
-                - temp/properties/node/applyConfig
             - label: ""
               subtitle: ⓘ Changes will take effect after a successful redeployment.
               type: label-element
@@ -816,6 +817,7 @@ step:
               type: function
             label: Create a New Config Secret
             showLabels: true
+            fixedBlock: true
             type: block-layout
           - editorHeight: 500px
             hideFormatButton: true
@@ -839,7 +841,8 @@ step:
           - customClass: mb-15
             label: Apply New Config
             subtitle: Define custom configurations for your Aggregator node using
-              key-value pairs. These parameters will overwrite existing settings.
+              key-value pairs. These parameters will overwrite existing settings.<br>Select a Configuration first, then Enter the
+              parameter you want to configure (e.g., max_connections).
             type: label-element
           - customClass: mb-2
             label: Select Configuration
@@ -847,6 +850,10 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/aggregator/selectedConfiguration
             type: select
+            watcher:
+              func: onApplyconfigChange|aggregator
+              paths:
+              - temp/properties/aggregator/applyConfig
           - elements:
             - editorHeight: 500px
               hideFormatButton: true
@@ -858,10 +865,6 @@ step:
               schema: temp/properties/aggregator/applyConfig
               type: multi-file-editor
               validateContent: false
-              watcher:
-                func: onApplyconfigChange|aggregator
-                paths:
-                - temp/properties/aggregator/applyConfig
             - label: ""
               subtitle: ⓘ Changes will take effect after a successful redeployment.
               type: label-element
@@ -1011,6 +1014,7 @@ step:
               type: function
             label: Create a New Config Secret
             showLabels: true
+            fixedBlock: true
             type: block-layout
           - editorHeight: 500px
             hideFormatButton: true
@@ -1034,7 +1038,8 @@ step:
           - customClass: mb-15
             label: Apply New Config
             subtitle: Define custom configurations for your Leaf node using key-value
-              pairs. These parameters will overwrite existing settings.
+              pairs. These parameters will overwrite existing settings.<br>Select a Configuration first, then Enter the
+              parameter you want to configure (e.g., max_connections).
             type: label-element
           - customClass: mb-2
             label: Select Configuration
@@ -1042,6 +1047,10 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/leaf/selectedConfiguration
             type: select
+            watcher:
+              func: onApplyconfigChange|leaf
+              paths:
+              - temp/properties/leaf/applyConfig
           - elements:
             - editorHeight: 500px
               hideFormatButton: true
@@ -1053,10 +1062,6 @@ step:
               schema: temp/properties/leaf/applyConfig
               type: multi-file-editor
               validateContent: false
-              watcher:
-                func: onApplyconfigChange|leaf
-                paths:
-                - temp/properties/leaf/applyConfig
             - label: ""
               subtitle: ⓘ Changes will take effect after a successful redeployment.
               type: label-element

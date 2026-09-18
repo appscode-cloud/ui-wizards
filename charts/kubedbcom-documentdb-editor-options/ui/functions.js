@@ -311,8 +311,8 @@ const modeDetails = {
     description: 'Single node DocumentDB without high availability.',
     text: 'Standalone',
   },
-  ReplicaSet: {
-    description: 'DocumentDB ReplicaSet for high availability.',
+  Replicaset: {
+    description: 'DocumentDB Replicaset for high availability.',
     text: 'Replicated Cluster',
   },
 }
@@ -713,7 +713,8 @@ export const useFunc = (model) => {
       value: versions,
       force: true,
     })
-    const currentVersion = getValue(model, '/spec/admin/databases/DocumentDB/versions/default') || ''
+    const currentVersion =
+      getValue(model, '/spec/admin/databases/DocumentDB/versions/default') || ''
     if (!currentVersion && versions.length >= 1) {
       commit('wizard/model$update', {
         path: '/spec/admin/databases/DocumentDB/versions/default',
@@ -1079,37 +1080,6 @@ export const useFunc = (model) => {
     return features.length
   }
 
-  function checkHostnameOrIP() {
-    const tls = getValue(model, '/spec/admin/tls/default')
-    const expose = getValue(model, '/spec/admin/expose/enable/default')
-    if (tls && expose) {
-      if (hostName) {
-        commit('wizard/model$update', {
-          path: '/spec/hostName',
-          value: hostName,
-          force: true,
-        })
-      } else {
-        commit('wizard/model$update', {
-          path: '/spec/ip',
-          value: ip,
-          force: true,
-        })
-      }
-    } else {
-      commit('wizard/model$update', {
-        path: '/spec/hostName',
-        value: '',
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/spec/ip',
-        value: '',
-        force: true,
-      })
-    }
-  }
-
   function getDefault(type) {
     const val = getValue(model, `/spec/admin/${type}/default`) || ''
     return val
@@ -1227,7 +1197,7 @@ export const useFunc = (model) => {
         force: true,
       })
     } catch (e) {
-      pointIntimeError =
+      const pointIntimeError =
         e.response?.data?.message || 'Invalid name / namespace for recovery timestamp'
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
@@ -1251,7 +1221,6 @@ export const useFunc = (model) => {
     }
   }
 
-  let pointIntimeError = ''
   return {
     onReferSecretChange,
     showReferSecretSwitch,
@@ -1260,7 +1229,6 @@ export const useFunc = (model) => {
     showReferSecret,
     getReferSecrets,
     setPointInTimeRecovery,
-    checkHostnameOrIP,
     showRecovery,
     showAdditionalSettings,
     initBundle,

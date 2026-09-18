@@ -336,8 +336,8 @@ export const useFunc = (model) => {
       default: 'Standalone',
     },
     DocumentDB: {
-      availableModes: ['Standalone', 'ReplicaSet'],
-      default: 'ReplicaSet',
+      availableModes: ['Standalone', 'Replicaset'],
+      default: 'Replicaset',
     },
     Druid: {
       availableModes: ['Topology'],
@@ -809,22 +809,22 @@ export const useFunc = (model) => {
   function parseMemory(memory) {
     if (memory == null || (typeof memory !== 'string' && typeof memory !== 'number')) return 0
     const units = {
-      B: 1, 
-      K: 1000, 
-      KB: 1000, 
-      Ki: 1024, 
-      M: 1000 * 1000, 
-      MB: 1000 * 1000, 
-      Mi: 1024 * 1024, 
-      G: 1000 * 1000 * 1000, 
-      GB: 1000 * 1000 * 1000, 
-      Gi: 1024 * 1024 * 1024, 
-      T: 1000 * 1000 * 1000 * 1000, 
-      TB: 1000 * 1000 * 1000 * 1000, 
-      Ti: 1024 * 1024 * 1024 * 1024, 
-      P: 1000 * 1000 * 1000 * 1000 * 1000, 
-      PB: 1000 * 1000 * 1000 * 1000 * 1000, 
-      Pi: 1024 * 1024 * 1024 * 1024 * 1024, 
+      B: 1,
+      K: 1000,
+      KB: 1000,
+      Ki: 1024,
+      M: 1000 * 1000,
+      MB: 1000 * 1000,
+      Mi: 1024 * 1024,
+      G: 1000 * 1000 * 1000,
+      GB: 1000 * 1000 * 1000,
+      Gi: 1024 * 1024 * 1024,
+      T: 1000 * 1000 * 1000 * 1000,
+      TB: 1000 * 1000 * 1000 * 1000,
+      Ti: 1024 * 1024 * 1024 * 1024,
+      P: 1000 * 1000 * 1000 * 1000 * 1000,
+      PB: 1000 * 1000 * 1000 * 1000 * 1000,
+      Pi: 1024 * 1024 * 1024 * 1024 * 1024,
     }
 
     if (/^\d+(\.\d+)?$/.test(memory)) {
@@ -838,21 +838,21 @@ export const useFunc = (model) => {
       return value * (units[unit] || 1)
     }
 
-    return 0 
+    return 0
   }
 
   function parseCPU(cpu) {
     if (cpu == null) return 0
-    if (typeof cpu === 'number') return cpu 
+    if (typeof cpu === 'number') return cpu
 
     const match = cpu.match(/^(\d+(?:\.\d+)?)(m)?$/)
-    if (!match) return 0 
+    if (!match) return 0
 
     if (cpu.endsWith('m')) {
-      return parseFloat(cpu) / 1000 
+      return parseFloat(cpu) / 1000
     }
 
-    return parseFloat(cpu) 
+    return parseFloat(cpu)
   }
 
   function sortMachines(arr) {

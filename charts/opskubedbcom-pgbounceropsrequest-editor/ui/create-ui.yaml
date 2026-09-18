@@ -346,6 +346,7 @@ step:
               type: function
             label: Create a New Config Secret
             showLabels: true
+            fixedBlock: true
             type: block-layout
           - editorHeight: 500px
             hideFormatButton: true
@@ -379,6 +380,10 @@ step:
             refresh: fetchConfigSecrets
             schema: temp/properties/selectedConfiguration
             type: select
+            watcher:
+              func: onApplyconfigChange
+              paths:
+              - temp/properties/applyConfig
           - elements:
             - editorHeight: 500px
               hideFormatButton: true
@@ -390,10 +395,6 @@ step:
               schema: temp/properties/applyConfig
               type: multi-file-editor
               validateContent: false
-              watcher:
-                func: onApplyconfigChange
-                paths:
-                - temp/properties/applyConfig
             - label: ""
               subtitle: ⓘ Changes will take effect after a successful redeployment.
               type: label-element

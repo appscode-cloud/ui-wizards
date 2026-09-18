@@ -27,7 +27,7 @@ step:
     schema: schema/properties/spec/properties/mode
     type: radio
   - if:
-      name: isEqualToModelPathValue|ReplicaSet|/spec/mode
+      name: isEqualToModelPathValue|Replicaset|/spec/mode
       type: function
     label: Replicaset Number
     schema: schema/properties/spec/properties/replicas
@@ -385,16 +385,9 @@ step:
       - if:
           name: isToggleOn|tls
           type: function
-        init:
-          type: func
-          value: checkHostnameOrIP
         label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
-        watcher:
-          func: checkHostnameOrIP
-          paths:
-          - schema/properties/spec/properties/admin/properties/tls/properties/default
       - if:
           name: showIssuer
           type: function
@@ -409,16 +402,9 @@ step:
       - if:
           name: isToggleOn|expose
           type: function
-        init:
-          type: func
-          value: checkHostnameOrIP
         label: Expose via Gateway?
         schema: schema/properties/spec/properties/admin/properties/expose/properties/enable/properties/default
         type: switch
-        watcher:
-          func: checkHostnameOrIP
-          paths:
-          - schema/properties/spec/properties/admin/properties/expose/properties/enable/properties/default
       type: block-layout
     if:
       name: showAdditionalSettings

@@ -505,9 +505,16 @@ export const useFunc = (model) => {
             isVersionWithinConstraints(item.spec?.version, limit)
           )
       })
-      setDiscriminatorValue('/filteredVersion', filteredClickHouseVersions)
+      // When no version meets the preset and upgrade constraints, let the user
+      // choose from every non-deprecated version in the catalog.
+      const versionsToShow = filteredClickHouseVersions.length
+        ? filteredClickHouseVersions
+        : sortedVersions.filter((item) => !item.spec?.deprecated)
 
-      return filteredClickHouseVersions.map((item) => {
+      setDiscriminatorValue('/filteredVersion', versionsToShow)
+      setDiscriminatorValue('/filteredVersionStatus', 'success')
+
+      return versionsToShow.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const specVersion = (item.spec && item.spec.version) || ''
         return {
@@ -525,20 +532,24 @@ export const useFunc = (model) => {
     const filteredVersion = getValue(discriminator, '/filteredVersion')
     if (filteredVersion.length) return ''
 
-    let txt = 'No versions from this list can be selected as the target version: [ '
+    let txt = 'No versions from this list can be selected as the target version '
 
-    presetVersions.forEach((v, idx) => {
-      txt = `${txt}"${v}"`
-      if (idx !== presetVersions.length - 1) txt = txt + ', '
-      else txt = txt + ' ]'
-    })
+    if (presetVersions.length) {
+      txt = `${txt} [ `
+      presetVersions.forEach((v, idx) => {
+        txt = `${txt}"${v}"`
+        if (idx !== presetVersions.length - 1) txt = txt + ', '
+        else txt = txt + ' ]'
+      })
+    }
 
     return txt
   }
 
   function isVersionEmpty() {
     const val = getValue(discriminator, '/filteredVersion')
-    return val.length === 0
+    const status = getValue(discriminator, '/filteredVersionStatus')
+    return val.length === 0 && status === 'success'
   }
 
   function versionCompare(v1, v2) {
