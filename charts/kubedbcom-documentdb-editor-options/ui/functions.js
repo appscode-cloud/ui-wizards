@@ -312,7 +312,7 @@ const modeDetails = {
     text: 'Standalone',
   },
   Replicaset: {
-    description: 'DocumentDB ReplicaSet for high availability.',
+    description: 'DocumentDB Replicaset for high availability.',
     text: 'Replicated Cluster',
   },
 }
