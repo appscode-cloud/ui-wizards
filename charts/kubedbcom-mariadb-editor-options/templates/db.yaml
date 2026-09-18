@@ -89,7 +89,36 @@ spec:
     apiGroup: ""
     kind: Secret
 {{- end }}
-  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
+  replicas: {{ (eq .Values.spec.mode "Standalone") | ternary 1 .Values.spec.replicas }}
+{{- if eq .Values.spec.mode "MariaDBReplication" }}
+  topology:
+    mode: MariaDBReplication
+    maxscale:
+      replicas: {{ .Values.spec.maxscale.replicas }}
+      storageType: Durable
+      storage:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.maxscale.persistence.size }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+    {{- if .Values.spec.maxscale.configuration }}
+      configSecret:
+        name: {{ include "kubedbcom-mariadb-editor-options.fullname" . }}-maxscale-config
+    {{- end }}
+      podTemplate:
+        spec:
+          securityContext:
+            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+          containers:
+            - name: maxscale
+              resources:
+                {{- toYaml .maxscale_res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+          {{- include "common.placement" . | nindent 10 }}
+{{- end }}
   storage:
     accessModes:
     - ReadWriteOnce
@@ -108,7 +137,7 @@ spec:
             {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
-          {{- if eq .Values.spec.mode "Replicaset" }}
+          {{- if ne .Values.spec.mode "Standalone" }}
         - name: md-coordinator
           resources:
             {{- toYaml .sidecar_res | nindent 12 }}

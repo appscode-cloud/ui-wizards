@@ -27,11 +27,89 @@ step:
     schema: schema/properties/spec/properties/mode
     type: radio
   - if:
-      name: EqualToDatabaseMode|Replicaset
+      name: isClusterMode
       type: function
     label: Replicas
     schema: schema/properties/spec/properties/replicas
     type: input
+  - elements:
+    - label: ""
+      subtitle: Configure the MaxScale proxy tier that fronts the MariaDB replication
+        cluster. MaxScale routes reads and writes to the primary and replicas.
+      type: label-element
+    - elements:
+      - label: MaxScale Replicas
+        schema: schema/properties/spec/properties/maxscale/properties/replicas
+        type: input
+      - label: MaxScale Storage Size
+        schema: schema/properties/spec/properties/maxscale/properties/persistence/properties/size
+        type: input
+      showLabels: true
+      type: horizontal-layout
+    - elements:
+      - init:
+          type: func
+          value: setMachineToCustom
+        label: Machine
+        loader: getMachineListForOptions
+        schema: schema/properties/spec/properties/maxscale/properties/podResources/properties/machine
+        type: select
+      - disable:
+          name: isMachineNotCustom|maxscale
+          watchPaths:
+          - schema/properties/spec/properties/maxscale/properties/podResources/properties/machine
+        init:
+          type: func
+          value: setLimits|cpu|maxscale
+        label: CPU
+        loader: setLimits|cpu|maxscale
+        schema: schema/properties/spec/properties/maxscale/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+        watcher:
+          func: setRequests|cpu|maxscale
+          paths:
+          - schema/properties/spec/properties/maxscale/properties/podResources/properties/resources/properties/requests/properties/cpu
+          - schema/properties/spec/properties/maxscale/properties/podResources/properties/machine
+      - disable:
+          name: isMachineNotCustom|maxscale
+          watchPaths:
+          - schema/properties/spec/properties/maxscale/properties/podResources/properties/machine
+        init:
+          type: func
+          value: setLimits|memory|maxscale
+        label: Memory
+        loader: setLimits|memory|maxscale
+        schema: schema/properties/spec/properties/maxscale/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+        watcher:
+          func: setRequests|memory|maxscale
+          paths:
+          - schema/properties/spec/properties/maxscale/properties/podResources/properties/resources/properties/requests/properties/memory
+          - schema/properties/spec/properties/maxscale/properties/podResources/properties/machine
+      showLabels: true
+      type: horizontal-layout
+    - if:
+        name: getDefaultValue|spec/admin/customConfiguration
+        type: function
+      label: Configure MaxScale?
+      schema: temp/configMaxscale
+      type: switch
+      watcher:
+        func: clearMaxscaleConfiguration
+        paths:
+        - temp/configMaxscale
+    - if:
+        name: isConfigMaxscaleOn
+        type: function
+      label: MaxScale Configuration
+      schema: schema/properties/spec/properties/maxscale/properties/configuration
+      type: textarea
+    if:
+      name: EqualToDatabaseMode|MariaDBReplication
+      type: function
+    label: MaxScale
+    showLabels: true
+    type: block-layout
   - elements:
     - label: ""
       subtitle: Select a machine profile to allocate CPU and memory resources for

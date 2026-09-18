@@ -22,9 +22,23 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, Replicaset
-  mode: Replicaset
+  # Standalone, GaleraCluster, MariaDBReplication
+  mode: GaleraCluster
   replicas: 3
+
+  # MaxScale proxy tier, only used in MariaDBReplication mode
+  maxscale:
+    replicas: 3
+    persistence:
+      size: 2Gi
+    podResources:
+      machine: ""
+
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+    configuration: ""
 
   deletionPolicy: WipeOut
 
@@ -99,8 +113,8 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: ["Standalone", "Replicaset"]
-          default: "Replicaset"
+          available: ["Standalone", "GaleraCluster", "MariaDBReplication"]
+          default: "GaleraCluster"
           toggle: true
     storageClasses:
       available: []

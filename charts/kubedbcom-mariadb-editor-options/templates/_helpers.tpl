@@ -144,11 +144,21 @@ seccompProfile:
     {{- $profiles = .id -}}
   {{- end }}
 {{- end }}
+{{- $maxscale_res := .Values.spec.maxscale.podResources.resources -}}
+{{- if and .Values.spec.maxscale.podResources.machine (hasKey $machines .Values.spec.maxscale.podResources.machine) }}
+  {{- $maxscale_res = get (get $machines .Values.spec.maxscale.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.maxscale.podResources.machine (eq .id $.Values.spec.maxscale.podResources.machine) }}
+    {{- $maxscale_res = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 {{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 {{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
 
 {{- $_ := set . "res" $res -}}
+{{- $_ = set . "maxscale_res" $maxscale_res -}}
 {{- $_ = set . "init_res" $init_res -}}
 {{- $_ = set . "sidecar_res" $sidecar_res -}}
 

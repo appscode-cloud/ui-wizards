@@ -311,9 +311,13 @@ const modeDetails = {
     description: 'Single node MariaDB without high availability',
     text: 'Standalone',
   },
-  Replicaset: {
+  GaleraCluster: {
     description: 'Mariadb Galera cluster for high availability.',
     text: 'Galera Cluster',
+  },
+  MariaDBReplication: {
+    description: 'Primary-replica MariaDB cluster fronted by a MaxScale proxy tier.',
+    text: 'MariaDB Replication',
   },
 }
 
@@ -325,6 +329,7 @@ export const useFunc = (model) => {
 
   setDiscriminatorValue('bundleApiLoaded', false)
   setDiscriminatorValue('configDatabase', false)
+  setDiscriminatorValue('configMaxscale', false)
   setDiscriminatorValue('createAuthSecret', false)
   setDiscriminatorValue('recovery', false)
   setDiscriminatorValue('referSecret', false)
@@ -639,6 +644,21 @@ export const useFunc = (model) => {
     const modelPathValue = getValue(model, '/spec/mode')
     // watchDependency('model#/spec/mode')
     return modelPathValue && modelPathValue === mode
+  }
+
+  function isClusterMode() {
+    const modelPathValue = getValue(model, '/spec/mode')
+    return !!modelPathValue && modelPathValue !== 'Standalone'
+  }
+
+  function clearMaxscaleConfiguration() {
+    if (!getValue(discriminator, '/configMaxscale')) {
+      commit('wizard/model$delete', '/spec/maxscale/configuration')
+    }
+  }
+
+  function isConfigMaxscaleOn() {
+    return getValue(discriminator, '/configMaxscale')
   }
 
   function isConfigDatabaseOn() {
@@ -1293,6 +1313,9 @@ export const useFunc = (model) => {
     showAdditionalSettings,
     initBundle,
     EqualToDatabaseMode,
+    isClusterMode,
+    clearMaxscaleConfiguration,
+    isConfigMaxscaleOn,
     getNamespaces,
     isMachineNotCustom,
     isMachineCustom,

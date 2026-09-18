@@ -716,10 +716,10 @@ export const useFunc = (model) => {
   // machine profile stuffs
   // let machinesFromPreset = []
 
-  function getMachines() {
+  function getMachines(component) {
     const presets = storeGet('/kubedbuiPresets') || {}
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = getLimits()
+    const limits = getLimits(component)
 
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
@@ -767,9 +767,11 @@ export const useFunc = (model) => {
     return arr
   }
 
-  function setMachine() {
+  function setMachine(component) {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = getLimits()
+    const limits = getLimits(component)
+    if (component === 'maxscale')
+      return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
     const annotations = dbDetails?.metadata?.annotations || {}
     const instance = annotations['kubernetes.io/instance-type']
 
@@ -794,7 +796,8 @@ export const useFunc = (model) => {
   }
 
   function onMachineChange(type) {
-    const selectedMachine = getValue(discriminator, `/machine`) || {}
+    const discriminatorPath = type === 'maxscale' ? '/maxscaleMachine' : '/machine'
+    const selectedMachine = getValue(discriminator, discriminatorPath) || {}
     const machine = machinesFromPreset.find((item) => item.id === selectedMachine.machine)
 
     let obj = {}
@@ -824,6 +827,8 @@ export const useFunc = (model) => {
     } else {
       commit('wizard/model$delete', `/spec/verticalScaling/${type}`)
     }
+
+    if (type === 'maxscale') return
 
     // update metadata.annotations
     const annotations = getValue(model, '/metadata/annotations') || {}
@@ -1491,9 +1496,44 @@ export const useFunc = (model) => {
     return limitVal
   }
 
-  function isReplicasValid() {
+  function hasMaxScale() {
+    const topology = getValue(discriminator, '/dbDetails/spec/topology')
+    return topology?.mode === 'MariaDBReplication' && !!topology?.maxscale
+  }
+
+  function isMaxScaleScaleTarget() {
+    return getValue(discriminator, '/scaleTarget') === 'maxscale'
+  }
+
+  function initScaleTarget() {
+    return 'mariadb'
+  }
+
+  function currentReplicasOfScaleTarget() {
     const dbDetails = getValue(discriminator, '/dbDetails')
-    const currentReplicas = dbDetails?.spec?.replicas
+    return isMaxScaleScaleTarget()
+      ? dbDetails?.spec?.topology?.maxscale?.replicas
+      : dbDetails?.spec?.replicas
+  }
+
+  function onScaleTargetChange() {
+    if (isMaxScaleScaleTarget())
+      commit('wizard/model$update', {
+        path: '/spec/horizontalScaling/maxscale',
+        value: true,
+        force: true,
+      })
+    else commit('wizard/model$delete', '/spec/horizontalScaling/maxscale')
+
+    commit('wizard/model$update', {
+      path: '/spec/horizontalScaling/member',
+      value: currentReplicasOfScaleTarget(),
+      force: true,
+    })
+  }
+
+  function isReplicasValid() {
+    const currentReplicas = currentReplicasOfScaleTarget()
     const newReplicas = getValue(model, '/spec/horizontalScaling/member')
 
     if (currentReplicas === newReplicas) {
@@ -1502,11 +1542,13 @@ export const useFunc = (model) => {
     return false
   }
 
-  function isMachineValid() {
-    const dbDetails = getValue(discriminator, '/dbDetails')
-    const limits = getLimits()
+  function isMachineValid(component) {
+    const limits = getLimits(component)
 
-    const selectedMachine = getValue(discriminator, '/machine')
+    const selectedMachine = getValue(
+      discriminator,
+      component === 'maxscale' ? '/maxscaleMachine' : '/machine',
+    )
     const selectedLimits = { cpu: selectedMachine?.cpu, memory: selectedMachine?.memory }
 
     if (JSON.stringify(limits) === JSON.stringify(selectedLimits)) {
@@ -1515,15 +1557,18 @@ export const useFunc = (model) => {
     return false
   }
 
-  function getLimits() {
+  function getLimits(component) {
     const dbDetails = getValue(discriminator, '/dbDetails')
+    const podTemplate =
+      component === 'maxscale'
+        ? dbDetails?.spec?.topology?.maxscale?.podTemplate
+        : dbDetails?.spec?.podTemplate
     let limits = {}
-    const containers = dbDetails?.spec?.podTemplate?.spec?.containers || []
-    if (containers.length === 0)
-      limits = dbDetails?.spec?.podTemplate?.spec?.resources?.requests || {}
+    const containers = podTemplate?.spec?.containers || []
+    if (containers.length === 0) limits = podTemplate?.spec?.resources?.requests || {}
     else {
-      const kind = dbDetails?.kind
-      const resource = containers.filter((ele) => ele.name === kind?.toLowerCase())
+      const name = component === 'maxscale' ? 'maxscale' : dbDetails?.kind?.toLowerCase()
+      const resource = containers.filter((ele) => ele.name === name)
       limits = resource[0]?.resources?.requests || {}
     }
     return limits
@@ -1536,6 +1581,9 @@ export const useFunc = (model) => {
 
   return {
     isMonitoringEnabled,
+    hasMaxScale,
+    initScaleTarget,
+    onScaleTargetChange,
     isReplicasValid,
     isMachineValid,
     setExporter,
