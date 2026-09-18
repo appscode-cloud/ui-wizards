@@ -49,14 +49,14 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 	Labels map[string]string `json:"labels"`
 	Mode   SolrMode          `json:"mode"`
 	// +optional
-	Replicas       int             `json:"replicas"`
-	Topology       SolrTopology    `json:"topology"`
-	ZookeeperRef   ObjectReference `json:"zookeeperRef"`
-	Persistence    Persistence     `json:"persistence"`
-	PodResources   PodResources    `json:"podResources"`
-	AuthSecret     AuthSecret      `json:"authSecret"`
-	DeletionPolicy DeletionPolicy  `json:"deletionPolicy"`
-	Configuration  string          `json:"configuration"`
+	Replicas       int              `json:"replicas"`
+	Topology       SolrTopology     `json:"topology"`
+	ZookeeperRef   SolrZooKeeperRef `json:"zookeeperRef"`
+	Persistence    Persistence      `json:"persistence"`
+	PodResources   PodResources     `json:"podResources"`
+	AuthSecret     AuthSecret       `json:"authSecret"`
+	DeletionPolicy DeletionPolicy   `json:"deletionPolicy"`
+	Configuration  string           `json:"configuration"`
 	// +optional
 	ServiceTemplates []SolrServiceTemplate `json:"serviceTemplates,omitempty"`
 	Admin            AdminOptions          `json:"admin"`
@@ -90,6 +90,11 @@ type SolrTopology struct {
 	Overseer    *SolrNode `json:"overseer"`
 	Data        *SolrNode `json:"data"`
 	Coordinator *SolrNode `json:"coordinator"`
+}
+
+type SolrZooKeeperRef struct {
+	ObjectReference   `json:",inline"`
+	ExternallyManaged bool `json:"externallyManaged"`
 }
 
 type SolrAlertsSpecForm struct {
