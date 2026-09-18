@@ -1773,6 +1773,35 @@ properties:
                         type: object
                     type: object
                 type: object
+              serviceMonitor:
+                properties:
+                  endpoints:
+                    items:
+                      properties:
+                        port:
+                          type: string
+                        relabelings:
+                          items:
+                            properties:
+                              action:
+                                type: string
+                              sourceLabels:
+                                items:
+                                  type: string
+                                type: array
+                              targetLabel:
+                                type: string
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  interval:
+                    type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                type: object
               toggle:
                 type: boolean
             required:
@@ -1794,6 +1823,21 @@ properties:
             - default
             - toggle
             type: object
+          serviceTemplates:
+            items:
+              properties:
+                alias:
+                  type: string
+                annotations:
+                  additionalProperties:
+                    type: string
+                  type: object
+                svcType:
+                  type: string
+              required:
+              - alias
+              type: object
+            type: array
           showPreview:
             type: boolean
           storageClasses:
@@ -2031,6 +2075,25 @@ properties:
         type: object
       replicas:
         type: integer
+      serviceTemplates:
+        items:
+          properties:
+            alias:
+              enum:
+              - primary
+              - standby
+              - stats
+              type: string
+            annotations:
+              additionalProperties:
+                type: string
+              type: object
+            svcType:
+              type: string
+          required:
+          - alias
+          type: object
+        type: array
       syncUsers:
         type: boolean
     required:

@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kmapi "kmodules.xyz/client-go/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
@@ -51,19 +52,32 @@ type KubedbcomNeo4jEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	StorageType     string             `json:"storageType,omitempty"`
-	DisableSecurity bool               `json:"disableSecurity"`
-	Persistence     Persistence        `json:"persistence"`
-	PodResources    PodResources       `json:"podResources"`
-	AuthSecret      AuthSecret         `json:"authSecret"`
-	DeletionPolicy  DeletionPolicy     `json:"deletionPolicy"`
-	Configuration   string             `json:"configuration"`
-	TLS             Neo4jTLS           `json:"tls"`
-	Admin           AdminOptions       `json:"admin"`
-	Backup          BackupToolSpec     `json:"backup"`
-	Monitoring      MonitoringOperator `json:"monitoring"`
+	StorageType     string         `json:"storageType,omitempty"`
+	DisableSecurity bool           `json:"disableSecurity"`
+	Persistence     Persistence    `json:"persistence"`
+	PodResources    PodResources   `json:"podResources"`
+	AuthSecret      AuthSecret     `json:"authSecret"`
+	DeletionPolicy  DeletionPolicy `json:"deletionPolicy"`
+	Configuration   string         `json:"configuration"`
+	TLS             Neo4jTLS       `json:"tls"`
+	// +optional
+	ServiceTemplates []Neo4jServiceTemplate `json:"serviceTemplates"`
+	Admin            AdminOptions           `json:"admin"`
+	Backup           BackupToolSpec         `json:"backup"`
+	Monitoring       MonitoringOperator     `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
+type Neo4jServiceAlias string
+
+type Neo4jServiceTemplate struct {
+	Alias Neo4jServiceAlias `json:"alias"`
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// +optional
+	SvcType core.ServiceType `json:"svcType,omitempty"`
 }
 
 type Neo4jTLS struct {
