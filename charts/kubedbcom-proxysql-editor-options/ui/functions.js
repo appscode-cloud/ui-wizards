@@ -360,7 +360,11 @@ export const useFunc = (model) => {
       const resources = (resp && resp.data && resp.data.items) || []
 
       const fileredResources = resources
-        .filter((item) => item.spec?.type === 'kubedb.com/mysql')
+        .filter((item) =>
+          ['kubedb.com/mysql', 'kubedb.com/mariadb', 'kubedb.com/perconaxtradb'].includes(
+            item.spec?.type,
+          ),
+        )
         .map((item) => {
           const name = (item.metadata && item.metadata.name) || ''
           return {
