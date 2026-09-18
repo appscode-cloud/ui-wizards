@@ -147,18 +147,47 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.GaleraCluster.description
+        text: options.database.mode.GaleraCluster.label
+        value: GaleraCluster
+      - description: options.database.mode.MariaDBReplication.description
+        text: options.database.mode.MariaDBReplication.label
+        value: MariaDBReplication
       schema:
         $ref: discriminator#/activeDatabaseMode
       type: radio
-    - if: isEqualToDatabaseMode|Cluster
+    - if: isNotStandaloneDatabaseMode
       label:
         text: labels.replicaset.number
       schema:
         $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/replicas
       type: input
+    - elements:
+      - label:
+          text: labels.maxscale.replicas
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/topology/properties/maxscale/properties/replicas
+        type: input
+      - fetch: getStorageClassNames
+        label:
+          text: labels.storage.class
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/topology/properties/maxscale/properties/storage/properties/storageClassName
+        type: select
+      - label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/topology/properties/maxscale/properties/storage/properties/resources/properties/requests/properties/storage
+        type: input
+      - label:
+          text: labels.maxscale.configSecret
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/topology/properties/maxscale/properties/configSecret/properties/name
+        type: input
+      if: isEqualToDatabaseMode|MariaDBReplication
+      label:
+        text: labels.maxscale.title
+      type: single-step-form
     - elements:
       - fetch: getStorageClassNames
         label:

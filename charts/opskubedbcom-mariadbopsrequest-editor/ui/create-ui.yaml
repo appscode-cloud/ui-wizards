@@ -113,6 +113,27 @@ step:
     showLabels: true
     type: block-layout
   - elements:
+    - if:
+        name: hasMaxScale
+        type: function
+      init:
+        type: func
+        value: initScaleTarget
+      isHorizontal: true
+      label: Scale Target
+      options:
+      - description: Scale the MariaDB database replicas
+        text: MariaDB
+        value: mariadb
+      - description: Scale the MaxScale proxy replicas
+        text: MaxScale
+        value: maxscale
+      schema: temp/properties/scaleTarget
+      type: radio
+      watcher:
+        func: onScaleTargetChange
+        paths:
+        - temp/properties/scaleTarget
     - elements:
       - header: Replica
         if:
@@ -171,6 +192,32 @@ step:
         func: onMachineChange|mariadb
         paths:
         - temp/properties/machine
+    - elements:
+      - init:
+          type: func
+          value: setMachine|maxscale
+        label: Resources
+        loader: getMachines|maxscale
+        schema: temp/properties/maxscaleMachine
+        subtitle: Compare the current MaxScale machine configuration with the proposed
+          adjustments for the proxy tier
+        type: machine-compare
+        validation:
+          name: isMachineValid|maxscale
+          type: custom|required
+          watchPaths:
+          - temp/properties/maxscaleMachine/properties/cpu
+          - temp/properties/maxscaleMachine/properties/memory
+        watcher:
+          func: onMachineChange|maxscale
+          paths:
+          - temp/properties/maxscaleMachine
+      if:
+        name: hasMaxScale
+        type: function
+      label: MaxScale
+      showLabels: true
+      type: block-layout
     - elements:
       - elements:
         - elements:
@@ -299,6 +346,29 @@ step:
           type: horizontal-layout
         fixedBlock: true
         label: MariaDB volume expansion
+        showLabels: true
+        type: block-layout
+      - elements:
+        - elements:
+          - disable: isScalingDisabled
+            header: Storage
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/topology/maxscale/storage/resources/requests/storage
+            label: Storage Size
+            schema: schema/properties/spec/properties/volumeExpansion/properties/maxscale
+            subtitle: Specify the new volume size for the MaxScale proxy pods (e.g.
+              2Gi for 2 gigabytes)
+            type: input-compare
+            validation:
+              name: checkVolume|/spec/topology/maxscale/storage/resources/requests/storage|/spec/volumeExpansion/maxscale
+              type: custom
+          type: horizontal-layout
+        fixedBlock: true
+        if:
+          name: hasMaxScale
+          type: function
+        label: MaxScale volume expansion
         showLabels: true
         type: block-layout
       hideBorder: true

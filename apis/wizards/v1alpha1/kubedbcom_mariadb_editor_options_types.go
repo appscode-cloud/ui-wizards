@@ -47,14 +47,15 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   GeneralMode       `json:"mode"`
+	Mode   MariadbMode       `json:"mode"`
 	// +optional
-	Replicas       int            `json:"replicas,omitempty"`
-	Persistence    Persistence    `json:"persistence"`
-	PodResources   PodResources   `json:"podResources"`
-	AuthSecret     AuthSecret     `json:"authSecret"`
-	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
-	Configuration  string         `json:"configuration"`
+	Replicas       int             `json:"replicas,omitempty"`
+	MaxScale       MariadbMaxScale `json:"maxscale"`
+	Persistence    Persistence     `json:"persistence"`
+	PodResources   PodResources    `json:"podResources"`
+	AuthSecret     AuthSecret      `json:"authSecret"`
+	DeletionPolicy DeletionPolicy  `json:"deletionPolicy"`
+	Configuration  string          `json:"configuration"`
 	// +optional
 	ArchiverName string       `json:"archiverName"`
 	Init         InitDatabase `json:"init"`
@@ -65,6 +66,16 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	Monitoring       MonitoringOperator       `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=Standalone;GaleraCluster;MariaDBReplication
+type MariadbMode string
+
+type MariadbMaxScale struct {
+	Replicas      int          `json:"replicas"`
+	Persistence   Persistence  `json:"persistence"`
+	PodResources  PodResources `json:"podResources"`
+	Configuration string       `json:"configuration"`
 }
 
 // +kubebuilder:validation:Enum=primary;standby;stats
