@@ -59,7 +59,7 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
 	Configuration  string         `json:"configuration"`
 	// +optional
-	ServiceTemplates []RedisServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []RedisServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions           `json:"admin"`
 	Backup           BackupToolSpec         `json:"backup"`
 	Monitoring       MonitoringOperator     `json:"monitoring"`

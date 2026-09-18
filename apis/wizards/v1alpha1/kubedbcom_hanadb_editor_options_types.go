@@ -58,7 +58,7 @@ type KubedbcomHanaDBEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
 	Configuration  string         `json:"configuration"`
 	// +optional
-	ServiceTemplates []HanaDBServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []HanaDBServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions            `json:"admin"`
 	Backup           BackupToolSpec          `json:"backup"`
 	Monitoring       MonitoringOperator      `json:"monitoring"`

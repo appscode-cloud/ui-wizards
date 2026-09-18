@@ -62,7 +62,7 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	ArchiverName string       `json:"archiverName"`
 	Init         InitDatabase `json:"init"`
 	// +optional
-	ServiceTemplates []PostgresServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []PostgresServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions              `json:"admin"`
 	Backup           BackupToolSpec            `json:"backup"`
 	Monitoring       MonitoringOperator        `json:"monitoring"`

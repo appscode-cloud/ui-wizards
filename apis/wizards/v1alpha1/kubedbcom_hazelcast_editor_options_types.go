@@ -55,7 +55,7 @@ type KubedbcomHazelcastEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
 	Configuration  string         `json:"configuration"`
 	// +optional
-	ServiceTemplates []HazelcastServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []HazelcastServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions               `json:"admin"`
 	Backup           BackupToolSpec             `json:"backup"`
 	Monitoring       MonitoringOperator         `json:"monitoring"`

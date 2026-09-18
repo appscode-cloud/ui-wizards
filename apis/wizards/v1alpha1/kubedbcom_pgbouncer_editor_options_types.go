@@ -55,7 +55,7 @@ type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Configuration  string            `json:"configuration"`
 	// +optional
-	ServiceTemplates []PgbouncerServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []PgbouncerServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions               `json:"admin"`
 	Backup           BackupToolSpec             `json:"backup"`
 	Monitoring       MonitoringOperator         `json:"monitoring"`

@@ -56,7 +56,7 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Configuration  string            `json:"configuration"`
 	// +optional
-	ServiceTemplates []PgpoolServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []PgpoolServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions            `json:"admin"`
 	Backup           BackupToolSpec          `json:"backup"`
 	Monitoring       MonitoringOperator      `json:"monitoring"`

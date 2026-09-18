@@ -66,7 +66,7 @@ type KubedbcomMilvusEditorOptionsSpecSpec struct {
 	// +optional
 	ConfigurationInline map[string]string `json:"configurationInline,omitempty"`
 	// +optional
-	ServiceTemplates []MilvusServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []MilvusServiceTemplate `json:"serviceTemplates"`
 	TLS              MilvusTLS               `json:"tls"`
 	Admin            AdminOptions            `json:"admin"`
 	Backup           BackupToolSpec          `json:"backup"`

@@ -56,7 +56,7 @@ type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy      `json:"deletionPolicy"`
 	Configuration  string              `json:"configuration"`
 	// +optional
-	ServiceTemplates []SinglestoreServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []SinglestoreServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions                 `json:"admin"`
 	Backup           BackupToolSpec               `json:"backup"`
 	Monitoring       MonitoringOperator           `json:"monitoring"`

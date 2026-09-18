@@ -67,7 +67,7 @@ type AdminOptions struct {
 	Expose         ExposeOption           `json:"expose"`
 
 	// +optional
-	ServiceTemplates []ServiceTemplateOption `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []ServiceTemplateOption `json:"serviceTemplates"`
 
 	Monitoring Monitoring `json:"monitoring"`
 	Alert      Alert      `json:"alert"`
@@ -255,9 +255,9 @@ type ServiceMonitorOption struct {
 	// +optional
 	Interval string `json:"interval,omitempty"`
 	// +optional
-	Labels map[string]string `json:"labels,omitempty"`
+	Labels map[string]string `json:"labels"`
 	// +optional
-	Endpoints []ServiceMonitorEndpoint `json:"endpoints,omitempty"`
+	Endpoints []ServiceMonitorEndpoint `json:"endpoints"`
 }
 
 type ServiceMonitorEndpoint struct {

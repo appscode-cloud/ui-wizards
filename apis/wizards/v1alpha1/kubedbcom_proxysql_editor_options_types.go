@@ -57,7 +57,7 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Configuration  string            `json:"configuration"`
 	// +optional
-	ServiceTemplates []ProxysqlServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []ProxysqlServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions              `json:"admin"`
 	Backup           BackupToolSpec            `json:"backup"`
 	Monitoring       MonitoringOperator        `json:"monitoring"`

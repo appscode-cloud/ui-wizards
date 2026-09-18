@@ -60,7 +60,7 @@ type KubedbcomCassandraEditorOptionsSpecSpec struct {
 	ArchiverName string       `json:"archiverName"`
 	Init         InitDatabase `json:"init"`
 	// +optional
-	ServiceTemplates []CassandraServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []CassandraServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions               `json:"admin"`
 	Backup           BackupToolSpec             `json:"backup"`
 	Monitoring       MonitoringOperator         `json:"monitoring"`

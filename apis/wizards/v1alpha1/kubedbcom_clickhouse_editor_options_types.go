@@ -55,7 +55,7 @@ type KubedbcomClickhouseEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
 	Configuration  string             `json:"configuration"`
 	// +optional
-	ServiceTemplates []ClickhouseServiceTemplate `json:"serviceTemplates,omitempty"`
+	ServiceTemplates []ClickhouseServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions                `json:"admin"`
 	Backup           BackupToolSpec              `json:"backup"`
 	Monitoring       MonitoringOperator          `json:"monitoring"`
