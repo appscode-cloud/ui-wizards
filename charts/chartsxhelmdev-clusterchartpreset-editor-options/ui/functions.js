@@ -368,8 +368,8 @@ export const useFunc = (model) => {
       default: 'Topology',
     },
     MariaDB: {
-      availableModes: ['Standalone', 'Replicaset'],
-      default: 'Replicaset',
+      availableModes: ['Standalone', 'GaleraCluster', 'MariaDBReplication'],
+      default: 'GaleraCluster',
     },
     Memcached: {
       availableModes: ['Standalone', 'Replicaset'],
