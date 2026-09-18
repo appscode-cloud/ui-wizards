@@ -750,10 +750,9 @@ export const useFunc = (model) => {
       const annotations = response.data?.metadata?.annotations || {}
       const uidRange = annotations['openshift.io/sa.scc.uid-range']
       if (uidRange) {
-        const val = uidRange.split('/')[0]
         commit('wizard/model$update', {
           path: '/spec/openshift/securityContext/runAsUser',
-          value: val,
+          value: 0,
           force: true,
         })
       }
