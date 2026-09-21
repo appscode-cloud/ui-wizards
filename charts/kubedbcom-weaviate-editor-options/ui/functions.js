@@ -883,6 +883,29 @@ export const useFunc = (model) => {
     return val
   }
 
+  function initDeletionPolicy() {
+    const deletionPolicy = getDefault('deletionPolicy')
+    const options = {
+      DoNotTerminate: {
+        text: 'DoNotTerminate — Blocks deletion; protects against accidental removal',
+        value: 'DoNotTerminate',
+      },
+      Halt: {
+        text: 'Halt — Deletes pods & services; retains data, secrets & backups',
+        value: 'Halt',
+      },
+      Delete: {
+        text: 'Delete — Deletes pods, services & data; retains secrets & backups',
+        value: 'Delete',
+      },
+      WipeOut: {
+        text: 'WipeOut — Deletes everything, including data, secrets & backups',
+        value: 'WipeOut',
+      },
+    }
+    return options[deletionPolicy] || options.WipeOut
+  }
+
   async function getReferSecrets() {
     const referSecret = getValue(discriminator, '/referSecret')
     if (!referSecret) {
@@ -904,8 +927,7 @@ export const useFunc = (model) => {
       const items = resp.data?.items || []
       items.forEach((ele) => {
         const keys = Object.keys(ele.data || {})
-        if (keys.includes('AUTHENTICATION_APIKEY_ALLOWED_KEYS'))
-          options.push(ele.metadata?.name)
+        if (keys.includes('AUTHENTICATION_APIKEY_ALLOWED_KEYS')) options.push(ele.metadata?.name)
       })
     } catch (e) {
       console.log(e)
@@ -1050,6 +1072,7 @@ export const useFunc = (model) => {
     setStorageClass,
     setBackup,
     getDefault,
+    initDeletionPolicy,
     checkHostnameOrIP,
     onArchiverChange,
     showArchiverAlert,

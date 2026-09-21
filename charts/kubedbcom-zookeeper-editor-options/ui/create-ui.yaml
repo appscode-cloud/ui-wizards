@@ -118,27 +118,23 @@ step:
       label: Labels & Annotations
       showLabels: true
       type: block-layout
-    - customClass: mt-20
+    - customClass: mt-16
       if:
         name: isToggleOn|deletionPolicy
         type: function
       init:
         type: func
-        value: getDefault|deletionPolicy
+        value: initDeletionPolicy
       label: Deletion Policy
       options:
-      - description: options.deletionPolicy.delete.description
-        text: Delete ( Keep only database Secrets and backed up data )
-        value: Delete
-      - description: options.deletionPolicy.halt.description
-        text: Halt ( Keep PVCs, database Secrets and backed up data )
-        value: Halt
-      - description: options.deletionPolicy.wipeOut.description
-        text: WipeOut ( Delete everything including backed up data )
-        value: WipeOut
-      - description: options.deletionPolicy.doNotTerminate.description
-        text: DoNotTerminate ( Prevent deletion of the ZooKeeper CRD )
+      - text: DoNotTerminate — Blocks deletion; protects against accidental removal
         value: DoNotTerminate
+      - text: Halt — Deletes pods & services; retains data, secrets & backups
+        value: Halt
+      - text: Delete — Deletes pods, services & data; retains secrets & backups
+        value: Delete
+      - text: WipeOut — Deletes everything, including data, secrets & backups
+        value: WipeOut
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
       watcher:
@@ -272,7 +268,7 @@ step:
       label: Service Templates
       showLabels: true
       type: block-layout
-    hideBlock: true
+    hideBlock: false
     label: Advanced Configuration
     showLabels: true
     type: block-layout

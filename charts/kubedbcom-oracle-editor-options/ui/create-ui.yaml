@@ -120,27 +120,23 @@ step:
       label: Labels & Annotations
       showLabels: true
       type: block-layout
-    - customClass: mt-20
+    - customClass: mt-16
       if:
         name: isToggleOn|deletionPolicy
         type: function
       init:
         type: func
-        value: getDefault|deletionPolicy
+        value: initDeletionPolicy
       label: Deletion Policy
       options:
-      - description: options.deletionPolicy.delete.description
-        text: Delete
-        value: Delete
-      - description: options.deletionPolicy.halt.description
-        text: Halt
-        value: Halt
-      - description: options.deletionPolicy.wipeOut.description
-        text: WipeOut
-        value: WipeOut
-      - description: options.deletionPolicy.doNotTerminate.description
-        text: DoNotTerminate
+      - text: DoNotTerminate — Blocks deletion; protects against accidental removal
         value: DoNotTerminate
+      - text: Halt — Deletes pods & services; retains data, secrets & backups
+        value: Halt
+      - text: Delete — Deletes pods, services & data; retains secrets & backups
+        value: Delete
+      - text: WipeOut — Deletes everything, including data, secrets & backups
+        value: WipeOut
       schema: schema/properties/spec/properties/deletionPolicy
       type: select
       watcher:

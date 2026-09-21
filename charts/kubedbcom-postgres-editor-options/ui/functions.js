@@ -1107,6 +1107,29 @@ export const useFunc = (model) => {
     return val
   }
 
+  function initDeletionPolicy() {
+    const deletionPolicy = getDefault('deletionPolicy')
+    const options = {
+      DoNotTerminate: {
+        text: 'DoNotTerminate — Blocks deletion; protects against accidental removal',
+        value: 'DoNotTerminate',
+      },
+      Halt: {
+        text: 'Halt — Deletes pods & services; retains data, secrets & backups',
+        value: 'Halt',
+      },
+      Delete: {
+        text: 'Delete — Deletes pods, services & data; retains secrets & backups',
+        value: 'Delete',
+      },
+      WipeOut: {
+        text: 'WipeOut — Deletes everything, including data, secrets & backups',
+        value: 'WipeOut',
+      },
+    }
+    return options[deletionPolicy] || options.WipeOut
+  }
+
   function convertToUTC(localTime) {
     const date = new Date(localTime)
     if (isNaN(date.getTime())) return
@@ -1394,6 +1417,7 @@ export const useFunc = (model) => {
     setBackup,
     showAdditionalSettings,
     getDefault,
+    initDeletionPolicy,
     onArchiverChange,
     showArchiverAlert,
     showArchiver,
