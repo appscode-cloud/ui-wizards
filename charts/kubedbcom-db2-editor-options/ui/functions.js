@@ -491,12 +491,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
-
     if (!getValue(model, `/spec/admin/databases/DB2/mode/toggle`)) {
       let defMode = getDefault('databases/DB2/mode') || ''
       if (defMode === '') {

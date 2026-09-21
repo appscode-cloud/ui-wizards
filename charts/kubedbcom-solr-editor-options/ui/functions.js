@@ -538,12 +538,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
-
     if (!getValue(model, `/spec/admin/databases/Solr/mode/toggle`)) {
       let defMode = getDefault('databases/Solr/mode') || ''
       if (defMode === '') {

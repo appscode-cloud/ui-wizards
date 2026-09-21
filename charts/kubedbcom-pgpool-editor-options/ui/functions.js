@@ -556,12 +556,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
-
     if (!getValue(model, `/spec/admin/databases/Pgpool/mode/toggle`)) {
       let defMode = getDefault('databases/Pgpool/mode') || ''
       if (defMode === '') {

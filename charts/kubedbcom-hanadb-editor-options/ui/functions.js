@@ -683,12 +683,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
-
     if (!getValue(model, `/spec/admin/databases/HanaDB/mode/toggle`)) {
       let defMode = getDefault('databases/HanaDB/mode') || ''
       if (defMode === '') {

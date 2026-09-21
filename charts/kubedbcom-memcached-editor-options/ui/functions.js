@@ -583,12 +583,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
-
     if (!getValue(model, `/spec/admin/databases/Memcached/mode/toggle`)) {
       let defMode = getDefault('databases/Memcached/mode') || ''
       if (defMode === '') {

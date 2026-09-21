@@ -456,12 +456,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
-
     if (!getValue(model, `/spec/admin/databases/Elasticsearch/mode/toggle`)) {
       let defMode = getDefault('databases/Elasticsearch/mode') || ''
       if (defMode === '') {

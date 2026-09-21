@@ -715,12 +715,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
-
     if (!getValue(model, `/spec/admin/databases/MariaDB/mode/toggle`)) {
       let defMode = getDefault('databases/MariaDB/mode') || ''
       if (defMode === '') {

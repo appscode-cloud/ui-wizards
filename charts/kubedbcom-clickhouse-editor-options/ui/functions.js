@@ -602,12 +602,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
-
     if (!getValue(model, `/spec/admin/databases/ClickHouse/mode/toggle`)) {
       let defMode = getDefault('databases/ClickHouse/mode') || ''
       if (defMode === '') {

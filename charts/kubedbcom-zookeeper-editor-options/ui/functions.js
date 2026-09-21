@@ -611,12 +611,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
-
     if (!getValue(model, `/spec/admin/databases/ZooKeeper/mode/toggle`)) {
       let defMode = getDefault('databases/ZooKeeper/mode') || ''
       if (defMode === '') {
