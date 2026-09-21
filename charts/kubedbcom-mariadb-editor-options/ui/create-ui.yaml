@@ -34,6 +34,72 @@ step:
     type: input
   - elements:
     - label: ""
+      subtitle: Select a machine profile to allocate CPU and memory resources for
+        your database cluster. Choose 'custom' to manually specify resource requirements
+        or select a predefined profile.
+      type: label-element
+    - elements:
+      - init:
+          type: func
+          value: setMachineToCustom
+        label: Machine
+        loader: getMachineListForOptions
+        schema: schema/properties/spec/properties/podResources/properties/machine
+        type: select
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+          - schema/properties/spec/properties/podResources/properties/machine
+        init:
+          type: func
+          value: setLimits|cpu
+        label: CPU
+        loader: setLimits|cpu
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+        watcher:
+          func: setRequests|cpu
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          - schema/properties/spec/properties/podResources/properties/machine
+      - disable:
+          name: isMachineNotCustom
+          watchPaths:
+          - schema/properties/spec/properties/podResources/properties/machine
+        init:
+          type: func
+          value: setLimits|memory
+        label: Memory
+        loader: setLimits|memory
+        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+        watcher:
+          func: setRequests|memory
+          paths:
+          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          - schema/properties/spec/properties/podResources/properties/machine
+      showLabels: true
+      type: horizontal-layout
+    label: Machine Profile
+    showLabels: true
+    type: block-layout
+  - elements:
+    - elements:
+      - if:
+          name: isToggleOn|storageClasses
+          type: function
+        label: Storage Class
+        loader: getAdminOptions|storageClasses
+        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
+        type: select
+      - label: Storage Size
+        schema: schema/properties/spec/properties/persistence/properties/size
+        type: input
+      showLabels: true
+      type: horizontal-layout
+    type: block-layout
+  - elements:
+    - label: ""
       subtitle: Configure the MaxScale proxy tier that fronts the MariaDB replication
         cluster. MaxScale routes reads and writes to the primary and replicas.
       type: label-element
@@ -109,72 +175,6 @@ step:
       type: function
     label: MaxScale
     showLabels: true
-    type: block-layout
-  - elements:
-    - label: ""
-      subtitle: Select a machine profile to allocate CPU and memory resources for
-        your database cluster. Choose 'custom' to manually specify resource requirements
-        or select a predefined profile.
-      type: label-element
-    - elements:
-      - init:
-          type: func
-          value: setMachineToCustom
-        label: Machine
-        loader: getMachineListForOptions
-        schema: schema/properties/spec/properties/podResources/properties/machine
-        type: select
-      - disable:
-          name: isMachineNotCustom
-          watchPaths:
-          - schema/properties/spec/properties/podResources/properties/machine
-        init:
-          type: func
-          value: setLimits|cpu
-        label: CPU
-        loader: setLimits|cpu
-        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-        type: input
-        watcher:
-          func: setRequests|cpu
-          paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-          - schema/properties/spec/properties/podResources/properties/machine
-      - disable:
-          name: isMachineNotCustom
-          watchPaths:
-          - schema/properties/spec/properties/podResources/properties/machine
-        init:
-          type: func
-          value: setLimits|memory
-        label: Memory
-        loader: setLimits|memory
-        schema: schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-        type: input
-        watcher:
-          func: setRequests|memory
-          paths:
-          - schema/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-          - schema/properties/spec/properties/podResources/properties/machine
-      showLabels: true
-      type: horizontal-layout
-    label: Machine Profile
-    showLabels: true
-    type: block-layout
-  - elements:
-    - elements:
-      - if:
-          name: isToggleOn|storageClasses
-          type: function
-        label: Storage Class
-        loader: getAdminOptions|storageClasses
-        schema: schema/properties/spec/properties/admin/properties/storageClasses/properties/default
-        type: select
-      - label: Storage Size
-        schema: schema/properties/spec/properties/persistence/properties/size
-        type: input
-      showLabels: true
-      type: horizontal-layout
     type: block-layout
   - description: Configure Credentials, Deployment Mode etc.
     elements:
@@ -385,6 +385,9 @@ step:
           - LoadBalancer
           schema: svcType
           type: select
+        init:
+          type: func
+          value: setServiceTemplate
         label: New Service Template
         schema: schema/properties/spec/properties/serviceTemplates
         type: array-object-form

@@ -1162,6 +1162,10 @@ export const useFunc = (model) => {
     return 'true'
   }
 
+  function setServiceTemplate() {
+    const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
+    if (serviceTemplates.length) return serviceTemplates
+  }
   return {
     checkIfFeatureOn,
     clearConfiguration,
@@ -1213,5 +1217,6 @@ export const useFunc = (model) => {
     showSelectZone,
     showSentinelNameAndNamespace,
     updateAlertValue,
+    setServiceTemplate,
   }
 }

@@ -1069,6 +1069,10 @@ export const useFunc = (model) => {
     } else return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
   }
 
+  function setServiceTemplate() {
+    const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
+    if (serviceTemplates.length) return serviceTemplates
+  }
   return {
     clearConfiguration,
     dedicatedOnChange,
@@ -1113,5 +1117,6 @@ export const useFunc = (model) => {
     getNodeTopology,
     checkIfFeatureOn,
     isToggleOn,
+    setServiceTemplate,
   }
 }

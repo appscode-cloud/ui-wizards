@@ -1444,6 +1444,10 @@ export const useFunc = (model) => {
     return
   }
 
+  function setServiceTemplate() {
+    const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
+    if (serviceTemplates.length) return serviceTemplates
+  }
   return {
     onReferSecretChange,
     showReferSecretSwitch,
@@ -1501,5 +1505,6 @@ export const useFunc = (model) => {
     onHorizonsChange,
     isHorizonsValid,
     onTimestampChange,
+    setServiceTemplate,
   }
 }
