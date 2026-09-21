@@ -617,7 +617,7 @@ export const useFunc = (model) => {
     const hubOwner = clusterInfo?.hubClusterOwnerName || owner
     const hubClusterName = clusterInfo?.hubClusterName
     if (!hubClusterName) return `${domain}/console/${hubOwner}/hubs`
-    return `${domain}/console/${hubOwner}/hubs/${hubClusterName}`
+    return `${domain}/console/${hubOwner}/hubs/${hubClusterName}/settings/preset/kubedb-ui-presets/edit`
   }
 
   async function fetchHubOwnership() {
