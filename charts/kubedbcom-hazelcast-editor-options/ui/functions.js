@@ -1163,6 +1163,10 @@ export const useFunc = (model) => {
     }
   }
 
+  function setServiceTemplate() {
+    const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
+    if (serviceTemplates.length) return serviceTemplates
+  }
   return {
     getArchiverName,
     onArchiverChange,
@@ -1207,5 +1211,6 @@ export const useFunc = (model) => {
     setBackup,
     showAdditionalSettings,
     getDefault,
+    setServiceTemplate,
   }
 }

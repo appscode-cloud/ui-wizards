@@ -1221,6 +1221,10 @@ export const useFunc = (model) => {
     }
   }
 
+  function setServiceTemplate() {
+    const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
+    if (serviceTemplates.length) return serviceTemplates
+  }
   return {
     onReferSecretChange,
     showReferSecretSwitch,
@@ -1261,5 +1265,6 @@ export const useFunc = (model) => {
     showArchiverAlert,
     showArchiver,
     onTimestampChange,
+    setServiceTemplate,
   }
 }

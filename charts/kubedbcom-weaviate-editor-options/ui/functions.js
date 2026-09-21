@@ -1017,6 +1017,10 @@ export const useFunc = (model) => {
     return show
   }
 
+  function setServiceTemplate() {
+    const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
+    if (serviceTemplates.length) return serviceTemplates
+  }
   return {
     showReferSecretSwitch,
     onReferSecretChange,
@@ -1049,5 +1053,6 @@ export const useFunc = (model) => {
     checkHostnameOrIP,
     onArchiverChange,
     showArchiverAlert,
+    setServiceTemplate,
   }
 }

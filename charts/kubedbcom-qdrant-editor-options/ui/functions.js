@@ -1033,6 +1033,10 @@ export const useFunc = (model) => {
     return !!modelPathValue && showReferSecret()
   }
 
+  function setServiceTemplate() {
+    const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
+    if (serviceTemplates.length) return serviceTemplates
+  }
   return {
     onReferSecretChange,
     showReferSecretSwitch,
@@ -1068,5 +1072,6 @@ export const useFunc = (model) => {
     clearConfiguration,
     setBackup,
     getDefault,
+    setServiceTemplate,
   }
 }

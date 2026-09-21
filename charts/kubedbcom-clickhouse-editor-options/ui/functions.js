@@ -1143,6 +1143,10 @@ export const useFunc = (model) => {
     }
   }
 
+  function setServiceTemplate() {
+    const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
+    if (serviceTemplates.length) return serviceTemplates
+  }
   return {
     isExternallyManaged,
     showReferSecretSwitch,
@@ -1186,5 +1190,6 @@ export const useFunc = (model) => {
     setPointInTimeRecovery,
     onTimestampChange,
     showRecovery,
+    setServiceTemplate,
   }
 }

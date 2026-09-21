@@ -1027,6 +1027,10 @@ export const useFunc = (model) => {
     // Add your implementation here if needed
   }
 
+  function setServiceTemplate() {
+    const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
+    if (serviceTemplates.length) return serviceTemplates
+  }
   return {
     showReferSecretSwitch,
     onReferSecretChange,
@@ -1068,5 +1072,6 @@ export const useFunc = (model) => {
     showAdditionalSettings,
     getDefault,
     setResourceLimit,
+    setServiceTemplate,
   }
 }
