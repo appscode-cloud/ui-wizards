@@ -488,6 +488,29 @@ export const useFunc = (model) => {
     return val
   }
 
+  function initDeletionPolicy() {
+    const deletionPolicy = getDefault('deletionPolicy')
+    const options = {
+      DoNotTerminate: {
+        text: 'DoNotTerminate — Blocks deletion; protects against accidental removal',
+        value: 'DoNotTerminate',
+      },
+      Halt: {
+        text: 'Halt — Deletes pods & services; retains data, secrets & backups',
+        value: 'Halt',
+      },
+      Delete: {
+        text: 'Delete — Deletes pods, services & data; retains secrets & backups',
+        value: 'Delete',
+      },
+      WipeOut: {
+        text: 'WipeOut — Deletes everything, including data, secrets & backups',
+        value: 'WipeOut',
+      },
+    }
+    return options[deletionPolicy] || options.WipeOut
+  }
+
   function getDefaultValue(path) {
     const val = getValue(model, `/${path}`) || ''
     return val
@@ -688,12 +711,6 @@ export const useFunc = (model) => {
     } catch (e) {
       console.log(e)
     }
-
-    commit('wizard/model$update', {
-      path: '/spec/deletionPolicy',
-      value: getDefault('deletionPolicy'),
-      force: true,
-    })
 
     if (!getValue(model, `/spec/admin/databases/Redis/mode/toggle`)) {
       let defMode = getDefault('databases/Redis/mode') || ''
@@ -1174,6 +1191,7 @@ export const useFunc = (model) => {
     getIssuers,
     getAdminOptions,
     getDefault,
+    initDeletionPolicy,
     getDefaultValue,
     getMachineListForOptions,
     getNodeTopology,
