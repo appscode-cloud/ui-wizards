@@ -54,7 +54,9 @@ type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	PodResources   PodResources        `json:"podResources"`
 	AuthSecret     AuthSecret          `json:"authSecret"`
 	DeletionPolicy DeletionPolicy      `json:"deletionPolicy"`
-	Configuration  string              `json:"configuration"`
+	// +optional
+	Init          InitScriptOnly `json:"init"`
+	Configuration string         `json:"configuration"`
 	// +optional
 	ServiceTemplates []SinglestoreServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions                 `json:"admin"`

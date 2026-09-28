@@ -51,7 +51,9 @@ type KubedbcomDB2EditorOptionsSpecSpec struct {
 	PodResources   PodResources   `json:"podResources"`
 	AuthSecret     AuthSecret     `json:"authSecret"`
 	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
-	Configuration  string         `json:"configuration"`
+	// +optional
+	Init          InitScriptOnly `json:"init"`
+	Configuration string         `json:"configuration"`
 	// +optional
 	ServiceTemplates []DB2ServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions         `json:"admin"`

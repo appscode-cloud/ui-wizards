@@ -222,8 +222,25 @@ spec:
         {{- end }}
       {{- end }}
 {{- end }}
-{{- if (and .Values.spec.init .Values.spec.init.archiver .Values.spec.init.archiver.recoveryTimestamp) }}
+{{- $init := .Values.spec.init | default dict }}
+{{- $initArchiver := and $init.archiver $init.archiver.recoveryTimestamp }}
+{{- $script := $init.script | default dict }}
+{{- $scriptCM := ($script.configMap | default dict).name }}
+{{- $scriptSecret := ($script.secret | default dict).secretName }}
+{{- if or $initArchiver $scriptCM $scriptSecret }}
   init:
+  {{- if $initArchiver }}
     archiver:
-      {{- toYaml .Values.spec.init.archiver | nindent 6 }}
+      {{- toYaml $init.archiver | nindent 6 }}
+  {{- end }}
+  {{- if or $scriptCM $scriptSecret }}
+    script:
+    {{- if $scriptCM }}
+      configMap:
+        name: {{ $scriptCM }}
+    {{- else }}
+      secret:
+        secretName: {{ $scriptSecret }}
+    {{- end }}
+  {{- end }}
 {{- end }}
