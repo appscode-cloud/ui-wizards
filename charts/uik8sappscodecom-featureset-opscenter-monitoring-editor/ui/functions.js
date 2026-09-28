@@ -230,6 +230,7 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) 
                 },
               },
               targetNamespace,
+              storageNamespace: targetNamespace,
             },
           },
           force: true,
