@@ -59,10 +59,12 @@ step:
         type: horizontal-layout
       - elements:
         - elements:
-          - disable: true
-            label: Type
+          - label: Type
+            options:
+            - text: block
+              value: block
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/store/properties/shardingStrategy/properties/type
-            type: input
+            type: select
           - label: Shards
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/store/properties/shardingStrategy/properties/shards
             type: input
@@ -246,6 +248,9 @@ step:
             type: input
             validation:
               type: required
+          if:
+            name: hasVolumeType
+            type: function
           type: horizontal-layout
         - customClass: mb-16
           elements:
@@ -260,6 +265,9 @@ step:
             validation:
               type: required
           - disable: true
+            init:
+              type: func
+              value: volumeMode
             label: Mode
             schema: schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/mode
             type: input
@@ -267,6 +275,9 @@ step:
               func: volumeMode
               paths:
               - schema/properties/spec/properties/metrics/properties/thanos/properties/ruler/properties/additionalConfig/properties/additionalVolumes/properties/0/properties/volumeType
+          if:
+            name: hasVolumeType
+            type: function
           type: horizontal-layout
         label: Additional Volumes
         showLabels: true
@@ -294,6 +305,9 @@ step:
         - label: Read Only
           schema: temp/properties/additionalVolumeMount/properties/readOnly
           type: switch
+        if:
+          name: hasVolumeType
+          type: function
         label: Additional Volume Mounts
         showLabels: true
         type: block-layout

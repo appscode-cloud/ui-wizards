@@ -25,12 +25,17 @@ export const useFunc = (model) => {
 
   const additionalVolumesPath = `${additionalConfigPath}/additionalVolumes/0`
 
+  function hasVolumeType() {
+    return !!getValue(model, `${additionalVolumesPath}/volumeType`)
+  }
+
   function isVolumeType(type) {
     return getValue(model, `${additionalVolumesPath}/volumeType`) === type
   }
 
   function volumeMode() {
-    return getValue(model, `${additionalVolumesPath}/volumeType`) ? 420 : ''
+    if (!hasVolumeType()) return ''
+    return getValue(model, `${additionalVolumesPath}/mode`) || 420
   }
 
   function volumeName() {
@@ -202,6 +207,7 @@ export const useFunc = (model) => {
     validateReplicationFactor,
     validateRetention,
     validateStorageSize,
+    hasVolumeType,
     isActivePage,
     isClusterTopology,
     isVolumeType,
