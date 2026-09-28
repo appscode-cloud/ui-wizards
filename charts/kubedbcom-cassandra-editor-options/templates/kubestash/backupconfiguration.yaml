@@ -43,6 +43,7 @@ spec:
           encryptionSecret:
             name: {{ .Values.spec.backup.kubestash.encryptionSecret.name }}
             namespace: {{ .Values.spec.backup.kubestash.encryptionSecret.namespace }}
+          deletionPolicy: {{ if has .Values.spec.deletionPolicy (list "WipeOut" "Delete") }}{{ .Values.spec.deletionPolicy }}{{ else }}Retain{{ end }}
       addon:
         name: cassandra-addon
         tasks:
