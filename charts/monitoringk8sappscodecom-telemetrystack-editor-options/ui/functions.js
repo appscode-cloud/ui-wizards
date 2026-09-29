@@ -24,49 +24,13 @@ export const useFunc = (model) => {
     return getValue(model, `/spec/${pillar}/backend`) === backend
   }
 
-
-  // Both products in a pillar share one sidebar page.
-  function isBackendPage(arg) {
-    const [page, pillar, backend] = arg.split(',')
-    return isActivePage(page) && isBackend(pillar, backend)
-  }
-
-  // Which backend each page belongs to. The sidebar cannot be gated, so a page
-  // for an unselected backend is reachable and would otherwise render blank.
-  const PAGE_BACKEND = {
-    's3': ['metrics', 'Thanos'],
-    'metrics-thanos-compact': ['metrics', 'Thanos'],
-    'metrics-thanos-store': ['metrics', 'Thanos'],
-    'metrics-thanos-query': ['metrics', 'Thanos'],
-    'metrics-thanos-receive': ['metrics', 'Thanos'],
-    'metrics-thanos-ruler': ['metrics', 'Thanos'],
-    'metrics-thanos-additional-config': ['metrics', 'Thanos'],
-    'metrics-victoriametrics': ['metrics', 'VictoriaMetrics'],
-    'logs-clickhouse': ['logs', 'ClickHouse'],
-    'logs-victorialogs': ['logs', 'VictoriaLogs'],
-  }
-
-  // True on a page for an unselected backend, which shows a note instead of rendering empty.
-  function isUnselectedBackendPage() {
-    const page = getValue(discriminator, '/telemetryPage')
-    const entry = PAGE_BACKEND[page]
-    if (!entry) return false
-    return !isBackend(entry[0], entry[1])
-  }
-
-  function unselectedBackendName() {
-    const entry = PAGE_BACKEND[getValue(discriminator, '/telemetryPage')]
-    return entry ? entry[1] : ''
+  function needsS3() {
+    return isBackend('metrics', 'Thanos') || isBackend('logs', 'ClickHouse')
   }
 
   function isVictoriaCluster(arg) {
     const [pillar, field] = arg.split(',')
     return getValue(model, `/spec/${pillar}/${field}/deploymentMode`) === 'Cluster'
-  }
-
-  // Only VictoriaMetrics has an enterprise build to license.
-  function isLicensedBackend() {
-    return isBackend('metrics', 'VictoriaMetrics')
   }
 
   // Retention filters are enterprise only, so the choice is hidden without a
@@ -84,12 +48,17 @@ export const useFunc = (model) => {
 
   const additionalVolumesPath = `${additionalConfigPath}/additionalVolumes/0`
 
+  function hasVolumeType() {
+    return !!getValue(model, `${additionalVolumesPath}/volumeType`)
+  }
+
   function isVolumeType(type) {
     return getValue(model, `${additionalVolumesPath}/volumeType`) === type
   }
 
   function volumeMode() {
-    return getValue(model, `${additionalVolumesPath}/volumeType`) ? 420 : ''
+    if (!hasVolumeType()) return ''
+    return getValue(model, `${additionalVolumesPath}/mode`) || 420
   }
 
   function volumeName() {
@@ -241,7 +210,15 @@ export const useFunc = (model) => {
     return !value && getValue(model, `${licensePath}/secretName`) ? 'Key is required' : false
   }
 
-  function getStorageClasses() {
+  function validateDiskUsagePercent(value) {
+    if (!value) return false
+    const percent = Number(value)
+    return Number.isInteger(percent) && percent >= 1 && percent <= 100
+      ? false
+      : 'Must be between 1 and 100'
+  }
+
+  function fetchStorageClasses() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const key = `${owner}/${cluster}`
@@ -249,10 +226,7 @@ export const useFunc = (model) => {
     if (!storageClassCache[key]) {
       storageClassCache[key] = axios
         .get(`/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`)
-        .then((resp) => {
-          const items = (resp && resp.data && resp.data.items) || []
-          return items.map((item) => item?.metadata?.name).filter(Boolean)
-        })
+        .then((resp) => (resp && resp.data && resp.data.items) || [])
         .catch((e) => {
           console.log(e)
           delete storageClassCache[key]
@@ -263,8 +237,26 @@ export const useFunc = (model) => {
     return storageClassCache[key]
   }
 
+  async function getStorageClasses() {
+    const items = await fetchStorageClasses()
+    return items.map((item) => item?.metadata?.name).filter(Boolean)
+  }
+
+  async function defaultStorageClass(backendPath) {
+    const current = getValue(model, `/spec/${backendPath}/storage/storageClassName`)
+    if (current) return current
+
+    const items = await fetchStorageClasses()
+    const isDefault = (item) =>
+      item?.metadata?.annotations?.['storageclass.kubernetes.io/is-default-class'] === 'true'
+    const picked = items.length === 1 ? items[0] : items.find(isDefault)
+    return picked?.metadata?.name || ''
+  }
+
   return {
+    defaultStorageClass,
     getStorageClasses,
+    validateDiskUsagePercent,
     validateClientCaCertificates,
     validateFiveMinutesRetention,
     validateLicenseSecretKey,
@@ -274,16 +266,14 @@ export const useFunc = (model) => {
     validateReplicationFactor,
     validateRetention,
     validateStorageSize,
+    hasVolumeType,
     isActivePage,
-    isBackendPage,
-    isUnselectedBackendPage,
-    unselectedBackendName,
     isBackend,
     isClusterTopology,
-    isLicensedBackend,
     isVictoriaCluster,
     canUseRetentionFilters,
     isVolumeType,
+    needsS3,
     s3Field,
     syncS3,
     volumeMode,
