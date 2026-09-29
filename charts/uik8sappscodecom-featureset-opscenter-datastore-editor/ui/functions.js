@@ -236,6 +236,7 @@ export const useFunc = (model) => {
           },
         },
         targetNamespace,
+        storageNamespace: targetNamespace,
       },
     }
   }
