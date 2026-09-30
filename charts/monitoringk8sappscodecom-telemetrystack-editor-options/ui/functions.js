@@ -19,18 +19,46 @@ export const useFunc = (model) => {
     return getValue(discriminator, '/telemetryPage') === page
   }
 
+  // Renders a pillar's options only for the backend selected for it.
+  function isBackend(pillar, backend) {
+    return getValue(model, `/spec/${pillar}/backend`) === backend
+  }
+
+  function needsS3() {
+    return isBackend('metrics', 'Thanos') || isBackend('logs', 'ClickHouse')
+  }
+
+  function isVictoriaCluster(arg) {
+    const [pillar, field] = arg.split(',')
+    return getValue(model, `/spec/${pillar}/${field}/deploymentMode`) === 'Cluster'
+  }
+
+  // Retention filters are enterprise only, so the choice is hidden without a
+  // licence rather than offered and refused on apply.
+  function canUseRetentionFilters() {
+    return (
+      isBackend('metrics', 'VictoriaMetrics') &&
+      !!getValue(model, '/spec/metrics/victoriaMetrics/license/secretName')
+    )
+  }
+
   function isClusterTopology(pillar) {
     return getValue(model, `/spec/${pillar}/deploymentMode`) === 'ClusterTopology'
   }
 
   const additionalVolumesPath = `${additionalConfigPath}/additionalVolumes/0`
 
+  function hasVolumeType() {
+    return !!getValue(model, `${additionalVolumesPath}/volumeType`)
+  }
+
   function isVolumeType(type) {
     return getValue(model, `${additionalVolumesPath}/volumeType`) === type
   }
 
   function volumeMode() {
-    return getValue(model, `${additionalVolumesPath}/volumeType`) ? 420 : ''
+    if (!hasVolumeType()) return ''
+    return getValue(model, `${additionalVolumesPath}/mode`) || 420
   }
 
   function volumeName() {
@@ -171,7 +199,26 @@ export const useFunc = (model) => {
     return false
   }
 
-  function getStorageClasses() {
+  // The licence is optional, but a Secret without a key, or a key without a Secret, is not.
+  const licensePath = '/spec/metrics/victoriaMetrics/license'
+
+  function validateLicenseSecretName(value) {
+    return !value && getValue(model, `${licensePath}/secretKey`) ? 'Secret name is required' : false
+  }
+
+  function validateLicenseSecretKey(value) {
+    return !value && getValue(model, `${licensePath}/secretName`) ? 'Key is required' : false
+  }
+
+  function validateDiskUsagePercent(value) {
+    if (!value) return false
+    const percent = Number(value)
+    return Number.isInteger(percent) && percent >= 1 && percent <= 100
+      ? false
+      : 'Must be between 1 and 100'
+  }
+
+  function fetchStorageClasses() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const key = `${owner}/${cluster}`
@@ -179,10 +226,7 @@ export const useFunc = (model) => {
     if (!storageClassCache[key]) {
       storageClassCache[key] = axios
         .get(`/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`)
-        .then((resp) => {
-          const items = (resp && resp.data && resp.data.items) || []
-          return items.map((item) => item?.metadata?.name).filter(Boolean)
-        })
+        .then((resp) => (resp && resp.data && resp.data.items) || [])
         .catch((e) => {
           console.log(e)
           delete storageClassCache[key]
@@ -193,18 +237,43 @@ export const useFunc = (model) => {
     return storageClassCache[key]
   }
 
+  async function getStorageClasses() {
+    const items = await fetchStorageClasses()
+    return items.map((item) => item?.metadata?.name).filter(Boolean)
+  }
+
+  async function defaultStorageClass(backendPath) {
+    const current = getValue(model, `/spec/${backendPath}/storage/storageClassName`)
+    if (current) return current
+
+    const items = await fetchStorageClasses()
+    const isDefault = (item) =>
+      item?.metadata?.annotations?.['storageclass.kubernetes.io/is-default-class'] === 'true'
+    const picked = items.length === 1 ? items[0] : items.find(isDefault)
+    return picked?.metadata?.name || ''
+  }
+
   return {
+    defaultStorageClass,
     getStorageClasses,
+    validateDiskUsagePercent,
     validateClientCaCertificates,
     validateFiveMinutesRetention,
+    validateLicenseSecretKey,
+    validateLicenseSecretName,
     validateOneHourRetention,
     validateRawRetention,
     validateReplicationFactor,
     validateRetention,
     validateStorageSize,
+    hasVolumeType,
     isActivePage,
+    isBackend,
     isClusterTopology,
+    isVictoriaCluster,
+    canUseRetentionFilters,
     isVolumeType,
+    needsS3,
     s3Field,
     syncS3,
     volumeMode,

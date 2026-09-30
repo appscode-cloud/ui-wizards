@@ -6,6 +6,39 @@ metadata:
     {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.labels" . | nindent 4 }}
 spec:
   metrics:
+    backend: {{ .Values.spec.metrics.backend }}
+    {{- if eq .Values.spec.metrics.backend "VictoriaMetrics" }}
+    {{- $vm := .Values.spec.metrics.victoriaMetrics }}
+    victoriaMetrics:
+      deploymentMode: {{ $vm.deploymentMode }}
+      {{- if $vm.version }}
+      version: {{ $vm.version | quote }}
+      {{- end }}
+      retentionStrategy: {{ $vm.retentionStrategy }}
+      {{- if $vm.defaultRetention }}
+      defaultRetention: {{ $vm.defaultRetention | quote }}
+      {{- end }}
+      {{- if $vm.license.secretName }}
+      license:
+        keyRef:
+          name: {{ $vm.license.secretName }}
+          key: {{ $vm.license.secretKey }}
+      {{- end }}
+      {{- if eq $vm.deploymentMode "Cluster" }}
+      cluster:
+        replicationFactor: {{ $vm.cluster.replicationFactor }}
+        insert:
+          replicas: {{ $vm.cluster.insertReplicas }}
+        select:
+          replicas: {{ $vm.cluster.selectReplicas }}
+        storage:
+          replicas: {{ $vm.cluster.storageReplicas }}
+          {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.victoriaStorage" $vm.storage | nindent 10 }}
+      {{- else }}
+      single:
+        {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.victoriaStorage" $vm.storage | nindent 8 }}
+      {{- end }}
+    {{- else }}
     thanos:
       compact:
         storageSize: {{ .Values.spec.metrics.thanos.compact.storageSize }}
@@ -66,9 +99,23 @@ spec:
       s3:
         {{- toYaml .Values.spec.metrics.thanos.s3 | nindent 8 }}
       {{- end }}
+    {{- end }}
   logs:
+    backend: {{ .Values.spec.logs.backend }}
+    {{- if eq .Values.spec.logs.backend "VictoriaLogs" }}
+    {{- $vl := .Values.spec.logs.victoriaLogs }}
+    victoriaLogs:
+      {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.victoriaTopology" (dict "pillar" $vl) | nindent 6 }}
+      {{- if $vl.futureRetention }}
+      futureRetention: {{ $vl.futureRetention | quote }}
+      {{- end }}
+      {{- if $vl.maxDiskUsagePercent }}
+      maxDiskUsagePercent: {{ $vl.maxDiskUsagePercent }}
+      {{- end }}
+    {{- else }}
     clickhouse:
       {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.clickhouse" (dict "root" $ "pillar" .Values.spec.logs) | nindent 6 }}
+    {{- end }}
   traces:
     clickhouse:
       {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.clickhouse" (dict "root" $ "pillar" .Values.spec.traces) | nindent 6 }}
