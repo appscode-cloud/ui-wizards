@@ -1353,7 +1353,48 @@ export const useFunc = (model) => {
     const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
     if (serviceTemplates.length) return serviceTemplates
   }
+  setDiscriminatorValue('initScript', false)
+  setDiscriminatorValue('initScriptSource', 'configMap')
+
+  function isInitScriptOn() {
+    return !!getValue(discriminator, '/initScript')
+  }
+
+  function isInitScriptSource(source) {
+    return getValue(discriminator, '/initScriptSource') === source
+  }
+
+  function onInitScriptChange() {
+    if (!getValue(discriminator, '/initScript')) commit('wizard/model$delete', '/spec/init/script')
+  }
+
+  function onInitScriptSourceChange() {
+    const source = getValue(discriminator, '/initScriptSource')
+    const other = source === 'secret' ? 'configMap' : 'secret'
+    commit('wizard/model$delete', `/spec/init/script/${other}`)
+  }
+
+  async function getInitScriptSources(resource) {
+    const { user, cluster } = storeGet('/route/params')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/${resource}`
+    try {
+      const resp = await axios.get(url, {
+        params: { filter: { items: { metadata: { name: null } } } },
+      })
+      return (resp.data?.items || []).map((item) => item.metadata?.name)
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
   return {
+    isInitScriptOn,
+    isInitScriptSource,
+    onInitScriptChange,
+    onInitScriptSourceChange,
+    getInitScriptSources,
     showReferSecretSwitch,
     onReferSecretChange,
     getDefaultValue,

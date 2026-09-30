@@ -125,6 +125,21 @@ spec:
             {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- $init := .Values.spec.init | default dict }}
+{{- $script := $init.script | default dict }}
+{{- $scriptCM := ($script.configMap | default dict).name }}
+{{- $scriptSecret := ($script.secret | default dict).secretName }}
+{{- if or $scriptCM $scriptSecret }}
+  init:
+    script:
+    {{- if $scriptCM }}
+      configMap:
+        name: {{ $scriptCM }}
+    {{- else }}
+      secret:
+        secretName: {{ $scriptSecret }}
+    {{- end }}
+{{- end }}
 {{- $svcTpls := .Values.spec.serviceTemplates | default .Values.spec.admin.serviceTemplates }}
 {{- if $svcTpls }}
   serviceTemplates:

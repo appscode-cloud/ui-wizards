@@ -270,6 +270,54 @@ step:
       label: Service Templates
       showLabels: true
       type: block-layout
+    - label: Initialize with Script?
+      schema: temp/initScript
+      type: switch
+      watcher:
+        func: onInitScriptChange
+        paths:
+        - temp/initScript
+    - elements:
+      - init:
+          type: static
+          value: configMap
+        isHorizontal: true
+        label: Script Source
+        options:
+        - text: ConfigMap
+          value: configMap
+        - text: Secret
+          value: secret
+        schema: temp/initScriptSource
+        type: radio
+        watcher:
+          func: onInitScriptSourceChange
+          paths:
+          - temp/initScriptSource
+      - if:
+          name: isInitScriptSource|configMap
+          type: function
+        label: ConfigMap
+        loader: getInitScriptSources|configmaps
+        schema: schema/properties/spec/properties/init/properties/script/properties/configMap/properties/name
+        type: select
+        validation:
+          type: required
+      - if:
+          name: isInitScriptSource|secret
+          type: function
+        label: Secret
+        loader: getInitScriptSources|secrets
+        schema: schema/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
+        type: select
+        validation:
+          type: required
+      if:
+        name: isInitScriptOn
+        type: function
+      label: Init Script
+      showLabels: true
+      type: block-layout
     label: Advanced Configuration
     showLabels: true
     type: block-layout

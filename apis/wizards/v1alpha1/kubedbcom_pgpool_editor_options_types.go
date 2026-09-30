@@ -54,7 +54,9 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	PodResources   PodResources      `json:"podResources"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
-	Configuration  string            `json:"configuration"`
+	// +optional
+	Init          InitScriptOnly `json:"init"`
+	Configuration string         `json:"configuration"`
 	// +optional
 	ServiceTemplates []PgpoolServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions            `json:"admin"`

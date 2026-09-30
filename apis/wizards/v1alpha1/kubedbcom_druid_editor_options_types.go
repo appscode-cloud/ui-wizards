@@ -53,7 +53,9 @@ type KubedbcomDruidEditorOptionsSpecSpec struct {
 	ZookeeperRef    DruidZooKeeperRef    `json:"zookeeperRef"`
 	AuthSecret      AuthSecret           `json:"authSecret"`
 	DeletionPolicy  DeletionPolicy       `json:"deletionPolicy"`
-	Configuration   string               `json:"configuration"`
+	// +optional
+	Init          InitScriptOnly `json:"init"`
+	Configuration string         `json:"configuration"`
 	// +optional
 	ServiceTemplates []DruidServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions           `json:"admin"`

@@ -42,6 +42,28 @@ type StorageClass struct {
 
 type InitDatabase struct {
 	Archiver Archiver `json:"archiver"`
+	// +optional
+	Script *InitScript `json:"script,omitempty"`
+}
+
+type InitScriptOnly struct {
+	// +optional
+	Script *InitScript `json:"script,omitempty"`
+}
+
+type InitScript struct {
+	// +optional
+	ConfigMap *InitScriptConfigMap `json:"configMap,omitempty"`
+	// +optional
+	Secret *InitScriptSecret `json:"secret,omitempty"`
+}
+
+type InitScriptConfigMap struct {
+	Name string `json:"name"`
+}
+
+type InitScriptSecret struct {
+	SecretName string `json:"secretName"`
 }
 
 type Archiver struct {

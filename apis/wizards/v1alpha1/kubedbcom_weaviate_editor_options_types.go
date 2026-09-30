@@ -56,7 +56,9 @@ type KubedbcomWeaviateEditorOptionsSpecSpec struct {
 	PodResources   PodResources           `json:"podResources"`
 	AuthSecret     WeaviateAuthSecret     `json:"authSecret"`
 	DeletionPolicy DeletionPolicy         `json:"deletionPolicy"`
-	Configuration  string                 `json:"configuration"`
+	// +optional
+	Init          InitScriptOnly `json:"init"`
+	Configuration string         `json:"configuration"`
 	// +optional
 	ServiceTemplates []WeaviateServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions              `json:"admin"`
