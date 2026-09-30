@@ -479,7 +479,61 @@ export const useFunc = (model) => {
     await onEnabledFeaturesChange()
   }
 
+  function isMonitoringSelected() {
+    const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+    if (enabledFeatures.includes('monitoring-operator')) {
+      return true
+    }
+    return false
+  }
+
+  function isEnableAlert(type) {
+    const val = getValue(
+      model,
+      `/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/spec/values/alertmanager/${type}/enabled`,
+    )
+    return !!val
+  }
+
+  function validateEmail(field) {
+    const value = getValue(
+      model,
+      `/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/spec/values/alertmanager/email/${field}`,
+    )
+    const email = String(value ?? '').trim()
+    if (!email) return ''
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!regex.test(email)) {
+      return 'Please enter a valid email address'
+    }
+    return ''
+  }
+
+  function validateUrl(provider) {
+    const value = getValue(
+      model,
+      `/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/spec/values/alertmanager/webhook/relay/providers/${provider}/url`,
+    )
+    const url = String(value ?? '').trim()
+    if (!url) return ''
+    // allow urls without a scheme, e.g. google.com
+    const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(url) ? url : `https://${url}`
+    try {
+      const { hostname } = new URL(withScheme)
+      if (!/^[^.]+(\.[^.]+)+$/.test(hostname)) {
+        return 'Please enter a valid URL'
+      }
+    } catch (e) {
+      return 'Please enter a valid URL'
+    }
+    return ''
+  }
+
   return {
+    isMonitoringSelected,
+    isEnableAlert,
+    validateEmail,
+    validateUrl,
     hideThisElement,
     checkIsResourceLoaded,
     getFeatureSetDetails,
