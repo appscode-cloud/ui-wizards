@@ -55,6 +55,19 @@ storage:
   resources:
     requests:
       storage: {{ $pillar.storage.size }}
+{{- $res := dict -}}
+{{- range $kind := list "requests" "limits" -}}
+{{- $vals := dict -}}
+{{- range $r := list "cpu" "memory" -}}
+{{- $v := index (default dict (index (default dict $pillar.resources) $kind)) $r -}}
+{{- if $v }}{{- $_ := set $vals $r $v -}}{{- end -}}
+{{- end -}}
+{{- if $vals }}{{- $_ := set $res $kind $vals -}}{{- end -}}
+{{- end }}
+{{- if $res }}
+resources:
+  {{- toYaml $res | nindent 2 }}
+{{- end }}
 {{- if $pillar.clientCaCertificates }}
 tls:
   clientCaCertificateRefs:
