@@ -166,13 +166,20 @@ export const useFunc = (model) => {
       if (featureBlock === 'aceshifter') {
         return [
           'aceshifter',
+          'akp-crd-manager',
           'flux2',
           'kube-ui-server',
           'license-proxyserver',
           'opscenter-features',
         ]
       }
-      return ['flux2', 'kube-ui-server', 'license-proxyserver', 'opscenter-features']
+      return [
+        'akp-crd-manager',
+        'flux2',
+        'kube-ui-server',
+        'license-proxyserver',
+        'opscenter-features',
+      ]
     }
 
     const allFeatureSetFeature =
