@@ -45,6 +45,7 @@ type KubedbcomDocumentDBEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
+	Mode   GeneralMode       `json:"mode"`
 	// +optional
 	Replicas       int            `json:"replicas,omitempty"`
 	Persistence    Persistence    `json:"persistence"`

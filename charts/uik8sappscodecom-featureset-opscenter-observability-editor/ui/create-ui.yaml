@@ -32,102 +32,102 @@ step:
       func: onMonitoringClusterChange
       paths:
       - temp/properties/monitoringClusterName
-  - label: Alertmanager Configuration
-    type: label-element
-    if:
+  - if:
       name: isMonitoringSelected
       type: function
+    label: Alertmanager Configuration
+    type: label-element
   - elements:
-    - type: switch
-      label: Enable Email
+    - label: Enable Email
       schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/email/properties/enabled
-    - type: horizontal-layout
+      type: switch
+    - elements:
+      - label: To
+        schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/email/properties/to
+        type: input
+        validation:
+          name: validateEmail|to
+          type: custom
+      - label: From
+        schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/email/properties/from
+        type: input
+        validation:
+          name: validateEmail|from
+          type: custom
       if:
         name: isEnableAlert|email
         type: function
-      elements:
-        - type: input
-          label: To
-          validation: 
-            type: custom
-            name: validateEmail|to
-          schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/email/properties/to
-        - type: input
-          label: From
-          validation: 
-            type: custom
-            name: validateEmail|from
-          schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/email/properties/from
-    - type: input
-      if:
+      type: horizontal-layout
+    - if:
         name: isEnableAlert|email
         type: function
       label: SmartHost
       schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/email/properties/smarthost
-    - type: input
-      if:
+      type: input
+    - if:
         name: isEnableAlert|email
         type: function
       label: AuthUsername
       schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/email/properties/authUsername
-    - type: input
-      if:
+      type: input
+    - if:
         name: isEnableAlert|email
         type: function
       label: Password
       schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/email/properties/password
+      type: input
+    if:
+      name: isMonitoringSelected
+      type: function
     label: Email
     showLabels: true
     type: block-layout
+  - elements:
+    - label: Enable Webhook
+      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/enabled
+      type: switch
+    - if:
+        name: isEnableAlert|webhook
+        type: function
+      label: Google Chat URL
+      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/relay/properties/providers/properties/googleChat/properties/url
+      type: input
+      validation:
+        name: validateUrl|googleChat
+        type: custom
+    - if:
+        name: isEnableAlert|webhook
+        type: function
+      label: Slack URL
+      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/relay/properties/providers/properties/slack/properties/url
+      type: input
+      validation:
+        name: validateUrl|slack
+        type: custom
+    - if:
+        name: isEnableAlert|webhook
+        type: function
+      label: MS Teams URL
+      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/relay/properties/providers/properties/msTeams/properties/url
+      type: input
+      validation:
+        name: validateUrl|msTeams
+        type: custom
+    - if:
+        name: isEnableAlert|webhook
+        type: function
+      label: Mattermost URL
+      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/relay/properties/providers/properties/mattermost/properties/url
+      type: input
+      validation:
+        name: validateUrl|mattermost
+        type: custom
     if:
       name: isMonitoringSelected
       type: function
-  - elements:
-    - type: switch
-      label: Enable Webhook
-      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/enabled
-    - type: input
-      label: Google Chat URL
-      if:
-        name: isEnableAlert|webhook
-        type: function
-      validation:
-        type: custom
-        name: validateUrl|googleChat
-      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/relay/properties/providers/properties/googleChat/properties/url
-    - type: input
-      label: Slack URL
-      if:
-        name: isEnableAlert|webhook
-        type: function
-      validation:
-        type: custom
-        name: validateUrl|slack
-      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/relay/properties/providers/properties/slack/properties/url
-    - type: input
-      label: MS Teams URL
-      if:
-        name: isEnableAlert|webhook
-        type: function
-      validation:
-        type: custom
-        name: validateUrl|msTeams
-      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/relay/properties/providers/properties/msTeams/properties/url
-    - type: input
-      label: Mattermost URL
-      if:
-        name: isEnableAlert|webhook
-        type: function
-      validation:
-        type: custom
-        name: validateUrl|mattermost
-      schema: schema/properties/resources/helmToolkitFluxcdIoHelmRelease_monitoring_operator/properties/spec/properties/values/properties/alertmanager/properties/webhook/properties/relay/properties/providers/properties/mattermost/properties/url
     label: Webhook
     showLabels: true
     type: block-layout
-    if:
-      name: isMonitoringSelected
-      type: function
   id: opscenter-monitoring
   loader: setReleaseNameAndNamespaceAndInitializeValues
   type: single-step-form
