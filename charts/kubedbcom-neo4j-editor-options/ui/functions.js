@@ -311,13 +311,9 @@ const modeDetails = {
     description: 'Single node Neo4j without high availability.',
     text: 'Standalone',
   },
-  DataGuard: {
-    description: 'Neo4j Data Guard for high availability, data protection, and disaster recovery',
-    text: 'DataGuard',
-  },
-  Replicaset: {
-    description: 'Neo4j Replicaset for high availability, data protection, and disaster recovery',
-    text: 'Replicaset',
+  Cluster: {
+    description: 'Neo4j cluster with Raft-based primaries and secondaries for high availability and read scaling.',
+    text: 'Cluster',
   },
 }
 

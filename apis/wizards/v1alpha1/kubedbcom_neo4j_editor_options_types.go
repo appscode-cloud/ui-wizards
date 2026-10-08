@@ -48,7 +48,7 @@ type KubedbcomNeo4jEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   GeneralMode       `json:"mode"`
+	Mode   ClusterMode       `json:"mode"`
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional

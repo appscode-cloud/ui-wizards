@@ -308,12 +308,12 @@ const machineList = [
 
 const modeDetails = {
   Standalone: {
-    description: 'Single node ProxySQL without high availability',
+    description: 'Single node ProxySQL without high availability.',
     text: 'Standalone',
   },
-  Replicaset: {
-    description: 'ProxySQL Replicaset for high availability.',
-    text: 'Replicaset',
+  Cluster: {
+    description: 'ProxySQL cluster where nodes sync configuration with each other for high availability.',
+    text: 'Cluster',
   },
 }
 

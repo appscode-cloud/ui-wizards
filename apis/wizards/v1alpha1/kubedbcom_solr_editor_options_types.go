@@ -77,7 +77,7 @@ type SolrServiceTemplate struct {
 	SvcType core.ServiceType `json:"svcType,omitempty"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Topology
+// +kubebuilder:validation:Enum=Combined;Topology
 type SolrMode string
 
 type SolrNode struct {

@@ -307,16 +307,12 @@ const machineList = [
 ]
 
 const modeDetails = {
-  Standalone: {
-    description: 'Single node Solr without high availability and sharding.',
-    text: 'Standalone',
-  },
-  Replicaset: {
-    description: 'Solr ReplicaSet for high availability.',
-    text: 'Replicated Cluster',
+  Combined: {
+    description: 'Solr combined cluster where each node acts as overseer, data and coordinator. Set replicas to 1 for a single node.',
+    text: 'Combined Cluster',
   },
   Topology: {
-    description: 'Solr Topology cluster for high performance and high availability.',
+    description: 'Solr topology cluster with dedicated overseer, data and coordinator nodes.',
     text: 'Topology Cluster',
   },
 }
@@ -840,8 +836,7 @@ export const useFunc = (model) => {
   function showStorageSizeField() {
     const modelPathValue = getValue(model, '/spec/mode')
     // watchDependency('model#/spec/mode')
-    const validType = ['Standalone', 'Replicaset']
-    return validType.includes(modelPathValue)
+    return modelPathValue === 'Combined'
   }
 
   function showIssuer() {

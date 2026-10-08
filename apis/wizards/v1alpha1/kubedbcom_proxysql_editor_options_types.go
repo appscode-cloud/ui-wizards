@@ -48,7 +48,7 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Mode           GeneralMode       `json:"mode"`
+	Mode           ClusterMode       `json:"mode"`
 	Replicas       int               `json:"replicas"`
 	SyncUsers      bool              `json:"syncUsers"`
 	Backend        string            `json:"backend"`
