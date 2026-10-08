@@ -308,12 +308,12 @@ const machineList = [
 
 const modeDetails = {
   Standalone: {
-    description: 'Single node Memcached without high availability',
+    description: 'Single node Memcached without high availability.',
     text: 'Standalone',
   },
-  Replicaset: {
-    description: 'Memcached Replicaset for high availability.',
-    text: 'Replicaset',
+  Distributed: {
+    description: 'Multiple Memcached nodes for distributed caching and higher throughput.',
+    text: 'Distributed',
   },
 }
 

@@ -45,7 +45,7 @@ type KubedbcomDB2EditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   GeneralMode       `json:"mode"`
+	Mode   DB2Mode           `json:"mode"`
 	// +optional
 	Replicas       int            `json:"replicas,omitempty"`
 	Persistence    Persistence    `json:"persistence"`
@@ -63,6 +63,9 @@ type KubedbcomDB2EditorOptionsSpecSpec struct {
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
+
+// +kubebuilder:validation:Enum=Standalone;HADR
+type DB2Mode string
 
 // +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
 type DB2ServiceAlias string

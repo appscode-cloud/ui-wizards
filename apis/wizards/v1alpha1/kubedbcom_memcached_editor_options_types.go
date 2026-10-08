@@ -47,7 +47,7 @@ type KubedbcomMemcachedEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   GeneralMode       `json:"mode"`
+	Mode   MemcachedMode     `json:"mode"`
 	// +optional
 	Replicas       int            `json:"replicas"`
 	PodResources   PodResources   `json:"podResources"`
@@ -62,6 +62,9 @@ type KubedbcomMemcachedEditorOptionsSpecSpec struct {
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
+
+// +kubebuilder:validation:Enum=Standalone;Distributed
+type MemcachedMode string
 
 // +kubebuilder:validation:Enum=primary;standby;stats
 type MemcachedServiceAlias string

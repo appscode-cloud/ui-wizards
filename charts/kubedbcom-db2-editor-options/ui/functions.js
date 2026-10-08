@@ -311,13 +311,9 @@ const modeDetails = {
     description: 'Single node DB2 without high availability.',
     text: 'Standalone',
   },
-  DataGuard: {
-    description: 'DB2 Data Guard for high availability, data protection, and disaster recovery',
-    text: 'DataGuard',
-  },
-  Replicaset: {
-    description: 'DB2 Replicaset for high availability, data protection, and disaster recovery',
-    text: 'Replicaset',
+  HADR: {
+    description: 'DB2 High Availability Disaster Recovery with a primary replicating logs to standby databases for failover.',
+    text: 'HADR',
   },
 }
 
