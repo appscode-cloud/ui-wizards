@@ -189,7 +189,9 @@ type ClickHouseOptions struct {
 	DeploymentMode ClickHouseDeploymentMode `json:"deploymentMode"`
 	Version        string                   `json:"version"`
 	DeletionPolicy DeletionPolicy           `json:"deletionPolicy"`
-	Storage        ClickHouseStorage        `json:"storage"`
+	// +optional
+	Resources ClickHouseResources `json:"resources"`
+	Storage   ClickHouseStorage   `json:"storage"`
 	// +optional
 	ClientCACertificates []ClientCACertificateRef `json:"clientCaCertificates,omitempty"`
 	// +optional
@@ -204,6 +206,20 @@ const (
 	ClickHouseDeploymentModeStandalone      ClickHouseDeploymentMode = "Standalone"
 	ClickHouseDeploymentModeClusterTopology ClickHouseDeploymentMode = "ClusterTopology"
 )
+
+type ClickHouseResources struct {
+	// +optional
+	Requests CPUMemory `json:"requests"`
+	// +optional
+	Limits CPUMemory `json:"limits"`
+}
+
+type CPUMemory struct {
+	// +optional
+	CPU string `json:"cpu"`
+	// +optional
+	Memory string `json:"memory"`
+}
 
 type ClickHouseStorage struct {
 	StorageClassName string `json:"storageClassName"`
