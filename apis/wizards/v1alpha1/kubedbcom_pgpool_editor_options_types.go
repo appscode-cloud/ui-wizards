@@ -47,7 +47,6 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Mode           GeneralMode       `json:"mode"`
 	Replicas       int               `json:"replicas"`
 	PostgresRef    ObjectReference   `json:"postgresRef"`
 	SyncUsers      bool              `json:"syncUsers"`

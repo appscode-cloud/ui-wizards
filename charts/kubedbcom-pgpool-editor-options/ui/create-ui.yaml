@@ -15,25 +15,7 @@ step:
     type: select
     validation:
       type: required
-  - if:
-      name: isToggleOn|databases/Pgpool/mode
-      type: function
-    init:
-      type: func
-      value: getDefault|databases/Pgpool/mode
-    isHorizontal: true
-    label: Database Mode
-    loader: getAdminOptions|databases/Pgpool/mode
-    schema: schema/properties/spec/properties/mode
-    type: radio
-    watcher:
-      func: onModeChange
-      paths:
-      - schema/properties/spec/properties/mode
-  - if:
-      name: isEqualToModelPathValue|Replicaset|/spec/mode
-      type: function
-    label: Replica Number
+  - label: Replicas
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:

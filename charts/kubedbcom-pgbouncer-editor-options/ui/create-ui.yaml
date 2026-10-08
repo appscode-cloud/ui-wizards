@@ -15,25 +15,7 @@ step:
     type: select
     validation:
       type: required
-  - if:
-      name: isToggleOn|databases/PgBouncer/mode
-      type: function
-    init:
-      type: func
-      value: getDefault|databases/PgBouncer/mode
-    isHorizontal: true
-    label: Database Mode
-    loader: getAdminOptions|databases/PgBouncer/mode
-    schema: schema/properties/spec/properties/mode
-    type: radio
-    watcher:
-      func: onDatabaseModeChange
-      paths:
-      - schema/properties/spec/properties/mode
-  - if:
-      name: isEqualToModelPathValue|Replicaset|/spec/mode
-      type: function
-    label: Replica number
+  - label: Replicas
     schema: schema/properties/spec/properties/replicas
     type: input
   - elements:

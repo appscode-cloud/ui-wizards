@@ -47,7 +47,7 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Mode           GeneralMode       `json:"mode"`
+	Mode           ZooKeeperMode     `json:"mode"`
 	Replicas       int               `json:"replicas"`
 	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
@@ -62,6 +62,9 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
+
+// +kubebuilder:validation:Enum=Standalone;Ensemble
+type ZooKeeperMode string
 
 // +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
 type ZookeeperServiceAlias string

@@ -68,7 +68,7 @@ metadata:
     {{- include "kubedbcom-pgbouncer-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
+  replicas: {{ .Values.spec.replicas }}
   version: {{ .Values.spec.admin.databases.PgBouncer.versions.default | quote }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:

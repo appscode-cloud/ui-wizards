@@ -311,9 +311,9 @@ const modeDetails = {
     description: 'Single node ZooKeeper without high availability.',
     text: 'Standalone',
   },
-  Replicaset: {
-    description: 'ZooKeeper ReplicaSet for high availability.',
-    text: 'Replicaset',
+  Ensemble: {
+    description: 'ZooKeeper ensemble of replicated servers with quorum-based leader election for high availability.',
+    text: 'Ensemble',
   },
 }
 
@@ -347,7 +347,7 @@ export const useFunc = (model) => {
   function showStorageSizeField() {
     const modelPathValue = getValue(model, '/spec/mode')
     // watchDependency('model#/spec/mode')
-    const validType = ['Standalone', 'Replicaset']
+    const validType = ['Standalone', 'Ensemble']
     return validType.includes(modelPathValue)
   }
 
