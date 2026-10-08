@@ -305,17 +305,6 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
-const modeDetails = {
-  Standalone: {
-    description: 'Single node Pgpool without high availability.',
-    text: 'Standalone',
-  },
-  Replicaset: {
-    description: 'Pgpool Replicaset for high availability.',
-    text: 'Replicaset',
-  },
-}
-
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
@@ -556,19 +545,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    if (!getValue(model, `/spec/admin/databases/Pgpool/mode/toggle`)) {
-      let defMode = getDefault('databases/Pgpool/mode') || ''
-      if (defMode === '') {
-        const arr = getValue(model, '/spec/databases/Pgpool/mode/available') || []
-        if (arr.length) defMode = arr[0]
-      }
-      commit('wizard/model$update', {
-        path: '/spec/mode',
-        value: defMode,
-        force: true,
-      })
-    }
-
     if (!features.includes('tls')) {
       commit('wizard/model$update', {
         path: '/spec/admin/tls/default',
@@ -649,14 +625,6 @@ export const useFunc = (model) => {
 
     const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
-    if (type.endsWith('/mode')) {
-      const modes = options.length ? options : Object.keys(modeDetails)
-      return modes.map((item) => ({
-        description: modeDetails[item]?.description || '',
-        text: modeDetails[item]?.text || '',
-        value: item,
-      }))
-    }
     if (options.length === 0) {
       return fetchOptions(type)
     }
@@ -806,18 +774,6 @@ export const useFunc = (model) => {
     return getValue(discriminator, '/configDatabase')
   }
 
-  function notEqualToDatabaseMode(mode) {
-    const modelPathValue = getValue(model, '/spec/mode')
-    // watchDependency('model#/spec/mode')
-    return modelPathValue && modelPathValue !== mode
-  }
-
-  function notEqualToDatabaseMode(mode) {
-    const modelPathValue = getValue(model, '/spec/mode')
-    // watchDependency('model#/spec/mode')
-    return modelPathValue && modelPathValue !== mode
-  }
-
   function clearConfiguration() {
     const configOn = getValue(discriminator, '/configDatabase')
 
@@ -875,15 +831,6 @@ export const useFunc = (model) => {
     commit('wizard/model$update', {
       path: '/spec/admin/monitoring/agent',
       value: agent,
-      force: true,
-    })
-  }
-
-  function onModeChange() {
-    const dbMode = getValue(model, '/spec/mode')
-    commit('wizard/model$update', {
-      path: '/spec/replicas',
-      value: dbMode === 'Replicaset' ? 3 : 1,
       force: true,
     })
   }
@@ -1102,7 +1049,6 @@ export const useFunc = (model) => {
     showAlerts,
     getNodeTopology,
     isConfigDatabaseOn,
-    notEqualToDatabaseMode,
     filterNodeTopology,
     onAuthChange,
     setMonitoring,
@@ -1116,7 +1062,6 @@ export const useFunc = (model) => {
     setRequests,
     setMachineToCustom,
     setStorageClass,
-    onModeChange,
     getAppBindings,
     onRefChange,
     showAdditionalSettings,

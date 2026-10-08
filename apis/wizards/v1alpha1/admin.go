@@ -133,8 +133,8 @@ type DatabaseProfiles struct {
 }
 
 type DatabaseProfile struct {
-	Versions RequiredClusterScopedProfile `json:"versions"`
-	Mode     RequiredClusterScopedProfile `json:"mode"`
+	Versions RequiredClusterScopedProfile  `json:"versions"`
+	Mode     *RequiredClusterScopedProfile `json:"mode,omitempty"`
 }
 
 // *** Backup-related starts *** //

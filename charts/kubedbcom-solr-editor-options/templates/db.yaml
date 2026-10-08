@@ -126,11 +126,7 @@ spec:
                 {{- toYaml .coordinator_res | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
 {{- else }}
-  {{- if eq .Values.spec.mode "Replicaset" }}
   replicas: {{ .Values.spec.replicas }}
-  {{- else }}
-  replicas: 1
-  {{- end }}
   storage:
     storageClassName: {{ .Values.spec.admin.storageClasses.default }}
     accessModes:

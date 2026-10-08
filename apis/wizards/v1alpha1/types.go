@@ -79,6 +79,9 @@ type GeneralMode string
 // +kubebuilder:validation:Enum=Standalone;Topology
 type DoubleMode string
 
+// +kubebuilder:validation:Enum=Standalone;Cluster
+type ClusterMode string
+
 type AuthSecret struct {
 	// +optional
 	Name string `json:"name"`

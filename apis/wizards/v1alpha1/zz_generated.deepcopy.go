@@ -1294,7 +1294,11 @@ func (in *DataGuardSpec) DeepCopy() *DataGuardSpec {
 func (in *DatabaseProfile) DeepCopyInto(out *DatabaseProfile) {
 	*out = *in
 	in.Versions.DeepCopyInto(&out.Versions)
-	in.Mode.DeepCopyInto(&out.Mode)
+	if in.Mode != nil {
+		in, out := &in.Mode, &out.Mode
+		*out = new(RequiredClusterScopedProfile)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

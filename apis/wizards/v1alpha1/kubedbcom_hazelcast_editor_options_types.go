@@ -45,7 +45,7 @@ type KubedbcomHazelcastEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   HazelcastMode     `json:"mode"`
+	Mode   ClusterMode       `json:"mode"`
 	// +optional
 	Replicas       int            `json:"replicas,omitempty"`
 	Persistence    Persistence    `json:"persistence"`
@@ -73,9 +73,6 @@ type HazelcastServiceTemplate struct {
 	// +optional
 	SvcType core.ServiceType `json:"svcType,omitempty"`
 }
-
-// +kubebuilder:validation:Enum=Combined;Topology
-type HazelcastMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

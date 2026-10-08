@@ -47,7 +47,6 @@ type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Mode           GeneralMode       `json:"mode"`
 	Replicas       int               `json:"replicas"`
 	Database       PgbouncerDatabase `json:"database"`
 	PodResources   PodResources      `json:"podResources"`

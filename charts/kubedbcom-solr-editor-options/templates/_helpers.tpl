@@ -193,10 +193,7 @@ seccompProfile:
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res = dict "requests" .limits "limits" .limits }}
-      {{- if eq $.Values.spec.mode "Replicaset" }}
-        {{- $_ := set $profiles "node" .id }}
-      {{- end }}
-      {{- if eq $.Values.spec.mode "Standalone" }}
+      {{- if eq $.Values.spec.mode "Combined" }}
         {{- $_ := set $profiles "node" .id }}
       {{- end }}
     {{- end }}

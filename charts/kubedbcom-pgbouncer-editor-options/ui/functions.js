@@ -306,17 +306,6 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
-const modeDetails = {
-  Standalone: {
-    description: 'Single node PgBouncer without high availability.',
-    text: 'Standalone',
-  },
-  Replicaset: {
-    description: 'PgBouncer ReplicaSet for high availability.',
-    text: 'Replicaset',
-  },
-}
-
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
@@ -395,15 +384,6 @@ export const useFunc = (model) => {
     const modelPathValue = getValue(model, modelPath)
     // watchDependency('model#' + modelPath)
     return modelPathValue === value
-  }
-
-  const onDatabaseModeChange = () => {
-    const databaseMode = getValue(model, '/spec/mode')
-    commit('wizard/model$update', {
-      path: '/spec/replicas',
-      value: databaseMode === 'Standalone' ? 1 : 3,
-      force: true,
-    })
   }
 
   let array = []
@@ -628,19 +608,6 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-    if (!getValue(model, `/spec/admin/databases/PgBouncer/mode/toggle`)) {
-      let defMode = getDefault('databases/PgBouncer/mode') || ''
-      if (defMode === '') {
-        const arr = getValue(model, '/spec/databases/PgBouncer/mode/available') || []
-        if (arr.length) defMode = arr[0]
-      }
-      commit('wizard/model$update', {
-        path: '/spec/mode',
-        value: defMode,
-        force: true,
-      })
-    }
-
     if (!features.includes('tls')) {
       commit('wizard/model$update', {
         path: '/spec/admin/tls/default',
@@ -721,14 +688,6 @@ export const useFunc = (model) => {
 
     const options = (await getValue(model, `/spec/admin/${type}/available`)) || []
 
-    if (type.endsWith('/mode')) {
-      const modes = options.length ? options : Object.keys(modeDetails)
-      return modes.map((item) => ({
-        description: modeDetails[item]?.description || '',
-        text: modeDetails[item]?.text || '',
-        value: item,
-      }))
-    }
     if (options.length === 0) {
       return fetchOptions(type)
     }
@@ -1070,7 +1029,6 @@ export const useFunc = (model) => {
     isMachineNotCustom,
     isMachineCustom,
     updateAlertValue,
-    onDatabaseModeChange,
     getNodeTopology,
     filterNodeTopology,
     getIssuers,
