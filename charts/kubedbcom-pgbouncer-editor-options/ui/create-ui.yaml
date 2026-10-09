@@ -1,25 +1,23 @@
 step:
 - elements:
   - label: ""
-    subtitle: Select the PgBouncer version and replicas you want to deploy on Kubernetes. The chosen
-      version and replicas determines the PgBouncer engine features, compatibility, and runtime
+    subtitle: Select the PgBouncer version you want to deploy on Kubernetes. The chosen
+      version determines the PgBouncer engine features, compatibility, and runtime
       behavior of your connection pooler.
     type: label-element
-  - elements:
-    - disableUnselect: true
-      if:
-        name: isToggleOn|databases/PgBouncer/versions
-        type: function
-      label: Database Version
-      loader: getAdminOptions|databases/PgBouncer/versions
-      schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
-      type: select
-      validation:
-        type: required
-    - label: Replicas
-      schema: schema/properties/spec/properties/replicas
-      type: input
-    type: horizontal-layout
+  - disableUnselect: true
+    if:
+      name: isToggleOn|databases/PgBouncer/versions
+      type: function
+    label: Database Version
+    loader: getAdminOptions|databases/PgBouncer/versions
+    schema: schema/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
+    type: select
+    validation:
+      type: required
+  - label: Replicas
+    schema: schema/properties/spec/properties/replicas
+    type: input
   - elements:
     - label: ""
       subtitle: Select a machine profile to allocate CPU and memory resources for
