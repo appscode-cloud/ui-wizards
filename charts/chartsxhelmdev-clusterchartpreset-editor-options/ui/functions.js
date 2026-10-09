@@ -332,7 +332,7 @@ export const useFunc = (model) => {
       default: 'Topology',
     },
     DB2: {
-      availableModes: ['Standalone'],
+      availableModes: ['Standalone', 'HADR'],
       default: 'Standalone',
     },
     DocumentDB: {
@@ -356,8 +356,8 @@ export const useFunc = (model) => {
       default: 'Topology',
     },
     Hazelcast: {
-      availableModes: ['Combined', 'Topology'],
-      default: 'Topology',
+      availableModes: ['Standalone', 'Cluster'],
+      default: 'Cluster',
     },
     Ignite: {
       availableModes: ['Standalone', 'Replicaset'],
@@ -372,8 +372,8 @@ export const useFunc = (model) => {
       default: 'GaleraCluster',
     },
     Memcached: {
-      availableModes: ['Standalone', 'Replicaset'],
-      default: 'Replicaset',
+      availableModes: ['Standalone', 'Distributed'],
+      default: 'Distributed',
     },
     Milvus: {
       availableModes: ['Standalone', 'Distributed'],
@@ -394,32 +394,20 @@ export const useFunc = (model) => {
       default: 'GroupReplication',
     },
     Neo4j: {
-      availableModes: ['Standalone', 'Replicaset'],
-      default: 'Replicaset',
+      availableModes: ['Standalone', 'Cluster'],
+      default: 'Cluster',
     },
     Oracle: {
       availableModes: ['Standalone', 'DataGuard'],
       default: 'DataGuard',
-    },
-    PerconaXtraDB: {
-      availableModes: ['Replicaset'],
-      default: 'Replicaset',
-    },
-    PgBouncer: {
-      availableModes: ['Standalone', 'Replicaset'],
-      default: 'Replicaset',
-    },
-    Pgpool: {
-      availableModes: ['Standalone', 'Replicaset'],
-      default: 'Replicaset',
     },
     Postgres: {
       availableModes: ['Standalone', 'Cluster', 'RemoteReplica'],
       default: 'Cluster',
     },
     ProxySQL: {
-      availableModes: ['Standalone', 'Replicaset'],
-      default: 'Replicaset',
+      availableModes: ['Standalone', 'Cluster'],
+      default: 'Cluster',
     },
     Qdrant: {
       availableModes: ['Standalone', 'Distributed'],
@@ -438,7 +426,7 @@ export const useFunc = (model) => {
       default: 'Topology',
     },
     Solr: {
-      availableModes: ['Standalone', 'Replicaset', 'Topology'],
+      availableModes: ['Combined', 'Topology'],
       default: 'Topology',
     },
     Weaviate: {
@@ -446,8 +434,8 @@ export const useFunc = (model) => {
       default: 'Replicaset',
     },
     ZooKeeper: {
-      availableModes: ['Standalone', 'Replicaset'],
-      default: 'Replicaset',
+      availableModes: ['Standalone', 'Ensemble'],
+      default: 'Ensemble',
     },
   }
 
