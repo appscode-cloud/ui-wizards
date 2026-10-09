@@ -13,6 +13,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/profile', '')
   setDiscriminatorValue('/profileChoseSwitch', false)
   setDiscriminatorValue('/presetPage', 'deployment-type')
+  setDiscriminatorValue('/visitedPages', [])
   setDiscriminatorValue('/isHubManaged', false)
   setDiscriminatorValue('/hubUiLink', '')
   setDiscriminatorValue('/preview/disabled', false)
@@ -332,7 +333,7 @@ export const useFunc = (model) => {
       default: 'Topology',
     },
     DB2: {
-      availableModes: ['Standalone', 'HADR'],
+      availableModes: ['Standalone'],
       default: 'Standalone',
     },
     DocumentDB: {
@@ -356,8 +357,8 @@ export const useFunc = (model) => {
       default: 'Topology',
     },
     Hazelcast: {
-      availableModes: ['Standalone', 'Cluster'],
-      default: 'Cluster',
+      availableModes: ['Combined', 'Topology'],
+      default: 'Topology',
     },
     Ignite: {
       availableModes: ['Standalone', 'Replicaset'],
@@ -372,8 +373,8 @@ export const useFunc = (model) => {
       default: 'GaleraCluster',
     },
     Memcached: {
-      availableModes: ['Standalone', 'Distributed'],
-      default: 'Distributed',
+      availableModes: ['Standalone', 'Replicaset'],
+      default: 'Replicaset',
     },
     Milvus: {
       availableModes: ['Standalone', 'Distributed'],
@@ -394,20 +395,32 @@ export const useFunc = (model) => {
       default: 'GroupReplication',
     },
     Neo4j: {
-      availableModes: ['Standalone', 'Cluster'],
-      default: 'Cluster',
+      availableModes: ['Standalone', 'Replicaset'],
+      default: 'Replicaset',
     },
     Oracle: {
       availableModes: ['Standalone', 'DataGuard'],
       default: 'DataGuard',
+    },
+    PerconaXtraDB: {
+      availableModes: ['Replicaset'],
+      default: 'Replicaset',
+    },
+    PgBouncer: {
+      availableModes: ['Standalone', 'Replicaset'],
+      default: 'Replicaset',
+    },
+    Pgpool: {
+      availableModes: ['Standalone', 'Replicaset'],
+      default: 'Replicaset',
     },
     Postgres: {
       availableModes: ['Standalone', 'Cluster', 'RemoteReplica'],
       default: 'Cluster',
     },
     ProxySQL: {
-      availableModes: ['Standalone', 'Cluster'],
-      default: 'Cluster',
+      availableModes: ['Standalone', 'Replicaset'],
+      default: 'Replicaset',
     },
     Qdrant: {
       availableModes: ['Standalone', 'Distributed'],
@@ -426,7 +439,7 @@ export const useFunc = (model) => {
       default: 'Topology',
     },
     Solr: {
-      availableModes: ['Combined', 'Topology'],
+      availableModes: ['Standalone', 'Replicaset', 'Topology'],
       default: 'Topology',
     },
     Weaviate: {
@@ -434,8 +447,8 @@ export const useFunc = (model) => {
       default: 'Replicaset',
     },
     ZooKeeper: {
-      availableModes: ['Standalone', 'Ensemble'],
-      default: 'Ensemble',
+      availableModes: ['Standalone', 'Replicaset'],
+      default: 'Replicaset',
     },
   }
 
@@ -490,6 +503,16 @@ export const useFunc = (model) => {
     return getValue(discriminator, '/presetPage') === page
   }
 
+  function isVisitedPage(page) {
+    return getValue(discriminator, '/visitedPages').includes(page)
+  }
+
+  function markVisitedPage() {
+    const page = getValue(discriminator, '/presetPage')
+    const visited = getValue(discriminator, '/visitedPages')
+    if (!visited.includes(page)) setDiscriminatorValue('/visitedPages', [...visited, page])
+  }
+
   function getOptions(type) {
     const options = getValue(model, `/spec/admin/${type}/available`)
     return options
@@ -512,10 +535,10 @@ export const useFunc = (model) => {
   }
 
   async function FetchDbVersions(db) {
-    let data = getValue(discriminator, `allDbVersions/${db}Version`)
-    if (!data?.includes('Remove all')) data?.unshift('Remove all')
-    if (!data?.includes('Select all')) data?.unshift('Select all')
-    return data
+    const data = getValue(discriminator, `allDbVersions/${db}Version`)
+    if (!data) return data
+    const versions = data.filter((v) => v !== 'Select all' && v !== 'Remove all')
+    return ['Select all', 'Remove all', ...versions]
   }
 
   function allDbVersions(db) {
@@ -649,7 +672,11 @@ export const useFunc = (model) => {
   }
 
   async function initPresetPage() {
-    await Promise.all([FetchDbBundle(), fetchHubOwnership()])
+    await Promise.all([
+      FetchDbBundle(),
+      fetchHubOwnership(),
+      FetchAllDbVersions().catch((e) => console.log(e)),
+    ])
   }
 
   function isHubManaged() {
@@ -1135,6 +1162,8 @@ export const useFunc = (model) => {
     fetchJsons,
     presetNameEqualsTo,
     isActivePage,
+    isVisitedPage,
+    markVisitedPage,
     fetchModes,
     availableModes,
     setDefaultMode,
