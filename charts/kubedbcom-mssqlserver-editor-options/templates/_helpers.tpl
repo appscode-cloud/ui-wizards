@@ -166,3 +166,8 @@ seccompProfile:
 
 {{- $profiles | toJson -}}
 {{- end -}}
+
+{{- define "kubedbcom-mssqlserver-editor-options.customPid" -}}
+{{- $editions := list "Developer" "Express" "Standard" "Evaluation" "Enterprise" "EnterpriseCore" -}}
+{{- and .Values.spec.pid (not (has .Values.spec.pid $editions)) | toString -}}
+{{- end }}

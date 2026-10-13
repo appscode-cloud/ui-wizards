@@ -110,7 +110,14 @@ spec:
             value: {{ .Values.spec.acceptEULA | toString | quote }}
           {{ end }}
           - name: MSSQL_PID
-            value: {{ .Values.spec.pid }}
+          {{- if eq (include "kubedbcom-mssqlserver-editor-options.customPid" .) "true" }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}-product-key
+                key: product-key
+          {{- else }}
+            value: {{ .Values.spec.pid | quote }}
+          {{- end }}
           resources:
             {{- toYaml .res | nindent 12 }}
         {{- if eq .Values.spec.mode "Topology" }}
