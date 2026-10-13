@@ -131,6 +131,7 @@ The following table lists the configurable parameters of the `kubedbcom-mssqlser
 | resources.monitoringCoreosComServiceMonitor                                   |             | <code>{"apiVersion":"monitoring.coreos.com/v1","kind":"ServiceMonitor","metadata":{"name":"sqlserver-ag","namespace":"demo"}}</code>               |
 | resources.secret_auth                                                         |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"sqlserver-ag-auth","namespace":"demo"}}</code>                                        |
 | resources.secret_config                                                       |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"sqlserver-ag-config","namespace":"demo"}}</code>                                      |
+| resources.secret_product_key                                                  |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"sqlserver-ag-product-key","namespace":"demo"}}</code>                                 |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:

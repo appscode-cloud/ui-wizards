@@ -4111,6 +4111,11 @@ func (in *KubedbcomMssqlserverEditorOptionsSpecSpec) DeepCopyInto(out *Kubedbcom
 			(*out)[key] = val
 		}
 	}
+	if in.PIDSecretRef != nil {
+		in, out := &in.PIDSecretRef, &out.PIDSecretRef
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	in.Topology.DeepCopyInto(&out.Topology)
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)

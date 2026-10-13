@@ -130,6 +130,18 @@ seccompProfile:
   type: RuntimeDefault
 {{- end }}
 
+{{- define "backup.securityContext" -}}
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+  - ALL
+runAsGroup: 0
+runAsNonRoot: false
+runAsUser: 0
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
+
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := "" -}}
@@ -154,3 +166,8 @@ seccompProfile:
 
 {{- $profiles | toJson -}}
 {{- end -}}
+
+{{- define "kubedbcom-mssqlserver-editor.customPid" -}}
+{{- $editions := list "Developer" "Express" "Standard" "Evaluation" "Enterprise" "EnterpriseCore" -}}
+{{- and .Values.spec.pid (not (has .Values.spec.pid $editions)) | toString -}}
+{{- end }}

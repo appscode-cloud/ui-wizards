@@ -1129,6 +1129,7 @@ export const useFunc = (model) => {
 
   function onPidChange() {
     const pid = getValue(discriminator, '/pid')
+    if (pid !== 'Custom') commit('wizard/model$delete', '/spec/pidSecretRef')
     commit('wizard/model$update', {
       path: '/spec/pid',
       value: pid !== 'Custom' ? pid : '',
@@ -1149,6 +1150,61 @@ export const useFunc = (model) => {
       value: customPid,
       force: true,
     })
+  }
+
+  function isPidFromSecret() {
+    return !!getValue(model, '/spec/pidSecretRef/name')
+  }
+
+  function showCustomPidInput() {
+    return isPidCustom() && !getValue(discriminator, '/pidFromSecret')
+  }
+
+  function showPidSecretFields() {
+    return isPidCustom() && !!getValue(discriminator, '/pidFromSecret')
+  }
+
+  function onPidFromSecretChange() {
+    if (getValue(discriminator, '/pidFromSecret')) {
+      commit('wizard/model$update', { path: '/spec/pid', value: 'Custom', force: true })
+      return
+    }
+    commit('wizard/model$delete', '/spec/pidSecretRef')
+    commit('wizard/model$update', {
+      path: '/spec/pid',
+      value: getValue(discriminator, '/customPid') || '',
+      force: true,
+    })
+  }
+
+  async function getPidSecrets() {
+    const { user, cluster } = storeGet('/route/params')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
+    try {
+      const resp = await axios.get(url, {
+        params: { filter: { items: { metadata: { name: null } } } },
+      })
+      return (resp.data?.items || []).map((item) => item.metadata?.name)
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
+  async function getPidSecretKeys() {
+    const name = getValue(model, '/spec/pidSecretRef/name')
+    if (!name) return []
+    const { user, cluster } = storeGet('/route/params')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${name}`
+    try {
+      const resp = await axios.get(url)
+      return Object.keys(resp.data?.data || {})
+    } catch (e) {
+      console.log(e)
+      return []
+    }
   }
 
   function showEULAWarning() {
@@ -1441,6 +1497,12 @@ export const useFunc = (model) => {
     getDefaulPid,
     onPidChange,
     isPidCustom,
+    isPidFromSecret,
+    showCustomPidInput,
+    showPidSecretFields,
+    onPidFromSecretChange,
+    getPidSecrets,
+    getPidSecretKeys,
     onCustomPidChange,
     showEULAWarning,
     onArchiverChange,
