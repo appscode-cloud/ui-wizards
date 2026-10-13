@@ -46,17 +46,19 @@ type KubedbcomMssqlserverEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels         map[string]string   `json:"labels"`
-	Mode           DoubleMode          `json:"mode"`
-	Replicas       int                 `json:"replicas"`
-	AcceptEULA     bool                `json:"acceptEULA"`
-	PID            MSSQLServerPID      `json:"pid"`
-	Topology       MSSQLServerTopology `json:"topology"`
-	Persistence    Persistence         `json:"persistence"`
-	PodResources   PodResources        `json:"podResources"`
-	AuthSecret     AuthSecret          `json:"authSecret"`
-	DeletionPolicy DeletionPolicy      `json:"deletionPolicy"`
-	Configuration  string              `json:"configuration"`
+	Labels     map[string]string `json:"labels"`
+	Mode       DoubleMode        `json:"mode"`
+	Replicas   int               `json:"replicas"`
+	AcceptEULA bool              `json:"acceptEULA"`
+	PID        MSSQLServerPID    `json:"pid"`
+	// +optional
+	PIDSecretRef   *core.SecretKeySelector `json:"pidSecretRef,omitempty"`
+	Topology       MSSQLServerTopology     `json:"topology"`
+	Persistence    Persistence             `json:"persistence"`
+	PodResources   PodResources            `json:"podResources"`
+	AuthSecret     AuthSecret              `json:"authSecret"`
+	DeletionPolicy DeletionPolicy          `json:"deletionPolicy"`
+	Configuration  string                  `json:"configuration"`
 	// +optional
 	ArchiverName string       `json:"archiverName"`
 	Init         InitDatabase `json:"init"`

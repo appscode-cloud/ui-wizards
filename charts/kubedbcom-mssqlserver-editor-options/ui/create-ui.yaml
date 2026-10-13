@@ -151,6 +151,19 @@ step:
   - if:
       name: isPidCustom
       type: function
+    init:
+      type: func
+      value: isPidFromSecret
+    label: Use existing Secret?
+    schema: temp/pidFromSecret
+    type: switch
+    watcher:
+      func: onPidFromSecretChange
+      paths:
+      - temp/pidFromSecret
+  - if:
+      name: showCustomPidInput
+      type: function
     label: Custom PID
     schema: temp/customPid
     type: input
@@ -160,6 +173,27 @@ step:
       func: onCustomPidChange
       paths:
       - temp/customPid
+  - if:
+      name: showPidSecretFields
+      type: function
+    label: Secret
+    loader: getPidSecrets
+    schema: schema/properties/spec/properties/pidSecretRef/properties/name
+    type: select
+    validation:
+      type: required
+  - if:
+      name: showPidSecretFields
+      type: function
+    label: Key
+    loader:
+      name: getPidSecretKeys
+      watchPaths:
+      - schema/properties/spec/properties/pidSecretRef/properties/name
+    schema: schema/properties/spec/properties/pidSecretRef/properties/key
+    type: select
+    validation:
+      type: required
   - description: Configure Credentials, Deployment Mode etc.
     elements:
     - elements:
