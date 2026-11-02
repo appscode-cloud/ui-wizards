@@ -552,6 +552,21 @@ export const useFunc = (model) => {
     return selectedType === type
   }
 
+  function onRequestTypeChange() {
+    const selectedType = getValue(model, '/spec/type')
+    const reqTypeMapping = {
+      UpdateVersion: 'updateVersion',
+      HorizontalScaling: 'horizontalScaling',
+      VerticalScaling: 'verticalScaling',
+      Restart: 'restart',
+      Reconfigure: 'configuration',
+    }
+
+    Object.keys(reqTypeMapping).forEach((key) => {
+      if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
+    })
+  }
+
   function initNamespace() {
     const { namespace } = route.query || {}
     return namespace || null
@@ -1312,6 +1327,7 @@ export const useFunc = (model) => {
     getVersionInfo,
     isVersionEmpty,
     ifRequestTypeEqualsTo,
+    onRequestTypeChange,
     initNamespace,
     initDatabaseRef,
     showAndInitName,

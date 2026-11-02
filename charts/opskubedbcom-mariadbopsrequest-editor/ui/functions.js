@@ -582,6 +582,23 @@ export const useFunc = (model) => {
     return selectedType === type
   }
 
+  function onRequestTypeChange() {
+    const selectedType = getValue(model, '/spec/type')
+    const reqTypeMapping = {
+      UpdateVersion: 'updateVersion',
+      HorizontalScaling: 'horizontalScaling',
+      VerticalScaling: 'verticalScaling',
+      VolumeExpansion: 'volumeExpansion',
+      Restart: 'restart',
+      Reconfigure: 'configuration',
+      ReconfigureTLS: 'tls',
+    }
+
+    Object.keys(reqTypeMapping).forEach((key) => {
+      if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
+    })
+  }
+
   function getDbTls() {
     // watchDependency('discriminator#/dbDetails')
     const dbDetails = getValue(discriminator, '/dbDetails')
@@ -1610,6 +1627,7 @@ export const useFunc = (model) => {
     getVersionInfo,
     isVersionEmpty,
     ifRequestTypeEqualsTo,
+    onRequestTypeChange,
     getDbTls,
     getDbType,
     initNamespace,
