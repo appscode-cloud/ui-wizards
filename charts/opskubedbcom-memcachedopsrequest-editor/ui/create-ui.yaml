@@ -73,6 +73,9 @@ step:
     - description: Reconfigure your database
       text: Reconfigure
       value: Reconfigure
+    - description: Rotate authentication credentials
+      text: Rotate Auth
+      value: RotateAuth
     schema: schema/properties/spec/properties/type
     type: radio
     watcher:
@@ -615,6 +618,30 @@ step:
       name: ifRequestTypeEqualsTo|ReconfigureTLS
       type: function
     label: TLS
+    type: block-layout
+  - elements:
+    - label: Authentication Secret
+      subtitle: Existing secret with the new credentials. Leave empty to generate
+        a random password.
+      type: label-element
+    - label: Secret Name
+      schema: schema/properties/spec/properties/authentication/properties/secretRef/properties/name
+      type: input
+    - disable: true
+      init:
+        type: func
+        value: initAuthSecretRefKind
+      label: Secret Kind
+      schema: schema/properties/spec/properties/authentication/properties/secretRef/properties/kind
+      type: input
+      watcher:
+        func: initAuthSecretRefKind
+        paths:
+        - schema/properties/spec/properties/authentication/properties/secretRef/properties/name
+    if:
+      name: ifRequestTypeEqualsTo|RotateAuth
+      type: function
+    label: Rotate Auth Form
     type: block-layout
   - elements:
     - label: Timeout

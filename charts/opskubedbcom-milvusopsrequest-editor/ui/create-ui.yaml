@@ -1217,11 +1217,23 @@ step:
     type: block-layout
   - elements:
     - label: Authentication Secret
-      subtitle: Reference to an existing secret containing authentication credentials
+      subtitle: Existing secret with the new credentials. Leave empty to generate
+        a random password.
       type: label-element
     - label: Secret Name
       schema: schema/properties/spec/properties/authentication/properties/secretRef/properties/name
       type: input
+    - disable: true
+      init:
+        type: func
+        value: initAuthSecretRefKind
+      label: Secret Kind
+      schema: schema/properties/spec/properties/authentication/properties/secretRef/properties/kind
+      type: input
+      watcher:
+        func: initAuthSecretRefKind
+        paths:
+        - schema/properties/spec/properties/authentication/properties/secretRef/properties/name
     if:
       name: ifRequestTypeEqualsTo|RotateAuth
       type: function

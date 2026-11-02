@@ -583,6 +583,11 @@ export const useFunc = (model) => {
     return selectedType === type
   }
 
+  function initAuthSecretRefKind() {
+    const name = getValue(model, '/spec/authentication/secretRef/name')
+    return name ? 'Secret' : undefined
+  }
+
   function onRequestTypeChange() {
     const selectedType = getValue(model, '/spec/type')
     const reqTypeMapping = {
@@ -1562,6 +1567,7 @@ export const useFunc = (model) => {
     getDbVersions,
     ifRequestTypeEqualsTo,
     onRequestTypeChange,
+    initAuthSecretRefKind,
     getDbTls,
     getDbType,
     initNamespace,
