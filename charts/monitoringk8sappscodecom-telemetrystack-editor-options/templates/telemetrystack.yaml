@@ -112,6 +112,10 @@ spec:
       {{- if $vl.maxDiskUsagePercent }}
       maxDiskUsagePercent: {{ $vl.maxDiskUsagePercent }}
       {{- end }}
+      {{- if $vl.retentionConfig }}
+      retentionConfig:
+        {{- toYaml $vl.retentionConfig | nindent 8 }}
+      {{- end }}
     {{- else }}
     clickhouse:
       {{- include "monitoringk8sappscodecom-telemetrystack-editor-options.clickhouse" (dict "root" $ "pillar" .Values.spec.logs) | nindent 6 }}
