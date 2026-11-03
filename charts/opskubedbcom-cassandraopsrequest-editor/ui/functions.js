@@ -587,6 +587,11 @@ export const useFunc = (model) => {
     return selectedType === type
   }
 
+  function initAuthSecretRefKind() {
+    const name = getValue(model, '/spec/authentication/secretRef/name')
+    return name ? 'Secret' : undefined
+  }
+
   function onRequestTypeChange() {
     const selectedType = getValue(model, '/spec/type')
     const reqTypeMapping = {
@@ -598,6 +603,7 @@ export const useFunc = (model) => {
       Restart: 'restart',
       Reconfigure: 'configuration',
       ReconfigureTLS: 'tls',
+      RotateAuth: 'authentication',
     }
 
     Object.keys(reqTypeMapping).forEach((key) => {
@@ -708,6 +714,7 @@ export const useFunc = (model) => {
       restart: 'Restart',
       reconfiguretls: 'ReconfigureTLS',
       reconfigure: 'Reconfigure',
+      rotateauth: 'RotateAuth',
     }
     if (ver) {
       const operation = storeGet('/resource/activeActionItem/result/operationId') || ''
@@ -1558,6 +1565,7 @@ export const useFunc = (model) => {
     isVersionEmpty,
     ifRequestTypeEqualsTo,
     onRequestTypeChange,
+    initAuthSecretRefKind,
     getDbTls,
     initNamespace,
     initDatabaseRef,
