@@ -72,6 +72,8 @@ type ThanosRetentionConfig struct {
 	OneHour string `json:"oneHour,omitempty"`
 	// +optional
 	FiveMinutes string `json:"fiveMinutes,omitempty"`
+	// +optional
+	StorageSize string `json:"storageSize,omitempty"`
 }
 
 type ThanosStoreOptions struct {
