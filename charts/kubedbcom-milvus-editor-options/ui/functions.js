@@ -1141,7 +1141,68 @@ export const useFunc = (model) => {
     const serviceTemplates = getValue(model, '/spec/admin/serviceTemplates') || []
     if (serviceTemplates.length) return serviceTemplates
   }
+
+  function showBackupStorage(type) {
+    if (!getValue(model, `/spec/admin/${type}/backupStorage/toggle`)) return false
+    if (type === 'archiver') return !!getValue(model, '/spec/admin/archiver/enable/default')
+    return (
+      !!getValue(discriminator, '/backup') &&
+      getValue(model, '/spec/admin/backup/by') !== 'BackupBlueprint'
+    )
+  }
+
+  // Mirrors KubeStash BackupStorage.UsageAllowed; the webhook rejects storages the DB namespace can't use.
+  function isBackupStorageUsable(storage, namespace, namespaceLabels) {
+    const allowed = storage.spec?.usagePolicy?.allowedNamespaces || {}
+    if (allowed.from === 'All') return true
+    if (allowed.from === 'Same') return storage.metadata?.namespace === namespace
+    if (allowed.from !== 'Selector' || !allowed.selector) return false
+
+    const { matchLabels = {}, matchExpressions = [] } = allowed.selector
+    const labelsMatch = Object.entries(matchLabels).every(
+      ([key, value]) => namespaceLabels[key] === value,
+    )
+    const expressionsMatch = matchExpressions.every(({ key, operator, values = [] }) => {
+      const hasKey = Object.prototype.hasOwnProperty.call(namespaceLabels, key)
+      if (operator === 'In') return hasKey && values.includes(namespaceLabels[key])
+      if (operator === 'NotIn') return !hasKey || !values.includes(namespaceLabels[key])
+      if (operator === 'Exists') return hasKey
+      if (operator === 'DoesNotExist') return !hasKey
+      return false
+    })
+    return labelsMatch && expressionsMatch
+  }
+
+  async function getBackupStorages() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    try {
+      const [storageResp, namespaceResp] = await Promise.all([
+        axios.get(
+          `/clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/backupstorages`,
+        ),
+        axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`),
+      ])
+      const namespaceLabels = namespaceResp.data?.metadata?.labels || {}
+      return (storageResp.data?.items || [])
+        .filter((item) => isBackupStorageUsable(item, namespace, namespaceLabels))
+        .map((item) => {
+          const { name, namespace: storageNamespace } = item.metadata
+          return {
+            text: `${storageNamespace}/${name}`,
+            value: { name, namespace: storageNamespace },
+          }
+        })
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
   return {
+    showBackupStorage,
+    getBackupStorages,
     onReferSecretChange,
     showReferSecretSwitch,
     getDefaultValue,

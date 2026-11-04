@@ -103,6 +103,7 @@ The following table lists the configurable parameters of the `monitoringk8sappsc
 | spec.logs.victoriaLogs.defaultRetention                                   |             | <code>30d</code>                         |
 | spec.logs.victoriaLogs.futureRetention                                    |             | <code>2d</code>                          |
 | spec.logs.victoriaLogs.maxDiskUsagePercent                                |             | <code>80</code>                          |
+| spec.logs.victoriaLogs.retentionConfig                                    |             | <code>[]</code>                          |
 | spec.logs.victoriaLogs.storage.size                                       |             | <code>10Gi</code>                        |
 | spec.logs.victoriaLogs.storage.storageClassName                           |             | <code>''</code>                          |
 | spec.logs.victoriaLogs.cluster.insertReplicas                             |             | <code>2</code>                           |

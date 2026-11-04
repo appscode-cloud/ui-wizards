@@ -1,4 +1,3 @@
----
 properties:
   form:
     properties:
@@ -890,6 +889,13 @@ properties:
             type: object
           archiver:
             properties:
+              backupStorage:
+                properties:
+                  toggle:
+                    type: boolean
+                required:
+                - toggle
+                type: object
               enable:
                 properties:
                   default:
@@ -925,6 +931,13 @@ properties:
             type: object
           backup:
             properties:
+              backupStorage:
+                properties:
+                  toggle:
+                    type: boolean
+                required:
+                - toggle
+                type: object
               by:
                 default: BackupConfiguration
                 enum:
@@ -2324,6 +2337,24 @@ properties:
       annotations:
         additionalProperties:
           type: string
+        type: object
+      archiver:
+        properties:
+          backupStorage:
+            properties:
+              name:
+                type: string
+              namespace:
+                type: string
+            required:
+            - name
+            - namespace
+            type: object
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+        required:
+        - backupStorage
         type: object
       archiverName:
         type: string

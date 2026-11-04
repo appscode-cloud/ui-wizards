@@ -79,8 +79,13 @@ spec:
 {{- if .Values.spec.admin.archiver.enable.default }}
   archiver:
     ref:
+{{- if include "kubedbcom-mysql-editor-options.customArchiver" . }}
+      name: {{ include "kubedbcom-mysql-editor-options.fullname" . }}-archiver
+      namespace: {{ .Release.Namespace }}
+{{- else }}
       name: {{ .Values.spec.archiverName }}
       namespace: kubedb
+{{- end }}
 {{- end }}
   version: {{ .Values.spec.admin.databases.MySQL.versions.default | quote }}
 {{- if eq .Values.spec.mode "Standalone" }}
