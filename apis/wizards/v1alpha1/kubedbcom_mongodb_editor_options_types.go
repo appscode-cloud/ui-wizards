@@ -62,8 +62,10 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	// +optional
 	IP string `json:"ip"`
 	// +optional
-	ArchiverName string       `json:"archiverName"`
-	Init         InitDatabase `json:"init"`
+	ArchiverName string `json:"archiverName"`
+	// +optional
+	Archiver *ArchiverOverride `json:"archiver,omitempty"`
+	Init     InitDatabase      `json:"init"`
 	// +optional
 	ServiceTemplates []MongodbServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions             `json:"admin"`

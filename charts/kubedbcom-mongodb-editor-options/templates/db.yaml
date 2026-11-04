@@ -78,8 +78,13 @@ spec:
 {{- if .Values.spec.admin.archiver.enable.default }}
   archiver:
     ref:
+{{- if include "kubedbcom-mongodb-editor-options.customArchiver" . }}
+      name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-archiver
+      namespace: {{ .Release.Namespace }}
+{{- else }}
       name: {{ .Values.spec.archiverName }}
       namespace: kubedb
+{{- end }}
 {{- end }}
   version: {{ .Values.spec.admin.databases.MongoDB.versions.default | quote }}
 {{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
