@@ -1,6 +1,6 @@
-const { axios, useOperator, store } = window.vueHelpers || {}
+const { useOperator, store } = window.vueHelpers || {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -63,11 +63,16 @@ export const useFunc = (model) => {
     )
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/hanadbs`,
-      { params: { filter: { items: { metadata: { name: null } } } } },
-    )
-    const resources = (resp && resp.data && resp.data.items) || []
+    const resp = await akp.resources.list({
+      owner,
+      cluster,
+      group: 'kubedb.com',
+      version: 'v1alpha2',
+      resource: 'hanadbs',
+      namespace,
+      filter: { items: { metadata: { name: null } } },
+    })
+    const resources = resp?.items || []
     return resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
       return { text: name, value: name }
@@ -102,9 +107,15 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     if (instance) {
       try {
-        const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
-        const resp = await axios.get(url)
-        const nodeGroups = resp.data?.spec?.nodeGroups || []
+        const resp = await akp.resources.get({
+          owner: user,
+          cluster,
+          group: 'node.k8s.appscode.com',
+          version: 'v1alpha1',
+          resource: 'nodetopologies',
+          name: 'kubedb-ui-machine-profiles',
+        })
+        const nodeGroups = resp?.spec?.nodeGroups || []
         setDiscriminatorValue('/topologyMachines', nodeGroups)
         return nodeGroups
       } catch (e) {
@@ -215,10 +226,15 @@ export const useFunc = (model) => {
   async function fetchNodeTopology() {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
-    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
     try {
-      const resp = await axios.get(url)
-      const list = (resp && resp.data?.items) || []
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group: 'node.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'nodetopologies',
+      })
+      const list = resp?.items || []
       return list.map((item) => (item.metadata && item.metadata.name) || '')
     } catch (e) {
       console.log(e)
@@ -423,11 +439,16 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
-    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-      params: { filter: { items: { metadata: { name: null } } } },
+    const resp = await akp.resources.list({
+      owner,
+      cluster,
+      group: 'core',
+      version: 'v1',
+      resource: 'namespaces',
+      filter: { items: { metadata: { name: null } } },
     })
 
-    const resources = (resp && resp.data && resp.data.items) || []
+    const resources = resp?.items || []
     return resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
       return { text: name, value: name }
@@ -440,11 +461,16 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
 
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`,
-        { params: { filter: { items: { metadata: { name: null }, type: null } } } },
-      )
-      let items = (resp && resp.data && resp.data.items) || []
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group,
+        version,
+        resource,
+        namespace,
+        filter: { items: { metadata: { name: null }, type: null } },
+      })
+      let items = resp?.items || []
       if (resource === 'secrets') {
         items = items.filter((item) => {
           const validType = ['Opaque']
@@ -471,10 +497,16 @@ export const useFunc = (model) => {
     )
     if (!configMapName) return []
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/configmaps/${configMapName}`,
-      )
-      const configMaps = (resp && resp.data && resp.data.data) || {}
+      const resp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'configmaps',
+        namespace,
+        name: configMapName,
+      })
+      const configMaps = resp?.data || {}
       return Object.keys(configMaps).map((item) => ({ text: item, value: item }))
     } catch (e) {
       console.log(e)
@@ -487,11 +519,16 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/release/namespace')
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-        { params: { filter: { items: { metadata: { name: null }, type: null } } } },
-      )
-      const items = (resp && resp.data && resp.data.items) || []
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+        namespace,
+        filter: { items: { metadata: { name: null }, type: null } },
+      })
+      const items = resp?.items || []
       return items
         .filter((item) => ['Opaque'].includes(item.type))
         .map((item) => {
@@ -514,10 +551,16 @@ export const useFunc = (model) => {
     )
     if (!secretName) return []
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${secretName}`,
-      )
-      const secret = (resp && resp.data && resp.data.data) || {}
+      const resp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+        namespace,
+        name: secretName,
+      })
+      const secret = resp?.data || {}
       return Object.keys(secret).map((item) => ({ text: item, value: item }))
     } catch (e) {
       console.log(e)
