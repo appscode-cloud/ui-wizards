@@ -1,144 +1,120 @@
-steps:
-- form:
-    elements:
-    - disabled: isVariantAvailable
-      if: showAndInitName
-      label:
-        text: labels.restoresession.name
-      schema:
-        $ref: schema#/properties/metadata/properties/release/properties/name
-      type: input
-    - add_new_button:
-        label: labels.add_new_namespace
+step:
+- elements:
+  - disable: isVariantAvailable
+    if:
+      name: showAndInitName
+      type: function
+    label: Restore Session Name
+    schema: schema/properties/metadata/properties/release/properties/name
+    type: input
+  - addNewButton:
+      label: Add New Namespace
+      target: _blank
+      url:
+        function: getCreateNameSpaceUrl
+    disable: isNamespaceDisabled
+    if:
+      name: showAndInitNamespace
+      type: function
+    init:
+      type: func
+      value: initNamespace
+    label: Namespace
+    loader: getResources|core|v1|namespaces
+    refresh: true
+    schema: schema/properties/metadata/properties/release/properties/namespace
+    type: select
+  - elements:
+    - if:
+        name: showIfDoesNotHaveOperationQuery
+        type: function
+      label: Labels
+      schema: schema/properties/spec/properties/labels
+      type: object-item
+    - if:
+        name: showIfDoesNotHaveOperationQuery
+        type: function
+      label: Annotations
+      schema: schema/properties/spec/properties/annotations
+      type: object-item
+    - disable: isDatabaseSelectDisabled
+      if:
+        name: showAndInitDatabase
+        type: function
+      label: Select AppBinding
+      loader:
+        name: fetchDatabases
+        watchPaths:
+        - schema/properties/metadata/properties/release/properties/namespace
+      refresh: true
+      schema: schema/properties/spec/properties/target
+      type: select
+    - addNewButton:
+        label: Create New Repository
         target: _blank
         url:
-          function: getCreateNameSpaceUrl
-      computed: initNamespace
-      disabled: isNamespaceDisabled
-      fetch: getResources|core|v1|namespaces
-      if: showAndInitNamespace
-      label:
-        text: labels.namespace
+          function: getCreateRepositoryUrl
+      label: Select Repository
+      loader:
+        name: fetchRepositories
+        watchPaths:
+        - schema/properties/metadata/properties/release/properties/namespace
       refresh: true
-      schema:
-        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      schema: schema/properties/spec/properties/repository
       type: select
+    - label: Snapshot
+      schema: schema/properties/spec/properties/snapshot
+      type: input
     - elements:
-      - if: showIfDoesNotHaveOperationQuery
-        individualItemDisabilityCheck: labelsDisabilityChecker
-        isArray: true
-        keys:
-          label:
-            text: labels.key
-        label:
-          text: labels.restoresession.labels
-        schema:
-          $ref: schema#/properties/spec/properties/labels
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.value
-          schema:
-            $ref: schema#/properties/spec/properties/labels/additionalProperties
-          type: input
-      - if: showIfDoesNotHaveOperationQuery
-        isArray: true
-        keys:
-          label:
-            text: labels.key
-        label:
-          text: labels.restoresession.annotations
-        schema:
-          $ref: schema#/properties/spec/properties/annotations
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.value
-          schema:
-            $ref: schema#/properties/spec/properties/annotations/additionalProperties
-          type: input
-      - disabled: isDatabaseSelectDisabled
-        fetch: fetchDatabases
-        if: showAndInitDatabase
-        label:
-          text: labels.restoresession.database
-        refresh: true
-        schema:
-          $ref: schema#/properties/spec/properties/target
+      - label: Storage Class
+        loader: getStorageClassNames|/spec/interimVolumeTemplate/spec/storageClassName
+        schema: schema/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/storageClassName
         type: select
-      - add_new_button:
-          label: labels.repository.create
-          target: _blank
-          url:
-            params:
-              cluster:
-                $ref: store#/route/params/cluster
-              namespace:
-                $ref: model#/metadata/release/namespace
-              user:
-                $ref: store#/route/params/user
-            path: /${user}/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=${namespace}
-        fetch: fetchRepositories
-        label:
-          text: labels.repository.select
-        refresh: true
-        schema:
-          $ref: schema#/properties/spec/properties/repository
-        type: select
-      - label:
-          text: labels.restoresession.snapshot
-        schema:
-          $ref: schema#/properties/spec/properties/snapshot
+      - label: Storage Size
+        schema: schema/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/resources/properties/requests/properties/storage
         type: input
+      if:
+        name: showInterimVolumneTemplate
+        type: function
+      label: Interim Volume
+      showLabels: true
+      type: block-layout
+    - elements:
+      - label: Customize Restore Job Runtime Settings?
+        schema: temp/properties/customizeRestoreJobRuntimeSettings
+        type: switch
+        watcher:
+          func: onCustomizeRestoreJobRuntimeSettingsChange
+          paths:
+          - temp/properties/customizeRestoreJobRuntimeSettings
       - elements:
-        - fetch: getStorageClassNames|/spec/interimVolumeTemplate/spec/storageClassName
-          label:
-            text: labels.storage.class
-          schema:
-            $ref: schema#/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/storageClassName
+        - label: Service Account Name
+          loader:
+            name: getServiceAccounts
+            watchPaths:
+            - schema/properties/metadata/properties/release/properties/namespace
+          schema: schema/properties/spec/properties/runtimeSettings/properties/pod/properties/serviceAccountName
           type: select
-        - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/resources/properties/requests/properties/storage
+        - label: FS Group
+          schema: schema/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/fsGroup
           type: input
-        if: showInterimVolumneTemplate
-        label:
-          text: labels.interimVolumeTemplate
-        schema:
-          $ref: schema#/properties/spec/properties/interimVolumeTemplate
-        show_label: true
-        type: single-step-form
-      - discriminator:
-          customizeRestoreJobRuntimeSettings:
-            default: false
-            type: boolean
-        elements:
-        - label:
-            text: labels.runtimeSettings.choise
-          schema:
-            $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
-          type: switch
-        - alias: database-restore-runtime-settings
-          chart:
-            name: uibytebuildersdev-component-database-runtime-settings
-            version: v0.30.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/release/properties/namespace
-          if: showRuntimeSettingsForm
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/spec/properties/runtimeSettings
-          type: reusable-element
-        label:
-          text: Runtime Settings
-        show_label: true
-        type: single-step-form
-      schema:
-        $ref: schema#/properties/spec
-      type: single-step-form
-    type: single-step-form
+        - label: Run As User
+          schema: schema/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/runAsUser
+          type: input
+        - label: Run As Group
+          schema: schema/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/runAsGroup
+          type: input
+        if:
+          name: showRuntimeSettingsForm
+          type: function
+        label: Pod Runtime Settings
+        showLabels: true
+        type: block-layout
+      label: Runtime Settings
+      showLabels: true
+      type: block-layout
+    showLabels: false
+    type: block-layout
   id: options
-  title: steps.0.label
+  type: single-step-form
 type: multi-step-form
