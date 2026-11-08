@@ -1,6 +1,6 @@
-const { axios, store, useOperator } = window.vueHelpers || {}
+const { store, useOperator } = window.vueHelpers || {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -232,6 +232,13 @@ export const useFunc = (model) => {
     return merged
   }
 
+  // The cluster that is to send to the monitoring cluster: the spoke on a hub's page.
+  function targetClusterName(currentRoute, spokeCluster, cluster) {
+    if (!cluster) return ''
+    if (currentRoute.fullPath.includes('/hubs/') && spokeCluster) return spokeCluster
+    return cluster
+  }
+
   // fetch monitoring cluster configuration
   async function fetchMonitoringClusterConfig(monitoringClusterName) {
     if (!monitoringClusterName) {
@@ -242,16 +249,13 @@ export const useFunc = (model) => {
     const spokeCluster = getRoute.params?.spoke
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    let url = `/telemetry/${owner}/${monitoringClusterName}/values/appscode-otel-stack`
-    if (cluster) {
-      if (getRoute.fullPath.includes('/hubs/') && spokeCluster) {
-        url += `?targetClusterName=${encodeURIComponent(spokeCluster)}`
-      } else {
-        url += `?targetClusterName=${encodeURIComponent(cluster)}`
-      }
-    }
-    const { data } = await axios.get(url)
-    return data
+    const telemetry = await akp.client('akp.telemetry.v2.TelemetryService')
+    const { values } = await telemetry.getStackValues({
+      cluster: { owner, name: monitoringClusterName },
+      stack: 'appscode-otel-stack',
+      targetCluster: targetClusterName(getRoute, spokeCluster, cluster),
+    })
+    return values
   }
 
   async function onEnabledFeaturesChange() {
@@ -353,12 +357,19 @@ export const useFunc = (model) => {
         sourceRef,
         version: chartVersion,
       } = getFeatureSetPropertyValue('/spec/chart')
-      let url =
-        `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json` +
-        (clusterset ? `&clusterset=${clusterset}` : '')
-      if (spoke)
-        url = `/clusters/${owner}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
-      const { data } = await axios.get(url)
+      const packages = await akp.client('akp.editor.v2.PackageService')
+      const { values: data } = await packages.getPackageValues({
+        cluster: { owner, name: spoke || cluster },
+        chart: {
+          name: chartName,
+          version: chartVersion,
+          sourceApiGroup: sourceRef.apiGroup,
+          sourceKind: sourceRef.kind,
+          sourceNamespace: sourceRef.namespace,
+          sourceName: sourceRef.name,
+        },
+        clusterSet: (!spoke && clusterset) || '',
+      })
       const { resources: resourcesDefaultValues } = data || {}
 
       Object.keys(resourcesDefaultValues || {}).forEach((key) => {
@@ -454,17 +465,12 @@ export const useFunc = (model) => {
     const spokeCluster = getRoute.params?.spoke
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    let url = `/telemetry/${owner}/monitoring-clusters`
-    if (cluster) {
-      if (getRoute.fullPath.includes('/hubs/') && spokeCluster) {
-        url += `?targetClusterName=${encodeURIComponent(spokeCluster)}`
-      } else {
-        url += `?targetClusterName=${encodeURIComponent(cluster)}`
-      }
-    }
-    const { data } = await axios.get(url)
-
-    return data || []
+    const telemetry = await akp.client('akp.telemetry.v2.TelemetryService')
+    const { clusters } = await telemetry.listMonitoringClusters({
+      owner,
+      targetCluster: targetClusterName(getRoute, spokeCluster, cluster),
+    })
+    return clusters
   }
 
   async function onMonitoringClusterChange() {
