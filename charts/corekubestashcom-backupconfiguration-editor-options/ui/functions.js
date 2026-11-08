@@ -8,7 +8,7 @@ let availableKinds = {}
 let kindToResourceMap = {}
 let version = ''
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -26,9 +26,13 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
     try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
+      const resp = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'identity.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'selfsubjectnamespaceaccessreviews',
+        object: {
           apiVersion: 'identity.k8s.appscode.com/v1alpha1',
           kind: 'SelfSubjectNamespaceAccessReview',
           spec: {
@@ -42,9 +46,9 @@ export const useFunc = (model) => {
             ],
           },
         },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
+      })
+      if (resp?.status?.projects) {
+        const projects = resp?.status?.projects
         let projectsNamespace = []
         projectsNamespace = Object.keys(projects).map((project) => ({
           project: project,
@@ -55,7 +59,7 @@ export const useFunc = (model) => {
         }))
         return projectsNamespace
       } else {
-        return resp.data?.status?.namespaces || []
+        return resp?.status?.namespaces || []
       }
     } catch (e) {
       console.log(e)
@@ -78,11 +82,16 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
 
     const { user, cluster } = params
-    let url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons`
     try {
-      const resp = await axios.get(url)
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'addons.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'addons',
+      })
       let addons = []
-      resp.data?.items.forEach((item) => {
+      resp?.items.forEach((item) => {
         addons.push(item.metadata.name)
       })
       return addons
@@ -99,12 +108,18 @@ export const useFunc = (model) => {
 
     const params = storeGet('/route/params')
     const { user, cluster } = params
-    let url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons/${addon}`
     if (addon) {
       try {
-        const resp = await axios.get(url)
+        const resp = await akp.resources.get({
+          owner: user,
+          cluster,
+          group: 'addons.kubestash.com',
+          version: 'v1alpha1',
+          resource: 'addons',
+          name: addon,
+        })
 
-        const backupTasks = resp?.data?.spec?.backupTasks?.map((task) => task.name) || []
+        const backupTasks = resp?.spec?.backupTasks?.map((task) => task.name) || []
         return backupTasks
       } catch (e) {
         console.log(e)
@@ -127,11 +142,17 @@ export const useFunc = (model) => {
     const namespace = session[index]?.encryptionSecret?.namespace
     const params = storeGet('/route/params')
     const { user, cluster } = params
-    let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
     if (namespace) {
       try {
-        const resp = await axios.get(url)
-        const name = resp?.data?.items?.map((item) => item.metadata?.name) || []
+        const resp = await akp.resources.list({
+          owner: user,
+          cluster,
+          group: 'core',
+          version: 'v1',
+          resource: 'secrets',
+          namespace,
+        })
+        const name = resp?.items?.map((item) => item.metadata?.name) || []
         return name
       } catch (e) {
         console.log(e)
@@ -143,15 +164,26 @@ export const useFunc = (model) => {
   async function getKindsApi() {
     const params = storeGet('/route/params')
     const { user, cluster } = params
-    let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
     try {
-      const resp = await axios.get(url)
+      const clusters = await akp.client('akp.cluster.v2.ClusterService')
+      const { types } = await clusters.listAvailableTypes({
+        cluster: { owner: user, name: cluster },
+        groups: ['core', 'apps', 'kubedb.com'],
+      })
 
       kindToResourceMap['kubedb.com'] = {}
       kindToResourceMap['apps'] = {}
       kindToResourceMap['core'] = {}
 
-      availableKinds = resp.data
+      // Same shape as the AKP v1 API answered: { [group]: { [version]: [{ Kind, Resource }] } }, '' being core.
+      availableKinds = {}
+      types.forEach(({ group, version, resources }) => {
+        availableKinds[group] ??= {}
+        availableKinds[group][version] = resources.map((r) => ({
+          Kind: r.kind,
+          Resource: r.resource,
+        }))
+      })
       appKind = Object.values(availableKinds['apps'])
         .flat()
         .map((ele) => {
@@ -212,11 +244,17 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster } = params
 
-    const url = `/clusters/${user}/${cluster}/proxy/${apiGroup}/${version}/namespaces/${namespace}/${resource}`
     if (apiGroup && version && resource && namespace) {
       try {
-        const resp = await axios.get(url)
-        const items = resp.data?.items
+        const resp = await akp.resources.list({
+          owner: user,
+          cluster,
+          group: apiGroup,
+          version,
+          resource,
+          namespace,
+        })
+        const items = resp?.items
         const options = items.map((ele) => {
           return ele.metadata.name
         })
@@ -275,13 +313,16 @@ export const useFunc = (model) => {
     const orgType = orgList.find((item) => item.username === activeOrg)?.orgType
 
     const resource = type === 'retentionPolicy' ? 'retentionpolicies' : 'backupstorages'
-    let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/${resource}`
-    if (orgType === 3 && namespace) {
-      url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/${resource}`
-    }
     try {
-      const data = await axios.get(url)
-      const items = data.data?.items || []
+      const data = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'storage.kubestash.com',
+        version: 'v1alpha1',
+        resource,
+        namespace: orgType === 3 && namespace ? namespace : undefined,
+      })
+      const items = data?.items || []
       const options = items.map((item) => {
         return {
           text: `${item.metadata.namespace}/${item.metadata.name}`,
