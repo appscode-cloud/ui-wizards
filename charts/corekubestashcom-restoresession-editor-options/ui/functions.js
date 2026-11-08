@@ -1,6 +1,6 @@
-const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+const { ref, computed, watch, useOperator, store } = window.vueHelpers || {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -65,10 +65,16 @@ export const useFunc = (model) => {
   async function getPreset() {
     const user = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
-    const url = `/clusters/${user}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
     try {
-      const resp = await axios.get(url)
-      const encryptionSecret = resp?.data?.spec?.values?.spec?.backup?.kubestash?.encryptionSecret
+      const resp = await akp.resources.get({
+        owner: user,
+        cluster,
+        group: 'charts.x-helm.dev',
+        version: 'v1alpha1',
+        resource: 'clusterchartpresets',
+        name: 'stash-presets',
+      })
+      const encryptionSecret = resp?.spec?.values?.spec?.backup?.kubestash?.encryptionSecret
       commit('wizard/model$update', {
         path: '/spec/dataSource/encryptionSecret',
         value: encryptionSecret,
@@ -89,9 +95,13 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
     try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
+      const resp = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'identity.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'selfsubjectnamespaceaccessreviews',
+        object: {
           apiVersion: 'identity.k8s.appscode.com/v1alpha1',
           kind: 'SelfSubjectNamespaceAccessReview',
           spec: {
@@ -105,9 +115,9 @@ export const useFunc = (model) => {
             ],
           },
         },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
+      })
+      if (resp?.status?.projects) {
+        const projects = resp?.status?.projects
         let projectsNamespace = []
         projectsNamespace = Object.keys(projects).map((project) => ({
           project: project,
@@ -118,7 +128,7 @@ export const useFunc = (model) => {
         }))
         return projectsNamespace
       } else {
-        return resp.data?.status?.namespaces || []
+        return resp?.status?.namespaces || []
       }
     } catch (e) {
       console.log(e)
@@ -161,17 +171,18 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/core.k8s.appscode.com/v1alpha1/namespaces/${namespace}/genericresources`,
-      {
-        params: {
-          convertToTable: true,
-          labelSelector: 'k8s.io/group=kubedb.com',
-        },
-      },
-    )
+    const resp = await akp.resources.list({
+      owner,
+      cluster,
+      group: 'core.k8s.appscode.com',
+      version: 'v1alpha1',
+      resource: 'genericresources',
+      namespace,
+      convertToTable: true,
+      labelSelector: 'k8s.io/group=kubedb.com',
+    })
 
-    const resources = (resp && resp.data && resp.data.rows) || []
+    const resources = (resp && resp.rows) || []
 
     return resources.map((item) => {
       const name = (item.cells?.length > 0 && item.cells[0].data) || ''
@@ -206,16 +217,22 @@ export const useFunc = (model) => {
   async function getRepositories() {
     const user = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
-    let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/repositories`
+    let namespace
     if (isNamespaceScopedOrg()) {
-      const namespace = await resolveNamespace()
+      namespace = await resolveNamespace()
       if (!namespace) return []
-      url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`
     }
 
     try {
-      const resp = await axios.get(url)
-      let names = resp?.data?.items
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'storage.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'repositories',
+        namespace,
+      })
+      let names = resp?.items
       names.map((item) => {
         item.value = { name: item?.metadata?.name, namespace: item?.metadata?.namespace } || {}
         item.text = `${item?.metadata?.namespace}/${item?.metadata?.name}` || ''
@@ -276,12 +293,17 @@ export const useFunc = (model) => {
     const namespace = repo.namespace || ''
     const repository = repo.name || ''
 
-    const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/snapshots`
-
     try {
       if (namespace) {
-        const resp = await axios.get(url)
-        let snapshots = resp?.data?.items
+        const resp = await akp.resources.list({
+          owner: user,
+          cluster,
+          group: core,
+          version,
+          resource: 'snapshots',
+          namespace,
+        })
+        let snapshots = resp?.items
         snapshotList = snapshots
         snapshots.map((item) => {
           const name = item?.metadata?.name
@@ -343,11 +365,16 @@ export const useFunc = (model) => {
   async function getAddons() {
     const user = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
-    const url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons`
     if (isConsole()) {
       try {
-        const resp = await axios.get(url)
-        let addons = resp?.data?.items
+        const resp = await akp.resources.list({
+          owner: user,
+          cluster,
+          group: 'addons.kubestash.com',
+          version: 'v1alpha1',
+          resource: 'addons',
+        })
+        let addons = resp?.items
         addonList = addons
 
         addons = addons.map((item) => item?.metadata?.name)
@@ -414,10 +441,16 @@ export const useFunc = (model) => {
     const user = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
     if (namespace) {
-      const url = `clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}`
       try {
-        const resp = await axios.get(url)
-        const annotations = resp.data?.metadata?.annotations || {}
+        const resp = await akp.resources.get({
+          owner: user,
+          cluster,
+          group: 'core',
+          version: 'v1',
+          resource: 'namespaces',
+          name: namespace,
+        })
+        const annotations = resp?.metadata?.annotations || {}
         const uidRange = annotations['openshift.io/sa.scc.uid-range']
         if (uidRange) {
           const val = uidRange.split('/')[0]
@@ -473,15 +506,26 @@ export const useFunc = (model) => {
   async function getKindsApi() {
     const params = storeGet('/route/params')
     const { user, cluster } = params
-    let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
     try {
-      const resp = await axios.get(url)
+      const clusters = await akp.client('akp.cluster.v2.ClusterService')
+      const { types } = await clusters.listAvailableTypes({
+        cluster: { owner: user, name: cluster },
+        groups: ['core', 'apps', 'kubedb.com'],
+      })
 
       kindToResourceMap['kubedb.com'] = {}
       kindToResourceMap['apps'] = {}
       kindToResourceMap['core'] = {}
 
-      availableKinds = resp.data
+      // Shaped as the AKP v1 API answered it: group -> version -> [{ Kind, Resource }].
+      availableKinds = {}
+      types.forEach(({ group, version, resources }) => {
+        availableKinds[group] ??= {}
+        availableKinds[group][version] = resources.map(({ kind, resource }) => ({
+          Kind: kind,
+          Resource: resource,
+        }))
+      })
 
       appKind = Object.values(availableKinds['apps'])
         .flat()
@@ -529,11 +573,17 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster } = params
 
-    const url = `/clusters/${user}/${cluster}/proxy/${apiGroup}/${version}/namespaces/${namespace}/${resource}`
     if (apiGroup && version && resource && namespace) {
       try {
-        const resp = await axios.get(url)
-        const items = resp.data?.items
+        const resp = await akp.resources.list({
+          owner: user,
+          cluster,
+          group: apiGroup,
+          version,
+          resource,
+          namespace,
+        })
+        const items = resp?.items
         const options = items.map((ele) => {
           return ele.metadata.name
         })
