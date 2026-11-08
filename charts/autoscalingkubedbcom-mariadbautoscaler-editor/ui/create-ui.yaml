@@ -1,253 +1,205 @@
-steps:
-- form:
-    elements:
-    - elements:
-      - label:
-          text: labels.name
-        schema:
-          $ref: schema#/properties/metadata/properties/name
-        type: input
-      - fetch: getNamespaces
-        label:
-          text: labels.selectNamespace
-        onChange: onNamespaceChange
-        schema:
-          $ref: schema#/properties/metadata/properties/namespace
-        type: select
-      - fetch: getMariaDbs
-        label:
-          text: labels.selectDb
-        onChange: initMetadata
-        refresh: true
-        required: true
-        schema:
-          $ref: schema#/properties/spec/properties/databaseRef/properties/name
-        type: select
-      if: isConsole
-      type: single-step-form
-    - hasDescription: true
-      if: isConsole
-      label:
-        text: labels.selectType
-      onChange: initMetadata
-      options:
-      - description: Scale your CPU Memory based on resource usage
-        text: Compute
-        value: compute
-      - description: Expand your database size based on volume usage
-        text: Storage
-        value: storage
-      required: true
-      schema:
-        $ref: discriminator#/properties/autoscalingType
-      type: radio
-    - elements:
-      - elements:
-        - elements:
-          - computed: setTrigger
-            label:
-              text: labels.trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/trigger
-            type: select
-          - label:
-              text: labels.podLifeTimeThreshold
-            schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: labels.resourceDiffPercentage
-            schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
-            type: input
-          - elements:
-            - label:
-                text: labels.cpu
-              schema:
-                $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/cpu
-              type: input
-            - label:
-                text: labels.memory
-              schema:
-                $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
-              type: input
-            label:
-              text: labels.minAllowed
-            schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/minAllowed
-            show_label: true
-            type: single-step-form
-          - elements:
-            - label:
-                text: labels.cpu
-              schema:
-                $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/cpu
-              type: input
-            - label:
-                text: labels.memory
-              schema:
-                $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/memory
-              type: input
-            label:
-              text: labels.maxAllowed
-            schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed
-            show_label: true
-            type: single-step-form
-          - fetch: setControlledResources|mariadb
-            label:
-              text: labels.controlledResources
-            schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/controlledResources
-            type: multiselect
-          schema:
-            $ref: schema#/properties/spec/properties/compute/properties/mariadb
-          type: single-step-form
-        label:
-          text: labels.mariadb
-        schema:
-          $ref: schema#/properties/spec/properties/compute/properties/mariadb
-        show_label: true
-        type: single-step-form
-      - elements:
-        - fetch: fetchNodeTopology
-          label:
-            text: labels.selectNodeTopology
-          schema:
-            $ref: schema#/properties/spec/properties/compute/properties/nodeTopology/properties/name
-          type: select
-        - if: isNodeTopologySelected
-          label:
-            text: labels.scaleUpDiffPercentage
-          schema:
-            $ref: schema#/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-          type: input
-        - if: isNodeTopologySelected
-          label:
-            text: labels.scaleDownDiffPercentage
-          schema:
-            $ref: schema#/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
-          type: input
-        label:
-          text: labels.nodeTopology
-        schema:
-          $ref: schema#/properties/spec/properties/compute/properties/nodeTopology
-        show_label: true
-        type: single-step-form
-      if: ifScalingTypeEqualsTo|compute
-      type: single-step-form
+step:
+- elements:
+  - elements:
+    - label: Name
+      schema: schema/properties/metadata/properties/name
+      type: input
+    - label: Select Namespace
+      loader: getNamespaces
+      schema: schema/properties/metadata/properties/namespace
+      type: select
+      watcher:
+        func: onNamespaceChange
+        paths:
+        - schema/properties/metadata/properties/namespace
+    - label: Select Maria Database
+      loader:
+        name: getMariaDbs
+        watchPaths:
+        - schema/properties/metadata/properties/namespace
+      refresh: true
+      schema: schema/properties/spec/properties/databaseRef/properties/name
+      type: select
+      validation:
+        type: required
+      watcher:
+        func: initMetadata
+        paths:
+        - schema/properties/spec/properties/databaseRef/properties/name
+    if:
+      name: isConsole
+      type: function
+    showLabels: false
+    type: block-layout
+  - if:
+      name: isConsole
+      type: function
+    label: Select Autoscale Type
+    options:
+    - description: Scale your CPU Memory based on resource usage
+      text: Compute
+      value: compute
+    - description: Expand your database size based on volume usage
+      text: Storage
+      value: storage
+    schema: temp/properties/autoscalingType
+    type: radio
+    validation:
+      type: required
+    watcher:
+      func: initMetadata
+      paths:
+      - temp/properties/autoscalingType
+  - elements:
     - elements:
       - elements:
-        - computed: setTrigger
-          label:
-            text: labels.trigger
+        - init:
+            type: func
+            value: setTrigger
+          label: Trigger
           options:
           - "On"
           - "Off"
-          schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/trigger
+          schema: schema/properties/spec/properties/compute/properties/mariadb/properties/trigger
           type: select
-        - label:
-            text: labels.expansionMode
-          options:
-          - Online
-          - Offline
-          schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/expansionMode
+        - label: Pod Life Time Threshold
+          schema: schema/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
+          type: input
+        - label: Resource Difference Percentage
+          schema: schema/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
+          type: input
+        - elements:
+          - label: CPU
+            schema: schema/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/cpu
+            type: input
+          - label: Memory
+            schema: schema/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
+            type: input
+          label: Min Allowed
+          showLabels: true
+          type: block-layout
+        - elements:
+          - label: CPU
+            schema: schema/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/cpu
+            type: input
+          - label: Memory
+            schema: schema/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/memory
+            type: input
+          label: Max Allowed
+          showLabels: true
+          type: block-layout
+        - label: Controlled Resources
+          loader: setControlledResources|mariadb
+          multiple: true
+          schema: schema/properties/spec/properties/compute/properties/mariadb/properties/controlledResources
           type: select
-        - label:
-            text: labels.usageThreshold
-          schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/usageThreshold
-          type: input
-        - addFormLabel: labels.scalingRules
-          element:
-            elements:
-            - label:
-                text: labels.appliesUpto
-              schema:
-                $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/scalingRules/items/properties/appliesUpto
-              type: input
-            - label:
-                text: labels.threshold
-              schema:
-                $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/scalingRules/items/properties/threshold
-              type: input
-            type: single-step-form
-          label:
-            text: labels.scalingRules
-          schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/scalingRules
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.appliesUpto
-            path: appliesUpto
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: labels.threshold
-            path: threshold
-            type: value
-            typeOfValue: string
-          type: single-step-form-array
-        - label:
-            text: labels.upperBound
-          schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/upperBound
-          type: input
-        label:
-          text: labels.mariadb
-        schema:
-          $ref: schema#/properties/spec/properties/compute/properties/mariadb
-        show_label: true
-        type: single-step-form
-      if: ifScalingTypeEqualsTo|storage
-      type: single-step-form
+        showLabels: false
+        type: block-layout
+      label: MariaDB
+      showLabels: true
+      type: block-layout
     - elements:
-      - label:
-          text: labels.timeout
-        options:
-        - text: 5 minutes
-          value: 5m
-        - text: 10 minutes
-          value: 10m
-        - text: 30 minutes
-          value: 30m
-        - text: 1 hour
-          value: 1h
-        - text: 2 hours
-          value: 2h
-        - text: 5 hours
-          value: 5h
-        - text: 10 hours
-          value: 10h
-        schema:
-          $ref: schema#/properties/spec/properties/opsRequestOptions/properties/timeout
+      - label: Select Node Topology
+        loader: fetchNodeTopology
+        schema: schema/properties/spec/properties/compute/properties/nodeTopology/properties/name
         type: select
-      - computed: setApplyToIfReady
-        label:
-          text: labels.apply
+      - if:
+          name: isNodeTopologySelected
+          type: function
+        label: Scale-up Difference Percentage
+        schema: schema/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+        type: input
+      - if:
+          name: isNodeTopologySelected
+          type: function
+        label: Scale-down Difference Percentage
+        schema: schema/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+        type: input
+      label: Node Topology
+      showLabels: true
+      type: block-layout
+    if:
+      name: ifScalingTypeEqualsTo|compute
+      type: function
+    showLabels: false
+    type: block-layout
+  - elements:
+    - elements:
+      - init:
+          type: func
+          value: setTrigger
+        label: Trigger
         options:
-        - text: IfReady (OpsRequest will be applied if database is ready)
-          value: IfReady
-        - text: Always (OpsRequest will always be applied)
-          value: Always
-        schema:
-          $ref: schema#/properties/spec/properties/opsRequestOptions/properties/apply
-        type: radio
-      if: showOpsRequestOptions
-      label:
-        text: labels.opsRequestOptions
-      schema:
-        $ref: schema#/properties/spec/properties/opsRequestOptions
-      show_label: true
-      type: single-step-form
-    type: single-step-form
+        - "On"
+        - "Off"
+        schema: schema/properties/spec/properties/storage/properties/mariadb/properties/trigger
+        type: select
+      - label: Expansion Mode
+        options:
+        - Online
+        - Offline
+        schema: schema/properties/spec/properties/storage/properties/mariadb/properties/expansionMode
+        type: select
+      - label: Usage Threshold
+        schema: schema/properties/spec/properties/storage/properties/mariadb/properties/usageThreshold
+        type: input
+      - elements:
+        - label: Applies Upto
+          schema: appliesUpto
+          type: input
+        - label: Threshold
+          schema: threshold
+          type: input
+        label: Scaling Rules
+        schema: schema/properties/spec/properties/storage/properties/mariadb/properties/scalingRules
+        type: array-object-form
+      - label: Upper Bound
+        schema: schema/properties/spec/properties/storage/properties/mariadb/properties/upperBound
+        type: input
+      label: MariaDB
+      showLabels: true
+      type: block-layout
+    if:
+      name: ifScalingTypeEqualsTo|storage
+      type: function
+    showLabels: false
+    type: block-layout
+  - elements:
+    - label: Timeout
+      options:
+      - text: 5 minutes
+        value: 5m
+      - text: 10 minutes
+        value: 10m
+      - text: 30 minutes
+        value: 30m
+      - text: 1 hour
+        value: 1h
+      - text: 2 hours
+        value: 2h
+      - text: 5 hours
+        value: 5h
+      - text: 10 hours
+        value: 10h
+      schema: schema/properties/spec/properties/opsRequestOptions/properties/timeout
+      type: select
+    - init:
+        type: func
+        value: setApplyToIfReady
+      label: Apply
+      options:
+      - text: IfReady (OpsRequest will be applied if database is ready)
+        value: IfReady
+      - text: Always (OpsRequest will always be applied)
+        value: Always
+      schema: schema/properties/spec/properties/opsRequestOptions/properties/apply
+      type: radio
+    if:
+      name: showOpsRequestOptions
+      type: function
+    label: Ops Request Options
+    showLabels: true
+    type: block-layout
   id: basic
-  title: steps.0.label
+  type: single-step-form
 type: multi-step-form
