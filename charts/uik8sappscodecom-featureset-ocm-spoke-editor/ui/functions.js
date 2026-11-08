@@ -1,6 +1,6 @@
-const { axios, store, useOperator } = window.vueHelpers || {}
+const { store, useOperator } = window.vueHelpers || {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -243,19 +243,24 @@ export const useFunc = (model) => {
       // get resources default values when featureset is installed
       const owner = storeGet('/route/params/user')
       const cluster = storeGet('/route/params/cluster')
-      const spoke = storeGet('/route/params/spoke')
 
       const {
         name: chartName,
         sourceRef,
         version: chartVersion,
       } = getFeatureSetPropertyValue('/spec/chart')
-      let url = `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
-
-      if (spoke)
-        url = `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
-
-      const { data } = await axios.get(url)
+      const packages = await akp.client('akp.editor.v2.PackageService')
+      const { values: data } = await packages.getPackageValues({
+        cluster: { owner, name: cluster },
+        chart: {
+          name: chartName,
+          version: chartVersion,
+          sourceApiGroup: sourceRef.apiGroup,
+          sourceKind: sourceRef.kind,
+          sourceNamespace: sourceRef.namespace,
+          sourceName: sourceRef.name,
+        },
+      })
       const { resources: resourcesDefaultValues } = data || {}
 
       Object.keys(resourcesDefaultValues || {}).forEach((key) => {
@@ -336,7 +341,8 @@ export const useFunc = (model) => {
 
   async function getHubList() {
     const owner = storeGet('/route/params/user')
-    const resp = await axios.get(`/clustersv2/${owner}/hub-info`)
+    const hubs = await akp.client('akp.cluster.v2.HubService')
+    await hubs.getHubInfo({ owner })
 
     hubData = [{ name: 'yo', apiServer: 'https://api-server-url', token: 'token-value' }]
 
