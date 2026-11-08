@@ -1,4 +1,4 @@
-const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+const { ref, computed, watch, useOperator, store } = window.vueHelpers || {}
 
 const machines = {
   'db.t.micro': {
@@ -317,7 +317,7 @@ const modeDetails = {
   },
 }
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -575,20 +575,30 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     let db = getValue(model, '/metadata/resource/kind')
     db = db.toLowerCase()
-    let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
-    const annotationUrl = `clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`
     try {
-      const resp = await axios.get(url)
-      features = resp.data.features || []
-      placement = resp.data.placementpolicies || []
-      versions = resp.data.versions || []
-      storageClass = resp.data.storageclasses || []
-      clusterIssuers = resp.data.clusterissuers || []
-      nodetopologiesDedicated = resp.data.dedicated || []
-      nodetopologiesShared = resp.data.shared || []
+      const clusters = await akp.client('akp.cluster.v2.ClusterService')
+      const bundle = await clusters.getDatabaseBundle({
+        cluster: { owner, name: cluster },
+        parts: ['features', 'common', 'versions'],
+        database: db,
+      })
+      features = bundle.features
+      placement = bundle.placementPolicies
+      versions = bundle.versions
+      storageClass = bundle.storageClasses
+      clusterIssuers = bundle.clusterIssuers
+      nodetopologiesDedicated = bundle.dedicatedNodeTopologies
+      nodetopologiesShared = bundle.sharedNodeTopologies
 
-      const response = await axios.get(annotationUrl)
-      const annotations = response.data?.metadata?.annotations || {}
+      const response = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'namespaces',
+        name: namespace,
+      })
+      const annotations = response?.metadata?.annotations || {}
       const uidRange = annotations['openshift.io/sa.scc.uid-range']
       if (uidRange) {
         const val = uidRange.split('/')[0]
@@ -987,16 +997,19 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster } = params
     const namespace = getValue(model, `/metadata/release/namespace`)
-    let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
 
     const options = []
     try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, data: null } },
-        },
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+        namespace,
+        filter: { items: { metadata: { name: null }, data: null } },
       })
-      const items = resp.data?.items || []
+      const items = resp?.items || []
       items.forEach((ele) => {
         const keys = Object.keys(ele.data || {})
         if (keys.length === 2 && keys.includes('username') && keys.includes('password'))
@@ -1058,19 +1071,33 @@ export const useFunc = (model) => {
     const refDBName = getValue(discriminator, '/refDBName')
 
     try {
-      const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}-full`
-      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
-      const repositoriesResp = await axios.get(repositoriesUrl)
-      const snapshotsResp = await axios.get(snapshotsUrl)
+      const repositoriesResp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'storage.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'repositories',
+        namespace: refNamespace,
+        name: `${refDBName}-full`,
+      })
+      const snapshotsResp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'storage.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'snapshots',
+        namespace: refNamespace,
+        name: `${refDBName}-incremental-snapshot`,
+      })
 
       commit('wizard/model$update', {
         path: `/spec/init/archiver/encryptionSecret/name`,
-        value: repositoriesResp.data?.spec.encryptionSecret.name,
+        value: repositoriesResp?.spec.encryptionSecret.name,
         force: true,
       })
       commit('wizard/model$update', {
         path: `/spec/init/archiver/encryptionSecret/namespace`,
-        value: repositoriesResp.data?.spec.encryptionSecret.namespace,
+        value: repositoriesResp?.spec.encryptionSecret.namespace,
         force: true,
       })
       commit('wizard/model$update', {
@@ -1094,7 +1121,7 @@ export const useFunc = (model) => {
         force: true,
       })
 
-      const resp = getComponentLogStats(snapshotsResp.data)
+      const resp = getComponentLogStats(snapshotsResp)
 
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
@@ -1113,7 +1140,8 @@ export const useFunc = (model) => {
       })
     } catch (e) {
       pointIntimeError =
-        e.response?.data?.message || 'Invalid name / namespace for recovery timestamp'
+        (e instanceof akp.ConnectError && e.rawMessage) ||
+        'Invalid name / namespace for recovery timestamp'
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
         value: '',
@@ -1188,12 +1216,17 @@ export const useFunc = (model) => {
   async function getInitScriptSources(resource) {
     const { user, cluster } = storeGet('/route/params')
     const namespace = getValue(model, '/metadata/release/namespace')
-    const url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/${resource}`
     try {
-      const resp = await axios.get(url, {
-        params: { filter: { items: { metadata: { name: null } } } },
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource,
+        namespace,
+        filter: { items: { metadata: { name: null } } },
       })
-      return (resp.data?.items || []).map((item) => item.metadata?.name)
+      return (resp?.items || []).map((item) => item.metadata?.name)
     } catch (e) {
       console.log(e)
       return []
