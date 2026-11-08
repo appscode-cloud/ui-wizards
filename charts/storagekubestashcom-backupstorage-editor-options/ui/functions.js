@@ -43,7 +43,7 @@ const backendMap = {
   },
 }
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -66,16 +66,17 @@ export const useFunc = (model) => {
       // call api if resource is either not namespaced
       // or namespaced and user has selected a namespace
       try {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
-            namespace ? '/namespaces/' + namespace : ''
-          }/${resource}`,
-          {
-            params: { filter: { items: { metadata: { name: null } } } },
-          },
-        )
+        const resp = await akp.resources.list({
+          owner,
+          cluster,
+          group,
+          version,
+          resource,
+          namespace: namespace || undefined,
+          filter: { items: { metadata: { name: null } } },
+        })
 
-        const resources = (resp && resp.data && resp.data.items) || []
+        const resources = (resp && resp.items) || []
 
         resources.map((item) => {
           const name = (item.metadata && item.metadata.name) || ''
@@ -259,9 +260,13 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
     try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
+      const resp = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'identity.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'selfsubjectnamespaceaccessreviews',
+        object: {
           apiVersion: 'identity.k8s.appscode.com/v1alpha1',
           kind: 'SelfSubjectNamespaceAccessReview',
           spec: {
@@ -275,9 +280,9 @@ export const useFunc = (model) => {
             ],
           },
         },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
+      })
+      if (resp?.status?.projects) {
+        const projects = resp?.status?.projects
         let projectsNamespace = []
         projectsNamespace = Object.keys(projects).map((project) => ({
           project: project,
@@ -288,7 +293,7 @@ export const useFunc = (model) => {
         }))
         return projectsNamespace
       } else {
-        return resp.data?.status?.namespaces || []
+        return resp?.status?.namespaces || []
       }
     } catch (e) {
       console.log(e)
