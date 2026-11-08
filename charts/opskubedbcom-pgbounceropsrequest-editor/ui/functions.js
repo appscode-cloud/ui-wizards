@@ -1,4 +1,4 @@
-const { axios, useOperator, store, useToast } = window.vueHelpers || {}
+const { useOperator, store, useToast } = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -309,7 +309,7 @@ let machinesFromPreset = []
 let secretArray = []
 const configSecretKeys = ['kubedb-user.ini']
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const route = store.state?.route
   const toast = useToast()
 
@@ -330,11 +330,16 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
-    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-      params: { filter: { items: { metadata: { name: null } } } },
+    const resp = await akp.resources.list({
+      owner,
+      cluster,
+      group: 'core',
+      version: 'v1',
+      resource: 'namespaces',
+      filter: { items: { metadata: { name: null } } },
     })
 
-    const resources = (resp && resp.data && resp.data.items) || []
+    const resources = resp?.items || []
 
     return resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
@@ -353,14 +358,17 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/namespace')
     // watchDependency('model#/metadata/namespace')
 
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/pgbouncers`,
-      {
-        params: { filter: { items: { metadata: { name: null } } } },
-      },
-    )
+    const resp = await akp.resources.list({
+      owner,
+      cluster,
+      group: 'kubedb.com',
+      version: 'v1alpha2',
+      resource: 'pgbouncers',
+      namespace,
+      filter: { items: { metadata: { name: null } } },
+    })
 
-    const resources = (resp && resp.data && resp.data.items) || []
+    const resources = resp?.items || []
 
     return resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
@@ -380,12 +388,19 @@ export const useFunc = (model) => {
     const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
     const version = storeGet('/route/params/version')
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/pgbouncers/${name}`
-      const resp = await axios.get(url)
+      const resp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'kubedb.com',
+        version,
+        resource: 'pgbouncers',
+        namespace,
+        name,
+      })
 
-      setDiscriminatorValue('/dbDetails', resp.data || {})
+      setDiscriminatorValue('/dbDetails', resp || {})
 
-      return resp.data || {}
+      return resp || {}
     } else return {}
   }
 
@@ -394,15 +409,21 @@ export const useFunc = (model) => {
   async function getDbVersions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
     let presets = storeGet('/kubedbuiPresets') || {}
     if (!storeGet('/route/params/actions')) {
       try {
-        const presetResp = await axios.get(url)
-        presets = presetResp.data?.spec?.values?.spec
+        const presetResp = await akp.resources.get({
+          owner,
+          cluster,
+          group: 'charts.x-helm.dev',
+          version: 'v1alpha1',
+          resource: 'clusterchartpresets',
+          name: 'kubedb-ui-presets',
+        })
+        presets = presetResp?.spec?.values?.spec
       } catch (e) {
         console.log(e)
-        presets.status = String(e.status)
+        if (e instanceof akp.ConnectError && e.code === akp.Code.NotFound) presets.status = '404'
       }
     }
     try {
@@ -415,13 +436,15 @@ export const useFunc = (model) => {
           },
         },
       }
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/pgbouncerversions`,
-        {
-          params: queryParams,
-        },
-      )
-      const resources = (resp && resp.data && resp.data.items) || []
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group: 'catalog.kubedb.com',
+        version: 'v1alpha1',
+        resource: 'pgbouncerversions',
+        ...queryParams,
+      })
+      const resources = resp?.items || []
       const sortedVersions = resources.sort((a, b) =>
         versionCompare(a.spec.version, b.spec.version),
       )
@@ -827,25 +850,30 @@ export const useFunc = (model) => {
     const dbKind = getValue(store.state, '/resource/definition/result/kind')
 
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/ui.kubedb.com/v1alpha1/namespaces/${namespace}/databaseconfigurations/${name}~${dbKind}.${dbGroup}`,
-        {
-          params: {
-            keys: ['*.ini'].join(','),
-          },
-        },
-      )
-      databaseInfoResponse = resp?.data?.response || {}
-      configSecrets = resp?.data?.response?.availableSecrets || []
-      secretConfigData = resp?.data?.response?.configurations || []
+      const resp = await akp.resources.getDatabaseConfiguration({
+        owner,
+        cluster,
+        namespace,
+        name: `${name}~${dbKind}.${dbGroup}`,
+        params: { keys: ['*.ini'].join(',') },
+      })
+      databaseInfoResponse = resp?.response || {}
+      configSecrets = resp?.response?.availableSecrets || []
+      secretConfigData = resp?.response?.configurations || []
     } catch (e) {
       console.log(e)
     }
 
     // Fetching all existing secrets
     try {
-      const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/secrets`)
-      resp.data?.items.forEach((item) => {
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+      })
+      resp?.items.forEach((item) => {
         if (item.metadata?.name) {
           existingSecrets.push(item.metadata.name)
         }
@@ -883,7 +911,6 @@ export const useFunc = (model) => {
   async function createNewConfigSecret(type) {
     type = type ? type + '/' : ''
     const { user, cluster } = route.params
-    const url = `/clusters/${user}/${cluster}/resources`
     const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
     const secretName = getValue(discriminator, `${type}createSecret/name`)
     const secretData = getValue(discriminator, `${type}createSecret/data`)
@@ -898,15 +925,22 @@ export const useFunc = (model) => {
     }
 
     try {
-      const res = await axios.post(url, {
-        apiVersion: 'v1',
-        stringData: secretDataObj,
-        kind: 'Secret',
-        metadata: {
-          name: secretName,
-          namespace: namespace,
+      const res = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+        object: {
+          apiVersion: 'v1',
+          stringData: secretDataObj,
+          kind: 'Secret',
+          metadata: {
+            name: secretName,
+            namespace: namespace,
+          },
+          type: 'Opaque',
         },
-        type: 'Opaque',
       })
       commit('wizard/temp$update', {
         path: `${type}createSecret/status`,
@@ -937,8 +971,7 @@ export const useFunc = (model) => {
       return msg || defaultMsg
     }
     return (
-      (msg.response && msg.response.data && msg.response.data.message) ||
-      (msg.response && msg.response.data) ||
+      (msg instanceof akp.ConnectError && msg.rawMessage) ||
       (msg.status && msg.status.status) ||
       defaultMsg
     )
@@ -1126,11 +1159,17 @@ export const useFunc = (model) => {
 
     try {
       // Fetch the secret data from API
-      const secretResp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${selectedSecret}`,
-      )
+      const secretResp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+        namespace,
+        name: selectedSecret,
+      })
 
-      const secretData = secretResp.data?.data || {}
+      const secretData = secretResp?.data || {}
       const configObj = []
 
       // Decode base64 and format as array of objects with name and content
