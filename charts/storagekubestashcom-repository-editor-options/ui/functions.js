@@ -1,4 +1,4 @@
-const { axios, store, useOperator } = window.vueHelpers || {}
+const { store, useOperator } = window.vueHelpers || {}
 
 let namespaces = []
 let appKind = []
@@ -8,7 +8,7 @@ let availableKinds = {}
 let kindToResourceMap = {}
 let version = ''
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -54,15 +54,26 @@ export const useFunc = (model) => {
   async function getKindsApi() {
     const params = storeGet('/route/params')
     const { user, cluster } = params
-    let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
     try {
-      const resp = await axios.get(url)
+      const clusters = await akp.client('akp.cluster.v2.ClusterService')
+      const { types } = await clusters.listAvailableTypes({
+        cluster: { owner: user, name: cluster },
+        groups: ['core', 'apps', 'kubedb.com'],
+      })
 
       kindToResourceMap['kubedb.com'] = {}
       kindToResourceMap['apps'] = {}
       kindToResourceMap['core'] = {}
 
-      availableKinds = resp.data
+      // Same shape as the AKP v1 API answered: { [group]: { [version]: [{ Kind, Resource }] } }, '' being core.
+      availableKinds = {}
+      types.forEach(({ group, version, resources }) => {
+        availableKinds[group] ??= {}
+        availableKinds[group][version] = resources.map((r) => ({
+          Kind: r.kind,
+          Resource: r.resource,
+        }))
+      })
       appKind = Object.values(availableKinds['apps'])
         .flat()
         .map((ele) => {
@@ -102,9 +113,13 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
     try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
+      const resp = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'identity.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'selfsubjectnamespaceaccessreviews',
+        object: {
           apiVersion: 'identity.k8s.appscode.com/v1alpha1',
           kind: 'SelfSubjectNamespaceAccessReview',
           spec: {
@@ -118,9 +133,9 @@ export const useFunc = (model) => {
             ],
           },
         },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
+      })
+      if (resp?.status?.projects) {
+        const projects = resp?.status?.projects
         let projectsNamespace = []
         projectsNamespace = Object.keys(projects).map((project) => ({
           project: project,
@@ -131,7 +146,7 @@ export const useFunc = (model) => {
         }))
         return projectsNamespace
       } else {
-        return resp.data?.status?.namespaces || []
+        return resp?.status?.namespaces || []
       }
     } catch (e) {
       console.log(e)
@@ -150,12 +165,18 @@ export const useFunc = (model) => {
     else if (type === 'storageRef') suffix = 'backupstorages'
     const core = suffix === 'secrets' ? 'core' : 'storage.kubestash.com'
     const version = suffix === 'secrets' ? 'v1' : 'v1alpha1'
-    const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
 
     try {
       if (namespace) {
-        const resp = await axios.get(url)
-        let names = resp?.data?.items
+        const resp = await akp.resources.list({
+          owner: user,
+          cluster,
+          group: core,
+          version,
+          resource: suffix,
+          namespace,
+        })
+        let names = resp?.items
         names.map((item) => {
           item.value = item?.metadata?.name || ''
           item.text = item?.metadata?.name || ''
@@ -218,11 +239,17 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster } = params
 
-    const url = `/clusters/${user}/${cluster}/proxy/${apiGroup}/${version}/namespaces/${namespace}/${resource}`
     if (apiGroup && version && resource && namespace) {
       try {
-        const resp = await axios.get(url)
-        const items = resp.data?.items
+        const resp = await akp.resources.list({
+          owner: user,
+          cluster,
+          group: apiGroup,
+          version,
+          resource,
+          namespace,
+        })
+        const items = resp?.items
         const options = items.map((ele) => {
           return ele.metadata.name
         })
