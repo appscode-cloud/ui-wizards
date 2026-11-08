@@ -1,6 +1,6 @@
-const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+const { ref, computed, watch, useOperator, store } = window.vueHelpers || {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -24,11 +24,17 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const namespace = storeGet('/route/query/namespace')
     const name = storeGet('/route/params/name')
-    const url = `/clusters/${owner}/${cluster}/proxy/core.kubestash.com/v1alpha1/namespaces/${namespace}/backupconfigurations`
 
     try {
-      const resp = await axios.get(url)
-      const items = resp.data.items
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group: 'core.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'backupconfigurations',
+        namespace,
+      })
+      const items = resp.items
 
       backups = items
       items.forEach((ele) => {
