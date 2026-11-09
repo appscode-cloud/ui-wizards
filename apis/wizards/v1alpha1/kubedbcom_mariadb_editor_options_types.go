@@ -57,8 +57,10 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy  `json:"deletionPolicy"`
 	Configuration  string          `json:"configuration"`
 	// +optional
-	ArchiverName string       `json:"archiverName"`
-	Init         InitDatabase `json:"init"`
+	ArchiverName string `json:"archiverName"`
+	// +optional
+	Archiver *ArchiverOverride `json:"archiver,omitempty"`
+	Init     InitDatabase      `json:"init"`
 	// +optional
 	ServiceTemplates []MariadbServiceTemplate `json:"serviceTemplates"`
 	Admin            AdminOptions             `json:"admin"`

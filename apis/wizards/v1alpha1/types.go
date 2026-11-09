@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // +kubebuilder:validation:Enum=db.t.micro;db.t.small;db.t.medium;db.t.large;db.t.xlarge;db.t.2xlarge;db.m.small;db.m.large;db.m.xlarge;db.m.2xlarge;db.m.4xlarge;db.m.8xlarge;db.m.12xlarge;db.m.16xlarge;db.m.24xlarge;db.r.large;db.r.xlarge;db.r.2xlarge;db.r.4xlarge;db.r.8xlarge;db.r.12xlarge;db.r.16xlarge;db.r.24xlarge
@@ -71,6 +72,16 @@ type Archiver struct {
 	EncryptionSecret   ObjectReference `json:"encryptionSecret"`
 	FullDBRepository   ObjectReference `json:"fullDBRepository"`
 	ManifestRepository ObjectReference `json:"manifestRepository"`
+}
+
+// ArchiverOverride makes the chart create a per-database Archiver: the DB spec can only
+// reference an Archiver CR, and the BackupStorage is defined inside it.
+type ArchiverOverride struct {
+	BackupStorage ObjectReference `json:"backupStorage"`
+	// Spec of the default Archiver this one is cloned from; its shape differs per database kind.
+	// +optional
+	// +kubebuilder:pruning:PreserveUnknownFields
+	Spec *runtime.RawExtension `json:"spec,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset

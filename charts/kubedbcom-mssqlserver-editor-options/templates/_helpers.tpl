@@ -172,3 +172,17 @@ seccompProfile:
 {{- $pidSecretName := dig "name" "" (.Values.spec.pidSecretRef | default dict) -}}
 {{- and .Values.spec.pid (not (has .Values.spec.pid $editions)) (not $pidSecretName) | toString -}}
 {{- end }}
+
+{{/*
+Non-empty when the user picked a BackupStorage that differs from the default Archiver's,
+so the chart must create its own Archiver.
+*/}}
+{{- define "kubedbcom-mssqlserver-editor-options.customArchiver" -}}
+{{- $archiver := .Values.spec.archiver -}}
+{{- if and .Values.spec.admin.archiver.enable.default $archiver $archiver.spec $archiver.backupStorage -}}
+{{- $defaultRef := dig "backupStorage" "ref" dict $archiver.spec -}}
+{{- if or (ne $archiver.backupStorage.name ($defaultRef.name | default "")) (ne $archiver.backupStorage.namespace ($defaultRef.namespace | default "")) -}}
+true
+{{- end -}}
+{{- end -}}
+{{- end }}

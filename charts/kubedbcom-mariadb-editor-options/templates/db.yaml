@@ -79,8 +79,13 @@ spec:
 {{- if .Values.spec.admin.archiver.enable.default }}
   archiver:
     ref:
+{{- if include "kubedbcom-mariadb-editor-options.customArchiver" . }}
+      name: {{ include "kubedbcom-mariadb-editor-options.fullname" . }}-archiver
+      namespace: {{ .Release.Namespace }}
+{{- else }}
       name: {{ .Values.spec.archiverName }}
       namespace: kubedb
+{{- end }}
 {{- end }}
   version: {{ .Values.spec.admin.databases.MariaDB.versions.default | quote }}
 {{- if .Values.spec.authSecret.name }}

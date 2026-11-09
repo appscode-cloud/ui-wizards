@@ -762,6 +762,15 @@ step:
         func: onBackupSwitch
         paths:
         - temp/backup
+    - if:
+        name: showBackupStorage|backup
+        type: function
+      label: Backup Storage
+      loader: getBackupStorages
+      schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef
+      type: select
+      validation:
+        type: required
     - elements:
       - disable:
           name: showArchiverAlert
@@ -775,6 +784,17 @@ step:
           func: onArchiverChange
           paths:
           - schema/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
+      - if:
+          name: showBackupStorage|archiver
+          type: function
+        label: Archiver Backup Storage
+        loader: getBackupStorages
+        schema: schema/properties/spec/properties/archiver/properties/backupStorage
+        type: select
+        watcher:
+          func: onArchiverBackupStorageChange
+          paths:
+          - schema/properties/spec/properties/archiver/properties/backupStorage
       - if:
           name: showArchiverAlert
           type: function
