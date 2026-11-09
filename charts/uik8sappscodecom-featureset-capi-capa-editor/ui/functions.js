@@ -1,6 +1,6 @@
-const { axios, store, useOperator } = window.vueHelpers || {}
+const { store, useOperator } = window.vueHelpers || {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -289,12 +289,19 @@ export const useFunc = (model) => {
         sourceRef,
         version: chartVersion,
       } = getFeatureSetPropertyValue('/spec/chart')
-      let url =
-        `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json` +
-        (clusterset ? `&clusterset=${clusterset}` : '')
-      if (spoke)
-        url = `/clusters/${owner}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
-      const { data } = await axios.get(url)
+      const packages = await akp.client('akp.editor.v2.PackageService')
+      const { values: data } = await packages.getPackageValues({
+        cluster: { owner, name: spoke || cluster },
+        chart: {
+          name: chartName,
+          version: chartVersion,
+          sourceApiGroup: sourceRef.apiGroup,
+          sourceKind: sourceRef.kind,
+          sourceNamespace: sourceRef.namespace,
+          sourceName: sourceRef.name,
+        },
+        clusterSet: spoke ? '' : clusterset || '',
+      })
       const { resources: resourcesDefaultValues } = data || {}
 
       Object.keys(resourcesDefaultValues || {}).forEach((key) => {

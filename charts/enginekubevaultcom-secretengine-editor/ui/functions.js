@@ -1,6 +1,6 @@
-const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+const { ref, computed, watch, useOperator, store } = window.vueHelpers || {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -19,17 +19,17 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster') || ''
     if (isConsole()) {
       try {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-          {
-            params: {
-              convertToTable: true,
-              labelSelector: 'k8s.io/group=kubedb.com',
-            },
-          },
-        )
+        const resp = await akp.resources.list({
+          owner,
+          cluster,
+          group,
+          version,
+          resource,
+          convertToTable: true,
+          labelSelector: 'k8s.io/group=kubedb.com',
+        })
 
-        const resources = (resp && resp.data && resp.data.rows) || []
+        const resources = resp?.rows || []
 
         resources.map((item) => {
           const name = (item.cells && item.cells[0].data) || ''
@@ -97,16 +97,16 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-        {
-          params: {
-            filter: { items: { metadata: { name: null, namespace: null } } },
-          },
-        },
-      )
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group,
+        version,
+        resource,
+        filter: { items: { metadata: { name: null, namespace: null } } },
+      })
 
-      const resources = (resp && resp.data && resp.data.items) || []
+      const resources = resp?.items || []
       resources.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         const namespace = (item.metadata && item.metadata.namespace) || ''

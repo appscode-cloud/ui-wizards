@@ -1,5 +1,5 @@
-const { axios, store, useOperator } = window.vueHelpers || {}
-export const useFunc = (model) => {
+const { store, useOperator } = window.vueHelpers || {}
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -298,12 +298,19 @@ export const useFunc = (model) => {
         sourceRef,
         version: chartVersion,
       } = getFeatureSetPropertyValue('/spec/chart')
-      let url =
-        `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json` +
-        (clusterset ? `&clusterset=${clusterset}` : '')
-      if (spoke)
-        url = `/clusters/${owner}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
-      const { data } = await axios.get(url)
+      const packages = await akp.client('akp.editor.v2.PackageService')
+      const { values: data } = await packages.getPackageValues({
+        cluster: { owner, name: spoke || cluster },
+        chart: {
+          name: chartName,
+          version: chartVersion,
+          sourceApiGroup: sourceRef.apiGroup,
+          sourceKind: sourceRef.kind,
+          sourceNamespace: sourceRef.namespace,
+          sourceName: sourceRef.name,
+        },
+        clusterSet: (!spoke && clusterset) || '',
+      })
       const { resources: resourcesDefaultValues } = data || {}
 
       Object.keys(resourcesDefaultValues || {}).forEach((key) => {
@@ -456,14 +463,13 @@ export const useFunc = (model) => {
           ? getRoute.fullPath.split('/clustersets/')[1].split('/')[0]
           : null
 
-        let url = clusterset
-          ? `/clusters/${owner}/${cluster}/db-status?clusterset=${clusterset}`
-          : `/clusters/${owner}/${cluster}/db-status`
-        if (spoke) url = `/clusters/${owner}/${spoke}/db-status`
+        const clusters = await akp.client('akp.cluster.v2.ClusterService')
+        const { featureGates } = await clusters.getDatabaseFeatureGates({
+          cluster: { owner, name: spoke || cluster },
+          clusterSet: (!spoke && clusterset) || '',
+        })
 
-        const resp = await axios.get(url)
-
-        data = resp?.data
+        data = featureGates || {}
         isFetching = 'success'
         if (Object.keys(data).length) {
           enabledTypes = []
@@ -577,7 +583,6 @@ export const useFunc = (model) => {
 
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/${lowerCaseDbName}versions`
 
     const queryParams = {
       filter: {
@@ -589,8 +594,15 @@ export const useFunc = (model) => {
     }
 
     try {
-      const resp = await axios.get(url, { params: queryParams })
-      const resources = (resp && resp.data && resp.data.items) || []
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group: 'catalog.kubedb.com',
+        version: 'v1alpha1',
+        resource: `${lowerCaseDbName}versions`,
+        ...queryParams,
+      })
+      const resources = resp?.items || []
 
       // keep only non deprecated versions
       const filteredResources = resources

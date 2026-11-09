@@ -1,6 +1,6 @@
-const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+const { ref, computed, watch, useOperator, store } = window.vueHelpers || {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -33,9 +33,13 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
     try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
+      const resp = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'identity.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'selfsubjectnamespaceaccessreviews',
+        object: {
           apiVersion: 'identity.k8s.appscode.com/v1alpha1',
           kind: 'SelfSubjectNamespaceAccessReview',
           spec: {
@@ -49,9 +53,9 @@ export const useFunc = (model) => {
             ],
           },
         },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
+      })
+      if (resp?.status?.projects) {
+        const projects = resp?.status?.projects
         let projectsNamespace = []
         projectsNamespace = Object.keys(projects).map((project) => ({
           project: project,
@@ -62,7 +66,7 @@ export const useFunc = (model) => {
         }))
         return projectsNamespace
       } else {
-        return resp.data?.status?.namespaces || []
+        return resp?.status?.namespaces || []
       }
     } catch (e) {
       console.log(e)
@@ -88,9 +92,15 @@ export const useFunc = (model) => {
     const suffix = kind === 'BackupConfiguration' ? 'backupconfigurations' : 'backupblueprints'
     try {
       if (namespace && kind) {
-        const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
-        const resp = await axios.get(url)
-        invokerData = resp.data.items
+        const resp = await akp.resources.list({
+          owner: user,
+          cluster,
+          group: core,
+          version,
+          resource: suffix,
+          namespace,
+        })
+        invokerData = resp.items
 
         const dbKind = storeGet('/resource/layout/result/resource/kind') || ''
         const group = storeGet('/resource/layout/result/resource/group') || ''

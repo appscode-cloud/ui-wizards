@@ -1,6 +1,6 @@
 const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -521,12 +521,19 @@ export const useFunc = (model) => {
   async function FetchAllDbVersions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/all-available`
+    const resources = await akp.client('akp.cluster.v2.ResourceService')
+    const { objects } = await resources.listGroupVersionObjects({
+      cluster: { owner, name: cluster },
+      group: 'catalog.kubedb.com',
+      version: 'v1alpha1',
+    })
+    // The AKP v1 API answered the names of each kind as a plain list.
+    const versions = Object.fromEntries(
+      Object.entries(objects).map(([kind, { names }]) => [kind, names]),
+    )
 
-    const resp = await axios.get(url)
-
-    setDiscriminatorValue(`/allDbVersions`, resp.data)
-    return resp.data
+    setDiscriminatorValue(`/allDbVersions`, versions)
+    return versions
   }
 
   function isConfigureDb(value) {
@@ -600,10 +607,20 @@ export const useFunc = (model) => {
   async function FetchDbBundle() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const url = `/clusters/${owner}/${cluster}/db-bundle?type=common&deployment=all`
     try {
-      const resp = await axios.get(url)
-      setDiscriminatorValue('/bundle', resp.data)
+      const clusters = await akp.client('akp.cluster.v2.ClusterService')
+      const bundle = await clusters.getDatabaseBundle({
+        cluster: { owner, name: cluster },
+        parts: ['common'],
+      })
+      // Keyed as the AKP v1 API's db-bundle answered them.
+      setDiscriminatorValue('/bundle', {
+        dedicated: bundle.dedicatedNodeTopologies,
+        shared: bundle.sharedNodeTopologies,
+        placementpolicies: bundle.placementPolicies,
+        storageclasses: bundle.storageClasses,
+        clusterissuers: bundle.clusterIssuers,
+      })
     } catch (e) {
       console.log(e)
       return []
@@ -618,8 +635,9 @@ export const useFunc = (model) => {
     let clusterInfo = storeGet('/cluster/clusterDefinition/result') || {}
     if (!clusterInfo?.hubClusterName) {
       try {
-        const resp = await axios.get(`/clusters/${owner}/${cluster}`)
-        clusterInfo = resp.data || {}
+        const clusters = await akp.client('akp.cluster.v2.ClusterService')
+        const resp = await clusters.getCluster({ cluster: { owner, name: cluster } })
+        clusterInfo = resp.cluster || {}
       } catch (e) {
         console.log(e)
       }
@@ -639,22 +657,32 @@ export const useFunc = (model) => {
       setDiscriminatorValue('/isHubManaged', false)
       return false
     }
-    const proxyUrl = `/clusters/${owner}/${cluster}/proxy`
     try {
-      const preset = await axios.get(
-        `${proxyUrl}/charts.x-helm.dev/v1alpha1/clusterchartpresets/${presetName}`,
-      )
-      const labels = preset.data?.metadata?.labels || {}
+      const preset = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'charts.x-helm.dev',
+        version: 'v1alpha1',
+        resource: 'clusterchartpresets',
+        name: presetName,
+      })
+      const labels = preset?.metadata?.labels || {}
       const releaseName = labels['helm.toolkit.fluxcd.io/name']
       const releaseNamespace = labels['helm.toolkit.fluxcd.io/namespace']
       if (!releaseName || !releaseNamespace) {
         setDiscriminatorValue('/isHubManaged', false)
         return false
       }
-      const release = await axios.get(
-        `${proxyUrl}/helm.toolkit.fluxcd.io/v2/namespaces/${releaseNamespace}/helmreleases/${releaseName}`,
-      )
-      const ownerReferences = release.data?.metadata?.ownerReferences || []
+      const release = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'helm.toolkit.fluxcd.io',
+        version: 'v2',
+        resource: 'helmreleases',
+        namespace: releaseNamespace,
+        name: releaseName,
+      })
+      const ownerReferences = release?.metadata?.ownerReferences || []
       const isHubManaged = ownerReferences.some(
         (ref) =>
           ref?.apiVersion === 'work.open-cluster-management.io/v1' &&
@@ -726,9 +754,13 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
     try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
+      const resp = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'identity.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'selfsubjectnamespaceaccessreviews',
+        object: {
           apiVersion: 'identity.k8s.appscode.com/v1alpha1',
           kind: 'SelfSubjectNamespaceAccessReview',
           spec: {
@@ -742,9 +774,9 @@ export const useFunc = (model) => {
             ],
           },
         },
-      )
-      if (resp.data?.status?.projects) {
-        const projects = resp.data?.status?.projects
+      })
+      if (resp?.status?.projects) {
+        const projects = resp?.status?.projects
         let projectsNamespace = []
         projectsNamespace = Object.keys(projects).map((project) => ({
           project: project,
@@ -755,7 +787,7 @@ export const useFunc = (model) => {
         }))
         return projectsNamespace
       } else {
-        return resp.data?.status?.namespaces || []
+        return resp?.status?.namespaces || []
       }
     } catch (e) {
       console.log(e)
@@ -1120,11 +1152,17 @@ export const useFunc = (model) => {
           : 'backupstorages'
     const core = suffix === 'secrets' ? 'core' : 'storage.kubestash.com'
     const version = suffix === 'secrets' ? 'v1' : 'v1alpha1'
-    const url = `/clusters/${username}/${clusterName}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
     try {
       if (namespace) {
-        const resp = await axios.get(url)
-        let names = resp?.data?.items
+        const resp = await akp.resources.list({
+          owner: username,
+          cluster: clusterName,
+          group: core,
+          version,
+          resource: suffix,
+          namespace,
+        })
+        let names = resp?.items
         names = names.map((ele) => ele?.metadata?.name)
         return names
       }

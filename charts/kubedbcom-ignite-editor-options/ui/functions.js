@@ -1,4 +1,4 @@
-const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+const { ref, computed, watch, useOperator, store } = window.vueHelpers || {}
 
 const machines = {
   'db.t.micro': {
@@ -317,7 +317,7 @@ const modeDetails = {
   },
 }
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -465,21 +465,31 @@ export const useFunc = (model) => {
 
     let db = getValue(model, '/metadata/resource/kind')
     db = db.toLowerCase()
-    let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
-    const annotationUrl = `clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`
 
     try {
-      const resp = await axios.get(url)
-      features = resp.data.features || []
-      placement = resp.data.placementpolicies || []
-      versions = resp.data.versions || []
-      storageClass = resp.data.storageclasses || []
-      clusterIssuers = resp.data.clusterissuers || []
-      nodetopologiesDedicated = resp.data.dedicated || []
-      nodetopologiesShared = resp.data.shared || []
+      const clusters = await akp.client('akp.cluster.v2.ClusterService')
+      const bundle = await clusters.getDatabaseBundle({
+        cluster: { owner, name: cluster },
+        parts: ['features', 'common', 'versions'],
+        database: db,
+      })
+      features = bundle.features
+      placement = bundle.placementPolicies
+      versions = bundle.versions
+      storageClass = bundle.storageClasses
+      clusterIssuers = bundle.clusterIssuers
+      nodetopologiesDedicated = bundle.dedicatedNodeTopologies
+      nodetopologiesShared = bundle.sharedNodeTopologies
 
-      const response = await axios.get(annotationUrl)
-      const annotations = response.data?.metadata?.annotations || {}
+      const response = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'namespaces',
+        name: namespace,
+      })
+      const annotations = response?.metadata?.annotations || {}
       const uidRange = annotations['openshift.io/sa.scc.uid-range']
       if (uidRange) {
         const val = uidRange.split('/')[0]
@@ -796,9 +806,13 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
     try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
+      const resp = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'identity.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'selfsubjectnamespaceaccessreviews',
+        object: {
           apiVersion: 'identity.k8s.appscode.com/v1alpha1',
           kind: 'SelfSubjectNamespaceAccessReview',
           spec: {
@@ -812,8 +826,8 @@ export const useFunc = (model) => {
             ],
           },
         },
-      )
-      const projects = resp?.data?.status?.projects
+      })
+      const projects = resp?.status?.projects
       if (projects) {
         let projectsNamespace = []
         projectsNamespace = Object.keys(projects).map((project) => ({
@@ -825,7 +839,7 @@ export const useFunc = (model) => {
         }))
         return projectsNamespace
       } else {
-        return resp.data?.status?.namespaces || []
+        return resp?.status?.namespaces || []
       }
     } catch (e) {
       console.log(e)
@@ -1007,16 +1021,19 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster } = params
     const namespace = getValue(model, `/metadata/release/namespace`)
-    let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
 
     const options = []
     try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, data: null } },
-        },
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+        namespace,
+        filter: { items: { metadata: { name: null }, data: null } },
       })
-      const items = resp.data?.items || []
+      const items = resp?.items || []
       items.forEach((ele) => {
         const keys = Object.keys(ele.data || {})
         if (keys.length === 2 && keys.includes('username') && keys.includes('password'))

@@ -1,4 +1,4 @@
-const { axios, useOperator, store } = window.vueHelpers || {}
+const { useOperator, store } = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -307,7 +307,7 @@ const machineList = [
 
 let machinesFromPreset = []
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const route = store.state?.route
 
   const { getValue, storeGet, discriminator, setDiscriminatorValue, commit } = useOperator(
@@ -333,11 +333,16 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
-    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-      params: { filter: { items: { metadata: { name: null } } } },
+    const list = await akp.resources.list({
+      owner,
+      cluster,
+      group: 'core',
+      version: 'v1',
+      resource: 'namespaces',
+      filter: { items: { metadata: { name: null } } },
     })
 
-    const resources = (resp && resp.data && resp.data.items) || []
+    const resources = list?.items || []
 
     return resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
@@ -356,14 +361,17 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/namespace')
     // watchDependency('model#/metadata/namespace')
 
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/proxysqls`,
-      {
-        params: { filter: { items: { metadata: { name: null } } } },
-      },
-    )
+    const list = await akp.resources.list({
+      owner,
+      cluster,
+      group: 'kubedb.com',
+      version: 'v1alpha2',
+      resource: 'proxysqls',
+      namespace,
+      filter: { items: { metadata: { name: null } } },
+    })
 
-    const resources = (resp && resp.data && resp.data.items) || []
+    const resources = list?.items || []
 
     return resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
@@ -383,12 +391,19 @@ export const useFunc = (model) => {
     const name = storeGet('/route/params/name') || getValue(model, '/spec/proxyRef/name')
     const version = storeGet('/route/params/version')
     if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/proxysqls/${name}`
-      const resp = await axios.get(url)
+      const db = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'kubedb.com',
+        version,
+        resource: 'proxysqls',
+        namespace,
+        name,
+      })
 
-      setDiscriminatorValue('/dbDetails', resp.data || {})
+      setDiscriminatorValue('/dbDetails', db || {})
 
-      return resp.data || {}
+      return db || {}
     } else return {}
   }
 
@@ -397,15 +412,22 @@ export const useFunc = (model) => {
   async function getDbVersions() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
     let presets = storeGet('/kubedbuiPresets') || {}
     if (!storeGet('/route/params/actions')) {
       try {
-        const presetResp = await axios.get(url)
-        presets = presetResp.data?.spec?.values?.spec
+        const preset = await akp.resources.get({
+          owner,
+          cluster,
+          group: 'charts.x-helm.dev',
+          version: 'v1alpha1',
+          resource: 'clusterchartpresets',
+          name: 'kubedb-ui-presets',
+        })
+        presets = preset?.spec?.values?.spec
       } catch (e) {
         console.log(e)
-        presets.status = String(e.status)
+        // '404' marks a cluster without presets.
+        presets.status = e?.code === akp.Code.NotFound ? '404' : String(e?.code)
       }
     }
     try {
@@ -418,13 +440,15 @@ export const useFunc = (model) => {
           },
         },
       }
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/proxysqlversions`,
-        {
-          params: queryParams,
-        },
-      )
-      const resources = (resp && resp.data && resp.data.items) || []
+      const list = await akp.resources.list({
+        owner,
+        cluster,
+        group: 'catalog.kubedb.com',
+        version: 'v1alpha1',
+        resource: 'proxysqlversions',
+        ...queryParams,
+      })
+      const resources = list?.items || []
       const sortedVersions = resources.sort((a, b) =>
         versionCompare(a.spec.version, b.spec.version),
       )
@@ -900,25 +924,29 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/namespace')
 
     if (kind === 'Issuer') {
-      const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
-      return getIssuer(url)
+      return getIssuer({ resource: 'issuers', namespace })
     } else if (kind === 'ClusterIssuer') {
-      const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
-
       let presets = storeGet('/kubedbuiPresets') || {}
       if (!storeGet('/route/params/actions')) {
         try {
-          const presetResp = await axios.get(url)
-          presets = presetResp.data?.spec?.values?.spec
+          const preset = await akp.resources.get({
+            owner,
+            cluster,
+            group: 'charts.x-helm.dev',
+            version: 'v1alpha1',
+            resource: 'clusterchartpresets',
+            name: 'kubedb-ui-presets',
+          })
+          presets = preset?.spec?.values?.spec
         } catch (e) {
           console.log(e)
-          presets.status = String(e.status)
+          // '404' marks a cluster without presets.
+          presets.status = e?.code === akp.Code.NotFound ? '404' : String(e?.code)
         }
       }
       let clusterIssuers = presets.admin?.clusterIssuers?.available || []
       if (presets.status === '404') {
-        const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
-        return getIssuer(url)
+        return getIssuer({ resource: 'clusterissuers' })
       }
       return clusterIssuers
     } else if (!kind) {
@@ -926,10 +954,16 @@ export const useFunc = (model) => {
       return []
     }
 
-    async function getIssuer(url) {
+    async function getIssuer(ref) {
       try {
-        const resp = await axios.get(url)
-        const resources = (resp && resp.data && resp.data.items) || []
+        const list = await akp.resources.list({
+          owner,
+          cluster,
+          group: 'cert-manager.io',
+          version: 'v1',
+          ...ref,
+        })
+        const resources = list?.items || []
 
         resources.map((item) => {
           const name = (item.metadata && item.metadata.name) || ''
