@@ -67,7 +67,7 @@ type KubedbcomDB2EditorOptionsSpecSpec struct {
 // +kubebuilder:validation:Enum=Standalone;HADR
 type DB2Mode string
 
-// +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
+// +kubebuilder:validation:Enum=primary;standby;stats
 type DB2ServiceAlias string
 
 type DB2ServiceTemplate struct {

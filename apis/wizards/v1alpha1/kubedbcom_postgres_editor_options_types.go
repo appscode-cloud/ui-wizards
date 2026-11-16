@@ -72,7 +72,7 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	Openshift Openshift `json:"openshift"`
 }
 
-// +kubebuilder:validation:Enum=primary;standby;stats
+// +kubebuilder:validation:Enum=primary;standby;stats;readreplica
 type PostgresServiceAlias string
 
 type PostgresServiceTemplate struct {

@@ -64,7 +64,7 @@ type KubedbcomIgniteEditorOptionsSpecSpec struct {
 	Openshift Openshift `json:"openshift"`
 }
 
-// +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
+// +kubebuilder:validation:Enum=primary;standby;stats
 type IgniteServiceAlias string
 
 type IgniteServiceTemplate struct {

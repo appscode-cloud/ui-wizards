@@ -63,7 +63,7 @@ type KubedbcomHazelcastEditorOptionsSpecSpec struct {
 	Openshift Openshift `json:"openshift"`
 }
 
-// +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
+// +kubebuilder:validation:Enum=primary;standby;stats
 type HazelcastServiceAlias string
 
 type HazelcastServiceTemplate struct {

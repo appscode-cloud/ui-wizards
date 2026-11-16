@@ -66,7 +66,7 @@ type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	Openshift Openshift `json:"openshift"`
 }
 
-// +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
+// +kubebuilder:validation:Enum=primary;standby;stats
 type SinglestoreServiceAlias string
 
 type SinglestoreServiceTemplate struct {
