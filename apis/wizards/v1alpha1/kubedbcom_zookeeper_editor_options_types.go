@@ -66,7 +66,7 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 // +kubebuilder:validation:Enum=Standalone;Ensemble
 type ZooKeeperMode string
 
-// +kubebuilder:validation:Enum=primary;standby;stats;dashboard;secondary
+// +kubebuilder:validation:Enum=primary;standby;stats
 type ZookeeperServiceAlias string
 
 type ZookeeperServiceTemplate struct {
