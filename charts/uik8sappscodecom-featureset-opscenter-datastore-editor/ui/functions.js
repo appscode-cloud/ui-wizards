@@ -404,6 +404,11 @@ export const useFunc = (model) => {
     return true
   }
 
+  // onEnabledFeaturesChange drops the resource when the feature is deselected or enabled but unmanaged
+  function isUiPresetsSelected() {
+    return !!getValue(model, '/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets')
+  }
+
   let allAvailableTypes = [
     'Cassandra',
     'ClickHouse',
@@ -637,6 +642,7 @@ export const useFunc = (model) => {
     setReleaseNameAndNamespaceAndInitializeValues,
     fetchFeatureSetOptions,
     isKubedbSelected,
+    isUiPresetsSelected,
     getDatabaseTypes,
     onTypeUpdate,
     returnFalse,
