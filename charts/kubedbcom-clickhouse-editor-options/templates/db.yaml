@@ -59,6 +59,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-clickhouse-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.admin.archiver.enable.default }}
+    kubedb.com/archiver: "true"
+{{- end }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
     {{- if $profiles }}
@@ -68,6 +71,17 @@ metadata:
     {{- include "kubedbcom-clickhouse-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
+{{- if .Values.spec.admin.archiver.enable.default }}
+  archiver:
+    ref:
+{{- if include "kubedbcom-clickhouse-editor-options.customArchiver" . }}
+      name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}-archiver
+      namespace: {{ .Release.Namespace }}
+{{- else }}
+      name: {{ .Values.spec.archiverName }}
+      namespace: kubedb
+{{- end }}
+{{- end }}
   version: {{ .Values.spec.admin.databases.ClickHouse.versions.default | quote }}
 {{- if eq .Values.spec.mode "Standalone" }}
   replicas: 1
@@ -185,11 +199,17 @@ spec:
 {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- $init := .Values.spec.init | default dict }}
+{{- $initArchiver := and $init.archiver $init.archiver.recoveryTimestamp }}
 {{- $script := $init.script | default dict }}
 {{- $scriptCM := ($script.configMap | default dict).name }}
 {{- $scriptSecret := ($script.secret | default dict).secretName }}
-{{- if or $scriptCM $scriptSecret }}
+{{- if or $initArchiver $scriptCM $scriptSecret }}
   init:
+  {{- if $initArchiver }}
+    archiver:
+      {{- toYaml $init.archiver | nindent 6 }}
+  {{- end }}
+  {{- if or $scriptCM $scriptSecret }}
     script:
     {{- if $scriptCM }}
       configMap:
@@ -198,6 +218,7 @@ spec:
       secret:
         secretName: {{ $scriptSecret }}
     {{- end }}
+  {{- end }}
 {{- end }}
 {{- $svcTpls := .Values.spec.serviceTemplates | default .Values.spec.admin.serviceTemplates }}
 {{- if $svcTpls }}

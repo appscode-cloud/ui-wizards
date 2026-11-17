@@ -1227,6 +1227,50 @@ export const useFunc = (model) => {
     }
   }
 
+
+  function showArchiver() {
+    return checkIfFeatureOn('archiver')
+  }
+
+  // ClickHouse archives via wal-g, so the default Archiver is named after the kind instead of a StorageClass annotation.
+  function onArchiverChange() {
+    const isArchiverOn = getValue(model, '/spec/admin/archiver/enable/default')
+    const kind = getValue(model, '/metadata/resource/kind') || ''
+    commit('wizard/model$update', {
+      path: '/spec/archiverName',
+      value: isArchiverOn ? kind.toLowerCase() : '',
+      force: true,
+    })
+  }
+
+  function showArchiverAlert() {
+    onArchiverChange()
+    return false
+  }
+
+  // The chart clones this default Archiver with the selected BackupStorage; the template skips
+  // the clone when the selection equals the default's storage.
+  async function onArchiverBackupStorageChange() {
+    const selected = getValue(model, '/spec/archiver/backupStorage')
+    if (!selected?.name) return
+
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const kind = getValue(model, '/metadata/resource/kind').toLowerCase()
+    const archiverName = getValue(model, '/spec/archiverName') || kind
+    const url = `/clusters/${owner}/${cluster}/proxy/archiver.kubedb.com/v1alpha1/namespaces/kubedb/${kind}archivers/${archiverName}`
+    try {
+      const resp = await axios.get(url)
+      commit('wizard/model$update', {
+        path: '/spec/archiver/spec',
+        value: resp.data?.spec || {},
+        force: true,
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   function showBackupStorage(type) {
     if (!getValue(model, `/spec/admin/${type}/backupStorage/toggle`)) return false
     if (type === 'archiver') return !!getValue(model, '/spec/admin/archiver/enable/default')
@@ -1288,6 +1332,10 @@ export const useFunc = (model) => {
   return {
     showBackupStorage,
     getBackupStorages,
+    showArchiver,
+    onArchiverChange,
+    showArchiverAlert,
+    onArchiverBackupStorageChange,
     isInitScriptOn,
     isInitScriptSource,
     onInitScriptChange,

@@ -1985,6 +1985,26 @@ properties:
         additionalProperties:
           type: string
         type: object
+      archiver:
+        properties:
+          backupStorage:
+            properties:
+              name:
+                type: string
+              namespace:
+                type: string
+            required:
+            - name
+            - namespace
+            type: object
+          spec:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+        required:
+        - backupStorage
+        type: object
+      archiverName:
+        type: string
       authSecret:
         properties:
           name:
@@ -2057,6 +2077,47 @@ properties:
         type: string
       init:
         properties:
+          archiver:
+            properties:
+              encryptionSecret:
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              fullDBRepository:
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              manifestRepository:
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              recoveryTimestamp:
+                format: date-time
+                type: string
+            required:
+            - encryptionSecret
+            - fullDBRepository
+            - manifestRepository
+            - recoveryTimestamp
+            type: object
           script:
             properties:
               configMap:
@@ -2074,6 +2135,8 @@ properties:
                 - secretName
                 type: object
             type: object
+        required:
+        - archiver
         type: object
       labels:
         additionalProperties:
@@ -2322,6 +2385,7 @@ properties:
     - backup
     - configuration
     - deletionPolicy
+    - init
     - mode
     - monitoring
     - persistence
