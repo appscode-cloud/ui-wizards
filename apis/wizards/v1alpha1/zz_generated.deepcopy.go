@@ -2502,6 +2502,11 @@ func (in *KubedbcomClickhouseEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomC
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
+	if in.Archiver != nil {
+		in, out := &in.Archiver, &out.Archiver
+		*out = new(ArchiverOverride)
+		(*in).DeepCopyInto(*out)
+	}
 	in.Init.DeepCopyInto(&out.Init)
 	if in.ServiceTemplates != nil {
 		in, out := &in.ServiceTemplates, &out.ServiceTemplates
