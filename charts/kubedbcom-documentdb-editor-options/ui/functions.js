@@ -1117,17 +1117,20 @@ export const useFunc = (model) => {
 
   function onTimestampChange() {
     const localTime = getValue(model, '/spec/init/archiver/recoveryTimestamp')
-    if (!localTime) return
+    if (!localTime) return ''
 
     const utcString = convertToUTC(localTime)
+    if (!utcString) return
 
-    if (utcString && localTime !== utcString) {
+    // Only update if the value is not already in UTC format
+    if (localTime !== utcString) {
       commit('wizard/model$update', {
         path: '/spec/init/archiver/recoveryTimestamp',
         value: utcString,
         force: true,
       })
     }
+    return utcString
   }
 
   function getComponentLogStats(snapshot) {

@@ -646,15 +646,25 @@ export const useFunc = (model) => {
     return options
   }
 
+  let backupToolInitialValue = ''
   function checkIfFeatureOn(type) {
     let val = getValue(model, `/spec/admin/${type}/toggle`)
     if (type === 'backup' || type === 'archiver' || type === 'expose') {
       val = getValue(model, `/spec/admin/${type}/enable/toggle`)
     }
     const backupVal = getValue(model, '/spec/backup/tool')
-
     if (type === 'backup') {
-      return features.includes('backup') && backupVal === 'KubeStash' && val
+      if (backupToolInitialValue === '') {
+        backupToolInitialValue =
+          features.includes('backup') && backupVal === 'KubeStash' && val ? 'on' : 'off'
+        return features.includes('backup') && backupVal === 'KubeStash' && val
+      } else {
+        if (backupToolInitialValue === 'on') {
+          return true
+        } else {
+          return false
+        }
+      }
     } else if (type === 'tls') {
       return features.includes('tls') && val
     } else if (type === 'expose') {
@@ -1180,7 +1190,6 @@ export const useFunc = (model) => {
       return []
     }
   }
-
 
   function showBackupStorage(type) {
     if (!getValue(model, `/spec/admin/${type}/backupStorage/toggle`)) return false

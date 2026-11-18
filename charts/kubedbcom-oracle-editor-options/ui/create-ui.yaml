@@ -333,28 +333,30 @@ step:
         name: isToggleOn|monitoring
         type: function
       type: block-layout
-    - if:
-        name: returnFalse
-        type: function
-      init:
-        type: func
-        value: setBackup
-      label: Enable Backup?
-      schema: temp/backup
-      type: switch
-      watcher:
-        func: onBackupSwitch
-        paths:
-        - temp/backup
-    - if:
-        name: showBackupStorage|backup
-        type: function
-      label: Backup Storage
-      loader: getBackupStorages
-      schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef
-      type: select
-      validation:
-        type: required
+    - elements:
+      - if:
+          name: returnFalse
+          type: function
+        init:
+          type: func
+          value: setBackup
+        label: Enable Backup?
+        schema: temp/backup
+        type: switch
+        watcher:
+          func: onBackupSwitch
+          paths:
+          - temp/backup
+      - if:
+          name: showBackupStorage|backup
+          type: function
+        label: Backup Storage
+        loader: getBackupStorages
+        schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef
+        type: select
+        validation:
+          type: required
+      type: block-layout
     - elements:
       - disable:
           name: showArchiverAlert
@@ -381,9 +383,6 @@ step:
       - if:
           name: isToggleOn|tls
           type: function
-        init:
-          type: func
-          value: checkHostnameOrIP
         label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
@@ -405,9 +404,6 @@ step:
       - if:
           name: isToggleOn|expose
           type: function
-        init:
-          type: func
-          value: checkHostnameOrIP
         label: Expose via Gateway?
         schema: schema/properties/spec/properties/admin/properties/expose/properties/enable/properties/default
         type: switch

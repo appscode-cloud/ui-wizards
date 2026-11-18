@@ -519,28 +519,30 @@ step:
         name: isToggleOn|monitoring
         type: function
       type: block-layout
-    - if:
-        name: isToggleOn|backup
-        type: function
-      init:
-        type: func
-        value: setBackup
-      label: Enable Backup?
-      schema: temp/backup
-      type: switch
-      watcher:
-        func: onBackupSwitch
-        paths:
-        - temp/backup
-    - if:
-        name: showBackupStorage|backup
-        type: function
-      label: Backup Storage
-      loader: getBackupStorages
-      schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef
-      type: select
-      validation:
-        type: required
+    - elements:
+      - if:
+          name: isToggleOn|backup
+          type: function
+        init:
+          type: func
+          value: setBackup
+        label: Enable Backup?
+        schema: temp/backup
+        type: switch
+        watcher:
+          func: onBackupSwitch
+          paths:
+          - temp/backup
+      - if:
+          name: showBackupStorage|backup
+          type: function
+        label: Backup Storage
+        loader: getBackupStorages
+        schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef
+        type: select
+        validation:
+          type: required
+      type: block-layout
     - elements:
       - if:
           name: isToggleOn|tls
