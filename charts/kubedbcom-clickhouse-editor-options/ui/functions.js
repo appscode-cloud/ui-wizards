@@ -1136,6 +1136,31 @@ export const useFunc = (model) => {
     }
   }
 
+  let pointIntimeError = ''
+
+  function getComponentLogStats(snapshot) {
+    if (!snapshot || !snapshot.status || !snapshot.status.components) {
+      return null
+    }
+
+    const components = snapshot.status.components
+    const appKind = snapshot.spec?.appRef?.kind
+
+    if (appKind === 'MongoDB') {
+      for (const [key, value] of Object.entries(components)) {
+        if (key.endsWith('0') && value.logStats) {
+          return value.logStats
+        }
+      }
+    }
+
+    if (components['wal'] && components['wal'].logStats) {
+      return components['wal'].logStats
+    }
+
+    return null
+  }
+
   function convertToUTC(localTime) {
     const date = new Date(localTime)
     if (isNaN(date.getTime())) return
@@ -1146,18 +1171,20 @@ export const useFunc = (model) => {
 
   function onTimestampChange() {
     const localTime = getValue(model, '/spec/init/archiver/recoveryTimestamp')
-    if (!localTime) return
+    if (!localTime) return ''
 
     const utcString = convertToUTC(localTime)
+    if (!utcString) return
 
-    // Only update if the value is valid & not already in UTC format
-    if (utcString && localTime !== utcString) {
+    // Only update if the value is not already in UTC format
+    if (localTime !== utcString) {
       commit('wizard/model$update', {
         path: '/spec/init/archiver/recoveryTimestamp',
         value: utcString,
         force: true,
       })
     }
+    return utcString
   }
 
   function setServiceTemplate() {
@@ -1199,7 +1226,6 @@ export const useFunc = (model) => {
       return []
     }
   }
-
 
   function showBackupStorage(type) {
     if (!getValue(model, `/spec/admin/${type}/backupStorage/toggle`)) return false

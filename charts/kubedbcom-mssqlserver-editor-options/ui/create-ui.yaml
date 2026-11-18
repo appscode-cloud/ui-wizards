@@ -180,6 +180,7 @@ step:
     loader: getPidSecrets
     schema: schema/properties/spec/properties/pidSecretRef/properties/name
     type: select
+    searchable: true
     validation:
       type: required
   - if:
@@ -263,6 +264,7 @@ step:
       label: Secret
       loader: getReferSecrets
       schema: schema/properties/spec/properties/authSecret/properties/name
+      searchable: true
       type: select
     - if:
         name: showReferSecret
@@ -476,45 +478,47 @@ step:
           func: updateAlertValue
           paths:
           - temp/monitoring
+      - customClass: mt-10
+        if:
+          name: showAlerts
+          type: function
+        label: Alert Options
+        options:
+        - text: None
+          value: none
+        - text: Critical
+          value: critical
+        - text: Warning
+          value: warning
+        - text: Info
+          value: info
+        schema: schema/properties/form/properties/alert/properties/enabled
+        type: select
       type: block-layout
-    - customClass: mt-10
-      if:
-        name: showAlerts
-        type: function
-      label: Alert Options
-      options:
-      - text: None
-        value: none
-      - text: Critical
-        value: critical
-      - text: Warning
-        value: warning
-      - text: Info
-        value: info
-      schema: schema/properties/form/properties/alert/properties/enabled
-      type: select
-    - if:
-        name: isToggleOn|backup
-        type: function
-      init:
-        type: func
-        value: setBackup
-      label: Enable Backup?
-      schema: temp/backup
-      type: switch
-      watcher:
-        func: onBackupSwitch
-        paths:
-        - temp/backup
-    - if:
-        name: showBackupStorage|backup
-        type: function
-      label: Backup Storage
-      loader: getBackupStorages
-      schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef
-      type: select
-      validation:
-        type: required
+    - elements:
+      - if:
+          name: isToggleOn|backup
+          type: function
+        init:
+          type: func
+          value: setBackup
+        label: Enable Backup?
+        schema: temp/backup
+        type: switch
+        watcher:
+          func: onBackupSwitch
+          paths:
+          - temp/backup
+      - if:
+          name: showBackupStorage|backup
+          type: function
+        label: Backup Storage
+        loader: getBackupStorages
+        schema: schema/properties/spec/properties/backup/properties/kubestash/properties/storageRef
+        type: select
+        validation:
+          type: required
+      type: block-layout
     - elements:
       - disable:
           name: showArchiverAlert

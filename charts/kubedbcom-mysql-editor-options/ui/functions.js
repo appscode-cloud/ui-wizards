@@ -1130,18 +1130,20 @@ export const useFunc = (model) => {
 
   function onTimestampChange() {
     const localTime = getValue(model, '/spec/init/archiver/recoveryTimestamp')
-    if (!localTime) return
+    if (!localTime) return ''
 
     const utcString = convertToUTC(localTime)
+    if (!utcString) return
 
-    // Only update if the value is valid & not already in UTC format
-    if (utcString && localTime !== utcString) {
+    // Only update if the value is not already in UTC format
+    if (localTime !== utcString) {
       commit('wizard/model$update', {
         path: '/spec/init/archiver/recoveryTimestamp',
         value: utcString,
         force: true,
       })
     }
+    return utcString
   }
 
   function getComponentLogStats(snapshot) {
@@ -1161,6 +1163,17 @@ export const useFunc = (model) => {
     }
     if (components['log'] && components['log'].logStats) {
       return components['log'].logStats
+    }
+
+    if (components['wal'] && components['wal'].logStats) {
+      return components['wal'].logStats
+    }
+
+    // fallback: archiver may use a different component key (e.g. binlog)
+    for (const value of Object.values(components)) {
+      if (value?.logStats) {
+        return value.logStats
+      }
     }
 
     return null
@@ -1397,7 +1410,6 @@ export const useFunc = (model) => {
       return []
     }
   }
-
 
   function showBackupStorage(type) {
     if (!getValue(model, `/spec/admin/${type}/backupStorage/toggle`)) return false

@@ -98,6 +98,7 @@ step:
     loader: getSecrets
     refresh: true
     schema: schema/properties/spec/properties/licenseSecret/properties/name
+    searchable: true
     type: select
   - description: Configure Credentials, Deployment Mode etc.
     elements:
@@ -163,6 +164,7 @@ step:
       label: Secret
       loader: getReferSecrets
       schema: schema/properties/spec/properties/authSecret/properties/name
+      searchable: true
       type: select
     - if:
         name: showReferSecret
@@ -317,9 +319,6 @@ step:
       - if:
           name: isToggleOn|tls
           type: function
-        init:
-          type: func
-          value: checkHostnameOrIP
         label: Enable TLS?
         schema: schema/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
@@ -341,9 +340,6 @@ step:
       - if:
           name: isToggleOn|expose
           type: function
-        init:
-          type: func
-          value: checkHostnameOrIP
         label: Expose via Gateway?
         schema: schema/properties/spec/properties/admin/properties/expose/properties/enable/properties/default
         type: switch
