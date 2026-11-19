@@ -304,25 +304,43 @@ step:
           for recovery.
         type: label-element
       - elements:
-        - forceRequired: true
-          label: Namespace
+        - label: Namespace
+          loader: getNamespaces
           schema: temp/refNamespace
-          type: input
+          type: select
           validation:
             type: required
           watcher:
-            func: setPointInTimeRecovery
+            func: onRefNamespaceChange
             paths:
             - temp/refNamespace
         - label: Name
+          loader:
+            name: getRefDbNames
+            watchPaths:
+            - temp/refNamespace
           schema: temp/refDBName
-          type: input
+          type: select
+          validation:
+            type: required
+          watcher:
+            func: onRefDBNameChange
+            paths:
+            - temp/refDBName
+        - label: Snapshot
+          loader:
+            name: getRefSnapshots
+            watchPaths:
+            - temp/refNamespace
+            - temp/refDBName
+          schema: temp/refSnapshot
+          type: select
           validation:
             type: required
           watcher:
             func: setPointInTimeRecovery
             paths:
-            - temp/refDBName
+            - temp/refSnapshot
         showLabels: true
         type: horizontal-layout
       - customClass: mt-10

@@ -1186,15 +1186,75 @@ export const useFunc = (model) => {
     return null
   }
 
+  async function getRefDbNames() {
+    const namespace = getValue(discriminator, '/refNamespace')
+    if (!namespace) return []
+
+    const params = storeGet('/route/params')
+    const { user, cluster } = params
+    try {
+      const resp = await axios.get(
+        `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`,
+      )
+      const items = resp?.data?.items || []
+      const names = items
+        .filter((item) => {
+          const kind = item.spec?.appRef?.kind
+          return !kind || kind === 'MariaDB'
+        })
+        .map((item) => item.spec?.appRef?.name || item.metadata?.name)
+        .filter(Boolean)
+      return [...new Set(names)].map((name) => ({ text: name, value: name }))
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
+  async function getRefSnapshots() {
+    const namespace = getValue(discriminator, '/refNamespace')
+    const dbName = getValue(discriminator, '/refDBName')
+    if (!namespace || !dbName) return []
+
+    const params = storeGet('/route/params')
+    const { user, cluster } = params
+    try {
+      const resp = await axios.get(
+        `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/snapshots`,
+      )
+      const items = resp?.data?.items || []
+      return items
+        .filter((item) => item.spec?.repository === dbName)
+        .sort((a, b) =>
+          (b.metadata?.creationTimestamp || '').localeCompare(a.metadata?.creationTimestamp || ''),
+        )
+        .map((item) => ({ text: item.metadata?.name, value: item.metadata?.name }))
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
+  function onRefNamespaceChange() {
+    setDiscriminatorValue('refDBName', '')
+    setDiscriminatorValue('refSnapshot', '')
+  }
+
+  function onRefDBNameChange() {
+    setDiscriminatorValue('refSnapshot', '')
+  }
+
   async function setPointInTimeRecovery() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const refNamespace = getValue(discriminator, '/refNamespace')
     const refDBName = getValue(discriminator, '/refDBName')
+    const refSnapshot = getValue(discriminator, '/refSnapshot')
+    if (!refNamespace || !refDBName || !refSnapshot) return
 
     try {
       const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}-full`
-      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
+      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refSnapshot}`
       const repositoriesResp = await axios.get(repositoriesUrl)
       const snapshotsResp = await axios.get(snapshotsUrl)
 
@@ -1457,6 +1517,10 @@ export const useFunc = (model) => {
     showReferSecret,
     getReferSecrets,
     setPointInTimeRecovery,
+    getRefDbNames,
+    onRefNamespaceChange,
+    onRefDBNameChange,
+    getRefSnapshots,
     showRecovery,
     showAdditionalSettings,
     initBundle,
