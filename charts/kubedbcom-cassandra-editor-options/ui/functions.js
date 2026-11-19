@@ -327,6 +327,9 @@ export const useFunc = (model) => {
   setDiscriminatorValue('configDatabase', false)
   setDiscriminatorValue('createAuthSecret', false)
   setDiscriminatorValue('referSecret', false)
+  setDiscriminatorValue('recovery', false)
+  setDiscriminatorValue('refDBName', '')
+  setDiscriminatorValue('refNamespace', '')
   setDiscriminatorValue('backup', false)
   setDiscriminatorValue('monitoring', false)
 
@@ -1124,7 +1127,6 @@ export const useFunc = (model) => {
     }
   }
 
-
   function showBackupStorage(type) {
     if (!getValue(model, `/spec/admin/${type}/backupStorage/toggle`)) return false
     if (type === 'archiver') return !!getValue(model, '/spec/admin/archiver/enable/default')
@@ -1183,7 +1185,154 @@ export const useFunc = (model) => {
     }
   }
 
+  function showRecovery() {
+    // watchDependency('discriminator#/recovery')
+    const isRecoveryOn = getValue(discriminator, '/recovery') || ''
+    return isRecoveryOn
+  }
+
+  function convertToUTC(localTime) {
+    const date = new Date(localTime)
+    if (isNaN(date.getTime())) return
+
+    const utcString = date.toISOString()
+    return utcString
+  }
+
+  function onTimestampChange() {
+    const localTime = getValue(model, '/spec/init/archiver/recoveryTimestamp')
+    if (!localTime) return ''
+
+    const utcString = convertToUTC(localTime)
+    if (!utcString) return
+
+    // Only update if the value is not already in UTC format
+    if (localTime !== utcString) {
+      commit('wizard/model$update', {
+        path: '/spec/init/archiver/recoveryTimestamp',
+        value: utcString,
+        force: true,
+      })
+    }
+    return utcString
+  }
+
+  function getComponentLogStats(snapshot) {
+    if (!snapshot || !snapshot.status || !snapshot.status.components) {
+      return null
+    }
+
+    const components = snapshot.status.components
+
+    if (components['wal'] && components['wal'].logStats) {
+      return components['wal'].logStats
+    }
+
+    if (components['log'] && components['log'].logStats) {
+      return components['log'].logStats
+    }
+
+    // fallback: archiver may use a different component key
+    for (const value of Object.values(components)) {
+      if (value?.logStats) {
+        return value.logStats
+      }
+    }
+
+    return null
+  }
+
+  async function setPointInTimeRecovery() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const refNamespace = getValue(discriminator, '/refNamespace')
+    const refDBName = getValue(discriminator, '/refDBName')
+
+    try {
+      const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}-full`
+      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
+      const repositoriesResp = await axios.get(repositoriesUrl)
+      const snapshotsResp = await axios.get(snapshotsUrl)
+
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/encryptionSecret/name`,
+        value: repositoriesResp.data?.spec.encryptionSecret.name,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/encryptionSecret/namespace`,
+        value: repositoriesResp.data?.spec.encryptionSecret.namespace,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/fullDBRepository/name`,
+        value: `${refDBName}-full`,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/fullDBRepository/namespace`,
+        value: `${refNamespace}`,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/manifestRepository/name`,
+        value: `${refDBName}-manifest`,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/manifestRepository/namespace`,
+        value: `${refNamespace}`,
+        force: true,
+      })
+
+      const resp = getComponentLogStats(snapshotsResp.data)
+
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/recoveryTimestamp`,
+        value: convertToUTC(resp?.end),
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/minDate`,
+        value: convertToUTC(resp?.start),
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/maxDate`,
+        value: convertToUTC(resp?.end),
+        force: true,
+      })
+    } catch (e) {
+      pointIntimeError =
+        e.response?.data?.message || 'Invalid name / namespace for recovery timestamp'
+      commit('wizard/model$update', {
+        path: `/spec/init/archiver/recoveryTimestamp`,
+        value: '',
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/minDate`,
+        value: '',
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/maxDate`,
+        value: '',
+        force: true,
+      })
+      commit('wizard/model$delete', '/spec/init/archiver/encryptionSecret')
+      commit('wizard/model$delete', '/spec/init/archiver/fullDBRepository')
+      commit('wizard/model$delete', '/spec/init/archiver/manifestRepository')
+      console.log(e)
+    }
+  }
+
+  let pointIntimeError = ''
+
   return {
+    showRecovery,
+    onTimestampChange,
+    setPointInTimeRecovery,
     showBackupStorage,
     getBackupStorages,
     isInitScriptOn,

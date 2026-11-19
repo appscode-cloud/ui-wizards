@@ -1179,8 +1179,8 @@ export const useFunc = (model) => {
       }
     }
 
-    if (components['wal'] && components['wal'].logStats) {
-      return components['wal'].logStats
+    if (components['log'] && components['log'].logStats) {
+      return components['log'].logStats
     }
 
     return null

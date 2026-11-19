@@ -1281,7 +1281,7 @@ export const useFunc = (model) => {
 
     if (appKind === 'MongoDB') {
       for (const [key, value] of Object.entries(components)) {
-        if (key.endsWith('0') && value.logStats) {
+        if (key.startsWith('wal-') && value.logStats) {
           return value.logStats
         }
       }
