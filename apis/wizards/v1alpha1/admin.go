@@ -293,5 +293,4 @@ type PrometheusExporter struct {
 type Alert struct {
 	Toggle bool `json:"toggle"`
 }
-
 // *** Monitoring ends *** //
