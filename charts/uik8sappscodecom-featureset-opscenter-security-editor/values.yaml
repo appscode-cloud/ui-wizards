@@ -156,37 +156,6 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
-  helmToolkitFluxcdIoHelmRelease_kube_bench: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2
-    kind: HelmRelease
-    metadata:
-      labels:
-        app.kubernetes.io/component: kube-bench
-      name: kube-bench
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: kube-bench
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: 0.1.0
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: kube-bench
-      storageNamespace: kube-bench
-      targetNamespace: kube-bench
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_patch_console_agent: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
