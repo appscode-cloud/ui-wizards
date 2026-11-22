@@ -1051,17 +1051,102 @@ export const useFunc = (model) => {
     return isRecoveryOn
   }
 
+  async function getNamespaces() {
+    const params = storeGet('/route/params')
+    const { user, cluster, group, version, resource } = params
+    try {
+      const resp = await axios.post(
+        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
+        {
+          apiVersion: 'identity.k8s.appscode.com/v1alpha1',
+          kind: 'SelfSubjectNamespaceAccessReview',
+          spec: {
+            resourceAttributes: [
+              {
+                verb: 'create',
+                group: group,
+                version: version,
+                resource: resource,
+              },
+            ],
+          },
+        },
+      )
+      const projects = resp?.data?.status?.projects
+      if (projects) {
+        return Object.keys(projects).map((project) => ({
+          project: project,
+          namespaces: projects[project].map((namespace) => ({
+            text: namespace,
+            value: namespace,
+          })),
+        }))
+      }
+      return resp?.data?.status?.namespaces || []
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
+  async function getRefDbNames() {
+    const namespace = getValue(discriminator, '/refNamespace')
+    if (!namespace) return []
+
+    const params = storeGet('/route/params')
+    const { user, cluster } = params
+    try {
+      const resp = await axios.get(
+        `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`,
+      )
+      const items = resp?.data?.items || []
+      const names = items
+        .filter((item) => {
+          const kind = item.spec?.appRef?.kind
+          return !kind || kind === 'ClickHouse'
+        })
+        .map((item) => item.spec?.appRef?.name || item.metadata?.name)
+        .filter(Boolean)
+      return [...new Set(names)].map((name) => ({ text: name, value: name }))
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
+  function onRefNamespaceChange() {
+    setDiscriminatorValue('refDBName', '')
+    setDiscriminatorValue('refDBNameError', '')
+  }
+
+  async function onRefDBNameChange() {
+    setDiscriminatorValue('refDBNameError', '')
+    await setPointInTimeRecovery()
+  }
+
+  function validateRefDBName() {
+    const refDBName = getValue(discriminator, '/refDBName')
+    if (!refDBName) return 'This field is required'
+    return getValue(discriminator, '/refDBNameError') || ''
+  }
+
   async function setPointInTimeRecovery() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const refNamespace = getValue(discriminator, '/refNamespace')
     const refDBName = getValue(discriminator, '/refDBName')
+    if (!refNamespace || !refDBName) return
 
     try {
-      const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}-full`
+      const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}`
       const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
       const repositoriesResp = await axios.get(repositoriesUrl)
       const snapshotsResp = await axios.get(snapshotsUrl)
+
+      const logStats = getComponentLogStats(snapshotsResp.data)
+      if (!logStats) {
+        throw new Error(`No recovery window found in snapshot ${refDBName}-incremental-snapshot`)
+      }
 
       commit('wizard/model$update', {
         path: `/spec/init/archiver/encryptionSecret/name`,
@@ -1094,26 +1179,27 @@ export const useFunc = (model) => {
         force: true,
       })
 
-      const resp = getComponentLogStats(snapshotsResp.data)
-
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
-        value: convertToUTC(resp?.end),
+        value: convertToUTC(logStats.end),
         force: true,
       })
       commit('wizard/model$update', {
         path: `/minDate`,
-        value: convertToUTC(resp?.start),
+        value: convertToUTC(logStats.start),
         force: true,
       })
       commit('wizard/model$update', {
         path: `/maxDate`,
-        value: convertToUTC(resp?.end),
+        value: convertToUTC(logStats.end),
         force: true,
       })
+      setDiscriminatorValue('refDBNameError', '')
     } catch (e) {
-      pointIntimeError =
-        e.response?.data?.message || 'Invalid name / namespace for recovery timestamp'
+      setDiscriminatorValue(
+        'refDBNameError',
+        e.response?.data?.message || e.message || 'Invalid name / namespace for recovery timestamp',
+      )
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
         value: '',
@@ -1136,7 +1222,6 @@ export const useFunc = (model) => {
     }
   }
 
-  let pointIntimeError = ''
 
   function getComponentLogStats(snapshot) {
     if (!snapshot || !snapshot.status || !snapshot.status.components) {
@@ -1226,7 +1311,6 @@ export const useFunc = (model) => {
       return []
     }
   }
-
 
   function showArchiver() {
     return checkIfFeatureOn('archiver')
@@ -1382,6 +1466,11 @@ export const useFunc = (model) => {
     getDefault,
     initDeletionPolicy,
     setPointInTimeRecovery,
+    getNamespaces,
+    getRefDbNames,
+    onRefNamespaceChange,
+    onRefDBNameChange,
+    validateRefDBName,
     onTimestampChange,
     showRecovery,
     setServiceTemplate,

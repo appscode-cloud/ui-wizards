@@ -560,23 +560,31 @@ step:
           source backup namespace, database name, and the exact timestamp for recovery.
         type: label-element
       - elements:
-        - forceRequired: true
-          label: Namespace
+        - label: Namespace
+          loader: getNamespaces
           schema: temp/refNamespace
-          type: input
+          type: select
           validation:
             type: required
           watcher:
-            func: setPointInTimeRecovery
+            func: onRefNamespaceChange
             paths:
             - temp/refNamespace
         - label: Name
+          loader:
+            name: getRefDbNames
+            watchPaths:
+            - temp/refNamespace
           schema: temp/refDBName
-          type: input
+          type: select
           validation:
-            type: required
+            name: validateRefDBName
+            type: custom
+            watchPaths:
+            - temp/refDBName
+            - temp/refDBNameError
           watcher:
-            func: setPointInTimeRecovery
+            func: onRefDBNameChange
             paths:
             - temp/refDBName
         showLabels: true
