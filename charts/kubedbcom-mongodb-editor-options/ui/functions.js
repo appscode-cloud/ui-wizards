@@ -1586,13 +1586,24 @@ export const useFunc = (model, { akp } = {}) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     try {
       const [storageResp, namespaceResp] = await Promise.all([
-        axios.get(
-          `/clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/backupstorages`,
-        ),
-        axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`),
+        akp.resources.list({
+          owner,
+          cluster,
+          group: 'storage.kubestash.com',
+          version: 'v1alpha1',
+          resource: 'backupstorages',
+        }),
+        akp.resources.get({
+          owner,
+          cluster,
+          group: 'core',
+          version: 'v1',
+          resource: 'namespaces',
+          name: namespace,
+        }),
       ])
-      const namespaceLabels = namespaceResp.data?.metadata?.labels || {}
-      return (storageResp.data?.items || [])
+      const namespaceLabels = namespaceResp?.metadata?.labels || {}
+      return (storageResp?.items || [])
         .filter((item) => isBackupStorageUsable(item, namespace, namespaceLabels))
         .map((item) => {
           const { name, namespace: storageNamespace } = item.metadata
@@ -1617,12 +1628,19 @@ export const useFunc = (model, { akp } = {}) => {
     const cluster = storeGet('/route/params/cluster')
     const kind = getValue(model, '/metadata/resource/kind').toLowerCase()
     const archiverName = getValue(model, '/spec/archiverName') || kind
-    const url = `/clusters/${owner}/${cluster}/proxy/archiver.kubedb.com/v1alpha1/namespaces/kubedb/${kind}archivers/${archiverName}`
     try {
-      const resp = await axios.get(url)
+      const archiver = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'archiver.kubedb.com',
+        version: 'v1alpha1',
+        namespace: 'kubedb',
+        resource: `${kind}archivers`,
+        name: archiverName,
+      })
       commit('wizard/model$update', {
         path: '/spec/archiver/spec',
-        value: resp.data?.spec || {},
+        value: archiver?.spec || {},
         force: true,
       })
     } catch (e) {
