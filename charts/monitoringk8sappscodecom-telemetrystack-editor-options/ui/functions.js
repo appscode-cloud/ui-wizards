@@ -1,4 +1,4 @@
-const { axios, useOperator, store } = window.vueHelpers || {}
+const { useOperator, store } = window.vueHelpers || {}
 
 const certificateMountDir = '/etc/thanos/certs'
 const additionalConfigPath = '/spec/metrics/thanos/ruler/additionalConfig'
@@ -7,7 +7,7 @@ const externalLabelsPath = '/spec/metrics/thanos/receive/routerSpec/externalLabe
 
 const storageClassCache = {}
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, storeGet, discriminator, commit } = useOperator(
     model,
     store.state,
@@ -224,9 +224,9 @@ export const useFunc = (model) => {
     const key = `${owner}/${cluster}`
 
     if (!storageClassCache[key]) {
-      storageClassCache[key] = axios
-        .get(`/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`)
-        .then((resp) => (resp && resp.data && resp.data.items) || [])
+      storageClassCache[key] = akp.resources
+        .list({ owner, cluster, group: 'storage.k8s.io', version: 'v1', resource: 'storageclasses' })
+        .then((resp) => resp?.items || [])
         .catch((e) => {
           console.log(e)
           delete storageClassCache[key]

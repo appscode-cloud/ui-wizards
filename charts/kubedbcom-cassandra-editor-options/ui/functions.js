@@ -1186,13 +1186,24 @@ export const useFunc = (model, { akp } = {}) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     try {
       const [storageResp, namespaceResp] = await Promise.all([
-        axios.get(
-          `/clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/backupstorages`,
-        ),
-        axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`),
+        akp.resources.list({
+          owner,
+          cluster,
+          group: 'storage.kubestash.com',
+          version: 'v1alpha1',
+          resource: 'backupstorages',
+        }),
+        akp.resources.get({
+          owner,
+          cluster,
+          group: 'core',
+          version: 'v1',
+          resource: 'namespaces',
+          name: namespace,
+        }),
       ])
-      const namespaceLabels = namespaceResp.data?.metadata?.labels || {}
-      return (storageResp.data?.items || [])
+      const namespaceLabels = namespaceResp?.metadata?.labels || {}
+      return (storageResp?.items || [])
         .filter((item) => isBackupStorageUsable(item, namespace, namespaceLabels))
         .map((item) => {
           const { name, namespace: storageNamespace } = item.metadata
@@ -1271,19 +1282,35 @@ export const useFunc = (model, { akp } = {}) => {
     const refDBName = getValue(discriminator, '/refDBName')
 
     try {
-      const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}-full`
-      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
-      const repositoriesResp = await axios.get(repositoriesUrl)
-      const snapshotsResp = await axios.get(snapshotsUrl)
+      const [repository, snapshot] = await Promise.all([
+        akp.resources.get({
+          owner,
+          cluster,
+          group: 'storage.kubestash.com',
+          version: 'v1alpha1',
+          namespace: refNamespace,
+          resource: 'repositories',
+          name: `${refDBName}-full`,
+        }),
+        akp.resources.get({
+          owner,
+          cluster,
+          group: 'storage.kubestash.com',
+          version: 'v1alpha1',
+          namespace: refNamespace,
+          resource: 'snapshots',
+          name: `${refDBName}-incremental-snapshot`,
+        }),
+      ])
 
       commit('wizard/model$update', {
         path: `/spec/init/archiver/encryptionSecret/name`,
-        value: repositoriesResp.data?.spec.encryptionSecret.name,
+        value: repository?.spec.encryptionSecret.name,
         force: true,
       })
       commit('wizard/model$update', {
         path: `/spec/init/archiver/encryptionSecret/namespace`,
-        value: repositoriesResp.data?.spec.encryptionSecret.namespace,
+        value: repository?.spec.encryptionSecret.namespace,
         force: true,
       })
       commit('wizard/model$update', {
@@ -1307,7 +1334,7 @@ export const useFunc = (model, { akp } = {}) => {
         force: true,
       })
 
-      const resp = getComponentLogStats(snapshotsResp.data)
+      const resp = getComponentLogStats(snapshot)
 
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
