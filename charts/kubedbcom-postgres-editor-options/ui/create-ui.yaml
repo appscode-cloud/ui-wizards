@@ -248,25 +248,15 @@ step:
           schema: temp/refDBName
           type: select
           validation:
-            type: required
+            name: validateRefDBName
+            type: custom
+            watchPaths:
+            - temp/refDBName
+            - temp/refDBNameError
           watcher:
             func: onRefDBNameChange
             paths:
             - temp/refDBName
-        - label: Snapshot
-          loader:
-            name: getRefSnapshots
-            watchPaths:
-            - temp/refNamespace
-            - temp/refDBName
-          schema: temp/refSnapshot
-          type: select
-          validation:
-            type: required
-          watcher:
-            func: setPointInTimeRecovery
-            paths:
-            - temp/refSnapshot
         showLabels: true
         type: horizontal-layout
       - label: Recovery Timestamp

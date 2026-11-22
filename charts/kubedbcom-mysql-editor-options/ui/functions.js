@@ -1204,37 +1204,20 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getRefSnapshots() {
-    const namespace = getValue(discriminator, '/refNamespace')
-    const dbName = getValue(discriminator, '/refDBName')
-    if (!namespace || !dbName) return []
-
-    const params = storeGet('/route/params')
-    const { user, cluster } = params
-    try {
-      const resp = await axios.get(
-        `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/snapshots`,
-      )
-      const items = resp?.data?.items || []
-      return items
-        .filter((item) => item.spec?.repository === dbName)
-        .sort((a, b) =>
-          (b.metadata?.creationTimestamp || '').localeCompare(a.metadata?.creationTimestamp || ''),
-        )
-        .map((item) => ({ text: item.metadata?.name, value: item.metadata?.name }))
-    } catch (e) {
-      console.log(e)
-      return []
-    }
-  }
-
   function onRefNamespaceChange() {
     setDiscriminatorValue('refDBName', '')
-    setDiscriminatorValue('refSnapshot', '')
+    setDiscriminatorValue('refDBNameError', '')
   }
 
-  function onRefDBNameChange() {
-    setDiscriminatorValue('refSnapshot', '')
+  async function onRefDBNameChange() {
+    setDiscriminatorValue('refDBNameError', '')
+    await setPointInTimeRecovery()
+  }
+
+  function validateRefDBName() {
+    const refDBName = getValue(discriminator, '/refDBName')
+    if (!refDBName) return 'This field is required'
+    return getValue(discriminator, '/refDBNameError') || ''
   }
 
   async function setPointInTimeRecovery() {
@@ -1242,14 +1225,18 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const refNamespace = getValue(discriminator, '/refNamespace')
     const refDBName = getValue(discriminator, '/refDBName')
-    const refSnapshot = getValue(discriminator, '/refSnapshot')
-    if (!refNamespace || !refDBName || !refSnapshot) return
+    if (!refNamespace || !refDBName) return
 
     try {
       const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}-full`
-      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refSnapshot}`
+      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
       const repositoriesResp = await axios.get(repositoriesUrl)
       const snapshotsResp = await axios.get(snapshotsUrl)
+
+      const logStats = getComponentLogStats(snapshotsResp.data)
+      if (!logStats) {
+        throw new Error(`No recovery window found in snapshot ${refDBName}-incremental-snapshot`)
+      }
 
       commit('wizard/model$update', {
         path: `/spec/init/archiver/encryptionSecret/name`,
@@ -1282,26 +1269,27 @@ export const useFunc = (model) => {
         force: true,
       })
 
-      const resp = getComponentLogStats(snapshotsResp.data)
-
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
-        value: convertToUTC(resp?.end),
+        value: convertToUTC(logStats.end),
         force: true,
       })
       commit('wizard/model$update', {
         path: `/minDate`,
-        value: convertToUTC(resp?.start),
+        value: convertToUTC(logStats.start),
         force: true,
       })
       commit('wizard/model$update', {
         path: `/maxDate`,
-        value: convertToUTC(resp?.end),
+        value: convertToUTC(logStats.end),
         force: true,
       })
+      setDiscriminatorValue('refDBNameError', '')
     } catch (e) {
-      pointIntimeError =
-        e.response?.data?.message || 'Invalid name / namespace for recovery timestamp'
+      setDiscriminatorValue(
+        'refDBNameError',
+        e.response?.data?.message || e.message || 'Invalid name / namespace for recovery timestamp',
+      )
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
         value: '',
@@ -1324,7 +1312,6 @@ export const useFunc = (model) => {
     }
   }
 
-  let pointIntimeError = ''
   async function getReferSecrets() {
     const referSecret = getValue(discriminator, '/referSecret')
     if (!referSecret) {
@@ -1571,7 +1558,7 @@ export const useFunc = (model) => {
     getRefDbNames,
     onRefNamespaceChange,
     onRefDBNameChange,
-    getRefSnapshots,
+    validateRefDBName,
     showRecovery,
     showAdditionalSettings,
     initBundle,
