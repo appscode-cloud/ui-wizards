@@ -1,4 +1,4 @@
-const { useOperator, store, useToast } = window.vueHelpers || {}
+const { axios, useOperator, store, useToast } = window.vueHelpers || {}
 
 // ============================================================
 // MACHINE PROFILES - Predefined Resource Configurations

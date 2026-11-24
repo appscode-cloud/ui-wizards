@@ -1,5 +1,14 @@
-const { useOperator, store, yaml, useResourceInfo, resourceCreate$api, ref, useToast, axiosVue } =
-  window.vueHelpers || {}
+const {
+  axios,
+  useOperator,
+  store,
+  yaml,
+  useResourceInfo,
+  resourceCreate$api,
+  ref,
+  useToast,
+  axiosVue,
+} = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {

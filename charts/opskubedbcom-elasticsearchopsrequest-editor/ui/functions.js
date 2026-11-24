@@ -1,4 +1,4 @@
-const { useOperator, store, useToast } = window.vueHelpers || {}
+const { axios, useOperator, store, useToast } = window.vueHelpers || {}
 
 // =====================================================
 // Machine Profiles Configuration
