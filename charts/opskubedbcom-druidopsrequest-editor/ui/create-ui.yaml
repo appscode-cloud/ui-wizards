@@ -1030,13 +1030,52 @@ step:
     type: block-layout
   - elements:
     - label: Authentication Secret
-      subtitle: Existing secret with the new credentials. Leave empty to generate
-        a random password.
+      subtitle: Choose how the new credentials are provided.
       type: label-element
-    - label: Secret Name
+    - init:
+        type: func
+        value: initRotateAuthMode
+      label: Credential Source
+      options:
+      - description: KubeDB generates a random password and updates the current auth
+          secret
+        text: Generate Random Password
+        value: generate
+      - description: Rotate to an existing secret in this namespace
+        text: Use Existing Secret
+        value: existing
+      - description: Create a new secret with your password, then rotate to it
+        text: Create New Secret
+        value: create
+      schema: temp/properties/rotateAuth/properties/mode
+      type: radio
+      watcher:
+        func: onRotateAuthModeChange
+        paths:
+        - temp/properties/rotateAuth/properties/mode
+    - if:
+        name: isRotateAuthMode|existing
+        type: function
+      init:
+        type: func
+        value: initRotateAuthSecretName
+      label: Secret Name
+      loader:
+        name: getRotateAuthSecrets
+        watchPaths:
+        - schema/properties/metadata/properties/namespace
+        - temp/properties/rotateAuth/properties/createdSecret
       schema: schema/properties/spec/properties/authentication/properties/secretRef/properties/name
-      type: input
+      searchable: true
+      subtitle: Only secrets with <b>username</b> and <b>password</b> keys and the
+        database's current username are listed.
+      type: select
+      validation:
+        type: required
     - disable: true
+      if:
+        name: isRotateAuthMode|existing
+        type: function
       init:
         type: func
         value: initAuthSecretRefKind
@@ -1047,6 +1086,33 @@ step:
         func: initAuthSecretRefKind
         paths:
         - schema/properties/spec/properties/authentication/properties/secretRef/properties/name
+    - elements:
+      - label: Secret Name
+        schema: temp/properties/rotateAuth/properties/name
+        subtitle: Enter a <b>unique name</b> to identify this secret.
+        type: input
+        validation:
+          type: required
+      - isSecret: true
+        label: Password
+        schema: temp/properties/rotateAuth/properties/password
+        type: input
+        validation:
+          type: required
+      - label: ""
+        loader: getRotateAuthUsernameInfo
+        type: info
+      fixedBlock: true
+      hasButton:
+        action: createRotateAuthSecret
+        hasCancel: cancelRotateAuthSecret
+        text: Create Secret
+      if:
+        name: isRotateAuthMode|create
+        type: function
+      label: Create a New Auth Secret
+      showLabels: true
+      type: block-layout
     if:
       name: ifRequestTypeEqualsTo|RotateAuth
       type: function

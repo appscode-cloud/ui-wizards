@@ -598,6 +598,163 @@ export const useFunc = (model) => {
     return name ? 'Secret' : undefined
   }
 
+  let rotateAuthUsernamePromise = null
+
+  function isRotateAuthMode(mode) {
+    return getValue(discriminator, '/rotateAuth/mode') === mode
+  }
+
+  function initRotateAuthMode() {
+    if (getValue(model, '/spec/authentication/secretRef/name')) return 'existing'
+    // An empty secretRef fails CRD validation (name is required); omitting
+    // spec.authentication makes the operator generate the password.
+    commit('wizard/model$delete', '/spec/authentication')
+    return 'generate'
+  }
+
+  function onRotateAuthModeChange() {
+    const mode = getValue(discriminator, '/rotateAuth/mode')
+    commit('wizard/temp$delete', 'rotateAuth/name')
+    commit('wizard/temp$delete', 'rotateAuth/password')
+    if (mode === 'existing') {
+      const name = getValue(model, '/spec/authentication/secretRef/name')
+      if (name && name === getValue(discriminator, '/rotateAuth/createdSecret')) return mode
+    }
+    commit('wizard/model$delete', '/spec/authentication')
+    // The radio only re-syncs its selection from a watcher's return value, so
+    // programmatic mode switches (after create / cancel) must echo the mode.
+    return mode
+  }
+
+  function initRotateAuthSecretName() {
+    return getValue(model, '/spec/authentication/secretRef/name') || undefined
+  }
+
+  function getRotateAuthNamespace() {
+    return storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+  }
+
+  function decodeBase64(value) {
+    try {
+      return value ? atob(value) : ''
+    } catch (e) {
+      console.log(e)
+      return ''
+    }
+  }
+
+  // The operator applies the new secret's username, so pin it to the current
+  // one; a rotation must never change the database user.
+  async function fetchRotateAuthUsername() {
+    if (!getValue(discriminator, '/dbDetails/spec')) await getDbDetails()
+    const authSecretName = getValue(discriminator, '/dbDetails/spec/authSecret/name')
+    let username = ''
+    if (authSecretName) {
+      const owner = storeGet('/route/params/user')
+      const cluster = storeGet('/route/params/cluster')
+      const namespace = getRotateAuthNamespace()
+      try {
+        const resp = await axios.get(
+          `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${authSecretName}`,
+        )
+        username = decodeBase64(resp.data?.data?.username)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+    return username
+  }
+
+  function getRotateAuthUsername() {
+    if (!rotateAuthUsernamePromise) rotateAuthUsernamePromise = fetchRotateAuthUsername()
+    return rotateAuthUsernamePromise
+  }
+
+  async function getRotateAuthUsernameInfo() {
+    const username = await getRotateAuthUsername()
+    if (!username) return "The username will be the same as the database's current username."
+    return `The username will be "${username}", same as the database's current username.`
+  }
+
+  async function getRotateAuthSecrets() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getRotateAuthNamespace()
+    if (!namespace) return []
+
+    const username = await getRotateAuthUsername()
+    const currentSecret = getValue(discriminator, '/dbDetails/spec/authSecret/name')
+
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+        { params: { filter: { items: { metadata: { name: null }, data: null } } } },
+      )
+      return (resp.data?.items || []).reduce((options, item) => {
+        const name = item.metadata?.name
+        const data = item.data || {}
+        if (
+          name &&
+          name !== currentSecret &&
+          data.username &&
+          data.password &&
+          (!username || decodeBase64(data.username) === username)
+        ) {
+          options.push({ text: name, value: name })
+        }
+        return options
+      }, [])
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
+  async function createRotateAuthSecret() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getRotateAuthNamespace()
+    const name = getValue(discriminator, '/rotateAuth/name')
+    const password = getValue(discriminator, '/rotateAuth/password')
+    const username = await getRotateAuthUsername()
+
+    if (!username) {
+      toast.error("Could not read the database's current username.", { timeout: 5000 })
+      return false
+    }
+    if (!name || !password) {
+      toast.error('Secret name and password are required.', { timeout: 5000 })
+      return false
+    }
+
+    try {
+      await axios.post(`/clusters/${owner}/${cluster}/resources`, {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        metadata: { name, namespace },
+        type: 'kubernetes.io/basic-auth',
+        stringData: { username, password },
+      })
+    } catch (error) {
+      toast.error(decodeError(error, 'Failed to create secret'), { timeout: 5000 })
+      return false
+    }
+
+    setDiscriminatorValue('/rotateAuth/createdSecret', name)
+    commit('wizard/model$update', {
+      path: '/spec/authentication/secretRef',
+      value: { kind: 'Secret', name },
+      force: true,
+    })
+    setDiscriminatorValue('/rotateAuth/mode', 'existing')
+    toast.success(`Secret ${name} created and selected.`, { timeout: 5000 })
+    return true
+  }
+
+  function cancelRotateAuthSecret() {
+    setDiscriminatorValue('/rotateAuth/mode', 'generate')
+  }
+
   function onRequestTypeChange() {
     const selectedType = getValue(model, '/spec/type')
     const reqTypeMapping = {
@@ -1546,6 +1703,14 @@ export const useFunc = (model) => {
     ifRequestTypeEqualsTo,
     onRequestTypeChange,
     initAuthSecretRefKind,
+    isRotateAuthMode,
+    initRotateAuthMode,
+    onRotateAuthModeChange,
+    initRotateAuthSecretName,
+    getRotateAuthUsernameInfo,
+    getRotateAuthSecrets,
+    createRotateAuthSecret,
+    cancelRotateAuthSecret,
     getDbTls,
     initNamespace,
     initDatabaseRef,
