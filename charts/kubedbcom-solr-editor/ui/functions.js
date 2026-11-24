@@ -1,8 +1,8 @@
-const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+const { ref, computed, watch, useOperator, store } = window.vueHelpers || {}
 
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -604,11 +604,16 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
-    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-      params: { filter: { items: { metadata: { name: null } } } },
+    const resp = await akp.resources.list({
+      owner,
+      cluster,
+      group: 'core',
+      version: 'v1',
+      resource: 'namespaces',
+      filter: { items: { metadata: { name: null } } },
     })
 
-    const resources = (resp && resp.data && resp.data.items) || []
+    const resources = resp?.items || []
 
     return resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
@@ -625,14 +630,17 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/solrs`,
-      {
-        params: { filter: { items: { metadata: { name: null } } } },
-      },
-    )
+    const resp = await akp.resources.list({
+      owner,
+      cluster,
+      group: 'kubedb.com',
+      version: 'v1alpha2',
+      resource: 'solrs',
+      namespace,
+      filter: { items: { metadata: { name: null } } },
+    })
 
-    const resources = (resp && resp.data && resp.data.items) || []
+    const resources = resp?.items || []
 
     return resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
@@ -660,10 +668,16 @@ export const useFunc = (model) => {
 
     if (namespace && name) {
       try {
-        const resp = await axios.get(
-          `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/solrs/${name}`,
-        )
-        dbDetails = resp.data || {}
+        const resp = await akp.resources.get({
+          owner,
+          cluster,
+          group: 'kubedb.com',
+          version: 'v1alpha2',
+          resource: 'solrs',
+          namespace,
+          name,
+        })
+        dbDetails = resp || {}
         setDiscriminatorValue('/dbDetails', true)
       } catch (e) {
         console.log(e)
@@ -727,10 +741,15 @@ export const useFunc = (model) => {
   async function fetchNodeTopology() {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
-    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
     try {
-      const resp = await axios.get(url)
-      const list = (resp && resp.data?.items) || []
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group: 'node.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'nodetopologies',
+      })
+      const list = resp?.items || []
       const mappedList = list.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         return name
@@ -781,10 +800,16 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     if (instance) {
       try {
-        const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
-        const resp = await axios.get(url)
+        const resp = await akp.resources.get({
+          owner: user,
+          cluster,
+          group: 'node.k8s.appscode.com',
+          version: 'v1alpha1',
+          resource: 'nodetopologies',
+          name: 'kubedb-ui-machine-profiles',
+        })
 
-        const nodeGroups = resp.data?.spec?.nodeGroups || []
+        const nodeGroups = resp?.spec?.nodeGroups || []
         setDiscriminatorValue('/topologyMachines', nodeGroups)
         return nodeGroups
       } catch (e) {
@@ -977,14 +1002,16 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
 
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-        {
-          params: { filter: { items: { metadata: { name: null } } } },
-        },
-      )
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group,
+        version,
+        resource,
+        filter: { items: { metadata: { name: null } } },
+      })
 
-      const resources = (resp && resp.data && resp.data.items) || []
+      const resources = resp?.items || []
 
       resources.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
@@ -999,25 +1026,23 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getNamespacedResourceList(
-    axios,
-    storeGet,
-    { namespace, group, version, resource },
-  ) {
+  async function getNamespacedResourceList(storeGet, { namespace, group, version, resource }) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
-    const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
-
     let ans = []
     try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group,
+        version,
+        resource,
+        namespace,
+        filter: { items: { metadata: { name: null }, type: null } },
       })
 
-      const items = (resp && resp.data && resp.data.items) || []
+      const items = resp?.items || []
       ans = items
     } catch (e) {
       console.log(e)
@@ -1228,7 +1253,7 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     // watchDependency('model#/metadata/release/namespace')
 
-    let resources = await getNamespacedResourceList(axios, storeGet, {
+    let resources = await getNamespacedResourceList(storeGet, {
       namespace,
       group,
       version,
@@ -1267,11 +1292,17 @@ export const useFunc = (model) => {
     if (!configMapName) return []
 
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/configmaps/${configMapName}`,
-      )
+      const resp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'configmaps',
+        namespace,
+        name: configMapName,
+      })
 
-      const configMaps = (resp && resp.data && resp.data.data) || {}
+      const configMaps = resp?.data || {}
 
       const configMapKeys = Object.keys(configMaps).map((item) => ({
         text: item,
@@ -1292,16 +1323,17 @@ export const useFunc = (model) => {
     // watchDependency('model#/metadata/release/namespace')
 
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-        {
-          params: {
-            filter: { items: { metadata: { name: null }, type: null } },
-          },
-        },
-      )
+      const resp = await akp.resources.list({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+        namespace,
+        filter: { items: { metadata: { name: null }, type: null } },
+      })
 
-      const secrets = (resp && resp.data && resp.data.items) || []
+      const secrets = resp?.items || []
 
       const filteredSecrets = secrets.filter((item) => {
         const validType = ['Opaque']
@@ -1337,11 +1369,17 @@ export const useFunc = (model) => {
     if (!secretName) return []
 
     try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${secretName}`,
-      )
+      const resp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+        namespace,
+        name: secretName,
+      })
 
-      const secret = (resp && resp.data && resp.data.data) || {}
+      const secret = resp?.data || {}
 
       const secretKeys = Object.keys(secret).map((item) => ({
         text: item,

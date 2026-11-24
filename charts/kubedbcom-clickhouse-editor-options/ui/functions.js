@@ -1,4 +1,4 @@
-const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+const { ref, computed, watch, useOperator, store } = window.vueHelpers || {}
 
 const machines = {
   'db.t.micro': {
@@ -317,7 +317,7 @@ const modeDetails = {
   },
 }
 
-export const useFunc = (model) => {
+export const useFunc = (model, { akp } = {}) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
@@ -575,20 +575,30 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     let db = getValue(model, '/metadata/resource/kind')
     db = db.toLowerCase()
-    let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
-    const annotationUrl = `clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`
     try {
-      const resp = await axios.get(url)
-      features = resp.data.features || []
-      placement = resp.data.placementpolicies || []
-      versions = resp.data.versions || []
-      storageClass = resp.data.storageclasses || []
-      clusterIssuers = resp.data.clusterissuers || []
-      nodetopologiesDedicated = resp.data.dedicated || []
-      nodetopologiesShared = resp.data.shared || []
+      const clusters = await akp.client('akp.cluster.v2.ClusterService')
+      const bundle = await clusters.getDatabaseBundle({
+        cluster: { owner, name: cluster },
+        parts: ['features', 'common', 'versions'],
+        database: db,
+      })
+      features = bundle.features
+      placement = bundle.placementPolicies
+      versions = bundle.versions
+      storageClass = bundle.storageClasses
+      clusterIssuers = bundle.clusterIssuers
+      nodetopologiesDedicated = bundle.dedicatedNodeTopologies
+      nodetopologiesShared = bundle.sharedNodeTopologies
 
-      const response = await axios.get(annotationUrl)
-      const annotations = response.data?.metadata?.annotations || {}
+      const response = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'namespaces',
+        name: namespace,
+      })
+      const annotations = response?.metadata?.annotations || {}
       const uidRange = annotations['openshift.io/sa.scc.uid-range']
       if (uidRange) {
         const val = uidRange.split('/')[0]
@@ -987,16 +997,19 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster } = params
     const namespace = getValue(model, `/metadata/release/namespace`)
-    let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
 
     const options = []
     try {
-      const resp = await axios.get(url, {
-        params: {
-          filter: { items: { metadata: { name: null }, data: null } },
-        },
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource: 'secrets',
+        namespace,
+        filter: { items: { metadata: { name: null }, data: null } },
       })
-      const items = resp.data?.items || []
+      const items = resp?.items || []
       items.forEach((ele) => {
         const keys = Object.keys(ele.data || {})
         if (keys.length === 2 && keys.includes('username') && keys.includes('password'))
@@ -1055,9 +1068,13 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
     try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
+      const resp = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'identity.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'selfsubjectnamespaceaccessreviews',
+        object: {
           apiVersion: 'identity.k8s.appscode.com/v1alpha1',
           kind: 'SelfSubjectNamespaceAccessReview',
           spec: {
@@ -1071,8 +1088,8 @@ export const useFunc = (model) => {
             ],
           },
         },
-      )
-      const projects = resp?.data?.status?.projects
+      })
+      const projects = resp?.status?.projects
       if (projects) {
         return Object.keys(projects).map((project) => ({
           project: project,
@@ -1082,7 +1099,7 @@ export const useFunc = (model) => {
           })),
         }))
       }
-      return resp?.data?.status?.namespaces || []
+      return resp?.status?.namespaces || []
     } catch (e) {
       console.log(e)
       return []
@@ -1096,10 +1113,15 @@ export const useFunc = (model) => {
     const params = storeGet('/route/params')
     const { user, cluster } = params
     try {
-      const resp = await axios.get(
-        `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`,
-      )
-      const items = resp?.data?.items || []
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'storage.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'repositories',
+        namespace,
+      })
+      const items = resp?.items || []
       const names = items
         .filter((item) => {
           const kind = item.spec?.appRef?.kind
@@ -1138,24 +1160,38 @@ export const useFunc = (model) => {
     if (!refNamespace || !refDBName) return
 
     try {
-      const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}`
-      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
-      const repositoriesResp = await axios.get(repositoriesUrl)
-      const snapshotsResp = await axios.get(snapshotsUrl)
+      const repositoriesResp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'storage.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'repositories',
+        namespace: refNamespace,
+        name: `${refDBName}`,
+      })
+      const snapshotsResp = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'storage.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'snapshots',
+        namespace: refNamespace,
+        name: `${refDBName}-incremental-snapshot`,
+      })
 
-      const logStats = getComponentLogStats(snapshotsResp.data)
+      const logStats = getComponentLogStats(snapshotsResp)
       if (!logStats) {
         throw new Error(`No recovery window found in snapshot ${refDBName}-incremental-snapshot`)
       }
 
       commit('wizard/model$update', {
         path: `/spec/init/archiver/encryptionSecret/name`,
-        value: repositoriesResp.data?.spec.encryptionSecret.name,
+        value: repositoriesResp?.spec.encryptionSecret.name,
         force: true,
       })
       commit('wizard/model$update', {
         path: `/spec/init/archiver/encryptionSecret/namespace`,
-        value: repositoriesResp.data?.spec.encryptionSecret.namespace,
+        value: repositoriesResp?.spec.encryptionSecret.namespace,
         force: true,
       })
       commit('wizard/model$update', {
@@ -1198,7 +1234,9 @@ export const useFunc = (model) => {
     } catch (e) {
       setDiscriminatorValue(
         'refDBNameError',
-        e.response?.data?.message || e.message || 'Invalid name / namespace for recovery timestamp',
+        (e instanceof akp.ConnectError && e.rawMessage) ||
+          e.message ||
+          'Invalid name / namespace for recovery timestamp',
       )
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
@@ -1300,12 +1338,17 @@ export const useFunc = (model) => {
   async function getInitScriptSources(resource) {
     const { user, cluster } = storeGet('/route/params')
     const namespace = getValue(model, '/metadata/release/namespace')
-    const url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/${resource}`
     try {
-      const resp = await axios.get(url, {
-        params: { filter: { items: { metadata: { name: null } } } },
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'core',
+        version: 'v1',
+        resource,
+        namespace,
+        filter: { items: { metadata: { name: null } } },
       })
-      return (resp.data?.items || []).map((item) => item.metadata?.name)
+      return (resp?.items || []).map((item) => item.metadata?.name)
     } catch (e) {
       console.log(e)
       return []
@@ -1342,12 +1385,19 @@ export const useFunc = (model) => {
     const cluster = storeGet('/route/params/cluster')
     const kind = getValue(model, '/metadata/resource/kind').toLowerCase()
     const archiverName = getValue(model, '/spec/archiverName') || kind
-    const url = `/clusters/${owner}/${cluster}/proxy/archiver.kubedb.com/v1alpha1/namespaces/kubedb/${kind}archivers/${archiverName}`
     try {
-      const resp = await axios.get(url)
+      const archiver = await akp.resources.get({
+        owner,
+        cluster,
+        group: 'archiver.kubedb.com',
+        version: 'v1alpha1',
+        namespace: 'kubedb',
+        resource: `${kind}archivers`,
+        name: archiverName,
+      })
       commit('wizard/model$update', {
         path: '/spec/archiver/spec',
-        value: resp.data?.spec || {},
+        value: archiver?.spec || {},
         force: true,
       })
     } catch (e) {
@@ -1392,13 +1442,24 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/release/namespace')
     try {
       const [storageResp, namespaceResp] = await Promise.all([
-        axios.get(
-          `/clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/backupstorages`,
-        ),
-        axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`),
+        akp.resources.list({
+          owner,
+          cluster,
+          group: 'storage.kubestash.com',
+          version: 'v1alpha1',
+          resource: 'backupstorages',
+        }),
+        akp.resources.get({
+          owner,
+          cluster,
+          group: 'core',
+          version: 'v1',
+          resource: 'namespaces',
+          name: namespace,
+        }),
       ])
-      const namespaceLabels = namespaceResp.data?.metadata?.labels || {}
-      return (storageResp.data?.items || [])
+      const namespaceLabels = namespaceResp?.metadata?.labels || {}
+      return (storageResp?.items || [])
         .filter((item) => isBackupStorageUsable(item, namespace, namespaceLabels))
         .map((item) => {
           const { name, namespace: storageNamespace } = item.metadata
