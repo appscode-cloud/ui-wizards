@@ -1199,10 +1199,15 @@ export const useFunc = (model, { akp } = {}) => {
     const params = storeGet('/route/params')
     const { user, cluster } = params
     try {
-      const resp = await axios.get(
-        `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`,
-      )
-      const items = resp?.data?.items || []
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'storage.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'repositories',
+        namespace,
+      })
+      const items = resp?.items || []
       const names = items
         .filter((item) => {
           const kind = item.spec?.appRef?.kind

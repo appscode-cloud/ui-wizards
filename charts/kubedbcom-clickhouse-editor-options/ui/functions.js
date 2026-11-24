@@ -1068,9 +1068,13 @@ export const useFunc = (model, { akp } = {}) => {
     const params = storeGet('/route/params')
     const { user, cluster, group, version, resource } = params
     try {
-      const resp = await axios.post(
-        `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
-        {
+      const resp = await akp.resources.create({
+        owner: user,
+        cluster,
+        group: 'identity.k8s.appscode.com',
+        version: 'v1alpha1',
+        resource: 'selfsubjectnamespaceaccessreviews',
+        object: {
           apiVersion: 'identity.k8s.appscode.com/v1alpha1',
           kind: 'SelfSubjectNamespaceAccessReview',
           spec: {
@@ -1084,8 +1088,8 @@ export const useFunc = (model, { akp } = {}) => {
             ],
           },
         },
-      )
-      const projects = resp?.data?.status?.projects
+      })
+      const projects = resp?.status?.projects
       if (projects) {
         return Object.keys(projects).map((project) => ({
           project: project,
@@ -1095,7 +1099,7 @@ export const useFunc = (model, { akp } = {}) => {
           })),
         }))
       }
-      return resp?.data?.status?.namespaces || []
+      return resp?.status?.namespaces || []
     } catch (e) {
       console.log(e)
       return []
@@ -1109,10 +1113,15 @@ export const useFunc = (model, { akp } = {}) => {
     const params = storeGet('/route/params')
     const { user, cluster } = params
     try {
-      const resp = await axios.get(
-        `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`,
-      )
-      const items = resp?.data?.items || []
+      const resp = await akp.resources.list({
+        owner: user,
+        cluster,
+        group: 'storage.kubestash.com',
+        version: 'v1alpha1',
+        resource: 'repositories',
+        namespace,
+      })
+      const items = resp?.items || []
       const names = items
         .filter((item) => {
           const kind = item.spec?.appRef?.kind
